@@ -44,6 +44,10 @@ android {
         val buildNum = project.findProperty("BUILD_NUM")?.toString()?.toIntOrNull() ?: 1
         versionCode = date.year * 1_000_000 + date.monthValue * 10_000 +
                 date.dayOfMonth * 100 + buildNum
+
+        // TODO: Bump this for every GitHub Release!
+        // If this doesn't match the release tag, the app will always show "update available".
+      
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

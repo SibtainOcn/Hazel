@@ -2,17 +2,21 @@
   {
     "version": "1.0.1",
     "date": "2026-03-28",
-    "title": "Finalizing the Update Mechanism",
+    "title": "Update Mechanism Overhaul",
     "sections": {
-      "Changed": [
-        "Rebuilt update dialog"
-      ],
       "Added": [
-        "Background download — dismiss dialog during download, auto-prompts install when ready",
-        "Changelog button in update dialog — opens curated release notes on GitHub Pages",
+        "Dedicated Software Update screen with version info, progress, and install controls",
+        "Animated update indicator in top bar with accent-color fill animation",
+        "Smart APK caching — skips re-download if already cached"
+      ],
+      "Changed": [
+        "Settings 'Check for Updates' now opens the Update screen directly",
+        "Centralized update state into single ViewModel"
       ],
       "Fixed": [
-        "Download timer not stopping when download progress starts streaming",
+        "Update dialog flickering during download",
+        "Always downloading universal APK instead of device-specific arm64",
+        "GitHub Pages changelog not loading (invalid JSON)"
       ]
     }
   },

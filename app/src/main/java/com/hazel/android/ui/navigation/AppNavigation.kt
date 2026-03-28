@@ -63,6 +63,9 @@ import com.hazel.android.ui.screens.history.HistoryScreen
 import com.hazel.android.ui.screens.player.PlayerScreen
 import com.hazel.android.ui.screens.settings.SettingsScreen
 import com.hazel.android.ui.screens.settings.StorageLocationsScreen
+import com.hazel.android.update.UpdateIndicator
+import com.hazel.android.update.UpdateScreen
+import com.hazel.android.update.UpdateViewModel
 
 sealed class Screen(
     val route: String,
@@ -92,7 +95,8 @@ fun AppNavigation(
     isDarkTheme: Boolean,
     onToggleTheme: () -> Unit,
     accentName: String,
-    onAccentChanged: (String) -> Unit
+    onAccentChanged: (String) -> Unit,
+    updateViewModel: UpdateViewModel
 ) {
     val navController = rememberNavController()
 
@@ -104,12 +108,17 @@ fun AppNavigation(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val isSubScreen = currentRoute in listOf("about", "logs", "multi_links_review", "bulk_editor", "guide", "storage_locations")
+    val isSubScreen = currentRoute in listOf("about", "logs", "multi_links_review", "bulk_editor", "guide", "storage_locations", "update")
 
     val isPlayerTab = currentRoute == "player"
 
     var showAccentPicker by remember { mutableStateOf(false) }
     val currentAccent = AccentColors.find { it.name == accentName } ?: AccentColors.first()
+
+    // Update indicator state
+    val updateState by updateViewModel.uiState.collectAsState()
+    val downloadProgress by updateViewModel.downloadProgress.collectAsState()
+    val showIndicator = updateViewModel.shouldShowIndicator(updateState)
 
     Scaffold(
         topBar = {
@@ -130,6 +139,17 @@ fun AppNavigation(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
+
+                            // ── Update Indicator — animated download icon ──
+                            if (showIndicator) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                UpdateIndicator(
+                                    isDownloading = updateState is UpdateViewModel.UiState.Downloading,
+                                    downloadProgress = downloadProgress,
+                                    isReady = updateState is UpdateViewModel.UiState.ReadyToInstall,
+                                    onClick = { navController.navigate("update") }
+                                )
+                            }
                         }
                     },
                     actions = {
@@ -260,7 +280,8 @@ fun AppNavigation(
                     onAccentChanged = onAccentChanged,
                     onNavigateToAbout = { navController.navigate("about") },
                     onNavigateToGuide = { navController.navigate("guide") },
-                    onNavigateToStorageLocations = { navController.navigate("storage_locations") }
+                    onNavigateToStorageLocations = { navController.navigate("storage_locations") },
+                    onNavigateToUpdate = { navController.navigate("update") }
                 )
             }
             composable("storage_locations") {
@@ -274,6 +295,12 @@ fun AppNavigation(
             }
             composable("logs") {
                 com.hazel.android.ui.screens.logs.LogViewerScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable("update") {
+                UpdateScreen(
+                    viewModel = updateViewModel,
                     onBack = { navController.popBackStack() }
                 )
             }
