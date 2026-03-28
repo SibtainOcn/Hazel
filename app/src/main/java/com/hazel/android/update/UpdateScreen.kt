@@ -486,7 +486,7 @@ private fun ActionButtons(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 ActionChip(
-                    text = "Not Now",
+                    text = "Later",
                     onClick = { viewModel.dismissCompletely() },
                     modifier = Modifier.weight(1f)
                 )
