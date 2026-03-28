@@ -5,7 +5,20 @@ All notable changes to Hazel (formerly FetchKit) will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2026-03-29
+## [1.0.2] - 2026-03-29
+
+### Added
+- **Browser Favicon**: Added the Hazel logo as a favicon for all documentation pages (landing page, changelog, license) — browser tabs now show the app branding.
+
+### Changed
+- **Update UX Polish**: Renamed the "Not Now" button to "Later" across the Software Update screen and Update Dialog to align with industry-standard patterns for deferring updates.
+- **Download Performance (Critical)**: Increased the APK download network buffer from 8KB to 64KB (8x larger). This significantly reduces OS read syscalls and improves throughput for faster in-app update downloads.
+- **Website Titles**: Cleaned up the browser tab titles on the documentation website by removing the em-dash subtitles and keeping only "Hazel".
+
+### Fixed
+- **Update Dialog Layout**: Forced the Update Dialog to use full available width across all device sizes and prevented text wrapping on "Background" and "Cancel" buttons by enforcing single-line display.
+
+## [1.0.1] - 2026-03-29
 
 ### Changed
 - **Update Indicator Rewrite**: Replaced Lottie-based `UpdateIndicator` with pure Compose Canvas implementation. Now fully theme-adaptive (light/dark) and accent-color aware — uses `MaterialTheme.colorScheme.primary` directly. Reduced size from 36dp/28dp to 24dp/18dp to match the Hazel logo icon. Three distinct states: downloading (animated bounce + pulse), available (static arrow), ready to install (static checkmark). Animation only allocated during downloading — zero recomposition overhead when static.

@@ -87,7 +87,8 @@ fun UpdateDialog(
         onDismissRequest = { if (isDismissable) onDismiss() },
         properties = DialogProperties(
             dismissOnBackPress = isDismissable,
-            dismissOnClickOutside = isDismissable
+            dismissOnClickOutside = isDismissable,
+            usePlatformDefaultWidth = false
         )
     ) {
         Card(
@@ -96,7 +97,9 @@ fun UpdateDialog(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
         ) {
             // Use contentKey so that progress updates within Downloading state
             // do NOT cause AnimatedContent to re-animate (fixes flickering)
@@ -365,7 +368,7 @@ private fun ReadyContent(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             AccentChipButton(
-                text = "Not Now",
+                text = "Later",
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f)
             )
@@ -395,7 +398,7 @@ private fun AccentChipButton(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -403,7 +406,9 @@ private fun AccentChipButton(
                 text,
                 fontWeight = FontWeight.SemiBold,
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                softWrap = false
             )
         }
     }

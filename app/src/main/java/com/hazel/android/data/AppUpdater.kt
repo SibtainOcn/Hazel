@@ -60,7 +60,7 @@ object AppUpdater {
 
             body.byteStream().use { input ->
                 apkFile.outputStream().use { output ->
-                    val buffer = ByteArray(8192)
+                    val buffer = ByteArray(65_536) // 64KB buffer for fast downloads
                     var downloaded = 0L
                     var read: Int
 
