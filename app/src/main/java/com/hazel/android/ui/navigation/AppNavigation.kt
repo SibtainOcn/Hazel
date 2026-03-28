@@ -142,7 +142,7 @@ fun AppNavigation(
 
                             // ── Update Indicator — animated download icon ──
                             if (showIndicator) {
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
                                 UpdateIndicator(
                                     isDownloading = updateState is UpdateViewModel.UiState.Downloading,
                                     downloadProgress = downloadProgress,
