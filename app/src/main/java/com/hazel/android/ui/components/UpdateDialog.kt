@@ -1,8 +1,11 @@
 package com.hazel.android.ui.components
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -51,6 +54,23 @@ sealed class UpdateDialogState {
     data class Ready(val info: UpdateChecker.UpdateInfo) : UpdateDialogState()
 }
 
+/**
+ * Returns a stable key for AnimatedContent so that progress updates within the same
+ * logical state (e.g. Downloading) do NOT trigger a re-animation.
+ * Only transitions between different state TYPES animate.
+ */
+private fun stateContentKey(state: UpdateDialogState): String = when (state) {
+    is UpdateDialogState.Found -> "found"
+    is UpdateDialogState.Downloading -> "downloading"
+    is UpdateDialogState.Ready -> "ready"
+}
+
+/** M3 Emphasized Decelerate — Fast start, smooth landing */
+private val EmphasizedDecelerate = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1.0f)
+
+/** M3 Emphasized Accelerate — Smooth start, fast exit */
+private val EmphasizedAccelerate = CubicBezierEasing(0.3f, 0.0f, 0.8f, 0.15f)
+
 @Composable
 fun UpdateDialog(
     state: UpdateDialogState,
@@ -78,9 +98,16 @@ fun UpdateDialog(
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
+            // Use contentKey so that progress updates within Downloading state
+            // do NOT cause AnimatedContent to re-animate (fixes flickering)
             AnimatedContent(
                 targetState = state,
-                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                contentKey = { stateContentKey(it) },
+                transitionSpec = {
+                    (fadeIn(tween(250, easing = EmphasizedDecelerate)) +
+                            scaleIn(initialScale = 0.92f, animationSpec = tween(250, easing = EmphasizedDecelerate)))
+                        .togetherWith(fadeOut(tween(200, easing = EmphasizedAccelerate)))
+                },
                 label = "update_dialog_state"
             ) { currentState ->
                 when (currentState) {

@@ -77,6 +77,18 @@ object UpdateChecker {
         val assets = releaseJson.optJSONArray("assets") ?: return null to 0L
         val deviceAbi = Build.SUPPORTED_ABIS.firstOrNull() ?: "arm64-v8a"
 
+        // Map full ABI strings to their short aliases used in APK filenames
+        // e.g. "arm64-v8a" -> also match "arm64", "armeabi-v7a" -> also match "armeabi"
+        val abiAliases = buildList {
+            add(deviceAbi)
+            when (deviceAbi) {
+                "arm64-v8a" -> add("arm64")
+                "armeabi-v7a" -> add("armeabi")
+                "x86_64" -> { /* already short */ }
+                "x86" -> { /* already short */ }
+            }
+        }
+
         var bestUrl: String? = null
         var bestSize: Long = 0
         var universalUrl: String? = null
@@ -98,16 +110,17 @@ object UpdateChecker {
                 anyApkSize = size
             }
 
-            // Check for device-specific ABI match
-            if (name.contains(deviceAbi)) {
-                bestUrl = url
-                bestSize = size
-            }
-
             // Check for universal APK
             if (name.contains("universal")) {
                 universalUrl = url
                 universalSize = size
+                continue // Don't let "universal" also match ABI aliases
+            }
+
+            // Check for device-specific ABI match (full name or short alias)
+            if (bestUrl == null && abiAliases.any { name.contains(it) }) {
+                bestUrl = url
+                bestSize = size
             }
         }
 

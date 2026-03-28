@@ -38,7 +38,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,7 +53,6 @@ import com.hazel.android.ui.theme.AccentColors
 import com.hazel.android.ui.components.AccentPickerDialog
 import com.hazel.android.util.StoragePaths
 import com.hazel.android.util.openInAppBrowser
-import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
@@ -62,12 +60,18 @@ fun SettingsScreen(
     onAccentChanged: (String) -> Unit,
     onNavigateToAbout: () -> Unit,
     onNavigateToGuide: () -> Unit = {},
-    onNavigateToStorageLocations: () -> Unit = {}
+    onNavigateToStorageLocations: () -> Unit = {},
+    onNavigateToUpdate: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var accentMenuExpanded by remember { mutableStateOf(false) }
 
     val currentAccent = AccentColors.find { it.name == accentName } ?: AccentColors.first()
+
+    // Read version name for display
+    val versionName = try {
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
+    } catch (_: Exception) { "1.0.0" }
 
     Column(
         modifier = Modifier
@@ -154,109 +158,23 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Check for updates — clickable with in-app download + install
-            run {
-                val versionName = try {
-                    context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
-                } catch (_: Exception) { "1.0.0" }
-                var checking by remember { mutableStateOf(false) }
-                var statusText by remember { mutableStateOf("v$versionName · Tap to check") }
-                var updateDialogState by remember {
-                    mutableStateOf<com.hazel.android.ui.components.UpdateDialogState?>(null)
-                }
-                var downloadedApk by remember { mutableStateOf<java.io.File?>(null) }
-                var downloadJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
-                var downloadedBytes by remember { androidx.compose.runtime.mutableLongStateOf(0L) }
-                var totalBytes by remember { androidx.compose.runtime.mutableLongStateOf(0L) }
-                val updateScope = rememberCoroutineScope()
-
-                ListItem(
-                    headlineContent = { Text("Check for Updates") },
-                    supportingContent = { Text(statusText) },
-                    leadingContent = {
-                        Icon(Icons.Filled.Update, null, tint = MaterialTheme.colorScheme.primary)
-                    },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.clickable(enabled = !checking) {
-                        checking = true
-                        statusText = "Checking..."
-                        updateScope.launch {
-                            val info = com.hazel.android.data.UpdateChecker.check(versionName)
-                            checking = false
-                            if (info != null) {
-                                updateDialogState = com.hazel.android.ui.components.UpdateDialogState.Found(info)
-                                statusText = "v$versionName · Update available!"
-                            } else {
-                                statusText = "v$versionName · Up to date"
-                            }
-                        }
-                    }
-                )
-
-                val currentState = updateDialogState
-                if (currentState != null) {
-                    val displayState = if (currentState is com.hazel.android.ui.components.UpdateDialogState.Downloading) {
-                        currentState.copy(downloaded = downloadedBytes, total = totalBytes)
-                    } else currentState
-
-                    com.hazel.android.ui.components.UpdateDialog(
-                        state = displayState,
-                        onDismiss = { updateDialogState = null },
-                        onDownload = {
-                            val info = when (currentState) {
-                                is com.hazel.android.ui.components.UpdateDialogState.Found -> currentState.info
-                                else -> return@UpdateDialog
-                            }
-                            val url = info.apkDownloadUrl
-                            if (url.isNullOrBlank()) {
-                                context.startActivity(
-                                    android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(info.htmlUrl))
-                                )
-                                updateDialogState = null
-                                return@UpdateDialog
-                            }
-                            downloadedBytes = 0L
-                            totalBytes = info.apkSize
-                            updateDialogState = com.hazel.android.ui.components.UpdateDialogState.Downloading(info)
-                            downloadJob = updateScope.launch {
-                                val file = com.hazel.android.data.AppUpdater.downloadUpdate(
-                                    context = context,
-                                    url = url,
-                                    onProgress = { dl, tot ->
-                                        downloadedBytes = dl
-                                        totalBytes = tot
-                                    }
-                                )
-                                if (file != null) {
-                                    downloadedApk = file
-                                    updateDialogState = com.hazel.android.ui.components.UpdateDialogState.Ready(info)
-                                } else {
-                                    updateDialogState = null
-                                }
-                            }
-                        },
-                        onCancel = {
-                            downloadJob?.cancel()
-                            downloadJob = null
-                            com.hazel.android.data.AppUpdater.cleanupUpdates(context)
-                            updateDialogState = null
-                        },
-                        onInstall = {
-                            val apk = downloadedApk
-                            if (apk != null && apk.exists()) {
-                                com.hazel.android.data.AppUpdater.installUpdate(context, apk)
-                            }
-                            updateDialogState = null
-                        },
-                        onChangelog = {
-                            openInAppBrowser(context, "https://sibtainocn.github.io/Hazel/")
-                        },
-                        onKeepInBackground = {
-                            updateDialogState = null
-                        }
+            // Check for updates — navigates to dedicated UpdateScreen
+            ListItem(
+                headlineContent = { Text("Check for Updates") },
+                supportingContent = { Text("v$versionName") },
+                leadingContent = {
+                    Icon(Icons.Filled.Update, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        modifier = Modifier.size(16.dp)
                     )
-                }
-            }
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onNavigateToUpdate() }
+            )
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -403,5 +321,3 @@ fun SettingsScreen(
         }
     }
 }
-
-

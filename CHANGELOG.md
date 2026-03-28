@@ -8,14 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- **Update Dialog Redesign**: Complete rebuild of the update dialog with clean, minimalist design. Uses `install_ic.xml` icon, borderless accent-style buttons (Surface with 12% primary alpha), and removed inline release notes display. All buttons now match the app's chip design language.
+- **Update Dialog Flickering Fix**: Root cause was `AnimatedContent` re-animating every progress tick because each `Downloading` state was a new data class instance. Fixed by adding a `contentKey` that returns the state TYPE name only — progress updates within `Downloading` no longer trigger re-animation.
+- **Centralized Update State**: Eliminated duplicated `mutableStateOf` update logic from both `MainActivity` and `SettingsScreen`. All update state now lives in a single `UpdateViewModel` (single source of truth), preventing the state synchronization bugs that caused flickering.
+- **Settings Update Row**: "Check for Updates" row in Settings now navigates directly to the dedicated Software Update screen instead of duplicating the check/download/install logic inline.
+- **Consolidated Update Package**: All update-related files (`UpdateViewModel`, `UpdateScreen`, `UpdateIndicator`) moved into `com.hazel.android.update` package.
+- **M3 Fluid Transitions**: All update UI animations now use M3 emphasized decelerate/accelerate easing curves for fluid, professional transitions.
 - **Changelog Button**: Instead of showing raw release notes inline, the update dialog now has a "Changelog" button that opens the curated GitHub Pages changelog in a dark Chrome Custom Tab.
 - **Background Download**: "Background" button in the downloading state dismisses the dialog while keeping the download running. Auto-prompts install when the download completes.
-- **BrowserUtil Extraction**: Moved `openInAppBrowser()` from `SettingsScreen.kt` to shared `BrowserUtil.kt` utility — reused across MainActivity, SettingsScreen, and update dialog.
 - **Browser Fallback Safety**: Double-wrapped browser fallback — Custom Tabs → any browser → silent no-op. Prevents crash on devices with no browser installed.
 
 ### Added
-- **GitHub Pages Changelog**: New `docs/` directory with `index.html` and `changelog.json` for a curated, auto-rendering changelog page at `https://sibtainocn.github.io/Hazel/`. Dark theme (#0A0A0A), Inter font, color-coded section badges (Added/Changed/Fixed/Removed). Update `changelog.json` and push to `main` — GitHub Pages auto-deploys.
+- **Dedicated Software Update Screen**: Full-page screen (`UpdateScreen.kt`) accessible from Settings and top-bar indicator. Shows version comparison (current → new), large animated install icon with accent-color fill, download progress card with percentage/size/remaining, action buttons (Download/Cancel/Install/Retry/Check), and info section (repository, APK size, distribution, changelog link, refresh).
+- **Animated Update Indicator**: `install_ic.xml` icon button placed next to the Hazel logo in the top bar. Features accent-color "liquid fill" animation that sweeps downward — tracks actual download progress during active downloads, continuous sweep when update is available, fully filled when ready to install. Tap opens the UpdateScreen.
+- **Smart APK Caching**: If APK was previously downloaded but never installed, `startDownload()` detects the cached file and skips straight to "Ready to Install" instead of re-downloading. `autoCheckOnLaunch()` also detects cached APKs.
+- **Intelligent Cleanup**: Old APKs cleaned on cancel. On install, APK is kept (user might cancel system installer). On next app launch, if current version is up-to-date, stale cache is cleaned automatically.
+- **GitHub Pages Changelog**: New `docs/` directory with `index.html` and `changelog.json` for a curated, auto-rendering changelog page at `https://sibtainocn.github.io/Hazel/`.
 
 ### Infrastructure
 - **GitHub Actions CI/CD**: Added `ci.yml` (lint + debug build on every PR), `release.yml` (auto-build signed APK on GitHub Release), `security.yml` (weekly dependency + secret scan).
@@ -28,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **README**: Removed Windows references, added Buy Me a Coffee badge, Tech Stack table, Build from Source section.
 
 ### Fixed
+- **GitHub Pages Changelog Not Loading**: `changelog.json` had trailing commas (lines 12, 15) making it invalid JSON. `JSON.parse()` fails silently on strict-mode trailing commas, causing the page to show "Unable to load changelog."
 - **Download Log Timer**: Fixed "Downloading file..." timer not stopping when the download progress stats start streaming.
 - **Release Build OOM Crash**: `packageRelease` was failing with `OutOfMemoryError: Java heap space` during APK packaging. Increased Gradle JVM heap from 2048m → 4096m in `gradle.properties`.
 - **Release Build Signing**: Release build variant could not be run from Android Studio — no signing configuration existed. Added auto-detect signing config that reads keystore credentials from an external `signing.properties` companion file.
