@@ -5,29 +5,25 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.hazel.android.data.AppUpdater
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hazel.android.data.SettingsRepository
-import com.hazel.android.data.UpdateChecker
 import com.hazel.android.ui.components.UpdateDialog
 import com.hazel.android.ui.components.UpdateDialogState
 import com.hazel.android.ui.navigation.AppNavigation
 import com.hazel.android.ui.theme.HazelTheme
+import com.hazel.android.update.UpdateViewModel
 import com.hazel.android.util.PermissionHelper
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.io.File
 
 class MainActivity : ComponentActivity() {
 
@@ -43,9 +39,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         handleShareIntent(intent)
 
-        // Clean up stale update APKs from previous sessions
-        AppUpdater.cleanupUpdates(this)
-
         // Register permission launcher (used lazily when music scanner needs READ)
         PermissionHelper.register(this)
 
@@ -60,23 +53,15 @@ class MainActivity : ComponentActivity() {
             // Don't render until accent preference is loaded to prevent theme flash
             val resolvedAccent = accentName ?: return@setContent
 
-            HazelTheme(darkTheme = isDark, accentName = resolvedAccent) {
-                // ── Update state machine ──
-                var updateDialogState by remember { mutableStateOf<UpdateDialogState?>(null) }
-                var downloadedApk by remember { mutableStateOf<File?>(null) }
-                var downloadJob by remember { mutableStateOf<Job?>(null) }
-                var downloadedBytes by remember { mutableLongStateOf(0L) }
-                var totalBytes by remember { mutableLongStateOf(0L) }
+            // ── Single UpdateViewModel — shared across entire app ──
+            val updateViewModel: UpdateViewModel = viewModel()
 
-                // Auto-check for updates on launch
+            HazelTheme(darkTheme = isDark, accentName = resolvedAccent) {
+
+                // Auto-check for updates & cleanup old APKs
                 LaunchedEffect(Unit) {
-                    val currentVersion = try {
-                        packageManager.getPackageInfo(packageName, 0).versionName ?: "1.0.0"
-                    } catch (_: Exception) { "1.0.0" }
-                    val info = UpdateChecker.check(currentVersion)
-                    if (info != null) {
-                        updateDialogState = UpdateDialogState.Found(info)
-                    }
+                    updateViewModel.cleanupIfUpdated()
+                    updateViewModel.autoCheckOnLaunch()
                 }
 
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -90,86 +75,40 @@ class MainActivity : ComponentActivity() {
                         accentName = resolvedAccent,
                         onAccentChanged = { name ->
                             scope.launch { SettingsRepository.setAccentColor(this@MainActivity, name) }
-                        }
+                        },
+                        updateViewModel = updateViewModel
                     )
                 }
 
-                // Update dialog overlay
-                val currentState = updateDialogState
-                if (currentState != null) {
-                    // Sync downloading progress into state
-                    val displayState = if (currentState is UpdateDialogState.Downloading) {
-                        currentState.copy(downloaded = downloadedBytes, total = totalBytes)
-                    } else currentState
+                // ── Initial popup dialog (first-launch update notification) ──
+                val showDialog by updateViewModel.showInitialDialog.collectAsState()
+                val uiState by updateViewModel.uiState.collectAsState()
 
-                    UpdateDialog(
-                        state = displayState,
-                        onDismiss = {
-                            updateDialogState = null
-                        },
-                        onDownload = {
-                            val info = when (currentState) {
-                                is UpdateDialogState.Found -> currentState.info
-                                else -> return@UpdateDialog
-                            }
-                            val url = info.apkDownloadUrl
-                            if (url.isNullOrBlank()) {
-                                // No APK asset found — fallback to browser
-                                startActivity(
-                                    Intent(Intent.ACTION_VIEW, android.net.Uri.parse(info.htmlUrl))
+                if (showDialog) {
+                    val dialogState = when (val s = uiState) {
+                        is UpdateViewModel.UiState.Available -> UpdateDialogState.Found(s.info)
+                        is UpdateViewModel.UiState.Downloading ->
+                            UpdateDialogState.Downloading(s.info, s.downloaded, s.total)
+                        is UpdateViewModel.UiState.ReadyToInstall -> UpdateDialogState.Ready(s.info)
+                        else -> null
+                    }
+
+                    if (dialogState != null) {
+                        UpdateDialog(
+                            state = dialogState,
+                            onDismiss = { updateViewModel.dismissDialog() },
+                            onDownload = { updateViewModel.startDownload() },
+                            onCancel = { updateViewModel.cancelDownload() },
+                            onInstall = { updateViewModel.installUpdate() },
+                            onChangelog = {
+                                com.hazel.android.util.openInAppBrowser(
+                                    this@MainActivity,
+                                    "https://sibtainocn.github.io/Hazel/"
                                 )
-                                updateDialogState = null
-                                return@UpdateDialog
-                            }
-                            // Start download
-                            downloadedBytes = 0L
-                            totalBytes = info.apkSize
-                            updateDialogState = UpdateDialogState.Downloading(info)
-                            downloadJob = scope.launch {
-                                val file = AppUpdater.downloadUpdate(
-                                    context = this@MainActivity,
-                                    url = url,
-                                    onProgress = { dl, tot ->
-                                        downloadedBytes = dl
-                                        totalBytes = tot
-                                    }
-                                )
-                                if (file != null) {
-                                    downloadedApk = file
-                                    // Auto-show install prompt (works even if dialog was backgrounded)
-                                    updateDialogState = UpdateDialogState.Ready(info)
-                                } else {
-                                    // Download failed — dismiss
-                                    updateDialogState = null
-                                }
-                            }
-                        },
-                        onCancel = {
-                            downloadJob?.cancel()
-                            downloadJob = null
-                            AppUpdater.cleanupUpdates(this@MainActivity)
-                            updateDialogState = null
-                        },
-                        onInstall = {
-                            val apk = downloadedApk
-                            if (apk != null && apk.exists()) {
-                                AppUpdater.installUpdate(this@MainActivity, apk)
-                            }
-                            updateDialogState = null
-                        },
-                        onChangelog = {
-                            com.hazel.android.util.openInAppBrowser(
-                                this@MainActivity,
-                                "https://sibtainocn.github.io/Hazel/"
-                            )
-                        },
-                        onKeepInBackground = {
-                            // Dismiss dialog but keep downloading — download continues via downloadJob
-                            // When download completes, updateDialogState is set to Ready
-                            // which auto-shows the install prompt
-                            updateDialogState = null
-                        }
-                    )
+                            },
+                            onKeepInBackground = { updateViewModel.backgroundDownload() }
+                        )
+                    }
                 }
             }
         }
