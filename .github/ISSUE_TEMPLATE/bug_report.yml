@@ -1,0 +1,92 @@
+name:  Bug Report
+description: Report a bug or unexpected behavior
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the form below.
+
+  - type: input
+    id: version
+    attributes:
+      label: Hazel Version
+      description: "Find this in Settings → About"
+      placeholder: "e.g. 1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: "Your device model"
+      placeholder: "e.g. Realme 8i, Samsung Galaxy S24, Pixel 8"
+    validations:
+      required: true
+
+  - type: input
+    id: android_version
+    attributes:
+      label: Android Version
+      description: "Your Android version (Settings → About Phone)"
+      placeholder: "e.g. Android 14 (API 34)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: "What happened? What did you expect to happen?"
+      placeholder: "Describe the bug clearly..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: "How can we reproduce this bug?"
+      placeholder: |
+        1. Open the app
+        2. Go to '...'
+        3. Tap on '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / Screen Recording
+      description: "Drag & drop images or videos here. This helps us understand the issue faster."
+      placeholder: "Paste or drag screenshots/recordings here..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (if available)
+      description: "Paste any error logs from Settings → Log Viewer"
+      render: shell
+    validations:
+      required: false
+
+  - type: dropdown
+    id: download_mode
+    attributes:
+      label: Which feature is affected?
+      options:
+        - Download (Single)
+        - Download (Playlist)
+        - Download (Multi Links)
+        - Download (Bulk Import)
+        - Converter
+        - Music Player
+        - Settings
+        - Auto Update
+        - Other
+    validations:
+      required: true

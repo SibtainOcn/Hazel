@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- App-specific external: Android/data/com.hazel.android/files/ -->
+    <external-files-path
+        name="hazel_downloads"
+        path="Hazel/" />
+    <external-files-path
+        name="hazel_music"
+        path="Music/" />
+    <!-- Public Downloads: /storage/emulated/0/Download/Hazel/ -->
+    <external-path
+        name="public_downloads"
+        path="Download/Hazel/" />
+    <!-- Public Music: /storage/emulated/0/Music/Hazel/ -->
+    <external-path
+        name="public_music"
+        path="Music/Hazel/" />
+    <!-- Cached update APKs -->
+    <cache-path
+        name="apk_updates"
+        path="updates/" />
+</paths>

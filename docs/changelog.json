@@ -1,0 +1,38 @@
+[
+  {
+    "version": "1.0.1",
+    "date": "2026-03-28",
+    "title": "Finalizing the Update Mechanism",
+    "sections": {
+      "Changed": [
+        "Rebuilt update dialog"
+      ],
+      "Added": [
+        "Background download — dismiss dialog during download, auto-prompts install when ready",
+        "Changelog button in update dialog — opens curated release notes on GitHub Pages",
+      ],
+      "Fixed": [
+        "Download timer not stopping when download progress starts streaming",
+      ]
+    }
+  },
+  {
+    "version": "1.0.0",
+    "date": "2026-03-27",
+    "title": "Initial Public Release",
+    "sections": {
+      "Added": [
+        "YouTube, Instagram & 3000+ platform support via yt-dlp",
+        "Video downloads up to 4K resolution",
+        "Audio extraction in MP3, AAC, FLAC, WAV, and Opus formats",
+        "Playlist, Multi Links, and Bulk download modes",
+        "Built-in music player with background playback",
+        "Video to audio converter with FFmpeg",
+        "In-app auto-update system via GitHub Releases",
+        "11 accent color themes with dark/light mode",
+        "Share-to-download from any app",
+        "Download history with search and file manager integration"
+      ]
+    }
+  }
+]

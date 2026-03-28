@@ -1,0 +1,32 @@
+*.iml
+.gradle
+/local.properties
+local.properties
+
+# IDE — never commit
+.idea/
+.kotlin/
+
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+/app/build
+/app/release
+/release/
+
+# APK / Bundle artifacts
+*.apk
+*.ap_
+*.aab
+*.dm
+
+# Signing — never commit
+signing.properties
+*.jks
+*.keystore
+/signing/
+
+# Internal
+ISSUES.md

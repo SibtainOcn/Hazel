@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hazel — Changelog</title>
+  <meta name="description" content="Release notes and changelog for Hazel — the open-source media downloader for Android.">
+  <meta property="og:title" content="Hazel Changelog">
+  <meta property="og:description" content="Release notes for Hazel Android">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#FFFFFF">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #FFFFFF;
+      --surface: #F5F5F5;
+      --surface-variant: #EEEEEE;
+      --text: #1C1C1C;
+      --text-muted: #555555;
+      --text-dim: #999999;
+      --accent: #00838F;
+      --accent-dim: rgba(0, 131, 143, 0.10);
+      --divider: #E8E8E8;
+      --badge-added: #2E7D32;
+      --badge-changed: #1565C0;
+      --badge-fixed: #E65100;
+      --badge-removed: #C62828;
+      --badge-infra: #7B1FA2;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Header */
+    .header {
+      padding: 48px 24px 32px;
+      text-align: center;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .header-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    /* Container */
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Release Entry */
+    .release {
+      padding: 36px 0;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .release:last-child {
+      border-bottom: none;
+    }
+
+    .release-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .release-version {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .release-date {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+    }
+
+    .release-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .section-badge.added {
+      background: rgba(76, 175, 80, 0.15);
+      color: var(--badge-added);
+    }
+    .section-badge.changed {
+      background: rgba(33, 150, 243, 0.15);
+      color: var(--badge-changed);
+    }
+    .section-badge.fixed {
+      background: rgba(255, 152, 0, 0.15);
+      color: var(--badge-fixed);
+    }
+    .section-badge.removed {
+      background: rgba(229, 57, 53, 0.15);
+      color: var(--badge-removed);
+    }
+    .section-badge.infrastructure {
+      background: rgba(171, 71, 188, 0.15);
+      color: var(--badge-infra);
+    }
+
+    .section-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .section-list li {
+      position: relative;
+      padding: 6px 0 6px 18px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .section-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 14px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--text-dim);
+    }
+
+    /* Footer */
+    .footer {
+      padding: 32px 24px;
+      text-align: center;
+      border-top: 1px solid var(--divider);
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .footer p {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 8px;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .header {
+        padding: 36px 20px 24px;
+      }
+      .header h1 {
+        font-size: 24px;
+      }
+      .release-version {
+        font-size: 20px;
+      }
+      .release {
+        padding: 28px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-title">Hazel</div>
+    <h1>Changelog</h1>
+  </div>
+
+  <div class="container" id="changelog">
+    <div class="loading">Loading releases...</div>
+  </div>
+
+  <div class="footer">
+    <a href="https://github.com/SibtainOcn/Hazel">View on GitHub</a>
+    <p>Open-source media downloader for Android</p>
+  </div>
+
+  <script>
+    const SECTION_ORDER = ['Added', 'Changed', 'Fixed', 'Removed', 'Infrastructure'];
+
+    function badgeClass(section) {
+      return section.toLowerCase().replace(/\s+/g, '-');
+    }
+
+    function renderRelease(release) {
+      let html = '<div class="release">';
+      html += '<div class="release-header">';
+      html += `<span class="release-version">v${release.version}</span>`;
+      if (release.date) {
+        const d = new Date(release.date + 'T00:00:00');
+        const formatted = d.toLocaleDateString('en-US', {
+          year: 'numeric', month: 'long', day: 'numeric'
+        });
+        html += `<span class="release-date">${formatted}</span>`;
+      }
+      html += '</div>';
+      if (release.title) {
+        html += `<div class="release-title">${release.title}</div>`;
+      }
+
+      // Render sections in consistent order
+      const sections = release.sections || {};
+      const keys = SECTION_ORDER.filter(k => sections[k] && sections[k].length > 0);
+      // Include any extra sections not in the predefined order
+      Object.keys(sections).forEach(k => {
+        if (!SECTION_ORDER.includes(k) && sections[k] && sections[k].length > 0) {
+          keys.push(k);
+        }
+      });
+
+      keys.forEach(key => {
+        html += '<div class="section">';
+        html += `<span class="section-badge ${badgeClass(key)}">${key}</span>`;
+        html += '<ul class="section-list">';
+        sections[key].forEach(item => {
+          html += `<li>${item}</li>`;
+        });
+        html += '</ul></div>';
+      });
+
+      html += '</div>';
+      return html;
+    }
+
+    async function loadChangelog() {
+      const container = document.getElementById('changelog');
+      try {
+        const resp = await fetch('changelog.json');
+        if (!resp.ok) throw new Error('Failed to load');
+        const releases = await resp.json();
+
+        if (!releases.length) {
+          container.innerHTML = '<div class="loading">No releases yet.</div>';
+          return;
+        }
+
+        container.innerHTML = releases.map(renderRelease).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="loading">Unable to load changelog.</div>';
+        console.error(e);
+      }
+    }
+
+    loadChangelog();
+  </script>
+
+</body>
+</html>
