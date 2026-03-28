@@ -337,7 +337,7 @@ fun SettingsScreen(
                 modifier = Modifier
                     .size(44.dp)
                     .clickable {
-                        openInAppBrowser(context, "https://instagram.com/hazel.android")
+                        openInAppBrowser(context, "https://instagram.com/sibtaincore")
                     },
                 shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(
