@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Update Indicator Rewrite**: Replaced Lottie-based `UpdateIndicator` with pure Compose Canvas implementation. Now fully theme-adaptive (light/dark) and accent-color aware — uses `MaterialTheme.colorScheme.primary` directly. Reduced size from 36dp/28dp to 24dp/18dp to match the Hazel logo icon. Three distinct states: downloading (animated bounce + pulse), available (static arrow), ready to install (static checkmark). Animation only allocated during downloading — zero recomposition overhead when static.
+- **Update Screen Icon Fix**: The install icon on the Software Update screen was animating (infinite sweep fill) even on "Available" state when no download was running. Now only animates during actual download — Available/Checking show static dimmed icon, Ready shows fully filled accent icon, Downloading tracks real progress.
+
+### Removed
+- **Lottie Dependency**: Removed `com.airbnb.android:lottie-compose:6.4.1` from `build.gradle.kts` and `libs.versions.toml`. Deleted `download_anim.lottie` raw resource and empty `res/raw/` directory. Saves ~1MB from APK size.
 - **Update Dialog Flickering Fix**: Root cause was `AnimatedContent` re-animating every progress tick because each `Downloading` state was a new data class instance. Fixed by adding a `contentKey` that returns the state TYPE name only — progress updates within `Downloading` no longer trigger re-animation.
 - **Centralized Update State**: Eliminated duplicated `mutableStateOf` update logic from both `MainActivity` and `SettingsScreen`. All update state now lives in a single `UpdateViewModel` (single source of truth), preventing the state synchronization bugs that caused flickering.
 - **Settings Update Row**: "Check for Updates" row in Settings now navigates directly to the dedicated Software Update screen instead of duplicating the check/download/install logic inline.

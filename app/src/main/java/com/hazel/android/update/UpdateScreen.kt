@@ -189,36 +189,22 @@ private fun StatusHeader(
             .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Large animated install icon
-        val infiniteTransition = rememberInfiniteTransition(label = "update_screen_sweep")
-        val sweepFraction by infiniteTransition.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 2000, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart
-            ),
-            label = "sweep_screen"
-        )
+        // Only show the sweeping fill animation during actual download
+        val isActuallyDownloading = state is UpdateViewModel.UiState.Downloading
 
-        val animatedProgress by animateFloatAsState(
-            targetValue = progress,
-            animationSpec = tween(300),
-            label = "progress_anim"
-        )
+        if (isActuallyDownloading) {
+            // ── Downloading: infinite sweep loop (not tied to real progress) ──
+            val infiniteTransition = rememberInfiniteTransition(label = "download_sweep")
+            val sweepFraction by infiniteTransition.animateFloat(
+                initialValue = 0f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 2000, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart
+                ),
+                label = "sweep"
+            )
 
-        val fillFraction = when (state) {
-            is UpdateViewModel.UiState.Downloading -> animatedProgress
-            is UpdateViewModel.UiState.ReadyToInstall -> 1f
-            is UpdateViewModel.UiState.Available -> sweepFraction
-            is UpdateViewModel.UiState.Checking -> sweepFraction
-            else -> 0f
-        }
-
-        val showAnimation = state !is UpdateViewModel.UiState.Idle &&
-                state !is UpdateViewModel.UiState.Error
-
-        if (showAnimation) {
             Box(
                 modifier = Modifier.size(72.dp),
                 contentAlignment = Alignment.Center
@@ -230,7 +216,7 @@ private fun StatusHeader(
                     modifier = Modifier.size(72.dp),
                     tint = dimColor
                 )
-                // Accent fill with mask
+                // Accent fill with mask — sweeps infinitely top-to-bottom
                 Box(
                     modifier = Modifier
                         .size(72.dp)
@@ -244,7 +230,7 @@ private fun StatusHeader(
                         tint = accentColor
                     )
                     Canvas(modifier = Modifier.size(72.dp)) {
-                        val fillHeight = size.height * fillFraction
+                        val fillHeight = size.height * sweepFraction
                         drawRect(
                             color = Color.Transparent,
                             topLeft = Offset(0f, fillHeight),
@@ -254,8 +240,16 @@ private fun StatusHeader(
                     }
                 }
             }
+        } else if (state is UpdateViewModel.UiState.ReadyToInstall) {
+            // ── Ready: fully filled accent icon (static) ──
+            Icon(
+                painter = painterResource(R.drawable.install_ic),
+                contentDescription = null,
+                modifier = Modifier.size(72.dp),
+                tint = accentColor
+            )
         } else {
-            // Static icon for idle/error
+            // ── Available / Checking / Idle / Error: static dimmed icon ──
             Icon(
                 painter = painterResource(R.drawable.install_ic),
                 contentDescription = null,
