@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.0.1",
+    "date": "2026-03-29",
+    "title": "Changes in Settings",
+    "sections": {
+      "Added": [
+        "Added a Homepage shortcut in Settings to open the Hazel landing page directly in-app",
+        "Added a Share Hazel option in Settings to easily send the app link to others"
+      ],
+      "Changed": [
+        "License now opens a clean, formatted page instead of a raw file",
+        "Minor polish across Settings"
+      ]
+    }
+  },
+  {
     "version": "1.0.0",
     "date": "2026-03-28",
     "title": "Update Mechanism Overhaul",

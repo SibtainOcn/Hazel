@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.settings
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -187,7 +188,7 @@ fun SettingsScreen(
         ) {
             ListItem(
                 headlineContent = { Text("Quick Guide", fontWeight = FontWeight.Medium) },
-                supportingContent = { Text("Step-by-step instructions for all features") },
+                supportingContent = { Text("Learn how to use Hazel") },
                 leadingContent = {
                     Icon(Icons.Filled.MenuBook, null, tint = MaterialTheme.colorScheme.primary)
                 },
@@ -200,6 +201,64 @@ fun SettingsScreen(
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToGuide() }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            // Hazel Homepage — opens landing page in-app
+            ListItem(
+                headlineContent = { Text("Hazel Homepage", fontWeight = FontWeight.Medium) },
+                supportingContent = { Text("Visit our page") },
+                leadingContent = {
+                    Icon(painterResource(R.drawable.home_ic), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable {
+                    openInAppBrowser(context, "https://sibtainocn.github.io/Hazel/")
+                }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            // Share Hazel — native share sheet
+            ListItem(
+                headlineContent = { Text("Share Hazel", fontWeight = FontWeight.Medium) },
+                supportingContent = { Text("Tell your friends") },
+                leadingContent = {
+                    Icon(painterResource(R.drawable.share_ic), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable {
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_SUBJECT, "Hazel — Media Downloader")
+                        putExtra(
+                            Intent.EXTRA_TEXT,
+                            "Check out Hazel a powerful, open-source media extractor for Android.\nhttps://sibtainocn.github.io/Hazel/"
+                        )
+                    }
+                    context.startActivity(Intent.createChooser(shareIntent, "Share Hazel"))
+                }
             )
 
             HorizontalDivider(
@@ -222,7 +281,7 @@ fun SettingsScreen(
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { 
-                    openInAppBrowser(context, "https://github.com/SibtainOcn/Hazel/blob/main/LICENSE")
+                    openInAppBrowser(context, "https://sibtainocn.github.io/Hazel/license.html")
                 }
             )
 

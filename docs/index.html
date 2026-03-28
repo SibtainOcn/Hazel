@@ -1,329 +1,410 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hazel — Changelog</title>
-  <meta name="description"
-    content="Release notes and changelog for Hazel — the open-source media downloader for Android.">
-  <meta property="og:title" content="Hazel Changelog">
-  <meta property="og:description" content="Release notes for Hazel Android">
-  <meta property="og:type" content="website">
+  <title>Hazel — Pro Media Downloader</title>
+  <meta name="description" content="Hazel - The completely free, open-source media downloader for Android. Supports 3000+ platforms, 4K video, and audio extraction.">
   <meta name="theme-color" content="#FFFFFF">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
-    *,
-    *::before,
-    *::after {
+    :root {
+      --bg: #FFFFFF;
+      --surface: #F8F9FA;
+      --text: #111111;
+      --text-muted: #555555;
+      --text-dim: #888888;
+      --accent: #2E7D32; /* Vibrant Green from Hazel */
+      --accent-hover: #1B5E20;
+      --divider: #EAEAEA;
+      
+      --shadow-sm: 0 4px 6px rgba(0,0,0,0.05);
+      --shadow-md: 0 10px 15px rgba(0,0,0,0.05);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121212;
+        --surface: #1E1E1E;
+        --text: #F5F5F5;
+        --text-muted: #B0B0B0;
+        --text-dim: #777777;
+        --divider: #2C2C2C;
+        --accent: #4CAF50;
+        --accent-hover: #81C784;
+        
+        --shadow-sm: 0 4px 6px rgba(0,0,0,0.2);
+        --shadow-md: 0 10px 20px rgba(0,0,0,0.3);
+      }
+    }
+
+    *, *::before, *::after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    :root {
-      --bg: #FFFFFF;
-      --surface: #F5F5F5;
-      --surface-variant: #EEEEEE;
-      --text: #1C1C1C;
-      --text-muted: #555555;
-      --text-dim: #999999;
-      --accent: #00838F;
-      --accent-dim: rgba(0, 131, 143, 0.10);
-      --divider: #E8E8E8;
-      --badge-added: #2E7D32;
-      --badge-changed: #1565C0;
-      --badge-fixed: #E65100;
-      --badge-removed: #C62828;
-      --badge-infra: #7B1FA2;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    html, body {
+      font-family: 'Inter', -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
     }
 
-    /* Header */
-    .header {
-      padding: 48px 24px 32px;
-      text-align: center;
-      border-bottom: 1px solid var(--divider);
-    }
-
-    .header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.8px;
-    }
-
-    .brand {
-      color: #2E7D32;
-      /* Vibrant Green */
-      margin-right: 4px;
-    }
-
-    /* Container */
+    /* Container base */
     .container {
-      max-width: 680px;
+      max-width: 1000px;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0 24px;
     }
 
-    /* Release Entry */
-    .release {
-      padding: 36px 0;
-      border-bottom: 1px solid var(--divider);
-    }
-
-    .release:last-child {
-      border-bottom: none;
-    }
-
-    .release-header {
+    /* Top Nav */
+    nav {
+      padding: 32px 0;
       display: flex;
-      align-items: baseline;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo-area {
+      display: flex;
+      align-items: center;
       gap: 12px;
-      margin-bottom: 6px;
-      flex-wrap: wrap;
+      font-weight: 800;
+      font-size: 24px;
+      letter-spacing: -0.5px;
     }
 
-    .release-version {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.3px;
+    .brand-accent {
+      color: var(--accent);
     }
 
-    .release-date {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-dim);
-    }
-
-    .release-title {
-      font-size: 15px;
-      font-weight: 500;
+    .nav-links a {
       color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 80px 0 40px;
+    }
+
+    .hero h1 {
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
       margin-bottom: 24px;
     }
 
-    /* Section */
-    .section {
-      margin-bottom: 20px;
-    }
-
-    .section:last-child {
-      margin-bottom: 0;
-    }
-
-    .section-badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 6px;
-      margin-bottom: 10px;
-    }
-
-    .section-badge.added {
-      background: rgba(76, 175, 80, 0.15);
-      color: var(--badge-added);
-    }
-
-    .section-badge.changed {
-      background: rgba(33, 150, 243, 0.15);
-      color: var(--badge-changed);
-    }
-
-    .section-badge.fixed {
-      background: rgba(255, 152, 0, 0.15);
-      color: var(--badge-fixed);
-    }
-
-    .section-badge.removed {
-      background: rgba(229, 57, 53, 0.15);
-      color: var(--badge-removed);
-    }
-
-    .section-badge.infrastructure {
-      background: rgba(171, 71, 188, 0.15);
-      color: var(--badge-infra);
-    }
-
-    .section-list {
-      list-style: none;
-      padding: 0;
-    }
-
-    .section-list li {
-      position: relative;
-      padding: 6px 0 6px 18px;
-      font-size: 14px;
+    .hero p {
+      font-size: 20px;
       color: var(--text-muted);
-      line-height: 1.55;
+      max-width: 600px;
+      margin: 0 auto 40px;
     }
 
-    .section-list li::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 14px;
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--text-dim);
+    /* Buttons */
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
     }
 
-    /* Footer */
-    .footer {
-      padding: 32px 24px;
-      text-align: center;
-      border-top: 1px solid var(--divider);
-    }
-
-    .footer a {
-      color: var(--accent);
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 52px;
+      padding: 0 32px;
+      border-radius: 26px;
+      font-weight: 600;
+      font-size: 16px;
       text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+      outline: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--divider);
+    }
+
+    .btn-secondary:hover {
+      background: var(--divider);
+    }
+
+    .download-meta {
+      display: block;
+      margin-top: 16px;
       font-size: 13px;
+      color: var(--text-dim);
       font-weight: 500;
     }
 
-    .footer a:hover {
-      text-decoration: underline;
+    /* Features Section */
+    .features {
+      padding: 40px 0 80px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
     }
 
-    .footer p {
-      font-size: 12px;
-      color: var(--text-dim);
-      margin-top: 8px;
+    .feature-card {
+      background: var(--surface);
+      padding: 40px 32px;
+      border-radius: 24px;
+      border: 1px solid var(--divider);
+      transition: transform 0.3s ease;
     }
 
-    /* Loading */
-    .loading {
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .icon-box {
+      width: 48px;
+      height: 48px;
+      background: rgba(46, 125, 50, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      color: var(--accent);
+    }
+
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* Privacy Banner */
+    .privacy-banner {
+      background: var(--surface);
+      border: 1px solid var(--divider);
+      border-radius: 24px;
+      padding: 48px 40px;
       text-align: center;
-      padding: 80px 24px;
+      margin-bottom: 80px;
+      transition: box-shadow 0.3s ease;
+    }
+    
+    .privacy-banner:hover {
+      box-shadow: var(--shadow-sm);
+    }
+
+    .privacy-banner h2 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+
+    .privacy-banner p {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--divider);
+      padding: 40px 0;
+      text-align: center;
       color: var(--text-dim);
       font-size: 14px;
+      margin-top: 40px;
     }
 
-    /* Responsive */
-    @media (max-width: 480px) {
-      .header {
-        padding: 36px 20px 24px;
-      }
-
-      .header h1 {
-        font-size: 24px;
-      }
-
-      .release-version {
-        font-size: 20px;
-      }
-
-      .release {
-        padding: 28px 0;
-      }
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
     }
+    
+    footer a:hover {
+      color: var(--text);
+    }
+
+    @media (max-width: 768px) {
+      .hero { padding: 60px 0; }
+      .hero h1 { font-size: 40px; }
+      .hero p { font-size: 18px; }
+      .cta-group { flex-direction: column; padding: 0 20px; }
+      .btn { width: 100%; }
+      .features { grid-template-columns: 1fr; }
+      .privacy-banner { padding: 32px 24px; margin-bottom: 40px; }
+      .privacy-banner h2 { font-size: 24px; }
+    }
+
+    /* Icon SVGs */
+    svg { fill: currentColor; }
   </style>
 </head>
-
 <body>
 
-  <div class="header">
-    <h1><span class="brand">Hazel</span> Changelog</h1>
-  </div>
+  <div class="container">
+    <nav>
+      <div class="logo-area">
+        <img src="logo.svg" alt="Hazel Logo" width="36" height="36" style="border-radius: 8px;">
+        <span class="brand-accent">Hazel</span>
+      </div>
+      <div class="nav-links">
+        <a href="changelog.html">Changelog</a>
+      </div>
+    </nav>
 
-  <div class="container" id="changelog">
-    <div class="loading">Loading releases...</div>
-  </div>
+    <main>
+      <section class="hero">
+        <img src="logo.svg" alt="Hazel App Icon" width="100" height="100" style="border-radius: 24px; margin-bottom: 24px; box-shadow: var(--shadow-md);">
+        <h1>Next-Generation<br>Media Downloader.</h1>
+        <p>Hazel is an advanced, privacy-respecting media client for Android. Built with a robust extraction engine, it delivers high-fidelity video and audio across 3,000+ platforms—with zero ads and zero compromises.</p>
+        
+        <div class="cta-group">
+          <!-- ID tags to inject JS logic -->
+          <a href="https://github.com/SibtainOcn/Hazel/releases/latest" id="download-btn" class="btn btn-primary">
+            Download APK
+          </a>
+          <a href="changelog.html" class="btn btn-secondary">
+            View Changelog
+          </a>
+        </div>
+        <span class="download-meta" id="version-text">Fetching latest version...</span>
+      </section>
 
-  <div class="footer">
-    <a href="https://github.com/SibtainOcn/Hazel">View on GitHub</a>
-    <p>Open-source media downloader for Android</p>
+      <section class="features">
+        <div class="feature-card">
+          <div class="icon-box">
+            <!-- Globe Icon -->
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+          </div>
+          <h3>Universal Compatibility</h3>
+          <p>Engineered with a robust, custom-tuned extraction backend, Hazel provides seamless media retrieval from over 3,000 supported websites and web services.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-box">
+            <!-- Music Note Icon -->
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+          </div>
+          <h3>Advanced Audio Processing</h3>
+          <p>Utilize integrated processing algorithms for lossless and high-quality on-device audio transcription to formats like MP3, FLAC, WAV, and Opus.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-box">
+            <!-- Layers/Queue Icon -->
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg>
+          </div>
+          <h3>Intelligent Management</h3>
+          <p>Built for heavy media workloads. Queue multiple streams, manage parallel background downloads, and utilize auto-resume capabilities without draining system resources.</p>
+        </div>
+      </section>
+
+      <section class="privacy-banner">
+        <h2>Built on Trust. Completely Open Source.</h2>
+        <p>Hazel operates entirely on-device, ensuring your media habits remain strictly private. No telemetry, no data collection, no ads, and no hidden subscriptions. The code is 100% transparent and available for anyone to verify.</p>
+      </section>
+    </main>
+
+    <footer>
+      <p>Hazel is Free and Open Source Software (GPL-3.0).</p>
+      <p style="margin-top: 8px;">
+        <a href="https://github.com/SibtainOcn/Hazel" target="_blank" rel="noopener">GitHub</a> • 
+        <a href="https://github.com/SibtainOcn/Hazel/releases" target="_blank" rel="noopener">Releases</a> • 
+        <a href="changelog.html">Changelog</a> • 
+        <a href="license.html">License</a> • 
+        <a href="https://buymeacoffee.com/sibtainocn" target="_blank" rel="noopener">Support</a>
+      </p>
+    </footer>
   </div>
 
   <script>
-    const SECTION_ORDER = ['Added', 'Changed', 'Fixed', 'Removed', 'Infrastructure'];
-
-    function badgeClass(section) {
-      return section.toLowerCase().replace(/\s+/g, '-');
-    }
-
-    function renderRelease(release) {
-      let html = '<div class="release">';
-      html += '<div class="release-header">';
-      html += `<span class="release-version">v${release.version}</span>`;
-      if (release.date) {
-        const d = new Date(release.date + 'T00:00:00');
-        const formatted = d.toLocaleDateString('en-US', {
-          year: 'numeric', month: 'long', day: 'numeric'
-        });
-        html += `<span class="release-date">${formatted}</span>`;
-      }
-      html += '</div>';
-      if (release.title) {
-        html += `<div class="release-title">${release.title}</div>`;
-      }
-
-      // Render sections in consistent order
-      const sections = release.sections || {};
-      const keys = SECTION_ORDER.filter(k => sections[k] && sections[k].length > 0);
-      // Include any extra sections not in the predefined order
-      Object.keys(sections).forEach(k => {
-        if (!SECTION_ORDER.includes(k) && sections[k] && sections[k].length > 0) {
-          keys.push(k);
-        }
-      });
-
-      keys.forEach(key => {
-        html += '<div class="section">';
-        html += `<span class="section-badge ${badgeClass(key)}">${key}</span>`;
-        html += '<ul class="section-list">';
-        sections[key].forEach(item => {
-          html += `<li>${item}</li>`;
-        });
-        html += '</ul></div>';
-      });
-
-      html += '</div>';
-      return html;
-    }
-
-    async function loadChangelog() {
-      const container = document.getElementById('changelog');
+    // Dynamically fetch the absolute latest APK link from GitHub Releases API
+    async function fetchLatestAPK() {
+      const btn = document.getElementById('download-btn');
+      const meta = document.getElementById('version-text');
+      
       try {
-        const resp = await fetch('changelog.json');
-        if (!resp.ok) throw new Error('Failed to load');
-        const releases = await resp.json();
+        const resp = await fetch('https://api.github.com/repos/SibtainOcn/Hazel/releases/latest');
+        if (!resp.ok) throw new Error('Network response was not ok');
+        
+        const data = await resp.json();
+        const version = data.tag_name; // e.g., v1.0.0
+        
+        let targetApkUrl = '';
+        let apkSizeMB = 0;
 
-        if (!releases.length) {
-          container.innerHTML = '<div class="loading">No releases yet.</div>';
-          return;
+        // Priority: arm64 -> universal -> any apk
+        if (data.assets && data.assets.length > 0) {
+          const armApk = data.assets.find(a => a.name.toLowerCase().includes('arm64') && a.name.endsWith('.apk'));
+          const universalApk = data.assets.find(a => a.name.toLowerCase().includes('universal') && a.name.endsWith('.apk'));
+          const anyApk = data.assets.find(a => a.name.endsWith('.apk'));
+          
+          const chosenAsset = armApk || universalApk || anyApk;
+          
+          if (chosenAsset) {
+            targetApkUrl = chosenAsset.browser_download_url;
+            apkSizeMB = (chosenAsset.size / (1024 * 1024)).toFixed(1);
+          }
         }
 
-        container.innerHTML = releases.map(renderRelease).join('');
-      } catch (e) {
-        container.innerHTML = '<div class="loading">Unable to load changelog.</div>';
-        console.error(e);
+        if (targetApkUrl) {
+          btn.href = targetApkUrl;
+          meta.innerHTML = `Version ${version} • ${apkSizeMB} MB`;
+        } else {
+          // Fallback if no apk found in assets
+          meta.innerHTML = `Version ${version}`;
+        }
+
+      } catch (err) {
+        console.error("Failed to fetch GitHub release structure:", err);
+        // On failure, button naturally falls back to the static html href (/releases/latest)
+        meta.innerHTML = 'Download from GitHub Releases';
       }
     }
 
-    loadChangelog();
+    // Call it immediately on load
+    fetchLatestAPK();
   </script>
-
 </body>
-
 </html>
