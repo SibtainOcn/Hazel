@@ -10,6 +10,7 @@
       ],
       "Changed": [
         "License now opens a clean, formatted page instead of a raw file",
+        "Significantly improved APK download speed by optimizing network buffer size",
         "Minor polish across Settings"
       ]
     }
