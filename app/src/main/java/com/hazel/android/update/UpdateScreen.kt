@@ -614,7 +614,7 @@ private fun InfoCard(
             // Changelog button
             Surface(
                 onClick = {
-                    openInAppBrowser(context, "https://sibtainocn.github.io/Hazel/")
+                    openInAppBrowser(context, "https://sibtainocn.github.io/Hazel/changelog.html")
                 },
                 modifier = Modifier
                     .fillMaxWidth()

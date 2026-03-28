@@ -103,7 +103,7 @@ class MainActivity : ComponentActivity() {
                             onChangelog = {
                                 com.hazel.android.util.openInAppBrowser(
                                     this@MainActivity,
-                                    "https://sibtainocn.github.io/Hazel/"
+                                    "https://sibtainocn.github.io/Hazel/changelog.html"
                                 )
                             },
                             onKeepInBackground = { updateViewModel.backgroundDownload() }

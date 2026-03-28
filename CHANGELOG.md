@@ -5,11 +5,13 @@ All notable changes to Hazel (formerly FetchKit) will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0] - 2026-03-29
 
 ### Changed
 - **Update Indicator Rewrite**: Replaced Lottie-based `UpdateIndicator` with pure Compose Canvas implementation. Now fully theme-adaptive (light/dark) and accent-color aware — uses `MaterialTheme.colorScheme.primary` directly. Reduced size from 36dp/28dp to 24dp/18dp to match the Hazel logo icon. Three distinct states: downloading (animated bounce + pulse), available (static arrow), ready to install (static checkmark). Animation only allocated during downloading — zero recomposition overhead when static.
 - **Update Screen Icon Fix**: The install icon on the Software Update screen was animating (infinite sweep fill) even on "Available" state when no download was running. Now only animates during actual download — Available/Checking show static dimmed icon, Ready shows fully filled accent icon, Downloading tracks real progress.
+- **Website & Links**: Created a premium dynamic landing page for Hazel at the root GitHub Pages URL, isolating the changelog to `changelog.html`. Overhauled the landing page copy and added a "Privacy & Open Source" feature section to establish an industry-standard tone. Added a dedicated `license.html` page for clean GPL-3.0 viewing. Unified footers across all pages with consistent navigation. Updated all in-app "View Changelog" buttons (`UpdateScreen` and `MainActivity`) to correctly point to the new `changelog.html` endpoint.
+- **Settings Quick Guide Subtitle**: Shortened from "Step-by-step instructions for all features" to "Learn how to use Hazel" for a cleaner single-line display.
 
 ### Removed
 - **Lottie Dependency**: Removed `com.airbnb.android:lottie-compose:6.4.1` from `build.gradle.kts` and `libs.versions.toml`. Deleted `download_anim.lottie` raw resource and empty `res/raw/` directory. Saves ~1MB from APK size.
@@ -28,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Smart APK Caching**: If APK was previously downloaded but never installed, `startDownload()` detects the cached file and skips straight to "Ready to Install" instead of re-downloading. `autoCheckOnLaunch()` also detects cached APKs.
 - **Intelligent Cleanup**: Old APKs cleaned on cancel. On install, APK is kept (user might cancel system installer). On next app launch, if current version is up-to-date, stale cache is cleaned automatically.
 - **GitHub Pages Changelog**: New `docs/` directory with `index.html` and `changelog.json` for a curated, auto-rendering changelog page at `https://sibtainocn.github.io/Hazel/`.
+- **Share Hazel**: New Settings row that opens the native Android share sheet with a pre-filled message and landing page link. Uses `Intent.ACTION_SEND` with `createChooser`.
+- **Hazel Homepage**: New Settings row that opens the landing page (`sibtainocn.github.io/Hazel/`) in the in-app Chrome Custom Tab browser.
+- **License Page**: In-app License row now opens the new `license.html` hosted page instead of the raw GitHub file.
 
 ### Infrastructure
 - **GitHub Actions CI/CD**: Added `ci.yml` (lint + debug build on every PR), `release.yml` (auto-build signed APK on GitHub Release), `security.yml` (weekly dependency + secret scan).
