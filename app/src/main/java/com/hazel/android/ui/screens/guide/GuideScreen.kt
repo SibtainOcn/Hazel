@@ -143,7 +143,7 @@ fun GuideScreen(onBack: () -> Unit) {
                 title = "Multi Links Mode",
                 steps = listOf(
                     "Set Mode to Multi Links",
-                    "Paste first URL → tap + Next URL",
+                    "Paste first URL -> tap + Next URL",
                     "Add up to 10 URLs one by one",
                     "Tap Review to verify, then Download All"
                 )
