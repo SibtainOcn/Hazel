@@ -174,13 +174,13 @@ class DownloadViewModel : ViewModel() {
 
     /**
      * Creates a subfolder inside downloadDir for separate folder mode.
-     * - Playlist: uses playlist name (first 10 chars, sanitized)
-     * - Batch/Multi Links: auto-generates Batch_01, Batch_02, etc.
+     * Checks the FINAL public dir (Download/Hazel/) for existing folders
+     * to correctly increment folder numbers across sessions.
      */
-    // Pre-compiled regex — avoids re-allocation per call
     private val folderNameRegex = Regex("[^a-zA-Z0-9_ -]")
 
     private fun resolveSeparateFolder(mode: String, playlistName: String = ""): File {
+        val finalDir = StoragePaths.finalDownloads // Check public dir for duplicates
         return try {
             val baseName = when (mode) {
                 "Playlist" -> {
@@ -188,25 +188,24 @@ class DownloadViewModel : ViewModel() {
                         .replace(folderNameRegex, "")
                         .trim()
                         .ifBlank { "Playlist" }
-                    // If folder exists, append _1, _2, etc.
-                    if (File(downloadDir, sanitized).exists()) {
+                    // Check if folder already exists in the final public dir
+                    if (File(finalDir, sanitized).exists()) {
                         var index = 1
-                        while (File(downloadDir, "${sanitized}_$index").exists()) index++
-                        "${sanitized}_$index"
+                        while (File(finalDir, "${sanitized}_${"%02d".format(index)}").exists()) index++
+                        "${sanitized}_${"%02d".format(index)}"
                     } else sanitized
                 }
                 else -> {
-                    // Find next available Batch_XX
+                    // Batch/Multi Links: batch_01, batch_02, etc.
                     var index = 1
-                    while (File(downloadDir, "Batch_%02d".format(index)).exists()) index++
-                    "Batch_%02d".format(index)
+                    while (File(finalDir, "batch_%02d".format(index)).exists()) index++
+                    "batch_%02d".format(index)
                 }
             }
             val subDir = File(downloadDir, baseName)
             if (!subDir.exists()) subDir.mkdirs()
             subDir
         } catch (e: Exception) {
-            // Fallback to default dir on any filesystem error
             downloadDir
         }
     }
