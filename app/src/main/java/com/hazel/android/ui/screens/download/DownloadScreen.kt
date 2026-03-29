@@ -1031,7 +1031,7 @@ fun DownloadScreen(
                                 modifier = Modifier
                                     .size(20.dp)
                                     .graphicsLayer { rotationZ = chevronRotation },
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
 
@@ -1054,6 +1054,27 @@ fun DownloadScreen(
                                         enter = fadeIn(tween(200))
                                     ) {
                                         LogEntryRow(log, isActive)
+                                    }
+                                }
+
+                                // Bottom collapse toggle — shown when 10+ logs
+                                if (downloadState.logs.size >= 10) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable { logsExpanded = false }
+                                            .padding(top = 6.dp),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.KeyboardArrowDown,
+                                            contentDescription = "Collapse",
+                                            modifier = Modifier
+                                                .size(18.dp)
+                                                .graphicsLayer { rotationZ = 180f },
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
                                     }
                                 }
                             }
