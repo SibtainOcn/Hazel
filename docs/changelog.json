@@ -12,6 +12,7 @@
         "Shrunk log font to 10sp for better visibility on mobile screens"
       ],
       "Fixed": [
+        "Fixed 'Separate Folder' duplicate detection and restored Android music notification playback controls.",
         "Completed files lost when cancelling multi-item downloads mid-way — now saves whatever finished",
         "Cancelling audio download triggered auto-retry at lower bitrate instead of stopping",
         "Resolved race conditions in the cancellation flow to ensure stable state resets"

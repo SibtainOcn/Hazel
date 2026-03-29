@@ -5,7 +5,7 @@ All notable changes to Hazel (formerly FetchKit) will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.1] - 2026-03-29
+## [1.0.2] - 2026-03-29
 
 ### Changed
 - **Download Speed: Persistent yt-dlp Cache (Critical)**: Added `--cache-dir` pointing to a persistent app cache directory (`cacheDir/yt-dlp/`). Previously, every yt-dlp process invocation re-downloaded and re-parsed YouTube's `player.js` (~1-2MB) from scratch, adding ~12 seconds per execution. The cache now persists across all process invocations. Also fixed `fetchPlaylistInfo()` which was missing `--cache-dir`, causing the metadata pre-fetch to not share cached player data with the main download process.
@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Unified Log Flow**: All download modes (Single, Playlist, Multi Links, Bulk) now follow the same log pattern: `Validating URL → Fetching from {platform} → Reading metadata → (yt-dlp phases) → Summary → Cleaning → Saving → Finished`. Removed mode-specific log prefixes ("playlist URL", "playlist metadata"), batch-internal logs ("Batch file ready"), and the video-only "Merging streams" step.
 
 ### Fixed
+- **'Separate Folder' Logic & Music Controls**: Fixed duplicate detection for separate folders and restored working Next/Previous controls in the Android music notification.
 - **Playlist Batch Counter Stuck at 0/N**: The `batchCurrent` counter in the download screen never updated during playlist downloads — regex patterns didn't match yt-dlp's actual output format (especially with `--lazy-playlist`). Broadened matching with 3 layers: primary regex (`Downloading item/video/playlist item X of Y`), word-boundary regex (`item X of Y` anywhere in line), and generic `X of Y` fallback guarded against false positives (excludes `fragment`, `format`, and progress-% lines).
 - **Counter Jumping (1→3 skipping 2)**: Removed the phase-based "downloading webpage" fallback counter that was double-incrementing because yt-dlp emits `downloading webpage` multiple times per item (once for video stream, once for audio stream). Counter now relies exclusively on regex-matched item numbers from yt-dlp output.
 - **Cancel Triggers Auto-Retry Instead of Stopping**: When user pressed Cancel during audio downloads (MP3/AAC), `destroyProcessById` kills the yt-dlp process which throws a generic exception — not `CancellationException`. The retry loop was catching this as a "format failure" and retrying at lower bitrates. Added `isCancelled` guard before each retry attempt so process-kill exceptions are treated as cancellation, not format errors.
