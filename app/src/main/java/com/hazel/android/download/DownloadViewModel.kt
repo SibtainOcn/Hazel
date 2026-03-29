@@ -5,6 +5,7 @@ import com.hazel.android.data.SettingsRepository
 import android.media.MediaScannerConnection
 import android.os.Environment
 import com.hazel.android.util.StoragePaths
+import com.hazel.android.HazelApp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yausername.youtubedl_android.YoutubeDL
@@ -163,6 +164,14 @@ class DownloadViewModel : ViewModel() {
     private val downloadDir: File
         get() = StoragePaths.tempDownloads
 
+    // Persistent yt-dlp cache — avoids re-fetching player.js (~12s) on every process
+    private val ytDlpCacheDir: File
+        get() {
+            val dir = File(HazelApp.instance.cacheDir, "yt-dlp")
+            if (!dir.exists()) dir.mkdirs()
+            return dir
+        }
+
     /**
      * Creates a subfolder inside downloadDir for separate folder mode.
      * - Playlist: uses playlist name (first 10 chars, sanitized)
@@ -284,10 +293,35 @@ class DownloadViewModel : ViewModel() {
                     "Playlist" -> executePlaylistDownload(context, urls.first(), isVideo, useSeparateFolder)
                     "Multi Links", "Bulk" -> executeBatchDownload(context, urls, isVideo, useSeparateFolder)
                 }
+
+                // ── Centralized cancel handling for ALL modes ──
+                if (isCancelled) {
+                    addLog("Download cancelled by user", LogLevel.WARN)
+                    // Clean only temp fragments, NOT completed files
+                    try {
+                        val tempFragments = downloadDir.listFiles { f ->
+                            f.name.endsWith(".part") || f.name.endsWith(".ytdl") || f.name.endsWith(".temp")
+                        }
+                        tempFragments?.forEach { it.delete() }
+                    } catch (_: Exception) {}
+                    DownloadNotificationHelper.showCancelled(context)
+                    closeLastLog()
+                    _state.value = _state.value.copy(
+                        isDownloading = false,
+                        error = "Cancelled"
+                    )
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                if (isCancelled) return@launch
+                if (isCancelled) {
+                    // Process kill exception during cancel — just clean up
+                    addLog("Download cancelled by user", LogLevel.WARN)
+                    DownloadNotificationHelper.showCancelled(context)
+                    closeLastLog()
+                    _state.value = _state.value.copy(isDownloading = false, error = "Cancelled")
+                    return@launch
+                }
                 val rawMsg = e.message ?: "Download failed"
                 val cleanMsg = sanitizeError(rawMsg)
                 addLog("ERROR — $cleanMsg", LogLevel.ERROR)
@@ -309,36 +343,17 @@ class DownloadViewModel : ViewModel() {
 
     /**
      * Gracefully cancel the current download.
-     * Kills yt-dlp process, cancels coroutine, cleans temp files, logs cancellation.
+     * Kills yt-dlp process and sets flag — the download coroutine detects
+     * isCancelled, saves any completed files, then exits naturally.
      */
     fun cancelDownload(context: Context) {
-        isCancelled = true
+        isCancelled = true  // Immediate signal — @Volatile ensures visibility across threads
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                // Kill the yt-dlp process
+                // Kill the yt-dlp process — causes executeYtDlp to throw,
+                // which the download flow catches and checks isCancelled
                 YoutubeDL.getInstance().destroyProcessById(processId)
             } catch (_: Exception) { /* process may already be done */ }
-
-            // Cancel the coroutine job
-            downloadJob?.cancel()
-            downloadJob = null
-
-            addLog("Download cancelled by user", LogLevel.WARN)
-
-            // Clean temp files
-            try {
-                val tempFiles = downloadDir.listFiles { f -> f.name.endsWith(".part") || f.name.endsWith(".ytdl") || f.name.endsWith(".temp") }
-                val cleaned = tempFiles?.size ?: 0
-                tempFiles?.forEach { it.delete() }
-                if (cleaned > 0) addLog("Cleaned $cleaned temp files", LogLevel.INFO)
-            } catch (_: Exception) { /* ignore cleanup errors */ }
-
-            DownloadNotificationHelper.showCancelled(context)
-            closeLastLog()
-            _state.value = _state.value.copy(
-                isDownloading = false,
-                error = "Cancelled"
-            )
         }
     }
 
@@ -346,28 +361,16 @@ class DownloadViewModel : ViewModel() {
     // Single Download
     // ═══════════════════════════════════════════════════════════════════
     private suspend fun executeSingleDownload(context: Context, url: String, isVideo: Boolean) {
-        val platform = detectPlatform(url)
-        addLog("Validating URL...", LogLevel.INFO)
-
         val httpStatus = validateUrl(url)
         if (!handleHttpStatus(httpStatus)) return
 
-        addLog("Fetching from $platform", LogLevel.SUCCESS)
         val request = buildRequest(url, isVideo, usePlaylist = false)
-        addLog("Reading metadata...", LogLevel.INFO)
         if (isVideo) {
             executeYtDlp(request)
         } else {
             executeAudioWithRetry(url, false, downloadDir)
         }
         if (isCancelled) return
-        addLog("Download completed", LogLevel.SUCCESS)
-
-        if (isVideo) {
-            addLog("Merging streams...", LogLevel.INFO)
-        }
-
-        addLog("Cleaning temp files...", LogLevel.INFO)
         finishDownload(context, downloadDir)
     }
 
@@ -375,41 +378,50 @@ class DownloadViewModel : ViewModel() {
     // Playlist Download
     // ═══════════════════════════════════════════════════════════════════
     private suspend fun executePlaylistDownload(context: Context, url: String, isVideo: Boolean, useSeparateFolder: Boolean) {
-        val platform = detectPlatform(url)
-        addLog("Validating playlist URL...", LogLevel.INFO)
-
         val httpStatus = validateUrl(url)
         if (!handleHttpStatus(httpStatus)) return
 
-        addLog("Fetching playlist from $platform", LogLevel.SUCCESS)
-        addLog("Reading playlist metadata...", LogLevel.INFO)
-
         val (pName, pCount) = fetchPlaylistInfo(url)
         if (pCount == 0) {
-            addLog("ERROR — Playlist is empty or private", LogLevel.ERROR)
+            addLog("Playlist is empty or private", LogLevel.ERROR)
             closeLastLog()
             _state.value = _state.value.copy(isDownloading = false, error = "Playlist is empty or private")
             return
         }
 
-        addLog("Playlist: $pName ($pCount items)", LogLevel.SUCCESS)
-        _state.value = _state.value.copy(playlistName = pName, playlistCount = pCount, batchTotal = pCount)
+        addLog("$pName ($pCount items)", LogLevel.SUCCESS)
+        _state.value = _state.value.copy(playlistName = pName, playlistCount = pCount)
 
-        // Resolve output folder
         val outputDir = if (useSeparateFolder) resolveSeparateFolder("Playlist", pName) else downloadDir
-        if (useSeparateFolder) addLog("Saving to folder: ${outputDir.name}", LogLevel.INFO)
 
-        addLog("Downloading playlist...", LogLevel.INFO)
         if (isVideo) {
             val request = buildRequest(url, isVideo, usePlaylist = true, outputDir = outputDir)
             executeYtDlp(request)
         } else {
             executeAudioWithRetry(url, true, outputDir)
         }
-        if (isCancelled) return
-        addLog("Playlist download completed", LogLevel.SUCCESS)
+        if (isCancelled) {
+            val completedFiles = outputDir.listFiles { f -> f.isFile && !f.name.endsWith(".part") && !f.name.endsWith(".ytdl") && !f.name.startsWith(".") }
+            if (!completedFiles.isNullOrEmpty()) {
+                addLog("Saving ${completedFiles.size} completed items...", LogLevel.INFO)
+                finishDownload(context, outputDir)
+            }
+            return
+        }
 
-        addLog("Cleaning temp files...", LogLevel.INFO)
+        // Summary
+        val total = pCount
+        val errorLogs = _state.value.logs.filter { it.level == LogLevel.ERROR }
+        val failures = errorLogs.size
+        val succeeded = (total - failures).coerceAtLeast(0)
+        if (failures == 0) {
+            addLog("\u2713 $succeeded/$total downloaded successfully", LogLevel.SUCCESS)
+        } else {
+            addLog("\u2713 $succeeded/$total downloaded \u00b7 $failures failed", LogLevel.WARN)
+            errorLogs.takeLast(5).forEach { err ->
+                addLog("  \u21b3 ${err.message.take(80)}", LogLevel.ERROR)
+            }
+        }
         finishDownload(context, outputDir)
     }
 
@@ -420,65 +432,120 @@ class DownloadViewModel : ViewModel() {
         val validUrls = urls.filter { it.isNotBlank() }
         val total = validUrls.size
 
-        // Resolve output folder
         val outputDir = if (useSeparateFolder) resolveSeparateFolder(selectedMode) else downloadDir
-        if (useSeparateFolder) addLog("Saving to folder: ${outputDir.name}", LogLevel.INFO)
 
-        addLog("Starting batch download ($total URLs)", LogLevel.INFO)
-        _state.value = _state.value.copy(batchTotal = total, batchCurrent = 0, batchFailures = 0)
+        _state.value = _state.value.copy(batchTotal = total)
 
-        var failures = 0
+        // Write URLs to a temp batch file for single-process execution
+        val batchFile = File(outputDir, ".hazel_batch.txt")
+        var batchSucceeded = false
+        try {
+            batchFile.writeText(validUrls.joinToString("\n"))
 
-        validUrls.forEachIndexed { index, url ->
-            val itemNum = index + 1
-            val platform = detectPlatform(url)
-            _state.value = _state.value.copy(batchCurrent = itemNum)
+            val request = buildBatchRequest(batchFile, isVideo, outputDir)
+            executeYtDlp(request)
 
-            addLog("$itemNum/$total · Initializing $platform...", LogLevel.INFO)
+            // Show summary only if not cancelled
+            if (!isCancelled) {
+                val errorLogs = _state.value.logs.filter { it.level == LogLevel.ERROR }
+                val failures = errorLogs.size
+                val succeeded = (total - failures).coerceAtLeast(0)
 
-            val httpStatus = validateUrl(url)
-            when {
-                httpStatus == 404 -> {
-                    addLog("$itemNum/$total · Skipped, not found (404)", LogLevel.WARN)
-                    failures++; return@forEachIndexed
-                }
-                httpStatus in 500..599 -> {
-                    addLog("$itemNum/$total · Skipped, server error ($httpStatus)", LogLevel.WARN)
-                    failures++; return@forEachIndexed
-                }
-                httpStatus == -1 -> addLog("$itemNum/$total · Validation skipped", LogLevel.WARN)
-                httpStatus in 200..299 -> addLog("$itemNum/$total · URL OK", LogLevel.SUCCESS)
-                else -> addLog("$itemNum/$total · HTTP $httpStatus, trying anyway...", LogLevel.WARN)
-            }
-
-            try {
-                addLog("$itemNum/$total · Downloading from $platform...", LogLevel.INFO)
-                if (isVideo) {
-                    val request = buildRequest(url, isVideo, usePlaylist = false, outputDir = outputDir)
-                    executeYtDlp(request)
+                if (failures == 0) {
+                    addLog("✓ $succeeded/$total downloaded successfully", LogLevel.SUCCESS)
                 } else {
-                    executeAudioWithRetry(url, false, outputDir)
+                    addLog("✓ $succeeded/$total downloaded · $failures failed", LogLevel.WARN)
+                    errorLogs.takeLast(5).forEach { err ->
+                        val reason = err.message
+                            .removePrefix("ERROR — ")
+                            .removePrefix("ERROR - ")
+                            .take(80)
+                        addLog("  ↳ $reason", LogLevel.ERROR)
+                    }
                 }
-                if (isCancelled) return
-                addLog("$itemNum/$total · Completed", LogLevel.SUCCESS)
-            } catch (e: CancellationException) { throw e } catch (e: Exception) {
-                addLog("$itemNum/$total · Failed, ${e.message?.take(50)}", LogLevel.ERROR)
-                failures++
+                batchSucceeded = true
+            }
+        } catch (e: CancellationException) { throw e } catch (e: Exception) {
+            if (!isCancelled) {
+                val rawMsg = e.message ?: "Batch download failed"
+                val cleanMsg = sanitizeError(rawMsg)
+                addLog("ERROR — $cleanMsg", LogLevel.ERROR)
+                closeLastLog()
                 com.hazel.android.utils.CrashLogger.logDownloadError(
-                    url = url, platform = platform,
-                    error = e.message ?: "Unknown error",
+                    url = validUrls.firstOrNull() ?: "batch", platform = "batch",
+                    error = rawMsg,
                     logs = _state.value.logs.map { "${it.level}: ${it.message}" }
                 )
+                DownloadNotificationHelper.showError(context, cleanMsg)
+                _state.value = _state.value.copy(isDownloading = false, error = cleanMsg)
             }
+            // On cancel: fall through to finishDownload below to save completed files
+        } finally {
+            // Always clean up batch file
+            try { batchFile.delete() } catch (_: Exception) {}
         }
 
-        _state.value = _state.value.copy(batchFailures = failures)
-        val succeeded = total - failures
-        if (failures == 0) addLog("All $total downloads completed", LogLevel.SUCCESS)
-        else addLog("Completed $succeeded/$total downloads ($failures failed)", LogLevel.WARN)
+        // Save completed files — whether fully done, cancelled, or partially failed
+        val completedFiles = outputDir.listFiles { f -> f.isFile && !f.name.endsWith(".part") && !f.name.endsWith(".ytdl") && !f.name.startsWith(".") }
+        if (!completedFiles.isNullOrEmpty()) {
+            addLog("Cleaning temp files...", LogLevel.INFO)
+            finishDownload(context, outputDir)
+        }
+    }
 
-        addLog("Cleaning temp files...", LogLevel.INFO)
-        finishDownload(context, outputDir)
+    /**
+     * Builds a yt-dlp request that reads URLs from a batch file.
+     * Single process handles all URLs — shares Python startup, player API cache,
+     * and network connections across all downloads.
+     */
+    private fun buildBatchRequest(batchFile: File, isVideo: Boolean, outputDir: File): YoutubeDLRequest {
+        // Empty URL list — yt-dlp reads URLs exclusively from --batch-file
+        // (YoutubeDLRequest appends urls to command; empty list = no stray positional arg)
+        return YoutubeDLRequest(emptyList<String>()).apply {
+            addOption("--batch-file", batchFile.absolutePath)
+            addOption("-o", "${outputDir.absolutePath}/%(title)s.%(ext)s")
+            addOption("--restrict-filenames")
+            addOption("--force-overwrites")
+            addOption("--cache-dir", ytDlpCacheDir.absolutePath)
+
+            if (isVideo) {
+                val formatStr = when (selectedQuality) {
+                    "best" -> "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+                    "4K" -> "bestvideo[height<=2160][ext=mp4]+bestaudio[ext=m4a]/best[height<=2160]/best"
+                    "2K" -> "bestvideo[height<=1440][ext=mp4]+bestaudio[ext=m4a]/best[height<=1440]/best"
+                    "1080p" -> "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]/best"
+                    "720p" -> "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720]/best"
+                    "480p" -> "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480]/best"
+                    "360p" -> "bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/best[height<=360]/best"
+                    else -> "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+                }
+                addOption("-f", formatStr)
+                addOption("--merge-output-format", "mp4")
+            } else {
+                val audioFormat = when {
+                    selectedQuality.startsWith("MP3") -> "mp3"
+                    selectedQuality.startsWith("AAC") -> "aac"
+                    selectedQuality.startsWith("FLAC") -> "flac"
+                    selectedQuality.startsWith("WAV") -> "wav"
+                    selectedQuality.startsWith("Opus") -> "opus"
+                    else -> "mp3"
+                }
+                val audioBitrate = when {
+                    selectedQuality.startsWith("MP3") -> "320K"
+                    selectedQuality.startsWith("AAC") -> "256K"
+                    else -> "0"
+                }
+                addOption("-x")
+                addOption("--audio-format", audioFormat)
+                if (audioBitrate != "0") addOption("--audio-quality", audioBitrate)
+            }
+            addOption("--embed-thumbnail"); addOption("--embed-metadata")
+            addOption("--no-playlist")
+            addOption("--concurrent-fragments", "8")
+            addOption("--buffer-size", "16K")
+            addOption("--no-check-certificates")
+            addOption("--force-ipv4")
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -532,79 +599,40 @@ class DownloadViewModel : ViewModel() {
             addOption("--concurrent-fragments", "8")
             addOption("--buffer-size", "16K")
             addOption("--no-check-certificates")
+            addOption("--cache-dir", ytDlpCacheDir.absolutePath)
+            addOption("--force-ipv4")
         }
     }
 
     private fun executeYtDlp(request: YoutubeDLRequest) {
-        var lastPhase = ""
-        var currentItem = 0
-        var totalItems = _state.value.batchTotal
-        // Match all yt-dlp playlist-item patterns:
-        //   "Downloading item 1 of 4"  |  "Downloading video 1 of 4"  |  "Downloading playlist item 1 of 4"
-        val itemRegex = Regex("""(?:Downloading\s+(?:item|video|playlist\s*item))\s+(\d+)\s+of\s+(\d+)""", RegexOption.IGNORE_CASE)
-
         YoutubeDL.getInstance().execute(request, processId) { progress, _, line ->
             val percent = progress.coerceIn(0f, 100f)
+            val trimmed = line.trim()
+            if (trimmed.isEmpty()) return@execute
 
-            // Detect playlist item progression
-            itemRegex.find(line)?.let { match ->
-                currentItem = match.groupValues[1].toIntOrNull() ?: currentItem
-                totalItems = match.groupValues[2].toIntOrNull() ?: totalItems
-                _state.value = _state.value.copy(
-                    batchCurrent = currentItem,
-                    batchTotal = totalItems
-                )
-                addLog("$currentItem/$totalItems · Starting item $currentItem", LogLevel.INFO)
+            // Forward raw yt-dlp output directly
+            val lower = trimmed.lowercase()
+            val level = when {
+                lower.startsWith("error") || "error:" in lower -> LogLevel.ERROR
+                lower.startsWith("warning") || "warning:" in lower -> LogLevel.WARN
+                else -> LogLevel.INFO
             }
 
-            // Fallback: match any "X of Y" pattern in download lines
-            if (currentItem == 0) {
-                val fallback = Regex("""(\d+)\s+of\s+(\d+)""").find(line)
-                if (fallback != null) {
-                    currentItem = fallback.groupValues[1].toIntOrNull() ?: currentItem
-                    totalItems = fallback.groupValues[2].toIntOrNull() ?: totalItems
-                    if (currentItem > 0) {
-                        _state.value = _state.value.copy(
-                            batchCurrent = currentItem,
-                            batchTotal = totalItems
-                        )
-                        addLog("$currentItem/$totalItems · Starting item $currentItem", LogLevel.INFO)
-                    }
-                }
-            }
-
-            val phase = detectPhase(line)
-            if (phase.isNotEmpty() && phase != lastPhase) {
-                val prefix = if (totalItems > 1 && currentItem > 0) "$currentItem/$totalItems · " else ""
-                addLog("$prefix$phase", when {
-                    phase.startsWith("ERROR") -> LogLevel.ERROR
-                    phase.startsWith("WARN") -> LogLevel.WARN
-                    else -> LogLevel.INFO
-                })
-                lastPhase = phase
-            } else if (phase.isEmpty() && line.isNotBlank()) {
-                // Forward interesting raw yt-dlp lines
-                val trimmed = line.trim()
-                    .removePrefix("[download]").removePrefix("[info]")
-                    .removePrefix("[youtube]").removePrefix("[generic]")
-                    .trim()
-                // Show download progress lines (contain % and size info)
-                if ("%" in line && ("MiB" in line || "KiB" in line || "GiB" in line || "ETA" in line)) {
-                    // Replace last raw progress line instead of spamming
-                    val logs = _state.value.logs.toMutableList()
-                    val lastIdx = logs.indexOfLast { it.message.startsWith("↓ ") }
-                    if (lastIdx >= 0) {
-                        logs[lastIdx] = LogEntry("↓ $trimmed", LogLevel.INFO)
-                        _state.value = _state.value.copy(logs = logs)
-                    } else {
-                        addLog("↓ $trimmed", LogLevel.INFO)
-                    }
-                } else if ("Destination:" in line || "format" in line.lowercase() || "filesize" in line.lowercase()) {
+            // Progress lines update in-place to prevent log spam
+            if ("%" in trimmed && ("MiB" in trimmed || "KiB" in trimmed || "GiB" in trimmed)) {
+                val logs = _state.value.logs.toMutableList()
+                val lastIdx = logs.indexOfLast { "%" in it.message && ("MiB" in it.message || "KiB" in it.message || "GiB" in it.message) }
+                if (lastIdx >= 0) {
+                    logs[lastIdx] = LogEntry(trimmed, LogLevel.INFO)
+                    _state.value = _state.value.copy(logs = logs)
+                } else {
                     addLog(trimmed, LogLevel.INFO)
                 }
+            } else {
+                addLog(trimmed, level)
             }
+
             _state.value = _state.value.copy(progress = percent / 100f)
-            // Update notification progress (throttle: every 2%)
             if (percent.toInt() % 2 == 0) {
                 downloadContext?.let { ctx ->
                     DownloadNotificationHelper.showProgress(ctx, percent.toInt())
@@ -640,6 +668,8 @@ class DownloadViewModel : ViewModel() {
                 val request = buildRequest(url, false, usePlaylist, outputDir, format, "0")
                 executeYtDlp(request)
             } catch (e: CancellationException) { throw e } catch (e: Exception) {
+                // If user cancelled, don't treat the kill as a format error
+                if (isCancelled) return
                 val msg = "${format.uppercase()} format not supported for this source. Try MP3 or AAC instead."
                 addLog("ERROR — $msg", LogLevel.ERROR)
                 closeLastLog()
@@ -655,6 +685,8 @@ class DownloadViewModel : ViewModel() {
                 executeYtDlp(request)
                 return // Success
             } catch (e: CancellationException) { throw e } catch (e: Exception) {
+                // If user cancelled, don't retry — process kill is not a format error
+                if (isCancelled) return
                 if (idx < bitrateFallbacks.lastIndex) {
                     val nextBitrate = bitrateFallbacks[idx + 1]
                     addLog("${format.uppercase()} ${bitrate} failed, retrying at $nextBitrate...", LogLevel.WARN)
@@ -700,6 +732,8 @@ class DownloadViewModel : ViewModel() {
         return try {
             val request = YoutubeDLRequest(url).apply {
                 addOption("--flat-playlist"); addOption("--dump-json"); addOption("--no-download")
+                addOption("--cache-dir", ytDlpCacheDir.absolutePath)
+                addOption("--force-ipv4")
             }
             val output = YoutubeDL.getInstance().execute(request, null, null)
             val stdout = output.out ?: ""
@@ -743,6 +777,20 @@ class DownloadViewModel : ViewModel() {
         // Scan final dir for gallery visibility
         com.hazel.android.util.MediaStoreHelper.scanFiles(context, finalDir)
 
+        // Clean up any leftover temp fragments and empty directories
+        try {
+            outputDir.listFiles()?.forEach { f ->
+                if (f.isFile && (f.name.endsWith(".part") || f.name.endsWith(".ytdl")
+                            || f.name.endsWith(".temp") || f.name.startsWith("."))) {
+                    f.delete()
+                }
+            }
+            // Remove empty temp subdirectories (playlist/batch folders)
+            if (outputDir != downloadDir && outputDir.listFiles()?.isEmpty() == true) {
+                outputDir.delete()
+            }
+        } catch (_: Exception) { /* best-effort cleanup */ }
+
         addLog("Finished", LogLevel.SUCCESS); closeLastLog()
 
         // Display path shows the public location
@@ -784,23 +832,7 @@ class DownloadViewModel : ViewModel() {
         else -> "source"
     }
 
-    private fun detectPhase(line: String): String {
-        val lower = line.lowercase()
-        return when {
-            "downloading webpage" in lower -> "Fetching webpage..."
-            "downloading api" in lower || "downloading json" in lower -> "Reading JSON data..."
-            "downloading android" in lower || "downloading player" in lower -> "Fetching player API..."
-            "downloading m3u8" in lower || "downloading manifest" in lower -> "Reading stream manifest..."
-            "downloading format" in lower -> "Selecting best format..."
-            "merging" in lower || "muxing" in lower -> "Merging streams..."
-            "deleting original" in lower -> "Cleaning temp files..."
-            "destination" in lower -> "Downloading file..."
-            "error" in lower -> "ERROR — ${sanitizeError(line)}"
-            "warning" in lower -> "WARN — ${line.take(60)}"
-            "has already been downloaded" in lower -> "Item already exists, re-downloading"
-            else -> ""
-        }
-    }
+
 
     /**
      * Translates raw yt-dlp error strings into clean, user-facing messages.

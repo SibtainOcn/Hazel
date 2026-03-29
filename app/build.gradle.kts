@@ -48,7 +48,7 @@ android {
         // TODO: Bump this for every GitHub Release!
         // If this doesn't match the release tag, the app will always show "update available".
       
-        versionName = "1.0.1"
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

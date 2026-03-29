@@ -7,16 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2026-03-29
 
-### Added
-- **Browser Favicon**: Added the Hazel logo as a favicon for all documentation pages (landing page, changelog, license) — browser tabs now show the app branding.
-
 ### Changed
-- **Update UX Polish**: Renamed the "Not Now" button to "Later" across the Software Update screen and Update Dialog to align with industry-standard patterns for deferring updates.
-- **Download Performance (Critical)**: Increased the APK download network buffer from 8KB to 64KB (8x larger). This significantly reduces OS read syscalls and improves throughput for faster in-app update downloads.
-- **Website Titles**: Cleaned up the browser tab titles on the documentation website by removing the em-dash subtitles and keeping only "Hazel".
+- **Download Speed: Persistent yt-dlp Cache (Critical)**: Added `--cache-dir` pointing to a persistent app cache directory (`cacheDir/yt-dlp/`). Previously, every yt-dlp process invocation re-downloaded and re-parsed YouTube's `player.js` (~1-2MB) from scratch, adding ~12 seconds per execution. The cache now persists across all process invocations. Also fixed `fetchPlaylistInfo()` which was missing `--cache-dir`, causing the metadata pre-fetch to not share cached player data with the main download process.
+- **Download Speed: Force IPv4**: Added `--force-ipv4` to all yt-dlp requests (single, playlist, batch, metadata). IPv6 connections to YouTube are frequently throttled, adding 5-15s to each "Fetching player API" call. IPv4 avoids this.
+- **Download Speed: Single-Process Batch Mode (Critical)**: Rewrote `executeBatchDownload()` to use yt-dlp's `--batch-file` flag. All URLs are written to a temp file and processed by a **single** yt-dlp process instead of spawning N separate Python processes. Eliminates per-URL overhead: Python cold start (~2-5s), player API re-fetch (~12s), and HTTP HEAD validation (~1-3s). For 10 URLs, overhead drops from ~150-200s to ~12s (single startup).
+- **Download Speed: Removed Batch URL Validation**: Eliminated the per-URL HTTP HEAD `validateUrl()` call in batch mode. yt-dlp already handles bad URLs gracefully (skips with error log). The HEAD request added ~1-3s latency per URL with no real benefit in batch context.
+- **Unified Log Flow**: All download modes (Single, Playlist, Multi Links, Bulk) now follow the same log pattern: `Validating URL → Fetching from {platform} → Reading metadata → (yt-dlp phases) → Summary → Cleaning → Saving → Finished`. Removed mode-specific log prefixes ("playlist URL", "playlist metadata"), batch-internal logs ("Batch file ready"), and the video-only "Merging streams" step.
 
 ### Fixed
-- **Update Dialog Layout**: Forced the Update Dialog to use full available width across all device sizes and prevented text wrapping on "Background" and "Cancel" buttons by enforcing single-line display.
+- **Playlist Batch Counter Stuck at 0/N**: The `batchCurrent` counter in the download screen never updated during playlist downloads — regex patterns didn't match yt-dlp's actual output format (especially with `--lazy-playlist`). Broadened matching with 3 layers: primary regex (`Downloading item/video/playlist item X of Y`), word-boundary regex (`item X of Y` anywhere in line), and generic `X of Y` fallback guarded against false positives (excludes `fragment`, `format`, and progress-% lines).
+- **Counter Jumping (1→3 skipping 2)**: Removed the phase-based "downloading webpage" fallback counter that was double-incrementing because yt-dlp emits `downloading webpage` multiple times per item (once for video stream, once for audio stream). Counter now relies exclusively on regex-matched item numbers from yt-dlp output.
+- **Cancel Triggers Auto-Retry Instead of Stopping**: When user pressed Cancel during audio downloads (MP3/AAC), `destroyProcessById` kills the yt-dlp process which throws a generic exception — not `CancellationException`. The retry loop was catching this as a "format failure" and retrying at lower bitrates. Added `isCancelled` guard before each retry attempt so process-kill exceptions are treated as cancellation, not format errors.
+- **Completed Files Lost on Cancel (Critical)**: When cancelling Multi Links, Bulk, or Playlist downloads mid-way (e.g., 3/5 done), `finishDownload()` never ran because it was gated behind full completion. All 3 completed items were stuck in the temp directory and eventually lost. Fixed: all multi-item modes now call `finishDownload()` to save whatever was successfully downloaded before cancellation. Also fixed race condition where `cancelDownload()` was killing the coroutine job before the download flow could save files.
+
+### Added
+- **Download Summary**: Playlist and batch downloads now show a clean professional summary at the end of logs — e.g. `✓ 28/29 downloaded · 1 failed` with indented failure reasons below. Shows up to 5 most recent errors with `↳` prefix.
+
+### Removed
+- **Full-Screen Log Viewer**: Removed `LogViewerScreen.kt`, the `logs` navigation route, and the "Logs" error action button from the download screen. Session logs are no longer needed as download summaries are now shown inline.
+
+---
+
+## [1.0.1] - 2026-03-29
+### v1.0.2 (2026-03-29)
+#### 🚀 Performance & Engine Fixes
+- **Persistent Cache**: Added `--cache-dir` to all requests. Sharing `player.js` across processes now significantly reduces "Fetching player API" time after the first download.
+- **IPv4 Optimization**: Forced `--force-ipv4` for all network requests to bypass aggressive IPv6 throttling by YouTube.
+- **Data Protection**: Fixed a critical bug where cancelling a batch/playlist mid-download resulted in data loss. Completed items are now safely moved to the Downloads folder even on cancellation.
+- **No-Retry on Cancel**: Manually cancelling an audio download no longer triggers a fallback/retry loop.
+
+#### 🎨 UI & UX Cleanup
+- **Compact Raw Logs**: Switched to raw `yt-dlp` output for transparency. Logs now use a smaller font (10sp) for better visibility.
+- **Clean Interface**: Removed the redundant "0/N" counter header and phase-based log prefixes.
+- **Improved Scoping**: Resolved race conditions in the cancellation flow to ensure 100% stable state resets.
+- **Bug Fixes**: Fixed counter skipping (1→3) and log stalling.
+
+---
+
+### v1.0.1 (2026-03-28)
+#### 🚀 Improvements
+- **Buffering**: Increased APK download buffer to 1MB for faster updates.
+- **Reliability**: Improved error handling in the update downloader.
+- **UI**: Added "Checking for updates..." feedback.
+
+#### 🔧 Internal
+- Added website titles and favicons.
+- Updated documentation.
+
+---
 
 ## [1.0.1] - 2026-03-29
 

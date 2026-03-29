@@ -108,7 +108,7 @@ fun AppNavigation(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val isSubScreen = currentRoute in listOf("about", "logs", "multi_links_review", "bulk_editor", "guide", "storage_locations", "update")
+    val isSubScreen = currentRoute in listOf("about", "multi_links_review", "bulk_editor", "guide", "storage_locations", "update")
 
     val isPlayerTab = currentRoute == "player"
 
@@ -258,7 +258,6 @@ fun AppNavigation(
                 DownloadScreen(
                     sharedUrl = sharedUrl,
                     onSharedUrlConsumed = onSharedUrlConsumed,
-                    onNavigateToLogs = { navController.navigate("logs") },
                     onNavigateToMultiLinksReview = { navController.navigate("multi_links_review") },
                     onNavigateToBulkEditor = { navController.navigate("bulk_editor") },
                     onNavigateToGuide = { navController.navigate("guide") },
@@ -292,11 +291,6 @@ fun AppNavigation(
             }
             composable("about") {
                 AboutScreen(onBack = { navController.popBackStack() })
-            }
-            composable("logs") {
-                com.hazel.android.ui.screens.logs.LogViewerScreen(
-                    onBack = { navController.popBackStack() }
-                )
             }
             composable("update") {
                 UpdateScreen(
