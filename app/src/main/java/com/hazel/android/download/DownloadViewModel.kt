@@ -5,6 +5,7 @@ import com.hazel.android.data.SettingsRepository
 import android.media.MediaScannerConnection
 import android.os.Environment
 import com.hazel.android.util.StoragePaths
+import com.hazel.android.HazelApp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yausername.youtubedl_android.YoutubeDL
@@ -162,6 +163,14 @@ class DownloadViewModel : ViewModel() {
 
     private val downloadDir: File
         get() = StoragePaths.tempDownloads
+
+    // Persistent yt-dlp cache — avoids re-fetching player.js (~12s) on every process
+    private val ytDlpCacheDir: File
+        get() {
+            val dir = File(HazelApp.instance.cacheDir, "yt-dlp")
+            if (!dir.exists()) dir.mkdirs()
+            return dir
+        }
 
     /**
      * Creates a subfolder inside downloadDir for separate folder mode.
@@ -363,10 +372,6 @@ class DownloadViewModel : ViewModel() {
         if (isCancelled) return
         addLog("Download completed", LogLevel.SUCCESS)
 
-        if (isVideo) {
-            addLog("Merging streams...", LogLevel.INFO)
-        }
-
         addLog("Cleaning temp files...", LogLevel.INFO)
         finishDownload(context, downloadDir)
     }
@@ -376,13 +381,13 @@ class DownloadViewModel : ViewModel() {
     // ═══════════════════════════════════════════════════════════════════
     private suspend fun executePlaylistDownload(context: Context, url: String, isVideo: Boolean, useSeparateFolder: Boolean) {
         val platform = detectPlatform(url)
-        addLog("Validating playlist URL...", LogLevel.INFO)
+        addLog("Validating URL...", LogLevel.INFO)
 
         val httpStatus = validateUrl(url)
         if (!handleHttpStatus(httpStatus)) return
 
-        addLog("Fetching playlist from $platform", LogLevel.SUCCESS)
-        addLog("Reading playlist metadata...", LogLevel.INFO)
+        addLog("Fetching from $platform", LogLevel.SUCCESS)
+        addLog("Reading metadata...", LogLevel.INFO)
 
         val (pName, pCount) = fetchPlaylistInfo(url)
         if (pCount == 0) {
@@ -392,14 +397,13 @@ class DownloadViewModel : ViewModel() {
             return
         }
 
-        addLog("Playlist: $pName ($pCount items)", LogLevel.SUCCESS)
+        addLog("$pName ($pCount items)", LogLevel.SUCCESS)
         _state.value = _state.value.copy(playlistName = pName, playlistCount = pCount, batchTotal = pCount)
 
         // Resolve output folder
         val outputDir = if (useSeparateFolder) resolveSeparateFolder("Playlist", pName) else downloadDir
         if (useSeparateFolder) addLog("Saving to folder: ${outputDir.name}", LogLevel.INFO)
 
-        addLog("Downloading playlist...", LogLevel.INFO)
         if (isVideo) {
             val request = buildRequest(url, isVideo, usePlaylist = true, outputDir = outputDir)
             executeYtDlp(request)
@@ -407,7 +411,25 @@ class DownloadViewModel : ViewModel() {
             executeAudioWithRetry(url, true, outputDir)
         }
         if (isCancelled) return
-        addLog("Playlist download completed", LogLevel.SUCCESS)
+
+        // ── Professional summary ──
+        val total = _state.value.batchTotal.coerceAtLeast(pCount)
+        val errorLogs = _state.value.logs.filter { it.level == LogLevel.ERROR }
+        val failures = errorLogs.size
+        val succeeded = (total - failures).coerceAtLeast(0)
+
+        if (failures == 0) {
+            addLog("✓ $succeeded/$total downloaded successfully", LogLevel.SUCCESS)
+        } else {
+            addLog("✓ $succeeded/$total downloaded · $failures failed", LogLevel.WARN)
+            errorLogs.takeLast(5).forEach { err ->
+                val reason = err.message
+                    .removePrefix("ERROR — ")
+                    .removePrefix("ERROR - ")
+                    .take(80)
+                addLog("  ↳ $reason", LogLevel.ERROR)
+            }
+        }
 
         addLog("Cleaning temp files...", LogLevel.INFO)
         finishDownload(context, outputDir)
@@ -419,66 +441,122 @@ class DownloadViewModel : ViewModel() {
     private suspend fun executeBatchDownload(context: Context, urls: List<String>, isVideo: Boolean, useSeparateFolder: Boolean) {
         val validUrls = urls.filter { it.isNotBlank() }
         val total = validUrls.size
+        val platform = detectPlatform(validUrls.firstOrNull() ?: "")
 
         // Resolve output folder
         val outputDir = if (useSeparateFolder) resolveSeparateFolder(selectedMode) else downloadDir
         if (useSeparateFolder) addLog("Saving to folder: ${outputDir.name}", LogLevel.INFO)
 
-        addLog("Starting batch download ($total URLs)", LogLevel.INFO)
+        addLog("Fetching from $platform", LogLevel.SUCCESS)
+        addLog("Reading metadata...", LogLevel.INFO)
         _state.value = _state.value.copy(batchTotal = total, batchCurrent = 0, batchFailures = 0)
 
-        var failures = 0
+        // Write URLs to a temp batch file for single-process execution
+        val batchFile = File(outputDir, ".hazel_batch.txt")
+        var batchSucceeded = false
+        try {
+            batchFile.writeText(validUrls.joinToString("\n"))
 
-        validUrls.forEachIndexed { index, url ->
-            val itemNum = index + 1
-            val platform = detectPlatform(url)
-            _state.value = _state.value.copy(batchCurrent = itemNum)
+            val request = buildBatchRequest(batchFile, isVideo, outputDir)
+            executeYtDlp(request)
 
-            addLog("$itemNum/$total · Initializing $platform...", LogLevel.INFO)
+            if (isCancelled) return
 
-            val httpStatus = validateUrl(url)
-            when {
-                httpStatus == 404 -> {
-                    addLog("$itemNum/$total · Skipped, not found (404)", LogLevel.WARN)
-                    failures++; return@forEachIndexed
+            // ──  summary ──
+            val errorLogs = _state.value.logs.filter { it.level == LogLevel.ERROR }
+            val failures = errorLogs.size
+            val succeeded = (total - failures).coerceAtLeast(0)
+
+            if (failures == 0) {
+                addLog("✓ $succeeded/$total downloaded successfully", LogLevel.SUCCESS)
+            } else {
+                addLog("✓ $succeeded/$total downloaded · $failures failed", LogLevel.WARN)
+                errorLogs.takeLast(5).forEach { err ->
+                    val reason = err.message
+                        .removePrefix("ERROR — ")
+                        .removePrefix("ERROR - ")
+                        .take(80)
+                    addLog("  ↳ $reason", LogLevel.ERROR)
                 }
-                httpStatus in 500..599 -> {
-                    addLog("$itemNum/$total · Skipped, server error ($httpStatus)", LogLevel.WARN)
-                    failures++; return@forEachIndexed
-                }
-                httpStatus == -1 -> addLog("$itemNum/$total · Validation skipped", LogLevel.WARN)
-                httpStatus in 200..299 -> addLog("$itemNum/$total · URL OK", LogLevel.SUCCESS)
-                else -> addLog("$itemNum/$total · HTTP $httpStatus, trying anyway...", LogLevel.WARN)
             }
-
-            try {
-                addLog("$itemNum/$total · Downloading from $platform...", LogLevel.INFO)
-                if (isVideo) {
-                    val request = buildRequest(url, isVideo, usePlaylist = false, outputDir = outputDir)
-                    executeYtDlp(request)
-                } else {
-                    executeAudioWithRetry(url, false, outputDir)
-                }
-                if (isCancelled) return
-                addLog("$itemNum/$total · Completed", LogLevel.SUCCESS)
-            } catch (e: CancellationException) { throw e } catch (e: Exception) {
-                addLog("$itemNum/$total · Failed, ${e.message?.take(50)}", LogLevel.ERROR)
-                failures++
-                com.hazel.android.utils.CrashLogger.logDownloadError(
-                    url = url, platform = platform,
-                    error = e.message ?: "Unknown error",
-                    logs = _state.value.logs.map { "${it.level}: ${it.message}" }
-                )
-            }
+            batchSucceeded = true
+        } catch (e: CancellationException) { throw e } catch (e: Exception) {
+            if (isCancelled) return
+            val rawMsg = e.message ?: "Batch download failed"
+            val cleanMsg = sanitizeError(rawMsg)
+            addLog("ERROR — $cleanMsg", LogLevel.ERROR)
+            closeLastLog()
+            com.hazel.android.utils.CrashLogger.logDownloadError(
+                url = validUrls.firstOrNull() ?: "batch", platform = "batch",
+                error = rawMsg,
+                logs = _state.value.logs.map { "${it.level}: ${it.message}" }
+            )
+            DownloadNotificationHelper.showError(context, cleanMsg)
+            _state.value = _state.value.copy(isDownloading = false, error = cleanMsg)
+        } finally {
+            // Always clean up batch file
+            try { batchFile.delete() } catch (_: Exception) {}
         }
 
-        _state.value = _state.value.copy(batchFailures = failures)
-        val succeeded = total - failures
-        if (failures == 0) addLog("All $total downloads completed", LogLevel.SUCCESS)
-        else addLog("Completed $succeeded/$total downloads ($failures failed)", LogLevel.WARN)
+        // Only finish+move files if batch actually downloaded something
+        if (batchSucceeded) {
+            addLog("Cleaning temp files...", LogLevel.INFO)
+            finishDownload(context, outputDir)
+        }
+    }
 
-        addLog("Cleaning temp files...", LogLevel.INFO)
-        finishDownload(context, outputDir)
+    /**
+     * Builds a yt-dlp request that reads URLs from a batch file.
+     * Single process handles all URLs — shares Python startup, player API cache,
+     * and network connections across all downloads.
+     */
+    private fun buildBatchRequest(batchFile: File, isVideo: Boolean, outputDir: File): YoutubeDLRequest {
+        // Empty URL list — yt-dlp reads URLs exclusively from --batch-file
+        // (YoutubeDLRequest appends urls to command; empty list = no stray positional arg)
+        return YoutubeDLRequest(emptyList<String>()).apply {
+            addOption("--batch-file", batchFile.absolutePath)
+            addOption("-o", "${outputDir.absolutePath}/%(title)s.%(ext)s")
+            addOption("--restrict-filenames")
+            addOption("--force-overwrites")
+            addOption("--cache-dir", ytDlpCacheDir.absolutePath)
+
+            if (isVideo) {
+                val formatStr = when (selectedQuality) {
+                    "best" -> "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+                    "4K" -> "bestvideo[height<=2160][ext=mp4]+bestaudio[ext=m4a]/best[height<=2160]/best"
+                    "2K" -> "bestvideo[height<=1440][ext=mp4]+bestaudio[ext=m4a]/best[height<=1440]/best"
+                    "1080p" -> "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]/best"
+                    "720p" -> "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720]/best"
+                    "480p" -> "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480]/best"
+                    "360p" -> "bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/best[height<=360]/best"
+                    else -> "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+                }
+                addOption("-f", formatStr)
+                addOption("--merge-output-format", "mp4")
+            } else {
+                val audioFormat = when {
+                    selectedQuality.startsWith("MP3") -> "mp3"
+                    selectedQuality.startsWith("AAC") -> "aac"
+                    selectedQuality.startsWith("FLAC") -> "flac"
+                    selectedQuality.startsWith("WAV") -> "wav"
+                    selectedQuality.startsWith("Opus") -> "opus"
+                    else -> "mp3"
+                }
+                val audioBitrate = when {
+                    selectedQuality.startsWith("MP3") -> "320K"
+                    selectedQuality.startsWith("AAC") -> "256K"
+                    else -> "0"
+                }
+                addOption("-x")
+                addOption("--audio-format", audioFormat)
+                if (audioBitrate != "0") addOption("--audio-quality", audioBitrate)
+            }
+            addOption("--embed-thumbnail"); addOption("--embed-metadata")
+            addOption("--no-playlist")
+            addOption("--concurrent-fragments", "8")
+            addOption("--buffer-size", "16K")
+            addOption("--no-check-certificates")
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -532,6 +610,7 @@ class DownloadViewModel : ViewModel() {
             addOption("--concurrent-fragments", "8")
             addOption("--buffer-size", "16K")
             addOption("--no-check-certificates")
+            addOption("--cache-dir", ytDlpCacheDir.absolutePath)
         }
     }
 
@@ -539,38 +618,79 @@ class DownloadViewModel : ViewModel() {
         var lastPhase = ""
         var currentItem = 0
         var totalItems = _state.value.batchTotal
-        // Match all yt-dlp playlist-item patterns:
-        //   "Downloading item 1 of 4"  |  "Downloading video 1 of 4"  |  "Downloading playlist item 1 of 4"
+        // Track phase cycling to detect new playlist items even without explicit "item X of Y" output
+        var phaseHitWebpage = false
+
+        // Pre-compiled regexes (allocated once per executeYtDlp call, NOT per callback)
+        // Match all yt-dlp playlist-item patterns (broad):
+        //   "[download] Downloading item 1 of 4"  |  "Downloading video 1 of 4"
+        //   "Downloading playlist item 1 of 4"    |  "[youtube:tab] Playlist ...: Downloading 1 items of 29"
         val itemRegex = Regex("""(?:Downloading\s+(?:item|video|playlist\s*item))\s+(\d+)\s+of\s+(\d+)""", RegexOption.IGNORE_CASE)
+        // Broader fallback: catches "item X of Y" anywhere in line
+        val itemRegexBroad = Regex("""\bitem\s+(\d+)\s+of\s+(\d+)\b""", RegexOption.IGNORE_CASE)
+        // Generic fallback: any "X of Y" — pre-compiled to avoid allocation in hot callback
+        val genericOfRegex = Regex("""(\d+)\s+of\s+(\d+)""")
 
         YoutubeDL.getInstance().execute(request, processId) { progress, _, line ->
             val percent = progress.coerceIn(0f, 100f)
+            val lower = line.lowercase()
 
-            // Detect playlist item progression
+            // ── Detect playlist item progression ──
+            var itemDetected = false
+
+            // Primary regex
             itemRegex.find(line)?.let { match ->
-                currentItem = match.groupValues[1].toIntOrNull() ?: currentItem
-                totalItems = match.groupValues[2].toIntOrNull() ?: totalItems
+                val newItem = match.groupValues[1].toIntOrNull() ?: 0
+                val newTotal = match.groupValues[2].toIntOrNull() ?: totalItems
+                if (newItem > 0) {
+                    currentItem = newItem; totalItems = newTotal; itemDetected = true
+                }
+            }
+
+            // Broader fallback regex (catches "item X of Y" anywhere in line)
+            if (!itemDetected) {
+                itemRegexBroad.find(line)?.let { match ->
+                    val newItem = match.groupValues[1].toIntOrNull() ?: 0
+                    val newTotal = match.groupValues[2].toIntOrNull() ?: totalItems
+                    if (newItem > 0) {
+                        currentItem = newItem; totalItems = newTotal; itemDetected = true
+                    }
+                }
+            }
+
+            // Fallback: match "X of Y" but only in download-context lines,
+            // excluding fragment/format lines which also contain "X of Y"
+            if (!itemDetected && currentItem == 0 && totalItems > 0) {
+                if ("fragment" !in lower && "format" !in lower && "%" !in line) {
+                    val fallback = genericOfRegex.find(line)
+                    if (fallback != null) {
+                        val newItem = fallback.groupValues[1].toIntOrNull() ?: 0
+                        val newTotal = fallback.groupValues[2].toIntOrNull() ?: totalItems
+                        if (newItem > 0 && newTotal > 1) {
+                            currentItem = newItem; totalItems = newTotal; itemDetected = true
+                        }
+                    }
+                }
+            }
+
+            // Phase-based item tracking: when downloading a playlist and we see
+            // "Fetching webpage..." repeat, it means yt-dlp moved to the next item
+            if (!itemDetected && totalItems > 1 && "downloading webpage" in lower) {
+                if (phaseHitWebpage) {
+                    // We already saw "webpage" before — this is a new item
+                    currentItem++
+                    itemDetected = true
+                }
+                phaseHitWebpage = true
+            }
+
+            if (itemDetected && currentItem > 0) {
                 _state.value = _state.value.copy(
                     batchCurrent = currentItem,
                     batchTotal = totalItems
                 )
-                addLog("$currentItem/$totalItems · Starting item $currentItem", LogLevel.INFO)
-            }
-
-            // Fallback: match any "X of Y" pattern in download lines
-            if (currentItem == 0) {
-                val fallback = Regex("""(\d+)\s+of\s+(\d+)""").find(line)
-                if (fallback != null) {
-                    currentItem = fallback.groupValues[1].toIntOrNull() ?: currentItem
-                    totalItems = fallback.groupValues[2].toIntOrNull() ?: totalItems
-                    if (currentItem > 0) {
-                        _state.value = _state.value.copy(
-                            batchCurrent = currentItem,
-                            batchTotal = totalItems
-                        )
-                        addLog("$currentItem/$totalItems · Starting item $currentItem", LogLevel.INFO)
-                    }
-                }
+                // Reset phase tracking for the new item
+                lastPhase = ""
             }
 
             val phase = detectPhase(line)

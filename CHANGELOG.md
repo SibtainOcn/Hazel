@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.2] - 2026-03-29
 
+### Changed
+- **Download Speed: Persistent yt-dlp Cache (Critical)**: Added `--cache-dir` pointing to a persistent app cache directory (`cacheDir/yt-dlp/`). Previously, every yt-dlp process invocation re-downloaded and re-parsed YouTube's `player.js` (~1-2MB) from scratch, adding ~12 seconds per execution. The cache now persists across all process invocations — "Fetching player API" effectively drops to ~0s after the first download.
+- **Download Speed: Single-Process Batch Mode (Critical)**: Rewrote `executeBatchDownload()` to use yt-dlp's `--batch-file` flag. All URLs are written to a temp file and processed by a **single** yt-dlp process instead of spawning N separate Python processes. Eliminates per-URL overhead: Python cold start (~2-5s), player API re-fetch (~12s), and HTTP HEAD validation (~1-3s). For 10 URLs, overhead drops from ~150-200s to ~12s (single startup).
+- **Download Speed: Removed Batch URL Validation**: Eliminated the per-URL HTTP HEAD `validateUrl()` call in batch mode. yt-dlp already handles bad URLs gracefully (skips with error log). The HEAD request added ~1-3s latency per URL with no real benefit in batch context.
+- **Unified Log Flow**: All download modes (Single, Playlist, Multi Links, Bulk) now follow the same log pattern: `Validating URL → Fetching from {platform} → Reading metadata → (yt-dlp phases) → Summary → Cleaning → Saving → Finished`. Removed mode-specific log prefixes ("playlist URL", "playlist metadata"), batch-internal logs ("Batch file ready"), and the video-only "Merging streams" step.
+
+### Fixed
+- **Playlist Batch Counter Stuck at 0/N**: The `batchCurrent` counter in the download screen never updated during playlist downloads — regex patterns didn't match yt-dlp's actual output format (especially with `--lazy-playlist`). Broadened matching with 3 layers: primary regex (`Downloading item/video/playlist item X of Y`), word-boundary regex (`item X of Y` anywhere in line), and generic `X of Y` fallback guarded against false positives (excludes `fragment`, `format`, and progress-% lines). Added **phase-based item tracking** as ultimate fallback — when `"downloading webpage"` repeats during a playlist download, it means yt-dlp moved to the next item, so the counter increments even if no explicit item progress line is emitted. Resets `lastPhase` on each new item so per-item log phases display correctly.
+
+### Added
+- **Download Summary**: Playlist and batch downloads now show a clean professional summary at the end of logs — e.g. `✓ 28/29 downloaded · 1 failed` with indented failure reasons below. Shows up to 5 most recent errors with `↳` prefix.
+
+### Removed
+- **Full-Screen Log Viewer**: Removed `LogViewerScreen.kt`, the `logs` navigation route, and the "Logs" error action button from the download screen. Session logs are no longer needed as download summaries are now shown inline.
+
+---
+
+## [1.0.1] - 2026-03-29
+
 ### Added
 - **Browser Favicon**: Added the Hazel logo as a favicon for all documentation pages (landing page, changelog, license) — browser tabs now show the app branding.
 

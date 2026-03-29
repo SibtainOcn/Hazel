@@ -94,7 +94,6 @@ import com.hazel.android.download.LogLevel
 fun DownloadScreen(
     sharedUrl: String? = null,
     onSharedUrlConsumed: () -> Unit = {},
-    onNavigateToLogs: () -> Unit = {},
     onNavigateToMultiLinksReview: () -> Unit = {},
     onNavigateToBulkEditor: () -> Unit = {},
     onNavigateToGuide: () -> Unit = {},
@@ -1144,39 +1143,19 @@ fun DownloadScreen(
                     // Error action chips (not shown on user cancel)
                     if (downloadState.error != null && downloadState.error != "Cancelled" && !downloadState.isComplete) {
                         Spacer(modifier = Modifier.height(12.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        // Retry button — full width
+                        Button(
+                            onClick = { downloadViewModel.resetState() },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(40.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
                         ) {
-                            // Retry chip
-                            Button(
-                                onClick = { downloadViewModel.resetState() },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(40.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                )
-                            ) {
-                                Text("Retry", style = MaterialTheme.typography.labelLarge)
-                            }
-
-                            // Logs chip — opens full-screen log file viewer
-                            Button(
-                                onClick = { onNavigateToLogs() },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(40.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                )
-                            ) {
-                                Text("Logs", style = MaterialTheme.typography.labelLarge)
-                            }
+                            Text("Retry", style = MaterialTheme.typography.labelLarge)
                         }
                     }
                 }

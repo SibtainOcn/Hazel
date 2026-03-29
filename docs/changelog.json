@@ -1,5 +1,27 @@
 [
   {
+    "version": "1.0.2",
+    "date": "2026-03-29",
+    "title": "Download Speed Overhaul",
+    "sections": {
+      "Added": [
+        "Professional download summary at end of playlist/batch downloads showing success and failure counts with reasons"
+      ],
+      "Changed": [
+        "Major speed boost for Multi Links & Bulk downloads — single yt-dlp process instead of one per URL",
+        "Added persistent yt-dlp cache — 'Fetching player API' step is now near-instant after first download",
+        "Removed redundant URL validation in batch modes for faster startup",
+        "Unified download logs across all modes — same clean flow for Single, Playlist, Multi Links, and Bulk"
+      ],
+      "Fixed": [
+        "Playlist batch counter (0/N) not updating during download"
+      ],
+      "Removed": [
+        "Full-screen log viewer screen and Logs button from error actions"
+      ]
+    }
+  },
+  {
     "version": "1.0.1",
     "date": "2026-03-29",
     "title": "Changes in Settings",
