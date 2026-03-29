@@ -974,31 +974,15 @@ fun DownloadScreen(
                         Spacer(modifier = Modifier.height(10.dp))
                     }
 
-                    // Speed + batch counter row (only during download)
+                    // Speed display during download
                     if (downloadState.isDownloading) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = speedDisplay,
-                                style = MaterialTheme.typography.labelMedium,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            // Batch counter for multi-item modes
-                            if (downloadState.batchTotal > 0) {
-                                Text(
-                                    text = "${downloadState.batchCurrent}/${downloadState.batchTotal}",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                )
-                            }
-                        }
+                        Text(
+                            text = speedDisplay,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
@@ -1181,7 +1165,6 @@ fun DownloadScreen(
 
 @Composable
 private fun LogEntryRow(log: com.hazel.android.download.LogEntry, isActive: Boolean = false) {
-   
     val shimmerBrush = if (isActive) {
         val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
         val translateAnim by infiniteTransition.animateFloat(
@@ -1202,15 +1185,12 @@ private fun LogEntryRow(log: com.hazel.android.download.LogEntry, isActive: Bool
             start = androidx.compose.ui.geometry.Offset(translateAnim, 0f),
             end = androidx.compose.ui.geometry.Offset(translateAnim + 400f, 0f)
         )
-    } else {
-        null
-    }
+    } else null
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Custom vector icon per level
         val iconRes = when (log.level) {
             LogLevel.SUCCESS -> R.drawable.small_right_tick
             LogLevel.WARN -> R.drawable.small_warn
@@ -1228,19 +1208,19 @@ private fun LogEntryRow(log: com.hazel.android.download.LogEntry, isActive: Bool
             painter = painterResource(iconRes),
             contentDescription = null,
             tint = tintColor,
-            modifier = Modifier.size(14.dp)
+            modifier = Modifier.size(12.dp)
         )
-        Spacer(modifier = Modifier.width(6.dp))
+        Spacer(modifier = Modifier.width(4.dp))
 
-        // Text with shimmer brush when active, normal color when not
         if (shimmerBrush != null) {
             Text(
                 text = log.message,
                 style = androidx.compose.ui.text.TextStyle(
                     brush = shimmerBrush,
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                    lineHeight = 13.sp,
+                    fontWeight = FontWeight.SemiBold
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -1249,8 +1229,9 @@ private fun LogEntryRow(log: com.hazel.android.download.LogEntry, isActive: Bool
         } else {
             Text(
                 text = log.message,
-                fontSize = 12.sp,
+                fontSize = 10.sp,
                 fontFamily = FontFamily.Monospace,
+                lineHeight = 13.sp,
                 color = when (log.level) {
                     LogLevel.SUCCESS -> com.hazel.android.ui.theme.SuccessGreen
                     LogLevel.ERROR -> com.hazel.android.ui.theme.ErrorRed
@@ -1262,28 +1243,6 @@ private fun LogEntryRow(log: com.hazel.android.download.LogEntry, isActive: Bool
                 modifier = Modifier.weight(1f)
             )
         }
-
-        // Per-step duration
-        val durationText = if (log.durationMs != null) {
-            "%.2fs".format(log.durationMs / 1000.0)
-        } else {
-            // Still running — show live counter
-            var elapsed by remember { mutableStateOf(0L) }
-            LaunchedEffect(log.timestamp) {
-                while (true) {
-                    elapsed = System.currentTimeMillis() - log.timestamp
-                    kotlinx.coroutines.delay(100L)
-                }
-            }
-            "%.2fs".format(elapsed / 1000.0)
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = durationText,
-            fontSize = 10.sp,
-            fontFamily = FontFamily.Monospace,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-        )
     }
 }
 
