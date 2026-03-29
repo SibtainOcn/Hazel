@@ -15,6 +15,8 @@ local.properties
 /app/build
 /app/release
 /release/
+DISCORD-PLAN.md
+main.tf
 
 # APK / Bundle artifacts
 *.apk
@@ -31,3 +33,11 @@ signing.properties
 # Internal
 ISSUES.md
 build_output.txt
+
+# Terraform — secrets & generated files must NOT be committed
+discord_build/terraform.tfvars
+discord_build/.terraform/
+discord_build/.terraform.lock.hcl
+discord_build/terraform.tfstate
+discord_build/terraform.tfstate.backup
+# main.tf is safe to commit (no secrets inside)

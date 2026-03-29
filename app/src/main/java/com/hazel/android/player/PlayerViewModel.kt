@@ -237,7 +237,20 @@ class PlayerViewModel : ViewModel() {
             loadedTrackIds = currentTrackIds
         }
 
-        // Lazily update current track's embedded artwork for richer notification
+        // Update notification artwork for the current track
+        updateNotificationArtwork(index)
+    }
+
+    /**
+     * Extracts embedded artwork from the audio file and updates the MediaItem
+     * so the notification shows the correct thumbnail. Called from both
+     * playTrack() and onMediaItemTransition() (notification next/prev).
+     */
+    private fun updateNotificationArtwork(index: Int) {
+        val tracks = _state.value.tracks
+        if (index !in tracks.indices) return
+        val ctrl = controller ?: return
+
         playJob?.cancel()
         playJob = viewModelScope.launch {
             val track = tracks[index]
@@ -250,7 +263,7 @@ class PlayerViewModel : ViewModel() {
                     } finally { retriever.release() }
                 } catch (_: Exception) { null }
             }
-            if (artBytes != null && ctrl.currentMediaItemIndex == index) {
+            if (artBytes != null && ctrl.isConnected && ctrl.currentMediaItemIndex == index) {
                 val updated = ctrl.currentMediaItem?.buildUpon()
                     ?.setMediaMetadata(
                         MediaMetadata.Builder()
@@ -352,10 +365,14 @@ class PlayerViewModel : ViewModel() {
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 val ctrl = controller ?: return
+                val newIndex = ctrl.currentMediaItemIndex
                 _state.value = _state.value.copy(
-                    currentIndex = ctrl.currentMediaItemIndex,
-                    duration = ctrl.duration.coerceAtLeast(0L)
+                    currentIndex = newIndex,
+                    duration = ctrl.duration.coerceAtLeast(0L),
+                    position = 0L
                 )
+                // Update notification artwork for the new track
+                updateNotificationArtwork(newIndex)
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
