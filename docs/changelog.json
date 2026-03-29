@@ -8,18 +8,18 @@
         "Major speed boost for Multi Links & Bulk downloads — single yt-dlp process instead of one per URL",
         "Added persistent yt-dlp cache — player API data shared across all downloads to reduce 'Fetching' time",
         "Force IPv4 connections to YouTube — bypasses throttled/slow IPv6 routes",
-        "Unified download logs with compact raw yt-dlp streaming and shimmer feedback",
-        "Shrunk log font to 10sp for better visibility on mobile screens"
+        "Unified download logs with compact raw yt-dlp streaming and shimmer feedback"
       ],
       "Fixed": [
         "Fixed 'Separate Folder' duplicate detection and restored Android music notification playback controls.",
         "Completed files lost when cancelling multi-item downloads mid-way — now saves whatever finished",
         "Cancelling audio download triggered auto-retry at lower bitrate instead of stopping",
-        "Resolved race conditions in the cancellation flow to ensure stable state resets"
+        "Resolved race conditions in the cancellation flow to ensure stable state resets",
+        "Fixed UI clipping for the download completion card on smaller devices",
+        "Unified font sizes in the download completion card for higher visual consistency"
       ],
       "Removed": [
-        "Redundant counter headers (0/N) and custom log prefixes for a cleaner interface",
-        "Full-screen log viewer screen and Logs button from error actions"
+        "Redundant counter headers (0/N) and custom log prefixes for a cleaner interface"
       ]
     }
   },

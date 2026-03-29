@@ -11,7 +11,10 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,17 +27,18 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Download
@@ -112,6 +116,7 @@ fun DownloadScreen(
     var selectedMode by remember { mutableStateOf(downloadViewModel.selectedMode) }
     var showQualityDialog by remember { mutableStateOf(false) }
     var showModeDialog by remember { mutableStateOf(false) }
+    var logsExpanded by remember { mutableStateOf(true) }
 
     // Multi Links state — owned by ViewModel for navigation safety
     val multiLinkUrls = downloadViewModel.multiLinkUrls
@@ -137,11 +142,11 @@ fun DownloadScreen(
         }
     }
 
-    // Auto-scroll logs
-    val logListState = rememberLazyListState()
+    // Auto-scroll page when new logs arrive
+    val scrollState = rememberScrollState()
     LaunchedEffect(downloadState.logs.size) {
         if (downloadState.logs.isNotEmpty()) {
-            logListState.animateScrollToItem(downloadState.logs.size - 1)
+            scrollState.animateScrollTo(scrollState.maxValue)
         }
     }
 
@@ -174,6 +179,7 @@ fun DownloadScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             // Bulk mode: Import File card instead of URL input
@@ -986,7 +992,7 @@ fun DownloadScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    // Progressive Log Console
+                    // Progressive Log Console — collapsible
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
@@ -994,21 +1000,61 @@ fun DownloadScreen(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
                     ) {
-                        LazyColumn(
-                            state = logListState,
+                        // Collapsible header
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(220.dp)
-                                .padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                .clickable { logsExpanded = !logsExpanded }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            items(downloadState.logs) { log ->
-                                val isActive = log.durationMs == null && downloadState.isDownloading
-                                AnimatedVisibility(
-                                    visible = true,
-                                    enter = fadeIn(tween(200))
-                                ) {
-                                    LogEntryRow(log, isActive)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    "Shell",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            }
+                            val chevronRotation by animateFloatAsState(
+                                targetValue = if (logsExpanded) 180f else 0f,
+                                animationSpec = tween(200),
+                                label = "chevron"
+                            )
+                            Icon(
+                                Icons.Filled.KeyboardArrowDown,
+                                contentDescription = if (logsExpanded) "Collapse" else "Expand",
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .graphicsLayer { rotationZ = chevronRotation },
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            )
+                        }
+
+                        // Expandable log content
+                        AnimatedVisibility(
+                            visible = logsExpanded,
+                            enter = expandVertically(tween(200)),
+                            exit = shrinkVertically(tween(200))
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                downloadState.logs.forEach { log ->
+                                    val isActive = log.durationMs == null && downloadState.isDownloading
+                                    AnimatedVisibility(
+                                        visible = true,
+                                        enter = fadeIn(tween(200))
+                                    ) {
+                                        LogEntryRow(log, isActive)
+                                    }
                                 }
                             }
                         }
@@ -1050,8 +1096,8 @@ fun DownloadScreen(
                             Column(modifier = Modifier.padding(14.dp)) {
                                 Text(
                                     downloadState.fileName,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Normal,
                                     color = MaterialTheme.colorScheme.primary,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
