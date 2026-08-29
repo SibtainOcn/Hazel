@@ -46,6 +46,7 @@ import com.hazel.android.ui.motion.M3Motion
 import com.hazel.android.ui.screens.converter.ConverterScreen
 import com.hazel.android.ui.screens.cookies.CookiesScreen
 import com.hazel.android.ui.screens.download.DownloadScreen
+import com.hazel.android.ui.screens.download.openBatterySettings
 import com.hazel.android.ui.screens.history.HistoryScreen
 import com.hazel.android.ui.screens.more.AppearanceScreen
 import com.hazel.android.ui.screens.more.DirectShareScreen
@@ -239,6 +240,7 @@ fun AppNavigation(
                     onNavigateToCookies = { navController.navigate("cookies") },
                     onNavigateToFetchSettings = { navController.navigate("fetch_settings") },
                     onNavigateToDirectShare = { navController.navigate("direct_share") },
+                    onOpenBatterySettings = { openBatterySettings(context) },
                     onNavigateToStorageCleanup = { navController.navigate("storage_cleanup") },
                     onNavigateToUpdate = { navController.navigate("update") }
                 )

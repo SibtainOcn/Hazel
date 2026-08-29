@@ -66,7 +66,7 @@ fun DirectShareScreen(onBack: () -> Unit) {
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Hazel Direct",
+                "Hazel Direct Configure",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary

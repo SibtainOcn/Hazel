@@ -29,11 +29,13 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -41,7 +43,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
+import com.hazel.android.ui.screens.download.isIgnoringBatteryOptimizations
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.Lifecycle
+import androidx.compose.ui.text.font.FontWeight
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.update.YtDlpUpdater
 import com.hazel.android.util.TempStorage
@@ -54,6 +63,7 @@ fun MoreScreen(
     onNavigateToCookies: () -> Unit = {},
     onNavigateToFetchSettings: () -> Unit = {},
     onNavigateToDirectShare: () -> Unit = {},
+    onOpenBatterySettings: () -> Unit = {},
     onNavigateToStorageCleanup: () -> Unit = {},
     onNavigateToUpdate: () -> Unit = {}
 ) {
@@ -62,6 +72,20 @@ fun MoreScreen(
     // Read when the screen appears so the row can show what clearing would free.
     var tempBytes by remember { mutableStateOf(0L) }
     LaunchedEffect(Unit) { tempBytes = TempStorage.totalBytes(context) }
+
+    // Re-read on every return to the screen, so coming back from the system settings shows
+    // the answer that was just given rather than the one from before leaving.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var batteryExempt by remember { mutableStateOf(true) }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                batteryExempt = isIgnoringBatteryOptimizations(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     // yt-dlp engine version, as recorded by the last in-app engine update
 
@@ -72,6 +96,50 @@ fun MoreScreen(
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(8.dp))
+
+        // Android suspends a long network job shortly after the app leaves the foreground,
+        // so without this exemption a download stops when the screen is turned off. It
+        // heads the screen while it is missing and disappears once granted, because at that
+        // point there is nothing left to do about it.
+        if (!batteryExempt) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                onClick = onOpenBatterySettings
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.battery_charge),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(26.dp)
+                    )
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Background downloads",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            "Android stops a download when you leave the app. Allow " +
+                                    "unrestricted battery use to let it finish.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                .copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            }
+        }
 
         // ── Main options card ──
         Card(
@@ -170,13 +238,7 @@ fun MoreScreen(
             // What the second share target does, which is the only place those choices can
             // be made: sharing to it never opens the sheet.
             ListItem(
-                headlineContent = { Text("Hazel Direct") },
-                supportingContent = {
-                    Text(
-                        "Quality used when a link is shared straight to a download",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                },
+                headlineContent = { Text("Hazel Direct Configure") },
                 leadingContent = {
                     Icon(Icons.Filled.Bolt, null, tint = MaterialTheme.colorScheme.primary)
                 },

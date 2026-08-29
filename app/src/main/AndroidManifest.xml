@@ -12,6 +12,14 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
+    <!--
+        Lets the app ask to be exempt from battery optimisation. A download is a long
+        network job, and without the exemption the system suspends it shortly after the
+        app leaves the foreground. The user is only ever asked through the system's own
+        screen; nothing is granted silently.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
     <application
         android:name=".HazelApp"
         android:allowBackup="true"

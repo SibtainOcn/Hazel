@@ -20,6 +20,15 @@ Everything merged since 1.0.0, plus what is open in review.
   saved quality, with no sheet and no questions. Its own settings screen under More chooses
   video or audio and a quality ceiling; a repeat warning never interrupts it, since being
   uninterrupted is the point.
+- **A getting-started guide on first launch**, covering the four things the screen does not
+  show on its own: that the field takes several links at once, that a share target skips the
+  sheet entirely, where finished files are listed, and that Android suspends a download the
+  moment the app is left. It appears once.
+- **Background downloads card**, heading More while the exemption is missing and disappearing
+  once it is granted. Android stops a long network job shortly after the app loses the
+  foreground, which reads as downloads that never finish and cannot be fixed from inside the
+  app. The card opens the system's own screen, trying three intents in turn so it works
+  across builders and versions.
 - **Incognito**, from a ghost in the top right of the home screen. While it is on a download
   leaves no record: nothing is written to the downloads list and no link is remembered for
   the search suggestions. The file itself still arrives in the same place it always would,

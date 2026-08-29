@@ -56,14 +56,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import com.hazel.android.R
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SearchHistoryRepository
@@ -113,6 +116,13 @@ fun DownloadScreen(
     // matters. A playlist can resolve to dozens of cards, and at one screen each the list
     // stops being something that can be looked over.
     var compact by rememberSaveable { mutableStateOf(false) }
+
+    // Collected as null until the stored value arrives, so the dialog cannot flash up for
+    // a frame on every launch before the real answer loads and dismisses it again.
+    val guideSeen by SettingsRepository.getGuideSeen(context)
+        .collectAsState(initial = null as Boolean?)
+
+    val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
 
     var searchOpen by remember { mutableStateOf(false) }
     var sheetVisible by remember { mutableStateOf(false) }
@@ -237,6 +247,16 @@ fun DownloadScreen(
             title = info.title,
             author = info.uploader,
             treeUri = treeUri
+        )
+    }
+
+    if (guideSeen == false) {
+        UserGuideDialog(
+            onOpenBatterySettings = {
+                scope.launch { SettingsRepository.setGuideSeen(context) }
+                openBatterySettings(context)
+            },
+            onDismiss = { scope.launch { SettingsRepository.setGuideSeen(context) } }
         )
     }
 
@@ -380,6 +400,37 @@ fun DownloadScreen(
                         { downloadViewModel.removeResult(info) }
                     } else null
                 )
+            }
+
+            if (incognito && state.results.isEmpty() && !state.isFetching) {
+                Spacer(modifier = Modifier.height(72.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.incognito),
+                        contentDescription = null,
+                        modifier = Modifier.size(44.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Text(
+                        "You're incognito",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "Downloads are not added to your history and links are not " +
+                                "remembered. The files themselves still save as usual.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
             }
 
             // Room for the action that floats over the list.

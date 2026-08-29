@@ -149,6 +149,24 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[FORCE_IPV4_KEY] = enabled }
     }
 
+    // ── First run ──
+
+    private val GUIDE_SEEN_KEY = booleanPreferencesKey("guide_seen")
+
+    /**
+     * Whether the getting-started dialog has been shown. It appears once and never again,
+     * because everything in it is either discoverable afterwards or repeated in More.
+     *
+     * Null while the stored value is still being read, so the caller can tell "not seen"
+     * apart from "not known yet" and avoid flashing the dialog up on every launch.
+     */
+    fun getGuideSeen(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GUIDE_SEEN_KEY] ?: false }
+
+    suspend fun setGuideSeen(context: Context) {
+        context.dataStore.edit { prefs -> prefs[GUIDE_SEEN_KEY] = true }
+    }
+
     // ── Incognito ──
 
     private val INCOGNITO_KEY = booleanPreferencesKey("incognito")
