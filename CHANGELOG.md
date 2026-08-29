@@ -121,7 +121,12 @@ Everything merged since 1.0.0, plus what is open in review.
   list.** Download type, quality, save location, container and the rest each open a sheet of
   their own from a row of buttons along the bottom, which gives the list back the height the
   settings had taken from it. Each of them applies to the ticked links, or to all of them
-  when nothing is ticked.
+  when nothing is ticked. The count beside the list is the whole set added up under whatever
+  each link is currently set to, marked as a floor while some link's formats are unread.
+- **The set-of-links sheet is drawn in near-black.** It covers most of the screen and is
+  mostly artwork, so the grey surfaces underneath it were showing through as a cast behind
+  every thumbnail. It sits on flat black now, with one step up for the rows and the bar, and
+  its text is a size larger throughout. A light theme is untouched.
 - **The repeat-download warning moved to where the link is entered.** It appeared on the
   home screen after the link had already been read, having spent the seconds that reading
   costs. It is now raised in the search screen at the moment of submitting, where going back

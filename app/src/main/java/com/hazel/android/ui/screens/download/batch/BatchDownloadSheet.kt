@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
@@ -73,8 +73,6 @@ fun BatchDownloadSheet(
     onPickSaveDir: () -> Unit,
     onResetSaveDir: () -> Unit,
     onResolveFormats: (MediaInfo) -> Unit,
-    incognito: Boolean,
-    onToggleIncognito: () -> Unit,
     onRemove: (MediaInfo) -> Unit,
     onDownload: (List<DownloadPlan>) -> Unit,
     onDismiss: () -> Unit
@@ -92,13 +90,13 @@ fun BatchDownloadSheet(
     var focusedUrl by remember { mutableStateOf<String?>(null) }
     val focused = results.firstOrNull { it.url == focusedUrl }
 
-    val plans = state.plans()
+    val plans = state.plans
     val totalBytes = state.totalBytes
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = batchSheetColor
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
 
@@ -163,14 +161,18 @@ fun BatchDownloadSheet(
                 Text(
                     if (state.selectionMode) "${state.selected.size} selected"
                     else "${results.size} links",
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 if (totalBytes > 0) {
                     Spacer(modifier = Modifier.width(12.dp))
+                    // The whole set added up, not one link's share of it. A link whose
+                    // formats have not been read yet reports no size, so while any are
+                    // outstanding the figure is marked as a floor rather than the total.
                     Text(
-                        "~ ${formatFileSize(totalBytes)}",
-                        style = MaterialTheme.typography.bodySmall,
+                        "~ ${formatFileSize(totalBytes)}" +
+                                if (state.allSizesKnown) "" else " +",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -254,11 +256,10 @@ fun BatchDownloadSheet(
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                itemsIndexed(results, key = { _, info -> info.url }) { index, info ->
+                items(results, key = { info -> info.url }) { info ->
                     val format = state.formatOf(info)
                     BatchDownloadCard(
                         info = info,
-                        position = index + 1,
                         formatLabel = format?.label.orEmpty(),
                         sizeLabel = format?.sizeLabel.orEmpty(),
                         isVideo = state.isVideo(info),
@@ -295,12 +296,10 @@ fun BatchDownloadSheet(
                 isVideo = state.videoTab,
                 qualityLabel = qualityLabelFor(state.maxHeight),
                 containerLabel = containerLabelFor(options, state.videoTab),
-                incognito = incognito,
                 onDownloadType = { openSheet = BatchSheet.TYPE },
                 onQuality = { openSheet = BatchSheet.QUALITY },
                 onSaveDir = { openSheet = BatchSheet.SAVE_DIR },
                 onContainer = { openSheet = BatchSheet.CONTAINER },
-                onIncognito = onToggleIncognito,
                 onMore = { openSheet = BatchSheet.MORE }
             )
 

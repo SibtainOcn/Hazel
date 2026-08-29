@@ -58,7 +58,6 @@ import com.hazel.android.ui.screens.download.MetaBadge
 @Composable
 fun BatchDownloadCard(
     info: MediaInfo,
-    position: Int,
     formatLabel: String,
     sizeLabel: String,
     isVideo: Boolean,
@@ -108,29 +107,21 @@ fun BatchDownloadCard(
             shape = RoundedCornerShape(10.dp),
             // Opaque: a translucent row would let the swipe background show through it
             // while the row is sitting still.
-            color = MaterialTheme.colorScheme.surfaceContainerHigh
+            color = batchRaisedColor
         ) {
             Row(
                 modifier = Modifier
                     .combinedClickable(onLongClick = onLongClick, onClick = onClick)
-                    .padding(start = if (selectionMode) 4.dp else 8.dp, end = 4.dp),
+                    .padding(start = if (selectionMode) 4.dp else 10.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (selectionMode) {
-                    // The number tells the user where they are in a long list while they
-                    // work through it, which is the point at which the order starts to
-                    // matter to them.
-                    Text(
-                        "$position",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                     Checkbox(checked = checked, onCheckedChange = { onClick() })
                 }
 
                 Box(
                     modifier = Modifier
-                        .width(78.dp)
+                        .width(88.dp)
                         .aspectRatio(16f / 9f)
                         .clip(RoundedCornerShape(6.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -164,15 +155,15 @@ fun BatchDownloadCard(
 
                 Spacer(modifier = Modifier.width(10.dp))
 
-                Column(modifier = Modifier.weight(1f).padding(vertical = 8.dp)) {
+                Column(modifier = Modifier.weight(1f).padding(vertical = 10.dp)) {
                     Text(
                         info.title,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         if (formatLabel.isNotBlank()) {
                             // Marked when the link carries a choice of its own, so a set
@@ -187,7 +178,7 @@ fun BatchDownloadCard(
                     Icon(
                         if (isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
                         contentDescription = "Download type for this link",
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }

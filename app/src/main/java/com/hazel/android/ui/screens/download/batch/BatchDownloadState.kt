@@ -1,6 +1,7 @@
 package com.hazel.android.ui.screens.download.batch
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -106,13 +107,32 @@ class BatchDownloadState {
     /** Whether a link is heading for a video file, which its own format decides. */
     fun isVideo(info: MediaInfo): Boolean = formatOf(info)?.hasVideo ?: videoTab
 
-    /** One plan per link, in list order. Links with no usable format are left out. */
-    fun plans(): List<DownloadPlan> = results.mapNotNull { info ->
-        formatOf(info)?.let { DownloadPlan(info, it, titleOf(info), authorOf(info)) }
+    /**
+     * One plan per link, in list order. Links with no usable format are left out.
+     *
+     * Worked out once per change rather than once per frame: the header, the total and
+     * every row read from this, and a hundred link playlist would otherwise walk its whole
+     * format list several times over on every recomposition.
+     */
+    private val plansState = derivedStateOf {
+        results.mapNotNull { info ->
+            formatOf(info)?.let { DownloadPlan(info, it, titleOf(info), authorOf(info)) }
+        }
     }
 
+    val plans: List<DownloadPlan> get() = plansState.value
+
+    /** Every link's chosen format added up, which is what the whole set will cost. */
     val totalBytes: Long
-        get() = plans().sumOf { it.format.fileSizeBytes }
+        get() = plans.sumOf { it.format.fileSizeBytes }
+
+    /**
+     * False while some link has not reported a size yet, which is the case for a link from
+     * a listing whose formats nobody has opened. The total is then a floor rather than the
+     * whole figure, and is marked as one.
+     */
+    val allSizesKnown: Boolean
+        get() = plans.size == results.size && plans.all { it.format.fileSizeBytes > 0L }
 
     // ── Changes from the action bar, which land on [targets] ──
 

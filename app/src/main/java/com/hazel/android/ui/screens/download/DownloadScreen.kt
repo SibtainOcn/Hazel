@@ -548,10 +548,6 @@ fun DownloadScreen(
                 scope.launch { SettingsRepository.clearDownloadTree(context) }
             },
             onResolveFormats = downloadViewModel::resolveFormats,
-            incognito = incognito,
-            onToggleIncognito = {
-                scope.launch { SettingsRepository.setIncognito(context, !incognito) }
-            },
             onRemove = downloadViewModel::removeResult,
             onDownload = { plans ->
                 batchSheetVisible = false

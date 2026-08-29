@@ -24,10 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
-import com.hazel.android.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -47,23 +44,24 @@ fun BatchActionBar(
     isVideo: Boolean,
     qualityLabel: String,
     containerLabel: String,
-    incognito: Boolean,
     onDownloadType: () -> Unit,
     onQuality: () -> Unit,
     onSaveDir: () -> Unit,
     onContainer: () -> Unit,
-    onIncognito: () -> Unit,
     onMore: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
+        color = batchRaisedColor
     ) {
+        // Ranged along the start rather than spread across the width: spreading them put
+        // wide gaps between buttons that belong together and left the row reading as five
+        // unrelated controls.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             BarButton(
@@ -88,14 +86,6 @@ fun BatchActionBar(
                 description = "Container",
                 onClick = onContainer
             )
-            // Dimmed when it is off, so the bar says which way the setting is standing
-            // without needing a label under it.
-            BarButton(
-                painter = painterResource(R.drawable.incognito),
-                description = if (incognito) "Incognito is on" else "Incognito is off",
-                highlighted = incognito,
-                onClick = onIncognito
-            )
             BarButton(
                 icon = Icons.Filled.MoreHoriz,
                 description = "More options",
@@ -110,39 +100,29 @@ private fun BarButton(
     description: String,
     onClick: () -> Unit,
     icon: ImageVector? = null,
-    painter: Painter? = null,
-    text: String? = null,
-    highlighted: Boolean = false
+    text: String? = null
 ) {
-    val tint = if (highlighted) MaterialTheme.colorScheme.primary
-    else MaterialTheme.colorScheme.onSurfaceVariant
+    val tint = MaterialTheme.colorScheme.onSurfaceVariant
     Box(
         modifier = Modifier
-            .height(44.dp)
-            .clip(RoundedCornerShape(22.dp))
+            .height(52.dp)
+            .clip(RoundedCornerShape(26.dp))
             .clickable(onClick = onClick)
             .background(androidx.compose.ui.graphics.Color.Transparent)
-            .padding(horizontal = 14.dp),
+            .padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center
     ) {
         if (icon != null) {
             Icon(
                 icon,
                 contentDescription = description,
-                modifier = Modifier.size(22.dp),
-                tint = tint
-            )
-        } else if (painter != null) {
-            Icon(
-                painter,
-                contentDescription = description,
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(24.dp),
                 tint = tint
             )
         } else if (text != null) {
             Text(
                 text,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = tint
             )
