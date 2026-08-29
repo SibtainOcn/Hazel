@@ -1,6 +1,5 @@
 package com.hazel.android.ui.navigation
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +7,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.annotation.DrawableRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,6 +40,7 @@ import com.hazel.android.ui.motion.M3Motion
 import com.hazel.android.ui.screens.converter.ConverterScreen
 import com.hazel.android.ui.screens.cookies.CookiesScreen
 import com.hazel.android.ui.screens.download.DownloadScreen
+import com.hazel.android.ui.screens.history.HistoryScreen
 import com.hazel.android.ui.screens.more.AppearanceScreen
 import com.hazel.android.ui.screens.more.FetchSettingsScreen
 import com.hazel.android.ui.screens.more.MoreScreen
@@ -47,14 +52,19 @@ import com.hazel.android.update.UpdateScreen
 sealed class Screen(
     val route: String,
     val title: String,
-    @DrawableRes val icon: Int
+    /** Drawable for a mark that ships with the app, otherwise null. */
+    @DrawableRes val iconRes: Int? = null,
+    /** Used when there is no drawable for this destination. */
+    val icon: ImageVector? = null
 ) {
-    data object Download : Screen("download", "Home", R.drawable.download)
-    data object More : Screen("more", "More", R.drawable.settings)
+    data object Download : Screen("download", "Home", iconRes = R.drawable.home)
+    data object History : Screen("history", "Downloads", icon = Icons.Filled.Download)
+    data object More : Screen("more", "More", icon = Icons.Filled.Settings)
 }
 
 private val bottomNavItems = listOf(
     Screen.Download,
+    Screen.History,
     Screen.More,
 )
 
@@ -128,11 +138,20 @@ fun AppNavigation(
                                 }
                             },
                             icon = {
-                                Icon(
-                                    painter = painterResource(id = screen.icon),
-                                    contentDescription = screen.title,
-                                    modifier = Modifier.size(22.dp)
-                                )
+                                val iconRes = screen.iconRes
+                                if (iconRes != null) {
+                                    Icon(
+                                        painter = painterResource(id = iconRes),
+                                        contentDescription = screen.title,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = screen.icon!!,
+                                        contentDescription = screen.title,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
                             },
                             label = { Text(screen.title, style = MaterialTheme.typography.labelSmall) },
                             colors = NavigationBarItemDefaults.colors(
@@ -167,6 +186,9 @@ fun AppNavigation(
                     onSharedUrlConsumed = onSharedUrlConsumed,
                     downloadViewModel = downloadViewModel
                 )
+            }
+            composable(Screen.History.route) {
+                HistoryScreen()
             }
             composable(Screen.More.route) {
                 MoreScreen(
