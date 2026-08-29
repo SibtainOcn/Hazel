@@ -15,6 +15,7 @@ local.properties
 
 # ── Signing material, never commit ──
 signing.properties
+hazel-dlp-release
 *.jks
 *.keystore
 /signing/
