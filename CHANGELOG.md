@@ -5,6 +5,38 @@ All notable changes to Hazel are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Everything merged since 1.0.0, plus what is open in review.
+
+### Added
+- **Downloads tab.** Everything that has finished, backed by a flow so an entry appears the
+  moment a download completes. Search, sort by date, title or size, and filter by audio or
+  video. Tapping a row opens the file in the device's default player; the row menu removes
+  the entry or deletes the file.
+- **Already downloaded warning.** Resolving a link that has been downloaded before raises
+  it before the sheet opens, offering to go ahead or leave it. Only a copy still present on
+  the device counts, so an entry whose file was deleted elsewhere does not block anything.
+  Links inside a multi-link set carry a Downloaded tag instead.
+- **Missing files read as missing.** A history row whose file has gone shows its artwork
+  drained of colour and dimmed, alongside the tag saying so.
+- One placeholder per link while a set of links is being read, rather than a single card
+  standing in for the whole set.
+
+### Fixed
+- **File sizes quoted well above the finished file**, 30.1 MB shown against a 12.6 MB
+  result. The probe passed `--compat-options manifest-filesize-approx`, which makes yt-dlp
+  drop the exact size it would otherwise report and substitute bitrate times duration. That
+  product is an upper bound, so anything that compressed well came out far under the quote.
+  An exact size is now used whenever the source reports one; where none is reported the
+  estimate is computed knowingly and shown as `~ 30.1 MB` rather than passed off as
+  measured.
+
+### Changed
+- Home, Downloads and More use stroked marks in one style, instead of Home and Downloads
+  sharing an icon.
+- README rewritten around what the app does.
+
 ## [1.0.0] - 2026-08-29
 
 First release. The app was rebuilt around a single idea: paste one link or several, see
