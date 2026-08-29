@@ -223,10 +223,6 @@ object MediaProbe {
         addOption("--socket-timeout", fetchMode.socketTimeoutSeconds.toString())
         addOption("-R", fetchMode.retries.toString())
 
-        // Reported sizes for fragmented streams are approximations rather than a reason
-        // to fetch every manifest.
-        addOption("--compat-options", "manifest-filesize-approx")
-
         if (forceIpv4) addOption("--force-ipv4")
         cookieFile?.let { addOption("--cookies", it.absolutePath) }
     }
@@ -310,7 +306,11 @@ object MediaProbe {
             }
             ?: root
 
-        val parsed = readFormats(media).distinctBy { it.formatId }
+        // Resolved before the formats, because a format with no reported size can only
+        // be estimated from its bitrate and the running time.
+        val duration = resolveDuration(media).takeIf { it > 0 } ?: resolveDuration(root)
+
+        val parsed = readFormats(media, duration).distinctBy { it.formatId }
 
         // Video entries lead with the highest resolution, then the smoothest frame rate,
         // then the richest bitrate, so the best option is always the first row.
@@ -342,7 +342,7 @@ object MediaProbe {
                 root.optString("channel")
             ),
             thumbnail = resolveThumbnail(media) ?: resolveThumbnail(root),
-            durationSeconds = resolveDuration(media).takeIf { it > 0 } ?: resolveDuration(root),
+            durationSeconds = duration,
             // "Best" always heads each tab, whatever the source did or did not report.
             videoFormats = listOf(BEST_VIDEO) + video,
             audioFormats = listOf(BEST_AUDIO) + audio
@@ -353,20 +353,24 @@ object MediaProbe {
      * Reads the `formats` array, or synthesises a single entry from the top-level fields
      * when the extractor describes the media as one direct stream (common on Instagram).
      */
-    private fun readFormats(media: JSONObject): List<MediaFormat> {
+    private fun readFormats(media: JSONObject, durationSeconds: Int): List<MediaFormat> {
         val array = media.optJSONArray("formats") ?: JSONArray()
         val formats = buildList {
             for (i in 0 until array.length()) {
-                array.optJSONObject(i)?.let { toFormat(it) }?.let { add(it) }
+                array.optJSONObject(i)?.let { toFormat(it, durationSeconds) }?.let { add(it) }
             }
         }
         if (formats.isNotEmpty()) return formats
 
         // No usable format list. If the payload still points at a stream, offer that.
-        return listOfNotNull(toFormat(media, fallbackId = "0"))
+        return listOfNotNull(toFormat(media, durationSeconds, fallbackId = "0"))
     }
 
-    private fun toFormat(json: JSONObject, fallbackId: String? = null): MediaFormat? {
+    private fun toFormat(
+        json: JSONObject,
+        durationSeconds: Int,
+        fallbackId: String? = null
+    ): MediaFormat? {
         val id = json.optString("format_id").takeIf { it.isNotBlank() && it != "null" }
             ?: fallbackId
             ?: return null
@@ -409,6 +413,25 @@ object MediaProbe {
 
         if (!hasVideo && !hasAudio) return null
 
+        val bitrate = json.optPositiveDouble("tbr")
+            ?: json.optPositiveDouble("abr")
+            ?: json.optPositiveDouble("vbr")
+            ?: 0.0
+
+        // An exact size when the source reports one. Streaming sites usually do not for
+        // adaptive formats, so the fallback is the bitrate over the running time. That is
+        // an upper bound rather than a measurement: the bitrate a site advertises is what
+        // the stream peaks at, and content that compresses well finishes well under it.
+        // The distinction is carried through so the sheet can mark it as approximate
+        // rather than quoting a figure the finished file will not match.
+        val exactSize = json.optPositiveLong("filesize")
+        val reportedApprox = json.optPositiveLong("filesize_approx")
+        val estimatedSize = if (bitrate > 0 && durationSeconds > 0) {
+            (bitrate * 1000.0 / 8.0 * durationSeconds).toLong()
+        } else {
+            0L
+        }
+
         return MediaFormat(
             formatId = id,
             selector = id,
@@ -418,13 +441,9 @@ object MediaProbe {
             acodec = acodec,
             height = height,
             fps = fps,
-            bitrateKbps = json.optPositiveDouble("tbr")
-                ?: json.optPositiveDouble("abr")
-                ?: json.optPositiveDouble("vbr")
-                ?: 0.0,
-            fileSizeBytes = json.optPositiveLong("filesize")
-                ?: json.optPositiveLong("filesize_approx")
-                ?: 0L,
+            bitrateKbps = bitrate,
+            fileSizeBytes = exactSize ?: reportedApprox ?: estimatedSize,
+            isEstimatedSize = exactSize == null,
             hasVideo = hasVideo,
             hasAudio = hasAudio
         )

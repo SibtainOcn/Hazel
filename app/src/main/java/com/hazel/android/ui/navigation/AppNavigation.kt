@@ -8,9 +8,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.annotation.DrawableRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,14 +48,11 @@ import com.hazel.android.update.UpdateScreen
 sealed class Screen(
     val route: String,
     val title: String,
-    /** Drawable for a mark that ships with the app, otherwise null. */
-    @DrawableRes val iconRes: Int? = null,
-    /** Used when there is no drawable for this destination. */
-    val icon: ImageVector? = null
+    @DrawableRes val icon: Int
 ) {
-    data object Download : Screen("download", "Home", iconRes = R.drawable.home)
-    data object History : Screen("history", "Downloads", icon = Icons.Filled.Download)
-    data object More : Screen("more", "More", icon = Icons.Filled.Settings)
+    data object Download : Screen("download", "Home", R.drawable.home)
+    data object History : Screen("history", "Downloads", R.drawable.downloads_tab)
+    data object More : Screen("more", "More", R.drawable.more_tab)
 }
 
 private val bottomNavItems = listOf(
@@ -138,20 +131,11 @@ fun AppNavigation(
                                 }
                             },
                             icon = {
-                                val iconRes = screen.iconRes
-                                if (iconRes != null) {
-                                    Icon(
-                                        painter = painterResource(id = iconRes),
-                                        contentDescription = screen.title,
-                                        modifier = Modifier.size(22.dp)
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = screen.icon!!,
-                                        contentDescription = screen.title,
-                                        modifier = Modifier.size(22.dp)
-                                    )
-                                }
+                                Icon(
+                                    painter = painterResource(id = screen.icon),
+                                    contentDescription = screen.title,
+                                    modifier = Modifier.size(22.dp)
+                                )
                             },
                             label = { Text(screen.title, style = MaterialTheme.typography.labelSmall) },
                             colors = NavigationBarItemDefaults.colors(
