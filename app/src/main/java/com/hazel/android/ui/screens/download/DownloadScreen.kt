@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -40,6 +41,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,6 +61,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import com.hazel.android.data.DownloadHistoryRepository
+import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.BatchItem
@@ -144,6 +148,11 @@ fun DownloadScreen(
         }
     }
 
+    // Links already downloaded, so a repeat can be pointed out before it is started again.
+    val history by DownloadHistoryRepository.getHistory(context)
+        .collectAsState(initial = emptyList())
+    var alreadyHave by remember { mutableStateOf<HistoryEntry?>(null) }
+
     // A single link goes straight to its sheet. A set of links does not, because the list
     // itself is the thing to look at first.
     var autoOpenedFor by remember { mutableStateOf<String?>(null) }
@@ -155,7 +164,15 @@ fun DownloadScreen(
             resolved != autoOpenedFor && !state.isMultiple &&
                     !state.isDownloading && !state.isComplete -> {
                 autoOpenedFor = resolved
-                sheetVisible = true
+
+                // Downloading the same thing twice is usually a mistake rather than a
+                // choice, so it is raised before the sheet opens. Only a copy that is
+                // still on the device counts: an entry whose file has since been deleted
+                // is not a reason to stop anyone downloading it again.
+                val existing = history.firstOrNull { it.url == resolved }
+                    ?.takeIf { DownloadHistoryRepository.fileExists(context, it) }
+
+                if (existing != null) alreadyHave = existing else sheetVisible = true
             }
         }
     }
@@ -240,6 +257,8 @@ fun DownloadScreen(
                     isComplete = batchItem?.state == BatchState.DONE ||
                             (!state.isMultiple && state.isComplete),
                     batchItem = batchItem,
+                    alreadyDownloaded = state.isMultiple &&
+                            history.any { it.url == info.url },
                     onOpenSheet = {
                         downloadViewModel.selectResult(info)
                         sheetVisible = true
@@ -287,6 +306,33 @@ fun DownloadScreen(
                 downloadViewModel.fetchAll(queries)
             },
             onDismiss = { searchOpen = false }
+        )
+    }
+
+    alreadyHave?.let { existing ->
+        AlertDialog(
+            onDismissRequest = { alreadyHave = null },
+            title = { Text("Already downloaded", fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    Text(existing.fileName, style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        "Saved to ${existing.savedPath}. Download it again anyway?",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    alreadyHave = null
+                    sheetVisible = true
+                }) { Text("Download again") }
+            },
+            dismissButton = {
+                TextButton(onClick = { alreadyHave = null }) { Text("Leave it") }
+            }
         )
     }
 
@@ -492,6 +538,7 @@ private fun MediaCard(
     totalBytes: Long,
     isComplete: Boolean,
     batchItem: BatchItem?,
+    alreadyDownloaded: Boolean = false,
     onOpenSheet: () -> Unit,
     onCancel: () -> Unit,
     onRemove: (() -> Unit)? = null
@@ -638,6 +685,9 @@ private fun MediaCard(
                                 foreground = MaterialTheme.colorScheme.onPrimary
                             )
                             batchItem?.state == BatchState.QUEUED -> CornerTag(text = "Queued")
+                            // Marks a link in a set that has been downloaded before, where
+                            // there is no dialog to raise it.
+                            alreadyDownloaded -> CornerTag(text = "Downloaded")
                         }
                     }
                 }

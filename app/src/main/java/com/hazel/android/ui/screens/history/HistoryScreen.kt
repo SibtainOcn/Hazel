@@ -55,6 +55,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -332,10 +334,17 @@ private fun HistoryCard(
                 .clickable(enabled = present, onClick = onOpen)
         ) {
             if (entry.thumbnail != null) {
+                // A row whose file has been deleted elsewhere keeps its place in the list,
+                // but the artwork is drained of colour and dimmed so the difference is
+                // visible at a glance rather than only on the tag.
                 AsyncImage(
                     model = entry.thumbnail,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
+                    alpha = if (present) 1f else 0.7f,
+                    colorFilter = if (present) null else ColorFilter.colorMatrix(
+                        ColorMatrix().apply { setToSaturation(0f) }
+                    ),
                     modifier = Modifier.fillMaxSize()
                 )
             }
