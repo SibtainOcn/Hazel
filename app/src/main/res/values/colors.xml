@@ -4,15 +4,10 @@
     <color name="ic_launcher_background">#0A0A0A</color>
 
     <!--
-        The launch window, which the system draws before any of the app is running.
-
-        It can only follow the device's own light or dark setting, because the app's theme
-        preference lives in storage the app has not read yet at that point. Matching the
-        system is the closest it can get: a launch that starts on the wrong ground reads as
-        a flash between two screens rather than as one screen appearing.
-
-        Light values here, dark ones in values-night.
+        The launch window, drawn by the system before any of the app is running. It stays
+        dark whatever the device is set to, so the app icon always appears on the ground it
+        was drawn for.
     -->
-    <color name="splash_background">#F7F5F1</color>
-    <color name="splash_foreground">#1F1D1A</color>
+    <color name="splash_background">#0A0A0A</color>
+    <color name="splash_foreground">#FFFFFF</color>
 </resources>

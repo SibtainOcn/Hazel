@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- The launch window on a device set to dark. See values/colors.xml for why. -->
-    <color name="splash_background">#0A0A0A</color>
-    <color name="splash_foreground">#FFFFFF</color>
-</resources>
