@@ -7,15 +7,9 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryChargingFull
@@ -29,11 +23,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 
 /**
  * Shown once, the first time the app is opened.
@@ -52,15 +46,6 @@ fun UserGuideDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.background,
-        tonalElevation = 0.dp,
-        shape = RoundedCornerShape(24.dp),
-        // Full width less a margin, in line with the app's other dialogs. Each step is a
-        // sentence, and at the default dialog width they wrap into five lines apiece.
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
         title = {
             Text(
                 "Getting started",
@@ -69,35 +54,31 @@ fun UserGuideDialog(
             )
         },
         text = {
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 420.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 GuideStep(
                     icon = Icons.Filled.Link,
-                    text = "Paste a link into the search field. Several can be queued at " +
-                            "once, and a playlist or channel resolves to every item it holds."
+                    text = "Paste a link into the search field to download it. " +
+                            "You can add multiple links, playlists"
                 )
                 GuideStep(
                     icon = Icons.Filled.Tune,
-                    text = "Tap a card to choose the exact format. Every quality the source " +
-                            "actually reports is listed, with its size and codec."
+                    text = "Tap a card to pick the exact format. All available" +
+                            " qualities are listed with size and codec."
                 )
                 GuideStep(
                     icon = Icons.Filled.Bolt,
-                    text = "Share a link to Hazel Direct from any app to download straight " +
-                            "away at a quality you set once, with nothing to confirm."
+                    text = "Share a link to Hazel Direct from any app to" +
+                            " download instantly at your preset quality."
                 )
                 GuideStep(
                     icon = Icons.Filled.Download,
-                    text = "Downloads holds everything finished. Tapping a row opens the " +
-                            "file in whatever the device uses for that kind of media."
+                    text = "Finished files appear in Downloads. Tap any" +
+                            " row to open it in the device's default player."
                 )
                 GuideStep(
                     icon = Icons.Filled.BatteryChargingFull,
-                    text = "Set this app's battery use to unrestricted, or Android will " +
-                            "suspend a download as soon as you leave the app."
+                    text = "Set battery use to unrestricted, otherwise Android" +
+                            " may stop downloads when you leave the app."
                 )
             }
         },
@@ -116,22 +97,23 @@ fun UserGuideDialog(
 
 @Composable
 private fun GuideStep(icon: ImageVector, text: String) {
-    Row(modifier = Modifier.padding(bottom = 18.dp)) {
+    Row(
+        modifier = Modifier.padding(top = 12.dp, bottom = 9.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Icon(
-            icon,
+            imageVector = icon,
             contentDescription = null,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.primary
         )
-        Spacer(modifier = Modifier.width(14.dp))
         Text(
-            text,
+            text = text,
+            modifier = Modifier.padding(start = 12.dp),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
-            modifier = Modifier.fillMaxWidth()
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
         )
     }
-    Spacer(modifier = Modifier.height(0.dp))
 }
 
 /**
