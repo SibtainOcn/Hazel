@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Home mark for the bottom navigation.
+
+  Drawn with strokes rather than fills so it matches the weight of the other navigation
+  icons, and tinted at runtime so it follows the selected and unselected colours.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+
+    <path
+        android:pathData="M9,16C9.85,16.63 10.88,17 12,17C13.12,17 14.15,16.63 15,16"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M22,12.2V13.73C22,17.63 22,19.58 20.83,20.79C19.66,22 17.77,22 14,22H10C6.23,22 4.34,22 3.17,20.79C2,19.58 2,17.63 2,13.73V12.2C2,9.92 2,8.77 2.52,7.82C3.04,6.87 3.99,6.29 5.88,5.11L7.88,3.87C9.89,2.62 10.89,2 12,2C13.11,2 14.11,2.62 16.12,3.87L18.12,5.11C20.01,6.29 20.96,6.87 21.48,7.82"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+</vector>

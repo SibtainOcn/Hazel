@@ -60,7 +60,9 @@ data class MediaFormat(
     val hasVideo: Boolean,
     val hasAudio: Boolean,
     /** True for the synthesised "best available" rows, which have no real format id. */
-    val isGeneric: Boolean = false
+    val isGeneric: Boolean = false,
+    /** True when the size came from the bitrate rather than from the source itself. */
+    val isEstimatedSize: Boolean = false
 ) {
     /** Codec badge text, e.g. "AVC1" for video or "OPUS" for audio. */
     val codecLabel: String
@@ -70,7 +72,15 @@ data class MediaFormat(
                 ?.uppercase() ?: ""
         }
 
-    val sizeLabel: String get() = formatFileSize(fileSizeBytes)
+    /**
+     * Size badge. Sources report either an exact size or an estimate derived from the
+     * bitrate; an estimate is marked so a figure that turns out larger than the file is
+     * not read as the app getting it wrong.
+     */
+    val sizeLabel: String
+        get() = formatFileSize(fileSizeBytes).let {
+            if (it.isNotBlank() && isEstimatedSize) "~ $it" else it
+        }
 
     val bitrateLabel: String get() = formatBitrate(bitrateKbps)
 }
