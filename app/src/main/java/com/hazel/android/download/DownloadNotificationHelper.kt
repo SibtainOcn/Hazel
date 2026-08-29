@@ -13,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.hazel.android.MainActivity
 import com.hazel.android.R
+import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 
 /**
  * Manages download notifications.
@@ -101,6 +102,34 @@ object DownloadNotificationHelper {
         )
     }
 
+    /**
+     * Reopens the app on the failure this notification is about.
+     *
+     * The reason travels in the intent rather than being looked up again once the app is
+     * open, because by then it may not exist: the process can be gone, taking the state
+     * that held it. Carrying it means the tap always lands on the dialog that offers the
+     * log and the sign-in, rather than on an ordinary home screen with no explanation.
+     */
+    private fun failurePendingIntent(
+        context: Context,
+        message: String,
+        signInUrl: String?
+    ): PendingIntent {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(EXTRA_FAILURE_MESSAGE, message)
+            signInUrl?.let { putExtra(EXTRA_FAILURE_URL, it) }
+        }
+        return PendingIntent.getActivity(
+            context, 3, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    /** Extras naming the failure a notification tap should reopen the app on. */
+    const val EXTRA_FAILURE_MESSAGE = "hazel.failure.message"
+    const val EXTRA_FAILURE_URL = "hazel.failure.url"
+
     private fun launchPendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -126,13 +155,23 @@ object DownloadNotificationHelper {
         context: Context,
         progress: Int,
         statusLine: String = "",
-        mediaTitle: String = ""
+        mediaTitle: String = "",
+        doneBytes: Long = 0L,
+        totalBytes: Long = 0L
     ) {
         createChannels(context)
+
+        val detail = progressLine(progress, statusLine, doneBytes, totalBytes)
+
         val builder = NotificationCompat.Builder(context, CHANNEL_PROGRESS)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(shortTitle(mediaTitle).ifBlank { "Hazel" })
-            .setContentText(statusLine.ifBlank { "Downloading" })
+            .setContentText(detail)
+            // Stated as a style as well as as content text. Some builders collapse a
+            // notification carrying a progress bar down to its title alone, and the figures
+            // under the bar are the whole reason to look at it.
+            .setStyle(NotificationCompat.BigTextStyle().bigText(detail))
+            .setSubText(if (progress in 0..100) "$progress%" else null)
             .setProgress(100, progress.coerceIn(0, 100), progress < 0)
             .setOngoing(true)
             .setSilent(true)
@@ -147,6 +186,52 @@ object DownloadNotificationHelper {
         val mgr = context.getSystemService(NotificationManager::class.java)
         mgr.notify(PROGRESS_NOTIFICATION_ID, builder.build())
     }
+
+
+    /**
+     * The line under the title: how far along, how much of how much, and how fast.
+     *
+     * The percentage and the byte counts are the app's own, rather than read back out of
+     * the engine's output, because that output is a moving target and a line that failed to
+     * parse would leave the notification saying nothing. Speed and time remaining are taken
+     * from the engine where it reports them, since it is the only thing that knows them,
+     * and simply left out where it does not.
+     */
+    private fun progressLine(
+        progress: Int,
+        statusLine: String,
+        doneBytes: Long,
+        totalBytes: Long
+    ): String {
+        val parts = mutableListOf<String>()
+
+        if (progress in 0..100) parts += "$progress%"
+
+        if (totalBytes > 0) {
+            parts += "${formatSize(doneBytes)} / ${formatSize(totalBytes)}"
+        }
+
+        RATE_PATTERN.find(statusLine)?.groupValues?.get(1)?.let { parts += it }
+        ETA_PATTERN.find(statusLine)?.groupValues?.get(1)?.let { parts += "ETA $it" }
+
+        // Nothing measurable yet, so whatever stage the engine named stands in for it.
+        if (parts.isEmpty()) return statusLine.ifBlank { "Downloading" }
+
+        return parts.joinToString("  ·  ")
+    }
+
+    private fun formatSize(bytes: Long): String = when {
+        bytes <= 0 -> "0 MB"
+        bytes >= 1_073_741_824 -> "%.2f GB".format(bytes / 1_073_741_824.0)
+        bytes >= 1_048_576 -> "%.1f MB".format(bytes / 1_048_576.0)
+        else -> "%.0f KB".format(bytes / 1024.0)
+    }
+
+    /** `at 2.35MiB/s` in a yt-dlp progress line. */
+    private val RATE_PATTERN = Regex("""at\s+([\d.]+\s*[KMG]iB/s)""", RegexOption.IGNORE_CASE)
+
+    /** `ETA 00:10` in a yt-dlp progress line. */
+    private val ETA_PATTERN = Regex("""ETA\s+([\d:]+)""", RegexOption.IGNORE_CASE)
 
     /** Cancel the progress notification */
     fun cancelProgress(context: Context) {
@@ -217,19 +302,69 @@ object DownloadNotificationHelper {
         mgr.notify(COMPLETE_NOTIFICATION_ID, builder.build())
     }
 
-    /** Show error — silent */
-    fun showError(context: Context, errorMsg: String) {
+    /**
+     * Reports a failure, and does it as loudly as a success is reported.
+     *
+     * A download is started and then left alone, so the app is usually in the background by
+     * the time it fails. A silent failure there is one the user finds out about later, by
+     * looking for a file that never arrived, which is worse than being told. It therefore
+     * follows the same rule as completion: quiet while the app is open, audible when it is
+     * not.
+     *
+     * @param title names the item where one failed inside a set, so a batch says which.
+     * @param signInUrl the site to sign in to, where the failure was one that signing in
+     *   would fix. It becomes an action on the notification, because the alternative is
+     *   asking the user to reopen the app and repeat the link to be told the same thing.
+     */
+    fun showError(
+        context: Context,
+        errorMsg: String,
+        title: String = "",
+        signInUrl: String? = null
+    ) {
+        createChannels(context)
         cancelProgress(context)
-        val builder = NotificationCompat.Builder(context, CHANNEL_PROGRESS)
+
+        val inForeground = isAppInForeground()
+        val channelId = if (inForeground) CHANNEL_PROGRESS else CHANNEL_COMPLETE
+
+        val heading = if (title.isBlank()) "Download failed"
+        else "Download failed: ${shortTitle(title)}"
+
+        val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Download failed")
+            .setContentTitle(heading)
             .setContentText(errorMsg)
+            // The reason can run past one line, and truncating it leaves the user with a
+            // failure they cannot act on.
+            .setStyle(NotificationCompat.BigTextStyle().bigText(errorMsg))
             .setAutoCancel(true)
-            .setSilent(true)
             .setColorized(true)
             .setColor(0xFF000000.toInt())
-            .setContentIntent(launchPendingIntent(context))
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentIntent(failurePendingIntent(context, errorMsg, signInUrl))
+            .setCategory(NotificationCompat.CATEGORY_ERROR)
+
+        if (inForeground) {
+            builder.setSilent(true).setPriority(NotificationCompat.PRIORITY_LOW)
+        } else {
+            builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
+        }
+
+        if (signInUrl != null) {
+            builder.addAction(
+                0,
+                "Sign in",
+                PendingIntent.getActivity(
+                    context,
+                    2,
+                    CookieWebViewActivity.intent(context, signInUrl)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
+        }
 
         val mgr = context.getSystemService(NotificationManager::class.java)
         mgr.notify(COMPLETE_NOTIFICATION_ID, builder.build())

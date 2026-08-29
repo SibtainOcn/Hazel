@@ -172,6 +172,12 @@ dependencies {
     // Networking (URL validation + yt-dlp release metadata)
     implementation(libs.okhttp)
 
+    // Metadata-only extractor. Used to list what is behind a link on the sites it knows,
+    // where it answers in one request instead of a yt-dlp process. It never resolves
+    // formats and never downloads: yt-dlp owns both, and this falls back to it on any
+    // failure, so a stale extractor costs speed rather than function.
+    implementation(libs.newpipe.extractor)
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 

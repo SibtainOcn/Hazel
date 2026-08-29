@@ -8,12 +8,18 @@ import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SettingsRepository
+import com.hazel.android.download.extractor.LinkContents
+import com.hazel.android.download.extractor.LinkResolver
+import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.util.StoragePaths
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -97,6 +103,9 @@ class DownloadViewModel : ViewModel() {
     /** When the progress notification was last redrawn, so updates stay evenly paced. */
     @Volatile private var lastNotifiedAt = 0L
 
+    /** Entries whose formats are being read, so opening a sheet twice reads once. */
+    private val formatsInFlight = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+
     private var downloadContext: Context? = null
     private var downloadIsVideo: Boolean = true
 
@@ -154,11 +163,18 @@ class DownloadViewModel : ViewModel() {
 
     // ── Metadata ──
 
-    /** Resolves whatever is in the field. */
-    fun fetchInfo() {
+    /**
+     * Resolves whatever is in the field.
+     *
+     * @param notifyFailure posts a notification if the link cannot be read, for the paths
+     *   where nobody is watching the screen. A share that goes straight to a download is
+     *   started and then left, so a failure reported only on screen is a failure the user
+     *   never learns about.
+     */
+    fun fetchInfo(notifyFailure: Boolean = false) {
         val url = _state.value.url.trim()
         if (url.isBlank()) return
-        fetchAll(listOf(url))
+        fetchAll(listOf(url), notifyFailure)
     }
 
     /**
@@ -173,7 +189,7 @@ class DownloadViewModel : ViewModel() {
      * of them resolved is the failure reported, since that is the case where the user has
      * nothing to act on.
      */
-    fun fetchAll(urls: List<String>) {
+    fun fetchAll(urls: List<String>, notifyFailure: Boolean = false) {
         val targets = urls.map { it.trim() }.filter { it.isNotBlank() }.distinct()
         if (targets.isEmpty() || _state.value.isFetching) return
 
@@ -204,33 +220,67 @@ class DownloadViewModel : ViewModel() {
             val fetchMode = SettingsRepository.getFetchMode(app).first()
             val forceIpv4 = SettingsRepository.getForceIpv4(app).first()
 
-            // Every link goes to one yt-dlp run rather than one run each, which is what
-            // makes reading a set take about as long as reading its slowest member.
+            val listingSource = SettingsRepository.getListingSource(app).first()
+
             val resolved: List<MediaInfo>
             var lastFailure = ""
 
             try {
-                resolved = if (valid.size == 1) {
-                    listOf(probeWithRetry(valid.first(), cookies, fetchMode, forceIpv4))
-                } else {
+                if (valid.size > 1) {
                     _state.value = _state.value.copy(
                         fetchProgress = "Reading ${valid.size} links"
                     )
-                    MediaProbe.probeAll(
-                        valid, ytDlpCacheDir, cookies, fetchMode, forceIpv4
-                    )
+                }
+
+                // Each pasted link is asked what it holds, and a link holding a collection
+                // contributes one card per entry. Reads run together rather than in turn,
+                // because each one is almost entirely waiting.
+                resolved = coroutineScope {
+                    valid.mapIndexed { index, link ->
+                        async(Dispatchers.IO) {
+                            runCatching {
+                                expand(
+                                    link, cookies, fetchMode, forceIpv4, listingSource,
+                                    "${MediaProbe.PROBE_PROCESS_ID}_$index"
+                                )
+                            }.onFailure { failure ->
+                                if (failure is CancellationException) throw failure
+                                lastFailure = failure.message?.trim().orEmpty()
+                            }.getOrDefault(emptyList())
+                        }
+                    }.awaitAll().flatten().distinctBy { it.url }
+                }
+
+                // One link that resolved to nothing is a failure worth reporting, since
+                // there is no other card to look at.
+                if (resolved.isEmpty() && valid.size == 1 && lastFailure.isBlank()) {
+                    lastFailure = "Could not read this link"
                 }
             } catch (_: CancellationException) {
                 _state.value = _state.value.copy(isFetching = false, fetchProgress = "")
                 return@launch
             } catch (e: Exception) {
                 lastFailure = e.message?.trim().orEmpty()
+                val message = sanitizeError(lastFailure.ifBlank { "Could not read this link" })
                 _state.value = _state.value.copy(
                     isFetching = false,
                     fetchProgress = "",
                     errorLog = lastFailure.ifBlank { "Could not read this link" }
                 )
+                if (notifyFailure) {
+                    DownloadNotificationHelper.showError(
+                        app, message, signInUrl = signInTargetFor(lastFailure, valid.first())
+                    )
+                }
                 return@launch
+            }
+
+            if (resolved.isEmpty() && notifyFailure) {
+                DownloadNotificationHelper.showError(
+                    app,
+                    sanitizeError(lastFailure.ifBlank { "Could not read this link" }),
+                    signInUrl = signInTargetFor(lastFailure, valid.first())
+                )
             }
 
             _state.value = if (resolved.isEmpty()) {
@@ -247,6 +297,77 @@ class DownloadViewModel : ViewModel() {
                     info = resolved.singleOrNull()
                 )
             }
+        }
+    }
+
+    /**
+     * Turns one pasted link into the cards it stands for.
+     *
+     * A link holding one item gives one card, fully resolved. A link holding a collection
+     * gives a card per entry, each carrying what the listing reported and no formats: those
+     * are read per item, when the item is opened, by [resolveFormats]. Reading them here
+     * would mean a read per entry before anything appeared, which for a long playlist is
+     * minutes of waiting for cards that will mostly never be opened.
+     */
+    private suspend fun expand(
+        url: String,
+        cookies: File?,
+        fetchMode: FetchMode,
+        forceIpv4: Boolean,
+        source: ListingSource,
+        processKey: String
+    ): List<MediaInfo> {
+        // A link read a moment ago is not read again. The engine costs seconds to start
+        // before it does any work, so the cheapest read is the one that does not happen.
+        InfoCache.metadataFor(url)?.let { return listOf(it) }
+
+        val contents = LinkResolver.resolve(
+            url, ytDlpCacheDir, cookies, fetchMode, forceIpv4, source, processKey
+        )
+
+        return when (contents) {
+            is LinkContents.Single -> listOf(contents.info)
+            is LinkContents.Many -> contents.entries.map(MediaProbe::pendingFor)
+        }
+    }
+
+    /**
+     * Reads one entry's formats, for a card that came from a listing.
+     *
+     * Called when the sheet opens on such a card. A card that already has formats, or one
+     * whose formats are still being read, is left alone.
+     */
+    fun resolveFormats(info: MediaInfo) {
+        if (info.hasResolvedFormats || info.url in formatsInFlight) return
+
+        formatsInFlight += info.url
+        viewModelScope.launch(Dispatchers.IO) {
+            val app = HazelApp.instance
+            val resolved = runCatching {
+                InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
+                    ?: probeWithRetry(
+                        info.url,
+                        CookieRepository.activeCookieFile(app),
+                        SettingsRepository.getFetchMode(app).first(),
+                        SettingsRepository.getForceIpv4(app).first(),
+                        "${MediaProbe.PROBE_PROCESS_ID}_formats"
+                    )
+            }.getOrNull()
+
+            formatsInFlight -= info.url
+            if (resolved == null) return@launch
+
+            // The listing's title and artwork are kept: they are what the card already
+            // shows, and replacing them mid-read would make the card flicker.
+            val merged = resolved.copy(
+                title = info.title.ifBlank { resolved.title },
+                thumbnail = info.thumbnail ?: resolved.thumbnail
+            )
+
+            _state.value = _state.value.copy(
+                results = _state.value.results.map { if (it.url == info.url) merged else it },
+                info = if (_state.value.info?.url == info.url) merged else _state.value.info
+            )
         }
     }
 
@@ -270,6 +391,15 @@ class DownloadViewModel : ViewModel() {
         MediaProbe.probe(
             url, ytDlpCacheDir, cookies, FetchMode.THOROUGH, forceIpv4, processKey
         )
+    }
+
+    /**
+     * Reopens the failure dialog on a reason that arrived from outside, which is how a tap
+     * on a failure notification gets back to the log and the sign-in offer.
+     */
+    fun showFailure(message: String) {
+        if (message.isBlank()) return
+        _state.value = _state.value.copy(isFetching = false, errorLog = message)
     }
 
     /** Dismisses the failure dialog without changing anything else. */
@@ -380,11 +510,29 @@ class DownloadViewModel : ViewModel() {
                 try {
                     if (!downloadDir.exists()) downloadDir.mkdirs()
 
-                    executeYtDlp(
-                        buildRequest(
-                            plan.info.url, plan.format, options, plan.title, plan.author, cookies
+                    try {
+                        executeYtDlp(
+                            buildRequest(
+                                plan.info.url, plan.format, options, plan.title, plan.author,
+                                cookies
+                            )
                         )
-                    )
+                    } catch (e: Exception) {
+                        // A replayed payload whose addresses have expired fails here. That
+                        // is not the link failing, so it is read again and tried once more
+                        // before the item is recorded as a failure.
+                        val replayed = InfoCache.infoJsonFor(plan.info.url) != null
+                        if (!replayed || isCancelled || isBatchCancelled) throw e
+
+                        InfoCache.invalidate(plan.info.url)
+                        purgeFragments()
+                        executeYtDlp(
+                            buildRequest(
+                                plan.info.url, plan.format, options, plan.title, plan.author,
+                                cookies
+                            )
+                        )
+                    }
 
                     if (isCancelled || isBatchCancelled) {
                         finishDownload(context)
@@ -452,8 +600,25 @@ class DownloadViewModel : ViewModel() {
             }
         )
 
-        if (isBatchCancelled && done == 0) {
-            DownloadNotificationHelper.showCancelled(context)
+        when {
+            isBatchCancelled && done == 0 -> DownloadNotificationHelper.showCancelled(context)
+
+            // A failure inside a set went unreported: the run ended, the notification was
+            // taken down, and nothing said why the file never arrived.
+            failed > 0 && done == 0 -> {
+                val item = current.batch.firstOrNull { it.state == BatchState.FAILED }
+                DownloadNotificationHelper.showError(
+                    context,
+                    item?.error ?: "Download failed",
+                    item?.title.orEmpty()
+                )
+            }
+
+            failed > 0 -> DownloadNotificationHelper.showError(
+                context,
+                "$failed of ${current.batch.size} could not be downloaded",
+                ""
+            )
         }
     }
 
@@ -477,6 +642,26 @@ class DownloadViewModel : ViewModel() {
 
     // ── Internals ──
 
+    /**
+     * The request a download starts from, given the metadata already in hand.
+     *
+     * Resolving a link and downloading it are two separate runs of the engine, and left to
+     * itself the second one repeats every bit of the extraction the first one did. Handing
+     * back the payload the read produced skips that: measured on a mid-range device, the
+     * wait before the first byte moved fell from 5.8 seconds to 3.2, the rest being the
+     * engine starting up.
+     *
+     * The payload holds signed addresses with a limited life, so this is only used while it
+     * is recent, and [startBatch] treats a refusal as a signal to discard it and read the
+     * link again rather than as a failed download.
+     */
+    private fun buildDownloadRequest(url: String): YoutubeDLRequest {
+        val cached = InfoCache.infoJsonFor(url) ?: return YoutubeDLRequest(url)
+        return YoutubeDLRequest(emptyList()).apply {
+            addOption("--load-info-json", cached.absolutePath)
+        }
+    }
+
     private fun buildRequest(
         url: String,
         format: MediaFormat,
@@ -484,7 +669,7 @@ class DownloadViewModel : ViewModel() {
         title: String,
         author: String,
         cookieFile: File?
-    ): YoutubeDLRequest = YoutubeDLRequest(url).apply {
+    ): YoutubeDLRequest = buildDownloadRequest(url).apply {
         val isVideo = format.hasVideo
         val container = (if (isVideo) options.videoContainer else options.audioContainer).trim()
 
@@ -670,8 +855,14 @@ class DownloadViewModel : ViewModel() {
             if (now - lastNotifiedAt >= NOTIFICATION_INTERVAL_MS) {
                 lastNotifiedAt = now
                 downloadContext?.let {
+                    val total = _state.value.totalBytes
                     DownloadNotificationHelper.showProgress(
-                        it, percent.toInt(), status, _state.value.info?.title.orEmpty()
+                        context = it,
+                        progress = percent.toInt(),
+                        statusLine = status,
+                        mediaTitle = _state.value.info?.title.orEmpty(),
+                        doneBytes = (total * percent / 100f).toLong(),
+                        totalBytes = total
                     )
                 }
             }
@@ -692,6 +883,13 @@ class DownloadViewModel : ViewModel() {
         val latestFile = downloadDir.listFiles()?.filter { it.isFile }
             ?.maxByOrNull { it.lastModified() }
         val fileName = latestFile?.name ?: "File saved"
+
+        // Measured off the finished file rather than taken from the transfer figures. Those
+        // count one stream at a time, so a video muxed from separate video and audio streams
+        // reported whichever of them finished last, which is a fraction of the real file.
+        // Read here, before the move, because afterwards it is a content URI rather than a
+        // file and its length is no longer a question with a cheap answer.
+        val finalSizeBytes = latestFile?.length()?.takeIf { it > 0 } ?: _state.value.totalBytes
 
         _state.value = _state.value.copy(status = "Saving", isProcessing = true)
 
@@ -745,7 +943,7 @@ class DownloadViewModel : ViewModel() {
             fileUri = savedUri
         )
 
-        recordHistory(context, fileName, savedPath, savedUri)
+        recordHistory(context, fileName, savedPath, savedUri, finalSizeBytes)
     }
 
     /**
@@ -759,11 +957,16 @@ class DownloadViewModel : ViewModel() {
         context: Context,
         fileName: String,
         savedPath: String,
-        savedUri: android.net.Uri?
+        savedUri: android.net.Uri?,
+        sizeBytes: Long
     ) {
         val info = _state.value.info ?: return
 
         viewModelScope.launch {
+            // Incognito is checked here rather than at the call site, so every path that
+            // finishes a download passes through the same gate and none can forget to.
+            if (SettingsRepository.getIncognito(context).first()) return@launch
+
             DownloadHistoryRepository.record(
                 context,
                 HistoryEntry(
@@ -777,7 +980,7 @@ class DownloadViewModel : ViewModel() {
                     fileUri = savedUri?.toString().orEmpty(),
                     savedPath = savedPath,
                     isVideo = downloadIsVideo,
-                    sizeBytes = _state.value.totalBytes,
+                    sizeBytes = sizeBytes,
                     completedAt = System.currentTimeMillis()
                 )
             )
@@ -850,6 +1053,21 @@ class DownloadViewModel : ViewModel() {
             else -> return null
         }
         return (amount * multiplier).toLong()
+    }
+
+    /**
+     * The site to offer a sign-in for, when the failure reads like one an account would
+     * settle, or null when signing in would not help.
+     *
+     * Cookies are stored per site, so the individual media address is trimmed back to the
+     * front page, which is where a sign-in actually happens.
+     */
+    private fun signInTargetFor(failure: String, url: String): String? {
+        if (!com.hazel.android.ui.screens.download.isCookieRelated(failure)) return null
+        return runCatching {
+            val parsed = java.net.URL(url)
+            "${parsed.protocol}://${parsed.host}"
+        }.getOrNull()
     }
 
     /**

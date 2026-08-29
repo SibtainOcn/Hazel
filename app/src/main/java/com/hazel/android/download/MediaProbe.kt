@@ -1,13 +1,10 @@
 package com.hazel.android.download
 
+import com.hazel.android.download.extractor.LinkContents
+import com.hazel.android.download.extractor.LinkEntry
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -57,136 +54,132 @@ object MediaProbe {
             val payload = response.out.trim().takeIf { it.isNotBlank() }
                 ?: throw IllegalStateException("No metadata returned")
 
-            parse(url, JSONObject(payload))
+            val parsed = parse(url, JSONObject(payload))
+
+            // Kept so a repeat of this link needs no read, and so the download can replay
+            // the payload instead of extracting the same thing over again.
+            InfoCache.put(url, parsed, payload)
+            parsed
         } finally {
             activeProcessIds.remove(processId)
         }
     }
 
     /**
-     * Reads several links, grouping them by the site they come from.
+     * Finds out what a link actually holds: one item, or a collection of them.
      *
-     * One yt-dlp run works through its URL list one entry at a time, so handing every link
-     * to a single run would read them in sequence no matter how many there are. Links are
-     * therefore grouped by host and each group gets its own run:
+     * The question is put to yt-dlp rather than answered by matching the address, because
+     * the address is not reliable evidence. A playlist, a channel, an album, a watch-later
+     * page and a multi-part post look nothing like each other, and a source nobody thought
+     * about looks like none of them. `_type` in the reply is the extractor's own answer, so
+     * anything it learns to handle is handled here without a change.
      *
-     *  - links from the same site share a run, so the extractor is warmed up once and one
-     *    set of cookies and cache entries serves all of them;
-     *  - different sites run at the same time, so a slow site cannot hold up a fast one.
-     *
-     * This adapts on its own to whatever was pasted. A set of links from one site behaves
-     * like a single efficient batch; a mixed set fans out across sites. [MAX_PARALLEL_HOSTS]
-     * caps how many run at once so a long, varied list cannot start a process per link.
-     *
-     * A link that cannot be read produces no output line and is simply absent from the
-     * result, leaving the rest of the set intact. Results come back in the order the links
-     * were given.
+     * `--flat-playlist` stops it opening each entry of a collection, which is what keeps the
+     * cost of listing three hundred videos the same as listing three. It does not affect a
+     * link that turns out to hold one item, so that case comes back fully resolved from this
+     * single read and needs no second one.
      */
-    suspend fun probeAll(
-        urls: List<String>,
+    suspend fun listContents(
+        url: String,
         cacheDir: File,
         cookieFile: File? = null,
         fetchMode: FetchMode = FetchMode.DEFAULT,
-        forceIpv4: Boolean = false
-    ): List<MediaInfo> = withContext(Dispatchers.IO) {
-        if (urls.isEmpty()) return@withContext emptyList()
-        if (urls.size == 1) {
-            return@withContext listOf(
-                probe(urls.first(), cacheDir, cookieFile, fetchMode, forceIpv4)
-            )
+        forceIpv4: Boolean = false,
+        processId: String = PROBE_PROCESS_ID
+    ): LinkContents = withContext(Dispatchers.IO) {
+        val request = YoutubeDLRequest(url).apply {
+            applySharedOptions(cacheDir, cookieFile, fetchMode, forceIpv4, singleItem = false)
+            addOption("--flat-playlist")
+            // Entries are emitted as they are found rather than after the whole collection
+            // has been walked, which is what stops a long playlist stalling on its own tail.
+            addOption("--lazy-playlist")
+            addOption("--dump-single-json")
         }
 
-        // Links are grouped by site, then each group is split into small runs. One run
-        // extracts its links one after another, so a group left whole would read in
-        // sequence however many links it held; splitting it lets a site's links overlap
-        // while still sharing an extractor warm-up within each run.
-        val runs = urls
-            .groupBy { hostOf(it) }
-            .flatMap { (host, groupUrls) ->
-                groupUrls.chunked(URLS_PER_RUN).mapIndexed { index, chunk ->
-                    "${host}_$index" to chunk
-                }
-            }
-
-        val gate = Semaphore(MAX_PARALLEL_RUNS)
-
-        val resolved = coroutineScope {
-            runs.map { (key, runUrls) ->
-                async {
-                    gate.withPermit {
-                        runCatching {
-                            probeGroup(
-                                key, runUrls, cacheDir, cookieFile, fetchMode, forceIpv4
-                            )
-                        }.getOrDefault(emptyList())
-                    }
-                }
-            }.awaitAll().flatten()
-        }
-
-        // Back into the order the links were given, which is the order the cards appear in.
-        val byUrl = resolved.associateBy { it.url }
-        val ordered = urls.mapNotNull { requested ->
-            byUrl[requested] ?: resolved.firstOrNull { it.url.contains(requested) }
-        }
-        ordered.ifEmpty { resolved }
-    }
-
-    /** One yt-dlp run covering a handful of links from the same site. */
-    private fun probeGroup(
-        key: String,
-        urls: List<String>,
-        cacheDir: File,
-        cookieFile: File?,
-        fetchMode: FetchMode,
-        forceIpv4: Boolean
-    ): List<MediaInfo> {
-        val request = YoutubeDLRequest(urls).apply {
-            applySharedOptions(cacheDir, cookieFile, fetchMode, forceIpv4)
-            // One JSON object per link, rather than one object wrapping them all.
-            addOption("--dump-json")
-            // One unreadable link in the group must not abandon the others.
-            addOption("--ignore-errors")
-        }
-
-        val processId = BATCH_PROCESS_ID + "_" + key
         activeProcessIds.add(processId)
-        val response = try {
-            YoutubeDL.getInstance().execute(request, processId, null)
+        val payload = try {
+            YoutubeDL.getInstance().execute(request, processId, null).out.trim()
+                .takeIf { it.isNotBlank() }
+                ?: throw IllegalStateException("No metadata returned")
         } finally {
             activeProcessIds.remove(processId)
         }
 
-        // Results are matched back to the requested links by address, because a redirect
-        // can change what the payload reports.
-        return response.out
-            .lineSequence()
-            .map { it.trim() }
-            .filter { it.startsWith("{") }
-            .mapNotNull { line ->
-                runCatching {
-                    val json = JSONObject(line)
-                    val reported = firstNonBlank(
-                        json.optString("webpage_url"),
-                        json.optString("original_url")
-                    )
-                    val requested = urls.firstOrNull { it == reported }
-                        ?: urls.firstOrNull { reported.isNotBlank() && reported.contains(it) }
-                        ?: reported.ifBlank { urls.first() }
-                    parse(requested, json)
-                }.getOrNull()
+        val root = JSONObject(payload)
+        val entries = root.optJSONArray("entries")
+        val isCollection = root.optString("_type") == "playlist" && entries != null
+
+        if (!isCollection) {
+            val info = parse(url, root)
+            InfoCache.put(url, info, payload)
+            return@withContext LinkContents.Single(info)
+        }
+
+        val listed = buildList {
+            for (index in 0 until entries!!.length()) {
+                val entry = entries.optJSONObject(index) ?: continue
+                toEntry(entry)?.let { add(it) }
             }
-            .toList()
+        }
+
+        // A wrapper holding exactly one entry is a single item wearing a collection's
+        // clothes, which is how several sites describe an ordinary post. Reading it as a
+        // list would put one card behind a set of links it does not belong to.
+        if (listed.size == 1) {
+            val only = listed.first()
+            val resolved = runCatching {
+                probe(only.url, cacheDir, cookieFile, fetchMode, forceIpv4, processId)
+            }.getOrNull()
+            if (resolved != null) return@withContext LinkContents.Single(resolved)
+        }
+
+        LinkContents.Many(
+            title = firstNonBlank(root.optString("title"), root.optString("playlist_title")),
+            entries = listed
+        )
+    }
+
+    /** Reads one entry of a flat listing, which carries no formats by design. */
+    private fun toEntry(json: JSONObject): LinkEntry? {
+        val address = firstNonBlank(
+            json.optString("webpage_url"),
+            json.optString("url"),
+            json.optString("original_url")
+        ).takeIf { it.isNotBlank() && it.startsWith("http") } ?: return null
+
+        val title = firstNonBlank(json.optString("title"), json.optString("alt_title"))
+        // Entries a source has withdrawn still occupy a slot in the listing. They cannot be
+        // downloaded, so they are left out rather than shown as cards that will fail.
+        if (title in UNAVAILABLE_TITLES) return null
+
+        return LinkEntry(
+            url = address,
+            title = title.ifBlank { address },
+            uploader = firstNonBlank(
+                json.optString("uploader"),
+                json.optString("channel"),
+                json.optString("uploader_id")
+            ),
+            thumbnail = resolveThumbnail(json),
+            durationSeconds = resolveDuration(json)
+        )
     }
 
     /**
-     * The site a link belongs to, used only to decide what shares a run. An address that
-     * cannot be parsed becomes its own group, so a malformed entry cannot drag a working
-     * group down with it.
+     * A card for an entry whose formats have not been read yet.
+     *
+     * It carries only the generic rows, so [MediaInfo.hasResolvedFormats] reports false and
+     * the sheet knows to resolve this item before showing a quality to choose.
      */
-    private fun hostOf(url: String): String = runCatching {
-        java.net.URL(url).host.removePrefix("www.").lowercase()
-    }.getOrNull()?.takeIf { it.isNotBlank() } ?: url
+    fun pendingFor(entry: LinkEntry) = MediaInfo(
+        url = entry.url,
+        title = entry.title,
+        uploader = entry.uploader,
+        thumbnail = entry.thumbnail,
+        durationSeconds = entry.durationSeconds,
+        videoFormats = listOf(BEST_VIDEO),
+        audioFormats = listOf(BEST_AUDIO)
+    )
 
     /**
      * Kills every in-flight probe.
@@ -209,9 +202,13 @@ object MediaProbe {
         cacheDir: File,
         cookieFile: File?,
         fetchMode: FetchMode,
-        forceIpv4: Boolean
+        forceIpv4: Boolean,
+        singleItem: Boolean = true
     ) {
-        addOption("--no-playlist")
+        // Left off when the point of the read is to find out whether the link holds one
+        // item or several, because that is exactly the question this option answers in
+        // advance. Everywhere else the caller already knows it wants one item.
+        if (singleItem) addOption("--no-playlist")
         addOption("--no-warnings")
         addOption("--no-check-certificates")
         addOption("--cache-dir", cacheDir.absolutePath)
@@ -229,16 +226,13 @@ object MediaProbe {
 
     const val PROBE_PROCESS_ID = "hazel_probe"
 
-    private const val BATCH_PROCESS_ID = "hazel_probe_batch"
+    /** Titles a source gives an entry that is no longer there. */
+    private val UNAVAILABLE_TITLES = setOf(
+        "[Private video]", "[Deleted video]", "[Unavailable video]", "[Removed video]"
+    )
 
-    /** How many reads run at the same time. */
-    private const val MAX_PARALLEL_RUNS = 4
 
-    /**
-     * Links per run. Small enough that a set overlaps rather than queueing behind itself,
-     * large enough that neighbouring links still share one extractor warm-up.
-     */
-    private const val URLS_PER_RUN = 2
+
 
     private val activeProcessIds = java.util.Collections.newSetFromMap(
         java.util.concurrent.ConcurrentHashMap<String, Boolean>()

@@ -7,68 +7,65 @@
 **A media downloader for Android.** Paste one link or several, see exactly what each source
 offers, choose, and download.
 
-Built on [yt-dlp](https://github.com/yt-dlp/yt-dlp) and FFmpeg, with a Material 3 interface
-written entirely in Jetpack Compose.
-
 </div>
 
 ---
 
 ## What it does
 
-Hazel resolves a link into what the source actually has, rather than guessing at a quality
-preset. Every format the site reports is listed with its container, codec, size, bitrate and
-format id, and the best concrete one is chosen for you.
+Hazel shows you what a link actually has, instead of guessing at a quality preset. Every
+format the site offers is listed with its size and quality, and the best one is picked for
+you.
 
-**One link or many.** Queue several links in one pass and download the whole set with one
-action, or open any of them individually and change just that one.
+**One link, many, or a whole playlist.** Queue several links at once and download the set
+with one action, or open any of them and change just that one. A playlist or channel becomes
+one card per video.
 
-**Real formats.** No quality presets and no hardcoded ladders. A video-only stream names the
-audio track it will be muxed with, and that is the track the download requests.
+**Real formats.** No presets. You see the exact qualities the source has and choose.
 
-**Anything yt-dlp supports.** Nothing in the app is written for a particular site. YouTube,
-Instagram, TikTok, X, Reddit, SoundCloud and the rest of yt-dlp's extractor list all go
-through the same path, and sources that report almost no metadata still work because every
-field degrades instead of failing.
+**Works nearly everywhere.** YouTube, Instagram, TikTok, X, Reddit, SoundCloud and hundreds
+of other sites.
 
 ## Features
 
 ### Downloading
-- Multi-link entry with queued links as removable chips and a history of links used before
-- Reads grouped by site and run in parallel, so a set resolves in about the time its slowest
-  member takes
-- Full format list in its own sheet, sortable by quality, size or container
-- Editable title, author and output container, for both audio and video
-- Save to `Download/Hazel` or to any folder picked through the system document picker,
-  including removable storage
-- Downloads run one after another with per-link progress, and one failure does not stop the
-  rest of the set
+- Paste or share one link, several at once, or a whole playlist
+- **Hazel Direct** — share a link to it and the download starts immediately at a quality you
+  set once
+- Full quality list, sortable by quality, size or format
+- Edit the title, author and file type before saving
+- Save to `Download/Hazel` or any folder you choose, including an SD card
+- Warns before downloading something you already have, and offers to play it instead
+- Progress in the notification shade, with a sound when a download finishes
 
 ### Processing
-- **SponsorBlock** segment removal, by category
-- **Chapters** embedded into the file, or used to split it into one file per chapter
-- **Subtitles** embedded, saved alongside, or both, with a language selector
-- **Containers**: mp4, webm, mkv, mov, avi, flv for video; mp3, m4a, aac, alac, flac, opus,
-  wav, vorbis for audio
-- Thumbnail embedding and a configurable yt-dlp filename template
+- **SponsorBlock** — cut out sponsors, intros and other segments
+- **Chapters** — keep them in the file, or split into one file per chapter
+- **Subtitles** — burn in, save alongside, or both, in the languages you pick
+- **Formats**: mp4, webm, mkv, mov, avi, flv for video; mp3, m4a, aac, alac, flac, opus, wav
+  for audio
+- Cover art embedding and custom file naming
 
 ### Sign-ins
-- Sign in through an in-app browser to reach age-restricted, private and members-only media
-- Cookies are stored per site and reused by every later read and download
-- Offered automatically when a link fails because it needs an account
-- Kept in the app's private storage and never sent anywhere but yt-dlp
+- Sign in to reach age-restricted, private and members-only media
+- Offered automatically when a link needs an account
+- Stays on your device
 
 ### Library
-- Everything downloaded, with search, sorting and audio/video filtering
-- Updates live as downloads finish, and flags entries whose file has since been deleted
-- Tap to open in your default player
+- Everything you have downloaded, with search, sorting and audio/video filters
+- Switch between large artwork and a compact list
+- Tap to play in your usual app
+
+### Privacy
+- **Incognito** — downloads are not added to your library and links are not remembered
+- No accounts, no analytics, nothing sent anywhere else
 
 ### Settings
-- Link reading speed: Fast, Balanced or Thorough, plus an IPv4 fallback for networks with a
-  broken IPv6 route
-- Temporary file cleanup, by category, with a running total
-- yt-dlp engine updates on a Stable, Nightly or Master channel, independent of app releases
-- Dark theme and accent colour
+- Link reading speed, for slower or unreliable connections
+- Default quality for Hazel Direct
+- Clear temporary files, with a running total
+- Keep the download engine up to date, separately from app updates
+- Dark and light themes, with an accent colour
 
 ## Install
 
@@ -98,6 +95,7 @@ it the release build still succeeds and produces an unsigned APK.
 | UI | Jetpack Compose, Material 3 |
 | Download engine | [yt-dlp](https://github.com/yt-dlp/yt-dlp) via [youtubedl-android](https://github.com/JunkFood02/youtubedl-android) |
 | Media processing | FFmpeg |
+| Metadata | [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) |
 | Storage | DataStore, MediaStore, Storage Access Framework |
 | Images | Coil |
 

@@ -2,5 +2,12 @@
 <resources>
     <!-- Launcher icon placeholder colors -->
     <color name="ic_launcher_background">#0A0A0A</color>
+
+    <!--
+        The launch window, drawn by the system before any of the app is running. It stays
+        dark whatever the device is set to, so the app icon always appears on the ground it
+        was drawn for.
+    -->
     <color name="splash_background">#0A0A0A</color>
+    <color name="splash_foreground">#FFFFFF</color>
 </resources>

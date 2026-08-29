@@ -3,7 +3,9 @@ package com.hazel.android.ui.components
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -60,9 +62,15 @@ private const val SWEEP_DURATION_MS = 1200
 /** Width of the moving highlight, as a fraction of the host's width. */
 private const val BAND_WIDTH = 0.45f
 
-/** The processing sweep is narrower and quicker, so it reads as a glint, not a wash. */
-private const val SHARP_BAND_WIDTH = 0.20f
-private const val SHARP_SWEEP_DURATION_MS = 900
+/** The processing sweep is narrower than the skeleton one, so it reads as a glint. */
+private const val SHARP_BAND_WIDTH = 0.17f
+
+/** How long the band takes to cross, and how long the whole cycle runs including its rest. */
+private const val SWEEP_TRAVEL_MS = 1150
+private const val SWEEP_CYCLE_MS = 2050
+
+/** Lean of the band, in degrees off vertical. */
+private const val SWEEP_TILT_DEGREES = 20.0
 
 /** Position of the band and the geometry it is measured against. */
 private data class ShimmerSweep(
@@ -252,11 +260,21 @@ fun FormatListShimmer(rows: Int = 5, modifier: Modifier = Modifier) {
 @Composable
 fun ProcessingShimmer(modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "processing")
+
+    // The sweep crosses, then waits. A band that runs on a loop with no gap reads as a
+    // spinner and stops being noticed; one that passes and leaves the artwork alone for a
+    // moment reads as light moving across a surface, and the pause is what gives the next
+    // pass something to arrive against.
     val progress by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = SHARP_SWEEP_DURATION_MS, easing = LinearEasing),
+            animation = keyframes {
+                durationMillis = SWEEP_CYCLE_MS
+                0f at 0 using FastOutSlowInEasing
+                1f at SWEEP_TRAVEL_MS
+                1f at SWEEP_CYCLE_MS
+            },
             repeatMode = RepeatMode.Restart
         ),
         label = "processingSweep"
@@ -265,22 +283,59 @@ fun ProcessingShimmer(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.drawBehind {
             val bandWidth = size.width * SHARP_BAND_WIDTH
-            val travel = size.width + bandWidth * 2f
-            val start = -bandWidth + travel * progress
 
+            // The band leans rather than standing upright. A vertical wipe reads as a
+            // progress bar lying on its side; a raked one reads as a reflection, which is
+            // the difference between the surface looking busy and looking lit.
+            val radians = Math.toRadians(SWEEP_TILT_DEGREES).toFloat()
+            val axisX = kotlin.math.cos(radians)
+            val axisY = kotlin.math.sin(radians)
+
+            // Travel is measured along the tilt, and overshoots at both ends so the band is
+            // fully clear of the artwork before the cycle restarts.
+            val reach = size.width + kotlin.math.abs(axisY) * size.height + bandWidth * 2f
+            val centreX = -bandWidth + reach * progress
+            val centreY = size.height / 2f
+
+            fun axis(width: Float) = Offset(
+                centreX - axisX * width / 2f,
+                centreY - axisY * width / 2f
+            ) to Offset(
+                centreX + axisX * width / 2f,
+                centreY + axisY * width / 2f
+            )
+
+            // Two passes make the sheen. A broad halo lifts the whole area the band is
+            // crossing, and a narrow core sits inside it as the highlight proper. One band
+            // alone is either soft and muddy or hard and cheap; the pair reads as depth.
+            val (haloStart, haloEnd) = axis(bandWidth * 2.6f)
             drawRect(
                 brush = Brush.linearGradient(
                     colorStops = arrayOf(
                         0f to Color.Transparent,
-                        0.30f to Color.Black.copy(alpha = 0.28f),
-                        0.44f to Color.White.copy(alpha = 0.10f),
-                        0.50f to Color.White.copy(alpha = 0.60f),
-                        0.56f to Color.White.copy(alpha = 0.10f),
-                        0.70f to Color.Black.copy(alpha = 0.28f),
+                        0.35f to Color.Black.copy(alpha = 0.20f),
+                        0.5f to Color.White.copy(alpha = 0.14f),
+                        0.65f to Color.Black.copy(alpha = 0.20f),
                         1f to Color.Transparent
                     ),
-                    start = Offset(start, 0f),
-                    end = Offset(start + bandWidth, size.height)
+                    start = haloStart,
+                    end = haloEnd
+                )
+            )
+
+            val (coreStart, coreEnd) = axis(bandWidth)
+            drawRect(
+                brush = Brush.linearGradient(
+                    colorStops = arrayOf(
+                        0f to Color.Transparent,
+                        0.42f to Color.White.copy(alpha = 0.08f),
+                        0.48f to Color.White.copy(alpha = 0.72f),
+                        0.52f to Color.White.copy(alpha = 0.72f),
+                        0.58f to Color.White.copy(alpha = 0.08f),
+                        1f to Color.Transparent
+                    ),
+                    start = coreStart,
+                    end = coreEnd
                 )
             )
         }

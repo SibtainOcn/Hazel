@@ -12,6 +12,14 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
+    <!--
+        Lets the app ask to be exempt from battery optimisation. A download is a long
+        network job, and without the exemption the system suspends it shortly after the
+        app leaves the foreground. The user is only ever asked through the system's own
+        screen; nothing is granted silently.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
     <application
         android:name=".HazelApp"
         android:allowBackup="true"
@@ -40,6 +48,25 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
+
+        <!--
+            Second share target, so the share sheet offers a choice rather than one Hazel.
+            An alias rather than another activity: it is the same screen, entered with a
+            different intention, and the app should not hold two copies of itself to say so.
+            Sharing here downloads at the saved quality without asking anything.
+        -->
+        <activity-alias
+            android:name=".DirectShareActivity"
+            android:targetActivity=".MainActivity"
+            android:exported="true"
+            android:label="@string/direct_share_label"
+            android:icon="@mipmap/ic_launcher">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
 
         <!-- Sign-in browser used to collect cookies for gated media -->
         <activity

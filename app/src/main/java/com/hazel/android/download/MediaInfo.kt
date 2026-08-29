@@ -36,6 +36,26 @@ data class MediaInfo(
     /** True once the source has reported at least one concrete format. */
     val hasResolvedFormats: Boolean
         get() = videoFormats.any { !it.isGeneric } || audioFormats.any { !it.isGeneric }
+
+    /**
+     * The format a download with no one watching should take.
+     *
+     * Used by the direct share, where there is no sheet to choose in. [maxHeight] is a
+     * ceiling rather than a target, because sources do not all offer the same ladder and a
+     * request for a height this one does not have would resolve to nothing. When nothing
+     * clears the ceiling the smallest available is taken, since a download slightly over
+     * budget is a better answer than no download at all.
+     */
+    fun autoPick(isVideo: Boolean, maxHeight: Int): MediaFormat? {
+        if (!isVideo) return bestAudio
+
+        val concrete = videoFormats.filter { !it.isGeneric }
+        if (concrete.isEmpty() || maxHeight <= 0) return bestVideo
+
+        return concrete.firstOrNull { it.height in 1..maxHeight }
+            ?: concrete.minByOrNull { it.height }
+            ?: bestVideo
+    }
 }
 
 /**

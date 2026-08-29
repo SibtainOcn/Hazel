@@ -25,6 +25,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +37,7 @@ import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -55,7 +60,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.hazel.android.data.DownloadHistoryRepository
+import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SearchHistoryRepository
+import com.hazel.android.data.SettingsRepository
+import com.hazel.android.util.LinkKey
+import com.hazel.android.util.MediaOpener
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -73,6 +84,7 @@ import kotlinx.coroutines.launch
 fun SearchScreen(
     initialQuery: String = "",
     onSearch: (List<String>) -> Unit,
+    onClearResults: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -85,6 +97,20 @@ fun SearchScreen(
     var text by remember { mutableStateOf(initialQuery) }
     var queued by remember { mutableStateOf(listOf<String>()) }
 
+    // Everything already downloaded, so a repeat can be raised before the link is read.
+    val downloaded by DownloadHistoryRepository.getHistory(context)
+        .collectAsState(initial = emptyList())
+
+    // The links waiting on an answer, paired with the copy already on the device.
+    var pendingDuplicate by remember {
+        mutableStateOf<Pair<List<String>, HistoryEntry>?>(null)
+    }
+
+    var menuOpen by remember { mutableStateOf(false) }
+
+    // Needed only to open the folder a repeat warning refers to.
+    val saveTreeUri by SettingsRepository.getDownloadTreeUri(context).collectAsState(initial = "")
+
     // Links already queued are hidden from the list, and what is being typed filters it.
     val suggestions = remember(history, text, queued) {
         history.filter { it !in queued && it.contains(text.trim(), ignoreCase = true) }
@@ -96,13 +122,37 @@ fun SearchScreen(
         text = ""
     }
 
+    fun startSearch(links: List<String>) {
+        keyboard?.hide()
+        scope.launch {
+            if (!SettingsRepository.getIncognito(context).first()) {
+                links.forEach { SearchHistoryRepository.record(context, it) }
+            }
+        }
+        onSearch(links)
+    }
+
     fun submit() {
         val all = (queued + text.trim()).filter { it.isNotBlank() }.distinct()
         if (all.isEmpty()) return
 
-        keyboard?.hide()
-        scope.launch { all.forEach { SearchHistoryRepository.record(context, it) } }
-        onSearch(all)
+        scope.launch {
+            // Raised here rather than after the link has been read, because this is where
+            // the choice still costs nothing: going back means editing the field that is
+            // already open, and leaving it means the seconds of reading are never spent.
+            //
+            // Matched on what the link points at rather than on how it is spelled, so a
+            // share link and an address-bar link for the same video count as one. Only a
+            // copy still on the device counts: an entry whose file has since been deleted
+            // is no reason to stop anyone downloading it again.
+            val existing = all.firstNotNullOfOrNull { link ->
+                downloaded
+                    .firstOrNull { LinkKey.sameMedia(it.url, link) }
+                    ?.takeIf { DownloadHistoryRepository.fileExists(context, it) }
+            }
+
+            if (existing != null) pendingDuplicate = all to existing else startSearch(all)
+        }
     }
 
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
@@ -117,6 +167,19 @@ fun SearchScreen(
         )
     ) {
         BackHandler(enabled = true) { onDismiss() }
+
+        pendingDuplicate?.let { (links, existing) ->
+            AlreadyDownloadedDialog(
+                entry = existing,
+                onPlay = { MediaOpener.play(context, existing.fileUri, existing.isVideo) },
+                onOpenLocation = { MediaOpener.openLocation(context, saveTreeUri) },
+                onDownloadAgain = {
+                    pendingDuplicate = null
+                    startSearch(links)
+                },
+                onDismiss = { pendingDuplicate = null }
+            )
+        }
 
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -152,6 +215,37 @@ fun SearchScreen(
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { submit() })
                 )
+
+                // With nothing typed there is nothing to add or clear, so the space the
+                // those controls occupy carries the menu instead. It is also the only
+                // moment the menu is worth offering: its actions clear things, and clearing
+                // is not what someone half way through typing a link is after.
+                if (text.isBlank()) {
+                    Box {
+                        IconButton(onClick = { menuOpen = true }) {
+                            Icon(Icons.Filled.MoreVert, contentDescription = "More")
+                        }
+                        DropdownMenu(
+                            expanded = menuOpen,
+                            onDismissRequest = { menuOpen = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Clear results") },
+                                onClick = {
+                                    menuOpen = false
+                                    onClearResults()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Clear search history") },
+                                onClick = {
+                                    menuOpen = false
+                                    scope.launch { SearchHistoryRepository.clear(context) }
+                                }
+                            )
+                        }
+                    }
+                }
 
                 // Parks the typed link so another can be entered.
                 if (text.isNotBlank()) {
