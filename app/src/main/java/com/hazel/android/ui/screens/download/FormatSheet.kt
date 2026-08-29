@@ -99,7 +99,11 @@ fun FormatSheet(
     // downloaded rather than a placeholder. The selection is keyed on the link rather than
     // the tab, so a format picked from the full list survives the tab switch that picking
     // it may have caused.
-    var selected by remember(info.url) {
+    //
+    // It is keyed on whether formats have arrived as well, because a card that came from a
+    // listing opens this sheet before they have. Without that, the sheet would keep the
+    // stand-in it was opened with and never show the real one.
+    var selected by remember(info.url, info.hasResolvedFormats) {
         mutableStateOf(if (info.videoFormats.isNotEmpty()) info.bestVideo else info.bestAudio)
     }
 

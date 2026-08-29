@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Hazel</string>
+    <string name="direct_share_label">Hazel direct</string>
 </resources>

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.annotation.DrawableRes
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -19,9 +20,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,12 +40,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hazel.android.R
+import com.hazel.android.data.SettingsRepository
+import kotlinx.coroutines.launch
 import com.hazel.android.ui.motion.M3Motion
 import com.hazel.android.ui.screens.converter.ConverterScreen
 import com.hazel.android.ui.screens.cookies.CookiesScreen
 import com.hazel.android.ui.screens.download.DownloadScreen
 import com.hazel.android.ui.screens.history.HistoryScreen
 import com.hazel.android.ui.screens.more.AppearanceScreen
+import com.hazel.android.ui.screens.more.DirectShareScreen
 import com.hazel.android.ui.screens.more.FetchSettingsScreen
 import com.hazel.android.ui.screens.more.MoreScreen
 import com.hazel.android.ui.screens.more.StorageCleanupScreen
@@ -65,18 +76,25 @@ private val bottomNavItems = listOf(
 @Composable
 fun AppNavigation(
     sharedUrl: String?,
+    sharedDirectly: Boolean = false,
+    pendingFailure: String? = null,
+    onPendingFailureConsumed: () -> Unit = {},
     onSharedUrlConsumed: () -> Unit,
     isDarkTheme: Boolean,
     onToggleTheme: () -> Unit,
     accentName: String,
     onAccentChanged: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
+
     val navController = rememberNavController()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val isSubScreen = currentRoute in listOf(
-        "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup"
+        "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "direct_share"
     )
 
     Scaffold(
@@ -97,6 +115,42 @@ fun AppNavigation(
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    },
+                    actions = {
+                        // Reads as on or off at a glance: lit and on a filled ground while
+                        // it is active, plain and muted while it is not. A mode that
+                        // silently changes what the app records has to be visible from the
+                        // screen it affects, not buried in settings.
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    SettingsRepository.setIncognito(context, !incognito)
+                                }
+                            },
+                            modifier = Modifier.padding(end = 4.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.incognito),
+                                contentDescription = if (incognito) {
+                                    "Incognito on, downloads are not recorded"
+                                } else {
+                                    "Incognito off"
+                                },
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (incognito) {
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                                        } else {
+                                            Color.Transparent
+                                        }
+                                    )
+                                    .padding(6.dp),
+                                tint = if (incognito) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                             )
                         }
                     },
@@ -167,6 +221,9 @@ fun AppNavigation(
                     androidx.lifecycle.viewmodel.compose.viewModel()
                 DownloadScreen(
                     sharedUrl = sharedUrl,
+                    sharedDirectly = sharedDirectly,
+                    pendingFailure = pendingFailure,
+                    onPendingFailureConsumed = onPendingFailureConsumed,
                     onSharedUrlConsumed = onSharedUrlConsumed,
                     downloadViewModel = downloadViewModel
                 )
@@ -181,6 +238,7 @@ fun AppNavigation(
                     onNavigateToStorageLocations = { navController.navigate("storage_locations") },
                     onNavigateToCookies = { navController.navigate("cookies") },
                     onNavigateToFetchSettings = { navController.navigate("fetch_settings") },
+                    onNavigateToDirectShare = { navController.navigate("direct_share") },
                     onNavigateToStorageCleanup = { navController.navigate("storage_cleanup") },
                     onNavigateToUpdate = { navController.navigate("update") }
                 )
@@ -193,6 +251,9 @@ fun AppNavigation(
             }
             composable("fetch_settings") {
                 FetchSettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("direct_share") {
+                DirectShareScreen(onBack = { navController.popBackStack() })
             }
             composable("storage_locations") {
                 StorageLocationsScreen(onBack = { navController.popBackStack() })

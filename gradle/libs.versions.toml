@@ -13,6 +13,7 @@ coroutines = "1.10.2"
 browser = "1.8.0"
 coil = "3.1.0"
 material3 = "1.5.0-alpha12"
+newpipeExtractor = "v0.26.5"
 
 
 [libraries]
@@ -34,6 +35,7 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 youtubedl-android-library = { group = "io.github.junkfood02.youtubedl-android", name = "library", version.ref = "youtubedlAndroid" }
 youtubedl-android-ffmpeg = { group = "io.github.junkfood02.youtubedl-android", name = "ffmpeg", version.ref = "youtubedlAndroid" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+newpipe-extractor = { group = "com.github.teamnewpipe", name = "newpipeextractor", version.ref = "newpipeExtractor" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }

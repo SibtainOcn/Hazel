@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
@@ -50,6 +52,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -90,6 +93,11 @@ fun HistoryScreen() {
 
     val history by DownloadHistoryRepository.getHistory(context)
         .collectAsState(initial = emptyList())
+
+    // Big artwork or a tight list. Kept across configuration changes because it is a way
+    // of reading the screen rather than a transient selection, and it is only offered once
+    // the list is long enough for the difference to matter.
+    var compact by rememberSaveable { mutableStateOf(false) }
 
     var sort by remember { mutableStateOf(HistorySort.NEWEST) }
     var filter by remember { mutableStateOf(HistoryFilter.ALL) }
@@ -149,6 +157,17 @@ fun HistoryScreen() {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
             )
+
+            if (visible.size > LAYOUT_TOGGLE_THRESHOLD) {
+                IconButton(onClick = { compact = !compact }) {
+                    Icon(
+                        if (compact) Icons.Filled.GridView
+                        else Icons.AutoMirrored.Filled.List,
+                        contentDescription =
+                            if (compact) "Show large artwork" else "Show as a list"
+                    )
+                }
+            }
 
             IconButton(onClick = { searchOpen = !searchOpen }) {
                 Icon(Icons.Filled.Search, contentDescription = "Search downloads")
@@ -253,18 +272,33 @@ fun HistoryScreen() {
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     start = 20.dp, end = 20.dp, bottom = 24.dp
                 ),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 12.dp)
             ) {
                 items(visible, key = { it.id }) { entry ->
-                    HistoryCard(
-                        entry = entry,
-                        present = presence[entry.id] ?: true,
-                        onOpen = { openEntry(context, entry) },
-                        onRemove = {
-                            scope.launch { DownloadHistoryRepository.remove(context, entry.id) }
-                        },
-                        onDeleteFile = { pendingDelete = entry }
-                    )
+                    val present = presence[entry.id] ?: true
+                    val open = { openEntry(context, entry) }
+                    val remove = {
+                        scope.launch { DownloadHistoryRepository.remove(context, entry.id) }
+                        Unit
+                    }
+
+                    if (compact) {
+                        HistoryRow(
+                            entry = entry,
+                            present = present,
+                            onOpen = open,
+                            onRemove = remove,
+                            onDeleteFile = { pendingDelete = entry }
+                        )
+                    } else {
+                        HistoryCard(
+                            entry = entry,
+                            present = present,
+                            onOpen = open,
+                            onRemove = remove,
+                            onDeleteFile = { pendingDelete = entry }
+                        )
+                    }
                 }
             }
         }
@@ -457,6 +491,174 @@ private fun HistoryCard(
         }
     }
 }
+
+
+/**
+ * One download as a single line: small artwork, then what it is.
+ *
+ * The card form leads with the artwork, which is right for browsing but wasteful once the
+ * list is long, since four entries fill a screen. This form fits several times as many by
+ * moving the text out from over the image onto its own column, where it also stops
+ * competing with the picture for contrast.
+ */
+@Composable
+private fun HistoryRow(
+    entry: HistoryEntry,
+    present: Boolean,
+    onOpen: () -> Unit,
+    onRemove: () -> Unit,
+    onDeleteFile: () -> Unit
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = present, onClick = onOpen)
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 104.dp, height = 60.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                if (entry.thumbnail != null) {
+                    AsyncImage(
+                        model = entry.thumbnail,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        alpha = if (present) 1f else 0.7f,
+                        colorFilter = if (present) null else ColorFilter.colorMatrix(
+                            ColorMatrix().apply { setToSaturation(0f) }
+                        ),
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(
+                        if (entry.isVideo) Icons.Filled.PlayArrow else Icons.Filled.MusicNote,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+                    )
+                }
+
+                val duration = formatDuration(entry.durationSeconds)
+                if (duration.isNotBlank()) {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(3.dp),
+                        shape = RoundedCornerShape(4.dp),
+                        color = Color.Black.copy(alpha = 0.7f)
+                    ) {
+                        Text(
+                            duration,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    entry.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (entry.author.isNotBlank()) {
+                    Text(
+                        entry.author,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        if (entry.isVideo) Icons.Filled.PlayArrow else Icons.Filled.MusicNote,
+                        contentDescription = null,
+                        modifier = Modifier.size(13.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        buildString {
+                            if (entry.sizeBytes > 0) {
+                                append(formatFileSize(entry.sizeBytes))
+                                append("  \u00b7  ")
+                            }
+                            append(formatDate(entry.completedAt))
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (!present) {
+                        Tag(
+                            "Missing",
+                            background = MaterialTheme.colorScheme.error,
+                            foreground = MaterialTheme.colorScheme.onError
+                        )
+                    }
+                }
+            }
+
+            Box {
+                IconButton(onClick = { menuOpen = true }) {
+                    Icon(
+                        Icons.Filled.MoreVert,
+                        contentDescription = "Options",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text("Remove from list") },
+                        onClick = {
+                            menuOpen = false
+                            onRemove()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Delete file") },
+                        enabled = present,
+                        onClick = {
+                            menuOpen = false
+                            onDeleteFile()
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * How many entries there have to be before the layout toggle is offered. Below this the two
+ * layouts read much the same, and the control is one more thing on screen for no gain.
+ */
+private const val LAYOUT_TOGGLE_THRESHOLD = 3
 
 @Composable
 private fun Tag(

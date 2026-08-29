@@ -15,27 +15,33 @@ val DarkOnSurface = Color(0xFFCCCCCC)
 // light defaults tint their container tones violet, which fought the accent in the search
 // field and the navigation bar. Every tone here is mixed towards paper instead, so the
 // surfaces stay quiet and the accent is the only colour on the screen.
-val LightBackground = Color(0xFFF6F4EF)
-val LightSurface = Color(0xFFFCFAF5)
-val LightSurfaceVariant = Color(0xFFE9E5DB)
-val LightOnBackground = Color(0xFF201D18)
-val LightOnSurface = Color(0xFF43403A)
-val LightOnSurfaceVariant = Color(0xFF5C574E)
-val LightOutline = Color(0xFF8C867A)
-val LightOutlineVariant = Color(0xFFDCD6C9)
+//
+// The warmth is carried at low saturation on purpose. The search field and the navigation
+// bar take the highest container tones and cover a lot of the screen, so a beige strong
+// enough to read as a colour on a small swatch reads as a stain across a whole bar. These
+// are warm against white and neutral against each other, which is the balance that lets the
+// artwork on the cards be the only saturated thing in view.
+val LightBackground = Color(0xFFF7F5F1)
+val LightSurface = Color(0xFFFDFCFA)
+val LightSurfaceVariant = Color(0xFFECE8E1)
+val LightOnBackground = Color(0xFF1F1D1A)
+val LightOnSurface = Color(0xFF44413B)
+val LightOnSurfaceVariant = Color(0xFF5E5A53)
+val LightOutline = Color(0xFF8D8880)
+val LightOutlineVariant = Color(0xFFDEDAD2)
 
 // Container tones, lightest to darkest. Cards sit on the lower ones; the search field and
 // the navigation bar take the higher ones, which is what gives them an edge against the
 // background without needing a border to carry it.
-val LightSurfaceContainerLowest = Color(0xFFFFFDF8)
-val LightSurfaceContainerLow = Color(0xFFF9F6F0)
-val LightSurfaceContainer = Color(0xFFF3EFE7)
-val LightSurfaceContainerHigh = Color(0xFFEDE9DF)
-val LightSurfaceContainerHighest = Color(0xFFE7E2D6)
-val LightSurfaceBright = Color(0xFFFCFAF5)
-val LightSurfaceDim = Color(0xFFDFDACE)
-val LightInverseSurface = Color(0xFF35322C)
-val LightInverseOnSurface = Color(0xFFF7F3EB)
+val LightSurfaceContainerLowest = Color(0xFFFFFEFC)
+val LightSurfaceContainerLow = Color(0xFFFAF8F5)
+val LightSurfaceContainer = Color(0xFFF5F2EE)
+val LightSurfaceContainerHigh = Color(0xFFF0EDE8)
+val LightSurfaceContainerHighest = Color(0xFFEAE6E0)
+val LightSurfaceBright = Color(0xFFFDFCFA)
+val LightSurfaceDim = Color(0xFFE2DED7)
+val LightInverseSurface = Color(0xFF34322E)
+val LightInverseOnSurface = Color(0xFFF7F4EF)
 
 // Default Brand — Hazel Cyan
 val HazelCyan = Color(0xFF00BCD4)

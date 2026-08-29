@@ -26,6 +26,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
@@ -49,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,6 +80,7 @@ import com.hazel.android.ui.components.ProcessingShimmer
 import com.hazel.android.ui.motion.M3Motion
 import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 import com.hazel.android.util.FolderUtil
+import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.StoragePaths
 import kotlinx.coroutines.launch
@@ -90,6 +94,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun DownloadScreen(
     sharedUrl: String? = null,
+    sharedDirectly: Boolean = false,
+    pendingFailure: String? = null,
+    onPendingFailureConsumed: () -> Unit = {},
     onSharedUrlConsumed: () -> Unit = {},
     downloadViewModel: DownloadViewModel = viewModel()
 ) {
@@ -101,6 +108,11 @@ fun DownloadScreen(
         .collectAsState(initial = DownloadOptions())
     val treeUri by SettingsRepository.getDownloadTreeUri(context).collectAsState(initial = "")
     val treeLabel by SettingsRepository.getDownloadTreeLabel(context).collectAsState(initial = "")
+
+    // Large artwork or a tight list, for a set of links long enough that the difference
+    // matters. A playlist can resolve to dozens of cards, and at one screen each the list
+    // stops being something that can be looked over.
+    var compact by rememberSaveable { mutableStateOf(false) }
 
     var searchOpen by remember { mutableStateOf(false) }
     var sheetVisible by remember { mutableStateOf(false) }
@@ -154,6 +166,16 @@ fun DownloadScreen(
         .collectAsState(initial = emptyList())
     var alreadyHave by remember { mutableStateOf<HistoryEntry?>(null) }
 
+    // Marks a link that arrived from another app's share sheet. That is the one route into
+    // the app that does not pass through the search screen, so it is the one whose repeat
+    // warning is still raised here rather than there.
+    var cameFromShare by remember { mutableStateOf(false) }
+
+    // Set while a link shared to the direct target is being resolved. It suppresses the
+    // sheet and the repeat warning, both of which are questions, and the point of that
+    // target is that nothing is asked.
+    var directPending by remember { mutableStateOf(false) }
+
     // A single link goes straight to its sheet. A set of links does not, because the list
     // itself is the thing to look at first.
     var autoOpenedFor by remember { mutableStateOf<String?>(null) }
@@ -166,25 +188,56 @@ fun DownloadScreen(
                     !state.isDownloading && !state.isComplete -> {
                 autoOpenedFor = resolved
 
-                // Downloading the same thing twice is usually a mistake rather than a
-                // choice, so it is raised before the sheet opens. Only a copy that is
-                // still on the device counts: an entry whose file has since been deleted
-                // is not a reason to stop anyone downloading it again.
-                val existing = history.firstOrNull { it.url == resolved }
-                    ?.takeIf { DownloadHistoryRepository.fileExists(context, it) }
+                // A repeat is raised in the search screen, where the link is entered and
+                // the answer is still cheap. A link shared in from another app never goes
+                // through that screen, so it is the one case still checked here.
+                val existing = if (cameFromShare && !directPending) {
+                    history.firstOrNull { LinkKey.sameMedia(it.url, resolved) }
+                        ?.takeIf { DownloadHistoryRepository.fileExists(context, it) }
+                } else null
 
-                if (existing != null) alreadyHave = existing else sheetVisible = true
+                when {
+                    existing != null -> alreadyHave = existing
+                    // The direct target downloads instead of opening the sheet. The effect
+                    // below does that once the formats are in.
+                    directPending -> Unit
+                    else -> sheetVisible = true
+                }
             }
         }
     }
 
-    // A link shared from another app goes through the same resolve step as a pasted one.
     LaunchedEffect(sharedUrl) {
         if (!sharedUrl.isNullOrBlank()) {
+            cameFromShare = true
+            directPending = sharedDirectly
             downloadViewModel.onUrlChange(sharedUrl.trim())
-            downloadViewModel.fetchInfo()
+            downloadViewModel.fetchInfo(notifyFailure = sharedDirectly)
             onSharedUrlConsumed()
         }
+    }
+
+    // A link shared to the direct target downloads as soon as its formats are known, at the
+    // quality saved in settings. Nothing is asked and no sheet opens: the whole value of
+    // that target is that sharing to it is the last thing the user has to do.
+    val quickIsVideo by SettingsRepository.getQuickIsVideo(context).collectAsState(initial = true)
+    val quickMaxHeight by SettingsRepository.getQuickMaxHeight(context).collectAsState(initial = 0)
+
+    LaunchedEffect(directPending, state.info?.url, state.isFetching) {
+        val info = state.info
+        if (!directPending || info == null || state.isFetching) return@LaunchedEffect
+        if (state.isDownloading || state.isComplete) return@LaunchedEffect
+
+        val format = info.autoPick(quickIsVideo, quickMaxHeight) ?: return@LaunchedEffect
+        directPending = false
+        downloadViewModel.startDownload(
+            context = context,
+            format = format,
+            options = options,
+            title = info.title,
+            author = info.uploader,
+            treeUri = treeUri
+        )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -198,10 +251,9 @@ fun DownloadScreen(
 
             UrlSearchBar(
                 url = state.url,
-                onOpenSearch = { searchOpen = true },
-                onClearResults = downloadViewModel::clearResults,
-                onClearHistory = {
-                    scope.launch { SearchHistoryRepository.clear(context) }
+                onOpenSearch = {
+                    cameFromShare = false
+                    searchOpen = true
                 }
             )
 
@@ -244,11 +296,65 @@ fun DownloadScreen(
                 }
             }
 
+            if (state.results.size > LAYOUT_TOGGLE_THRESHOLD) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "${state.results.size} links",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(onClick = { compact = !compact }) {
+                        Icon(
+                            if (compact) Icons.Filled.GridView
+                            else Icons.AutoMirrored.Filled.List,
+                            contentDescription =
+                                if (compact) "Show large artwork" else "Show as a list",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             state.results.forEach { info ->
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(if (compact) 8.dp else 20.dp))
 
                 val batchItem = state.batch.firstOrNull { it.url == info.url }
                 val isActive = state.isDownloading && state.info?.url == info.url
+
+                val openSheet = {
+                    downloadViewModel.selectResult(info)
+                    // A card that came from a listing carries no formats yet. Reading them
+                    // starts with the sheet, so the wait happens against an open sheet
+                    // rather than against a card that looks unresponsive.
+                    downloadViewModel.resolveFormats(info)
+                    sheetVisible = true
+                }
+
+                if (compact) {
+                    MediaRow(
+                        info = info,
+                        isDownloading = isActive,
+                        isProcessing = isActive && state.isProcessing,
+                        progress = state.progress,
+                        isComplete = batchItem?.state == BatchState.DONE ||
+                                (!state.isMultiple && state.isComplete),
+                        batchItem = batchItem,
+                        alreadyDownloaded = state.isMultiple &&
+                                history.any { LinkKey.sameMedia(it.url, info.url) },
+                        onOpenSheet = openSheet,
+                        onCancel = downloadViewModel::cancelDownload,
+                        onRemove = if (state.isMultiple && !state.isDownloading) {
+                            { downloadViewModel.removeResult(info) }
+                        } else null
+                    )
+                    return@forEach
+                }
 
                 MediaCard(
                     info = info,
@@ -263,6 +369,10 @@ fun DownloadScreen(
                             history.any { it.url == info.url },
                     onOpenSheet = {
                         downloadViewModel.selectResult(info)
+                        // A card that came from a listing carries no formats yet. Reading
+                        // them starts with the sheet, so the wait happens against an open
+                        // sheet rather than against a card that looks unresponsive.
+                        downloadViewModel.resolveFormats(info)
                         sheetVisible = true
                     },
                     onCancel = downloadViewModel::cancelDownload,
@@ -296,34 +406,19 @@ fun DownloadScreen(
                 searchOpen = false
                 downloadViewModel.fetchAll(queries)
             },
+            onClearResults = downloadViewModel::clearResults,
             onDismiss = { searchOpen = false }
         )
     }
 
     alreadyHave?.let { existing ->
-        AlertDialog(
-            onDismissRequest = { alreadyHave = null },
-            title = { Text("Already downloaded", fontWeight = FontWeight.Bold) },
-            text = {
-                Column {
-                    Text(existing.fileName, style = MaterialTheme.typography.bodyMedium)
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        "Saved to ${existing.savedPath}. Download it again anyway?",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+        AlreadyDownloadedDialog(
+            entry = existing,
+            onDownloadAgain = {
+                alreadyHave = null
+                sheetVisible = true
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    alreadyHave = null
-                    sheetVisible = true
-                }) { Text("Download again") }
-            },
-            dismissButton = {
-                TextButton(onClick = { alreadyHave = null }) { Text("Leave it") }
-            }
+            onDismiss = { alreadyHave = null }
         )
     }
 
@@ -357,7 +452,7 @@ fun DownloadScreen(
                 },
                 saveDirLabel = saveDirLabel,
                 isCustomSaveDir = treeUri.isNotBlank(),
-                isLoadingFormats = state.isFetching,
+                isLoadingFormats = state.isFetching || !info.hasResolvedFormats,
                 onOpenSaveDir = { openSaveDir(context, treeUri) },
                 onPickSaveDir = {
                     folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse))
@@ -409,8 +504,12 @@ private fun openSaveDir(context: android.content.Context, treeUri: String) {
 }
 
 /**
- * The resting search field. Tapping it opens the full screen entry, which is where links are
- * actually typed, so this stays a button rather than an input.
+ * The resting search field. Tapping it opens the full screen entry, which is where links
+ * are actually typed, so this stays a button rather than an input.
+ *
+ * It carries nothing else. The menu that used to sit on it acts on the search history and
+ * the resolved results, which are both things the entry screen is already about, so it
+ * lives there now and this is a single control that does one thing.
  *
  * It is drawn on the highest surface tone with an outline, because on the near-black
  * background a low-alpha fill has almost no edge and the field reads as empty space.
@@ -418,12 +517,8 @@ private fun openSaveDir(context: android.content.Context, treeUri: String) {
 @Composable
 private fun UrlSearchBar(
     url: String,
-    onOpenSearch: () -> Unit,
-    onClearResults: () -> Unit,
-    onClearHistory: () -> Unit
+    onOpenSearch: () -> Unit
 ) {
-    var menuOpen by remember { mutableStateOf(false) }
-
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -435,7 +530,7 @@ private fun UrlSearchBar(
         Row(
             modifier = Modifier
                 .clickable(onClick = onOpenSearch)
-                .padding(start = 16.dp, end = 4.dp),
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -455,32 +550,6 @@ private fun UrlSearchBar(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-
-            Box {
-                IconButton(onClick = { menuOpen = true }) {
-                    Icon(
-                        Icons.Filled.MoreVert,
-                        contentDescription = "More",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    DropdownMenuItem(
-                        text = { Text("Clear results") },
-                        onClick = {
-                            menuOpen = false
-                            onClearResults()
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Clear search history") },
-                        onClick = {
-                            menuOpen = false
-                            onClearHistory()
-                        }
-                    )
-                }
-            }
         }
     }
 }
@@ -747,6 +816,206 @@ private fun MediaCard(
         }
     }
 }
+
+
+/**
+ * One resolved link as a single line, for a set too long to browse as artwork.
+ *
+ * It carries the same controls as the card, in the same order, so switching layout changes
+ * how much fits on screen and nothing else. While this item downloads, its progress runs
+ * along the bottom edge and the artwork holds the cancel control, exactly as the card does.
+ */
+@Composable
+private fun MediaRow(
+    info: MediaInfo,
+    isDownloading: Boolean,
+    isProcessing: Boolean,
+    progress: Float,
+    isComplete: Boolean,
+    batchItem: BatchItem?,
+    alreadyDownloaded: Boolean,
+    onOpenSheet: () -> Unit,
+    onCancel: () -> Unit,
+    onRemove: (() -> Unit)?
+) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = M3Motion.emphasized(300),
+        label = "rowProgress"
+    )
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+    ) {
+        Column(
+            modifier = if (isDownloading) Modifier else Modifier.clickable(onClick = onOpenSheet)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(width = 104.dp, height = 60.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (info.thumbnail != null) {
+                        AsyncImage(
+                            model = info.thumbnail,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        Icon(
+                            Icons.Filled.MusicNote,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                        )
+                    }
+
+                    if (isDownloading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.4f))
+                        )
+                        if (isProcessing) {
+                            ProcessingShimmer(modifier = Modifier.fillMaxSize())
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Black.copy(alpha = 0.55f))
+                                    .clickable(onClick = onCancel),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = "Cancel download",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = Color.White
+                                )
+                            }
+                        }
+                    } else {
+                        val duration = formatDuration(info.durationSeconds)
+                        if (duration.isNotBlank()) {
+                            Surface(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(3.dp),
+                                shape = RoundedCornerShape(4.dp),
+                                color = Color.Black.copy(alpha = 0.7f)
+                            ) {
+                                Text(
+                                    duration,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White,
+                                    modifier = Modifier
+                                        .padding(horizontal = 4.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        info.title,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (info.uploader.isNotBlank()) {
+                        Text(
+                            info.uploader,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    val state = when {
+                        isProcessing -> "Processing"
+                        isDownloading -> "%.1f %%".format(animatedProgress * 100)
+                        batchItem?.state == BatchState.FAILED -> batchItem.error ?: "Failed"
+                        isComplete -> "Saved"
+                        batchItem?.state == BatchState.QUEUED -> "Queued"
+                        alreadyDownloaded -> "Downloaded"
+                        else -> ""
+                    }
+                    if (state.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            state,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = if (batchItem?.state == BatchState.FAILED) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            },
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                if (onRemove != null) {
+                    IconButton(onClick = onRemove) {
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = "Remove link",
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            if (isDownloading) {
+                if (isProcessing) {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(3.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = Color.Transparent
+                    )
+                } else {
+                    LinearProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(3.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = Color.Transparent,
+                        drawStopIndicator = {}
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * How many links there have to be before the layout toggle is offered. Below this the two
+ * layouts read much the same, and the control is one more thing on screen for no gain.
+ */
+private const val LAYOUT_TOGGLE_THRESHOLD = 3
 
 /** Dark pill drawn over the thumbnail. */
 @Composable

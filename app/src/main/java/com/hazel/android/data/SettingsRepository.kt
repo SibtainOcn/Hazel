@@ -5,10 +5,12 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.FetchMode
+import com.hazel.android.download.extractor.ListingSource
 import kotlinx.coroutines.flow.Flow
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.map
@@ -116,6 +118,18 @@ object SettingsRepository {
 
     private val FETCH_MODE_KEY = stringPreferencesKey("fetch_mode")
     private val FORCE_IPV4_KEY = booleanPreferencesKey("force_ipv4")
+    private val LISTING_SOURCE_KEY = stringPreferencesKey("listing_source")
+
+    /**
+     * Which extractor is asked what a link holds. Defaults to yt-dlp, which is the engine
+     * that updates itself in the field and does the downloading either way.
+     */
+    fun getListingSource(context: Context): Flow<ListingSource> =
+        context.dataStore.data.map { prefs -> ListingSource.fromName(prefs[LISTING_SOURCE_KEY]) }
+
+    suspend fun setListingSource(context: Context, source: ListingSource) {
+        context.dataStore.edit { prefs -> prefs[LISTING_SOURCE_KEY] = source.name }
+    }
 
     fun getFetchMode(context: Context): Flow<FetchMode> =
         context.dataStore.data.map { prefs -> FetchMode.fromName(prefs[FETCH_MODE_KEY]) }
@@ -133,6 +147,55 @@ object SettingsRepository {
 
     suspend fun setForceIpv4(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[FORCE_IPV4_KEY] = enabled }
+    }
+
+    // ── Incognito ──
+
+    private val INCOGNITO_KEY = booleanPreferencesKey("incognito")
+
+    /**
+     * While on, a download leaves no record: nothing is written to the downloads list and
+     * no link is remembered for the search suggestions. The file itself still arrives, in
+     * the same place it always would. This is about what the app keeps, not about hiding
+     * anything from the device or the network.
+     *
+     * Deliberately not persisted across launches would be the wrong call either way, so it
+     * is persisted: a mode you have to remember to re-enable is one that fails quietly.
+     */
+    fun getIncognito(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[INCOGNITO_KEY] ?: false }
+
+    suspend fun setIncognito(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[INCOGNITO_KEY] = enabled }
+    }
+
+    // ── Direct share ──
+    //
+    // Sharing to the direct target skips the sheet entirely, so the choices the sheet would
+    // have asked for have to be answered in advance. These are those answers.
+
+    private val QUICK_IS_VIDEO_KEY = booleanPreferencesKey("quick_is_video")
+    private val QUICK_MAX_HEIGHT_KEY = intPreferencesKey("quick_max_height")
+
+    /** Whether a direct share saves video or audio. */
+    fun getQuickIsVideo(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[QUICK_IS_VIDEO_KEY] ?: true }
+
+    suspend fun setQuickIsVideo(context: Context, isVideo: Boolean) {
+        context.dataStore.edit { prefs -> prefs[QUICK_IS_VIDEO_KEY] = isVideo }
+    }
+
+    /**
+     * Tallest video a direct share will take, or 0 for whatever the source calls best.
+     *
+     * A cap rather than an exact height: sources do not all offer the same ladder, and a
+     * request for a height that is missing would have nothing to fall back to.
+     */
+    fun getQuickMaxHeight(context: Context): Flow<Int> =
+        context.dataStore.data.map { prefs -> prefs[QUICK_MAX_HEIGHT_KEY] ?: 0 }
+
+    suspend fun setQuickMaxHeight(context: Context, height: Int) {
+        context.dataStore.edit { prefs -> prefs[QUICK_MAX_HEIGHT_KEY] = height }
     }
 
     // ── Download destination ──

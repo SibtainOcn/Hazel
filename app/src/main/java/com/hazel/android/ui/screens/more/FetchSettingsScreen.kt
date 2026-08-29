@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.FetchMode
+import com.hazel.android.download.extractor.ListingSource
 import kotlinx.coroutines.launch
 
 /**
@@ -51,6 +52,8 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
 
     val mode by SettingsRepository.getFetchMode(context)
         .collectAsState(initial = FetchMode.DEFAULT)
+    val listingSource by SettingsRepository.getListingSource(context)
+        .collectAsState(initial = ListingSource.DEFAULT)
     val forceIpv4 by SettingsRepository.getForceIpv4(context)
         .collectAsState(initial = false)
 
@@ -119,6 +122,55 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
                                     "${option.retries} ${if (option.retries == 1) "try" else "tries"}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            "Reading links",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            "Which reader works out what a link holds. Downloads always use yt-dlp, " +
+                    "whichever is chosen here.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            ListingSource.entries.forEach { option ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            scope.launch { SettingsRepository.setListingSource(context, option) }
+                        }
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = option == listingSource,
+                        onClick = {
+                            scope.launch { SettingsRepository.setListingSource(context, option) }
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(option.label, fontWeight = FontWeight.Medium)
+                        Text(
+                            option.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                         )
                     }
                 }
