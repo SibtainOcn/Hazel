@@ -217,8 +217,12 @@ fun DownloadScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    MediaCardShimmer()
+                    // One placeholder per link being read, so a set of links looks like
+                    // the list it is about to become rather than like a single card.
+                    repeat(state.fetchCount.coerceAtLeast(1)) {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        MediaCardShimmer()
+                    }
                 }
             }
 

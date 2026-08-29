@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hazel.android.HazelApp
 import com.hazel.android.data.CookieRepository
+import com.hazel.android.data.DownloadHistoryRepository
+import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.util.StoragePaths
 import com.yausername.youtubedl_android.YoutubeDL
@@ -46,6 +48,8 @@ data class DownloadState(
     val isFetching: Boolean = false,
     /** How far through a multi-link read the app is, for the progress line. */
     val fetchProgress: String = "",
+    /** How many links the current read covers, so the screen can stand in for each one. */
+    val fetchCount: Int = 0,
     /** Every link that resolved from the last search, in the order they were entered. */
     val results: List<MediaInfo> = emptyList(),
     /** The result the open sheet is editing, and the one the engine is working on. */
@@ -181,7 +185,8 @@ class DownloadViewModel : ViewModel() {
             info = null,
             batch = emptyList(),
             isComplete = false,
-            fetchProgress = ""
+            fetchProgress = "",
+            fetchCount = valid.size
         )
 
         fetchJob = viewModelScope.launch {
@@ -711,6 +716,44 @@ class DownloadViewModel : ViewModel() {
         DownloadNotificationHelper.showComplete(
             context, fileName, isVideo = downloadIsVideo, fileUri = savedUri
         )
+
+        recordHistory(context, fileName, savedPath, savedUri)
+    }
+
+    /**
+     * Files the finished download into the history.
+     *
+     * Written as the download completes rather than gathered later by scanning a folder,
+     * so the record keeps the title, artwork and duration the source reported. Once the
+     * file is in public storage there is nothing left to recover those from.
+     */
+    private fun recordHistory(
+        context: Context,
+        fileName: String,
+        savedPath: String,
+        savedUri: android.net.Uri?
+    ) {
+        val info = _state.value.info ?: return
+
+        viewModelScope.launch {
+            DownloadHistoryRepository.record(
+                context,
+                HistoryEntry(
+                    id = System.currentTimeMillis(),
+                    url = info.url,
+                    title = info.title,
+                    author = info.uploader,
+                    thumbnail = info.thumbnail,
+                    durationSeconds = info.durationSeconds,
+                    fileName = fileName,
+                    fileUri = savedUri?.toString().orEmpty(),
+                    savedPath = savedPath,
+                    isVideo = downloadIsVideo,
+                    sizeBytes = _state.value.totalBytes,
+                    completedAt = System.currentTimeMillis()
+                )
+            )
+        }
     }
 
     /** Deletes yt-dlp's in-progress artefacts from the temp directory. */
