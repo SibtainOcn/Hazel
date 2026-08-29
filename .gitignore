@@ -1,0 +1,45 @@
+# ── Gradle / build output ──
+.gradle/
+build/
+**/build/
+/captures
+.externalNativeBuild
+.cxx
+*.iml
+
+# ── Local machine config, never commit ──
+local.properties
+.idea/
+.kotlin/
+.DS_Store
+
+# ── Signing material, never commit ──
+signing.properties
+*.jks
+*.keystore
+/signing/
+
+# ── Build artifacts ──
+/release/
+/app/release/
+**/release/
+*.apk
+*.ap_
+*.aab
+*.dm
+*.hprof
+*.log
+build_output.txt
+
+# ── Reference checkouts and scratch ──
+/temp/
+ISSUES.md
+DISCORD-PLAN.md
+
+# ── Terraform: secrets and generated state ──
+main.tf
+discord_build/terraform.tfvars
+discord_build/.terraform/
+discord_build/.terraform.lock.hcl
+discord_build/terraform.tfstate
+discord_build/terraform.tfstate.backup
