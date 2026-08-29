@@ -59,6 +59,12 @@ data class DownloadState(
     /** Total transfer size reported by yt-dlp, 0 until its first progress line. */
     val totalBytes: Long = 0L,
     val status: String = "",
+    /**
+     * True once the transfer is done and yt-dlp has moved on to merging, converting or
+     * tagging. There is nothing left to cancel at that point, so the screen swaps the
+     * cancel control for a processing treatment.
+     */
+    val isProcessing: Boolean = false,
     val fileName: String = "",
     val savedPath: String = "",
     val error: String? = null,
@@ -87,6 +93,9 @@ class DownloadViewModel : ViewModel() {
     private var downloadJob: Job? = null
     private val processId = "hazel_download"
     @Volatile private var isCancelled = false
+
+    /** When the progress notification was last redrawn, so updates stay evenly paced. */
+    @Volatile private var lastNotifiedAt = 0L
 
     private var downloadContext: Context? = null
     private var downloadIsVideo: Boolean = true
@@ -337,6 +346,7 @@ class DownloadViewModel : ViewModel() {
             progress = 0f,
             totalBytes = 0L,
             status = "Starting download",
+            isProcessing = false,
             error = null,
             batch = plans.map { BatchItem(url = it.info.url, title = it.title) }
         )
@@ -362,7 +372,8 @@ class DownloadViewModel : ViewModel() {
                     info = plan.info,
                     progress = 0f,
                     totalBytes = 0L,
-                    status = "Starting download"
+                    status = "Starting download",
+                    isProcessing = false
                 )
                 DownloadNotificationHelper.showProgress(context, 0, "Starting download", plan.title)
 
@@ -432,6 +443,7 @@ class DownloadViewModel : ViewModel() {
             isDownloading = false,
             isComplete = done > 0,
             status = "",
+            isProcessing = false,
             error = when {
                 done == 0 && failed > 0 ->
                     current.batch.firstOrNull { it.error != null }?.error ?: "Download failed"
@@ -638,15 +650,25 @@ class DownloadViewModel : ViewModel() {
             .ifBlank { "download" }
 
     private fun executeYtDlp(request: YoutubeDLRequest) {
+        lastNotifiedAt = 0L
         YoutubeDL.getInstance().execute(request, processId) { progress, _, line ->
             val percent = progress.coerceIn(0f, 100f)
             val status = cleanProgressLine(line) ?: _state.value.status
+            val processing = _state.value.isProcessing || isPostProcessing(line)
             _state.value = _state.value.copy(
                 progress = percent / 100f,
                 totalBytes = parseTotalBytes(line) ?: _state.value.totalBytes,
-                status = status
+                status = status,
+                isProcessing = processing
             )
-            if (percent.toInt() % 2 == 0) {
+
+            // Updates are paced by the clock rather than by the percentage. yt-dlp reports
+            // the same percentage for seconds at a time on a large transfer while the speed
+            // and ETA behind it keep moving, so pacing on the percentage left the
+            // notification showing figures that were already out of date.
+            val now = System.currentTimeMillis()
+            if (now - lastNotifiedAt >= NOTIFICATION_INTERVAL_MS) {
+                lastNotifiedAt = now
                 downloadContext?.let {
                     DownloadNotificationHelper.showProgress(
                         it, percent.toInt(), status, _state.value.info?.title.orEmpty()
@@ -671,7 +693,7 @@ class DownloadViewModel : ViewModel() {
             ?.maxByOrNull { it.lastModified() }
         val fileName = latestFile?.name ?: "File saved"
 
-        _state.value = _state.value.copy(status = "Saving")
+        _state.value = _state.value.copy(status = "Saving", isProcessing = true)
 
         val tree = downloadTreeUri.takeIf { it.isNotBlank() }?.let(android.net.Uri::parse)
 
@@ -709,12 +731,18 @@ class DownloadViewModel : ViewModel() {
         _state.value = _state.value.copy(
             progress = 1f,
             status = "",
+            isProcessing = false,
             fileName = fileName,
             savedPath = savedPath
         )
 
+        // The media's own title heads the completion notification rather than the file
+        // name, which carries the template's separators and the container extension.
         DownloadNotificationHelper.showComplete(
-            context, fileName, isVideo = downloadIsVideo, fileUri = savedUri
+            context,
+            title = _state.value.info?.title.orEmpty().ifBlank { fileName },
+            isVideo = downloadIsVideo,
+            fileUri = savedUri
         )
 
         recordHistory(context, fileName, savedPath, savedUri)
@@ -777,6 +805,7 @@ class DownloadViewModel : ViewModel() {
             isDownloading = false,
             progress = 0f,
             status = "",
+            isProcessing = false,
             error = message
         )
         DownloadNotificationHelper.showError(context, message)
@@ -788,11 +817,24 @@ class DownloadViewModel : ViewModel() {
      * Every line is prefixed with the stage that produced it, such as `[download]` or
      * `[youtube]`. The prefix repeats on every line and says nothing the progress bar does
      * not already show, so it is dropped and the rest of the line is kept as written.
+     *
+     * Lines whose content is a file path are dropped rather than shown. A destination path
+     * fills a notification on its own, pushes the transfer figures out of view, and is not
+     * something anyone can act on while the download is still running.
      */
     private fun cleanProgressLine(line: String): String? =
         line.replace(LEADING_TAG_PATTERN, "")
             .trim()
-            .takeIf { it.isNotEmpty() }
+            .takeIf { it.isNotEmpty() && !PATH_LINE_PATTERN.containsMatchIn(it) }
+
+    /**
+     * Whether a line comes from a stage that runs after every byte is in: merging the video
+     * and audio streams, converting the container, or writing tags and artwork.
+     */
+    private fun isPostProcessing(line: String): Boolean {
+        val lower = line.lowercase()
+        return POST_PROCESS_MARKERS.any { it in lower }
+    }
 
     /**
      * Reads the transfer size out of a yt-dlp progress line, which looks like
@@ -891,6 +933,22 @@ class DownloadViewModel : ViewModel() {
 
         /** Leading `[stage]` markers yt-dlp puts at the front of every output line. */
         val LEADING_TAG_PATTERN = Regex("""^(\s*\[[^\]]*]\s*)+""")
+
+        /** Lines whose content is a file path, which the notification leaves out. */
+        val PATH_LINE_PATTERN = Regex(
+            """^(destination|merging formats into|writing)|/storage/|/data/|/files/""",
+            RegexOption.IGNORE_CASE
+        )
+
+        /** How often the progress notification is redrawn while a transfer runs. */
+        const val NOTIFICATION_INTERVAL_MS = 600L
+
+        /** Stages that run once the transfer itself has finished. */
+        val POST_PROCESS_MARKERS = listOf(
+            "[merger]", "merging formats", "[ffmpeg]", "[extractaudio]",
+            "[videoconvertor]", "[videoremuxer]", "[metadata]", "[embedthumbnail]",
+            "[fixup", "deleting original file", "correcting container"
+        )
 
         val TERMINAL_MARKERS = listOf(
             "unsupported url", "is not a valid url", "no suitable infoextractor",

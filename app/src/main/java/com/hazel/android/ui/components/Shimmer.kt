@@ -29,6 +29,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -58,6 +59,10 @@ private const val SWEEP_DURATION_MS = 1200
 
 /** Width of the moving highlight, as a fraction of the host's width. */
 private const val BAND_WIDTH = 0.45f
+
+/** The processing sweep is narrower and quicker, so it reads as a glint, not a wash. */
+private const val SHARP_BAND_WIDTH = 0.20f
+private const val SHARP_SWEEP_DURATION_MS = 900
 
 /** Position of the band and the geometry it is measured against. */
 private data class ShimmerSweep(
@@ -228,6 +233,58 @@ fun FormatListShimmer(rows: Int = 5, modifier: Modifier = Modifier) {
             repeat(rows) { FormatRowShimmer() }
         }
     }
+}
+
+/**
+ * A single bright band sweeping across whatever this is laid over.
+ *
+ * Unlike the skeleton blocks this paints no resting fill, so the artwork underneath stays
+ * visible and only the band moves over it. The band is narrow and its highlight rises and
+ * falls sharply, which reads as a surface catching the light rather than as a placeholder
+ * waiting to be filled — the download is finished at this point, and what is left is the
+ * work the app is doing to the file.
+ *
+ * The bright core is flanked by a darker shoulder on both sides. A single white band
+ * disappears over pale artwork, and a single dark one disappears over dark artwork; the
+ * pair always leaves one half of it standing out. That is also what makes this readable in
+ * either theme, since what the band crosses is the artwork rather than any app surface.
+ */
+@Composable
+fun ProcessingShimmer(modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "processing")
+    val progress by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = SHARP_SWEEP_DURATION_MS, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "processingSweep"
+    )
+
+    Box(
+        modifier = modifier.drawBehind {
+            val bandWidth = size.width * SHARP_BAND_WIDTH
+            val travel = size.width + bandWidth * 2f
+            val start = -bandWidth + travel * progress
+
+            drawRect(
+                brush = Brush.linearGradient(
+                    colorStops = arrayOf(
+                        0f to Color.Transparent,
+                        0.30f to Color.Black.copy(alpha = 0.28f),
+                        0.44f to Color.White.copy(alpha = 0.10f),
+                        0.50f to Color.White.copy(alpha = 0.60f),
+                        0.56f to Color.White.copy(alpha = 0.10f),
+                        0.70f to Color.Black.copy(alpha = 0.28f),
+                        1f to Color.Transparent
+                    ),
+                    start = Offset(start, 0f),
+                    end = Offset(start + bandWidth, size.height)
+                )
+            )
+        }
+    )
 }
 
 /** Single placeholder line, for a field whose value has not arrived yet. */

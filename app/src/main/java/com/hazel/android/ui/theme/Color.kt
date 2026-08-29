@@ -9,12 +9,33 @@ val DarkSurfaceVariant = Color(0xFF1E1E1E)
 val DarkOnBackground = Color(0xFFE0E0E0)
 val DarkOnSurface = Color(0xFFCCCCCC)
 
-// Light Theme
-val LightBackground = Color(0xFFFAFAFA)
-val LightSurface = Color(0xFFFFFFFF)
-val LightSurfaceVariant = Color(0xFFF0F0F0)
-val LightOnBackground = Color(0xFF1C1C1C)
-val LightOnSurface = Color(0xFF333333)
+// Light Theme — a warm paper ground rather than a neutral white.
+//
+// A pure white background under a full-bleed thumbnail reads as glare, and Material's own
+// light defaults tint their container tones violet, which fought the accent in the search
+// field and the navigation bar. Every tone here is mixed towards paper instead, so the
+// surfaces stay quiet and the accent is the only colour on the screen.
+val LightBackground = Color(0xFFF6F4EF)
+val LightSurface = Color(0xFFFCFAF5)
+val LightSurfaceVariant = Color(0xFFE9E5DB)
+val LightOnBackground = Color(0xFF201D18)
+val LightOnSurface = Color(0xFF43403A)
+val LightOnSurfaceVariant = Color(0xFF5C574E)
+val LightOutline = Color(0xFF8C867A)
+val LightOutlineVariant = Color(0xFFDCD6C9)
+
+// Container tones, lightest to darkest. Cards sit on the lower ones; the search field and
+// the navigation bar take the higher ones, which is what gives them an edge against the
+// background without needing a border to carry it.
+val LightSurfaceContainerLowest = Color(0xFFFFFDF8)
+val LightSurfaceContainerLow = Color(0xFFF9F6F0)
+val LightSurfaceContainer = Color(0xFFF3EFE7)
+val LightSurfaceContainerHigh = Color(0xFFEDE9DF)
+val LightSurfaceContainerHighest = Color(0xFFE7E2D6)
+val LightSurfaceBright = Color(0xFFFCFAF5)
+val LightSurfaceDim = Color(0xFFDFDACE)
+val LightInverseSurface = Color(0xFF35322C)
+val LightInverseOnSurface = Color(0xFFF7F3EB)
 
 // Default Brand — Hazel Cyan
 val HazelCyan = Color(0xFF00BCD4)

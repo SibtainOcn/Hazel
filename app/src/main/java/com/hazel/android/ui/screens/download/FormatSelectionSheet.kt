@@ -69,8 +69,8 @@ fun FormatSelectionSheet(
     onConfirm: (MediaFormat) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // Partially expanded on open, draggable up to full height.
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    // Full height on open, to match the sheet it is opened from.
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var sort by remember { mutableStateOf(FormatSort.QUALITY) }
     var sortMenuOpen by remember { mutableStateOf(false) }
