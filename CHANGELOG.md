@@ -79,6 +79,14 @@ Everything merged since 1.0.0, plus what is open in review.
   `youtube.com/watch?v=ID` are the same video, and share links carry tracking parameters
   besides, so the repeat-download warning missed most repeats and the cache above never hit.
   Links are now compared by what they point at rather than by how they are spelled.
+- **The size recorded against a download was the transfer figure, not the file.** yt-dlp
+  reports one stream at a time, so a video muxed from separate video and audio streams was
+  filed under whichever of them finished last, a fraction of the real size. It is now
+  measured off the finished file.
+- **The launch window was always dark**, so opening the app on a light device flashed black
+  before the warm ground appeared, and the mark on the first screen was stroked white on
+  white. Both follow the theme now. The launch window can only follow the device's own
+  setting, since it is drawn before the app has read its own preference.
 - **Progress notifications showed a bar and nothing else** on some builders, which collapse
   a notification carrying one down to its title. The figures are stated as an expanded style
   as well, and composed from the app's own counts rather than parsed back out of engine
@@ -120,7 +128,10 @@ Everything merged since 1.0.0, plus what is open in review.
 - **The repeat warning and the failure dialog were rebuilt.** Both sit on the darkest
   surface and take the screen's width less a margin. The repeat warning shows the copy that
   already exists, with artwork, running time, whether it was saved as video or audio, its
-  size and its age, because those are what decide whether it is the copy wanted. The failure
+  size and its age, because those are what decide whether it is the copy wanted. Its
+  location is a link rather than a caption, opening the folder in the device's file browser,
+  and a Play action sits beside Download again, since playing what already exists is usually
+  the answer to the question the dialog is asking. The failure
   dialog leads with a sentence saying what happened and keeps the engine's own output below
   it, monospaced and scrollable in both directions.
 - **The overflow menu moved into the search screen** and appears only while the field is

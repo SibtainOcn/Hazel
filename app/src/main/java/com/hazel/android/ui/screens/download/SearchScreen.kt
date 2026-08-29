@@ -65,6 +65,7 @@ import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.util.LinkKey
+import com.hazel.android.util.MediaOpener
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -106,6 +107,9 @@ fun SearchScreen(
     }
 
     var menuOpen by remember { mutableStateOf(false) }
+
+    // Needed only to open the folder a repeat warning refers to.
+    val saveTreeUri by SettingsRepository.getDownloadTreeUri(context).collectAsState(initial = "")
 
     // Links already queued are hidden from the list, and what is being typed filters it.
     val suggestions = remember(history, text, queued) {
@@ -167,6 +171,8 @@ fun SearchScreen(
         pendingDuplicate?.let { (links, existing) ->
             AlreadyDownloadedDialog(
                 entry = existing,
+                onPlay = { MediaOpener.play(context, existing.fileUri, existing.isVideo) },
+                onOpenLocation = { MediaOpener.openLocation(context, saveTreeUri) },
                 onDownloadAgain = {
                     pendingDuplicate = null
                     startSearch(links)

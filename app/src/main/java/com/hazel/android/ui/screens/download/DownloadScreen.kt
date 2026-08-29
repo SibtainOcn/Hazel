@@ -84,6 +84,7 @@ import com.hazel.android.ui.motion.M3Motion
 import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 import com.hazel.android.util.FolderUtil
 import com.hazel.android.util.LinkKey
+import com.hazel.android.util.MediaOpener
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.StoragePaths
 import kotlinx.coroutines.launch
@@ -465,6 +466,8 @@ fun DownloadScreen(
     alreadyHave?.let { existing ->
         AlreadyDownloadedDialog(
             entry = existing,
+            onPlay = { MediaOpener.play(context, existing.fileUri, existing.isVideo) },
+            onOpenLocation = { MediaOpener.openLocation(context, treeUri) },
             onDownloadAgain = {
                 alreadyHave = null
                 sheetVisible = true

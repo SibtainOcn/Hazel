@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
+import com.hazel.android.util.MediaOpener
 import com.hazel.android.data.HistoryFilter
 import com.hazel.android.data.HistorySort
 import com.hazel.android.download.formatDuration
@@ -678,25 +679,8 @@ private fun Tag(
 }
 
 /** Opens a finished download in whatever app the device uses for that media type. */
-private fun openEntry(context: Context, entry: HistoryEntry) {
-    if (entry.fileUri.isBlank()) {
-        Toast.makeText(context, "This file's location is unknown", Toast.LENGTH_SHORT).show()
-        return
-    }
-    runCatching {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(
-                Uri.parse(entry.fileUri),
-                if (entry.isVideo) "video/*" else "audio/*"
-            )
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(intent)
-    }.onFailure {
-        Toast.makeText(context, "Nothing can open this file", Toast.LENGTH_SHORT).show()
-    }
-}
+private fun openEntry(context: Context, entry: HistoryEntry) =
+    MediaOpener.play(context, entry.fileUri, entry.isVideo)
 
 private fun formatDate(millis: Long): String =
     runCatching {

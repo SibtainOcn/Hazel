@@ -884,6 +884,13 @@ class DownloadViewModel : ViewModel() {
             ?.maxByOrNull { it.lastModified() }
         val fileName = latestFile?.name ?: "File saved"
 
+        // Measured off the finished file rather than taken from the transfer figures. Those
+        // count one stream at a time, so a video muxed from separate video and audio streams
+        // reported whichever of them finished last, which is a fraction of the real file.
+        // Read here, before the move, because afterwards it is a content URI rather than a
+        // file and its length is no longer a question with a cheap answer.
+        val finalSizeBytes = latestFile?.length()?.takeIf { it > 0 } ?: _state.value.totalBytes
+
         _state.value = _state.value.copy(status = "Saving", isProcessing = true)
 
         val tree = downloadTreeUri.takeIf { it.isNotBlank() }?.let(android.net.Uri::parse)
@@ -936,7 +943,7 @@ class DownloadViewModel : ViewModel() {
             fileUri = savedUri
         )
 
-        recordHistory(context, fileName, savedPath, savedUri)
+        recordHistory(context, fileName, savedPath, savedUri, finalSizeBytes)
     }
 
     /**
@@ -950,7 +957,8 @@ class DownloadViewModel : ViewModel() {
         context: Context,
         fileName: String,
         savedPath: String,
-        savedUri: android.net.Uri?
+        savedUri: android.net.Uri?,
+        sizeBytes: Long
     ) {
         val info = _state.value.info ?: return
 
@@ -972,7 +980,7 @@ class DownloadViewModel : ViewModel() {
                     fileUri = savedUri?.toString().orEmpty(),
                     savedPath = savedPath,
                     isVideo = downloadIsVideo,
-                    sizeBytes = _state.value.totalBytes,
+                    sizeBytes = sizeBytes,
                     completedAt = System.currentTimeMillis()
                 )
             )

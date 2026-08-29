@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +16,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -51,6 +54,8 @@ import com.hazel.android.download.formatFileSize
 @Composable
 fun AlreadyDownloadedDialog(
     entry: HistoryEntry,
+    onPlay: () -> Unit,
+    onOpenLocation: () -> Unit,
     onDownloadAgain: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -179,29 +184,80 @@ fun AlreadyDownloadedDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                Text(
-                    "Saved in ${entry.savedPath}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+                // The location is a place, not a caption, so it behaves like one: tapping
+                // it hands the folder to the device's file browser. Someone deciding
+                // whether to download again often wants to look at what is already there,
+                // and the alternative is reading a path and navigating to it by hand.
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    color = Color.Transparent,
+                    onClick = onOpenLocation
+                ) {
+                    Row(
+                        modifier = Modifier.padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Filled.FolderOpen,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            entry.savedPath,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
             }
         },
+        // All three sit in one group rather than being split across the dialog's width.
+        // Three actions spaced apart read as three unrelated choices; grouped and weighted
+        // they read as one decision with an obvious default. Playing what already exists is
+        // usually the answer here, so it is present but quiet, and the only action that
+        // costs anything is the one carrying the emphasis.
         confirmButton = {
-            TextButton(onClick = onDownloadAgain) {
-                Text("Download again", fontWeight = FontWeight.SemiBold)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Keep it", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                TextButton(
+                    onClick = onDismiss,
+                    contentPadding = COMPACT_PADDING
+                ) {
+                    Text("Keep it", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                TextButton(
+                    onClick = onPlay,
+                    contentPadding = COMPACT_PADDING
+                ) {
+                    Text("Play", fontWeight = FontWeight.Medium)
+                }
+                FilledTonalButton(
+                    onClick = onDownloadAgain,
+                    contentPadding = COMPACT_PADDING
+                ) {
+                    Text("Download again", fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     )
 }
+
+/**
+ * Tighter than a button's default padding, so three actions fit one row on a narrow screen
+ * without any of them wrapping or being cut.
+ */
+private val COMPACT_PADDING = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
 
 /** Small flat label for one fact about the existing copy. */
 @Composable
