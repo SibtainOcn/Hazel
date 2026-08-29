@@ -131,4 +131,5 @@ as it now stands rather than how it got here.
 - **Independent yt-dlp updates.** The engine updates separately from the app, on a Stable,
   Nightly or Master channel, so extractor fixes can be picked up the day they ship.
 
-[1.0.0]: https://github.com/SibtainOcn/HAZEL-DLP/releases/tag/v1.0.0
+[Unreleased]: https://github.com/SibtainOcn/Hazel/compare/v1.0.0...main
+[1.0.0]: https://github.com/SibtainOcn/Hazel/releases/tag/v1.0.0
