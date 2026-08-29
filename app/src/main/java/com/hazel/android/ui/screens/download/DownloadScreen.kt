@@ -1,0 +1,726 @@
+package com.hazel.android.ui.screens.download
+
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.AsyncImage
+import com.hazel.android.data.SearchHistoryRepository
+import com.hazel.android.data.SettingsRepository
+import com.hazel.android.download.BatchItem
+import com.hazel.android.download.BatchState
+import com.hazel.android.download.DownloadOptions
+import com.hazel.android.download.DownloadViewModel
+import com.hazel.android.download.MediaInfo
+import com.hazel.android.download.formatDuration
+import com.hazel.android.download.formatFileSize
+import com.hazel.android.ui.components.MediaCardShimmer
+import com.hazel.android.ui.motion.M3Motion
+import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
+import com.hazel.android.util.FolderUtil
+import com.hazel.android.util.MediaStoreHelper
+import com.hazel.android.util.StoragePaths
+import kotlinx.coroutines.launch
+
+/**
+ * Paste one link or several, read what the sources offer, pick formats, download.
+ *
+ * A single link goes straight to its download sheet. Several links become a list, each card
+ * openable on its own, with one action that downloads the whole set.
+ */
+@Composable
+fun DownloadScreen(
+    sharedUrl: String? = null,
+    onSharedUrlConsumed: () -> Unit = {},
+    downloadViewModel: DownloadViewModel = viewModel()
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val state by downloadViewModel.state.collectAsState()
+
+    val options by SettingsRepository.getDownloadOptions(context)
+        .collectAsState(initial = DownloadOptions())
+    val treeUri by SettingsRepository.getDownloadTreeUri(context).collectAsState(initial = "")
+    val treeLabel by SettingsRepository.getDownloadTreeLabel(context).collectAsState(initial = "")
+
+    var searchOpen by remember { mutableStateOf(false) }
+    var sheetVisible by remember { mutableStateOf(false) }
+    var batchSheetVisible by remember { mutableStateOf(false) }
+
+    // Picking a destination goes through the system document picker so the folder can sit
+    // anywhere, including on removable storage. The grant is persisted so the same folder
+    // stays writable on later launches.
+    val folderPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+                scope.launch {
+                    SettingsRepository.setDownloadTree(
+                        context, uri.toString(), MediaStoreHelper.describeTree(uri)
+                    )
+                }
+            } catch (_: SecurityException) {
+                // The provider refused a lasting grant, so the built-in folder stays in use.
+            }
+        }
+    }
+
+    // Coming back from a successful sign-in, the link is read again: the cookies that were
+    // just saved are picked up by the new attempt.
+    val signInLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            downloadViewModel.fetchInfo()
+        }
+    }
+
+    // Reading links clears the resolved media, which would otherwise pull a sheet out of
+    // the tree mid-animation and show as a box flashing at the bottom of the screen.
+    LaunchedEffect(state.isFetching) {
+        if (state.isFetching) {
+            sheetVisible = false
+            batchSheetVisible = false
+        }
+    }
+
+    // A single link goes straight to its sheet. A set of links does not, because the list
+    // itself is the thing to look at first.
+    var autoOpenedFor by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(state.info?.url, state.isDownloading, state.isComplete) {
+        val resolved = state.info?.url
+        when {
+            resolved == null -> autoOpenedFor = null
+
+            resolved != autoOpenedFor && !state.isMultiple &&
+                    !state.isDownloading && !state.isComplete -> {
+                autoOpenedFor = resolved
+                sheetVisible = true
+            }
+        }
+    }
+
+    // A link shared from another app goes through the same resolve step as a pasted one.
+    LaunchedEffect(sharedUrl) {
+        if (!sharedUrl.isNullOrBlank()) {
+            downloadViewModel.onUrlChange(sharedUrl.trim())
+            downloadViewModel.fetchInfo()
+            onSharedUrlConsumed()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            UrlSearchBar(
+                url = state.url,
+                onOpenSearch = { searchOpen = true },
+                onClearResults = downloadViewModel::clearResults,
+                onClearHistory = {
+                    scope.launch { SearchHistoryRepository.clear(context) }
+                }
+            )
+
+            AnimatedVisibility(
+                visible = state.error != null,
+                enter = M3Motion.contentEnter(),
+                exit = M3Motion.contentExit()
+            ) {
+                state.error?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(top = 10.dp, start = 4.dp)
+                    )
+                }
+            }
+
+            // While links are being read, a skeleton of the card stands in for them.
+            AnimatedVisibility(
+                visible = state.isFetching,
+                enter = M3Motion.contentEnter(),
+                exit = M3Motion.contentExit()
+            ) {
+                Column {
+                    if (state.fetchProgress.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            state.fetchProgress,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    MediaCardShimmer()
+                }
+            }
+
+            state.results.forEach { info ->
+                Spacer(modifier = Modifier.height(20.dp))
+
+                val batchItem = state.batch.firstOrNull { it.url == info.url }
+                val isActive = state.isDownloading && state.info?.url == info.url
+
+                MediaCard(
+                    info = info,
+                    isDownloading = isActive,
+                    progress = state.progress,
+                    totalBytes = state.totalBytes,
+                    isComplete = batchItem?.state == BatchState.DONE ||
+                            (!state.isMultiple && state.isComplete),
+                    batchItem = batchItem,
+                    onOpenSheet = {
+                        downloadViewModel.selectResult(info)
+                        sheetVisible = true
+                    },
+                    onCancel = downloadViewModel::cancelDownload,
+                    onRemove = if (state.isMultiple && !state.isDownloading) {
+                        { downloadViewModel.removeResult(info) }
+                    } else null
+                )
+            }
+
+            if (state.isDownloading && state.status.isNotBlank()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    state.status,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // Room for the action that floats over the list.
+            Spacer(modifier = Modifier.height(if (state.isMultiple) 96.dp else 32.dp))
+        }
+
+        // One action for the whole set, which is the point of collecting links together.
+        if (state.isMultiple && !state.isDownloading) {
+            DownloadAllButton(
+                onClick = { batchSheetVisible = true },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(20.dp)
+            )
+        }
+    }
+
+    if (searchOpen) {
+        SearchScreen(
+            // Opened empty rather than prefilled: a prefilled field would filter the
+            // history down to that one link, hiding every other link already used.
+            initialQuery = "",
+            onSearch = { queries ->
+                searchOpen = false
+                downloadViewModel.fetchAll(queries)
+            },
+            onDismiss = { searchOpen = false }
+        )
+    }
+
+    state.errorLog?.let { log ->
+        NoResultsDialog(
+            message = log,
+            canFetchCookies = isCookieRelated(log) && state.url.isNotBlank(),
+            canContinue = state.url.isNotBlank(),
+            onCopyLog = {
+                copyToClipboard(context, log)
+                downloadViewModel.clearErrorLog()
+            },
+            onGetCookies = {
+                downloadViewModel.clearErrorLog()
+                signInLauncher.launch(CookieWebViewActivity.intent(context, siteRootOf(state.url)))
+            },
+            onContinueAnyway = downloadViewModel::continueWithoutMetadata,
+            onDismiss = downloadViewModel::clearErrorLog
+        )
+    }
+
+    val saveDirLabel = treeLabel.ifBlank { StoragePaths.DOWNLOADS_DISPLAY }
+
+    if (sheetVisible) {
+        state.info?.let { info ->
+            FormatSheet(
+                info = info,
+                options = options,
+                onOptionsChange = {
+                    scope.launch { SettingsRepository.setDownloadOptions(context, it) }
+                },
+                saveDirLabel = saveDirLabel,
+                isCustomSaveDir = treeUri.isNotBlank(),
+                isLoadingFormats = state.isFetching,
+                onOpenSaveDir = { openSaveDir(context, treeUri) },
+                onPickSaveDir = {
+                    folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse))
+                },
+                onResetSaveDir = {
+                    scope.launch { SettingsRepository.clearDownloadTree(context) }
+                },
+                onDownload = { format, title, author ->
+                    sheetVisible = false
+                    downloadViewModel.startDownload(
+                        context = context,
+                        format = format,
+                        options = options,
+                        title = title,
+                        author = author,
+                        treeUri = treeUri
+                    )
+                },
+                onDismiss = { sheetVisible = false }
+            )
+        }
+    }
+
+    if (batchSheetVisible) {
+        BatchDownloadSheet(
+            results = state.results,
+            options = options,
+            onOptionsChange = {
+                scope.launch { SettingsRepository.setDownloadOptions(context, it) }
+            },
+            saveDirLabel = saveDirLabel,
+            onOpenSaveDir = { openSaveDir(context, treeUri) },
+            onPickSaveDir = {
+                folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse))
+            },
+            onRemove = downloadViewModel::removeResult,
+            onDownload = { plans ->
+                batchSheetVisible = false
+                downloadViewModel.startBatch(context, plans, options, treeUri)
+            },
+            onDismiss = { batchSheetVisible = false }
+        )
+    }
+}
+
+private fun openSaveDir(context: android.content.Context, treeUri: String) {
+    if (treeUri.isNotBlank()) FolderUtil.openTree(context, Uri.parse(treeUri))
+    else FolderUtil.open(context, StoragePaths.finalDownloads)
+}
+
+/**
+ * The resting search field. Tapping it opens the full screen entry, which is where links are
+ * actually typed, so this stays a button rather than an input.
+ *
+ * It is drawn on the highest surface tone with an outline, because on the near-black
+ * background a low-alpha fill has almost no edge and the field reads as empty space.
+ */
+@Composable
+private fun UrlSearchBar(
+    url: String,
+    onOpenSearch: () -> Unit,
+    onClearResults: () -> Unit,
+    onClearHistory: () -> Unit
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        shape = RoundedCornerShape(26.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable(onClick = onOpenSearch)
+                .padding(start = 16.dp, end = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Filled.Search,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                url.ifBlank { "Search or insert URL" },
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (url.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant
+                else MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+
+            Box {
+                IconButton(onClick = { menuOpen = true }) {
+                    Icon(
+                        Icons.Filled.MoreVert,
+                        contentDescription = "More",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text("Clear results") },
+                        onClick = {
+                            menuOpen = false
+                            onClearResults()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Clear search history") },
+                        onClick = {
+                            menuOpen = false
+                            onClearHistory()
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.height(52.dp),
+        shape = RoundedCornerShape(26.dp),
+        color = MaterialTheme.colorScheme.primary
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 22.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Filled.Download,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                "Download all",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+    }
+}
+
+/**
+ * Thumbnail, title and author for a resolved link.
+ *
+ * The whole card is the download control: tapping anywhere on it opens the format sheet,
+ * so there is no separate button competing with it. While this card's download runs it
+ * carries the progress readout, and its centre becomes the cancel control.
+ */
+@Composable
+private fun MediaCard(
+    info: MediaInfo,
+    isDownloading: Boolean,
+    progress: Float,
+    totalBytes: Long,
+    isComplete: Boolean,
+    batchItem: BatchItem?,
+    onOpenSheet: () -> Unit,
+    onCancel: () -> Unit,
+    onRemove: (() -> Unit)? = null
+) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = M3Motion.emphasized(300),
+        label = "cardProgress"
+    )
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+    ) {
+        Column(
+            modifier = if (isDownloading) Modifier
+            else Modifier.clickable(onClick = onOpenSheet)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                // Sources without artwork simply show the placeholder glyph.
+                if (info.thumbnail != null) {
+                    AsyncImage(
+                        model = info.thumbnail,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(
+                        Icons.Filled.MusicNote,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .align(Alignment.Center),
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                    )
+                }
+
+                if (isDownloading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.35f))
+                    )
+
+                    // Percentage readout, with the transferred size beside it once
+                    // yt-dlp has reported a total.
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OverlayChip(
+                            text = "%.1f %%".format(animatedProgress * 100),
+                            bold = true
+                        )
+                        if (totalBytes > 0) {
+                            val done = (totalBytes * animatedProgress).toLong()
+                            OverlayChip(
+                                text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
+                            )
+                        }
+                    }
+
+                    // A progress ring wrapping the cancel control. It is the only tappable
+                    // area while a download runs, so a stray tap cannot reopen the sheet.
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .clickable(onClick = onCancel),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            progress = { animatedProgress },
+                            modifier = Modifier.size(60.dp),
+                            color = Color.White,
+                            trackColor = Color.Transparent,
+                            strokeWidth = 3.dp
+                        )
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = "Cancel download",
+                            modifier = Modifier.size(22.dp),
+                            tint = Color.White
+                        )
+                    }
+                }
+
+                // Removing a link from the set, offered only while the set is idle.
+                if (onRemove != null) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .clickable(onClick = onRemove),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = "Remove link",
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.White
+                        )
+                    }
+                }
+
+                // Bottom right corner carries the duration, and whatever this link's state
+                // is worth saying: queued, failed, or saved.
+                if (!isDownloading) {
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val duration = formatDuration(info.durationSeconds)
+                        if (duration.isNotBlank()) {
+                            CornerTag(text = duration)
+                        }
+                        when {
+                            batchItem?.state == BatchState.FAILED -> CornerTag(
+                                text = batchItem.error ?: "Failed",
+                                background = MaterialTheme.colorScheme.error,
+                                foreground = MaterialTheme.colorScheme.onError
+                            )
+                            isComplete -> CornerTag(
+                                text = "Saved",
+                                background = MaterialTheme.colorScheme.primary,
+                                foreground = MaterialTheme.colorScheme.onPrimary
+                            )
+                            batchItem?.state == BatchState.QUEUED -> CornerTag(text = "Queued")
+                        }
+                    }
+                }
+
+                // Filled line along the bottom edge of the thumbnail.
+                if (isDownloading) {
+                    LinearProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .height(4.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = Color.White.copy(alpha = 0.25f),
+                        drawStopIndicator = {}
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.padding(14.dp)) {
+                Text(
+                    info.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (info.uploader.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        info.uploader,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Dark pill drawn over the thumbnail. */
+@Composable
+private fun OverlayChip(text: String, bold: Boolean = false) {
+    Surface(shape = RoundedCornerShape(6.dp), color = Color.Black.copy(alpha = 0.6f)) {
+        Text(
+            text,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = if (bold) FontWeight.Bold else FontWeight.Medium,
+            color = Color.White,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+        )
+    }
+}
+
+/** Flat tag in the thumbnail's corner, for the duration and the state marker. */
+@Composable
+private fun CornerTag(
+    text: String,
+    background: Color = Color.Black.copy(alpha = 0.7f),
+    foreground: Color = Color.White
+) {
+    Surface(shape = RoundedCornerShape(4.dp), color = background) {
+        Text(
+            text,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = foreground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+        )
+    }
+}
+
+/**
+ * The site's front page, which is where a sign-in starts. Cookies are stored per site, so
+ * the individual media address is trimmed away.
+ */
+private fun siteRootOf(url: String): String = runCatching {
+    val parsed = java.net.URL(url)
+    "${parsed.protocol}://${parsed.host}"
+}.getOrDefault(url)
+
+private fun copyToClipboard(context: android.content.Context, text: String) {
+    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+            as? android.content.ClipboardManager
+    clipboard?.setPrimaryClip(android.content.ClipData.newPlainText("Hazel log", text))
+}
