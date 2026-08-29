@@ -109,6 +109,19 @@ Everything merged since 1.0.0, plus what is open in review.
   speed and ETA on it were routinely stale. It is redrawn on a timer instead.
 
 ### Changed
+- **A set of links is adjusted one link at a time.** Tapping a card in the set-of-links
+  sheet used to turn on the tick boxes, which is not what tapping a thing you want to
+  change should do. It now opens that link's own download sheet, the same one a single
+  download uses, so one link of a playlist can be 720p, another 1080p and a third audio,
+  and they still go out together. Ticking is its own mode now, reached by holding a card or
+  from the list menu, and it narrows what a change applies to rather than deciding what
+  gets downloaded. Opening a link's sheet reads its formats once and keeps them, so nothing
+  is fetched twice.
+- **The set-of-links sheet keeps its settings behind a bar rather than laid out below the
+  list.** Download type, quality, save location, container and the rest each open a sheet of
+  their own from a row of buttons along the bottom, which gives the list back the height the
+  settings had taken from it. Each of them applies to the ticked links, or to all of them
+  when nothing is ticked.
 - **The repeat-download warning moved to where the link is entered.** It appeared on the
   home screen after the link had already been read, having spent the seconds that reading
   costs. It is now raised in the search screen at the moment of submitting, where going back

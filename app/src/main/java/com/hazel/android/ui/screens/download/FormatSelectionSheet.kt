@@ -26,6 +26,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
@@ -60,6 +61,11 @@ enum class FormatSort(val label: String) {
  * to full height, and scrolls independently. Video and audio are listed under their own
  * headers, and picking an audio entry from a video download is allowed; the caller decides
  * what that means for the rest of the sheet.
+ *
+ * [isLoadingFormats] covers the case where the sheet is opened on a link that came from a
+ * listing and has not been read yet. Only the generic entries are there to show at that
+ * point, so the sheet says the rest is still coming rather than letting a one row list look
+ * like the whole answer.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +73,8 @@ fun FormatSelectionSheet(
     info: MediaInfo,
     selected: MediaFormat?,
     onConfirm: (MediaFormat) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    isLoadingFormats: Boolean = false
 ) {
     // Full height on open, to match the sheet it is opened from.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -164,6 +171,22 @@ fun FormatSelectionSheet(
                         )
                     }
                 }
+            }
+
+            if (isLoadingFormats) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Reading the rest of the formats",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             LazyColumn(

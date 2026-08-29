@@ -82,6 +82,7 @@ import com.hazel.android.ui.components.MediaCardShimmer
 import com.hazel.android.ui.components.ProcessingShimmer
 import com.hazel.android.ui.motion.M3Motion
 import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
+import com.hazel.android.ui.screens.download.batch.BatchDownloadSheet
 import com.hazel.android.util.FolderUtil
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
@@ -538,9 +539,18 @@ fun DownloadScreen(
                 scope.launch { SettingsRepository.setDownloadOptions(context, it) }
             },
             saveDirLabel = saveDirLabel,
+            isCustomSaveDir = treeUri.isNotBlank(),
             onOpenSaveDir = { openSaveDir(context, treeUri) },
             onPickSaveDir = {
                 folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse))
+            },
+            onResetSaveDir = {
+                scope.launch { SettingsRepository.clearDownloadTree(context) }
+            },
+            onResolveFormats = downloadViewModel::resolveFormats,
+            incognito = incognito,
+            onToggleIncognito = {
+                scope.launch { SettingsRepository.setIncognito(context, !incognito) }
             },
             onRemove = downloadViewModel::removeResult,
             onDownload = { plans ->
