@@ -22,6 +22,11 @@ Everything merged since 1.0.0, plus what is open in review.
   drained of colour and dimmed, alongside the tag saying so.
 - One placeholder per link while a set of links is being read, rather than a single card
   standing in for the whole set.
+- **Processing is shown as its own stage.** Once every byte is in and yt-dlp moves on to
+  merging, converting or tagging, a sharp sweep crosses the artwork, the corner reads
+  Processing, and the line along the bottom edge runs on its own. The band carries a dark
+  shoulder either side of its bright core, so it stands out over pale and dark artwork
+  alike.
 
 ### Fixed
 - **File sizes quoted well above the finished file**, 30.1 MB shown against a 12.6 MB
@@ -31,8 +36,30 @@ Everything merged since 1.0.0, plus what is open in review.
   An exact size is now used whenever the source reports one; where none is reported the
   estimate is computed knowingly and shown as `~ 30.1 MB` rather than passed off as
   measured.
+- **Cancel offered after there was anything left to cancel.** The cancel control stayed on
+  the card through merging and tagging, where the transfer is already over and stopping it
+  does nothing. It now goes as soon as that stage begins.
+- **The download sheet opened half height** for a single link, so reaching the format rows
+  and the fields under them took a drag before anything could be done. It opens at full
+  height, as the sheet for a set of links already did.
+- **The progress notification lagged behind the download.** It was redrawn on every second
+  percentage point, and a large transfer holds one percentage for seconds at a time, so the
+  speed and ETA on it were routinely stale. It is redrawn on a timer instead.
 
 ### Changed
+- **The light theme is warm rather than white.** Background, surfaces and every container
+  tone are mixed towards paper, replacing a near-white ground that read as glare under a
+  full-bleed thumbnail. The container tones are now named outright, which also takes the
+  violet tint out of the search field and the navigation bar, where Material's own light
+  defaults had put it. The dark theme is untouched.
+- **The notification says less.** The progress line is the source's own output with its
+  stage prefix stripped, giving percentage, size, speed and ETA, and it no longer carries
+  destination paths. Titles are shortened to one line, and a finished download is headed by
+  the media's title rather than the generated file name. Tapping it still opens the file in
+  the device's default player.
+- **The log line under the cards is gone.** The card's own header already shows the
+  percentage and the transferred size, the notification carries the full status line, and a
+  failure offers its log to copy, so a truncated third copy on the screen said nothing new.
 - Home, Downloads and More use stroked marks in one style, instead of Home and Downloads
   sharing an icon.
 - README rewritten around what the app does.

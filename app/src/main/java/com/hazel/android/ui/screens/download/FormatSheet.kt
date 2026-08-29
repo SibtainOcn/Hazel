@@ -87,7 +87,10 @@ fun FormatSheet(
     onDownload: (format: MediaFormat, title: String, author: String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    // Opened at full height. The sheet's own content is a full screen of format rows and
+    // fields, so a half-height first stop showed only the header and made an extra drag a
+    // condition of using it. The set-of-links sheet already opens this way.
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // Open on whichever tab the source actually has formats for.
     var videoTab by remember(info.url) { mutableStateOf(info.videoFormats.isNotEmpty()) }

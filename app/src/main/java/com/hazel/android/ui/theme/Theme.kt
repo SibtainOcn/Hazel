@@ -48,8 +48,23 @@ fun HazelTheme(
             surface = LightSurface,
             onSurface = LightOnSurface,
             surfaceVariant = LightSurfaceVariant,
+            onSurfaceVariant = LightOnSurfaceVariant,
+            outline = LightOutline,
+            outlineVariant = LightOutlineVariant,
+            // Named one by one rather than left to Material's defaults, which derive their
+            // light container tones from a violet neutral and pulled the search field and
+            // the navigation bar away from the rest of the screen.
+            surfaceContainerLowest = LightSurfaceContainerLowest,
+            surfaceContainerLow = LightSurfaceContainerLow,
+            surfaceContainer = LightSurfaceContainer,
+            surfaceContainerHigh = LightSurfaceContainerHigh,
+            surfaceContainerHighest = LightSurfaceContainerHighest,
+            surfaceBright = LightSurfaceBright,
+            surfaceDim = LightSurfaceDim,
+            inverseSurface = LightInverseSurface,
+            inverseOnSurface = LightInverseOnSurface,
             error = ErrorRedLight,
-            onError = LightBackground,
+            onError = Color.White,
         )
     }
 

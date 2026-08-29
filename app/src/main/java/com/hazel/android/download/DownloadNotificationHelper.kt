@@ -27,6 +27,22 @@ object DownloadNotificationHelper {
     private const val PROGRESS_NOTIFICATION_ID = 1001
     private const val COMPLETE_NOTIFICATION_ID = 1002
 
+    /**
+     * Longest title the notification shows. A title past this length wraps onto a second
+     * line and pushes the progress figures off the collapsed notification, which are the
+     * part worth reading while a download runs.
+     */
+    private const val TITLE_LIMIT = 48
+
+    /** Shortens a title to one line, ending on a word wherever that is possible. */
+    private fun shortTitle(title: String): String {
+        val clean = title.trim()
+        if (clean.length <= TITLE_LIMIT) return clean
+        val cut = clean.take(TITLE_LIMIT)
+        val lastSpace = cut.lastIndexOf(' ')
+        return (if (lastSpace > TITLE_LIMIT / 2) cut.take(lastSpace) else cut).trimEnd() + "\u2026"
+    }
+
     /** Create notification channels (safe to call multiple times) */
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -99,9 +115,10 @@ object DownloadNotificationHelper {
      * Shows or updates the progress notification. Always silent, never a popup.
      *
      * The media's own title heads the notification and the live yt-dlp line sits under it,
-     * so the notification says what is being downloaded and how far along it is. No file
-     * path is shown: it is long, wraps over several lines, and tells the user nothing they
-     * can act on.
+     * so the notification says what is being downloaded and how far along it is. Both are
+     * kept to one line each: the title is shortened here, and the status line arrives with
+     * its stage prefix and any file path already stripped out, because a path fills the
+     * notification on its own and tells the reader nothing they can act on.
      *
      * @param progress percent complete, or a negative value while that is not yet known.
      */
@@ -114,7 +131,7 @@ object DownloadNotificationHelper {
         createChannels(context)
         val builder = NotificationCompat.Builder(context, CHANNEL_PROGRESS)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(mediaTitle.ifBlank { "Hazel" })
+            .setContentTitle(shortTitle(mediaTitle).ifBlank { "Hazel" })
             .setContentText(statusLine.ifBlank { "Downloading" })
             .setProgress(100, progress.coerceIn(0, 100), progress < 0)
             .setOngoing(true)
@@ -146,7 +163,7 @@ object DownloadNotificationHelper {
      */
     fun showComplete(
         context: Context,
-        fileName: String,
+        title: String,
         isVideo: Boolean,
         fileUri: Uri? = null
     ) {
@@ -158,7 +175,7 @@ object DownloadNotificationHelper {
 
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(fileName)
+            .setContentTitle(shortTitle(title).ifBlank { "Hazel" })
             .setContentText(if (fileUri != null) "Tap to open" else "Saved")
             .setAutoCancel(true)
             .setColorized(true)

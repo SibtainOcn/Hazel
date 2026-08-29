@@ -73,6 +73,7 @@ import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.ui.components.MediaCardShimmer
+import com.hazel.android.ui.components.ProcessingShimmer
 import com.hazel.android.ui.motion.M3Motion
 import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 import com.hazel.android.util.FolderUtil
@@ -252,6 +253,7 @@ fun DownloadScreen(
                 MediaCard(
                     info = info,
                     isDownloading = isActive,
+                    isProcessing = isActive && state.isProcessing,
                     progress = state.progress,
                     totalBytes = state.totalBytes,
                     isComplete = batchItem?.state == BatchState.DONE ||
@@ -267,17 +269,6 @@ fun DownloadScreen(
                     onRemove = if (state.isMultiple && !state.isDownloading) {
                         { downloadViewModel.removeResult(info) }
                     } else null
-                )
-            }
-
-            if (state.isDownloading && state.status.isNotBlank()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    state.status,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
                 )
             }
 
@@ -529,11 +520,17 @@ private fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifier
  * The whole card is the download control: tapping anywhere on it opens the format sheet,
  * so there is no separate button competing with it. While this card's download runs it
  * carries the progress readout, and its centre becomes the cancel control.
+ *
+ * Once the transfer finishes and the streams are being merged and tagged, the cancel
+ * control goes: there is no transfer left to stop, and offering to stop one would only
+ * invite a tap that cannot do what it says. A sweep across the artwork takes its place, so
+ * the card still reads as busy while that work runs.
  */
 @Composable
 private fun MediaCard(
     info: MediaInfo,
     isDownloading: Boolean,
+    isProcessing: Boolean = false,
     progress: Float,
     totalBytes: Long,
     isComplete: Boolean,
@@ -591,7 +588,8 @@ private fun MediaCard(
                     )
 
                     // Percentage readout, with the transferred size beside it once
-                    // yt-dlp has reported a total.
+                    // yt-dlp has reported a total. Both are about the transfer, so once
+                    // that is done the corner just names the stage that follows.
                     Row(
                         modifier = Modifier
                             .align(Alignment.TopStart)
@@ -599,42 +597,51 @@ private fun MediaCard(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        OverlayChip(
-                            text = "%.1f %%".format(animatedProgress * 100),
-                            bold = true
-                        )
-                        if (totalBytes > 0) {
-                            val done = (totalBytes * animatedProgress).toLong()
+                        if (isProcessing) {
+                            OverlayChip(text = "Processing", bold = true)
+                        } else {
                             OverlayChip(
-                                text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
+                                text = "%.1f %%".format(animatedProgress * 100),
+                                bold = true
                             )
+                            if (totalBytes > 0) {
+                                val done = (totalBytes * animatedProgress).toLong()
+                                OverlayChip(
+                                    text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
+                                )
+                            }
                         }
                     }
 
-                    // A progress ring wrapping the cancel control. It is the only tappable
-                    // area while a download runs, so a stray tap cannot reopen the sheet.
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(60.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.55f))
-                            .clickable(onClick = onCancel),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            progress = { animatedProgress },
-                            modifier = Modifier.size(60.dp),
-                            color = Color.White,
-                            trackColor = Color.Transparent,
-                            strokeWidth = 3.dp
-                        )
-                        Icon(
-                            Icons.Filled.Close,
-                            contentDescription = "Cancel download",
-                            modifier = Modifier.size(22.dp),
-                            tint = Color.White
-                        )
+                    if (isProcessing) {
+                        ProcessingShimmer(modifier = Modifier.fillMaxSize())
+                    } else {
+                        // A progress ring wrapping the cancel control. It is the only
+                        // tappable area while a download runs, so a stray tap cannot
+                        // reopen the sheet.
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(60.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.55f))
+                                .clickable(onClick = onCancel),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                progress = { animatedProgress },
+                                modifier = Modifier.size(60.dp),
+                                color = Color.White,
+                                trackColor = Color.Transparent,
+                                strokeWidth = 3.dp
+                            )
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = "Cancel download",
+                                modifier = Modifier.size(22.dp),
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
 
@@ -692,18 +699,29 @@ private fun MediaCard(
                     }
                 }
 
-                // Filled line along the bottom edge of the thumbnail.
+                // Filled line along the bottom edge of the thumbnail. Processing has no
+                // figure to fill it with, so the line runs on its own there.
                 if (isDownloading) {
-                    LinearProgressIndicator(
-                        progress = { animatedProgress },
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .height(4.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color.White.copy(alpha = 0.25f),
-                        drawStopIndicator = {}
-                    )
+                    val lineModifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(4.dp)
+
+                    if (isProcessing) {
+                        LinearProgressIndicator(
+                            modifier = lineModifier,
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = Color.White.copy(alpha = 0.25f)
+                        )
+                    } else {
+                        LinearProgressIndicator(
+                            progress = { animatedProgress },
+                            modifier = lineModifier,
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = Color.White.copy(alpha = 0.25f),
+                            drawStopIndicator = {}
+                        )
+                    }
                 }
             }
 
