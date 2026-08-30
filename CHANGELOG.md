@@ -147,6 +147,14 @@ Everything merged since 1.0.0, plus what is open in review.
   as the app is running, each saying whether it is downloading, queued or saved, and the
   list is reordered rather than animated so a card does not slide about under a moving
   progress bar.
+- **A search adds to the list rather than replacing it, and Clear empties it.** Everything a
+  run has collected, downloaded or queued stays in view for as long as the app is running,
+  whether it arrived by share or by search, so a link read a minute ago is still there to
+  open. A Clear action sits beside the layout switch for putting the list down.
+- **Cards arrive rather than appear.** Each one fades up from slightly below where it
+  belongs the first time it is drawn, and the pinned header takes on a separation once the
+  list passes under it. The header itself stays put: what a scrolling app bar does for the
+  space is not worth losing the field and the layout switch to.
 - **Links asked for while a download is running join the queue instead of being dropped.**
   Starting a download was the only way in, so a second set asked for mid-run was silently
   turned away. Sharing three links to Hazel Instant in a row now downloads all three: the

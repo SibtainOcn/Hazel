@@ -373,7 +373,10 @@ class DownloadViewModel : ViewModel() {
             isFetching = true,
             error = null,
             errorLog = null,
-            results = emptyList(),
+            // What is already listed stays. A run's downloads, its queue and its finished
+            // items are all worth keeping in view, and a search is another thing asked for
+            // rather than a reason to forget the last one. The search screen's own clear
+            // action is what empties the list.
             info = null,
             batch = emptyList(),
             isComplete = false,
@@ -457,10 +460,15 @@ class DownloadViewModel : ViewModel() {
                     errorLog = lastFailure.ifBlank { "Could not read this link" }
                 )
             } else {
+                // Newest first, and a link read again keeps its new reading rather than
+                // appearing twice.
+                val merged = resolved + _state.value.results.filterNot { existing ->
+                    resolved.any { it.url == existing.url }
+                }
                 _state.value.copy(
                     isFetching = false,
                     fetchProgress = "",
-                    results = resolved,
+                    results = merged,
                     info = resolved.singleOrNull()
                 )
             }
@@ -584,7 +592,7 @@ class DownloadViewModel : ViewModel() {
         val fallback = MediaProbe.fallbackFor(url)
         _state.value = _state.value.copy(
             errorLog = null,
-            results = listOf(fallback),
+            results = listOf(fallback) + _state.value.results.filterNot { it.url == fallback.url },
             info = fallback
         )
     }

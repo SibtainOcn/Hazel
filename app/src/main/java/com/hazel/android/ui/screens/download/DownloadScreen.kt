@@ -60,6 +60,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -137,6 +141,18 @@ fun DownloadScreen(
         val active = state.info?.url?.takeIf { state.isDownloading }
         if (active == null) state.results
         else state.results.sortedByDescending { it.url == active }
+    }
+
+    val listState = rememberLazyListState()
+
+    // True once anything has moved under the pinned header. The header does not slide away
+    // on scroll, which is the usual trick, because the field and the layout switch are what
+    // the screen is for; it separates itself from the list instead, so the two stop reading
+    // as one surface the moment they start overlapping.
+    val listScrolled by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0
+        }
     }
 
     var searchOpen by remember { mutableStateOf(false) }
@@ -339,14 +355,52 @@ fun DownloadScreen(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+
+                    // The list is kept for as long as the app runs, so there has to be a
+                    // way of putting it down. Plain text rather than another icon: it
+                    // throws away work, and that is worth spelling out.
+                    Text(
+                        "Clear",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(18.dp))
+                            .clickable(enabled = !state.isDownloading) {
+                                downloadViewModel.clearResults()
+                            }
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    )
                 }
             }
+
+            // Drawn only once there is something underneath it to separate from, so a
+            // short list keeps the plain unbroken background it looks better on.
+            val separator by animateFloatAsState(
+                targetValue = if (listScrolled) 1f else 0f,
+                animationSpec = M3Motion.emphasized(200),
+                label = "headerSeparator"
+            )
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(12.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f * separator),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
 
             // A lazy list rather than a scrolling column: a column composes every card it
             // holds, artwork and all, so a playlist of a hundred built a hundred full width
             // images at once and ran the app out of memory on the way back from the compact
             // layout. This builds only what is on screen, whatever the list is holding.
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
@@ -405,6 +459,18 @@ fun DownloadScreen(
                 items(orderedResults, key = { it.url }) { info ->
                     Spacer(modifier = Modifier.height(if (compact) 8.dp else 20.dp))
 
+                    // Each card arrives rather than appearing: it fades up from slightly
+                    // below where it belongs, once, the first time it is composed. A long
+                    // playlist scrolls past as a series of cards settling into place
+                    // instead of a wall that redraws itself under the finger.
+                    var shown by remember(info.url) { mutableStateOf(false) }
+                    LaunchedEffect(info.url) { shown = true }
+                    val entrance by animateFloatAsState(
+                        targetValue = if (shown) 1f else 0f,
+                        animationSpec = M3Motion.emphasized(320),
+                        label = "cardEntrance"
+                    )
+
                     val batchItem = state.batch.firstOrNull { it.url == info.url }
                     val isActive = state.isDownloading && state.info?.url == info.url
 
@@ -420,6 +486,12 @@ fun DownloadScreen(
                         { downloadViewModel.removeResult(info) }
                     } else null
 
+                    Box(
+                        modifier = Modifier.graphicsLayer {
+                            alpha = entrance
+                            translationY = (1f - entrance) * 28f
+                        }
+                    ) {
                     if (compact) {
                         MediaRow(
                             info = info,
@@ -452,6 +524,7 @@ fun DownloadScreen(
                             onCancel = downloadViewModel::cancelDownload,
                             onRemove = remove
                         )
+                    }
                     }
                 }
 
