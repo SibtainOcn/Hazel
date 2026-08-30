@@ -5,9 +5,33 @@ All notable changes to Hazel are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-08-31
+
+### Fixed
+- **A set action offered to download what was already saved.** Reading a new link adds it to
+  what is already on screen, which is what makes a growing list of results useful. The set
+  action counted the whole list, so one new video alongside one already downloaded read as
+  two waiting and Download all fetched the saved one a second time. The action now covers
+  only what is still owed, and the button disappears once nothing is. A link already
+  downloaded keeps its place in the list, marked, because seeing what arrived is the point
+  of the list. Both records are consulted: what finished in this run, and what finished in
+  any run, which is what a link read after a restart turns on.
+- **Pasting several links at once said the paste was invalid.** The field took everything
+  typed into it as a single address, and an address cannot contain a space, so a set of links
+  copied together was rejected as one malformed link. Anything separated by whitespace is now
+  read as the several links it is, which is how links arrive when they are copied from
+  somewhere else.
+- **The card and the list disagreed on what counted as already downloaded.** One compared
+  addresses as they were written and the other reduced them to the media first, so a share
+  link and an address bar link for the same video were the same media in one layout and two
+  in the other.
+
+### Changed
+- **A history row whose file has gone reads Deleted** rather than File missing. The file is
+  not mislaid, and almost always it is gone because the user removed it.
+
 ## [1.0.1] - 2026-08-31
 
-Everything merged since 1.0.0, plus what is open in review.
 
 ### Added
 - **The saved file is named before it is made.** Tapping Convert opens a sheet holding the
@@ -95,23 +119,6 @@ Everything merged since 1.0.0, plus what is open in review.
   stay pure JVM, and tests are named for the behaviour a user would notice breaking.
 
 ### Fixed
-- **A set action offered to download what was already saved.** Reading a new link adds it to
-  what is already on screen, which is what makes a growing list of results useful. The set
-  action counted the whole list, so one new video alongside one already downloaded read as
-  two waiting and Download all fetched the saved one a second time. The action now covers
-  only what is still owed, and the button disappears once nothing is. A link already
-  downloaded keeps its place in the list, marked, because seeing what arrived is the point
-  of the list. Both records are consulted: what finished in this run, and what finished in
-  any run, which is what a link read after a restart turns on.
-- **Pasting several links at once said the paste was invalid.** The field took everything
-  typed into it as a single address, and an address cannot contain a space, so a set of links
-  copied together was rejected as one malformed link. Anything separated by whitespace is now
-  read as the several links it is, which is how links arrive when they are copied from
-  somewhere else.
-- **The card and the list disagreed on what counted as already downloaded.** One compared
-  addresses as they were written and the other reduced them to the media first, so a share
-  link and an address bar link for the same video were the same media in one layout and two
-  in the other.
 - **A finished file never reached the user's folder on Android 7 through 10.** Publishing a
   download or a conversion is a MediaStore insert from Android 11 and a direct file write
   below it, and the direct write needs a storage permission nothing had ever asked for. The
@@ -212,8 +219,6 @@ Everything merged since 1.0.0, plus what is open in review.
   speed and ETA on it were routinely stale. It is redrawn on a timer instead.
 
 ### Changed
-- **A history row whose file has gone reads Deleted** rather than File missing. The file is
-  not mislaid, and almost always it is gone because the user removed it.
 - **The converter sits directly under More.** It used to be behind a Tools screen whose
   entire content was that one row, which is a tap and a screen spent saying one word. Tools
   remains, empty, for whatever the next tool turns out to be.
@@ -531,5 +536,7 @@ as it now stands rather than how it got here.
 - **Independent yt-dlp updates.** The engine updates separately from the app, on a Stable,
   Nightly or Master channel, so extractor fixes can be picked up the day they ship.
 
-[Unreleased]: https://github.com/SibtainOcn/Hazel/compare/v1.0.0...main
+[Unreleased]: https://github.com/SibtainOcn/Hazel/compare/v1.0.2...main
+[1.0.2]: https://github.com/SibtainOcn/Hazel/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/SibtainOcn/Hazel/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/SibtainOcn/Hazel/releases/tag/v1.0.0
