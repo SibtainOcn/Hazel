@@ -1,20 +1,23 @@
 package com.hazel.android.ui.screens.converter
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,48 +26,69 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AudioFile
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.MovieCreation
 import androidx.compose.material.icons.filled.Transform
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import com.hazel.android.util.FolderUtil
-import com.hazel.android.util.StoragePaths
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hazel.android.R
+import com.hazel.android.converter.AudioFormat
+import com.hazel.android.converter.AudioFormats
+import com.hazel.android.converter.AudioTag
 import com.hazel.android.converter.ConverterViewModel
-import com.hazel.android.converter.LogEntry
 import com.hazel.android.converter.LogLevel
+import com.hazel.android.ui.theme.ErrorRed
+import com.hazel.android.ui.theme.SuccessGreen
+import com.hazel.android.ui.theme.WarningAmber
+import com.hazel.android.util.FolderUtil
+import com.hazel.android.util.PermissionHelper
+import com.hazel.android.util.StoragePaths
+import java.io.File
 
+/**
+ * Turns a video already on the phone into an audio file, with no network involved.
+ *
+ * The screen is three decisions in a column, in the order they are made: what to convert,
+ * what to turn it into, and where it lands. Everything else on the screen is a consequence
+ * of one of those three, so nothing appears until it has something to say.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConverterScreen(
     onBack: () -> Unit = {},
@@ -73,433 +97,711 @@ fun ConverterScreen(
     val state by converterViewModel.state.collectAsState()
     val context = LocalContext.current
 
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        uri?.let { converterViewModel.selectFile(context, it) }
+    var formatSheetOpen by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    // Whether a finished file will reach the user's own Music folder. Only ever false up to
+    // Android 10, where that is a direct file write and the permission can be refused.
+    var canPublish by remember { mutableStateOf(PermissionHelper.canWriteSharedStorage(context)) }
+
+    val storageRequest = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        canPublish = granted || !PermissionHelper.needsLegacyStorageWrite()
+        converterViewModel.convert(context)
     }
 
-    val logListState = rememberLazyListState()
-    LaunchedEffect(state.logs.size) {
-        if (state.logs.isNotEmpty()) logListState.animateScrollToItem(state.logs.size - 1)
+    // ACTION_OPEN_DOCUMENT, which every version this app runs on has. The list is wider than
+    // just video because a provider decides the type of what it holds, and plenty of them
+    // hand back a generic type for a container they do not recognise. Those files would
+    // otherwise be shown greyed out and unpickable, which reads as the app refusing them.
+    val filePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let { picked ->
+            // Held for as long as the picker's own grant allows, which covers the run. Some
+            // providers refuse to make it persistable, so this is attempted and not relied
+            // upon: the file is copied into the cache before any work starts either way.
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    picked, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+            converterViewModel.selectFile(context, picked)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        canPublish = PermissionHelper.canWriteSharedStorage(context)
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp)
     ) {
-        // Compact header with back arrow
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp, bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.back),
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = "Offline Converter",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Video to Audio",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-                )
-            }
-        }
+        Header(onBack = onBack)
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(Modifier.height(18.dp))
 
-        // File Picker
-        OutlinedButton(
-            onClick = { filePickerLauncher.launch(arrayOf("video/*")) },
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = RoundedCornerShape(14.dp),
-            enabled = !state.isConverting
-        ) {
-            Icon(Icons.Filled.FolderOpen, null, modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
+        SourceCard(
+            fileName = state.inputFileName,
+            sizeBytes = state.inputSizeBytes,
+            enabled = !state.isConverting,
+            onPick = { filePicker.launch(PICKER_TYPES) }
+        )
+
+        Spacer(Modifier.height(10.dp))
+
+        SettingRow(
+            icon = { tint ->
+                Icon(Icons.Filled.GraphicEq, null, Modifier.size(20.dp), tint = tint)
+            },
+            label = "Convert to",
+            value = state.format.name,
+            trailing = { TagStrip(state.format.tags) },
+            enabled = !state.isConverting,
+            onClick = { formatSheetOpen = true }
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        SettingRow(
+            icon = { tint ->
+                Icon(Icons.Filled.FolderOpen, null, Modifier.size(20.dp), tint = tint)
+            },
+            label = "Saved to",
+            value = if (canPublish) StoragePaths.CONVERTED_DISPLAY else "Hazel's own storage",
+            enabled = true,
+            onClick = { FolderUtil.open(context, StoragePaths.finalConverted) }
+        )
+
+        // Only ever shown on the versions that can refuse. Said before the conversion runs
+        // rather than after it, because it is the sort of thing worth knowing while it can
+        // still be changed.
+        if (!canPublish && PermissionHelper.needsLegacyStorageWrite()) {
+            Spacer(Modifier.height(6.dp))
             Text(
-                text = state.inputFileName.ifBlank { "Choose a video file" },
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1, overflow = TextOverflow.Ellipsis
+                "Without storage access the file stays inside Hazel, where other apps cannot see it.",
+                style = MaterialTheme.typography.labelSmall,
+                color = WarningAmber,
+                modifier = Modifier.padding(horizontal = 4.dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(Modifier.height(18.dp))
 
-        // Where converted files land. This is the only place the audio output folder is
-        // shown, so it sits with the tool that writes to it rather than in a shared list.
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-        ) {
-            Row(
-                modifier = Modifier
-                    .clickable { FolderUtil.open(context, StoragePaths.finalConverted) }
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Filled.FolderOpen,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        "Saved to",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                    Text(
-                        StoragePaths.CONVERTED_DISPLAY,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Quality Options
-        Text(
-            text = "Output Quality",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        val qualities = listOf(
-            Triple("320kbps", "MP3 · High Quality", "Best MP3, most compatible"),
-            Triple("AAC 256k", "AAC · Premium", "Better quality per size"),
-            Triple("FLAC", "FLAC · Lossless", "Perfect copy, large file"),
-        )
-
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            qualities.forEach { (id, title, subtitle) ->
-                val isSelected = state.selectedQuality == id
-                Surface(
-                    onClick = { if (!state.isConverting) converterViewModel.setQuality(id) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.surface,
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Filled.AudioFile, null, modifier = Modifier.size(20.dp),
-                            tint = if (isSelected) MaterialTheme.colorScheme.primary
-                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                title, style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (isSelected) MaterialTheme.colorScheme.primary
-                                       else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                            )
-                            Text(subtitle, style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
-                        }
-                        if (isSelected) {
-                            Icon(Icons.Filled.Check, null, Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.primary)
-                        }
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Convert Button
-        Button(
-            onClick = { converterViewModel.convert(context) },
-            modifier = Modifier.fillMaxWidth().height(46.dp),
+        ConvertButton(
+            isConverting = state.isConverting,
             enabled = state.inputFileUri != null && !state.isConverting,
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
-            if (state.isConverting) {
-                CircularProgressIndicator(Modifier.size(18.dp), MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
-                Spacer(Modifier.width(8.dp))
-                Text("Converting...", style = MaterialTheme.typography.titleMedium)
-            } else {
-                Icon(Icons.Filled.Transform, null, Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Convert", style = MaterialTheme.typography.titleMedium)
+            onClick = {
+                if (PermissionHelper.needsLegacyStorageWrite() && !canPublish) {
+                    storageRequest.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                } else {
+                    converterViewModel.convert(context)
+                }
             }
+        )
+
+        AnimatedVisibility(
+            visible = state.isConverting,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            ProgressPanel(
+                progress = state.progress,
+                line = state.statusLine,
+                level = state.statusLevel
+            )
         }
 
-        // ── Progress + Logs ──
-        AnimatedVisibility(
-            visible = state.isConverting || state.isComplete || state.error != null,
-            enter = fadeIn(tween(300)) + slideInVertically(tween(300))
+        AnimatedVisibility(visible = state.isComplete, enter = fadeIn(), exit = fadeOut()) {
+            ResultCard(
+                fileName = state.outputFileName,
+                sizeBytes = state.outputSizeBytes,
+                where = state.outputPath,
+                inAppStorage = state.savedToAppStorage,
+                onOpen = { openFolder(context, StoragePaths.finalConverted) },
+                onAgain = converterViewModel::resetState
+            )
+        }
+
+        AnimatedVisibility(visible = state.error != null, enter = fadeIn(), exit = fadeOut()) {
+            ErrorCard(
+                message = state.error.orEmpty(),
+                onDismiss = converterViewModel::dismissError
+            )
+        }
+
+        Spacer(Modifier.height(32.dp))
+    }
+
+    if (formatSheetOpen) {
+        ModalBottomSheet(
+            onDismissRequest = { formatSheetOpen = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface
         ) {
-            Column(modifier = Modifier.padding(top = 12.dp)) {
-                if (state.isConverting) {
-                    LinearProgressIndicator(
-                        progress = { state.progress },
-                        modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    )
-                    Spacer(Modifier.height(8.dp))
+            FormatSheetContent(
+                selected = state.format,
+                onPick = {
+                    converterViewModel.setFormat(it)
+                    formatSheetOpen = false
                 }
+            )
+        }
+    }
+}
 
-                // Step logs with shimmer on active entry
-                LazyColumn(
-                    state = logListState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f, fill = false),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    itemsIndexed(state.logs) { index, entry ->
-                        val isLast = index == state.logs.lastIndex && entry.durationMs == null
-                        ConverterLogRow(entry, isActive = isLast)
-                    }
-                }
+// ── Pieces ──
 
-                // Completion row — tick + filename + path + Open/Next buttons
-                if (state.isComplete) {
-                    Spacer(Modifier.height(8.dp))
-                    Surface(Modifier.fillMaxWidth(), RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)) {
-                        Column(Modifier.padding(14.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    painter = painterResource(R.drawable.small_right_tick),
-                                    contentDescription = null,
-                                    tint = com.hazel.android.ui.theme.SuccessGreen,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    state.outputFileName,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1, overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            Spacer(Modifier.height(2.dp))
-                            Text(
-                                state.outputPath,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                            )
-                            Spacer(Modifier.height(10.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                // Open folder — opens converted output folder in file manager
-                                Button(
-                                    onClick = {
-                                        val folder = com.hazel.android.util.StoragePaths.finalConverted
-                                        openConverterFolderInFileManager(context, folder)
-                                    },
-                                    modifier = Modifier.weight(1f).height(38.dp),
-                                    shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                ) {
-                                    Icon(Icons.Filled.FolderOpen, null, modifier = Modifier.size(16.dp))
-                                    Spacer(Modifier.width(4.dp))
-                                    Text("Open", style = MaterialTheme.typography.labelMedium)
-                                }
-                                // Next conversion
-                                Button(
-                                    onClick = { converterViewModel.resetState() },
-                                    modifier = Modifier.weight(1f).height(38.dp),
-                                    shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        contentColor = MaterialTheme.colorScheme.onSurface
-                                    )
-                                ) {
-                                    Text("Next", style = MaterialTheme.typography.labelMedium)
-                                }
-                        }
-                        }
-                    }
-                }
-
-                // Error card
-                if (state.error != null) {
-                    Spacer(Modifier.height(8.dp))
-                    Surface(Modifier.fillMaxWidth(), RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)) {
-                        Column(Modifier.padding(16.dp)) {
-                            Text("Conversion Failed", style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.error)
-                            Spacer(Modifier.height(4.dp))
-                            Text(state.error ?: "", style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                        }
-                    }
-                }
-            }
+@Composable
+private fun Header(onBack: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onBack, modifier = Modifier.size(32.dp)) {
+            Icon(
+                painter = painterResource(R.drawable.back),
+                contentDescription = "Back",
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+        Spacer(Modifier.width(10.dp))
+        Column {
+            Text(
+                "Offline Converter",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                "Video to audio, nothing leaves the phone",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+            )
         }
     }
 }
 
 /**
- * Log row with custom SVG icons and shimmer on active entry.
+ * The file to convert.
+ *
+ * Empty it is the one thing to do on the screen and is sized accordingly. Filled it steps
+ * back into a row, because by then the decision worth looking at is the next one down.
  */
 @Composable
-private fun ConverterLogRow(log: LogEntry, isActive: Boolean) {
-    val shimmerBrush = if (isActive) {
-        val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
-        val translateAnim by infiniteTransition.animateFloat(
-            initialValue = -300f, targetValue = 1000f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(1200, easing = androidx.compose.animation.core.LinearEasing),
-                repeatMode = RepeatMode.Restart
-            ), label = "shimmerTranslate"
-        )
-        androidx.compose.ui.graphics.Brush.linearGradient(
-            colors = listOf(
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-            ),
-            start = androidx.compose.ui.geometry.Offset(translateAnim, 0f),
-            end = androidx.compose.ui.geometry.Offset(translateAnim + 400f, 0f)
-        )
-    } else null
+private fun SourceCard(
+    fileName: String,
+    sizeBytes: Long,
+    enabled: Boolean,
+    onPick: () -> Unit
+) {
+    val chosen = fileName.isNotBlank()
 
-    val iconRes = when (log.level) {
-        LogLevel.SUCCESS -> R.drawable.small_right_tick
-        LogLevel.ERROR -> R.drawable.small_error_x
-        LogLevel.WARN -> R.drawable.small_warn
-        LogLevel.INFO -> R.drawable.small_chevron
-    }
-    val tintColor = when (log.level) {
-        LogLevel.SUCCESS -> com.hazel.android.ui.theme.SuccessGreen
-        LogLevel.ERROR -> com.hazel.android.ui.theme.ErrorRed
-        LogLevel.WARN -> com.hazel.android.ui.theme.WarningAmber
-        LogLevel.INFO -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-    }
-
-    val durationStr = log.durationMs?.let { " (${it}ms)" } ?: ""
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = if (chosen) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        else MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
     ) {
-        Icon(
-            painter = painterResource(iconRes),
-            contentDescription = null,
-            tint = tintColor,
-            modifier = Modifier.size(14.dp)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
+        Row(
+            modifier = Modifier
+                .clickable(enabled = enabled, onClick = onPick)
+                .padding(horizontal = 16.dp, vertical = if (chosen) 14.dp else 22.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Filled.MovieCreation,
+                contentDescription = null,
+                modifier = Modifier.size(if (chosen) 22.dp else 26.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    if (chosen) fileName else "Choose a video file",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    if (chosen) {
+                        if (sizeBytes > 0) formatSize(sizeBytes) else "Ready"
+                    } else {
+                        "Anything on the phone or an SD card"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                )
+            }
+            if (chosen && enabled) {
+                Text(
+                    "Change",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
 
-        if (shimmerBrush != null) {
-            Text(
-                log.message + durationStr,
-                style = TextStyle(brush = shimmerBrush, fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
-                maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
+/** One tappable line: an icon, what it is, what it is set to. */
+@Composable
+private fun SettingRow(
+    icon: @Composable (Color) -> Unit,
+    label: String,
+    value: String,
+    enabled: Boolean,
+    trailing: @Composable (() -> Unit)? = null,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable(enabled = enabled, onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 13.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon(MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        value,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    trailing?.let {
+                        Spacer(Modifier.width(8.dp))
+                        it()
+                    }
+                }
+            }
+            if (enabled) {
+                Icon(
+                    Icons.Filled.ChevronRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConvertButton(isConverting: Boolean, enabled: Boolean, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        enabled = enabled,
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    ) {
+        if (isConverting) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                color = MaterialTheme.colorScheme.onPrimary,
+                strokeWidth = 2.dp
             )
+            Spacer(Modifier.width(10.dp))
+            Text("Converting", style = MaterialTheme.typography.titleSmall)
         } else {
-            Text(
-                log.message,
-                fontSize = 12.sp, fontFamily = FontFamily.Monospace,
-                color = when (log.level) {
-                    LogLevel.SUCCESS -> com.hazel.android.ui.theme.SuccessGreen
-                    LogLevel.ERROR -> com.hazel.android.ui.theme.ErrorRed
-                    LogLevel.WARN -> com.hazel.android.ui.theme.WarningAmber
-                    LogLevel.INFO -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                },
-                maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
+            Icon(Icons.Filled.Transform, null, Modifier.size(20.dp))
+            Spacer(Modifier.width(10.dp))
+            Text("Convert", style = MaterialTheme.typography.titleSmall)
+        }
+    }
+}
+
+/**
+ * The bar, and the one line under it.
+ *
+ * The line is replaced in place as the engine reports the next thing it is doing, rather
+ * than added to a list that grows down the screen. What the engine said four seconds ago is
+ * of no use to anybody watching it work, and a panel of it pushes everything else off the
+ * bottom of the screen.
+ */
+@Composable
+private fun ProgressPanel(progress: Float, line: String, level: LogLevel) {
+    val animated by animateFloatAsState(targetValue = progress, label = "convertProgress")
+
+    Column(modifier = Modifier.padding(top = 16.dp)) {
+        LinearProgressIndicator(
+            progress = { animated },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp)),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+
+        Spacer(Modifier.height(10.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(
+                        when (level) {
+                            LogLevel.ERROR -> ErrorRed
+                            LogLevel.WARN -> WarningAmber
+                            LogLevel.SUCCESS -> SuccessGreen
+                            LogLevel.INFO -> MaterialTheme.colorScheme.primary
+                        }
+                    )
             )
+            Spacer(Modifier.width(10.dp))
+            // Crossfaded rather than swapped, so a line replaced several times a second
+            // reads as one line changing instead of as flicker.
+            AnimatedContent(
+                targetState = line,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "convertStatus"
+            ) { current ->
+                Text(
+                    current,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontFamily = FontFamily.Monospace,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
-        // Duration badge
-        if (log.durationMs != null) {
+        Spacer(Modifier.height(6.dp))
+        Text(
+            "${(animated * 100).toInt()}%",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+        )
+    }
+}
+
+@Composable
+private fun ResultCard(
+    fileName: String,
+    sizeBytes: Long,
+    where: String,
+    inAppStorage: Boolean,
+    onOpen: () -> Unit,
+    onAgain: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(R.drawable.small_right_tick),
+                    contentDescription = null,
+                    tint = SuccessGreen,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    fileName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(Modifier.height(4.dp))
             Text(
-                "%.2fs".format(log.durationMs / 1000.0),
-                fontSize = 10.sp, fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                buildString {
+                    if (sizeBytes > 0) {
+                        append(formatSize(sizeBytes))
+                        append("  ·  ")
+                    }
+                    append(where)
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = if (inAppStorage) WarningAmber
+                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+            )
+
+            Spacer(Modifier.height(14.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Button(
+                    onClick = onOpen,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Filled.FolderOpen, null, Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Open", style = MaterialTheme.typography.labelMedium)
+                }
+                Button(
+                    onClick = onAgain,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    )
+                ) {
+                    Text("Convert another", style = MaterialTheme.typography.labelMedium)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ErrorCard(message: String, onDismiss: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                "That did not convert",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.error
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+            Spacer(Modifier.height(6.dp))
+            TextButton(onClick = onDismiss, contentPadding = ButtonDefaults.TextButtonContentPadding) {
+                Text("Dismiss", style = MaterialTheme.typography.labelMedium)
+            }
+        }
+    }
+}
+
+// ── The format sheet ──
+
+@Composable
+private fun FormatSheetContent(selected: AudioFormat, onPick: (AudioFormat) -> Unit) {
+    val (common, rest) = AudioFormats.all.partition { it in COMMON }
+
+    Column(modifier = Modifier.padding(bottom = 28.dp)) {
+        Text(
+            "Convert to",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 12.dp)
+        )
+
+        SheetHeading("The three worth using")
+        common.forEach { FormatRow(it, it.id == selected.id, onPick) }
+
+        Spacer(Modifier.height(10.dp))
+        SheetHeading("Everything else")
+        rest.forEach { FormatRow(it, it.id == selected.id, onPick) }
+    }
+}
+
+@Composable
+private fun SheetHeading(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+        modifier = Modifier.padding(start = 22.dp, top = 6.dp, bottom = 6.dp)
+    )
+}
+
+@Composable
+private fun FormatRow(format: AudioFormat, isSelected: Boolean, onPick: (AudioFormat) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onPick(format) }
+            .padding(horizontal = 22.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    format.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    ".${format.extension}",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontFamily = FontFamily.Monospace,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                )
+                Spacer(Modifier.width(8.dp))
+                TagStrip(format.tags)
+            }
+            Spacer(Modifier.height(2.dp))
+            Text(
+                format.summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+            )
+        }
+        if (isSelected) {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }
 }
 
 /**
- * Opens a folder in the system's default file manager.
+ * The words beside a format.
+ *
+ * Quality tags carry the accent colour and size tags do not, so the two are told apart at a
+ * glance without anybody reading them.
  */
-private fun openConverterFolderInFileManager(context: android.content.Context, folder: java.io.File) {
-    if (!folder.exists()) folder.mkdirs()
-    try {
-        val relativePath = folder.absolutePath.substringAfter("/storage/emulated/0/")
-        val encodedPath = relativePath.replace("/", "%2F")
-        val uri = android.net.Uri.parse(
-            "content://com.android.externalstorage.documents/document/primary:$encodedPath"
-        )
-        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-            setDataAndType(uri, "vnd.android.document/directory")
-            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(intent)
-    } catch (_: Exception) {
-        try {
-            val uri = androidx.core.content.FileProvider.getUriForFile(
-                context, "${context.packageName}.fileprovider", folder
-            )
-            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "resource/folder")
-                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
-        } catch (_: Exception) {
-            try {
-                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                    data = android.net.Uri.parse("file://${folder.absolutePath}")
-                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(android.content.Intent.createChooser(intent, "Open folder"))
-            } catch (_: Exception) {
-                android.widget.Toast.makeText(
-                    context, "Path: ${folder.absolutePath}", android.widget.Toast.LENGTH_LONG
-                ).show()
+@Composable
+private fun TagStrip(tags: List<AudioTag>) {
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        tags.forEach { tag ->
+            val loud = tag in LOUD_TAGS
+            Surface(
+                shape = RoundedCornerShape(5.dp),
+                color = if (loud) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+            ) {
+                Text(
+                    tag.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Medium,
+                    color = if (loud) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                )
             }
         }
     }
+}
+
+// ── Helpers ──
+
+private val COMMON = listOf(AudioFormats.OPUS, AudioFormats.AAC, AudioFormats.MP3)
+
+private val LOUD_TAGS = setOf(AudioTag.BEST, AudioTag.RECOMMENDED, AudioTag.LOSSLESS)
+
+/**
+ * Every video type, plus the generic one.
+ *
+ * A document provider decides what type it reports for what it holds, and a container it
+ * does not recognise, which regularly means Matroska or a transport stream, comes back as
+ * a generic stream of bytes. Filtering on video alone leaves those greyed out in the
+ * picker, so the file the user came to convert is the one they cannot select.
+ */
+private val PICKER_TYPES = arrayOf("video/*", "application/octet-stream")
+
+private fun formatSize(bytes: Long): String = when {
+    bytes >= 1_073_741_824 -> "%.1f GB".format(bytes / 1_073_741_824.0)
+    bytes >= 1_048_576 -> "%.1f MB".format(bytes / 1_048_576.0)
+    bytes >= 1024 -> "%.0f KB".format(bytes / 1024.0)
+    else -> "$bytes B"
+}
+
+/**
+ * Opens the output folder in whatever the device uses to browse files.
+ *
+ * Three attempts, because there is no one intent every builder answers: the documents
+ * provider first, then the app's own file provider, then a plain chooser. The path is put
+ * on screen as the last resort, so the user can at least go and find it themselves.
+ */
+private fun openFolder(context: Context, folder: File) {
+    if (!folder.exists()) folder.mkdirs()
+
+    val attempts: List<() -> Intent> = listOf(
+        {
+            val relative = folder.absolutePath.substringAfter("/storage/emulated/0/")
+            Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(
+                    Uri.parse(
+                        "content://com.android.externalstorage.documents/document/primary:" +
+                            relative.replace("/", "%2F")
+                    ),
+                    "vnd.android.document/directory"
+                )
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        },
+        {
+            Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(
+                    androidx.core.content.FileProvider.getUriForFile(
+                        context, "${context.packageName}.fileprovider", folder
+                    ),
+                    "resource/folder"
+                )
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        },
+        {
+            Intent.createChooser(
+                Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse("file://${folder.absolutePath}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                },
+                "Open folder"
+            )
+        }
+    )
+
+    for (build in attempts) {
+        val worked = runCatching { context.startActivity(build()) }.isSuccess
+        if (worked) return
+    }
+
+    Toast.makeText(context, folder.absolutePath, Toast.LENGTH_LONG).show()
 }

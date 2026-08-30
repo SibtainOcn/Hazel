@@ -749,6 +749,12 @@ class DownloadViewModel : ViewModel() {
 
         com.hazel.android.util.PermissionHelper.ensureNotificationPermission(context)
 
+        // Asked here, on the versions that still need it, because this is where a finished
+        // file is about to be published into the user's own Download folder. Up to Android
+        // 10 that is a direct file write and needs the permission; without it the move
+        // failed and the file stayed in the app's folder without anything saying so.
+        com.hazel.android.util.PermissionHelper.ensureSharedStorageWrite(context)
+
         val queued = plans.map { it.toQueued(options, treeUri) }
         val alreadyRunning = _state.value.isDownloading
 
