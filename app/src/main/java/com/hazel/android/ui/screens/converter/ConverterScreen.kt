@@ -1,10 +1,8 @@
 package com.hazel.android.ui.screens.converter
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -20,6 +18,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,6 +39,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -48,6 +48,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -79,7 +80,6 @@ import com.hazel.android.ui.theme.WarningAmber
 import com.hazel.android.util.FolderUtil
 import com.hazel.android.util.PermissionHelper
 import com.hazel.android.util.StoragePaths
-import java.io.File
 
 /**
  * Turns a video already on the phone into an audio file, with no network involved.
@@ -222,7 +222,7 @@ fun ConverterScreen(
                 sizeBytes = state.outputSizeBytes,
                 where = state.outputPath,
                 inAppStorage = state.savedToAppStorage,
-                onOpen = { openFolder(context, StoragePaths.finalConverted) },
+                onOpen = { FolderUtil.open(context, StoragePaths.finalConverted) },
                 onAgain = converterViewModel::resetState
             )
         }
@@ -283,7 +283,7 @@ private fun Header(onBack: () -> Unit) {
             Text(
                 "Video to audio, nothing leaves the phone",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -339,7 +339,7 @@ private fun SourceCard(
                         "Anything on the phone or an SD card"
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             if (chosen && enabled) {
@@ -381,7 +381,7 @@ private fun SettingRow(
                 Text(
                     label,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -403,7 +403,7 @@ private fun SettingRow(
                     Icons.Filled.ChevronRight,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -412,6 +412,10 @@ private fun SettingRow(
 
 @Composable
 private fun ConvertButton(isConverting: Boolean, enabled: Boolean, onClick: () -> Unit) {
+    // Two different reasons for a button not to be tappable, and they must not look alike.
+    // Nothing chosen yet is a button waiting to be used and should recede. A conversion
+    // already running is the most active thing on the screen, and Material's disabled
+    // treatment drained it until the word and the spinner were barely there at all.
     Button(
         onClick = onClick,
         modifier = Modifier
@@ -421,7 +425,17 @@ private fun ConvertButton(isConverting: Boolean, enabled: Boolean, onClick: () -
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = if (isConverting) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+            },
+            disabledContentColor = if (isConverting) {
+                MaterialTheme.colorScheme.onPrimary
+            } else {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            }
         )
     ) {
         if (isConverting) {
@@ -485,26 +499,28 @@ private fun ProgressPanel(progress: Float, line: String, level: LogLevel) {
             AnimatedContent(
                 targetState = line,
                 transitionSpec = { fadeIn() togetherWith fadeOut() },
-                label = "convertStatus"
+                label = "convertStatus",
+                modifier = Modifier.weight(1f)
             ) { current ->
                 Text(
                     current,
                     style = MaterialTheme.typography.bodySmall,
                     fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth()
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+            Spacer(Modifier.width(10.dp))
+            // On the row it belongs to. Underneath it read as a second status below the
+            // first, which is one status too many for one progress bar.
+            Text(
+                "${(animated * 100).toInt()}%",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
-
-        Spacer(Modifier.height(6.dp))
-        Text(
-            "${(animated * 100).toInt()}%",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-        )
     }
 }
 
@@ -521,70 +537,92 @@ private fun ResultCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 16.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
     ) {
-        Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(R.drawable.small_right_tick),
-                    contentDescription = null,
-                    tint = SuccessGreen,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    fileName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            Spacer(Modifier.height(4.dp))
-            Text(
-                buildString {
-                    if (sizeBytes > 0) {
-                        append(formatSize(sizeBytes))
-                        append("  ·  ")
-                    }
-                    append(where)
-                },
-                style = MaterialTheme.typography.labelSmall,
-                color = if (inAppStorage) WarningAmber
-                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
-            )
-
-            Spacer(Modifier.height(14.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
-                    onClick = onOpen,
+        Column {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .height(40.dp),
-                    shape = RoundedCornerShape(12.dp)
+                        .size(34.dp)
+                        .clip(RoundedCornerShape(17.dp))
+                        .background(SuccessGreen.copy(alpha = 0.16f)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Filled.FolderOpen, null, Modifier.size(16.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("Open", style = MaterialTheme.typography.labelMedium)
-                }
-                Button(
-                    onClick = onAgain,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(40.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurface
+                    Icon(
+                        painter = painterResource(R.drawable.small_right_tick),
+                        contentDescription = null,
+                        tint = SuccessGreen,
+                        modifier = Modifier.size(16.dp)
                     )
-                ) {
-                    Text("Convert another", style = MaterialTheme.typography.labelMedium)
                 }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Saved",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = SuccessGreen
+                    )
+                    Text(
+                        fileName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        buildString {
+                            if (sizeBytes > 0) {
+                                append(formatSize(sizeBytes))
+                                append("  ·  ")
+                            }
+                            append(where)
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (inAppStorage) WarningAmber
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            // Two words, side by side, separated by a hairline rather than by two filled
+            // shapes. The work is already done: the card is reporting, not asking, and a
+            // pair of solid buttons under a finished job reads as another decision to make.
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+            Row(modifier = Modifier.height(46.dp)) {
+                FlatAction("Open folder", Modifier.weight(1f), onOpen)
+                VerticalDivider(
+                    modifier = Modifier.padding(vertical = 9.dp),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                )
+                FlatAction("Convert another", Modifier.weight(1f), onAgain)
             }
         }
+    }
+}
+
+/** One word, the whole width of its half, with nothing drawn around it. */
+@Composable
+private fun FlatAction(label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -608,7 +646,7 @@ private fun ErrorCard(message: String, onDismiss: () -> Unit) {
             Text(
                 message,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(6.dp))
             TextButton(onClick = onDismiss, contentPadding = ButtonDefaults.TextButtonContentPadding) {
@@ -648,7 +686,7 @@ private fun SheetHeading(text: String) {
         text,
         style = MaterialTheme.typography.labelSmall,
         fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(start = 22.dp, top = 6.dp, bottom = 6.dp)
     )
 }
@@ -676,7 +714,7 @@ private fun FormatRow(format: AudioFormat, isSelected: Boolean, onPick: (AudioFo
                     ".${format.extension}",
                     style = MaterialTheme.typography.labelSmall,
                     fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.width(8.dp))
                 TagStrip(format.tags)
@@ -685,7 +723,7 @@ private fun FormatRow(format: AudioFormat, isSelected: Boolean, onPick: (AudioFo
             Text(
                 format.summary,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         if (isSelected) {
@@ -712,15 +750,15 @@ private fun TagStrip(tags: List<AudioTag>) {
             val loud = tag in LOUD_TAGS
             Surface(
                 shape = RoundedCornerShape(5.dp),
-                color = if (loud) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
-                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+                color = if (loud) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
             ) {
                 Text(
                     tag.label,
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Medium,
                     color = if (loud) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                 )
             }
@@ -749,59 +787,4 @@ private fun formatSize(bytes: Long): String = when {
     bytes >= 1_048_576 -> "%.1f MB".format(bytes / 1_048_576.0)
     bytes >= 1024 -> "%.0f KB".format(bytes / 1024.0)
     else -> "$bytes B"
-}
-
-/**
- * Opens the output folder in whatever the device uses to browse files.
- *
- * Three attempts, because there is no one intent every builder answers: the documents
- * provider first, then the app's own file provider, then a plain chooser. The path is put
- * on screen as the last resort, so the user can at least go and find it themselves.
- */
-private fun openFolder(context: Context, folder: File) {
-    if (!folder.exists()) folder.mkdirs()
-
-    val attempts: List<() -> Intent> = listOf(
-        {
-            val relative = folder.absolutePath.substringAfter("/storage/emulated/0/")
-            Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(
-                    Uri.parse(
-                        "content://com.android.externalstorage.documents/document/primary:" +
-                            relative.replace("/", "%2F")
-                    ),
-                    "vnd.android.document/directory"
-                )
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-        },
-        {
-            Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(
-                    androidx.core.content.FileProvider.getUriForFile(
-                        context, "${context.packageName}.fileprovider", folder
-                    ),
-                    "resource/folder"
-                )
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-        },
-        {
-            Intent.createChooser(
-                Intent(Intent.ACTION_VIEW).apply {
-                    data = Uri.parse("file://${folder.absolutePath}")
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                },
-                "Open folder"
-            )
-        }
-    )
-
-    for (build in attempts) {
-        val worked = runCatching { context.startActivity(build()) }.isSuccess
-        if (worked) return
-    }
-
-    Toast.makeText(context, folder.absolutePath, Toast.LENGTH_LONG).show()
 }

@@ -9,6 +9,16 @@ val DarkSurfaceVariant = Color(0xFF1E1E1E)
 val DarkOnBackground = Color(0xFFE0E0E0)
 val DarkOnSurface = Color(0xFFCCCCCC)
 
+/**
+ * Secondary text on a dark surface: labels, one-line explanations, units beside a value.
+ *
+ * Named rather than left to Material, whose dark default is a violet-tinted grey that sits
+ * oddly against the neutral greys everything else here is built from. Light enough to read
+ * at a glance, which is the point of setting it: the alternative was dimming the primary
+ * colour down with alpha, and that lands somewhere unreadable on one theme or the other.
+ */
+val DarkOnSurfaceVariant = Color(0xFFAFAFAF)
+
 // Light Theme — a warm paper ground rather than a neutral white.
 //
 // A pure white background under a full-bleed thumbnail reads as glare, and Material's own
