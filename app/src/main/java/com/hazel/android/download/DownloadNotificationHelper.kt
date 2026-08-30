@@ -444,6 +444,42 @@ object DownloadNotificationHelper {
     }
 
     /**
+     * Says a run is waiting for Wi-Fi, and only when there is nobody looking at the screen.
+     *
+     * While the app is open the card already says it, over its own artwork, and a
+     * notification repeating it is one the user has to sweep away for having been told
+     * something they were looking straight at. In the background it is the only way to say
+     * it at all, so it goes out there. Silent either way: nothing failed and nothing needs
+     * attention this second.
+     */
+    fun showWaitingForWifi(context: Context) {
+        cancelProgress(context)
+        if (isAppInForeground()) return
+
+        createChannels(context)
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_PROGRESS)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle("Waiting for Wi-Fi")
+            .setContentText("Downloads are set to Wi-Fi only. They start when you are back on Wi-Fi.")
+            .setStyle(
+                NotificationCompat.BigTextStyle().bigText(
+                    "Downloads are set to Wi-Fi only. They start when you are back on Wi-Fi."
+                )
+            )
+            .setAutoCancel(true)
+            .setSilent(true)
+            .setColorized(true)
+            .setColor(0xFF000000.toInt())
+            .setContentIntent(launchPendingIntent(context))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+
+        context.getSystemService(NotificationManager::class.java)
+            .notify(COMPLETE_NOTIFICATION_ID, builder.build())
+    }
+
+    /**
      * Reports a failure, and does it as loudly as a success is reported.
      *
      * A download is started and then left alone, so the app is usually in the background by

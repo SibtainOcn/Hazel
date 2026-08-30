@@ -81,6 +81,16 @@ data class DownloadState(
     val savedPath: String = "",
     val error: String? = null,
     /**
+     * True when a run was held back because the phone is not on Wi-Fi and downloads are
+     * set to Wi-Fi only.
+     *
+     * Separate from [error] because it is not one. Nothing failed and nothing was lost: the
+     * queue is intact and the run starts the moment the phone is on Wi-Fi again. It reads
+     * on the card, over the artwork, rather than as a line of red text above the list,
+     * because it is a fact about the item and not about the screen.
+     */
+    val waitingForWifi: Boolean = false,
+    /**
      * Untouched text from a failed metadata read, shown in the failure dialog. The
      * sanitized [error] is for inline messages; this is what the user can copy or act on.
      */
@@ -781,6 +791,7 @@ class DownloadViewModel : ViewModel() {
             status = "Starting download",
             isProcessing = false,
             error = null,
+            waitingForWifi = false,
             batch = plans.map { BatchItem(url = it.info.url, title = it.title) }
         )
 
@@ -808,16 +819,12 @@ class DownloadViewModel : ViewModel() {
                 totalBytes = 0L,
                 status = "Resuming downloads",
                 isProcessing = false,
-                error = null
+                error = null,
+                waitingForWifi = false
             )
         }
 
         val firstTitle = synchronized(queue) { queue.firstOrNull() }?.title.orEmpty()
-
-        // Asks the system to leave the process alone for the length of the run. Started
-        // before the first link rather than per link, so a set of ten is one service for
-        // the whole set instead of ten in a row.
-        DownloadService.start(app, firstTitle)
 
         // Run on a scope tied to the process rather than to the screen. A download the user
         // has walked away from should not end because the screen that started it did.
@@ -825,7 +832,6 @@ class DownloadViewModel : ViewModel() {
             val cm = app.getSystemService(android.net.ConnectivityManager::class.java)
             val caps = cm?.activeNetwork?.let { cm.getNetworkCapabilities(it) }
             if (caps?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) != true) {
-                DownloadService.stop(app)
                 // The queue is left where it is, on disk and in memory. There is nothing
                 // wrong with what was asked for, only with the connection, so it waits.
                 fail(app, "No internet connection")
@@ -835,13 +841,26 @@ class DownloadViewModel : ViewModel() {
             // Checked once, as the run starts, rather than throughout. A transfer already
             // going when the phone drops off Wi-Fi is left alone: stopping it partway
             // wastes the data it has already spent, which is what the setting is for.
-            if (SettingsRepository.getWifiOnly(app).first() &&
-                caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_CELLULAR)
-            ) {
-                DownloadService.stop(app)
-                fail(app, "Waiting for Wi-Fi. Downloads are set to Wi-Fi only.")
+            //
+            // The question asked is which transport the connection is on, not whether it
+            // happens to be the mobile one. A network can be neither: a phone tethered over
+            // USB or Bluetooth, or a link the system describes some other way again. Asking
+            // whether it was cellular let all of those through a setting whose entire point
+            // is that they should not be.
+            if (SettingsRepository.getWifiOnly(app).first() && !onWifiOrEthernet(caps)) {
+                holdForWifi(app)
                 return@launch
             }
+
+            // Asks the system to leave the process alone for the length of the run. Started
+            // before the first link rather than per link, so a set of ten is one service for
+            // the whole set instead of ten in a row.
+            //
+            // Started here, after the run is known to be going ahead, rather than before the
+            // checks. A service started and stopped in the same breath is the thing the
+            // system kills the process over, and a run refused for the connection never
+            // needed one in the first place.
+            DownloadService.start(app, firstTitle)
 
             val cookies = CookieRepository.activeCookieFile(app)
             val speedLimit = SettingsRepository.getSpeedLimit(app).first()
@@ -1576,6 +1595,38 @@ class DownloadViewModel : ViewModel() {
                 }
             }
         } catch (_: Exception) { /* best-effort cleanup */ }
+    }
+
+    /**
+     * Whether a connection is one the Wi-Fi only setting permits.
+     *
+     * Ethernet counts. A device on a dock or an adapter is not on the mobile network and
+     * not spending anybody's allowance, which is the whole of what the setting is protecting.
+     * A VPN reports the transport it is carried over alongside its own, so a VPN over Wi-Fi
+     * is still Wi-Fi here.
+     */
+    private fun onWifiOrEthernet(caps: android.net.NetworkCapabilities): Boolean =
+        caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI) ||
+            caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_ETHERNET)
+
+    /**
+     * Holds the run back for want of Wi-Fi, without calling it a failure.
+     *
+     * Nothing is purged and nothing is dropped: the queue is exactly as it was, and the
+     * links keep their queued state, so starting again once the phone is on Wi-Fi picks up
+     * where this left off. That is the whole difference from [fail], which exists for a run
+     * that got somewhere and stopped.
+     */
+    private fun holdForWifi(context: Context) {
+        _state.value = _state.value.copy(
+            isDownloading = false,
+            progress = 0f,
+            status = "",
+            isProcessing = false,
+            error = null,
+            waitingForWifi = true
+        )
+        DownloadNotificationHelper.showWaitingForWifi(context)
     }
 
     private fun fail(context: Context, message: String) {
