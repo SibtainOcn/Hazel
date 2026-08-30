@@ -212,6 +212,8 @@ Everything merged since 1.0.0, plus what is open in review.
   speed and ETA on it were routinely stale. It is redrawn on a timer instead.
 
 ### Changed
+- **A history row whose file has gone reads Deleted** rather than File missing. The file is
+  not mislaid, and almost always it is gone because the user removed it.
 - **The converter sits directly under More.** It used to be behind a Tools screen whose
   entire content was that one row, which is a tap and a screen spent saying one word. Tools
   remains, empty, for whatever the next tool turns out to be.
