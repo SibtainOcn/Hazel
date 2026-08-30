@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 /** Where one link has got to while a batch is running. */
-enum class BatchState { QUEUED, DOWNLOADING, DONE, FAILED }
+enum class BatchState { QUEUED, DOWNLOADING, PAUSED, DONE, FAILED }
 
 /** One link's outcome inside a batch, so the screen can report progress per item. */
 data class BatchItem(
@@ -144,6 +144,17 @@ class DownloadViewModel : ViewModel() {
     private val processId = "hazel_download"
     @Volatile private var isCancelled = false
 
+    /**
+     * Set while the engine is being stopped for a pause rather than for good.
+     *
+     * The two look identical from inside the run: the process is destroyed and the call
+     * throws. What follows is the opposite in each case, so the difference has to be stated
+     * rather than inferred. A cancel throws the part file away and records a failure; a
+     * pause leaves the part file exactly where it is, which is what lets the download pick
+     * up from there instead of starting again.
+     */
+    @Volatile private var isPaused = false
+
     /** When the progress notification was last redrawn, so updates stay evenly paced. */
     @Volatile private var lastNotifiedAt = 0L
 
@@ -163,6 +174,24 @@ class DownloadViewModel : ViewModel() {
      * against and it does not move.
      */
     @Volatile private var expectedTotalBytes: Long = 0L
+
+    /**
+     * How far along the download actually is, judged by what is on disk.
+     *
+     * A download picked up from a part file reports its own progress from nothing: the
+     * engine counts what this run has fetched, not what is already written. Shown as it
+     * comes, that reads as the download having started again, which is the one thing a
+     * resume must not look like. The same gap opens up without any resume at all, because a
+     * video and its audio are fetched as two runs of the transfer and the second one starts
+     * its count at zero with most of the file already down.
+     *
+     * So the temp directory is measured instead, before the engine starts and again as it
+     * runs, and the readout never falls below what those bytes are worth.
+     */
+    @Volatile private var progressFloor = 0f
+
+    /** When the temp directory was last measured, so the floor is not re-read every line. */
+    @Volatile private var lastFloorCheckAt = 0L
 
     /**
      * Links waiting their turn, and the run that is draining them.
@@ -198,17 +227,29 @@ class DownloadViewModel : ViewModel() {
 
             val plans = pending.map { it.toPlan() }
 
+            // A link the user paused is shown as paused and left alone. Only what was
+            // still owed when the app went away is picked up, which is the difference
+            // between carrying on and overriding a decision already made.
             _state.value = _state.value.copy(
                 results = plans.map { it.info } + _state.value.results.filterNot { existing ->
                     plans.any { it.info.url == existing.url }
                 },
-                batch = plans.map { BatchItem(url = it.info.url, title = it.title) }
+                batch = pending.map {
+                    BatchItem(
+                        url = it.url,
+                        title = it.title,
+                        state = if (it.paused) BatchState.PAUSED else BatchState.QUEUED
+                    )
+                }
             )
+
+            val owed = pending.filterNot { it.paused }
+            if (owed.isEmpty()) return@launch
 
             synchronized(queue) {
                 // Straight into the queue rather than back through the front door: they are
                 // already written down, and enqueuing them again would only rewrite them.
-                pending.forEach { queue.addLast(it) }
+                owed.forEach { queue.addLast(it) }
             }
             runQueue(app, resumed = true)
         }
@@ -805,19 +846,25 @@ class DownloadViewModel : ViewModel() {
                 downloadTreeUri = next.treeUri
 
                 isCancelled = false
+                isPaused = false
                 downloadIsVideo = plan.format.hasVideo
                 markBatch(plan.info.url, BatchState.DOWNLOADING)
 
                 expectedTotalBytes = expectedTotalFor(plan)
+                lastFloorCheckAt = 0L
+                progressFloor = fractionOnDisk()
 
+                val opening = if (progressFloor > 0f) "Resuming" else "Starting download"
                 _state.value = _state.value.copy(
                     info = plan.info,
-                    progress = 0f,
+                    progress = progressFloor,
                     totalBytes = expectedTotalBytes,
-                    status = "Starting download",
+                    status = opening,
                     isProcessing = false
                 )
-                DownloadNotificationHelper.showProgress(app, 0, "Starting download", plan.title)
+                DownloadNotificationHelper.showProgress(
+                    app, (progressFloor * 100f).toInt(), opening, plan.title
+                )
 
                 try {
                     if (!downloadDir.exists()) downloadDir.mkdirs()
@@ -833,17 +880,31 @@ class DownloadViewModel : ViewModel() {
                         // A replayed payload whose addresses have expired fails here. That
                         // is not the link failing, so it is read again and tried once more
                         // before the item is recorded as a failure.
+                        // A pause counts as a reason not to retry, the same as a cancel.
+                        // Without that the retry treated the stopped process as a stale
+                        // payload, threw away the part file and started the download again,
+                        // which is the one thing a pause must not do.
                         val replayed = InfoCache.infoJsonFor(plan.info.url) != null
-                        if (!replayed || isCancelled || isBatchCancelled) throw e
+                        if (!replayed || isCancelled || isBatchCancelled || isPaused) throw e
 
                         InfoCache.invalidate(plan.info.url)
                         purgeFragments()
+                        // The fragments that earned the floor have just been thrown away,
+                        // so the floor goes with them rather than holding the bar up at a
+                        // figure nothing on disk backs any more.
+                        progressFloor = 0f
+                        lastFloorCheckAt = 0L
                         executeYtDlp(
                             buildRequest(
                                 plan.info.url, plan.format, options, plan.title, plan.author,
                                 cookies, speedLimit
                             )
                         )
+                    }
+
+                    if (isPaused) {
+                        holdForResume(next)
+                        break
                     }
 
                     if (isCancelled || isBatchCancelled) {
@@ -855,10 +916,19 @@ class DownloadViewModel : ViewModel() {
                     finishDownload(app)
                     markBatch(plan.info.url, BatchState.DONE)
                 } catch (_: CancellationException) {
+                    if (isPaused) {
+                        holdForResume(next)
+                        break
+                    }
                     finishDownload(app)
                     markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                     break
                 } catch (e: Exception) {
+                    if (isPaused) {
+                        holdForResume(next)
+                        break
+                    }
+
                     if (isCancelled || isBatchCancelled) {
                         finishDownload(app)
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
@@ -882,13 +952,33 @@ class DownloadViewModel : ViewModel() {
             }
 
             // A run stopped part way leaves whatever it did not reach written down, so the
-            // next launch carries on. Only a run that emptied the queue clears the record.
-            val remaining = synchronized(queue) { queue.toList() }
+            // next launch carries on. A run the user cancelled leaves nothing: they stopped
+            // it on purpose, and a queue that came back on the next launch would be the app
+            // overruling that.
+            val remaining =
+                if (isBatchCancelled) emptyList()
+                else synchronized(queue) { queue.toList() }
             DownloadQueueRepository.save(app, remaining)
             synchronized(queue) { queue.clear() }
 
             DownloadService.stop(app)
             finishBatch(app)
+        }
+    }
+
+    /**
+     * Puts a paused link back at the head of the queue, with its part file untouched.
+     *
+     * Nothing is swept and nothing is published: the temporary directory still holds a
+     * half-finished file, and handing that to the sweep would put half a video in the user's
+     * Downloads folder and write it into the history as though it had finished.
+     */
+    private fun holdForResume(item: QueuedDownload) {
+        synchronized(queue) { queue.addFirst(item.copy(paused = true)) }
+        markBatch(item.url, BatchState.PAUSED)
+        _state.value = _state.value.copy(status = "Paused", isProcessing = false)
+        downloadScope.launch {
+            DownloadQueueRepository.setPaused(HazelApp.instance, item.url, true)
         }
     }
 
@@ -900,7 +990,8 @@ class DownloadViewModel : ViewModel() {
         )
 
         // Taken off the written-down queue once it is settled either way. A link kept there
-        // after it finished would download itself again on the next launch.
+        // after it finished would download itself again on the next launch. A paused one is
+        // not settled: it is still owed, and staying on the record is the point of it.
         if (state == BatchState.DONE || state == BatchState.FAILED) {
             downloadScope.launch {
                 DownloadQueueRepository.remove(HazelApp.instance, url)
@@ -960,6 +1051,48 @@ class DownloadViewModel : ViewModel() {
             try {
                 YoutubeDL.getInstance().destroyProcessById(processId)
             } catch (_: Exception) { /* process may already be done */ }
+        }
+    }
+
+    /**
+     * Stops the download in hand and keeps everything it has fetched so far.
+     *
+     * The engine has no pause of its own, so the process is stopped the same way a cancel
+     * stops it. What makes it a pause is what does not happen afterwards: the part file is
+     * left alone, nothing is published, and the link goes back to the head of the queue,
+     * still written down. Starting again hands yt-dlp the same part file, which it carries
+     * on from rather than fetching a second time.
+     */
+    fun pauseDownload() {
+        if (!_state.value.isDownloading || _state.value.isProcessing) return
+
+        isPaused = true
+        downloadScope.launch {
+            try {
+                YoutubeDL.getInstance().destroyProcessById(processId)
+            } catch (_: Exception) { /* process may already be done */ }
+        }
+    }
+
+    /** Starts the queue again from whatever is at the head of it, paused item included. */
+    fun resumeDownload() {
+        if (_state.value.isDownloading) return
+        val app = HazelApp.instance
+        downloadScope.launch {
+            val pending = runCatching { DownloadQueueRepository.load(app) }
+                .getOrDefault(emptyList())
+            if (pending.isEmpty()) return@launch
+
+            DownloadQueueRepository.clearPaused(app)
+            synchronized(queue) {
+                if (queue.isEmpty()) pending.forEach { queue.addLast(it.copy(paused = false)) }
+            }
+            _state.value = _state.value.copy(
+                batch = _state.value.batch.map {
+                    if (it.state == BatchState.PAUSED) it.copy(state = BatchState.QUEUED) else it
+                }
+            )
+            runQueue(app, resumed = true)
         }
     }
 
@@ -1170,7 +1303,8 @@ class DownloadViewModel : ViewModel() {
     private fun executeYtDlp(request: YoutubeDLRequest) {
         lastNotifiedAt = 0L
         YoutubeDL.getInstance().execute(request, processId) { progress, _, line ->
-            val percent = progress.coerceIn(0f, 100f)
+            refreshFloorFromDisk()
+            val percent = progress.coerceIn(0f, 100f).coerceAtLeast(progressFloor * 100f)
             val status = cleanProgressLine(line) ?: _state.value.status
             val processing = _state.value.isProcessing || isPostProcessing(line)
             _state.value = _state.value.copy(
@@ -1321,7 +1455,53 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
+    /**
+     * What fraction of the expected file is sitting in the temp directory right now.
+     *
+     * Read off the files rather than remembered, because the files are the thing that
+     * actually survives: a download interrupted by the app being killed leaves them behind
+     * with nobody left to have remembered anything.
+     *
+     * Everything in the directory counts, not only what is still a part file. A video whose
+     * transfer finished is renamed off .part while its audio is still being fetched, and
+     * counting part files alone would call that download nearly empty at the moment it is
+     * nearly done. The directory holds one download's working files and nothing else, so
+     * its whole weight is the honest answer.
+     */
+    private fun fractionOnDisk(): Float {
+        if (expectedTotalBytes <= 0L) return 0f
+        val onDisk = try {
+            downloadDir.listFiles()
+                ?.filter { it.isFile && !it.name.endsWith(".ytdl") }
+                ?.sumOf { it.length() }
+                ?: 0L
+        } catch (_: Exception) {
+            0L
+        }
+        if (onDisk <= 0L) return 0f
+
+        // Capped short of the end: a floor of one would leave the bar full for the whole of
+        // whatever is left to do, muxing included.
+        return (onDisk.toFloat() / expectedTotalBytes).coerceIn(0f, 0.99f)
+    }
+
+    /**
+     * Re-measures the temp directory, at most once a second.
+     *
+     * The floor is what keeps the readout honest through a resume and through the switch
+     * from the video stream to the audio one, and it can only do that if it keeps up with
+     * the bytes landing. A progress line arrives many times a second, though, and listing a
+     * directory that often for a number that moves slowly is not worth the reads.
+     */
+    private fun refreshFloorFromDisk() {
+        val now = System.currentTimeMillis()
+        if (now - lastFloorCheckAt < FLOOR_INTERVAL_MS) return
+        lastFloorCheckAt = now
+        progressFloor = maxOf(progressFloor, fractionOnDisk())
+    }
+
     /** Deletes yt-dlp's in-progress artefacts from the temp directory. */
+
     private fun purgeFragments() {
         try {
             downloadDir.listFiles()?.forEach { f ->
@@ -1514,6 +1694,9 @@ class DownloadViewModel : ViewModel() {
 
         /** How often the progress notification is redrawn while a transfer runs. */
         const val NOTIFICATION_INTERVAL_MS = 600L
+
+        /** How often the temp directory is weighed while a transfer runs. */
+        const val FLOOR_INTERVAL_MS = 1000L
 
         /** Stages that run once the transfer itself has finished. */
         val POST_PROCESS_MARKERS = listOf(

@@ -148,6 +148,25 @@ Everything merged since 1.0.0, plus what is open in review.
   assumed answer and corrected once the screen resumed, so it arrived late and pushed
   everything under it down. The answer is read before the first frame.
 - **Source, at the end of More**, opening the project on GitHub.
+- **Pause and resume, from a menu in the corner of a downloading card.** The engine has no
+  pause of its own, so the process is stopped the way a cancel stops it; what makes it a
+  pause is what does not happen afterwards. The part file is left exactly where it is,
+  nothing is published, and the link goes back to the head of the queue. Starting again
+  hands yt-dlp the same part file, which it carries on from rather than fetching a second
+  time. While a download is paused the artwork keeps the treatment that says it is in hand,
+  and the control in the middle becomes the one that starts it again.
+- **A resumed download no longer reads as though it had started over.** The engine counts
+  what the current run has fetched, not what is already on disk, so a download picked up at
+  190 MB reported nought per cent while its file sat untouched. The bytes already written
+  are measured before the engine starts, and the readout never falls below them.
+- **A cancelled download stays cancelled.** Cancelling clears what was still owed from the
+  record, so nothing comes back on the next launch; a paused one is kept, but shown as
+  paused rather than started again, since a launch undoing a pause would make the button
+  mean nothing.
+- **The speed limit is chosen from a list rather than typed.** The value has a shape the
+  engine expects, a typo in it only shows up as a download running at modem speed, and
+  nobody has a particular number in mind. The choices cover the reasons for setting one at
+  all: sparing a metered connection, and leaving room for everything else on the network.
 - **The download queue outlives the app.** It was held in memory only, so a swipe off the
   recents list, a crash or a low-memory kill threw it away without a word: the user asked for
   ten downloads, got three, and nothing anywhere said what happened to the other seven. Each

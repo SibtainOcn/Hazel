@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -70,6 +71,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.hazel.android.R
@@ -544,6 +546,8 @@ fun DownloadScreen(
                                     history.any { it.url == info.url },
                             onOpenSheet = openSheet,
                             onCancel = downloadViewModel::cancelDownload,
+                            onPause = downloadViewModel::pauseDownload,
+                            onResume = downloadViewModel::resumeDownload,
                             onRemove = remove
                         )
                     }
@@ -827,6 +831,8 @@ private fun MediaCard(
     alreadyDownloaded: Boolean = false,
     onOpenSheet: () -> Unit,
     onCancel: () -> Unit,
+    onPause: () -> Unit = {},
+    onResume: () -> Unit = {},
     onRemove: (() -> Unit)? = null
 ) {
     val animatedProgress by animateFloatAsState(
@@ -834,6 +840,9 @@ private fun MediaCard(
         animationSpec = M3Motion.emphasized(300),
         label = "cardProgress"
     )
+
+    var menuOpen by remember { mutableStateOf(false) }
+    val isPaused = batchItem?.state == BatchState.PAUSED
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -869,7 +878,71 @@ private fun MediaCard(
                     )
                 }
 
-                if (isDownloading) {
+                // Offered while the download is in hand, and while it is sitting paused.
+                // It is the only way back from a pause, so it cannot go away with the
+                // thing it undoes.
+                if (isDownloading || isPaused) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .zIndex(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.55f))
+                                .clickable { menuOpen = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Filled.MoreVert,
+                                contentDescription = "Download options",
+                                modifier = Modifier.size(18.dp),
+                                tint = Color.White
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = menuOpen,
+                            onDismissRequest = { menuOpen = false }
+                        ) {
+                            if (isPaused) {
+                                DropdownMenuItem(
+                                    text = { Text("Resume") },
+                                    onClick = {
+                                        menuOpen = false
+                                        onResume()
+                                    }
+                                )
+                            } else {
+                                DropdownMenuItem(
+                                    text = { Text("Pause") },
+                                    // Nothing to pause once the transfer is done and the
+                                    // engine has moved on to merging or tagging.
+                                    enabled = !isProcessing,
+                                    onClick = {
+                                        menuOpen = false
+                                        onPause()
+                                    }
+                                )
+                            }
+                            DropdownMenuItem(
+                                text = { Text("Cancel") },
+                                onClick = {
+                                    menuOpen = false
+                                    onCancel()
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // A paused download is still a download in hand, so the artwork keeps the
+                // treatment that says so. Only the control in the middle changes: there is
+                // nothing to stop any more, and the thing to do is start it again.
+                if (isDownloading || isPaused) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -886,7 +959,15 @@ private fun MediaCard(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (isProcessing) {
+                        if (isPaused) {
+                            OverlayChip(text = "Paused", bold = true)
+                            if (totalBytes > 0) {
+                                val done = (totalBytes * animatedProgress).toLong()
+                                OverlayChip(
+                                    text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
+                                )
+                            }
+                        } else if (isProcessing) {
                             OverlayChip(text = "Processing", bold = true)
                         } else {
                             OverlayChip(
@@ -902,7 +983,7 @@ private fun MediaCard(
                         }
                     }
 
-                    if (isProcessing) {
+                    if (isProcessing && !isPaused) {
                         ProcessingShimmer(modifier = Modifier.fillMaxSize())
                     } else {
                         // A progress ring wrapping the cancel control. It is the only
@@ -914,7 +995,7 @@ private fun MediaCard(
                                 .size(60.dp)
                                 .clip(CircleShape)
                                 .background(Color.Black.copy(alpha = 0.55f))
-                                .clickable(onClick = onCancel),
+                                .clickable(onClick = if (isPaused) onResume else onCancel),
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(
@@ -925,8 +1006,9 @@ private fun MediaCard(
                                 strokeWidth = 3.dp
                             )
                             Icon(
-                                Icons.Filled.Close,
-                                contentDescription = "Cancel download",
+                                if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Close,
+                                contentDescription =
+                                    if (isPaused) "Resume download" else "Cancel download",
                                 modifier = Modifier.size(22.dp),
                                 tint = Color.White
                             )
@@ -1170,6 +1252,7 @@ private fun MediaRow(
                     }
 
                     val state = when {
+                        batchItem?.state == BatchState.PAUSED -> "Paused"
                         isProcessing -> "Processing"
                         // The same line the card shows: how far along, and how far there is
                         // to go. A percentage on its own says nothing about whether the

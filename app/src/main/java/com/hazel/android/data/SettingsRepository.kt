@@ -217,9 +217,29 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[SPEED_LIMIT_KEY] = limit.trim() }
     }
 
-    /** True when [limit] is something yt-dlp will accept, or blank. */
-    fun isValidSpeedLimit(limit: String): Boolean =
-        limit.isBlank() || Regex("""^\d+(\.\d+)?[KMkm]?$""").matches(limit.trim())
+    /**
+     * The ceilings offered, paired with what each is called.
+     *
+     * A list rather than a field to type in: the value has a shape yt-dlp expects, a typo
+     * in it is only discovered when a download runs slower than a modem, and nobody has a
+     * particular number in mind anyway. These cover the reasons for setting one at all,
+     * which are sparing a metered connection and leaving room for everything else on the
+     * network.
+     */
+    val SPEED_LIMITS: List<Pair<String, String>> = listOf(
+        "" to "No limit",
+        "256K" to "256 KB/s",
+        "512K" to "512 KB/s",
+        "1M" to "1 MB/s",
+        "2M" to "2 MB/s",
+        "5M" to "5 MB/s",
+        "10M" to "10 MB/s"
+    )
+
+    /** What to call the stored ceiling, falling back to its own text if it is not a preset. */
+    fun speedLimitLabel(limit: String): String =
+        SPEED_LIMITS.firstOrNull { it.first == limit }?.second
+            ?: limit.ifBlank { "No limit" }
 
     // ── List layout ──
     //

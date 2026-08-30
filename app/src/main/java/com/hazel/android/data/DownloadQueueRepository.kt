@@ -39,7 +39,15 @@ data class QueuedDownload(
     val mergeAudioSizeBytes: Long,
     val treeUri: String,
     /** The settings this link was asked for under, so a later change does not rewrite it. */
-    val options: DownloadOptions
+    val options: DownloadOptions,
+    /**
+     * True for a link the user stopped on purpose.
+     *
+     * Kept on the record, because the part file it already fetched is worth coming back to,
+     * but not started again on its own: a pause is a decision, and a launch undoing it
+     * would make the button mean nothing.
+     */
+    val paused: Boolean = false
 )
 
 /**
@@ -94,6 +102,26 @@ object DownloadQueueRepository {
         context.dataStore.edit { prefs -> prefs.remove(QUEUE_KEY) }
     }
 
+    /** Marks one link as stopped on purpose, or as owed again. */
+    suspend fun setPaused(context: Context, url: String, paused: Boolean) {
+        context.dataStore.edit { prefs ->
+            val updated = decode(prefs[QUEUE_KEY]).map {
+                if (it.url == url) it.copy(paused = paused) else it
+            }
+            if (updated.isEmpty()) prefs.remove(QUEUE_KEY)
+            else prefs[QUEUE_KEY] = encode(updated)
+        }
+    }
+
+    /** Clears the paused mark from everything, for a run being started again. */
+    suspend fun clearPaused(context: Context) {
+        context.dataStore.edit { prefs ->
+            val updated = decode(prefs[QUEUE_KEY]).map { it.copy(paused = false) }
+            if (updated.isEmpty()) prefs.remove(QUEUE_KEY)
+            else prefs[QUEUE_KEY] = encode(updated)
+        }
+    }
+
     private fun encode(items: List<QueuedDownload>): String {
         val array = JSONArray()
         items.forEach { item ->
@@ -116,6 +144,7 @@ object DownloadQueueRepository {
                     put("mergeAudioSize", item.mergeAudioSizeBytes)
                     put("treeUri", item.treeUri)
                     put("options", encodeOptions(item.options))
+                    put("paused", item.paused)
                 }
             )
         }
@@ -152,7 +181,8 @@ object DownloadQueueRepository {
                     },
                     mergeAudioSizeBytes = item.optLong("mergeAudioSize"),
                     treeUri = item.optString("treeUri"),
-                    options = decodeOptions(item.optJSONObject("options"))
+                    options = decodeOptions(item.optJSONObject("options")),
+                    paused = item.optBoolean("paused")
                 )
             }
         }.getOrDefault(emptyList())
