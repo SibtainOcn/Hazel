@@ -1,5 +1,18 @@
 package com.hazel.android.ui.screens.more
 
+import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import com.hazel.android.data.SettingsRepository
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,6 +59,21 @@ import com.hazel.android.util.StoragePaths
 @Composable
 fun StorageLocationsScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val wifiOnly by SettingsRepository.getWifiOnly(context).collectAsState(initial = false)
+    val savedLimit by SettingsRepository.getSpeedLimit(context).collectAsState(initial = "")
+
+    // Seeded from the saved value once it arrives, then left to the field: rebinding it on
+    // every save would fight whoever is typing.
+    var limitDraft by remember { mutableStateOf("") }
+    var limitLoaded by remember { mutableStateOf(false) }
+    LaunchedEffect(savedLimit) {
+        if (!limitLoaded) {
+            limitDraft = savedLimit
+            limitLoaded = true
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -72,7 +100,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Storage Locations",
+                "Downloads",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -81,7 +109,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
 
         // Info text
         Text(
-            "Tap any location to open it in your file manager",
+            "Where downloads are saved, and the limits they run under",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
             modifier = Modifier.padding(bottom = 16.dp)
@@ -101,6 +129,98 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                 onClick = { FolderUtil.open(context, StoragePaths.finalDownloads) }
             )
 
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            "Limits",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            // Checked as a download starts, not while one runs: stopping a transfer partway
+            // because the phone changed networks wastes the data it has already spent.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { scope.launch { SettingsRepository.setWifiOnly(context, !wifiOnly) } }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Filled.Wifi,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Wi-Fi only", fontWeight = FontWeight.Medium)
+                    Text(
+                        "Downloads wait rather than run on mobile data",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                }
+                Switch(
+                    checked = wifiOnly,
+                    onCheckedChange = { enabled ->
+                        scope.launch { SettingsRepository.setWifiOnly(context, enabled) }
+                    }
+                )
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            // Held locally while it is being typed and written once it reads as something
+            // the engine will take, so a half-typed "1" is not saved as a one-byte ceiling.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Filled.Speed,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Speed limit", fontWeight = FontWeight.Medium)
+                    Text(
+                        "Blank for no limit. A number with K or M, like 500K or 1.5M",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                OutlinedTextField(
+                    value = limitDraft,
+                    onValueChange = { typed ->
+                        limitDraft = typed
+                        if (SettingsRepository.isValidSpeedLimit(typed)) {
+                            scope.launch { SettingsRepository.setSpeedLimit(context, typed) }
+                        }
+                    },
+                    isError = !SettingsRepository.isValidSpeedLimit(limitDraft),
+                    singleLine = true,
+                    placeholder = { Text("None") },
+                    modifier = Modifier.width(120.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))

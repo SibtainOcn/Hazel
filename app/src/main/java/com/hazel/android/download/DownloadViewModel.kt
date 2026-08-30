@@ -6,6 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.hazel.android.HazelApp
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.DownloadHistoryRepository
+import com.hazel.android.data.DownloadQueueRepository
+import com.hazel.android.data.QueuedDownload
+import com.hazel.android.data.toPlan
+import com.hazel.android.data.toQueued
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.LinkContents
@@ -49,19 +53,6 @@ data class DownloadPlan(
     val format: MediaFormat,
     val title: String,
     val author: String
-)
-
-/**
- * One link waiting its turn, with the settings it was asked for under.
- *
- * The options travel with the link rather than being read when its turn comes, because
- * links can be added while a run is going: three shared in a row are three separate asks,
- * and the second one should not quietly pick up a setting changed after it was made.
- */
-private data class QueuedDownload(
-    val plan: DownloadPlan,
-    val options: DownloadOptions,
-    val treeUri: String
 )
 
 data class DownloadState(
@@ -180,8 +171,48 @@ class DownloadViewModel : ViewModel() {
      * going, and starting one was the only way in. They are appended instead, and the run
      * keeps going until the queue is empty, so a set collected over several shares behaves
      * the same as a set collected in one.
+     *
+     * The same list is written to disk as it changes. A queue held only here is one that a
+     * swipe off the recents list throws away without a word, leaving the user to work out
+     * for themselves which seven of their ten downloads never happened.
      */
     private val queue = ArrayDeque<QueuedDownload>()
+
+    init {
+        restoreQueue()
+    }
+
+    /**
+     * Picks up a queue left behind by a run that did not finish.
+     *
+     * The links are put back in the list so the screen shows what is still owed, and the
+     * run starts itself: they were asked for already, and asking again for permission to
+     * carry on would make the writing-down pointless.
+     */
+    private fun restoreQueue() {
+        downloadScope.launch {
+            val app = HazelApp.instance
+            val pending = runCatching { DownloadQueueRepository.load(app) }
+                .getOrDefault(emptyList())
+            if (pending.isEmpty()) return@launch
+
+            val plans = pending.map { it.toPlan() }
+
+            _state.value = _state.value.copy(
+                results = plans.map { it.info } + _state.value.results.filterNot { existing ->
+                    plans.any { it.info.url == existing.url }
+                },
+                batch = plans.map { BatchItem(url = it.info.url, title = it.title) }
+            )
+
+            synchronized(queue) {
+                // Straight into the queue rather than back through the front door: they are
+                // already written down, and enqueuing them again would only rewrite them.
+                pending.forEach { queue.addLast(it) }
+            }
+            runQueue(app, resumed = true)
+        }
+    }
 
     /** Destination picked through the document picker, or blank for Download/Hazel. */
     private var downloadTreeUri: String = ""
@@ -669,10 +700,14 @@ class DownloadViewModel : ViewModel() {
 
         com.hazel.android.util.PermissionHelper.ensureNotificationPermission(context)
 
-        val queued = plans.map { QueuedDownload(it, options, treeUri) }
+        val queued = plans.map { it.toQueued(options, treeUri) }
         val alreadyRunning = _state.value.isDownloading
 
         synchronized(queue) { queue.addAll(queued) }
+
+        // Written down before anything starts, so a queue interrupted a second later is
+        // still a queue that can be picked up.
+        downloadScope.launch { DownloadQueueRepository.add(HazelApp.instance, queued) }
 
         if (alreadyRunning) {
             // The run in flight picks these up on its own. Only the list the screen shows
@@ -700,30 +735,72 @@ class DownloadViewModel : ViewModel() {
             batch = plans.map { BatchItem(url = it.info.url, title = it.title) }
         )
 
+        runQueue(context.applicationContext, resumed = false)
+    }
+
+    /**
+     * Works through the queue, one link at a time, until there is nothing left in it.
+     *
+     * One at a time is deliberate: yt-dlp already saturates the connection for a single
+     * download, and every download shares one temporary directory, where the sweep that
+     * publishes finished files cannot tell one run's output from another's.
+     *
+     * [resumed] marks a queue picked up from disk rather than one just asked for, which is
+     * the only case where the run has to announce itself.
+     */
+    private fun runQueue(app: Context, resumed: Boolean) {
+        if (resumed) {
+            isBatchCancelled = false
+            downloadContext = app
+            _state.value = _state.value.copy(
+                isDownloading = true,
+                isComplete = false,
+                progress = 0f,
+                totalBytes = 0L,
+                status = "Resuming downloads",
+                isProcessing = false,
+                error = null
+            )
+        }
+
+        val firstTitle = synchronized(queue) { queue.firstOrNull() }?.title.orEmpty()
+
         // Asks the system to leave the process alone for the length of the run. Started
         // before the first link rather than per link, so a set of ten is one service for
         // the whole set instead of ten in a row.
-        DownloadService.start(context, plans.first().title)
+        DownloadService.start(app, firstTitle)
 
         // Run on a scope tied to the process rather than to the screen. A download the user
         // has walked away from should not end because the screen that started it did.
         downloadJob = downloadScope.launch {
-            val app = context.applicationContext
             val cm = app.getSystemService(android.net.ConnectivityManager::class.java)
             val caps = cm?.activeNetwork?.let { cm.getNetworkCapabilities(it) }
             if (caps?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) != true) {
                 DownloadService.stop(app)
-                synchronized(queue) { queue.clear() }
-                fail(context, "No internet connection")
+                // The queue is left where it is, on disk and in memory. There is nothing
+                // wrong with what was asked for, only with the connection, so it waits.
+                fail(app, "No internet connection")
                 return@launch
             }
 
-            val cookies = CookieRepository.activeCookieFile(context)
+            // Checked once, as the run starts, rather than throughout. A transfer already
+            // going when the phone drops off Wi-Fi is left alone: stopping it partway
+            // wastes the data it has already spent, which is what the setting is for.
+            if (SettingsRepository.getWifiOnly(app).first() &&
+                caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_CELLULAR)
+            ) {
+                DownloadService.stop(app)
+                fail(app, "Waiting for Wi-Fi. Downloads are set to Wi-Fi only.")
+                return@launch
+            }
+
+            val cookies = CookieRepository.activeCookieFile(app)
+            val speedLimit = SettingsRepository.getSpeedLimit(app).first()
 
             while (true) {
                 if (isBatchCancelled) break
                 val next = synchronized(queue) { queue.removeFirstOrNull() } ?: break
-                val plan = next.plan
+                val plan = next.toPlan()
                 val options = next.options
                 downloadTreeUri = next.treeUri
 
@@ -740,7 +817,7 @@ class DownloadViewModel : ViewModel() {
                     status = "Starting download",
                     isProcessing = false
                 )
-                DownloadNotificationHelper.showProgress(context, 0, "Starting download", plan.title)
+                DownloadNotificationHelper.showProgress(app, 0, "Starting download", plan.title)
 
                 try {
                     if (!downloadDir.exists()) downloadDir.mkdirs()
@@ -749,7 +826,7 @@ class DownloadViewModel : ViewModel() {
                         executeYtDlp(
                             buildRequest(
                                 plan.info.url, plan.format, options, plan.title, plan.author,
-                                cookies
+                                cookies, speedLimit
                             )
                         )
                     } catch (e: Exception) {
@@ -764,26 +841,26 @@ class DownloadViewModel : ViewModel() {
                         executeYtDlp(
                             buildRequest(
                                 plan.info.url, plan.format, options, plan.title, plan.author,
-                                cookies
+                                cookies, speedLimit
                             )
                         )
                     }
 
                     if (isCancelled || isBatchCancelled) {
-                        finishDownload(context)
+                        finishDownload(app)
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         break
                     }
 
-                    finishDownload(context)
+                    finishDownload(app)
                     markBatch(plan.info.url, BatchState.DONE)
                 } catch (_: CancellationException) {
-                    finishDownload(context)
+                    finishDownload(app)
                     markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                     break
                 } catch (e: Exception) {
                     if (isCancelled || isBatchCancelled) {
-                        finishDownload(context)
+                        finishDownload(app)
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         break
                     }
@@ -804,9 +881,14 @@ class DownloadViewModel : ViewModel() {
                 }
             }
 
+            // A run stopped part way leaves whatever it did not reach written down, so the
+            // next launch carries on. Only a run that emptied the queue clears the record.
+            val remaining = synchronized(queue) { queue.toList() }
+            DownloadQueueRepository.save(app, remaining)
             synchronized(queue) { queue.clear() }
-            DownloadService.stop(context.applicationContext)
-            finishBatch(context)
+
+            DownloadService.stop(app)
+            finishBatch(app)
         }
     }
 
@@ -816,6 +898,14 @@ class DownloadViewModel : ViewModel() {
                 if (it.url == url) it.copy(state = state, error = error) else it
             }
         )
+
+        // Taken off the written-down queue once it is settled either way. A link kept there
+        // after it finished would download itself again on the next launch.
+        if (state == BatchState.DONE || state == BatchState.FAILED) {
+            downloadScope.launch {
+                DownloadQueueRepository.remove(HazelApp.instance, url)
+            }
+        }
     }
 
     /** Reports the run as a whole once every item has been attempted. */
@@ -905,7 +995,8 @@ class DownloadViewModel : ViewModel() {
         options: DownloadOptions,
         title: String,
         author: String,
-        cookieFile: File?
+        cookieFile: File?,
+        speedLimit: String
     ): YoutubeDLRequest = buildDownloadRequest(url).apply {
         val isVideo = format.hasVideo
         val container = (if (isVideo) options.videoContainer else options.audioContainer).trim()
@@ -913,6 +1004,11 @@ class DownloadViewModel : ViewModel() {
         addOption("-o", "${downloadDir.absolutePath}/${outputTemplate(options, title, author)}")
         addOption("--no-playlist")
         addOption("--no-mtime")
+
+        // A ceiling on transfer speed, when one was asked for. Left off entirely otherwise,
+        // rather than passed as some very large number, so nothing stands between yt-dlp
+        // and the connection in the ordinary case.
+        if (speedLimit.isNotBlank()) addOption("--limit-rate", speedLimit)
         addOption("--no-check-certificates")
         addOption("--cache-dir", ytDlpCacheDir.absolutePath)
 

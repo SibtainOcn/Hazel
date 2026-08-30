@@ -187,6 +187,40 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[INCOGNITO_KEY] = enabled }
     }
 
+    // ── Network ──
+
+    private val WIFI_ONLY_KEY = booleanPreferencesKey("wifi_only")
+    private val SPEED_LIMIT_KEY = stringPreferencesKey("speed_limit")
+
+    /**
+     * Refuses to start a download while the phone is on mobile data.
+     *
+     * Checked when a download starts rather than throughout: a transfer already running
+     * when the connection changes is left alone, because killing it partway to save data
+     * wastes what it has already spent.
+     */
+    fun getWifiOnly(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[WIFI_ONLY_KEY] ?: false }
+
+    suspend fun setWifiOnly(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[WIFI_ONLY_KEY] = enabled }
+    }
+
+    /**
+     * Ceiling on transfer speed, as yt-dlp spells it: a number with an optional K or M, so
+     * "500K" or "1.5M". Blank means no ceiling, which is the default.
+     */
+    fun getSpeedLimit(context: Context): Flow<String> =
+        context.dataStore.data.map { prefs -> prefs[SPEED_LIMIT_KEY].orEmpty() }
+
+    suspend fun setSpeedLimit(context: Context, limit: String) {
+        context.dataStore.edit { prefs -> prefs[SPEED_LIMIT_KEY] = limit.trim() }
+    }
+
+    /** True when [limit] is something yt-dlp will accept, or blank. */
+    fun isValidSpeedLimit(limit: String): Boolean =
+        limit.isBlank() || Regex("""^\d+(\.\d+)?[KMkm]?$""").matches(limit.trim())
+
     // ── List layout ──
     //
     // Big artwork or a tight list. Two settings rather than one: the results list is read
