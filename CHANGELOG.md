@@ -148,6 +148,19 @@ Everything merged since 1.0.0, plus what is open in review.
   assumed answer and corrected once the screen resumed, so it arrived late and pushed
   everything under it down. The answer is read before the first frame.
 - **Source, at the end of More**, opening the project on GitHub.
+- **The download queue outlives the app.** It was held in memory only, so a swipe off the
+  recents list, a crash or a low-memory kill threw it away without a word: the user asked for
+  ten downloads, got three, and nothing anywhere said what happened to the other seven. Each
+  link is written down as it is queued, with the settings it was asked for under, taken off
+  again once it is done either way, and picked up on the next launch. A download interrupted
+  part way through starts itself again where it left off.
+- **Wi-Fi only**, under Downloads in More. Checked as a download starts rather than
+  throughout, so a transfer already going when the phone leaves Wi-Fi is left alone: cutting
+  it off partway wastes the data it has already spent.
+- **A speed limit**, under Downloads in More. Blank for none, otherwise a number with an
+  optional K or M, passed through as yt-dlp's own rate limit.
+- **Source code** at the end of More, opening the project on GitHub, and the storage screen
+  it sits above is now called Downloads, since it covers more than where files land.
 - **A download keeps going once the app is left.** It ran inside the screen that started
   it, so the system suspended it shortly after the app stopped being visible and killed it
   outright when the task was swiped away. It runs behind a foreground service now, on a

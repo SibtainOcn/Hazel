@@ -168,7 +168,7 @@ fun MoreScreen(
         ) {
             // Download location — read-only
             ListItem(
-                headlineContent = { Text("Download Location") },
+                headlineContent = { Text("Downloads") },
                 leadingContent = {
                     Icon(Icons.Filled.Folder, null, tint = MaterialTheme.colorScheme.primary)
                 },
@@ -359,8 +359,7 @@ fun MoreScreen(
             // right: the line under it already says where it goes, and the chevrons above
             // mean "another screen in here", which this is not.
             ListItem(
-                headlineContent = { Text("Source") },
-                supportingContent = { Text("View the project on GitHub") },
+                headlineContent = { Text("Source code") },
                 leadingContent = {
                     Icon(Icons.Filled.Code, null, tint = MaterialTheme.colorScheme.primary)
                 },
