@@ -64,6 +64,29 @@ Everything merged since 1.0.0, plus what is open in review.
   a band that loops without a gap stops being noticed.
 
 ### Fixed
+- **The app crashed when a download was refused for being on mobile data.** With downloads
+  set to Wi-Fi only, starting one on mobile data killed the app a few seconds later with
+  `ForegroundServiceDidNotStartInTimeException`, leaving the notification behind to say the
+  download was waiting for Wi-Fi when nothing was waiting for anything. The service that
+  keeps a download alive was being started before the connection was checked and stopped
+  again a few milliseconds later, and stopping a service the system has been told to start
+  but has not yet created leaves the start unsatisfied, which the system kills the process
+  over. The service is now started after the run is known to be going ahead, and stopping it
+  goes through the service itself so it always reaches the foreground first, however short
+  its life.
+- **Waiting for Wi-Fi reads on the card rather than as a line of red text.** A run held back
+  for want of Wi-Fi darkened nothing and said so above the list, in the colour used for
+  failures, while the card underneath sat untouched and bright. The card now carries it: the
+  artwork is dimmed exactly as a running download dims it, and the middle says Waiting for
+  Wi-Fi. Nothing failed and nothing was lost, so it is no longer reported as though something
+  had: the queue is intact and the run picks up where it left off. The notification is
+  posted only when the app is in the background, since a notification repeating what is on
+  screen is one the user has to sweep away for having been told what they were looking at.
+- **Wi-Fi only allowed anything that was not the mobile network.** The check asked whether
+  the connection was cellular, so a phone tethered over USB or Bluetooth, or any connection
+  the system describes some other way, downloaded freely under a setting whose whole purpose
+  is to stop that. It now asks for Wi-Fi or Ethernet, which is what the setting offers. A VPN
+  reports the transport carrying it, so a VPN over Wi-Fi still counts as Wi-Fi.
 - **Every download extracted the same link twice.** Resolving a link and downloading it are
   separate runs of the engine, and the second repeated all the work of the first. The read's
   own payload is now replayed into the download, which skips it. Measured on a mid-range

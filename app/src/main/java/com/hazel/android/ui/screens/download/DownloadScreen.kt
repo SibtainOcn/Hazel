@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
@@ -526,6 +527,7 @@ fun DownloadScreen(
                             isComplete = batchItem?.state == BatchState.DONE ||
                                     (!state.isMultiple && state.isComplete),
                             batchItem = batchItem,
+                            waitingForWifi = state.waitingForWifi,
                             alreadyDownloaded = state.isMultiple &&
                                     history.any { LinkKey.sameMedia(it.url, info.url) },
                             onOpenSheet = openSheet,
@@ -542,6 +544,7 @@ fun DownloadScreen(
                             isComplete = batchItem?.state == BatchState.DONE ||
                                     (!state.isMultiple && state.isComplete),
                             batchItem = batchItem,
+                            waitingForWifi = state.waitingForWifi,
                             alreadyDownloaded = state.isMultiple &&
                                     history.any { it.url == info.url },
                             onOpenSheet = openSheet,
@@ -828,6 +831,7 @@ private fun MediaCard(
     totalBytes: Long,
     isComplete: Boolean,
     batchItem: BatchItem?,
+    waitingForWifi: Boolean = false,
     alreadyDownloaded: Boolean = false,
     onOpenSheet: () -> Unit,
     onCancel: () -> Unit,
@@ -1016,6 +1020,44 @@ private fun MediaCard(
                     }
                 }
 
+                // Held back for want of Wi-Fi. The artwork is darkened exactly as a
+                // running download darkens it, because the card is in hand either way, and
+                // the middle says what it is waiting for. Said here rather than as a line of
+                // red text above the list: nothing failed, and the wait belongs to this item
+                // rather than to the screen.
+                if (waitingForWifi && !isDownloading && !isPaused) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.35f))
+                    )
+
+                    Surface(
+                        modifier = Modifier.align(Alignment.Center),
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color.Black.copy(alpha = 0.6f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                            horizontalArrangement = Arrangement.spacedBy(7.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Filled.WifiOff,
+                                contentDescription = null,
+                                modifier = Modifier.size(17.dp),
+                                tint = Color.White
+                            )
+                            Text(
+                                "Waiting for Wi-Fi",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+
                 // Removing a link from the set, offered only while the set is idle.
                 if (onRemove != null) {
                     Box(
@@ -1136,6 +1178,7 @@ private fun MediaRow(
     totalBytes: Long,
     isComplete: Boolean,
     batchItem: BatchItem?,
+    waitingForWifi: Boolean = false,
     alreadyDownloaded: Boolean,
     onOpenSheet: () -> Unit,
     onCancel: () -> Unit,
@@ -1253,6 +1296,7 @@ private fun MediaRow(
 
                     val state = when {
                         batchItem?.state == BatchState.PAUSED -> "Paused"
+                        waitingForWifi && !isDownloading -> "Waiting for Wi-Fi"
                         isProcessing -> "Processing"
                         // The same line the card shows: how far along, and how far there is
                         // to go. A percentage on its own says nothing about whether the
