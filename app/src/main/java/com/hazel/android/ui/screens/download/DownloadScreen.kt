@@ -273,7 +273,7 @@ fun DownloadScreen(
         val direct = shares.filter { it.direct }
         val asked = shares.filterNot { it.direct }
 
-        direct.forEach { downloadViewModel.startDirect(context, it.url) }
+        direct.forEach { downloadViewModel.startDirect(context, it.url, it.source) }
 
         // The ordinary target opens the sheet, so those go through the usual read, which
         // already takes several links at once.
@@ -424,6 +424,28 @@ fun DownloadScreen(
                                 color = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.padding(top = 10.dp, start = 4.dp)
                             )
+                        }
+                    }
+                }
+
+                // An instant share reads with nothing on screen to show for it, so the
+                // same skeleton stands in, named after where the link came from.
+                item(key = "instant") {
+                    AnimatedVisibility(
+                        visible = state.instantSource.isNotBlank(),
+                        enter = M3Motion.contentEnter(),
+                        exit = M3Motion.contentExit()
+                    ) {
+                        Column {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                "Instant \u00b7 reading from ${state.instantSource}",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            MediaCardShimmer()
                         }
                     }
                 }

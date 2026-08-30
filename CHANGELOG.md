@@ -135,6 +135,19 @@ Everything merged since 1.0.0, plus what is open in review.
   means editing a field that is still open. A link shared in from another app never passes
   through that screen, so it keeps its warning on the home screen, and a link shared to
   Hazel Direct is never interrupted at all.
+- **An instant share says what it is doing while it reads.** The instant target asks nothing
+  and opens nothing, so the seconds between the share and the first byte were spent on an
+  empty screen that looked like a share which had gone nowhere. A stand-in card now stands
+  there, named after the app the link was shared from, or after the site when Android does
+  not say which app that was.
+- **Screens fade through each other instead of sliding.** Home, Downloads and More are
+  peers, and the vertical slide between them read as a short panel moving about in the
+  middle of the screen rather than one screen replacing another. The outgoing screen fades,
+  then the incoming one fades up into place; nothing translates.
+- **The battery card no longer appears a moment after the settings do.** It was drawn on an
+  assumed answer and corrected once the screen resumed, so it arrived late and pushed
+  everything under it down. The answer is read before the first frame.
+- **Source, at the end of More**, opening the project on GitHub.
 - **A download keeps going once the app is left.** It ran inside the screen that started
   it, so the system suspended it shortly after the app stopped being visible and killed it
   outright when the task was swiped away. It runs behind a foreground service now, on a

@@ -96,7 +96,16 @@ data class DownloadState(
     val errorLog: String? = null,
     val isComplete: Boolean = false,
     /** Per-link state while several links download one after another. */
-    val batch: List<BatchItem> = emptyList()
+    val batch: List<BatchItem> = emptyList(),
+    /**
+     * Where an instant share is being read from, or blank when none is.
+     *
+     * The instant target asks nothing and opens nothing, so between the share and the first
+     * byte there was a stretch of seconds with an empty screen behind it. This is what the
+     * screen says during it, and it names the source because "reading a link" is less
+     * reassuring than naming the one the user just came from.
+     */
+    val instantSource: String = ""
 ) {
     /** True once more than one link resolved, which is what turns the screen into a list. */
     val isMultiple: Boolean get() = results.size > 1
@@ -228,8 +237,11 @@ class DownloadViewModel : ViewModel() {
 
     // ── Instant share ──
 
+    /** One link shared to the instant target, with where it was shared from. */
+    private data class DirectShare(val url: String, val source: String)
+
     /** Links shared to the instant target, waiting to be read. */
-    private val directQueue = ArrayDeque<String>()
+    private val directQueue = ArrayDeque<DirectShare>()
 
     @Volatile private var directRunning = false
 
@@ -245,21 +257,31 @@ class DownloadViewModel : ViewModel() {
      * The screen is shown whichever link is being read at the time, so a user who does open
      * the app mid-run sees where it has got to rather than the first link frozen in place.
      */
-    fun startDirect(context: Context, url: String) {
+    fun startDirect(context: Context, url: String, source: String = "") {
         val link = url.trim()
         if (link.isBlank()) return
 
-        synchronized(directQueue) { directQueue.addLast(link) }
+        synchronized(directQueue) { directQueue.addLast(DirectShare(link, source)) }
         if (directRunning) return
         directRunning = true
 
         val app = context.applicationContext
         downloadScope.launch {
             while (true) {
-                val next = synchronized(directQueue) { directQueue.removeFirstOrNull() } ?: break
+                val share = synchronized(directQueue) { directQueue.removeFirstOrNull() } ?: break
+                val next = share.url
+
+                // Said while the link is being read, which is the stretch this target used
+                // to spend showing nothing at all: it asks no questions and opens no sheet,
+                // so without this the seconds before the first byte look like a share that
+                // went nowhere.
+                _state.value = _state.value.copy(
+                    instantSource = share.source.ifBlank { "the link" }
+                )
 
                 val info = runCatching { readOne(next) }.getOrNull()
                 if (info == null) {
+                    _state.value = _state.value.copy(instantSource = "")
                     DownloadNotificationHelper.showError(app, "Could not read this link")
                     continue
                 }
@@ -268,6 +290,7 @@ class DownloadViewModel : ViewModel() {
                 val maxHeight = SettingsRepository.getQuickMaxHeight(app).first()
                 val format = info.autoPick(isVideo, maxHeight)
                 if (format == null) {
+                    _state.value = _state.value.copy(instantSource = "")
                     DownloadNotificationHelper.showError(app, "Nothing to download from this link")
                     continue
                 }
@@ -280,7 +303,9 @@ class DownloadViewModel : ViewModel() {
                     info = info,
                     results = listOf(info) + _state.value.results.filterNot { it.url == info.url },
                     error = null,
-                    errorLog = null
+                    errorLog = null,
+                    // The card is there now, so it says what is happening from here on.
+                    instantSource = ""
                 )
                 markAutoOpened(info.url)
 
@@ -291,6 +316,7 @@ class DownloadViewModel : ViewModel() {
                     treeUri = SettingsRepository.getDownloadTreeUri(app).first()
                 )
             }
+            _state.value = _state.value.copy(instantSource = "")
             directRunning = false
         }
     }
