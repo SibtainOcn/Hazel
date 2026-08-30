@@ -109,6 +109,17 @@ class DownloadViewModel : ViewModel() {
     private var downloadContext: Context? = null
     private var downloadIsVideo: Boolean = true
 
+    /**
+     * What the link being downloaded was advertised as costing, or 0 when nothing was.
+     *
+     * yt-dlp reports a total on every progress line, and on a fragmented transfer that
+     * total is an estimate it refines upward as it goes, so a figure read off the output
+     * climbs for the whole download and ends nowhere near where it started. The sheet
+     * already showed the user a size, so that size is what the progress is measured
+     * against and it does not move.
+     */
+    @Volatile private var expectedTotalBytes: Long = 0L
+
     /** Destination picked through the document picker, or blank for Download/Hazel. */
     private var downloadTreeUri: String = ""
 
@@ -498,10 +509,12 @@ class DownloadViewModel : ViewModel() {
                 downloadIsVideo = plan.format.hasVideo
                 markBatch(plan.info.url, BatchState.DOWNLOADING)
 
+                expectedTotalBytes = expectedTotalFor(plan)
+
                 _state.value = _state.value.copy(
                     info = plan.info,
                     progress = 0f,
-                    totalBytes = 0L,
+                    totalBytes = expectedTotalBytes,
                     status = "Starting download",
                     isProcessing = false
                 )
@@ -842,7 +855,8 @@ class DownloadViewModel : ViewModel() {
             val processing = _state.value.isProcessing || isPostProcessing(line)
             _state.value = _state.value.copy(
                 progress = percent / 100f,
-                totalBytes = parseTotalBytes(line) ?: _state.value.totalBytes,
+                totalBytes = if (expectedTotalBytes > 0) expectedTotalBytes
+                else parseTotalBytes(line) ?: _state.value.totalBytes,
                 status = status,
                 isProcessing = processing
             )
@@ -1043,6 +1057,26 @@ class DownloadViewModel : ViewModel() {
      * Reads the transfer size out of a yt-dlp progress line, which looks like
      * `[download]  42.5% of ~  40.20MiB at 2.35MiB/s ETA 00:10`.
      */
+    /**
+     * The size the sheet advertised for one link, which is what its progress is measured
+     * against.
+     *
+     * A video-only stream arrives with its audio track alongside it and the two are muxed,
+     * so the pair is what actually gets transferred and the pair is what is counted. A
+     * format that reported no size at all leaves this at 0, and the progress line's own
+     * figure is used instead, which is the best there is in that case.
+     */
+    private fun expectedTotalFor(plan: DownloadPlan): Long {
+        val format = plan.format
+        if (format.fileSizeBytes <= 0L) return 0L
+
+        val mergedAudio = if (format.hasVideo && !format.hasAudio) {
+            plan.info.mergeAudio?.fileSizeBytes ?: 0L
+        } else 0L
+
+        return format.fileSizeBytes + mergedAudio
+    }
+
     private fun parseTotalBytes(line: String): Long? {
         val match = TOTAL_SIZE_PATTERN.find(line) ?: return null
         val amount = match.groupValues[1].toDoubleOrNull() ?: return null

@@ -3,7 +3,6 @@ package com.hazel.android.ui.screens.download.batch
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,20 +14,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Videocam
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -36,10 +27,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -47,12 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.download.AUDIO_CONTAINERS
-import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.VIDEO_CONTAINERS
-import com.hazel.android.ui.screens.download.ChaptersDialog
-import com.hazel.android.ui.screens.download.FilenameTemplateDialog
-import com.hazel.android.ui.screens.download.SponsorBlockDialog
-import com.hazel.android.ui.screens.download.SubtitlesDialog
 
 /**
  * The heights the action bar offers, paired with what each is called.
@@ -194,105 +176,6 @@ fun BatchSaveDirSheet(
 }
 
 /**
- * The rest of the settings, which apply to every link the action bar covers.
- *
- * These are one step further in than the action bar because they are the ones a download
- * rarely needs changed. Each chip opens the same dialog the single download sheet uses, so
- * there is one place where each of these settings is explained.
- */
-@Composable
-fun BatchMoreSheet(
-    options: DownloadOptions,
-    isVideo: Boolean,
-    onOptionsChange: (DownloadOptions) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var openDialog by remember { mutableStateOf(BatchDialog.NONE) }
-
-    ChoiceSheet(
-        title = if (isVideo) "Adjust video" else "Adjust audio",
-        subtitle = "Applies to every link this covers",
-        onDismiss = onDismiss
-    ) {
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            BatchChip(
-                label = "Thumbnail",
-                icon = Icons.Filled.Image,
-                selected = options.embedThumbnail,
-                onClick = {
-                    onOptionsChange(options.copy(embedThumbnail = !options.embedThumbnail))
-                }
-            )
-            BatchChip(
-                label = "Chapters",
-                icon = Icons.Filled.Book,
-                badge = options.chapterBadge(isVideo),
-                onClick = { openDialog = BatchDialog.CHAPTERS }
-            )
-            if (isVideo) {
-                BatchChip(
-                    label = "Subtitles",
-                    icon = Icons.Filled.ClosedCaption,
-                    badge = options.subtitleBadge,
-                    onClick = { openDialog = BatchDialog.SUBTITLES }
-                )
-            }
-            BatchChip(
-                label = "SponsorBlock",
-                icon = Icons.Filled.Paid,
-                badge = options.sponsorBlockFilters.size,
-                onClick = { openDialog = BatchDialog.SPONSORBLOCK }
-            )
-            BatchChip(
-                label = "Filename template",
-                icon = Icons.Filled.Edit,
-                onClick = { openDialog = BatchDialog.FILENAME }
-            )
-        }
-    }
-
-    when (openDialog) {
-        BatchDialog.NONE -> Unit
-
-        BatchDialog.SPONSORBLOCK -> SponsorBlockDialog(
-            options = options,
-            onConfirm = {
-                onOptionsChange(it)
-                openDialog = BatchDialog.NONE
-            },
-            onDismiss = { openDialog = BatchDialog.NONE }
-        )
-
-        BatchDialog.CHAPTERS -> ChaptersDialog(
-            options = options,
-            isVideo = isVideo,
-            onChange = onOptionsChange,
-            onDismiss = { openDialog = BatchDialog.NONE }
-        )
-
-        BatchDialog.SUBTITLES -> SubtitlesDialog(
-            options = options,
-            onChange = onOptionsChange,
-            onDismiss = { openDialog = BatchDialog.NONE }
-        )
-
-        BatchDialog.FILENAME -> FilenameTemplateDialog(
-            template = options.filenameTemplate,
-            onConfirm = {
-                onOptionsChange(options.copy(filenameTemplate = it))
-                openDialog = BatchDialog.NONE
-            },
-            onDismiss = { openDialog = BatchDialog.NONE }
-        )
-    }
-}
-
-private enum class BatchDialog { NONE, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME }
-
-/**
  * The shell every one of these sheets shares: a title, a line saying what it covers, and
  * whatever the sheet is actually offering.
  */
@@ -395,40 +278,5 @@ private fun ChoiceRow(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun BatchChip(
-    label: String,
-    icon: ImageVector,
-    selected: Boolean = false,
-    badge: Int = 0,
-    onClick: () -> Unit
-) {
-    val chip = @Composable {
-        FilterChip(
-            selected = selected,
-            onClick = onClick,
-            label = { Text(label) },
-            leadingIcon = {
-                Icon(
-                    if (selected) Icons.Filled.Check else icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-            },
-            colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                selectedLabelColor = MaterialTheme.colorScheme.primary,
-                selectedLeadingIconColor = MaterialTheme.colorScheme.primary
-            )
-        )
-    }
-
-    if (badge > 0) {
-        BadgedBox(badge = { Badge { Text("$badge") } }) { chip() }
-    } else {
-        chip()
     }
 }

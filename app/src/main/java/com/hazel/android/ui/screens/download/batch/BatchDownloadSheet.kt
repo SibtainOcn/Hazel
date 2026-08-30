@@ -42,7 +42,11 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadPlan
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatFileSize
+import com.hazel.android.ui.screens.download.ChaptersDialog
+import com.hazel.android.ui.screens.download.FilenameTemplateDialog
 import com.hazel.android.ui.screens.download.FormatSheet
+import com.hazel.android.ui.screens.download.SponsorBlockDialog
+import com.hazel.android.ui.screens.download.SubtitlesDialog
 
 /**
  * Settings for a whole set of links, whether they came from several pasted urls or from
@@ -296,11 +300,18 @@ fun BatchDownloadSheet(
                 isVideo = state.videoTab,
                 qualityLabel = qualityLabelFor(state.maxHeight),
                 containerLabel = containerLabelFor(options, state.videoTab),
+                options = options,
                 onDownloadType = { openSheet = BatchSheet.TYPE },
                 onQuality = { openSheet = BatchSheet.QUALITY },
                 onSaveDir = { openSheet = BatchSheet.SAVE_DIR },
                 onContainer = { openSheet = BatchSheet.CONTAINER },
-                onMore = { openSheet = BatchSheet.MORE }
+                onThumbnail = {
+                    onOptionsChange(options.copy(embedThumbnail = !options.embedThumbnail))
+                },
+                onChapters = { openSheet = BatchSheet.CHAPTERS },
+                onSubtitles = { openSheet = BatchSheet.SUBTITLES },
+                onSponsorBlock = { openSheet = BatchSheet.SPONSORBLOCK },
+                onFilename = { openSheet = BatchSheet.FILENAME }
             )
 
             Spacer(modifier = Modifier.navigationBarsPadding())
@@ -403,17 +414,46 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
-        BatchSheet.MORE -> BatchMoreSheet(
+        // The remaining settings each open the dialog the single download sheet uses, so
+        // there is one place where each of them is explained.
+        BatchSheet.CHAPTERS -> ChaptersDialog(
             options = options,
             isVideo = state.videoTab,
-            onOptionsChange = onOptionsChange,
+            onChange = onOptionsChange,
+            onDismiss = { openSheet = BatchSheet.NONE }
+        )
+
+        BatchSheet.SUBTITLES -> SubtitlesDialog(
+            options = options,
+            onChange = onOptionsChange,
+            onDismiss = { openSheet = BatchSheet.NONE }
+        )
+
+        BatchSheet.SPONSORBLOCK -> SponsorBlockDialog(
+            options = options,
+            onConfirm = {
+                onOptionsChange(it)
+                openSheet = BatchSheet.NONE
+            },
+            onDismiss = { openSheet = BatchSheet.NONE }
+        )
+
+        BatchSheet.FILENAME -> FilenameTemplateDialog(
+            template = options.filenameTemplate,
+            onConfirm = {
+                onOptionsChange(options.copy(filenameTemplate = it))
+                openSheet = BatchSheet.NONE
+            },
             onDismiss = { openSheet = BatchSheet.NONE }
         )
     }
 }
 
 /** Which sheet the action bar or a row's type button has opened, if any. */
-private enum class BatchSheet { NONE, TYPE, ITEM_TYPE, QUALITY, CONTAINER, SAVE_DIR, MORE }
+private enum class BatchSheet {
+    NONE, TYPE, ITEM_TYPE, QUALITY, CONTAINER, SAVE_DIR,
+    CHAPTERS, SUBTITLES, SPONSORBLOCK, FILENAME
+}
 
 /** The action bar's container label, which is the extension it will write. */
 private fun containerLabelFor(options: DownloadOptions, isVideo: Boolean): String {

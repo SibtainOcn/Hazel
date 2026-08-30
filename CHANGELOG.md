@@ -117,10 +117,12 @@ Everything merged since 1.0.0, plus what is open in review.
   from the list menu, and it narrows what a change applies to rather than deciding what
   gets downloaded. Opening a link's sheet reads its formats once and keeps them, so nothing
   is fetched twice.
-- **The set-of-links sheet keeps its settings behind a bar rather than laid out below the
-  list.** Download type, quality, save location, container and the rest each open a sheet of
-  their own from a row of buttons along the bottom, which gives the list back the height the
-  settings had taken from it. Each of them applies to the ticked links, or to all of them
+- **The set-of-links sheet keeps its settings in a bar rather than laid out below the
+  list.** Download type, quality, save location and container are buttons along the bottom
+  that each open a sheet of their own, and the adjust-download options sit above them named
+  the way the single download sheet names them, wrapping onto as many lines as they need.
+  Nothing is behind an overflow menu, because an overflow hides exactly the settings whose
+  current value is worth seeing. Each of them applies to the ticked links, or to all of them
   when nothing is ticked. The count beside the list is the whole set added up under whatever
   each link is currently set to, marked as a floor while some link's formats are unread.
 - **The set-of-links sheet is drawn in near-black.** It covers most of the screen and is
@@ -133,6 +135,12 @@ Everything merged since 1.0.0, plus what is open in review.
   means editing a field that is still open. A link shared in from another app never passes
   through that screen, so it keeps its warning on the home screen, and a link shared to
   Hazel Direct is never interrupted at all.
+- **A download's size stops moving while it runs.** The figure beside the progress was read
+  off yt-dlp's own output, where on a fragmented transfer it is an estimate refined upward
+  as the download goes, so it climbed for the whole download and ended nowhere near where it
+  started. It is now the size the sheet advertised, plus the audio track where one is being
+  muxed in, and it does not move. A source that reported no size at all still falls back to
+  the engine's figure, which is the best there is in that case.
 - **Playlist entries resolve their formats when opened, not before.** A listing reports
   title, author, duration and artwork for every entry cheaply; reading formats costs a
   separate request each. Doing that up front would mean minutes of waiting before a
