@@ -6,6 +6,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+         A download is minutes of network work the user has already asked for and walked
+         away from. Without a foreground service the system suspends it once the app stops
+         being visible, and kills it outright when the task is swiped away.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="29"
         tools:ignore="ScopedStorage" />
@@ -67,6 +75,15 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity-alias>
+
+        <!--
+             Holds the process open while a download runs. It does no work of its own: the
+             queue lives in the app, and this only stops the system stopping it.
+        -->
+        <service
+            android:name=".download.DownloadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <!-- Sign-in browser used to collect cookies for gated media -->
         <activity

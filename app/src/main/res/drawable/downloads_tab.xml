@@ -2,8 +2,9 @@
 <!--
   Downloads mark for the bottom navigation.
 
-  Stroked and left deliberately open on one side, matching the home mark so the bar reads
-  as one set rather than as icons borrowed from different places.
+  An arrow into a closed bowl. The bowl was left open on one side to echo the home mark,
+  but at the size the bar draws it the gap read as a rendering fault rather than as a
+  choice, so it is closed.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
@@ -13,15 +14,15 @@
     android:tint="?attr/colorControlNormal">
 
     <path
+        android:pathData="M4,12C4,16.4183 7.5817,20 12,20C16.4183,20 20,16.4183 20,12"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+
+    <path
         android:pathData="M12,4L12,14M12,14L15,11M12,14L9,11"
         android:strokeWidth="1.5"
         android:strokeColor="#FFFFFF"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
-
-    <path
-        android:pathData="M12,20C7.58,20 4,16.42 4,12M20,12C20,14.53 18.83,16.78 17,18.25"
-        android:strokeWidth="1.5"
-        android:strokeColor="#FFFFFF"
-        android:strokeLineCap="round" />
 </vector>

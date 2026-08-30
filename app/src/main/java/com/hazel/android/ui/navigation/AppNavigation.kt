@@ -76,11 +76,10 @@ private val bottomNavItems = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(
-    sharedUrl: String?,
-    sharedDirectly: Boolean = false,
+    pendingShares: List<com.hazel.android.MainActivity.SharedLink> = emptyList(),
     pendingFailure: String? = null,
     onPendingFailureConsumed: () -> Unit = {},
-    onSharedUrlConsumed: () -> Unit,
+    onSharesConsumed: () -> Unit = {},
     isDarkTheme: Boolean,
     onToggleTheme: () -> Unit,
     accentName: String,
@@ -100,7 +99,12 @@ fun AppNavigation(
 
     Scaffold(
         topBar = {
-            if (!isSubScreen) {
+            // Only over the home screen. The other two carry their own headings, and the
+            // app's name above those made two titles stacked on top of each other, with the
+            // screen's own one pushed down a bar's height for nothing. The incognito switch
+            // goes with it: what it changes is what a download records, which is decided
+            // here and nowhere else.
+            if (currentRoute == Screen.Download.route) {
                 TopAppBar(
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -221,11 +225,10 @@ fun AppNavigation(
                 val downloadViewModel: com.hazel.android.download.DownloadViewModel =
                     androidx.lifecycle.viewmodel.compose.viewModel()
                 DownloadScreen(
-                    sharedUrl = sharedUrl,
-                    sharedDirectly = sharedDirectly,
+                    pendingShares = pendingShares,
                     pendingFailure = pendingFailure,
                     onPendingFailureConsumed = onPendingFailureConsumed,
-                    onSharedUrlConsumed = onSharedUrlConsumed,
+                    onSharesConsumed = onSharesConsumed,
                     downloadViewModel = downloadViewModel
                 )
             }

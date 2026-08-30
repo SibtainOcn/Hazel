@@ -71,6 +71,12 @@ import com.hazel.android.ui.components.FormatListShimmer
  * Only the currently chosen quality is shown here, as a single row. The full format list
  * lives in [FormatSelectionSheet], which gets a sheet of its own rather than growing this
  * one, because a source with a hundred formats would bury every control underneath them.
+ *
+ * The set-of-links sheet opens this same sheet for one of its links, so that adjusting one
+ * link of a batch and adjusting a single download are the same screen with the same
+ * controls. [initialFormat] is what that link is currently set to, and [confirmAsApply]
+ * turns the download action into one that hands the choice back instead, since there the
+ * download does not start until the whole set is sent.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,6 +87,13 @@ fun FormatSheet(
     saveDirLabel: String,
     isCustomSaveDir: Boolean,
     isLoadingFormats: Boolean = false,
+    initialFormat: MediaFormat? = null,
+    confirmAsApply: Boolean = false,
+    /**
+     * Set when this media is already downloaded and still on the device, in which case the
+     * header offers to play it beside the action that would fetch it again.
+     */
+    onPlay: (() -> Unit)? = null,
     onOpenSaveDir: () -> Unit,
     onPickSaveDir: () -> Unit,
     onResetSaveDir: () -> Unit,
@@ -93,7 +106,9 @@ fun FormatSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // Open on whichever tab the source actually has formats for.
-    var videoTab by remember(info.url) { mutableStateOf(info.videoFormats.isNotEmpty()) }
+    var videoTab by remember(info.url) {
+        mutableStateOf(initialFormat?.hasVideo ?: info.videoFormats.isNotEmpty())
+    }
 
     // The best concrete format is preselected, so the row shows what will actually be
     // downloaded rather than a placeholder. The selection is keyed on the link rather than
@@ -104,7 +119,10 @@ fun FormatSheet(
     // listing opens this sheet before they have. Without that, the sheet would keep the
     // stand-in it was opened with and never show the real one.
     var selected by remember(info.url, info.hasResolvedFormats) {
-        mutableStateOf(if (info.videoFormats.isNotEmpty()) info.bestVideo else info.bestAudio)
+        mutableStateOf(
+            initialFormat
+                ?: if (info.videoFormats.isNotEmpty()) info.bestVideo else info.bestAudio
+        )
     }
 
     // Title and author are editable: they name the saved file and, where the value is
@@ -146,6 +164,31 @@ fun FormatSheet(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                 }
+                // Left of the download action, and quieter than it. Playing what is already
+                // there is the smaller of the two things to do here, and it should not be
+                // possible to take it by aiming for the other.
+                if (onPlay != null) {
+                    Surface(
+                        onClick = onPlay,
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                        modifier = Modifier.height(44.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 18.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Play",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
+
                 Surface(
                     onClick = {
                         selected?.let { onDownload(it, title.trim(), author.trim()) }
@@ -162,13 +205,14 @@ fun FormatSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            Icons.Filled.Download, null,
+                            if (confirmAsApply) Icons.Filled.Check else Icons.Filled.Download,
+                            null,
                             modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "Download",
+                            if (confirmAsApply) "OK" else "Download",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary

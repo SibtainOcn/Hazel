@@ -187,6 +187,31 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[INCOGNITO_KEY] = enabled }
     }
 
+    // ── List layout ──
+    //
+    // Big artwork or a tight list. Two settings rather than one: the results list is read
+    // while deciding what to download, where the artwork is what identifies a link, and the
+    // downloads list is read while looking for a file that is already there, where a name
+    // finds it faster. Somebody who wants one of those compact does not necessarily want
+    // the other, so each screen remembers its own answer.
+
+    private val RESULTS_COMPACT_KEY = booleanPreferencesKey("results_compact")
+    private val HISTORY_COMPACT_KEY = booleanPreferencesKey("history_compact")
+
+    fun getResultsCompact(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[RESULTS_COMPACT_KEY] ?: false }
+
+    suspend fun setResultsCompact(context: Context, compact: Boolean) {
+        context.dataStore.edit { prefs -> prefs[RESULTS_COMPACT_KEY] = compact }
+    }
+
+    fun getHistoryCompact(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[HISTORY_COMPACT_KEY] ?: false }
+
+    suspend fun setHistoryCompact(context: Context, compact: Boolean) {
+        context.dataStore.edit { prefs -> prefs[HISTORY_COMPACT_KEY] = compact }
+    }
+
     // ── Direct share ──
     //
     // Sharing to the direct target skips the sheet entirely, so the choices the sheet would

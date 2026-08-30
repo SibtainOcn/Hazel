@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -58,6 +60,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -82,6 +88,7 @@ import com.hazel.android.ui.components.MediaCardShimmer
 import com.hazel.android.ui.components.ProcessingShimmer
 import com.hazel.android.ui.motion.M3Motion
 import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
+import com.hazel.android.ui.screens.download.batch.BatchDownloadSheet
 import com.hazel.android.util.FolderUtil
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
@@ -97,11 +104,10 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun DownloadScreen(
-    sharedUrl: String? = null,
-    sharedDirectly: Boolean = false,
+    pendingShares: List<com.hazel.android.MainActivity.SharedLink> = emptyList(),
     pendingFailure: String? = null,
     onPendingFailureConsumed: () -> Unit = {},
-    onSharedUrlConsumed: () -> Unit = {},
+    onSharesConsumed: () -> Unit = {},
     downloadViewModel: DownloadViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -116,7 +122,8 @@ fun DownloadScreen(
     // Large artwork or a tight list, for a set of links long enough that the difference
     // matters. A playlist can resolve to dozens of cards, and at one screen each the list
     // stops being something that can be looked over.
-    var compact by rememberSaveable { mutableStateOf(false) }
+    val compact by SettingsRepository.getResultsCompact(context)
+        .collectAsState(initial = false)
 
     // Collected as null until the stored value arrives, so the dialog cannot flash up for
     // a frame on every launch before the real answer loads and dismisses it again.
@@ -124,6 +131,29 @@ fun DownloadScreen(
         .collectAsState(initial = null as Boolean?)
 
     val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
+
+    // The link being downloaded is shown first, and the rest keep the order they arrived
+    // in. What is being worked on now is what the user opened the app to see, and hunting
+    // for it down a list of queued links is the opposite of that. The list is reordered
+    // rather than animated into place: a card sliding around under a moving progress bar
+    // is harder to read than one that is simply where it belongs.
+    val orderedResults = remember(state.results, state.info?.url, state.isDownloading) {
+        val active = state.info?.url?.takeIf { state.isDownloading }
+        if (active == null) state.results
+        else state.results.sortedByDescending { it.url == active }
+    }
+
+    val listState = rememberLazyListState()
+
+    // True once anything has moved under the pinned header. The header does not slide away
+    // on scroll, which is the usual trick, because the field and the layout switch are what
+    // the screen is for; it separates itself from the list instead, so the two stop reading
+    // as one surface the moment they start overlapping.
+    val listScrolled by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0
+        }
+    }
 
     var searchOpen by remember { mutableStateOf(false) }
     var sheetVisible by remember { mutableStateOf(false) }
@@ -189,15 +219,19 @@ fun DownloadScreen(
 
     // A single link goes straight to its sheet. A set of links does not, because the list
     // itself is the thing to look at first.
-    var autoOpenedFor by remember { mutableStateOf<String?>(null) }
+    //
+    // Which link has already had its sheet opened is remembered by the view model rather
+    // than here. This screen is rebuilt every time the user comes back to it from the
+    // downloads list or the settings, and a memory that lives here is blank each time, so
+    // the sheet for a link read minutes ago opened again on every return.
     LaunchedEffect(state.info?.url, state.isDownloading, state.isComplete) {
         val resolved = state.info?.url
         when {
-            resolved == null -> autoOpenedFor = null
+            resolved == null -> downloadViewModel.clearAutoOpened()
 
-            resolved != autoOpenedFor && !state.isMultiple &&
+            resolved != downloadViewModel.autoOpenedUrl && !state.isMultiple &&
                     !state.isDownloading && !state.isComplete -> {
-                autoOpenedFor = resolved
+                downloadViewModel.markAutoOpened(resolved)
 
                 // A repeat is raised in the search screen, where the link is entered and
                 // the answer is still cheap. A link shared in from another app never goes
@@ -218,38 +252,46 @@ fun DownloadScreen(
         }
     }
 
-    LaunchedEffect(sharedUrl) {
-        if (!sharedUrl.isNullOrBlank()) {
-            cameFromShare = true
-            directPending = sharedDirectly
-            downloadViewModel.onUrlChange(sharedUrl.trim())
-            downloadViewModel.fetchInfo(notifyFailure = sharedDirectly)
-            onSharedUrlConsumed()
+    LaunchedEffect(pendingShares.size) {
+        if (pendingShares.isEmpty()) return@LaunchedEffect
+
+        // Taken as a batch, in the order they arrived. Several shares in a row are several
+        // asks, and answering only the last of them is what made two of three links vanish.
+        val shares = pendingShares.toList()
+        onSharesConsumed()
+
+        cameFromShare = true
+
+        // Handed on before anything that suspends. A share arriving mid-drain restarts this
+        // effect, and anything left waiting behind a suspension point at that moment would
+        // be dropped: the links have already been taken off the pending list, so nothing
+        // would bring them back.
+        //
+        // The view model takes the direct ones rather than this screen reading them here.
+        // Shares arrive faster than a link can be read, and a queue that lives on a screen
+        // is one the next share arrives too early to join.
+        val direct = shares.filter { it.direct }
+        val asked = shares.filterNot { it.direct }
+
+        direct.forEach { downloadViewModel.startDirect(context, it.url) }
+
+        // The ordinary target opens the sheet, so those go through the usual read, which
+        // already takes several links at once.
+        if (asked.isNotEmpty()) {
+            downloadViewModel.onUrlChange(asked.first().url)
+            downloadViewModel.fetchAll(asked.map { it.url })
         }
+
+        // Remembered the same way a typed link is. A link shared in is a link used, and the
+        // entry screen offering back only what was typed there made the history look like it
+        // had forgotten half of what the app had downloaded. Incognito is the one case that
+        // is not recorded, which is its whole point.
+        if (!incognito) shares.forEach { SearchHistoryRepository.record(context, it.url) }
     }
 
-    // A link shared to the direct target downloads as soon as its formats are known, at the
-    // quality saved in settings. Nothing is asked and no sheet opens: the whole value of
-    // that target is that sharing to it is the last thing the user has to do.
-    val quickIsVideo by SettingsRepository.getQuickIsVideo(context).collectAsState(initial = true)
-    val quickMaxHeight by SettingsRepository.getQuickMaxHeight(context).collectAsState(initial = 0)
-
-    LaunchedEffect(directPending, state.info?.url, state.isFetching) {
-        val info = state.info
-        if (!directPending || info == null || state.isFetching) return@LaunchedEffect
-        if (state.isDownloading || state.isComplete) return@LaunchedEffect
-
-        val format = info.autoPick(quickIsVideo, quickMaxHeight) ?: return@LaunchedEffect
-        directPending = false
-        downloadViewModel.startDownload(
-            context = context,
-            format = format,
-            options = options,
-            title = info.title,
-            author = info.uploader,
-            treeUri = treeUri
-        )
-    }
+    // A link shared to the instant target reads and downloads itself, at the quality saved
+    // in settings, without a sheet or a question. That runs in the view model rather than
+    // here, so it survives this screen and so several shares in a row can queue up.
 
     if (guideSeen == false) {
         UserGuideDialog(
@@ -262,65 +304,33 @@ fun DownloadScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
+        Column(modifier = Modifier.fillMaxSize()) {
 
+            // The field stays where it is while the results move under it. It is what the
+            // screen is for, and a set of a hundred links used to carry it off the top of
+            // the screen on the first flick.
+            Spacer(modifier = Modifier.height(8.dp))
             UrlSearchBar(
                 url = state.url,
                 onOpenSearch = {
                     cameFromShare = false
                     searchOpen = true
-                }
+                },
+                modifier = Modifier.padding(horizontal = 20.dp)
             )
 
-            AnimatedVisibility(
-                visible = state.error != null,
-                enter = M3Motion.contentEnter(),
-                exit = M3Motion.contentExit()
-            ) {
-                state.error?.let {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(top = 10.dp, start = 4.dp)
-                    )
-                }
-            }
-
-            // While links are being read, a skeleton of the card stands in for them.
-            AnimatedVisibility(
-                visible = state.isFetching,
-                enter = M3Motion.contentEnter(),
-                exit = M3Motion.contentExit()
-            ) {
-                Column {
-                    if (state.fetchProgress.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            state.fetchProgress,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    // One placeholder per link being read, so a set of links looks like
-                    // the list it is about to become rather than like a single card.
-                    repeat(state.fetchCount.coerceAtLeast(1)) {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        MediaCardShimmer()
-                    }
-                }
-            }
-
-            if (state.results.size > LAYOUT_TOGGLE_THRESHOLD) {
+            // Kept out of the list with the field above it. It says how much the list
+            // holds and switches how it is drawn, and both of those are worth reaching
+            // without scrolling back to the top of a hundred links first.
+            //
+            // Shown from two links up. A single card is not a list: there is no count worth
+            // stating and nothing for a layout to change, and "1 links" reads as a bug.
+            if (state.results.size > 1) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -330,7 +340,29 @@ fun DownloadScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f)
                     )
-                    IconButton(onClick = { compact = !compact }) {
+                    // The list is kept for as long as the app runs, so there has to be a
+                    // way of putting it down. Plain text rather than another icon: it
+                    // throws away work, and that is worth spelling out.
+                    Text(
+                        "Clear",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(18.dp))
+                            .clickable(enabled = !state.isDownloading) {
+                                downloadViewModel.clearResults()
+                            }
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    )
+
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                SettingsRepository.setResultsCompact(context, !compact)
+                            }
+                        }
+                    ) {
                         Icon(
                             if (compact) Icons.Filled.GridView
                             else Icons.AutoMirrored.Filled.List,
@@ -342,100 +374,193 @@ fun DownloadScreen(
                 }
             }
 
-            state.results.forEach { info ->
-                Spacer(modifier = Modifier.height(if (compact) 8.dp else 20.dp))
+            // Drawn only once there is something underneath it to separate from, so a
+            // short list keeps the plain unbroken background it looks better on.
+            val separator by animateFloatAsState(
+                targetValue = if (listScrolled) 1f else 0f,
+                animationSpec = M3Motion.emphasized(200),
+                label = "headerSeparator"
+            )
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(12.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f * separator),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
 
-                val batchItem = state.batch.firstOrNull { it.url == info.url }
-                val isActive = state.isDownloading && state.info?.url == info.url
+            // A lazy list rather than a scrolling column: a column composes every card it
+            // holds, artwork and all, so a playlist of a hundred built a hundred full width
+            // images at once and ran the app out of memory on the way back from the compact
+            // layout. This builds only what is on screen, whatever the list is holding.
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    start = 20.dp,
+                    end = 20.dp,
+                    // Room for the action that floats over the list.
+                    bottom = if (state.isMultiple) 96.dp else 32.dp
+                )
+            ) {
+                item(key = "error") {
+                    AnimatedVisibility(
+                        visible = state.error != null,
+                        enter = M3Motion.contentEnter(),
+                        exit = M3Motion.contentExit()
+                    ) {
+                        state.error?.let {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(top = 10.dp, start = 4.dp)
+                            )
+                        }
+                    }
+                }
 
-                val openSheet = {
-                    downloadViewModel.selectResult(info)
+                // While links are being read, a skeleton of the card stands in for them.
+                item(key = "fetching") {
+                    AnimatedVisibility(
+                        visible = state.isFetching,
+                        enter = M3Motion.contentEnter(),
+                        exit = M3Motion.contentExit()
+                    ) {
+                        Column {
+                            if (state.fetchProgress.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    state.fetchProgress,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            // One placeholder per link being read, so a set of links looks
+                            // like the list it is about to become rather than like a single
+                            // card. Capped, because a hundred placeholders say nothing more
+                            // than a screenful of them does.
+                            repeat(state.fetchCount.coerceIn(1, SHIMMER_CARD_LIMIT)) {
+                                Spacer(modifier = Modifier.height(20.dp))
+                                MediaCardShimmer()
+                            }
+                        }
+                    }
+                }
+
+                items(orderedResults, key = { it.url }) { info ->
+                    Spacer(modifier = Modifier.height(if (compact) 8.dp else 20.dp))
+
+                    // Each card arrives rather than appearing: it fades up from slightly
+                    // below where it belongs, once, the first time it is composed. A long
+                    // playlist scrolls past as a series of cards settling into place
+                    // instead of a wall that redraws itself under the finger.
+                    var shown by remember(info.url) { mutableStateOf(false) }
+                    LaunchedEffect(info.url) { shown = true }
+                    val entrance by animateFloatAsState(
+                        targetValue = if (shown) 1f else 0f,
+                        animationSpec = M3Motion.emphasized(320),
+                        label = "cardEntrance"
+                    )
+
+                    val batchItem = state.batch.firstOrNull { it.url == info.url }
+                    val isActive = state.isDownloading && state.info?.url == info.url
+
                     // A card that came from a listing carries no formats yet. Reading them
                     // starts with the sheet, so the wait happens against an open sheet
                     // rather than against a card that looks unresponsive.
-                    downloadViewModel.resolveFormats(info)
-                    sheetVisible = true
-                }
-
-                if (compact) {
-                    MediaRow(
-                        info = info,
-                        isDownloading = isActive,
-                        isProcessing = isActive && state.isProcessing,
-                        progress = state.progress,
-                        isComplete = batchItem?.state == BatchState.DONE ||
-                                (!state.isMultiple && state.isComplete),
-                        batchItem = batchItem,
-                        alreadyDownloaded = state.isMultiple &&
-                                history.any { LinkKey.sameMedia(it.url, info.url) },
-                        onOpenSheet = openSheet,
-                        onCancel = downloadViewModel::cancelDownload,
-                        onRemove = if (state.isMultiple && !state.isDownloading) {
-                            { downloadViewModel.removeResult(info) }
-                        } else null
-                    )
-                    return@forEach
-                }
-
-                MediaCard(
-                    info = info,
-                    isDownloading = isActive,
-                    isProcessing = isActive && state.isProcessing,
-                    progress = state.progress,
-                    totalBytes = state.totalBytes,
-                    isComplete = batchItem?.state == BatchState.DONE ||
-                            (!state.isMultiple && state.isComplete),
-                    batchItem = batchItem,
-                    alreadyDownloaded = state.isMultiple &&
-                            history.any { it.url == info.url },
-                    onOpenSheet = {
+                    val openSheet = {
                         downloadViewModel.selectResult(info)
-                        // A card that came from a listing carries no formats yet. Reading
-                        // them starts with the sheet, so the wait happens against an open
-                        // sheet rather than against a card that looks unresponsive.
                         downloadViewModel.resolveFormats(info)
                         sheetVisible = true
-                    },
-                    onCancel = downloadViewModel::cancelDownload,
-                    onRemove = if (state.isMultiple && !state.isDownloading) {
+                    }
+                    val remove = if (state.isMultiple && !state.isDownloading) {
                         { downloadViewModel.removeResult(info) }
                     } else null
-                )
-            }
 
-            if (incognito && state.results.isEmpty() && !state.isFetching) {
-                Spacer(modifier = Modifier.height(72.dp))
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.incognito),
-                        contentDescription = null,
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(14.dp))
-                    Text(
-                        "You're incognito",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        "Downloads are not added to your history and links are not " +
-                                "remembered. The files themselves still save as usual.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
+                    Box(
+                        modifier = Modifier.graphicsLayer {
+                            alpha = entrance
+                            translationY = (1f - entrance) * 28f
+                        }
+                    ) {
+                    if (compact) {
+                        MediaRow(
+                            info = info,
+                            isDownloading = isActive,
+                            isProcessing = isActive && state.isProcessing,
+                            progress = state.progress,
+                            totalBytes = state.totalBytes,
+                            isComplete = batchItem?.state == BatchState.DONE ||
+                                    (!state.isMultiple && state.isComplete),
+                            batchItem = batchItem,
+                            alreadyDownloaded = state.isMultiple &&
+                                    history.any { LinkKey.sameMedia(it.url, info.url) },
+                            onOpenSheet = openSheet,
+                            onCancel = downloadViewModel::cancelDownload,
+                            onRemove = remove
+                        )
+                    } else {
+                        MediaCard(
+                            info = info,
+                            isDownloading = isActive,
+                            isProcessing = isActive && state.isProcessing,
+                            progress = state.progress,
+                            totalBytes = state.totalBytes,
+                            isComplete = batchItem?.state == BatchState.DONE ||
+                                    (!state.isMultiple && state.isComplete),
+                            batchItem = batchItem,
+                            alreadyDownloaded = state.isMultiple &&
+                                    history.any { it.url == info.url },
+                            onOpenSheet = openSheet,
+                            onCancel = downloadViewModel::cancelDownload,
+                            onRemove = remove
+                        )
+                    }
+                    }
+                }
+
+                if (incognito && state.results.isEmpty() && !state.isFetching) {
+                    item(key = "incognito") {
+                        Spacer(modifier = Modifier.height(72.dp))
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.incognito),
+                                contentDescription = null,
+                                modifier = Modifier.size(44.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(14.dp))
+                            Text(
+                                "You\'re incognito",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "Downloads are not added to your history and links are not " +
+                                        "remembered. The files themselves still save as usual.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 24.dp)
+                            )
+                        }
+                    }
                 }
             }
-
-            // Room for the action that floats over the list.
-            Spacer(modifier = Modifier.height(if (state.isMultiple) 96.dp else 32.dp))
         }
 
         // One action for the whole set, which is the point of collecting links together.
@@ -498,8 +623,21 @@ fun DownloadScreen(
 
     if (sheetVisible) {
         state.info?.let { info ->
+            // A link already downloaded and still on the device is one the user may have
+            // come back to in order to watch rather than to fetch again. The sheet says so
+            // by offering to play it, next to the action that would download it a second
+            // time. Checked only while the sheet is open, since it touches the filesystem.
+            var onDevice by remember(info.url) { mutableStateOf<HistoryEntry?>(null) }
+            LaunchedEffect(info.url, history) {
+                val entry = history.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
+                onDevice = entry?.takeIf { DownloadHistoryRepository.fileExists(context, it) }
+            }
+
             FormatSheet(
                 info = info,
+                onPlay = onDevice?.let { entry ->
+                    { MediaOpener.play(context, entry.fileUri, entry.isVideo) }
+                },
                 options = options,
                 onOptionsChange = {
                     scope.launch { SettingsRepository.setDownloadOptions(context, it) }
@@ -538,10 +676,15 @@ fun DownloadScreen(
                 scope.launch { SettingsRepository.setDownloadOptions(context, it) }
             },
             saveDirLabel = saveDirLabel,
+            isCustomSaveDir = treeUri.isNotBlank(),
             onOpenSaveDir = { openSaveDir(context, treeUri) },
             onPickSaveDir = {
                 folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse))
             },
+            onResetSaveDir = {
+                scope.launch { SettingsRepository.clearDownloadTree(context) }
+            },
+            onResolveFormats = downloadViewModel::resolveFormats,
             onRemove = downloadViewModel::removeResult,
             onDownload = { plans ->
                 batchSheetVisible = false
@@ -571,10 +714,11 @@ private fun openSaveDir(context: android.content.Context, treeUri: String) {
 @Composable
 private fun UrlSearchBar(
     url: String,
-    onOpenSearch: () -> Unit
+    onOpenSearch: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(26.dp),
@@ -885,6 +1029,7 @@ private fun MediaRow(
     isDownloading: Boolean,
     isProcessing: Boolean,
     progress: Float,
+    totalBytes: Long,
     isComplete: Boolean,
     batchItem: BatchItem?,
     alreadyDownloaded: Boolean,
@@ -1004,7 +1149,19 @@ private fun MediaRow(
 
                     val state = when {
                         isProcessing -> "Processing"
-                        isDownloading -> "%.1f %%".format(animatedProgress * 100)
+                        // The same line the card shows: how far along, and how far there is
+                        // to go. A percentage on its own says nothing about whether the
+                        // wait is thirty seconds or ten minutes.
+                        isDownloading -> buildString {
+                            append("%.1f %%".format(animatedProgress * 100))
+                            if (totalBytes > 0) {
+                                val done = (totalBytes * animatedProgress).toLong()
+                                append("  ")
+                                append(formatFileSize(done))
+                                append(" / ")
+                                append(formatFileSize(totalBytes))
+                            }
+                        }
                         batchItem?.state == BatchState.FAILED -> batchItem.error ?: "Failed"
                         isComplete -> "Saved"
                         batchItem?.state == BatchState.QUEUED -> "Queued"
@@ -1069,7 +1226,12 @@ private fun MediaRow(
  * How many links there have to be before the layout toggle is offered. Below this the two
  * layouts read much the same, and the control is one more thing on screen for no gain.
  */
-private const val LAYOUT_TOGGLE_THRESHOLD = 3
+/**
+ * How many stand-in cards a read shows at most. A long playlist reports its whole
+ * length, and a placeholder for every entry of it is a screenful of the same shape
+ * repeated, which says nothing the first few do not.
+ */
+private const val SHIMMER_CARD_LIMIT = 6
 
 /** Dark pill drawn over the thumbnail. */
 @Composable

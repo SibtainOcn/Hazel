@@ -40,7 +40,11 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -67,6 +71,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hazel.android.data.DownloadHistoryRepository
+import com.hazel.android.data.SettingsRepository
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.util.MediaOpener
 import com.hazel.android.data.HistoryFilter
@@ -95,10 +100,10 @@ fun HistoryScreen() {
     val history by DownloadHistoryRepository.getHistory(context)
         .collectAsState(initial = emptyList())
 
-    // Big artwork or a tight list. Kept across configuration changes because it is a way
-    // of reading the screen rather than a transient selection, and it is only offered once
-    // the list is long enough for the difference to matter.
-    var compact by rememberSaveable { mutableStateOf(false) }
+    // Big artwork or a tight list. Remembered between launches rather than only across
+    // configuration changes: it is how somebody reads this screen, not a choice they make
+    // again every time they open it.
+    val compact by SettingsRepository.getHistoryCompact(context).collectAsState(initial = false)
 
     var sort by remember { mutableStateOf(HistorySort.NEWEST) }
     var filter by remember { mutableStateOf(HistoryFilter.ALL) }
@@ -159,8 +164,17 @@ fun HistoryScreen() {
                 modifier = Modifier.weight(1f)
             )
 
-            if (visible.size > LAYOUT_TOGGLE_THRESHOLD) {
-                IconButton(onClick = { compact = !compact }) {
+            // Always offered, not only once the list is long. A short list still reads
+            // differently in the two layouts, and a control that comes and goes with the
+            // item count is one nobody learns is there.
+            if (visible.isNotEmpty()) {
+                IconButton(
+                    onClick = {
+                        scope.launch {
+                            SettingsRepository.setHistoryCompact(context, !compact)
+                        }
+                    }
+                ) {
                     Icon(
                         if (compact) Icons.Filled.GridView
                         else Icons.AutoMirrored.Filled.List,
@@ -213,16 +227,69 @@ fun HistoryScreen() {
             }
         }
 
+        // Shaped like the field on the home screen rather than as a boxed input: the two
+        // are the same act on two screens, and a square outlined box next to a pill reads
+        // as a control borrowed from somewhere else.
+        //
+        // Drawn from a bare text field rather than from Material's, whose own padding is
+        // sized for a floating label this has no room for and left the text sitting low
+        // and off-centre inside the pill.
         if (searchOpen) {
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
-                placeholder = { Text("Search downloads") },
-                singleLine = true,
+            val focusRequester = remember { FocusRequester() }
+            LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 4.dp)
-            )
+                    .padding(horizontal = 20.dp, vertical = 6.dp)
+                    .height(52.dp),
+                shape = RoundedCornerShape(26.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHighest
+            ) {
+                Row(
+                    modifier = Modifier.padding(start = 16.dp, end = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Filled.Search,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (query.isEmpty()) {
+                            Text(
+                                "Search downloads",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        BasicTextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester)
+                        )
+                    }
+                    if (query.isNotEmpty()) {
+                        IconButton(onClick = { query = "" }) {
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = "Clear search",
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         LazyRow(
@@ -655,11 +722,6 @@ private fun HistoryRow(
     }
 }
 
-/**
- * How many entries there have to be before the layout toggle is offered. Below this the two
- * layouts read much the same, and the control is one more thing on screen for no gain.
- */
-private const val LAYOUT_TOGGLE_THRESHOLD = 3
 
 @Composable
 private fun Tag(

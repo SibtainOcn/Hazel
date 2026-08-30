@@ -66,7 +66,7 @@ fun DirectShareScreen(onBack: () -> Unit) {
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Hazel Direct Configure",
+                "Hazel Instant",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -74,7 +74,7 @@ fun DirectShareScreen(onBack: () -> Unit) {
         }
 
         Text(
-            "Sharing a link to Hazel direct starts the download straight away, with no " +
+            "Sharing a link to Hazel Instant starts the download straight away, with no " +
                     "sheet and no questions. These are the answers it uses.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),

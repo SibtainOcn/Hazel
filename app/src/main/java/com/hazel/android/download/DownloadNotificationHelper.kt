@@ -1,6 +1,7 @@
 package com.hazel.android.download
 
 import android.app.NotificationChannel
+import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -25,7 +26,11 @@ object DownloadNotificationHelper {
 
     private const val CHANNEL_PROGRESS = "hazel_dl_progress"
     private const val CHANNEL_COMPLETE = "hazel_dl_complete"
-    private const val PROGRESS_NOTIFICATION_ID = 1001
+    /**
+     * Public so the foreground service can post the very same notification rather than one
+     * of its own. Two ids would mean two entries in the shade for one download.
+     */
+    const val PROGRESS_NOTIFICATION_ID = 1001
     private const val COMPLETE_NOTIFICATION_ID = 1002
 
     /**
@@ -161,9 +166,23 @@ object DownloadNotificationHelper {
     ) {
         createChannels(context)
 
+        val builder = progressBuilder(context, progress, statusLine, mediaTitle, doneBytes, totalBytes)
+
+        val mgr = context.getSystemService(NotificationManager::class.java)
+        mgr.notify(PROGRESS_NOTIFICATION_ID, builder.build())
+    }
+
+    private fun progressBuilder(
+        context: Context,
+        progress: Int,
+        statusLine: String,
+        mediaTitle: String,
+        doneBytes: Long,
+        totalBytes: Long
+    ): NotificationCompat.Builder {
         val detail = progressLine(progress, statusLine, doneBytes, totalBytes)
 
-        val builder = NotificationCompat.Builder(context, CHANNEL_PROGRESS)
+        return NotificationCompat.Builder(context, CHANNEL_PROGRESS)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(shortTitle(mediaTitle).ifBlank { "Hazel" })
             .setContentText(detail)
@@ -182,9 +201,23 @@ object DownloadNotificationHelper {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+    }
 
-        val mgr = context.getSystemService(NotificationManager::class.java)
-        mgr.notify(PROGRESS_NOTIFICATION_ID, builder.build())
+    /**
+     * The same notification [showProgress] posts, handed back rather than shown.
+     *
+     * A foreground service has to be given its notification directly, and it has to be the
+     * one the download already updates, or the shade ends up holding two entries for one
+     * download.
+     */
+    fun buildProgressNotification(
+        context: Context,
+        progress: Int,
+        statusLine: String = "",
+        mediaTitle: String = ""
+    ): Notification {
+        createChannels(context)
+        return progressBuilder(context, progress, statusLine, mediaTitle, 0L, 0L).build()
     }
 
 

@@ -109,12 +109,109 @@ Everything merged since 1.0.0, plus what is open in review.
   speed and ETA on it were routinely stale. It is redrawn on a timer instead.
 
 ### Changed
+- **A set of links is adjusted one link at a time.** Tapping a card in the set-of-links
+  sheet used to turn on the tick boxes, which is not what tapping a thing you want to
+  change should do. It now opens that link's own download sheet, the same one a single
+  download uses, so one link of a playlist can be 720p, another 1080p and a third audio,
+  and they still go out together. Ticking is its own mode now, reached by holding a card or
+  from the list menu, and it narrows what a change applies to rather than deciding what
+  gets downloaded. Opening a link's sheet reads its formats once and keeps them, so nothing
+  is fetched twice.
+- **The set-of-links sheet keeps its settings in a bar rather than laid out below the
+  list.** Download type, quality, save location and container are buttons along the bottom
+  that each open a sheet of their own, and the adjust-download options sit above them named
+  the way the single download sheet names them, wrapping onto as many lines as they need.
+  Nothing is behind an overflow menu, because an overflow hides exactly the settings whose
+  current value is worth seeing. Each of them applies to the ticked links, or to all of them
+  when nothing is ticked. The count beside the list is the whole set added up under whatever
+  each link is currently set to, marked as a floor while some link's formats are unread.
+- **The set-of-links sheet is drawn in near-black.** It covers most of the screen and is
+  mostly artwork, so the grey surfaces underneath it were showing through as a cast behind
+  every thumbnail. It sits on flat black now, with one step up for the rows and the bar, and
+  its text is a size larger throughout. A light theme is untouched.
 - **The repeat-download warning moved to where the link is entered.** It appeared on the
   home screen after the link had already been read, having spent the seconds that reading
   costs. It is now raised in the search screen at the moment of submitting, where going back
   means editing a field that is still open. A link shared in from another app never passes
   through that screen, so it keeps its warning on the home screen, and a link shared to
   Hazel Direct is never interrupted at all.
+- **A download keeps going once the app is left.** It ran inside the screen that started
+  it, so the system suspended it shortly after the app stopped being visible and killed it
+  outright when the task was swiped away. It runs behind a foreground service now, on a
+  scope tied to the process rather than to the screen, so a set of ten links finishes on its
+  own with the phone in a pocket. The service holds the progress notification the download
+  already posts, rather than adding a second one, and goes away when the queue is empty.
+- **The home screen keeps every link of a run, with the one downloading now at the top.**
+  It showed whichever link was being worked on and nothing else, so a set shared in over a
+  few seconds looked like a single download. Everything asked for stays listed for as long
+  as the app is running, each saying whether it is downloading, queued or saved, and the
+  list is reordered rather than animated so a card does not slide about under a moving
+  progress bar.
+- **A search adds to the list rather than replacing it, and Clear empties it.** Everything a
+  run has collected, downloaded or queued stays in view for as long as the app is running,
+  whether it arrived by share or by search, so a link read a minute ago is still there to
+  open. A Clear action sits beside the layout switch for putting the list down, with the
+  layout switch itself kept in the corner where it has always been.
+- **Cards arrive rather than appear.** Each one fades up from slightly below where it
+  belongs the first time it is drawn, and the pinned header takes on a separation once the
+  list passes under it. The header itself stays put: what a scrolling app bar does for the
+  space is not worth losing the field and the layout switch to.
+- **Links asked for while a download is running join the queue instead of being dropped.**
+  Starting a download was the only way in, so a second set asked for mid-run was silently
+  turned away. Sharing three links to Hazel Instant in a row now downloads all three: the
+  shares are read one after another, each handing its download to the queue behind it, and
+  each keeps the settings it was asked for under rather than picking up whatever changed
+  later. Shares themselves are held as a list too: they arrive as separate intents on the
+  same screen, and the single slot they used to land in meant each one overwrote the last
+  before it had been read.
+- **The download sheet stops reopening every time you come back to the home screen.** Which
+  link had already had its sheet opened was remembered by the screen, and the screen is
+  rebuilt on every return from the downloads list or the settings, so the memory was blank
+  and the sheet opened again. It is remembered by the view model now, and a fresh read is
+  what lets the next one open.
+- **A link already downloaded and still on the device offers to play it.** The download
+  sheet puts a Play action next to the one that would fetch it a second time, so coming back
+  to a link to watch it does not mean downloading it again first.
+- **Links shared into the app are remembered like typed ones.** The search screen offered
+  back only what had been typed there, which made the history look like it had forgotten
+  half of what the app had downloaded. Incognito still records nothing, which is its point.
+- **The compact rows show how much of how much, not just a percentage.** A percentage on its
+  own says nothing about whether the wait is thirty seconds or ten minutes.
+- **The app name sits over the home screen only.** The other two carry their own headings,
+  and the name above those stacked two titles on top of each other and pushed the screen's
+  own one down a bar's height for nothing. More names itself now, the way the downloads list
+  does.
+- **The link count appears from two links up.** A single card is not a list, and "1 links"
+  read as a bug.
+- **The share sheet stops saying the name twice.** Android puts the app name in front of a
+  share target's own label, and the label named the app again, so the entry read "Hazel
+  Hazel direct". It is "Hazel Instant" now, and the feature is called that everywhere else
+  in the app too.
+- **The downloads search field is shaped like the one on the home screen.** It was a boxed
+  outlined input with square corners sitting a screen away from a pill, which read as a
+  control borrowed from somewhere else. Same pill, same tone, with a clear button once
+  something is typed.
+- **The downloads tab mark closes its bowl.** It was left open on one side to echo the home
+  mark, but at the size the navigation bar draws it the gap read as a rendering fault.
+- **The results list builds only what is on screen.** It was a scrolling column, which
+  composes everything it holds whether or not any of it is visible, so a playlist of a
+  hundred built a hundred full-width images at once and the app ran out of memory on the way
+  back from the compact layout. It is a lazy list now and holds any length without that.
+- **The search field, the link count and the layout switch stay put while the results scroll
+  under them.** A set of a hundred links used to carry all three off the top of the screen on
+  the first flick, which left the controls the screen is for a long scroll away.
+- **The layout switch is always offered, and each list remembers its own answer.** It
+  appeared only past three items, so the control came and went with the item count and
+  nobody learned it was there. Both lists show it whenever they hold anything, and the
+  results list and the downloads list are remembered separately between launches: the first
+  is read while deciding what to download, where artwork identifies a link, and the second
+  while looking for a file that is already there, where a name finds it faster.
+- **A download's size stops moving while it runs.** The figure beside the progress was read
+  off yt-dlp's own output, where on a fragmented transfer it is an estimate refined upward
+  as the download goes, so it climbed for the whole download and ended nowhere near where it
+  started. It is now the size the sheet advertised, plus the audio track where one is being
+  muxed in, and it does not move. A source that reported no size at all still falls back to
+  the engine's figure, which is the best there is in that case.
 - **Playlist entries resolve their formats when opened, not before.** A listing reports
   title, author, duration and artwork for every entry cheaply; reading formats costs a
   separate request each. Doing that up front would mean minutes of waiting before a

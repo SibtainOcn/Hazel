@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Hazel</string>
-    <string name="direct_share_label">Hazel direct</string>
+    <!--
+         Shown in the system share sheet. Android puts the app name in front of this,
+         so naming the app here again would render as "Hazel Hazel direct".
+    -->
+    <string name="direct_share_label">Instant</string>
 </resources>
