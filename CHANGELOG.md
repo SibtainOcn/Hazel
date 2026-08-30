@@ -135,13 +135,23 @@ Everything merged since 1.0.0, plus what is open in review.
   means editing a field that is still open. A link shared in from another app never passes
   through that screen, so it keeps its warning on the home screen, and a link shared to
   Hazel Direct is never interrupted at all.
+- **The share sheet stops saying the name twice.** Android puts the app name in front of a
+  share target's own label, and the label named the app again, so the entry read "Hazel
+  Hazel direct". It is "Hazel Instant" now, and the feature is called that everywhere else
+  in the app too.
+- **The downloads search field is shaped like the one on the home screen.** It was a boxed
+  outlined input with square corners sitting a screen away from a pill, which read as a
+  control borrowed from somewhere else. Same pill, same tone, with a clear button once
+  something is typed.
+- **The downloads tab mark closes its bowl.** It was left open on one side to echo the home
+  mark, but at the size the navigation bar draws it the gap read as a rendering fault.
 - **The results list builds only what is on screen.** It was a scrolling column, which
   composes everything it holds whether or not any of it is visible, so a playlist of a
   hundred built a hundred full-width images at once and the app ran out of memory on the way
   back from the compact layout. It is a lazy list now and holds any length without that.
-- **The search field stays put while the results scroll under it.** A set of a hundred links
-  used to carry it off the top of the screen on the first flick, which left the one control
-  the screen is for a long scroll away.
+- **The search field, the link count and the layout switch stay put while the results scroll
+  under them.** A set of a hundred links used to carry all three off the top of the screen on
+  the first flick, which left the controls the screen is for a long scroll away.
 - **The layout switch is always offered, and each list remembers its own answer.** It
   appeared only past three items, so the control came and went with the item count and
   nobody learned it was there. Both lists show it whenever they hold anything, and the

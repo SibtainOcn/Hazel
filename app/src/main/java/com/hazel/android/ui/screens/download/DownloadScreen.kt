@@ -281,6 +281,46 @@ fun DownloadScreen(
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
 
+            // Kept out of the list with the field above it. It says how much the list
+            // holds and switches how it is drawn, and both of those are worth reaching
+            // without scrolling back to the top of a hundred links first.
+            //
+            // Always offered, not only once the list is long. A short list still reads
+            // differently in the two layouts, and a control that comes and goes with the
+            // item count is one nobody learns is there.
+            if (state.results.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "${state.results.size} links",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                SettingsRepository.setResultsCompact(context, !compact)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            if (compact) Icons.Filled.GridView
+                            else Icons.AutoMirrored.Filled.List,
+                            contentDescription =
+                                if (compact) "Show large artwork" else "Show as a list",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             // A lazy list rather than a scrolling column: a column composes every card it
             // holds, artwork and all, so a playlist of a hundred built a hundred full width
             // images at once and ran the app out of memory on the way back from the compact
@@ -336,42 +376,6 @@ fun DownloadScreen(
                             repeat(state.fetchCount.coerceIn(1, SHIMMER_CARD_LIMIT)) {
                                 Spacer(modifier = Modifier.height(20.dp))
                                 MediaCardShimmer()
-                            }
-                        }
-                    }
-                }
-
-                // Always offered, not only once the list is long. A short list still reads
-                // differently in the two layouts, and a control that comes and goes with
-                // the item count is one nobody learns is there.
-                if (state.results.isNotEmpty()) {
-                    item(key = "layout_toggle") {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                "${state.results.size} links",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.weight(1f)
-                            )
-                            IconButton(
-                                onClick = {
-                                    scope.launch {
-                                        SettingsRepository.setResultsCompact(context, !compact)
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    if (compact) Icons.Filled.GridView
-                                    else Icons.AutoMirrored.Filled.List,
-                                    contentDescription =
-                                        if (compact) "Show large artwork" else "Show as a list",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
                             }
                         }
                     }

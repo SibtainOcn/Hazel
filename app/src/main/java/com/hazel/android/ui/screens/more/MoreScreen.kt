@@ -238,7 +238,7 @@ fun MoreScreen(
             // What the second share target does, which is the only place those choices can
             // be made: sharing to it never opens the sheet.
             ListItem(
-                headlineContent = { Text("Hazel Direct Configure") },
+                headlineContent = { Text("Hazel Instant") },
                 leadingContent = {
                     Icon(Icons.Filled.Bolt, null, tint = MaterialTheme.colorScheme.primary)
                 },

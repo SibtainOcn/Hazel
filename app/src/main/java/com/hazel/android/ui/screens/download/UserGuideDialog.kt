@@ -67,7 +67,7 @@ fun UserGuideDialog(
                 )
                 GuideStep(
                     icon = Icons.Filled.Bolt,
-                    text = "Share a link to Hazel Direct from any app to" +
+                    text = "Share a link to Hazel Instant from any app to" +
                             " download instantly at your preset quality."
                 )
                 GuideStep(
