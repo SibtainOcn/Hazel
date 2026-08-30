@@ -208,7 +208,15 @@ class DownloadViewModel : ViewModel() {
     private val queue = ArrayDeque<QueuedDownload>()
 
     init {
+        // Offered to the notification's buttons, so a pause from the shade and a pause from
+        // the card are the same call rather than two ideas of what a pause is.
+        DownloadCommands.register(this)
         restoreQueue()
+    }
+
+    override fun onCleared() {
+        DownloadCommands.unregister(this)
+        super.onCleared()
     }
 
     /**
@@ -977,8 +985,54 @@ class DownloadViewModel : ViewModel() {
         synchronized(queue) { queue.addFirst(item.copy(paused = true)) }
         markBatch(item.url, BatchState.PAUSED)
         _state.value = _state.value.copy(status = "Paused", isProcessing = false)
+
+        // The shade is told the same thing the card is, off the same figures. A download
+        // held while the app is off screen otherwise loses its notification along with the
+        // service, leaving nothing anywhere to say it is waiting or to start it again.
+        val app = HazelApp.instance
+        val fraction = _state.value.progress.coerceIn(0f, 1f)
+        val total = _state.value.totalBytes
+        DownloadNotificationHelper.showPaused(
+            context = app,
+            progress = (fraction * 100f).toInt(),
+            mediaTitle = _state.value.info?.title.orEmpty().ifBlank { item.title },
+            doneBytes = (total * fraction).toLong(),
+            totalBytes = total
+        )
+
         downloadScope.launch {
-            DownloadQueueRepository.setPaused(HazelApp.instance, item.url, true)
+            DownloadQueueRepository.setPaused(app, item.url, true)
+        }
+    }
+
+    /**
+     * Throws away a download that was sitting paused.
+     *
+     * Everything a finished run would have done is done here instead: the half-finished
+     * files go, the record goes, and the shade is cleared. What is deliberately not done is
+     * publishing anything, because a cancelled download has nothing worth keeping.
+     */
+    private fun discardHeldDownload() {
+        val app = HazelApp.instance
+        purgeFragments()
+        DownloadNotificationHelper.cancelProgress(app)
+        DownloadNotificationHelper.showCancelled(app)
+
+        synchronized(queue) { queue.clear() }
+        _state.value = _state.value.copy(
+            batch = _state.value.batch.map {
+                if (it.state == BatchState.PAUSED || it.state == BatchState.QUEUED) {
+                    it.copy(state = BatchState.FAILED, error = "Cancelled")
+                } else it
+            },
+            isDownloading = false,
+            isProcessing = false,
+            progress = 0f,
+            status = ""
+        )
+
+        downloadScope.launch {
+            DownloadQueueRepository.save(app, emptyList())
         }
     }
 
@@ -1047,6 +1101,15 @@ class DownloadViewModel : ViewModel() {
     fun cancelDownload() {
         isCancelled = true
         isBatchCancelled = true
+
+        // A paused download has no process left to kill and no run left to tidy up after
+        // it, so giving it up has to be done here. Without this the record survived the
+        // cancel and the download let itself back in on the next launch.
+        if (!_state.value.isDownloading) {
+            discardHeldDownload()
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 YoutubeDL.getInstance().destroyProcessById(processId)
@@ -1083,6 +1146,7 @@ class DownloadViewModel : ViewModel() {
                 .getOrDefault(emptyList())
             if (pending.isEmpty()) return@launch
 
+            DownloadNotificationHelper.cancelPaused(app)
             DownloadQueueRepository.clearPaused(app)
             synchronized(queue) {
                 if (queue.isEmpty()) pending.forEach { queue.addLast(it.copy(paused = false)) }
