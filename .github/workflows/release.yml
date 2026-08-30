@@ -1,0 +1,179 @@
+name: Release
+
+# Pushing a version tag publishes a release.
+#
+#   git tag v1.0.1
+#   git push origin v1.0.1
+#
+# The tag is the only input. It names the release, it is what the APKs report as their
+# version, and a tag carrying a pre-release suffix (v1.1.0-beta.1) publishes as a
+# pre-release and names its files beta rather than stable.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build a release from, for example v1.0.1"
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true
+
+jobs:
+  # A release is the one build nobody can take back, so the tests run before anything is
+  # packaged rather than alongside it.
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+
+      - name: Run unit tests
+        run: ./gradlew :app:testDebugUnitTest --stacktrace
+
+      - name: Summarise the run
+        if: always()
+        run: python3 .github/scripts/test_summary.py
+
+  release:
+    name: Build and publish
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+    steps:
+      # Full history, so the tags already in the repository can be counted.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Read the tag
+        id: version
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION="${TAG#v}"
+
+          # The version code is YYYYMMDDNN, and NN separates two releases cut on the same
+          # day. Counting today's tags gives the first release of the day 1, the second 2.
+          TODAY=$(date -u +%Y-%m-%d)
+          BUILD_NUM=$(git tag --format='%(creatordate:short)' | grep -c "^$TODAY$" || true)
+          [ "$BUILD_NUM" -ge 1 ] || BUILD_NUM=1
+
+          # Anything after the version number marks a pre-release: v1.1.0-beta.1, v2.0.0-rc1.
+          case "$VERSION" in
+            *-*) PRERELEASE=true ;;
+            *)   PRERELEASE=false ;;
+          esac
+
+          {
+            echo "tag=$TAG"
+            echo "version=$VERSION"
+            echo "build_num=$BUILD_NUM"
+            echo "prerelease=$PRERELEASE"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+
+      # Without a keystore the build still finishes, but it produces APKs Android will not
+      # install over an existing copy, so the release is stopped here instead.
+      - name: Restore the signing keystore
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::No signing keystore is configured. Set the KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS and KEY_PASSWORD repository secrets."
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/signing"
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/signing/hazel.jks"
+          cat > "$RUNNER_TEMP/signing/signing.properties" <<PROPS
+          storeFile=hazel.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          PROPS
+          echo "HAZEL_SIGNING_DIR=$RUNNER_TEMP/signing" >> "$GITHUB_ENV"
+
+      # One APK per architecture plus a universal one, all from a single assemble.
+      - name: Build every architecture
+        run: |
+          ./gradlew :app:assembleRelease \
+            -PVERSION_NAME=${{ steps.version.outputs.version }} \
+            -PBUILD_NUM=${{ steps.version.outputs.build_num }} \
+            --stacktrace
+
+      - name: Collect the APKs
+        id: apks
+        run: |
+          mkdir -p artifacts
+          find app/build/outputs/apk/release -name '*.apk' -exec cp {} artifacts/ \;
+          {
+            echo "## Hazel ${{ steps.version.outputs.tag }}"
+            echo
+            for apk in artifacts/*.apk; do
+              echo "- \`$(basename "$apk")\` ($(du -h "$apk" | cut -f1))"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Write the release notes
+        run: |
+          REPO_URL="${{ github.server_url }}/${{ github.repository }}"
+          cat > release-notes.md <<NOTES
+          Requirements
+
+          * Android 7.0+ (API 24)
+
+          Most devices are arm64 - Not sure?
+          Download the universal build, it works on everything
+
+          [Full changelog here]($REPO_URL/blob/${{ steps.version.outputs.tag }}/CHANGELOG.md)
+          NOTES
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Hazel ${{ steps.version.outputs.tag }}
+          body_path: release-notes.md
+          prerelease: ${{ steps.version.outputs.prerelease }}
+          files: artifacts/*.apk
+          fail_on_unmatched_files: true
+
+      - name: Delete the keystore
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/signing"

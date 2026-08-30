@@ -1,3 +1,4 @@
+import com.android.build.api.variant.FilterConfiguration
 import java.util.Properties
 import java.time.LocalDate
 
@@ -18,10 +19,18 @@ plugins {
 //
 // When any of that is missing the release build produces an unsigned APK and says why,
 // instead of failing inside validateSigningRelease with no explanation.
+//
+// local.properties is a machine-local file and is absent on a build server, so it is read
+// only when it is there. A build server sets HAZEL_SIGNING_DIR in the environment instead
+// and writes the keystore and signing.properties into that folder before building.
 val localProps = Properties().apply {
-    rootProject.file("local.properties").inputStream().use { load(it) }
+    rootProject.file("local.properties")
+        .takeIf { it.exists() }
+        ?.inputStream()
+        ?.use { load(it) }
 }
 val signingDirPath: String? = localProps.getProperty("HAZEL_SIGNING_DIR")
+    ?: System.getenv("HAZEL_SIGNING_DIR")
 
 val signingProblem: String? = when {
     signingDirPath.isNullOrBlank() ->
@@ -60,6 +69,25 @@ gradle.taskGraph.whenReady {
     }
 }
 
+// The version this build reports. A tag build passes the tag through -PVERSION_NAME, so a
+// release is named by the tag that produced it rather than by whatever this file last said.
+val hazelVersionName: String =
+    (project.findProperty("VERSION_NAME") as String?)
+        ?.trim()
+        ?.removePrefix("v")
+        ?.takeIf { it.isNotBlank() }
+        ?: "1.0.0"
+
+// Whether to package one APK per architecture. On by default, since that is what a release
+// publishes, and turned off for a build that only has to prove the code compiles.
+val splitAbi: Boolean =
+    (project.findProperty("SPLIT_ABI") as String?)?.toBooleanStrictOrNull() ?: true
+
+// The word that goes in the APK name next to the version. A pre-release version carries a
+// suffix after the number, and anything with one is a beta as far as a downloader cares.
+// Debug builds override this, because there the build type says more than the version does.
+val hazelChannel: String = if (hazelVersionName.contains('-')) "beta" else "stable"
+
 android {
     namespace = "com.hazel.android"
     compileSdk = 36
@@ -81,13 +109,16 @@ android {
         minSdk = 24
         targetSdk = 35
 
-        // Date-based versionCode: YYYYMMDDNN — never exhausts, always increases
+        // Date-based versionCode: YYYYMMDDNN, which never exhausts and always increases
         val date = LocalDate.now()
-        val buildNum = project.findProperty("BUILD_NUM")?.toString()?.toIntOrNull() ?: 1
+        // Clamped to the two digits the code reserves for it, so a build number nobody
+        // expected cannot roll over into the day.
+        val buildNum = (project.findProperty("BUILD_NUM")?.toString()?.toIntOrNull() ?: 1)
+            .coerceIn(1, 99)
         versionCode = date.year * 1_000_000 + date.monthValue * 10_000 +
                 date.dayOfMonth * 100 + buildNum
 
-        versionName = "1.0.0"
+        versionName = hazelVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -119,9 +150,12 @@ android {
         compose = true
     }
 
+    // Five APKs take five times as long to package, which is worth it for a release and
+    // wasted on a check nobody installs. A check passes -PSPLIT_ABI=false and gets one
+    // universal APK instead.
     splits {
         abi {
-            isEnable = true
+            isEnable = splitAbi
             reset()
             include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
             isUniversalApk = true
@@ -134,7 +168,36 @@ android {
     }
 }
 
-// AGP 9.x built-in Kotlin — compilerOptions at top level
+// ── APK file names ──
+//
+// Left alone, every output lands as app-<abi>-<buildType>.apk, which says nothing about
+// what it is once several of them share a downloads folder. Named instead for the app, the
+// version, the architecture and the channel:
+//
+//   Hazel-v1.0.0-arm64-v8a-stable.apk
+//   Hazel-v1.0.0-universal-stable.apk
+//   Hazel-v1.1.0-beta.1-arm64-v8a-beta.apk
+//   Hazel-v1.0.0-arm64-v8a-debug.apk
+//
+// The rename goes through VariantOutputImpl because the public VariantOutput carries the
+// ABI filter but not the file name. The cast is safe rather than forced, so a plugin
+// version that drops it gives back the default names instead of failing the build.
+androidComponents {
+    onVariants { variant ->
+        val channel = if (variant.buildType == "debug") "debug" else hazelChannel
+        variant.outputs.forEach { output ->
+            val abi = output.filters
+                .firstOrNull { it.filterType == FilterConfiguration.FilterType.ABI }
+                ?.identifier
+                ?: "universal"
+            (output as? com.android.build.api.variant.impl.VariantOutputImpl)
+                ?.outputFileName
+                ?.set("Hazel-v$hazelVersionName-$abi-$channel.apk")
+        }
+    }
+}
+
+// AGP 9.x built-in Kotlin: compilerOptions at top level
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)

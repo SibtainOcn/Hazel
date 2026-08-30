@@ -12,25 +12,49 @@ local.properties
 .idea/
 .kotlin/
 .DS_Store
+Thumbs.db
 
 # ── Signing material, never commit ──
+#
+# Matched by extension as well as by name, because the one that leaks is always the copy
+# someone renamed. The base64 forms are here too: that is how a keystore is handed to CI,
+# and a keystore is no less a keystore for having been text at the time.
 signing.properties
+keystore.properties
+secrets.properties
 hazel-dlp-release
 *.jks
+*.jks.*
 *.keystore
+*.keystore.*
+*.p12
+*.pfx
+*.pepk
+*.pem
+*.der
+*.key
+*.base64
+*.b64
 /signing/
+google-services.json
+
+# ── Environment files ──
+.env
+.env.*
+!.env.example
 
 # ── Build artifacts ──
 /release/
 /app/release/
-**/release/
 *.apk
-*.ap_
 *.aab
+*.ap_
 *.dm
 *.hprof
 *.log
 build_output.txt
+artifacts/
+release-notes.md
 
 # ── Reference checkouts and scratch ──
 /temp/
@@ -39,8 +63,8 @@ DISCORD-PLAN.md
 
 # ── Terraform: secrets and generated state ──
 main.tf
-discord_build/terraform.tfvars
-discord_build/.terraform/
-discord_build/.terraform.lock.hcl
-discord_build/terraform.tfstate
-discord_build/terraform.tfstate.backup
+*.tfvars
+**/.terraform/
+*.terraform.lock.hcl
+*.tfstate
+*.tfstate.*

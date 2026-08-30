@@ -85,7 +85,31 @@ cd Hazel
 Release builds are signed from a keystore kept outside the repository. Point
 `HAZEL_SIGNING_DIR` in `local.properties` at a folder holding your keystore and a
 `signing.properties` with `storeFile`, `storePassword`, `keyAlias` and `keyPassword`. Without
-it the release build still succeeds and produces an unsigned APK.
+it the release build still succeeds and produces an unsigned APK. On a build server the same
+variable is read from the environment, so no `local.properties` is needed.
+
+APKs are named for what they are, one per architecture plus a universal build:
+
+```
+Hazel-v1.0.0-arm64-v8a-stable.apk
+Hazel-v1.0.0-universal-stable.apk
+Hazel-v1.0.0-arm64-v8a-debug.apk
+```
+
+`-PVERSION_NAME=1.1.0` names the build something other than the version in the build file,
+which is how a tagged release is versioned by its tag. A version carrying a suffix
+(`1.1.0-beta.1`) is named `beta` instead of `stable`. `-PSPLIT_ABI=false` skips the per-ABI
+split and produces the universal APK alone, which is most of the packaging time saved when
+you only need to know the code builds.
+
+## Tests
+
+```bash
+./gradlew :app:testDebugUnitTest
+```
+
+Pure JVM, no emulator, a couple of seconds. [docs/TESTING.md](docs/TESTING.md) covers what is
+tested, why only that, and the rules for adding more.
 
 ## Built with
 
