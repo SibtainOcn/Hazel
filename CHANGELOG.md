@@ -135,6 +135,19 @@ Everything merged since 1.0.0, plus what is open in review.
   means editing a field that is still open. A link shared in from another app never passes
   through that screen, so it keeps its warning on the home screen, and a link shared to
   Hazel Direct is never interrupted at all.
+- **The results list builds only what is on screen.** It was a scrolling column, which
+  composes everything it holds whether or not any of it is visible, so a playlist of a
+  hundred built a hundred full-width images at once and the app ran out of memory on the way
+  back from the compact layout. It is a lazy list now and holds any length without that.
+- **The search field stays put while the results scroll under it.** A set of a hundred links
+  used to carry it off the top of the screen on the first flick, which left the one control
+  the screen is for a long scroll away.
+- **The layout switch is always offered, and each list remembers its own answer.** It
+  appeared only past three items, so the control came and went with the item count and
+  nobody learned it was there. Both lists show it whenever they hold anything, and the
+  results list and the downloads list are remembered separately between launches: the first
+  is read while deciding what to download, where artwork identifies a link, and the second
+  while looking for a file that is already there, where a name finds it faster.
 - **A download's size stops moving while it runs.** The figure beside the progress was read
   off yt-dlp's own output, where on a fragmented transfer it is an estimate refined upward
   as the download goes, so it climbed for the whole download and ended nowhere near where it

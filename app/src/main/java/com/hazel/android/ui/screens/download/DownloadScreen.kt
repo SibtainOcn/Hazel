@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -117,7 +119,8 @@ fun DownloadScreen(
     // Large artwork or a tight list, for a set of links long enough that the difference
     // matters. A playlist can resolve to dozens of cards, and at one screen each the list
     // stops being something that can be looked over.
-    var compact by rememberSaveable { mutableStateOf(false) }
+    val compact by SettingsRepository.getResultsCompact(context)
+        .collectAsState(initial = false)
 
     // Collected as null until the stored value arrives, so the dialog cannot flash up for
     // a frame on every launch before the real answer loads and dismisses it again.
@@ -263,180 +266,202 @@ fun DownloadScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
+        Column(modifier = Modifier.fillMaxSize()) {
 
+            // The field stays where it is while the results move under it. It is what the
+            // screen is for, and a set of a hundred links used to carry it off the top of
+            // the screen on the first flick.
+            Spacer(modifier = Modifier.height(8.dp))
             UrlSearchBar(
                 url = state.url,
                 onOpenSearch = {
                     cameFromShare = false
                     searchOpen = true
-                }
+                },
+                modifier = Modifier.padding(horizontal = 20.dp)
             )
 
-            AnimatedVisibility(
-                visible = state.error != null,
-                enter = M3Motion.contentEnter(),
-                exit = M3Motion.contentExit()
+            // A lazy list rather than a scrolling column: a column composes every card it
+            // holds, artwork and all, so a playlist of a hundred built a hundred full width
+            // images at once and ran the app out of memory on the way back from the compact
+            // layout. This builds only what is on screen, whatever the list is holding.
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    start = 20.dp,
+                    end = 20.dp,
+                    // Room for the action that floats over the list.
+                    bottom = if (state.isMultiple) 96.dp else 32.dp
+                )
             ) {
-                state.error?.let {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(top = 10.dp, start = 4.dp)
-                    )
-                }
-            }
-
-            // While links are being read, a skeleton of the card stands in for them.
-            AnimatedVisibility(
-                visible = state.isFetching,
-                enter = M3Motion.contentEnter(),
-                exit = M3Motion.contentExit()
-            ) {
-                Column {
-                    if (state.fetchProgress.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            state.fetchProgress,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    // One placeholder per link being read, so a set of links looks like
-                    // the list it is about to become rather than like a single card.
-                    repeat(state.fetchCount.coerceAtLeast(1)) {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        MediaCardShimmer()
+                item(key = "error") {
+                    AnimatedVisibility(
+                        visible = state.error != null,
+                        enter = M3Motion.contentEnter(),
+                        exit = M3Motion.contentExit()
+                    ) {
+                        state.error?.let {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(top = 10.dp, start = 4.dp)
+                            )
+                        }
                     }
                 }
-            }
 
-            if (state.results.size > LAYOUT_TOGGLE_THRESHOLD) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "${state.results.size} links",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f)
-                    )
-                    IconButton(onClick = { compact = !compact }) {
-                        Icon(
-                            if (compact) Icons.Filled.GridView
-                            else Icons.AutoMirrored.Filled.List,
-                            contentDescription =
-                                if (compact) "Show large artwork" else "Show as a list",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                // While links are being read, a skeleton of the card stands in for them.
+                item(key = "fetching") {
+                    AnimatedVisibility(
+                        visible = state.isFetching,
+                        enter = M3Motion.contentEnter(),
+                        exit = M3Motion.contentExit()
+                    ) {
+                        Column {
+                            if (state.fetchProgress.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    state.fetchProgress,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            // One placeholder per link being read, so a set of links looks
+                            // like the list it is about to become rather than like a single
+                            // card. Capped, because a hundred placeholders say nothing more
+                            // than a screenful of them does.
+                            repeat(state.fetchCount.coerceIn(1, SHIMMER_CARD_LIMIT)) {
+                                Spacer(modifier = Modifier.height(20.dp))
+                                MediaCardShimmer()
+                            }
+                        }
                     }
                 }
-            }
 
-            state.results.forEach { info ->
-                Spacer(modifier = Modifier.height(if (compact) 8.dp else 20.dp))
+                // Always offered, not only once the list is long. A short list still reads
+                // differently in the two layouts, and a control that comes and goes with
+                // the item count is one nobody learns is there.
+                if (state.results.isNotEmpty()) {
+                    item(key = "layout_toggle") {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "${state.results.size} links",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        SettingsRepository.setResultsCompact(context, !compact)
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    if (compact) Icons.Filled.GridView
+                                    else Icons.AutoMirrored.Filled.List,
+                                    contentDescription =
+                                        if (compact) "Show large artwork" else "Show as a list",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
 
-                val batchItem = state.batch.firstOrNull { it.url == info.url }
-                val isActive = state.isDownloading && state.info?.url == info.url
+                items(state.results, key = { it.url }) { info ->
+                    Spacer(modifier = Modifier.height(if (compact) 8.dp else 20.dp))
 
-                val openSheet = {
-                    downloadViewModel.selectResult(info)
+                    val batchItem = state.batch.firstOrNull { it.url == info.url }
+                    val isActive = state.isDownloading && state.info?.url == info.url
+
                     // A card that came from a listing carries no formats yet. Reading them
                     // starts with the sheet, so the wait happens against an open sheet
                     // rather than against a card that looks unresponsive.
-                    downloadViewModel.resolveFormats(info)
-                    sheetVisible = true
-                }
-
-                if (compact) {
-                    MediaRow(
-                        info = info,
-                        isDownloading = isActive,
-                        isProcessing = isActive && state.isProcessing,
-                        progress = state.progress,
-                        isComplete = batchItem?.state == BatchState.DONE ||
-                                (!state.isMultiple && state.isComplete),
-                        batchItem = batchItem,
-                        alreadyDownloaded = state.isMultiple &&
-                                history.any { LinkKey.sameMedia(it.url, info.url) },
-                        onOpenSheet = openSheet,
-                        onCancel = downloadViewModel::cancelDownload,
-                        onRemove = if (state.isMultiple && !state.isDownloading) {
-                            { downloadViewModel.removeResult(info) }
-                        } else null
-                    )
-                    return@forEach
-                }
-
-                MediaCard(
-                    info = info,
-                    isDownloading = isActive,
-                    isProcessing = isActive && state.isProcessing,
-                    progress = state.progress,
-                    totalBytes = state.totalBytes,
-                    isComplete = batchItem?.state == BatchState.DONE ||
-                            (!state.isMultiple && state.isComplete),
-                    batchItem = batchItem,
-                    alreadyDownloaded = state.isMultiple &&
-                            history.any { it.url == info.url },
-                    onOpenSheet = {
+                    val openSheet = {
                         downloadViewModel.selectResult(info)
-                        // A card that came from a listing carries no formats yet. Reading
-                        // them starts with the sheet, so the wait happens against an open
-                        // sheet rather than against a card that looks unresponsive.
                         downloadViewModel.resolveFormats(info)
                         sheetVisible = true
-                    },
-                    onCancel = downloadViewModel::cancelDownload,
-                    onRemove = if (state.isMultiple && !state.isDownloading) {
+                    }
+                    val remove = if (state.isMultiple && !state.isDownloading) {
                         { downloadViewModel.removeResult(info) }
                     } else null
-                )
-            }
 
-            if (incognito && state.results.isEmpty() && !state.isFetching) {
-                Spacer(modifier = Modifier.height(72.dp))
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.incognito),
-                        contentDescription = null,
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(14.dp))
-                    Text(
-                        "You're incognito",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        "Downloads are not added to your history and links are not " +
-                                "remembered. The files themselves still save as usual.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
+                    if (compact) {
+                        MediaRow(
+                            info = info,
+                            isDownloading = isActive,
+                            isProcessing = isActive && state.isProcessing,
+                            progress = state.progress,
+                            isComplete = batchItem?.state == BatchState.DONE ||
+                                    (!state.isMultiple && state.isComplete),
+                            batchItem = batchItem,
+                            alreadyDownloaded = state.isMultiple &&
+                                    history.any { LinkKey.sameMedia(it.url, info.url) },
+                            onOpenSheet = openSheet,
+                            onCancel = downloadViewModel::cancelDownload,
+                            onRemove = remove
+                        )
+                    } else {
+                        MediaCard(
+                            info = info,
+                            isDownloading = isActive,
+                            isProcessing = isActive && state.isProcessing,
+                            progress = state.progress,
+                            totalBytes = state.totalBytes,
+                            isComplete = batchItem?.state == BatchState.DONE ||
+                                    (!state.isMultiple && state.isComplete),
+                            batchItem = batchItem,
+                            alreadyDownloaded = state.isMultiple &&
+                                    history.any { it.url == info.url },
+                            onOpenSheet = openSheet,
+                            onCancel = downloadViewModel::cancelDownload,
+                            onRemove = remove
+                        )
+                    }
+                }
+
+                if (incognito && state.results.isEmpty() && !state.isFetching) {
+                    item(key = "incognito") {
+                        Spacer(modifier = Modifier.height(72.dp))
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.incognito),
+                                contentDescription = null,
+                                modifier = Modifier.size(44.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(14.dp))
+                            Text(
+                                "You\'re incognito",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "Downloads are not added to your history and links are not " +
+                                        "remembered. The files themselves still save as usual.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 24.dp)
+                            )
+                        }
+                    }
                 }
             }
-
-            // Room for the action that floats over the list.
-            Spacer(modifier = Modifier.height(if (state.isMultiple) 96.dp else 32.dp))
         }
 
         // One action for the whole set, which is the point of collecting links together.
@@ -577,10 +602,11 @@ private fun openSaveDir(context: android.content.Context, treeUri: String) {
 @Composable
 private fun UrlSearchBar(
     url: String,
-    onOpenSearch: () -> Unit
+    onOpenSearch: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(26.dp),
@@ -1075,7 +1101,12 @@ private fun MediaRow(
  * How many links there have to be before the layout toggle is offered. Below this the two
  * layouts read much the same, and the control is one more thing on screen for no gain.
  */
-private const val LAYOUT_TOGGLE_THRESHOLD = 3
+/**
+ * How many stand-in cards a read shows at most. A long playlist reports its whole
+ * length, and a placeholder for every entry of it is a screenful of the same shape
+ * repeated, which says nothing the first few do not.
+ */
+private const val SHIMMER_CARD_LIMIT = 6
 
 /** Dark pill drawn over the thumbnail. */
 @Composable

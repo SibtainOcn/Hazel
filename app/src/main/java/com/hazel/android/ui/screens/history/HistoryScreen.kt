@@ -67,6 +67,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hazel.android.data.DownloadHistoryRepository
+import com.hazel.android.data.SettingsRepository
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.util.MediaOpener
 import com.hazel.android.data.HistoryFilter
@@ -95,10 +96,10 @@ fun HistoryScreen() {
     val history by DownloadHistoryRepository.getHistory(context)
         .collectAsState(initial = emptyList())
 
-    // Big artwork or a tight list. Kept across configuration changes because it is a way
-    // of reading the screen rather than a transient selection, and it is only offered once
-    // the list is long enough for the difference to matter.
-    var compact by rememberSaveable { mutableStateOf(false) }
+    // Big artwork or a tight list. Remembered between launches rather than only across
+    // configuration changes: it is how somebody reads this screen, not a choice they make
+    // again every time they open it.
+    val compact by SettingsRepository.getHistoryCompact(context).collectAsState(initial = false)
 
     var sort by remember { mutableStateOf(HistorySort.NEWEST) }
     var filter by remember { mutableStateOf(HistoryFilter.ALL) }
@@ -159,8 +160,17 @@ fun HistoryScreen() {
                 modifier = Modifier.weight(1f)
             )
 
-            if (visible.size > LAYOUT_TOGGLE_THRESHOLD) {
-                IconButton(onClick = { compact = !compact }) {
+            // Always offered, not only once the list is long. A short list still reads
+            // differently in the two layouts, and a control that comes and goes with the
+            // item count is one nobody learns is there.
+            if (visible.isNotEmpty()) {
+                IconButton(
+                    onClick = {
+                        scope.launch {
+                            SettingsRepository.setHistoryCompact(context, !compact)
+                        }
+                    }
+                ) {
                     Icon(
                         if (compact) Icons.Filled.GridView
                         else Icons.AutoMirrored.Filled.List,
@@ -655,11 +665,6 @@ private fun HistoryRow(
     }
 }
 
-/**
- * How many entries there have to be before the layout toggle is offered. Below this the two
- * layouts read much the same, and the control is one more thing on screen for no gain.
- */
-private const val LAYOUT_TOGGLE_THRESHOLD = 3
 
 @Composable
 private fun Tag(
