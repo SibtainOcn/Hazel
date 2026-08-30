@@ -32,6 +32,7 @@ fun HazelTheme(
             surface = DarkSurface,
             onSurface = DarkOnSurface,
             surfaceVariant = DarkSurfaceVariant,
+            onSurfaceVariant = DarkOnSurfaceVariant,
             error = ErrorRed,
             onError = DarkBackground,
         )

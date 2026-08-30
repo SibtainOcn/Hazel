@@ -50,7 +50,7 @@ object MediaStoreHelper {
                 if (Build.VERSION.SDK_INT >= 30) {
                     moveViaMediaStore(context, file, relativePath, isMusic)?.let(onMoved)
                 } else {
-                    moveViaDirect(file, relativePath).let(onMoved)
+                    moveViaDirect(context, file, relativePath).let(onMoved)
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to move ${file.name}: ${e.message}")
@@ -143,7 +143,7 @@ object MediaStoreHelper {
     /**
      * API ≤ 29: Direct file move using WRITE_EXTERNAL_STORAGE.
      */
-    private fun moveViaDirect(sourceFile: File, relativePath: String): Uri {
+    private fun moveViaDirect(context: Context, sourceFile: File, relativePath: String): Uri {
         val destDir = File(Environment.getExternalStorageDirectory(), relativePath)
         if (!destDir.exists()) destDir.mkdirs()
 
@@ -152,7 +152,7 @@ object MediaStoreHelper {
         // Try rename first (instant if same partition)
         if (sourceFile.renameTo(destFile)) {
             Log.d(TAG, "Moved ${sourceFile.name} to $relativePath via rename")
-            return Uri.fromFile(destFile)
+            return scanned(context, destFile)
         }
 
         // Fallback: zero-copy channel transfer
@@ -163,7 +163,24 @@ object MediaStoreHelper {
         }
         sourceFile.delete()
         Log.d(TAG, "Moved ${sourceFile.name} to $relativePath via copy")
-        return Uri.fromFile(destFile)
+        return scanned(context, destFile)
+    }
+
+    /**
+     * Tells the media scanner about a file written directly to disk.
+     *
+     * Only the pre-MediaStore path needs this. A file that appears in a folder without
+     * being scanned is invisible to every music player and gallery on the device, which
+     * reads as a download that never arrived, so on those versions the move is only really
+     * finished once the index knows about it.
+     */
+    private fun scanned(context: Context, file: File): Uri {
+        runCatching {
+            MediaScannerConnection.scanFile(
+                context, arrayOf(file.absolutePath), arrayOf(getMimeType(file)), null
+            )
+        }
+        return Uri.fromFile(file)
     }
 
     /**

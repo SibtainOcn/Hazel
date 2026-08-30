@@ -10,6 +10,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Everything merged since 1.0.0, plus what is open in review.
 
 ### Added
+- **The saved file is named before it is made.** Tapping Convert opens a sheet holding the
+  name the audio will be saved under, filled in from the video's own filename so the usual
+  answer is to leave it and press Start. What is typed there names the file and is written
+  into its title tag, because a file called one thing and announcing itself as another is a
+  distinction nobody asked for.
+- **A License entry under More**, opening the licence in the user's own browser rather than
+  the in-app one: a licence is a thing people save, share and read alongside something else,
+  and none of that works in a window that closes with the screen behind it. The project is
+  licensed GPL-3.0, and the text now ships in the repository.
+- **Every audio format the engine can produce**, chosen from a sheet rather than from three
+  fixed rows. Opus, AAC and MP3 head the list because they are the three anybody actually
+  wants, and each format carries a word or two saying what picking it costs: Best, Most
+  compatible, Lossless, Big file. MP3 stays the default rather than the one tagged Best,
+  because Opus in a `.opus` file only plays out of the box from Android 10 and converting
+  perfectly into something that will not play is not an improvement.
 - **Playlists and channels resolve to every item they hold.** A playlist link produced one
   card, because the metadata read was told to ignore playlists outright. It now asks the
   engine what the link actually holds and reads the answer off its own `_type`, so a
@@ -80,6 +95,33 @@ Everything merged since 1.0.0, plus what is open in review.
   stay pure JVM, and tests are named for the behaviour a user would notice breaking.
 
 ### Fixed
+- **A finished file never reached the user's folder on Android 7 through 10.** Publishing a
+  download or a conversion is a MediaStore insert from Android 11 and a direct file write
+  below it, and the direct write needs a storage permission nothing had ever asked for. The
+  write threw, the failure was caught and logged, and the file stayed in the app's own
+  storage where nothing else on the phone can see it. It is asked for now, as a download or
+  a conversion starts, and where it is refused the screen says the file stayed inside the
+  app instead of naming a folder it never reached.
+- **A file written that way was invisible until something else happened to scan it.** The
+  pre-MediaStore path put the file in the folder and told nothing about it, so no music
+  player or gallery listed it. It is handed to the media scanner as part of the move now.
+- **The converted file reported its size as nothing.** The size was read after the file had
+  been moved out of the folder it was read from, so every conversion finished by announcing
+  zero bytes.
+- **Opening a folder could not work on any version this app supports.** The last of the three
+  attempts built a `file://` intent, which has thrown `FileUriExposedException` since
+  Android 7. The documents URI it tries first was also assembled by pasting a path into a
+  string, leaving the separators unencoded, and it fell back to the whole path when the file
+  was not on the primary volume. It is built through `DocumentsContract` now, and the last
+  attempt opens the system's own picker at the folder rather than an intent that cannot run.
+- **Videos the system could not identify were unpickable.** The converter's picker asked for
+  video types alone, and a document provider that does not recognise a container reports it
+  as a generic stream of bytes, so those files were greyed out. The file the user came to
+  convert was the one they could not choose.
+- **A file whose provider withheld its name became a file called Unknown.** The name is now
+  looked for in the provider, then in the address, and the extension falls back to the
+  declared type, so the cached copy still carries something the engine can recognise. The
+  name is also made safe to use as a filename before it becomes one.
 - **The app crashed when a download was refused for being on mobile data.** With downloads
   set to Wi-Fi only, starting one on mobile data killed the app a few seconds later with
   `ForegroundServiceDidNotStartInTimeException`, leaving the notification behind to say the
@@ -153,6 +195,25 @@ Everything merged since 1.0.0, plus what is open in review.
   speed and ETA on it were routinely stale. It is redrawn on a timer instead.
 
 ### Changed
+- **The converter sits directly under More.** It used to be behind a Tools screen whose
+  entire content was that one row, which is a tap and a screen spent saying one word. Tools
+  remains, empty, for whatever the next tool turns out to be.
+- **The converter screen is three decisions in a column**: what to convert, what to turn it
+  into, where it lands. Each is one row that says what it is currently set to, and nothing
+  else appears until it has something to say.
+- **One line of engine output instead of a growing list.** The converter used to stack every
+  line the engine printed into a panel that pushed the rest of the screen off the bottom.
+  It now shows the line the engine is on, replaced in place as the next one arrives, with
+  the percentage on the same row. What the engine said four seconds ago is of no use to
+  anybody watching it work.
+- **The Convert button stays visible while it works.** Material drains a disabled button, and
+  the button spends the whole conversion disabled, so the spinner and the word were barely
+  there. Nothing chosen yet and a conversion already running are now told apart: the first
+  recedes, the second stays lit.
+- **Secondary text across the converter is legible in both themes.** It was drawn by fading
+  the primary text colour, which lands somewhere unreadable on one theme or the other. It
+  uses the theme's own secondary colour now, and the dark theme gained a neutral one rather
+  than inheriting Material's violet-tinted default.
 - **APKs are named after what they are.** Every output was `app-<abi>-<buildType>.apk`, which
   is indistinguishable from every other build once a few of them share a downloads folder.
   They are now `Hazel-v1.0.0-arm64-v8a-stable.apk`: the app, the version, the architecture
