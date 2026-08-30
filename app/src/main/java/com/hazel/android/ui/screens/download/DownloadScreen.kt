@@ -340,22 +340,6 @@ fun DownloadScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f)
                     )
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                SettingsRepository.setResultsCompact(context, !compact)
-                            }
-                        }
-                    ) {
-                        Icon(
-                            if (compact) Icons.Filled.GridView
-                            else Icons.AutoMirrored.Filled.List,
-                            contentDescription =
-                                if (compact) "Show large artwork" else "Show as a list",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
                     // The list is kept for as long as the app runs, so there has to be a
                     // way of putting it down. Plain text rather than another icon: it
                     // throws away work, and that is worth spelling out.
@@ -371,6 +355,22 @@ fun DownloadScreen(
                             }
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                     )
+
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                SettingsRepository.setResultsCompact(context, !compact)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            if (compact) Icons.Filled.GridView
+                            else Icons.AutoMirrored.Filled.List,
+                            contentDescription =
+                                if (compact) "Show large artwork" else "Show as a list",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 

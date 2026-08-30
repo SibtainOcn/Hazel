@@ -150,7 +150,8 @@ Everything merged since 1.0.0, plus what is open in review.
 - **A search adds to the list rather than replacing it, and Clear empties it.** Everything a
   run has collected, downloaded or queued stays in view for as long as the app is running,
   whether it arrived by share or by search, so a link read a minute ago is still there to
-  open. A Clear action sits beside the layout switch for putting the list down.
+  open. A Clear action sits beside the layout switch for putting the list down, with the
+  layout switch itself kept in the corner where it has always been.
 - **Cards arrive rather than appear.** Each one fades up from slightly below where it
   belongs the first time it is drawn, and the pinned header takes on a separation once the
   list passes under it. The header itself stays put: what a scrolling app bar does for the
