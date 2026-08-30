@@ -14,6 +14,7 @@ browser = "1.8.0"
 coil = "3.1.0"
 material3 = "1.5.0-alpha12"
 newpipeExtractor = "v0.26.5"
+json = "20250517"
 
 
 [libraries]
@@ -40,6 +41,8 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
+json = { group = "org.json", name = "json", version.ref = "json" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

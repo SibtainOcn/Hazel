@@ -165,7 +165,7 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
-    // Download Engine — yt-dlp + FFmpeg for Android
+    // Download engine: yt-dlp plus FFmpeg for Android
     implementation(libs.youtubedl.android.library)
     implementation(libs.youtubedl.android.ffmpeg)
 
@@ -177,6 +177,13 @@ dependencies {
     // formats and never downloads: yt-dlp owns both, and this falls back to it on any
     // failure, so a stale extractor costs speed rather than function.
     implementation(libs.newpipe.extractor)
+
+    // Unit tests, covering the two pure parts worth pinning: the link key and the metadata
+    // parser fed saved engine payloads. kotlin-test brings the JUnit runner with it.
+    // org.json is the real implementation, because the one the Android stubs provide throws
+    // on every call rather than parsing anything.
+    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.json)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
