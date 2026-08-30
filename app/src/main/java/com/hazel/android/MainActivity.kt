@@ -41,7 +41,12 @@ class MainActivity : ComponentActivity() {
      */
     val pendingShares = mutableStateListOf<SharedLink>()
 
-    data class SharedLink(val url: String, val direct: Boolean)
+    data class SharedLink(
+        val url: String,
+        val direct: Boolean,
+        /** Where it came from, for the line shown while it is being read. */
+        val source: String = ""
+    )
 
     /** A failure the user tapped a notification to come back to, or null. */
     var pendingFailure by mutableStateOf<String?>(null)
@@ -120,13 +125,40 @@ class MainActivity : ComponentActivity() {
                     // component name.
                     val direct =
                         intent.component?.className?.endsWith("DirectShareActivity") == true
-                    pendingShares.add(SharedLink(link, direct))
+                    pendingShares.add(SharedLink(link, direct, sourceLabelFor(link)))
                 }
         }
 
         intent?.getStringExtra(DownloadNotificationHelper.EXTRA_FAILURE_MESSAGE)
             ?.takeIf { it.isNotBlank() }
             ?.let { pendingFailure = it }
+    }
+
+    /**
+     * What to call where a shared link came from, for the line shown while it is being read.
+     *
+     * The app that did the sharing is the honest answer and the one the user will recognise,
+     * so it is asked for first. Android does not always say, and a share forwarded through
+     * another app can name the wrong one, so the link's own site stands in: for the purpose
+     * of "this is what is being read", the site is just as good.
+     */
+    private fun sourceLabelFor(link: String): String {
+        val referrerPackage = referrer
+            ?.takeIf { it.scheme == "android-app" }
+            ?.host
+            ?.takeIf { it != packageName }
+
+        if (referrerPackage != null) {
+            runCatching {
+                val info = packageManager.getApplicationInfo(referrerPackage, 0)
+                packageManager.getApplicationLabel(info).toString()
+            }.getOrNull()?.takeIf { it.isNotBlank() }?.let { return it }
+        }
+
+        return runCatching { java.net.URI(link).host.orEmpty() }
+            .getOrDefault("")
+            .removePrefix("www.")
+            .ifBlank { "the link" }
     }
 }
 

@@ -1,5 +1,8 @@
 package com.hazel.android.ui.screens.more
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -73,10 +76,17 @@ fun MoreScreen(
     var tempBytes by remember { mutableStateOf(0L) }
     LaunchedEffect(Unit) { tempBytes = TempStorage.totalBytes(context) }
 
-    // Re-read on every return to the screen, so coming back from the system settings shows
-    // the answer that was just given rather than the one from before leaving.
+    // Read once as the screen is built, then again on every return to it, so coming back
+    // from the system settings shows the answer that was just given.
+    //
+    // The first read happens here rather than being left to the resume below. Inside a
+    // navigation destination the lifecycle is the back stack entry's own, so it resumes on
+    // every visit to this tab, which meant the screen drew once on an assumed answer and
+    // corrected itself a moment later: the card appeared out of nowhere and pushed
+    // everything under it down. The call is a single lookup, cheap enough to make before
+    // the first frame instead of guessing.
     val lifecycleOwner = LocalLifecycleOwner.current
-    var batteryExempt by remember { mutableStateOf(true) }
+    var batteryExempt by remember { mutableStateOf(isIgnoringBatteryOptimizations(context)) }
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -138,8 +148,9 @@ fun MoreScreen(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            "Android stops a download when you leave the app. Allow " +
-                                    "unrestricted battery use to let it finish.",
+                            "Downloads keep running in the background on their own. Some " +
+                                    "phones still cut them short to save battery. Allow " +
+                                    "unrestricted use to rule that out.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                                 .copy(alpha = 0.8f)
@@ -338,6 +349,41 @@ fun MoreScreen(
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToUpdate() }
             )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            // Sits at the end, under everything the app can do for itself. No mark on the
+            // right: the line under it already says where it goes, and the chevrons above
+            // mean "another screen in here", which this is not.
+            ListItem(
+                headlineContent = { Text("Source") },
+                supportingContent = { Text("View the project on GitHub") },
+                leadingContent = {
+                    Icon(Icons.Filled.Code, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { openSourceRepository(context) }
+            )
         }
     }
 }
+
+/**
+ * Opens the project's page in whatever the user browses with.
+ *
+ * Failure is swallowed: a device with no browser at all cannot be helped by a crash, and
+ * this is the least important thing on the screen.
+ */
+private fun openSourceRepository(context: android.content.Context) {
+    runCatching {
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse(SOURCE_URL))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
+    }
+}
+
+private const val SOURCE_URL = "https://github.com/SibtainOcn/Hazel"

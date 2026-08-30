@@ -32,63 +32,59 @@ object M3Motion {
     private const val ENTER_SCALE = 0.92f
 
     // ============================================================================
-    // FORWARD NAVIGATION 
+    // SCREEN TRANSITIONS — fade through
     // ============================================================================
+    //
+    // The screens behind the navigation bar are peers: nothing goes forward or back
+    // between Home, Downloads and More, so nothing should look as though it does. They
+    // used to slide vertically past each other by a twelfth of the height, and because a
+    // screen is drawn inside the bars rather than under them, that read as a short panel
+    // sliding about in the middle instead of one screen replacing another.
+    //
+    // A fade through is what Material uses when there is no relationship to express: the
+    // outgoing screen fades quickly, and once it is gone the incoming one fades up while
+    // growing the last of the way to full size. Nothing translates, so nothing looks like
+    // it is arriving from somewhere.
 
-    fun forwardEnter(): EnterTransition {
+    /** How long the outgoing screen takes to clear. */
+    private const val FADE_OUT_DURATION = 90
+
+    /** How long the incoming screen takes, once the outgoing one has cleared. */
+    private const val FADE_IN_DURATION = 210
+
+    private fun fadeThroughEnter(): EnterTransition {
         return fadeIn(
             animationSpec = tween(
-                durationMillis = ENTER_DURATION,
+                durationMillis = FADE_IN_DURATION,
+                delayMillis = FADE_OUT_DURATION,
                 easing = EmphasizedDecelerate
             )
         ) + scaleIn(
             initialScale = ENTER_SCALE,
             animationSpec = tween(
-                durationMillis = ENTER_DURATION,
-                easing = EmphasizedDecelerate
-            )
-        ) + slideInVertically(
-            initialOffsetY = { fullHeight -> -fullHeight / 12 },
-            animationSpec = tween(
-                durationMillis = ENTER_DURATION,
+                durationMillis = FADE_IN_DURATION,
+                delayMillis = FADE_OUT_DURATION,
                 easing = EmphasizedDecelerate
             )
         )
     }
 
-    fun forwardExit(): ExitTransition {
+    private fun fadeThroughExit(): ExitTransition {
         return fadeOut(
             animationSpec = tween(
-                durationMillis = EXIT_DURATION,
+                durationMillis = FADE_OUT_DURATION,
                 easing = EmphasizedAccelerate
             )
         )
     }
 
-    
-    fun backEnter(): EnterTransition {
-        return fadeIn(
-            animationSpec = tween(
-                durationMillis = ENTER_DURATION,
-                easing = EmphasizedDecelerate
-            )
-        )
-    }
+    fun forwardEnter(): EnterTransition = fadeThroughEnter()
 
-    fun backExit(): ExitTransition {
-        return fadeOut(
-            animationSpec = tween(
-                durationMillis = EXIT_DURATION,
-                easing = EmphasizedAccelerate
-            )
-        ) + slideOutVertically(
-            targetOffsetY = { fullHeight -> fullHeight / 12 },
-            animationSpec = tween(
-                durationMillis = EXIT_DURATION,
-                easing = EmphasizedAccelerate
-            )
-        )
-    }
+    fun forwardExit(): ExitTransition = fadeThroughExit()
+
+    fun backEnter(): EnterTransition = fadeThroughEnter()
+
+    fun backExit(): ExitTransition = fadeThroughExit()
 
     // ============================================================================
     // CONTENT TRANSITIONS (elements appearing inside a screen)
