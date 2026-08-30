@@ -3,7 +3,6 @@ package com.hazel.android.ui.screens.more
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -356,20 +355,14 @@ fun MoreScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Leaves the app rather than opening a screen, so it is marked with the icon
-            // for that and sits at the end, under everything the app can do for itself.
+            // Sits at the end, under everything the app can do for itself. No mark on the
+            // right: the line under it already says where it goes, and the chevrons above
+            // mean "another screen in here", which this is not.
             ListItem(
                 headlineContent = { Text("Source") },
                 supportingContent = { Text("View the project on GitHub") },
                 leadingContent = {
                     Icon(Icons.Filled.Code, null, tint = MaterialTheme.colorScheme.primary)
-                },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.OpenInNew, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { openSourceRepository(context) }
