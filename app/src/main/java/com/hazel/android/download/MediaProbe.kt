@@ -289,7 +289,11 @@ object MediaProbe {
         audioFormats = listOf(BEST_AUDIO)
     )
 
-    private fun parse(url: String, root: JSONObject): MediaInfo {
+    /**
+     * Internal rather than private so the unit tests can feed it saved engine payloads.
+     * Nothing outside this module calls it.
+     */
+    internal fun parse(url: String, root: JSONObject): MediaInfo {
         // Carousels and multi-part posts come back as a playlist wrapper even with
         // --no-playlist. Fall through to the first entry that actually carries media.
         val media = root.optJSONArray("entries")
