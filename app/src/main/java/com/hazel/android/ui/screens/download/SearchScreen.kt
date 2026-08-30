@@ -116,9 +116,20 @@ fun SearchScreen(
         history.filter { it !in queued && it.contains(text.trim(), ignoreCase = true) }
     }
 
+    /**
+     * Splits what is in the field into the links it holds.
+     *
+     * Someone with several links to hand copies them together and pastes them together,
+     * separated by whatever the place they came from used: a space, a newline, a tab. The
+     * field used to take the whole paste as one link, which cannot match an address and was
+     * reported as the paste being invalid rather than as several links having arrived.
+     */
+    fun typedLinks(): List<String> =
+        text.split(WHITESPACE).map { it.trim() }.filter { it.isNotBlank() }
+
     fun queueCurrent() {
-        val entry = text.trim()
-        if (entry.isNotBlank() && entry !in queued) queued = queued + entry
+        val entries = typedLinks().filterNot { it in queued }
+        if (entries.isNotEmpty()) queued = queued + entries
         text = ""
     }
 
@@ -133,7 +144,7 @@ fun SearchScreen(
     }
 
     fun submit() {
-        val all = (queued + text.trim()).filter { it.isNotBlank() }.distinct()
+        val all = (queued + typedLinks()).filter { it.isNotBlank() }.distinct()
         if (all.isEmpty()) return
 
         scope.launch {
@@ -402,3 +413,6 @@ private fun HistoryRow(
     }
     Spacer(modifier = Modifier.height(0.dp))
 }
+
+/** Any run of whitespace, which is what separates one pasted link from the next. */
+private val WHITESPACE = Regex("""\s+""")

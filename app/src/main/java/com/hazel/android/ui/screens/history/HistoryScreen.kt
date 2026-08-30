@@ -540,8 +540,10 @@ private fun HistoryCard(
                 if (duration.isNotBlank()) Tag(duration)
                 if (entry.sizeBytes > 0) Tag(formatFileSize(entry.sizeBytes))
                 if (!present) {
+                    // "Deleted" rather than "File missing". The file is not mislaid, it is
+                    // gone, and almost always because the user removed it themselves.
                     Tag(
-                        "File missing",
+                        "Deleted",
                         background = MaterialTheme.colorScheme.error,
                         foreground = MaterialTheme.colorScheme.onError
                     )

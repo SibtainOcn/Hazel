@@ -208,6 +208,26 @@ fun DownloadScreen(
     // Links already downloaded, so a repeat can be pointed out before it is started again.
     val history by DownloadHistoryRepository.getHistory(context)
         .collectAsState(initial = emptyList())
+
+    /**
+     * The links the set action still owes a download on.
+     *
+     * A link that has already been fetched keeps its place in the list, marked, because
+     * seeing what arrived is the point of the list. It is not something to fetch a second
+     * time. Reading a new link used to add it to what was already on screen and offer to
+     * download the lot, so one new video alongside one already saved read as two waiting,
+     * and Download all fetched the saved one again.
+     *
+     * Both records are consulted. The batch says what finished in this run, and the history
+     * says what finished in any run, which is what a link read after a restart turns on.
+     */
+    val pendingResults = remember(state.results, state.batch, history) {
+        state.results.filterNot { info ->
+            state.batch.any { item -> item.url == info.url && item.state == BatchState.DONE } ||
+                history.any { entry -> LinkKey.sameMedia(entry.url, info.url) }
+        }
+    }
+
     var alreadyHave by remember { mutableStateOf<HistoryEntry?>(null) }
 
     // Marks a link that arrived from another app's share sheet. That is the one route into
@@ -546,7 +566,7 @@ fun DownloadScreen(
                             batchItem = batchItem,
                             waitingForWifi = state.waitingForWifi,
                             alreadyDownloaded = state.isMultiple &&
-                                    history.any { it.url == info.url },
+                                    history.any { LinkKey.sameMedia(it.url, info.url) },
                             onOpenSheet = openSheet,
                             onCancel = downloadViewModel::cancelDownload,
                             onPause = downloadViewModel::pauseDownload,
@@ -593,7 +613,8 @@ fun DownloadScreen(
         }
 
         // One action for the whole set, which is the point of collecting links together.
-        if (state.isMultiple && !state.isDownloading) {
+        // Hidden once there is nothing left in the set to fetch.
+        if (state.isMultiple && !state.isDownloading && pendingResults.isNotEmpty()) {
             DownloadAllButton(
                 onClick = { batchSheetVisible = true },
                 modifier = Modifier
@@ -699,7 +720,7 @@ fun DownloadScreen(
 
     if (batchSheetVisible) {
         BatchDownloadSheet(
-            results = state.results,
+            results = pendingResults,
             options = options,
             onOptionsChange = {
                 scope.launch { SettingsRepository.setDownloadOptions(context, it) }
