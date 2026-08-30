@@ -238,7 +238,7 @@ fun AppNavigation(
             composable(Screen.More.route) {
                 MoreScreen(
                     onNavigateToAppearance = { navController.navigate("appearance") },
-                    onNavigateToTools = { navController.navigate("tools") },
+                    onNavigateToConverter = { navController.navigate("converter") },
                     onNavigateToStorageLocations = { navController.navigate("storage_locations") },
                     onNavigateToCookies = { navController.navigate("cookies") },
                     onNavigateToFetchSettings = { navController.navigate("fetch_settings") },
@@ -273,10 +273,7 @@ fun AppNavigation(
                 )
             }
             composable("tools") {
-                ToolsScreen(
-                    onNavigateToConverter = { navController.navigate("converter") },
-                    onBack = { navController.popBackStack() }
-                )
+                ToolsScreen(onBack = { navController.popBackStack() })
             }
             composable("converter") {
                 ConverterScreen(onBack = { navController.popBackStack() })

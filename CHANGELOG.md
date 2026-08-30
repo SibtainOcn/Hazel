@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Everything merged since 1.0.0, plus what is open in review.
 
 ### Added
+- **The saved file is named before it is made.** Tapping Convert opens a sheet holding the
+  name the audio will be saved under, filled in from the video's own filename so the usual
+  answer is to leave it and press Start. What is typed there names the file and is written
+  into its title tag, because a file called one thing and announcing itself as another is a
+  distinction nobody asked for.
+- **A License entry under More**, opening the licence in the user's own browser rather than
+  the in-app one: a licence is a thing people save, share and read alongside something else,
+  and none of that works in a window that closes with the screen behind it. The project is
+  licensed GPL-3.0, and the text now ships in the repository.
 - **Every audio format the engine can produce**, chosen from a sheet rather than from three
   fixed rows. Opus, AAC and MP3 head the list because they are the three anybody actually
   wants, and each format carries a word or two saying what picking it costs: Best, Most
@@ -186,6 +195,9 @@ Everything merged since 1.0.0, plus what is open in review.
   speed and ETA on it were routinely stale. It is redrawn on a timer instead.
 
 ### Changed
+- **The converter sits directly under More.** It used to be behind a Tools screen whose
+  entire content was that one row, which is a tap and a screen spent saying one word. Tools
+  remains, empty, for whatever the next tool turns out to be.
 - **The converter screen is three decisions in a column**: what to convert, what to turn it
   into, where it lands. Each is one row that says what it is currently set to, and nothing
   else appears until it has something to say.

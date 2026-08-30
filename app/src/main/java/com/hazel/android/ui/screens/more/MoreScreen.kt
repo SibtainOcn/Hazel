@@ -3,6 +3,7 @@ package com.hazel.android.ui.screens.more
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -61,7 +62,7 @@ import com.hazel.android.util.TempStorage
 @Composable
 fun MoreScreen(
     onNavigateToAppearance: () -> Unit = {},
-    onNavigateToTools: () -> Unit = {},
+    onNavigateToConverter: () -> Unit = {},
     onNavigateToStorageLocations: () -> Unit = {},
     onNavigateToCookies: () -> Unit = {},
     onNavigateToFetchSettings: () -> Unit = {},
@@ -166,7 +167,7 @@ fun MoreScreen(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            // Download location — read-only
+            // Download location, read-only
             ListItem(
                 headlineContent = { Text("Downloads") },
                 leadingContent = {
@@ -188,7 +189,7 @@ fun MoreScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Appearance — theme + accent color
+            // Appearance: theme and accent colour
             ListItem(
                 headlineContent = { Text("Appearance") },
                 leadingContent = {
@@ -311,11 +312,16 @@ fun MoreScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Tools — standalone utilities
+            // The one tool the app has, reached directly. It used to sit behind a Tools
+            // screen that held nothing else, which is a tap and a screen to say one word.
             ListItem(
-                headlineContent = { Text("Tools") },
+                headlineContent = { Text("Offline convert video to audio") },
                 leadingContent = {
-                    Icon(Icons.Filled.Handyman, null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(
+                        painterResource(R.drawable.music), null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
                 },
                 trailingContent = {
                     Icon(
@@ -325,7 +331,7 @@ fun MoreScreen(
                     )
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToTools() }
+                modifier = Modifier.clickable { onNavigateToConverter() }
             )
 
             HorizontalDivider(
@@ -333,7 +339,7 @@ fun MoreScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Check for updates — navigates to the dedicated yt-dlp update screen
+            // Check for updates, which opens the dedicated yt-dlp update screen
             ListItem(
                 headlineContent = { Text("yt-dlp Engine Update") },
                 leadingContent = {
@@ -364,25 +370,46 @@ fun MoreScreen(
                     Icon(Icons.Filled.Code, null, tint = MaterialTheme.colorScheme.primary)
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { openSourceRepository(context) }
+                modifier = Modifier.clickable { openExternally(context, SOURCE_URL) }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            // Opened in the user's own browser rather than in the app's, because a licence
+            // is a thing people save, share and read next to something else, and none of
+            // that is possible in a window that closes when this screen does.
+            ListItem(
+                headlineContent = { Text("License") },
+                leadingContent = {
+                    Icon(
+                        Icons.Filled.Gavel, null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { openExternally(context, LICENSE_URL) }
             )
         }
     }
 }
 
 /**
- * Opens the project's page in whatever the user browses with.
+ * Hands an address to whatever the user browses with.
  *
  * Failure is swallowed: a device with no browser at all cannot be helped by a crash, and
- * this is the least important thing on the screen.
+ * nothing that opens this way is load-bearing.
  */
-private fun openSourceRepository(context: android.content.Context) {
+private fun openExternally(context: android.content.Context, url: String) {
     runCatching {
         context.startActivity(
-            Intent(Intent.ACTION_VIEW, Uri.parse(SOURCE_URL))
+            Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         )
     }
 }
 
 private const val SOURCE_URL = "https://github.com/SibtainOcn/Hazel"
+private const val LICENSE_URL = "https://github.com/SibtainOcn/Hazel/blob/main/LICENSE"

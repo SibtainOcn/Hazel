@@ -26,6 +26,13 @@ data class ConversionState(
     val inputFileUri: Uri? = null,
     val format: AudioFormat = AudioFormats.DEFAULT,
     /**
+     * What the saved file is called, editable before the conversion starts.
+     *
+     * It is the filename and the title tag at once, because a file called one thing and
+     * announcing itself as another is a distinction nobody asked for.
+     */
+    val outputName: String = "",
+    /**
      * The one line the screen shows while a conversion runs, replaced as the engine
      * reports the next thing it is doing.
      *
@@ -76,11 +83,16 @@ class ConverterViewModel : ViewModel() {
             inputFileName = name,
             inputSizeBytes = fileSize(context, uri),
             inputFileUri = uri,
+            outputName = safeBaseName(name),
             error = null,
             isComplete = false,
             statusLine = "",
             progress = 0f
         )
+    }
+
+    fun setOutputName(name: String) {
+        _state.value = _state.value.copy(outputName = name)
     }
 
     fun setFormat(format: AudioFormat) {
@@ -135,13 +147,22 @@ class ConverterViewModel : ViewModel() {
                 // can be told apart from anything an earlier run left behind.
                 val before = outputDir.listFiles()?.map { it.name }?.toSet().orEmpty()
 
-                val baseName = safeBaseName(sourceName)
+                val title = _state.value.outputName.trim()
+                    .ifBlank { safeBaseName(sourceName) }
+                val baseName = safeBaseName(title)
+
                 val request = YoutubeDLRequest("file://${tempInput.absolutePath}").apply {
                     addOption("--enable-file-urls")
                     addOption("-x")
                     addOption("--audio-format", format.id)
                     addOption("--audio-quality", "0")
                     addOption("-o", File(outputDir, "$baseName.%(ext)s").absolutePath)
+
+                    // The tags go in during the conversion rather than in a pass of their
+                    // own: extracting the audio is already an FFmpeg run, and these are
+                    // arguments to it. Aimed at that one step by name, so no other step the
+                    // engine might run picks them up.
+                    metadataArgs(title)?.let { addOption("--postprocessor-args", it) }
                 }
 
                 YoutubeDL.getInstance().execute(request, null) { progress, _, line ->
@@ -209,6 +230,20 @@ class ConverterViewModel : ViewModel() {
             )
             outputDir.listFiles()?.none { it.isFile } ?: true
         }.getOrDefault(false)
+    }
+
+    /**
+     * The tagging argument for the extraction step, or null when there is nothing to say.
+     *
+     * Quoted because a title is whatever the user typed and regularly contains spaces, and
+     * the engine hands this string on as a shell-shaped argument list. A quote inside the
+     * text is dropped rather than escaped: it cannot survive that round trip intact, and
+     * losing a character out of a title is a great deal better than a mangled command.
+     */
+    private fun metadataArgs(title: String): String? {
+        if (title.isBlank()) return null
+        val safe = title.replace("\"", "").replace("\\", "")
+        return "ExtractAudio:-metadata title=\"$safe\""
     }
 
     private fun finishWithError(message: String) {

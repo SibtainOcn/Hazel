@@ -30,11 +30,15 @@ import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 
 /**
- * Container for Hazel's standalone utilities that aren't part of the download flow.
+ * Where a standalone utility goes, once there is one.
+ *
+ * Empty at the moment. The converter used to live here and now sits directly under More,
+ * because a screen whose whole content is one row is a tap spent on saying one word. Kept
+ * rather than deleted: the next tool has somewhere to go, and nothing links here until it
+ * does.
  */
 @Composable
 fun ToolsScreen(
-    onNavigateToConverter: () -> Unit,
     onBack: () -> Unit
 ) {
     Column(
@@ -69,31 +73,10 @@ fun ToolsScreen(
             )
         }
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            ListItem(
-                headlineContent = { Text("Offline Converter", fontWeight = FontWeight.Medium) },
-                supportingContent = { Text("Video to audio, no internet needed") },
-                leadingContent = {
-                    Icon(
-                        painterResource(R.drawable.music), null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToConverter() }
-            )
-        }
+        Text(
+            "Nothing here yet.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

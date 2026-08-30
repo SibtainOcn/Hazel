@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
@@ -61,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -98,17 +100,30 @@ fun ConverterScreen(
     val context = LocalContext.current
 
     var formatSheetOpen by remember { mutableStateOf(false) }
+    var detailsSheetOpen by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val detailsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // Whether a finished file will reach the user's own Music folder. Only ever false up to
     // Android 10, where that is a direct file write and the permission can be refused.
     var canPublish by remember { mutableStateOf(PermissionHelper.canWriteSharedStorage(context)) }
 
+    // Asked for once the details are settled, so the run starts the moment it is answered
+    // either way. A refusal is not a reason to stop: it only changes where the file lands.
     val storageRequest = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
         canPublish = granted || !PermissionHelper.needsLegacyStorageWrite()
         converterViewModel.convert(context)
+    }
+
+    fun beginConversion() {
+        detailsSheetOpen = false
+        if (PermissionHelper.needsLegacyStorageWrite() && !canPublish) {
+            storageRequest.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        } else {
+            converterViewModel.convert(context)
+        }
     }
 
     // ACTION_OPEN_DOCUMENT, which every version this app runs on has. The list is wider than
@@ -195,13 +210,7 @@ fun ConverterScreen(
         ConvertButton(
             isConverting = state.isConverting,
             enabled = state.inputFileUri != null && !state.isConverting,
-            onClick = {
-                if (PermissionHelper.needsLegacyStorageWrite() && !canPublish) {
-                    storageRequest.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                } else {
-                    converterViewModel.convert(context)
-                }
-            }
+            onClick = { detailsSheetOpen = true }
         )
 
         AnimatedVisibility(
@@ -235,6 +244,21 @@ fun ConverterScreen(
         }
 
         Spacer(Modifier.height(32.dp))
+    }
+
+    if (detailsSheetOpen) {
+        ModalBottomSheet(
+            onDismissRequest = { detailsSheetOpen = false },
+            sheetState = detailsSheetState,
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            DetailsSheetContent(
+                outputName = state.outputName,
+                extension = state.format.extension,
+                onName = converterViewModel::setOutputName,
+                onConfirm = { beginConversion() }
+            )
+        }
     }
 
     if (formatSheetOpen) {
@@ -651,6 +675,127 @@ private fun ErrorCard(message: String, onDismiss: () -> Unit) {
             Spacer(Modifier.height(6.dp))
             TextButton(onClick = onDismiss, contentPadding = ButtonDefaults.TextButtonContentPadding) {
                 Text("Dismiss", style = MaterialTheme.typography.labelMedium)
+            }
+        }
+    }
+}
+
+// ── The details sheet ──
+
+/**
+ * What the saved file will be called and who it says made it, asked once, just before the
+ * conversion starts.
+ *
+ * Asked here rather than on the screen behind it because neither field is a decision until
+ * the moment of converting: the name arrives filled in from the video, and most of the time
+ * the right answer is to leave it and press the button.
+ */
+@Composable
+private fun DetailsSheetContent(
+    outputName: String,
+    extension: String,
+    onName: (String) -> Unit,
+    onConfirm: () -> Unit
+) {
+    Column(modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 28.dp)) {
+        Text(
+            "Save as",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "Names the file, and is written into its title tag.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(Modifier.height(18.dp))
+
+        FlatField(
+            value = outputName,
+            onValueChange = onName,
+            label = "Name",
+            // The extension is the format's to decide, so it is shown and not typed.
+            suffix = {
+                Text(
+                    ".$extension",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontFamily = FontFamily.Monospace,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        )
+
+        Spacer(Modifier.height(20.dp))
+
+        Button(
+            onClick = onConfirm,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            // Not "Convert" a second time. The button behind this sheet says that, and two
+            // of them in a row reads as the first one not having worked.
+            Text("Start", style = MaterialTheme.typography.titleSmall)
+        }
+    }
+}
+
+/**
+ * A text field drawn as one of the screen's own surfaces.
+ *
+ * No outline and no indicator line. Material's bordered fields put a notch in their own
+ * border to hold the label, which is a lot of drawing for two words and sits oddly next to
+ * the flat rows the rest of the screen is made of. The label goes above the text instead,
+ * where it reads the same way the rows do.
+ */
+@Composable
+private fun FlatField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String? = null,
+    suffix: @Composable (() -> Unit)? = null
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(2.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.weight(1f)) {
+                    if (value.isEmpty() && placeholder != null) {
+                        Text(
+                            placeholder,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+                    BasicTextField(
+                        value = value,
+                        onValueChange = onValueChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+                    )
+                }
+                suffix?.let {
+                    Spacer(Modifier.width(8.dp))
+                    it()
+                }
             }
         }
     }
