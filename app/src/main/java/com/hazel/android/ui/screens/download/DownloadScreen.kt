@@ -100,11 +100,10 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun DownloadScreen(
-    sharedUrl: String? = null,
-    sharedDirectly: Boolean = false,
+    pendingShares: List<com.hazel.android.MainActivity.SharedLink> = emptyList(),
     pendingFailure: String? = null,
     onPendingFailureConsumed: () -> Unit = {},
-    onSharedUrlConsumed: () -> Unit = {},
+    onSharesConsumed: () -> Unit = {},
     downloadViewModel: DownloadViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -128,6 +127,17 @@ fun DownloadScreen(
         .collectAsState(initial = null as Boolean?)
 
     val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
+
+    // The link being downloaded is shown first, and the rest keep the order they arrived
+    // in. What is being worked on now is what the user opened the app to see, and hunting
+    // for it down a list of queued links is the opposite of that. The list is reordered
+    // rather than animated into place: a card sliding around under a moving progress bar
+    // is harder to read than one that is simply where it belongs.
+    val orderedResults = remember(state.results, state.info?.url, state.isDownloading) {
+        val active = state.info?.url?.takeIf { state.isDownloading }
+        if (active == null) state.results
+        else state.results.sortedByDescending { it.url == active }
+    }
 
     var searchOpen by remember { mutableStateOf(false) }
     var sheetVisible by remember { mutableStateOf(false) }
@@ -226,30 +236,41 @@ fun DownloadScreen(
         }
     }
 
-    LaunchedEffect(sharedUrl) {
-        if (!sharedUrl.isNullOrBlank()) {
-            val link = sharedUrl.trim()
-            cameFromShare = true
-            directPending = sharedDirectly
+    LaunchedEffect(pendingShares.size) {
+        if (pendingShares.isEmpty()) return@LaunchedEffect
 
-            // Remembered the same way a typed link is. A link shared in is a link used,
-            // and the entry screen offering back only what was typed there made the
-            // history look like it had forgotten half of what the app had downloaded.
-            // Incognito is the one case that is not recorded, which is its whole point.
-            if (!incognito) SearchHistoryRepository.record(context, link)
+        // Taken as a batch, in the order they arrived. Several shares in a row are several
+        // asks, and answering only the last of them is what made two of three links vanish.
+        val shares = pendingShares.toList()
+        onSharesConsumed()
 
-            if (sharedDirectly) {
-                // Handed to the view model rather than read here. Shares arrive faster than
-                // a link can be read, and a queue that lives on this screen is one the next
-                // share arrives too early to join.
-                directPending = false
-                downloadViewModel.startDirect(context, link)
-            } else {
-                downloadViewModel.onUrlChange(link)
-                downloadViewModel.fetchInfo()
-            }
-            onSharedUrlConsumed()
+        cameFromShare = true
+
+        // Handed on before anything that suspends. A share arriving mid-drain restarts this
+        // effect, and anything left waiting behind a suspension point at that moment would
+        // be dropped: the links have already been taken off the pending list, so nothing
+        // would bring them back.
+        //
+        // The view model takes the direct ones rather than this screen reading them here.
+        // Shares arrive faster than a link can be read, and a queue that lives on a screen
+        // is one the next share arrives too early to join.
+        val direct = shares.filter { it.direct }
+        val asked = shares.filterNot { it.direct }
+
+        direct.forEach { downloadViewModel.startDirect(context, it.url) }
+
+        // The ordinary target opens the sheet, so those go through the usual read, which
+        // already takes several links at once.
+        if (asked.isNotEmpty()) {
+            downloadViewModel.onUrlChange(asked.first().url)
+            downloadViewModel.fetchAll(asked.map { it.url })
         }
+
+        // Remembered the same way a typed link is. A link shared in is a link used, and the
+        // entry screen offering back only what was typed there made the history look like it
+        // had forgotten half of what the app had downloaded. Incognito is the one case that
+        // is not recorded, which is its whole point.
+        if (!incognito) shares.forEach { SearchHistoryRepository.record(context, it.url) }
     }
 
     // A link shared to the instant target reads and downloads itself, at the quality saved
@@ -381,7 +402,7 @@ fun DownloadScreen(
                     }
                 }
 
-                items(state.results, key = { it.url }) { info ->
+                items(orderedResults, key = { it.url }) { info ->
                     Spacer(modifier = Modifier.height(if (compact) 8.dp else 20.dp))
 
                     val batchItem = state.batch.firstOrNull { it.url == info.url }

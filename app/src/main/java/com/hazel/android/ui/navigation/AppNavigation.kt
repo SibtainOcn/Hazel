@@ -76,11 +76,10 @@ private val bottomNavItems = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(
-    sharedUrl: String?,
-    sharedDirectly: Boolean = false,
+    pendingShares: List<com.hazel.android.MainActivity.SharedLink> = emptyList(),
     pendingFailure: String? = null,
     onPendingFailureConsumed: () -> Unit = {},
-    onSharedUrlConsumed: () -> Unit,
+    onSharesConsumed: () -> Unit = {},
     isDarkTheme: Boolean,
     onToggleTheme: () -> Unit,
     accentName: String,
@@ -226,11 +225,10 @@ fun AppNavigation(
                 val downloadViewModel: com.hazel.android.download.DownloadViewModel =
                     androidx.lifecycle.viewmodel.compose.viewModel()
                 DownloadScreen(
-                    sharedUrl = sharedUrl,
-                    sharedDirectly = sharedDirectly,
+                    pendingShares = pendingShares,
                     pendingFailure = pendingFailure,
                     onPendingFailureConsumed = onPendingFailureConsumed,
-                    onSharedUrlConsumed = onSharedUrlConsumed,
+                    onSharesConsumed = onSharesConsumed,
                     downloadViewModel = downloadViewModel
                 )
             }

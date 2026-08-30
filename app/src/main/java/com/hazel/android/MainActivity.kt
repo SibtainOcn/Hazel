@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,16 +27,21 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    var sharedUrl by mutableStateOf<String?>(null)
-        private set
-
     /**
-     * True when the link arrived through the direct share target rather than the ordinary
-     * one. The two entry points are the same screen; this is the whole of the difference
-     * between them, and it means "do not ask, just download".
+     * Shares waiting to be picked up, oldest first.
+     *
+     * A list rather than one slot. The activity is single-task, so several shares in a row
+     * arrive as several intents on the same instance, and a single slot meant each one
+     * overwrote the last before the screen had read it: sharing three links in a row
+     * downloaded whichever of them happened to be looked at.
+     *
+     * [SharedLink.direct] says which of the two share targets it came through. They resolve
+     * to the same class, so the component name is the only place the difference shows, and
+     * it is the whole difference: the direct one means "do not ask, just download".
      */
-    var sharedDirectly by mutableStateOf(false)
-        private set
+    val pendingShares = mutableStateListOf<SharedLink>()
+
+    data class SharedLink(val url: String, val direct: Boolean)
 
     /** A failure the user tapped a notification to come back to, or null. */
     var pendingFailure by mutableStateOf<String?>(null)
@@ -82,14 +88,10 @@ class MainActivity : ComponentActivity() {
             HazelTheme(darkTheme = isDark, accentName = resolvedAccent) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     AppNavigation(
-                        sharedUrl = sharedUrl,
-                        sharedDirectly = sharedDirectly,
+                        pendingShares = pendingShares,
                         pendingFailure = pendingFailure,
                         onPendingFailureConsumed = { pendingFailure = null },
-                        onSharedUrlConsumed = {
-                            sharedUrl = null
-                            sharedDirectly = false
-                        },
+                        onSharesConsumed = { pendingShares.clear() },
                         isDarkTheme = isDark,
                         onToggleTheme = {
                             scope.launch { SettingsRepository.setDarkTheme(this@MainActivity, !isDark) }
@@ -111,10 +113,15 @@ class MainActivity : ComponentActivity() {
 
     private fun handleShareIntent(intent: Intent?) {
         if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
-            sharedUrl = intent.getStringExtra(Intent.EXTRA_TEXT)
-            // The alias and the activity resolve to the same class, so which of the two the
-            // user picked in the share sheet is only visible in the component name.
-            sharedDirectly = intent.component?.className?.endsWith("DirectShareActivity") == true
+            intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()?.takeIf { it.isNotBlank() }
+                ?.let { link ->
+                    // The alias and the activity resolve to the same class, so which of the
+                    // two the user picked in the share sheet is only visible in the
+                    // component name.
+                    val direct =
+                        intent.component?.className?.endsWith("DirectShareActivity") == true
+                    pendingShares.add(SharedLink(link, direct))
+                }
         }
 
         intent?.getStringExtra(DownloadNotificationHelper.EXTRA_FAILURE_MESSAGE)

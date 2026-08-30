@@ -272,10 +272,13 @@ class DownloadViewModel : ViewModel() {
                     continue
                 }
 
+                // Added to the list rather than replacing it. Three links shared in a row
+                // are three downloads, and a screen showing only the one being worked on
+                // says nothing about the two behind it.
                 _state.value = _state.value.copy(
                     url = next,
                     info = info,
-                    results = listOf(info),
+                    results = listOf(info) + _state.value.results.filterNot { it.url == info.url },
                     error = null,
                     errorLog = null
                 )

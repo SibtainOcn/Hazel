@@ -141,12 +141,20 @@ Everything merged since 1.0.0, plus what is open in review.
   scope tied to the process rather than to the screen, so a set of ten links finishes on its
   own with the phone in a pocket. The service holds the progress notification the download
   already posts, rather than adding a second one, and goes away when the queue is empty.
+- **The home screen keeps every link of a run, with the one downloading now at the top.**
+  It showed whichever link was being worked on and nothing else, so a set shared in over a
+  few seconds looked like a single download. Everything asked for stays listed for as long
+  as the app is running, each saying whether it is downloading, queued or saved, and the
+  list is reordered rather than animated so a card does not slide about under a moving
+  progress bar.
 - **Links asked for while a download is running join the queue instead of being dropped.**
   Starting a download was the only way in, so a second set asked for mid-run was silently
   turned away. Sharing three links to Hazel Instant in a row now downloads all three: the
   shares are read one after another, each handing its download to the queue behind it, and
   each keeps the settings it was asked for under rather than picking up whatever changed
-  later.
+  later. Shares themselves are held as a list too: they arrive as separate intents on the
+  same screen, and the single slot they used to land in meant each one overwrote the last
+  before it had been read.
 - **The download sheet stops reopening every time you come back to the home screen.** Which
   link had already had its sheet opened was remembered by the screen, and the screen is
   rebuilt on every return from the downloads list or the settings, so the memory was blank
