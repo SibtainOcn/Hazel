@@ -63,30 +63,28 @@ Everything merged since 1.0.0, plus what is open in review.
   a surface and stands out over pale and dark artwork alike; it crosses, then rests, because
   a band that loops without a gap stops being noticed.
 
+- **Continuous integration.** Every pull request and every push to `main` runs the unit
+  tests and a build, as two jobs that start together rather than one after the other, so the
+  check finishes in about the time the slower half takes. The run summary reports the total,
+  passed, failed and skipped counts with a per-suite breakdown, all read from the reports the
+  run just produced, so a new test file changes the numbers with no workflow edit. A pull
+  request builds one unsigned debug APK, which is all that is needed to prove the code
+  compiles; only a push to `main` builds release.
+- **Tagged releases build and publish themselves.** Pushing a `v*` tag runs the tests, builds
+  an APK for every architecture plus a universal one, signs them from the repository secrets
+  and publishes a GitHub release titled after the tag, carrying the requirements and a link
+  to the full changelog. A tag with a suffix, `v1.1.0-beta.1`, publishes as a pre-release.
+  Nothing about the release is typed by hand: the tag is the only input.
+- **Testing notes**, in `docs/TESTING.md`, covering how to run the suite, what is covered and
+  why only that, and the two rules that keep the check fast as the project grows: unit tests
+  stay pure JVM, and tests are named for the behaviour a user would notice breaking.
+
 ### Fixed
-- **The app crashed when a download was refused for being on mobile data.** With downloads
-  set to Wi-Fi only, starting one on mobile data killed the app a few seconds later with
-  `ForegroundServiceDidNotStartInTimeException`, leaving the notification behind to say the
-  download was waiting for Wi-Fi when nothing was waiting for anything. The service that
-  keeps a download alive was being started before the connection was checked and stopped
-  again a few milliseconds later, and stopping a service the system has been told to start
-  but has not yet created leaves the start unsatisfied, which the system kills the process
-  over. The service is now started after the run is known to be going ahead, and stopping it
-  goes through the service itself so it always reaches the foreground first, however short
-  its life.
-- **Waiting for Wi-Fi reads on the card rather than as a line of red text.** A run held back
-  for want of Wi-Fi darkened nothing and said so above the list, in the colour used for
-  failures, while the card underneath sat untouched and bright. The card now carries it: the
-  artwork is dimmed exactly as a running download dims it, and the middle says Waiting for
-  Wi-Fi. Nothing failed and nothing was lost, so it is no longer reported as though something
-  had: the queue is intact and the run picks up where it left off. The notification is
-  posted only when the app is in the background, since a notification repeating what is on
-  screen is one the user has to sweep away for having been told what they were looking at.
-- **Wi-Fi only allowed anything that was not the mobile network.** The check asked whether
-  the connection was cellular, so a phone tethered over USB or Bluetooth, or any connection
-  the system describes some other way, downloaded freely under a setting whose whole purpose
-  is to stop that. It now asks for Wi-Fi or Ethernet, which is what the setting offers. A VPN
-  reports the transport carrying it, so a VPN over Wi-Fi still counts as Wi-Fi.
+- **The build assumed a `local.properties` was present.** It read the file unconditionally at
+  configuration time, so a checkout without one, which is every build server, failed before
+  it reached any task. The file is now read when it is there, and the signing folder can
+  arrive from the environment instead.
+
 - **Every download extracted the same link twice.** Resolving a link and downloading it are
   separate runs of the engine, and the second repeated all the work of the first. The read's
   own payload is now replayed into the download, which skips it. Measured on a mid-range
@@ -132,6 +130,23 @@ Everything merged since 1.0.0, plus what is open in review.
   speed and ETA on it were routinely stale. It is redrawn on a timer instead.
 
 ### Changed
+- **APKs are named after what they are.** Every output was `app-<abi>-<buildType>.apk`, which
+  is indistinguishable from every other build once a few of them share a downloads folder.
+  They are now `Hazel-v1.0.0-arm64-v8a-stable.apk`: the app, the version, the architecture
+  and the channel. The channel is `debug` for a debug build, `beta` for a version carrying a
+  pre-release suffix, and `stable` otherwise. The version can be supplied by the build, which
+  is what lets a tagged release be versioned by its tag, and a build number that would have
+  overflowed its two digits in the version code is clamped rather than rolling over into the
+  date.
+- **Ignored signing material by shape rather than by name.** The keystore was matched by the
+  one filename it happens to have, so a renamed copy, an exported `.p12` or the base64 form a
+  build server is handed would all have been committable. Extensions, environment files and
+  Terraform state are now covered as well. Nothing sensitive was ever committed: the history
+  is clean.
+- **Per-ABI splitting can be turned off** with `-PSPLIT_ABI=false`, producing the universal
+  APK alone. Five APKs take five times as long to package, which is worth it for a release
+  and wasted on a check nobody installs.
+
 - **A set of links is adjusted one link at a time.** Tapping a card in the set-of-links
   sheet used to turn on the tick boxes, which is not what tapping a thing you want to
   change should do. It now opens that link's own download sheet, the same one a single

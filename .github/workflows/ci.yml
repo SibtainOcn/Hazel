@@ -1,0 +1,163 @@
+name: CI
+
+# Runs on every pull request and on every push to main.
+#
+# The two jobs are independent and start together, so the whole check finishes in about the
+# time the slower of the two takes. Tests never wait on a packaging step, and a compile
+# failure surfaces alongside the test result rather than after it.
+#
+# A pull request builds debug: unsigned, one universal APK, nothing published. Only a push
+# to main builds release, because that is the only branch a release is ever cut from.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A new push replaces the run still going for the same branch, rather than queueing behind
+# it. The older run's answer is about code nobody is looking at any more.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # The daemon is a liability on a machine that is discarded after one build, and it hides
+  # memory problems behind a restart.
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true
+
+jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # A pull request reads the cache main wrote and does not write one of its own, so
+          # the caches stay small and one branch cannot poison another.
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      # The unit tests are pure JVM: no emulator, no device, no Android framework. That is
+      # what keeps this job to seconds, and it is the property to protect as the suite grows.
+      - name: Run unit tests
+        run: ./gradlew :app:testDebugUnitTest --stacktrace
+
+      # Runs whether the tests passed or failed, because a failed run is when the numbers
+      # are actually worth reading. Every figure comes from the XML the run just wrote.
+      - name: Summarise the run
+        if: always()
+        id: summary
+        run: python3 .github/scripts/test_summary.py
+
+      - name: Upload the test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: |
+            app/build/reports/tests/
+            app/build/test-results/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # Lifted to the job so the signing step can ask whether a keystore was configured at
+    # all: a step's condition can read env and cannot read secrets. On a fork's pull
+    # request these are empty, which is the case the condition is there to catch.
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      # Release only from main. Anywhere else a debug APK proves the same thing about the
+      # code and costs a fraction of the time, since it skips minification and signing.
+      - name: Decide what to build
+        id: target
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "task=assembleRelease" >> "$GITHUB_OUTPUT"
+            echo "variant=release" >> "$GITHUB_OUTPUT"
+            echo "split=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "task=assembleDebug" >> "$GITHUB_OUTPUT"
+            echo "variant=debug" >> "$GITHUB_OUTPUT"
+            echo "split=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Only reachable on a push to main, so a pull request from a fork never sees these.
+      # With the secrets unset the build still succeeds and produces an unsigned APK.
+      - name: Restore the signing keystore
+        if: steps.target.outputs.variant == 'release' && env.KEYSTORE_BASE64 != ''
+        run: |
+          mkdir -p "$RUNNER_TEMP/signing"
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/signing/hazel.jks"
+          cat > "$RUNNER_TEMP/signing/signing.properties" <<PROPS
+          storeFile=hazel.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          PROPS
+          echo "HAZEL_SIGNING_DIR=$RUNNER_TEMP/signing" >> "$GITHUB_ENV"
+
+      - name: Assemble
+        run: ./gradlew :app:${{ steps.target.outputs.task }} -PSPLIT_ABI=${{ steps.target.outputs.split }} --stacktrace
+
+      - name: Report what came out
+        if: always()
+        run: |
+          {
+            echo "## ${{ steps.target.outputs.variant }} build"
+            echo
+            found=0
+            for apk in $(find app/build/outputs/apk -name '*.apk' | sort); do
+              echo "- \`$(basename "$apk")\` ($(du -h "$apk" | cut -f1))"
+              found=1
+            done
+            [ "$found" = "1" ] || echo "No APK was produced."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: hazel-${{ steps.target.outputs.variant }}
+          path: app/build/outputs/apk/**/*.apk
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Delete the keystore
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/signing"

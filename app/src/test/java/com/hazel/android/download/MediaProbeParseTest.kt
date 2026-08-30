@@ -197,7 +197,19 @@ class MediaProbeParseTest {
     @Test
     fun `the url asked about is the url reported back`() {
         val info = MediaProbe.parse("https://example.com/asked", JSONObject(complete))
-        assertTrue(info.url.isNotBlank())
+        assertEquals("https://example.com/asked", info.url)
+    }
+
+    @Test
+    fun `a source that states its own address is believed over the one asked about`() {
+        // A share link and a shortened link both resolve to a canonical page, and the
+        // engine reports that page. Keeping the asked address here would file the same
+        // media under two identities.
+        val info = MediaProbe.parse(
+            "https://youtu.be/kUox2TPnpzo?si=abc",
+            JSONObject("""{"title": "T", "webpage_url": "https://www.youtube.com/watch?v=kUox2TPnpzo", "url": "https://cdn/c.mp4"}""")
+        )
+        assertEquals("https://www.youtube.com/watch?v=kUox2TPnpzo", info.url)
     }
 
     @Test
