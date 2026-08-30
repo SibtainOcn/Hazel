@@ -85,6 +85,15 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
+        <!--
+             Carries the notification's Pause, Resume and Cancel buttons to the download
+             they belong to. Not exported: nothing outside the app has any business
+             stopping a download the user started.
+        -->
+        <receiver
+            android:name=".download.DownloadActionReceiver"
+            android:exported="false" />
+
         <!-- Sign-in browser used to collect cookies for gated media -->
         <activity
             android:name=".ui.screens.cookies.CookieWebViewActivity"

@@ -34,6 +34,19 @@ object DownloadNotificationHelper {
     private const val COMPLETE_NOTIFICATION_ID = 1002
 
     /**
+     * The held download sits under an id of its own.
+     *
+     * The running notification belongs to the foreground service, and stopping that service
+     * takes its notification down with it. A pause stops the service, so posting the paused
+     * state under the same id would be posting something on its way out.
+     */
+    private const val PAUSED_NOTIFICATION_ID = 1003
+
+    private const val REQUEST_PAUSE = 2001
+    private const val REQUEST_RESUME = 2002
+    private const val REQUEST_CANCEL = 2003
+
+    /**
      * Longest title the notification shows. A title past this length wraps onto a second
      * line and pushes the progress figures off the collapsed notification, which are the
      * part worth reading while a download runs.
@@ -146,6 +159,23 @@ object DownloadNotificationHelper {
     }
 
     /**
+     * A notification button, wired to the receiver that hands it to the running download.
+     *
+     * Each action needs a request code of its own. Two buttons built with the same one are
+     * the same pending intent as far as the system is concerned, and the second would
+     * quietly replace the first, leaving Resume doing whatever Pause was asked to do.
+     */
+    private fun actionIntent(context: Context, action: String, requestCode: Int): PendingIntent {
+        val intent = Intent(context, DownloadActionReceiver::class.java)
+            .setAction(action)
+            .setPackage(context.packageName)
+        return PendingIntent.getBroadcast(
+            context, requestCode, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    /**
      * Shows or updates the progress notification. Always silent, never a popup.
      *
      * The media's own title heads the notification and the live yt-dlp line sits under it,
@@ -201,6 +231,19 @@ object DownloadNotificationHelper {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            // A download the user walked away from is one they can only reach from the
+            // shade, so the two things worth doing to it are offered there as well as on
+            // the card: hold it, or give it up.
+            .addAction(
+                R.drawable.ic_notification_pause,
+                "Pause",
+                actionIntent(context, DownloadActionReceiver.ACTION_PAUSE, REQUEST_PAUSE)
+            )
+            .addAction(
+                R.drawable.ic_notification_cancel,
+                "Cancel",
+                actionIntent(context, DownloadActionReceiver.ACTION_CANCEL, REQUEST_CANCEL)
+            )
     }
 
     /**
@@ -266,10 +309,75 @@ object DownloadNotificationHelper {
     /** `ETA 00:10` in a yt-dlp progress line. */
     private val ETA_PATTERN = Regex("""ETA\s+([\d:]+)""", RegexOption.IGNORE_CASE)
 
-    /** Cancel the progress notification */
+    /**
+     * Takes down whatever the download had in the shade, running or held.
+     *
+     * Both go, because every caller is a download that has ended. Leaving the paused entry
+     * behind would offer a Resume button for a download that finished.
+     */
     fun cancelProgress(context: Context) {
         val mgr = context.getSystemService(NotificationManager::class.java)
         mgr.cancel(PROGRESS_NOTIFICATION_ID)
+        mgr.cancel(PAUSED_NOTIFICATION_ID)
+    }
+
+    /**
+     * Says the download is held, and how far it got, with the button that starts it again.
+     *
+     * The figures are the ones the card shows, passed in rather than worked out here, so a
+     * download reading 39 percent on screen does not read as something else in the shade.
+     */
+    fun showPaused(
+        context: Context,
+        progress: Int,
+        mediaTitle: String,
+        doneBytes: Long,
+        totalBytes: Long
+    ) {
+        createChannels(context)
+        val mgr = context.getSystemService(NotificationManager::class.java)
+        mgr.cancel(PROGRESS_NOTIFICATION_ID)
+
+        val detail = buildList {
+            add("Paused")
+            if (progress in 0..100) add("$progress%")
+            if (totalBytes > 0) add("${formatSize(doneBytes)} / ${formatSize(totalBytes)}")
+        }.joinToString("  ·  ")
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_PROGRESS)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(shortTitle(mediaTitle).ifBlank { "Hazel" })
+            .setContentText(detail)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(detail))
+            .setSubText(if (progress in 0..100) "$progress%" else null)
+            .setProgress(100, progress.coerceIn(0, 100), false)
+            // Held in the shade rather than swept away with the run that stopped. A paused
+            // download is still owed, and this is the only thing that says so once the app
+            // is off screen.
+            .setOngoing(true)
+            .setSilent(true)
+            .setOnlyAlertOnce(true)
+            .setContentIntent(launchPendingIntent(context))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+            .addAction(
+                R.drawable.ic_notification_resume,
+                "Resume",
+                actionIntent(context, DownloadActionReceiver.ACTION_RESUME, REQUEST_RESUME)
+            )
+            .addAction(
+                R.drawable.ic_notification_cancel,
+                "Cancel",
+                actionIntent(context, DownloadActionReceiver.ACTION_CANCEL, REQUEST_CANCEL)
+            )
+
+        mgr.notify(PAUSED_NOTIFICATION_ID, builder.build())
+    }
+
+    /** Takes the held notification down, for a download that is running again. */
+    fun cancelPaused(context: Context) {
+        context.getSystemService(NotificationManager::class.java)
+            .cancel(PAUSED_NOTIFICATION_ID)
     }
 
     /**

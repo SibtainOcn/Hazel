@@ -1,10 +1,14 @@
 package com.hazel.android.ui.screens.more
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Surface
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,18 +66,8 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
 
     val wifiOnly by SettingsRepository.getWifiOnly(context).collectAsState(initial = false)
-    val savedLimit by SettingsRepository.getSpeedLimit(context).collectAsState(initial = "")
-
-    // Seeded from the saved value once it arrives, then left to the field: rebinding it on
-    // every save would fight whoever is typing.
-    var limitDraft by remember { mutableStateOf("") }
-    var limitLoaded by remember { mutableStateOf(false) }
-    LaunchedEffect(savedLimit) {
-        if (!limitLoaded) {
-            limitDraft = savedLimit
-            limitLoaded = true
-        }
-    }
+    val speedLimit by SettingsRepository.getSpeedLimit(context).collectAsState(initial = "")
+    var limitMenuOpen by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -201,25 +195,64 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Speed limit", fontWeight = FontWeight.Medium)
                     Text(
-                        "Blank for no limit. A number with K or M, like 500K or 1.5M",
+                        "How fast a download is allowed to go",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
-                OutlinedTextField(
-                    value = limitDraft,
-                    onValueChange = { typed ->
-                        limitDraft = typed
-                        if (SettingsRepository.isValidSpeedLimit(typed)) {
-                            scope.launch { SettingsRepository.setSpeedLimit(context, typed) }
+                Box {
+                    Surface(
+                        onClick = { limitMenuOpen = true },
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(start = 16.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                SettingsRepository.speedLimitLabel(speedLimit),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                Icons.Filled.ArrowDropDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
-                    },
-                    isError = !SettingsRepository.isValidSpeedLimit(limitDraft),
-                    singleLine = true,
-                    placeholder = { Text("None") },
-                    modifier = Modifier.width(120.dp)
-                )
+                    }
+
+                    DropdownMenu(
+                        expanded = limitMenuOpen,
+                        onDismissRequest = { limitMenuOpen = false }
+                    ) {
+                        SettingsRepository.SPEED_LIMITS.forEach { (value, label) ->
+                            DropdownMenuItem(
+                                text = { Text(label) },
+                                onClick = {
+                                    limitMenuOpen = false
+                                    scope.launch {
+                                        SettingsRepository.setSpeedLimit(context, value)
+                                    }
+                                },
+                                trailingIcon = if (value == speedLimit) {
+                                    {
+                                        Icon(
+                                            Icons.Filled.Check,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                } else null
+                            )
+                        }
+                    }
+                }
             }
         }
 
