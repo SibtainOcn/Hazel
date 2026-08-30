@@ -16,6 +16,8 @@ import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -47,6 +49,19 @@ data class DownloadPlan(
     val format: MediaFormat,
     val title: String,
     val author: String
+)
+
+/**
+ * One link waiting its turn, with the settings it was asked for under.
+ *
+ * The options travel with the link rather than being read when its turn comes, because
+ * links can be added while a run is going: three shared in a row are three separate asks,
+ * and the second one should not quietly pick up a setting changed after it was made.
+ */
+private data class QueuedDownload(
+    val plan: DownloadPlan,
+    val options: DownloadOptions,
+    val treeUri: String
 )
 
 data class DownloadState(
@@ -95,8 +110,37 @@ class DownloadViewModel : ViewModel() {
     private val _state = MutableStateFlow(DownloadState())
     val state: StateFlow<DownloadState> = _state.asStateFlow()
 
+    /**
+     * The link whose sheet has already opened on its own.
+     *
+     * Held here rather than on the screen because the screen is rebuilt every time the user
+     * comes back to it, and a memory that lives there is blank on every return: the sheet
+     * for a link read long ago would open again each time the user left the downloads list
+     * or the settings. A new read clears it, which is what lets the next one open.
+     */
+    var autoOpenedUrl: String? = null
+        private set
+
+    fun markAutoOpened(url: String) {
+        autoOpenedUrl = url
+    }
+
+    fun clearAutoOpened() {
+        autoOpenedUrl = null
+    }
+
     private var fetchJob: Job? = null
     private var downloadJob: Job? = null
+
+    /**
+     * Where a download runs.
+     *
+     * Not the view model's own scope: that is cancelled when the screen that owns it goes
+     * away, which is exactly what happens when the task is swiped off the recents list
+     * mid-download. This one lives as long as the process, which the foreground service
+     * keeps alive for as long as there is something to download.
+     */
+    private val downloadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val processId = "hazel_download"
     @Volatile private var isCancelled = false
 
@@ -119,6 +163,16 @@ class DownloadViewModel : ViewModel() {
      * against and it does not move.
      */
     @Volatile private var expectedTotalBytes: Long = 0L
+
+    /**
+     * Links waiting their turn, and the run that is draining them.
+     *
+     * Sharing three links in a row used to drop the second and third: a run was already
+     * going, and starting one was the only way in. They are appended instead, and the run
+     * keeps going until the queue is empty, so a set collected over several shares behaves
+     * the same as a set collected in one.
+     */
+    private val queue = ArrayDeque<QueuedDownload>()
 
     /** Destination picked through the document picker, or blank for Download/Hazel. */
     private var downloadTreeUri: String = ""
@@ -172,6 +226,102 @@ class DownloadViewModel : ViewModel() {
         )
     }
 
+    // ── Instant share ──
+
+    /** Links shared to the instant target, waiting to be read. */
+    private val directQueue = ArrayDeque<String>()
+
+    @Volatile private var directRunning = false
+
+    /**
+     * Reads a link shared to the instant target and downloads it without asking anything.
+     *
+     * Held as a queue of its own, ahead of the download queue, because the two stages fail
+     * differently. Sharing three links in a row used to leave one: the second arrived while
+     * the first was still being read, and a read already in flight turned it away. They are
+     * read one after another now, and each hands its download to the queue behind it, so
+     * three shares in three seconds become three downloads.
+     *
+     * The screen is shown whichever link is being read at the time, so a user who does open
+     * the app mid-run sees where it has got to rather than the first link frozen in place.
+     */
+    fun startDirect(context: Context, url: String) {
+        val link = url.trim()
+        if (link.isBlank()) return
+
+        synchronized(directQueue) { directQueue.addLast(link) }
+        if (directRunning) return
+        directRunning = true
+
+        val app = context.applicationContext
+        downloadScope.launch {
+            while (true) {
+                val next = synchronized(directQueue) { directQueue.removeFirstOrNull() } ?: break
+
+                val info = runCatching { readOne(next) }.getOrNull()
+                if (info == null) {
+                    DownloadNotificationHelper.showError(app, "Could not read this link")
+                    continue
+                }
+
+                val isVideo = SettingsRepository.getQuickIsVideo(app).first()
+                val maxHeight = SettingsRepository.getQuickMaxHeight(app).first()
+                val format = info.autoPick(isVideo, maxHeight)
+                if (format == null) {
+                    DownloadNotificationHelper.showError(app, "Nothing to download from this link")
+                    continue
+                }
+
+                _state.value = _state.value.copy(
+                    url = next,
+                    info = info,
+                    results = listOf(info),
+                    error = null,
+                    errorLog = null
+                )
+                markAutoOpened(info.url)
+
+                startBatch(
+                    context = app,
+                    plans = listOf(DownloadPlan(info, format, info.title, info.uploader)),
+                    options = SettingsRepository.getDownloadOptions(app).first(),
+                    treeUri = SettingsRepository.getDownloadTreeUri(app).first()
+                )
+            }
+            directRunning = false
+        }
+    }
+
+    /**
+     * Reads one link's metadata, for the paths with no screen watching. A link that turns
+     * out to hold several items contributes its first, since an instant share is one ask
+     * and a playlist shared that way is not a request for two hundred files.
+     */
+    private suspend fun readOne(url: String): MediaInfo? {
+        val app = HazelApp.instance
+        return expand(
+            url,
+            CookieRepository.activeCookieFile(app),
+            SettingsRepository.getFetchMode(app).first(),
+            SettingsRepository.getForceIpv4(app).first(),
+            SettingsRepository.getListingSource(app).first(),
+            "${MediaProbe.PROBE_PROCESS_ID}_direct"
+        ).firstOrNull()?.let { first ->
+            // A listing entry carries no formats, so it is read again on its own before a
+            // quality can be picked from it.
+            if (first.hasResolvedFormats) first
+            else runCatching {
+                probeWithRetry(
+                    first.url,
+                    CookieRepository.activeCookieFile(app),
+                    SettingsRepository.getFetchMode(app).first(),
+                    SettingsRepository.getForceIpv4(app).first(),
+                    "${MediaProbe.PROBE_PROCESS_ID}_direct_formats"
+                )
+            }.getOrNull() ?: first
+        }
+    }
+
     // ── Metadata ──
 
     /**
@@ -211,6 +361,9 @@ class DownloadViewModel : ViewModel() {
             )
             return
         }
+
+        // A fresh read is a fresh answer, so the sheet is allowed to open on its own again.
+        clearAutoOpened()
 
         _state.value = _state.value.copy(
             url = valid.first(),
@@ -464,8 +617,10 @@ class DownloadViewModel : ViewModel() {
      * for a single download, and parallel runs would share the same temporary directory,
      * where the completed-file sweep cannot tell one download's output from another's.
      *
-     * Each item keeps its own entry in [DownloadState.batch], so one failure is recorded
-     * against that link and the rest of the batch still runs.
+     * Links asked for while a run is going join the end of the queue instead of being
+     * turned away, so sharing three links in a row downloads all three. Each keeps its own
+     * entry in [DownloadState.batch], so one failure is recorded against that link and the
+     * rest of the queue still runs.
      */
     fun startBatch(
         context: Context,
@@ -473,12 +628,28 @@ class DownloadViewModel : ViewModel() {
         options: DownloadOptions,
         treeUri: String = ""
     ) {
-        if (_state.value.isDownloading || plans.isEmpty()) return
+        if (plans.isEmpty()) return
 
         com.hazel.android.util.PermissionHelper.ensureNotificationPermission(context)
 
+        val queued = plans.map { QueuedDownload(it, options, treeUri) }
+        val alreadyRunning = _state.value.isDownloading
+
+        synchronized(queue) { queue.addAll(queued) }
+
+        if (alreadyRunning) {
+            // The run in flight picks these up on its own. Only the list the screen shows
+            // needs saying, so the new links appear as waiting rather than as nothing.
+            _state.value = _state.value.copy(
+                batch = _state.value.batch + plans.map {
+                    BatchItem(url = it.info.url, title = it.title)
+                }
+            )
+            return
+        }
+
         isBatchCancelled = false
-        downloadContext = context
+        downloadContext = context.applicationContext
         downloadTreeUri = treeUri
 
         _state.value = _state.value.copy(
@@ -492,18 +663,32 @@ class DownloadViewModel : ViewModel() {
             batch = plans.map { BatchItem(url = it.info.url, title = it.title) }
         )
 
-        downloadJob = viewModelScope.launch(Dispatchers.IO) {
-            val cm = context.getSystemService(android.net.ConnectivityManager::class.java)
+        // Asks the system to leave the process alone for the length of the run. Started
+        // before the first link rather than per link, so a set of ten is one service for
+        // the whole set instead of ten in a row.
+        DownloadService.start(context, plans.first().title)
+
+        // Run on a scope tied to the process rather than to the screen. A download the user
+        // has walked away from should not end because the screen that started it did.
+        downloadJob = downloadScope.launch {
+            val app = context.applicationContext
+            val cm = app.getSystemService(android.net.ConnectivityManager::class.java)
             val caps = cm?.activeNetwork?.let { cm.getNetworkCapabilities(it) }
             if (caps?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) != true) {
+                DownloadService.stop(app)
+                synchronized(queue) { queue.clear() }
                 fail(context, "No internet connection")
                 return@launch
             }
 
             val cookies = CookieRepository.activeCookieFile(context)
 
-            for (plan in plans) {
+            while (true) {
                 if (isBatchCancelled) break
+                val next = synchronized(queue) { queue.removeFirstOrNull() } ?: break
+                val plan = next.plan
+                val options = next.options
+                downloadTreeUri = next.treeUri
 
                 isCancelled = false
                 downloadIsVideo = plan.format.hasVideo
@@ -582,6 +767,8 @@ class DownloadViewModel : ViewModel() {
                 }
             }
 
+            synchronized(queue) { queue.clear() }
+            DownloadService.stop(context.applicationContext)
             finishBatch(context)
         }
     }

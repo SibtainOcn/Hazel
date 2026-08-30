@@ -135,6 +135,37 @@ Everything merged since 1.0.0, plus what is open in review.
   means editing a field that is still open. A link shared in from another app never passes
   through that screen, so it keeps its warning on the home screen, and a link shared to
   Hazel Direct is never interrupted at all.
+- **A download keeps going once the app is left.** It ran inside the screen that started
+  it, so the system suspended it shortly after the app stopped being visible and killed it
+  outright when the task was swiped away. It runs behind a foreground service now, on a
+  scope tied to the process rather than to the screen, so a set of ten links finishes on its
+  own with the phone in a pocket. The service holds the progress notification the download
+  already posts, rather than adding a second one, and goes away when the queue is empty.
+- **Links asked for while a download is running join the queue instead of being dropped.**
+  Starting a download was the only way in, so a second set asked for mid-run was silently
+  turned away. Sharing three links to Hazel Instant in a row now downloads all three: the
+  shares are read one after another, each handing its download to the queue behind it, and
+  each keeps the settings it was asked for under rather than picking up whatever changed
+  later.
+- **The download sheet stops reopening every time you come back to the home screen.** Which
+  link had already had its sheet opened was remembered by the screen, and the screen is
+  rebuilt on every return from the downloads list or the settings, so the memory was blank
+  and the sheet opened again. It is remembered by the view model now, and a fresh read is
+  what lets the next one open.
+- **A link already downloaded and still on the device offers to play it.** The download
+  sheet puts a Play action next to the one that would fetch it a second time, so coming back
+  to a link to watch it does not mean downloading it again first.
+- **Links shared into the app are remembered like typed ones.** The search screen offered
+  back only what had been typed there, which made the history look like it had forgotten
+  half of what the app had downloaded. Incognito still records nothing, which is its point.
+- **The compact rows show how much of how much, not just a percentage.** A percentage on its
+  own says nothing about whether the wait is thirty seconds or ten minutes.
+- **The app name sits over the home screen only.** The other two carry their own headings,
+  and the name above those stacked two titles on top of each other and pushed the screen's
+  own one down a bar's height for nothing. More names itself now, the way the downloads list
+  does.
+- **The link count appears from two links up.** A single card is not a list, and "1 links"
+  read as a bug.
 - **The share sheet stops saying the name twice.** Android puts the app name in front of a
   share target's own label, and the label named the app again, so the entry read "Hazel
   Hazel direct". It is "Hazel Instant" now, and the feature is called that everywhere else

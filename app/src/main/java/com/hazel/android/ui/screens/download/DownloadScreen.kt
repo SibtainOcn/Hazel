@@ -193,15 +193,19 @@ fun DownloadScreen(
 
     // A single link goes straight to its sheet. A set of links does not, because the list
     // itself is the thing to look at first.
-    var autoOpenedFor by remember { mutableStateOf<String?>(null) }
+    //
+    // Which link has already had its sheet opened is remembered by the view model rather
+    // than here. This screen is rebuilt every time the user comes back to it from the
+    // downloads list or the settings, and a memory that lives here is blank each time, so
+    // the sheet for a link read minutes ago opened again on every return.
     LaunchedEffect(state.info?.url, state.isDownloading, state.isComplete) {
         val resolved = state.info?.url
         when {
-            resolved == null -> autoOpenedFor = null
+            resolved == null -> downloadViewModel.clearAutoOpened()
 
-            resolved != autoOpenedFor && !state.isMultiple &&
+            resolved != downloadViewModel.autoOpenedUrl && !state.isMultiple &&
                     !state.isDownloading && !state.isComplete -> {
-                autoOpenedFor = resolved
+                downloadViewModel.markAutoOpened(resolved)
 
                 // A repeat is raised in the search screen, where the link is entered and
                 // the answer is still cheap. A link shared in from another app never goes
@@ -224,36 +228,33 @@ fun DownloadScreen(
 
     LaunchedEffect(sharedUrl) {
         if (!sharedUrl.isNullOrBlank()) {
+            val link = sharedUrl.trim()
             cameFromShare = true
             directPending = sharedDirectly
-            downloadViewModel.onUrlChange(sharedUrl.trim())
-            downloadViewModel.fetchInfo(notifyFailure = sharedDirectly)
+
+            // Remembered the same way a typed link is. A link shared in is a link used,
+            // and the entry screen offering back only what was typed there made the
+            // history look like it had forgotten half of what the app had downloaded.
+            // Incognito is the one case that is not recorded, which is its whole point.
+            if (!incognito) SearchHistoryRepository.record(context, link)
+
+            if (sharedDirectly) {
+                // Handed to the view model rather than read here. Shares arrive faster than
+                // a link can be read, and a queue that lives on this screen is one the next
+                // share arrives too early to join.
+                directPending = false
+                downloadViewModel.startDirect(context, link)
+            } else {
+                downloadViewModel.onUrlChange(link)
+                downloadViewModel.fetchInfo()
+            }
             onSharedUrlConsumed()
         }
     }
 
-    // A link shared to the direct target downloads as soon as its formats are known, at the
-    // quality saved in settings. Nothing is asked and no sheet opens: the whole value of
-    // that target is that sharing to it is the last thing the user has to do.
-    val quickIsVideo by SettingsRepository.getQuickIsVideo(context).collectAsState(initial = true)
-    val quickMaxHeight by SettingsRepository.getQuickMaxHeight(context).collectAsState(initial = 0)
-
-    LaunchedEffect(directPending, state.info?.url, state.isFetching) {
-        val info = state.info
-        if (!directPending || info == null || state.isFetching) return@LaunchedEffect
-        if (state.isDownloading || state.isComplete) return@LaunchedEffect
-
-        val format = info.autoPick(quickIsVideo, quickMaxHeight) ?: return@LaunchedEffect
-        directPending = false
-        downloadViewModel.startDownload(
-            context = context,
-            format = format,
-            options = options,
-            title = info.title,
-            author = info.uploader,
-            treeUri = treeUri
-        )
-    }
+    // A link shared to the instant target reads and downloads itself, at the quality saved
+    // in settings, without a sheet or a question. That runs in the view model rather than
+    // here, so it survives this screen and so several shares in a row can queue up.
 
     if (guideSeen == false) {
         UserGuideDialog(
@@ -285,10 +286,9 @@ fun DownloadScreen(
             // holds and switches how it is drawn, and both of those are worth reaching
             // without scrolling back to the top of a hundred links first.
             //
-            // Always offered, not only once the list is long. A short list still reads
-            // differently in the two layouts, and a control that comes and goes with the
-            // item count is one nobody learns is there.
-            if (state.results.isNotEmpty()) {
+            // Shown from two links up. A single card is not a list: there is no count worth
+            // stating and nothing for a layout to change, and "1 links" reads as a bug.
+            if (state.results.size > 1) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     modifier = Modifier
@@ -405,6 +405,7 @@ fun DownloadScreen(
                             isDownloading = isActive,
                             isProcessing = isActive && state.isProcessing,
                             progress = state.progress,
+                            totalBytes = state.totalBytes,
                             isComplete = batchItem?.state == BatchState.DONE ||
                                     (!state.isMultiple && state.isComplete),
                             batchItem = batchItem,
@@ -528,8 +529,21 @@ fun DownloadScreen(
 
     if (sheetVisible) {
         state.info?.let { info ->
+            // A link already downloaded and still on the device is one the user may have
+            // come back to in order to watch rather than to fetch again. The sheet says so
+            // by offering to play it, next to the action that would download it a second
+            // time. Checked only while the sheet is open, since it touches the filesystem.
+            var onDevice by remember(info.url) { mutableStateOf<HistoryEntry?>(null) }
+            LaunchedEffect(info.url, history) {
+                val entry = history.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
+                onDevice = entry?.takeIf { DownloadHistoryRepository.fileExists(context, it) }
+            }
+
             FormatSheet(
                 info = info,
+                onPlay = onDevice?.let { entry ->
+                    { MediaOpener.play(context, entry.fileUri, entry.isVideo) }
+                },
                 options = options,
                 onOptionsChange = {
                     scope.launch { SettingsRepository.setDownloadOptions(context, it) }
@@ -921,6 +935,7 @@ private fun MediaRow(
     isDownloading: Boolean,
     isProcessing: Boolean,
     progress: Float,
+    totalBytes: Long,
     isComplete: Boolean,
     batchItem: BatchItem?,
     alreadyDownloaded: Boolean,
@@ -1040,7 +1055,19 @@ private fun MediaRow(
 
                     val state = when {
                         isProcessing -> "Processing"
-                        isDownloading -> "%.1f %%".format(animatedProgress * 100)
+                        // The same line the card shows: how far along, and how far there is
+                        // to go. A percentage on its own says nothing about whether the
+                        // wait is thirty seconds or ten minutes.
+                        isDownloading -> buildString {
+                            append("%.1f %%".format(animatedProgress * 100))
+                            if (totalBytes > 0) {
+                                val done = (totalBytes * animatedProgress).toLong()
+                                append("  ")
+                                append(formatFileSize(done))
+                                append(" / ")
+                                append(formatFileSize(totalBytes))
+                            }
+                        }
                         batchItem?.state == BatchState.FAILED -> batchItem.error ?: "Failed"
                         isComplete -> "Saved"
                         batchItem?.state == BatchState.QUEUED -> "Queued"

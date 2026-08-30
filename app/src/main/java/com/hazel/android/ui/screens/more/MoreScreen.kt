@@ -95,7 +95,15 @@ fun MoreScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+        // The screen names itself, the way the downloads list does. The app's name used to
+        // sit above it in a bar of its own; with that gone this is what the screen opens
+        // on, rather than the first card arriving with no introduction.
+        Text(
+            "More",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 
         // Android suspends a long network job shortly after the app leaves the foreground,
         // so without this exemption a download stops when the screen is turned off. It

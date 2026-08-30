@@ -100,7 +100,12 @@ fun AppNavigation(
 
     Scaffold(
         topBar = {
-            if (!isSubScreen) {
+            // Only over the home screen. The other two carry their own headings, and the
+            // app's name above those made two titles stacked on top of each other, with the
+            // screen's own one pushed down a bar's height for nothing. The incognito switch
+            // goes with it: what it changes is what a download records, which is decided
+            // here and nowhere else.
+            if (currentRoute == Screen.Download.route) {
                 TopAppBar(
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically) {

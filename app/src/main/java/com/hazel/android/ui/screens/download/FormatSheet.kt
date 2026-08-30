@@ -89,6 +89,11 @@ fun FormatSheet(
     isLoadingFormats: Boolean = false,
     initialFormat: MediaFormat? = null,
     confirmAsApply: Boolean = false,
+    /**
+     * Set when this media is already downloaded and still on the device, in which case the
+     * header offers to play it beside the action that would fetch it again.
+     */
+    onPlay: (() -> Unit)? = null,
     onOpenSaveDir: () -> Unit,
     onPickSaveDir: () -> Unit,
     onResetSaveDir: () -> Unit,
@@ -159,6 +164,31 @@ fun FormatSheet(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                 }
+                // Left of the download action, and quieter than it. Playing what is already
+                // there is the smaller of the two things to do here, and it should not be
+                // possible to take it by aiming for the other.
+                if (onPlay != null) {
+                    Surface(
+                        onClick = onPlay,
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                        modifier = Modifier.height(44.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 18.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Play",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
+
                 Surface(
                     onClick = {
                         selected?.let { onDownload(it, title.trim(), author.trim()) }
