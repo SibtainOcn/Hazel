@@ -105,4 +105,35 @@
     <string name="guide_battery_settings">Battery settings</string>
     <string name="guide_close">Close</string>
 
+    <!-- FormatSheet -->
+    <string name="format_sheet_title">Download</string>
+    <string name="format_sheet_subtitle">Adjust download</string>
+    <string name="format_sheet_play">Play</string>
+    <string name="format_sheet_ok">OK</string>
+    <string name="format_sheet_download">Download</string>
+    <string name="format_sheet_tab_audio">Audio</string>
+    <string name="format_sheet_tab_video">Video</string>
+    <string name="format_sheet_label_title">Title</string>
+    <string name="format_sheet_label_author">Author</string>
+    <string name="format_sheet_label_container">Container</string>
+    <string name="format_sheet_video_quality">Video quality</string>
+    <string name="format_sheet_audio_quality">Audio quality</string>
+    <string name="format_sheet_no_video_stream">This source has no separate video stream.</string>
+    <string name="format_sheet_no_audio_stream">This source has no separate audio stream.</string>
+    <string name="format_sheet_adjust_video">Adjust video</string>
+    <string name="format_sheet_adjust_audio">Adjust audio</string>
+    <string name="format_sheet_thumbnail">Thumbnail</string>
+    <string name="format_sheet_chapters">Chapters</string>
+    <string name="format_sheet_subtitles">Subtitles</string>
+    <string name="format_sheet_sponsorblock">SponsorBlock</string>
+    <string name="format_sheet_filename_template">Filename template</string>
+    <string name="format_sheet_change_field">Change %1$s</string>
+    <string name="format_sheet_save_dir">Save dir</string>
+    <string name="format_sheet_save_location">Save location</string>
+    <string name="format_sheet_save_location_title">Save location</string>
+    <string name="format_sheet_save_location_body">Open this folder in your file manager, or pick a different one to save downloads into.</string>
+    <string name="format_sheet_open_folder">Open folder</string>
+    <string name="format_sheet_reset">Reset</string>
+    <string name="format_sheet_change">Change</string>
+
 </resources>

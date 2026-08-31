@@ -53,8 +53,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.download.AUDIO_CONTAINERS
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.MediaFormat
@@ -154,12 +156,12 @@ fun FormatSheet(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        "Download",
+                        stringResource(R.string.format_sheet_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "Adjust download",
+                        stringResource(R.string.format_sheet_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
@@ -179,7 +181,7 @@ fun FormatSheet(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "Play",
+                                stringResource(R.string.format_sheet_play),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -212,7 +214,7 @@ fun FormatSheet(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            if (confirmAsApply) "OK" else "Download",
+                            if (confirmAsApply) stringResource(R.string.format_sheet_ok) else stringResource(R.string.format_sheet_download),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary
@@ -236,7 +238,7 @@ fun FormatSheet(
                         selected = info.bestAudio
                     },
                     enabled = info.audioFormats.isNotEmpty(),
-                    text = { Text("Audio", fontWeight = FontWeight.SemiBold) }
+                    text = { Text(stringResource(R.string.format_sheet_tab_audio), fontWeight = FontWeight.SemiBold) }
                 )
                 Tab(
                     selected = videoTab,
@@ -245,25 +247,25 @@ fun FormatSheet(
                         selected = info.bestVideo
                     },
                     enabled = info.videoFormats.isNotEmpty(),
-                    text = { Text("Video", fontWeight = FontWeight.SemiBold) }
+                    text = { Text(stringResource(R.string.format_sheet_tab_video), fontWeight = FontWeight.SemiBold) }
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            EditableField(label = "Title", value = title, onValueChange = { title = it })
+            EditableField(label = stringResource(R.string.format_sheet_label_title), value = title, onValueChange = { title = it })
 
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 EditableField(
-                    label = "Author",
+                    label = stringResource(R.string.format_sheet_label_author),
                     value = author,
                     onValueChange = { author = it },
                     modifier = Modifier.weight(1f)
                 )
                 DropdownField(
-                    label = "Container",
+                    label = stringResource(R.string.format_sheet_label_container),
                     value = container.ifBlank { "Default" },
                     choices = containerChoices,
                     onSelect = { choice ->
@@ -281,7 +283,7 @@ fun FormatSheet(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                if (videoTab) "Video quality" else "Audio quality",
+                if (videoTab) stringResource(R.string.format_sheet_video_quality) else stringResource(R.string.format_sheet_audio_quality),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
@@ -296,7 +298,8 @@ fun FormatSheet(
                 isLoadingFormats -> FormatRowShimmerCard()
 
                 current == null -> Text(
-                    "This source has no separate ${if (videoTab) "video" else "audio"} stream.",
+                    if (videoTab) stringResource(R.string.format_sheet_no_video_stream)
+                    else stringResource(R.string.format_sheet_no_audio_stream),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
@@ -324,7 +327,8 @@ fun FormatSheet(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                "Adjust ${if (videoTab) "video" else "audio"}",
+                if (videoTab) stringResource(R.string.format_sheet_adjust_video)
+                else stringResource(R.string.format_sheet_adjust_audio),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
@@ -339,7 +343,7 @@ fun FormatSheet(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OptionChip(
-                        label = "Thumbnail",
+                        label = stringResource(R.string.format_sheet_thumbnail),
                         icon = Icons.Filled.Image,
                         selected = options.embedThumbnail,
                         onClick = {
@@ -347,14 +351,14 @@ fun FormatSheet(
                         }
                     )
                     OptionChip(
-                        label = "Chapters",
+                        label = stringResource(R.string.format_sheet_chapters),
                         icon = Icons.Filled.Book,
                         badge = options.chapterBadge(videoTab),
                         onClick = { openDialog = SheetDialog.CHAPTERS }
                     )
                     if (videoTab) {
                         OptionChip(
-                            label = "Subtitles",
+                            label = stringResource(R.string.format_sheet_subtitles),
                             icon = Icons.Filled.ClosedCaption,
                             badge = options.subtitleBadge,
                             onClick = { openDialog = SheetDialog.SUBTITLES }
@@ -363,13 +367,13 @@ fun FormatSheet(
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OptionChip(
-                        label = "SponsorBlock",
+                        label = stringResource(R.string.format_sheet_sponsorblock),
                         icon = Icons.Filled.Paid,
                         badge = options.sponsorBlockFilters.size,
                         onClick = { openDialog = SheetDialog.SPONSORBLOCK }
                     )
                     OptionChip(
-                        label = "Filename template",
+                        label = stringResource(R.string.format_sheet_filename_template),
                         icon = Icons.Filled.Edit,
                         onClick = { openDialog = SheetDialog.FILENAME }
                     )
@@ -520,7 +524,7 @@ private fun DropdownField(
                 }
                 Icon(
                     Icons.Filled.ArrowDropDown,
-                    contentDescription = "Change $label",
+                    contentDescription = stringResource(R.string.format_sheet_change_field, label),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -559,7 +563,7 @@ private fun SaveDirField(label: String, onClick: () -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Save dir",
+                    stringResource(R.string.format_sheet_save_dir),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
@@ -569,7 +573,7 @@ private fun SaveDirField(label: String, onClick: () -> Unit) {
             Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 Icons.Filled.Folder,
-                contentDescription = "Save location",
+                contentDescription = stringResource(R.string.format_sheet_save_location),
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
@@ -589,26 +593,25 @@ private fun SaveDirDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Filled.Folder, null) },
-        title = { Text("Save location", fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.format_sheet_save_location_title), fontWeight = FontWeight.Bold) },
         text = {
             Column {
                 Text(label, style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    "Open this folder in your file manager, or pick a different one to " +
-                            "save downloads into.",
+                    stringResource(R.string.format_sheet_save_location_body),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
         },
-        confirmButton = { TextButton(onClick = onOpen) { Text("Open folder") } },
+        confirmButton = { TextButton(onClick = onOpen) { Text(stringResource(R.string.format_sheet_open_folder)) } },
         dismissButton = {
             Row {
                 if (isCustom) {
-                    TextButton(onClick = onReset) { Text("Reset") }
+                    TextButton(onClick = onReset) { Text(stringResource(R.string.format_sheet_reset)) }
                 }
-                TextButton(onClick = onPick) { Text("Change") }
+                TextButton(onClick = onPick) { Text(stringResource(R.string.format_sheet_change)) }
             }
         }
     )
@@ -644,7 +647,7 @@ private fun OptionChip(
     }
 
     if (badge > 0) {
-        BadgedBox(badge = { Badge { Text("$badge") } }) { chip() }
+        BadgedBox(badge = { Badge { Text(badge.toString()) } }) { chip() }
     } else {
         chip()
     }
