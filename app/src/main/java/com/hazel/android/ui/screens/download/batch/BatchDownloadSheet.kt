@@ -36,8 +36,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadPlan
 import com.hazel.android.download.MediaInfo
@@ -113,12 +116,12 @@ fun BatchDownloadSheet(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        "Download",
+                        stringResource(R.string.batch_header_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "Adjust download",
+                        stringResource(R.string.batch_header_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -144,7 +147,7 @@ fun BatchDownloadSheet(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "Download",
+                            stringResource(R.string.batch_download_action),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary
@@ -163,8 +166,15 @@ fun BatchDownloadSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    if (state.selectionMode) "${state.selected.size} selected"
-                    else "${results.size} links",
+                    if (state.selectionMode) {
+                        pluralStringResource(
+                            R.plurals.batch_selected,
+                            state.selected.size,
+                            state.selected.size
+                        )
+                    } else {
+                        pluralStringResource(R.plurals.batch_links, results.size, results.size)
+                    },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -190,8 +200,10 @@ fun BatchDownloadSheet(
                 ) {
                     Icon(
                         Icons.Filled.SelectAll,
-                        contentDescription = if (state.selectionMode) "Stop selecting"
-                        else "Select links",
+                        contentDescription = stringResource(
+                            if (state.selectionMode) R.string.batch_stop_selecting
+                            else R.string.batch_start_selecting
+                        ),
                         tint = if (state.selectionMode) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -199,7 +211,10 @@ fun BatchDownloadSheet(
 
                 Box {
                     IconButton(onClick = { listMenuOpen = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = "List options")
+                        Icon(
+                            Icons.Filled.MoreVert,
+                            contentDescription = stringResource(R.string.batch_list_options)
+                        )
                     }
                     DropdownMenu(
                         expanded = listMenuOpen,
@@ -207,7 +222,7 @@ fun BatchDownloadSheet(
                     ) {
                         if (!state.selectionMode) {
                             DropdownMenuItem(
-                                text = { Text("Select links") },
+                                text = { Text(stringResource(R.string.batch_menu_select_links)) },
                                 onClick = {
                                     listMenuOpen = false
                                     state.startSelection()
@@ -215,21 +230,21 @@ fun BatchDownloadSheet(
                             )
                         } else {
                             DropdownMenuItem(
-                                text = { Text("Select all") },
+                                text = { Text(stringResource(R.string.batch_menu_select_all)) },
                                 onClick = {
                                     listMenuOpen = false
                                     state.selectAll()
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Invert selection") },
+                                text = { Text(stringResource(R.string.batch_menu_invert)) },
                                 onClick = {
                                     listMenuOpen = false
                                     state.invertSelection()
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Remove selected") },
+                                text = { Text(stringResource(R.string.batch_menu_remove_selected)) },
                                 enabled = state.selected.isNotEmpty(),
                                 onClick = {
                                     listMenuOpen = false
@@ -238,7 +253,7 @@ fun BatchDownloadSheet(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Done") },
+                                text = { Text(stringResource(R.string.batch_menu_done)) },
                                 onClick = {
                                     listMenuOpen = false
                                     state.endSelection()
@@ -298,7 +313,7 @@ fun BatchDownloadSheet(
 
             BatchActionBar(
                 isVideo = state.videoTab,
-                qualityLabel = qualityLabelFor(state.maxHeight),
+                qualityLabel = stringResource(qualityLabelFor(state.maxHeight)),
                 containerLabel = containerLabelFor(options, state.videoTab),
                 options = options,
                 onDownloadType = { openSheet = BatchSheet.TYPE },

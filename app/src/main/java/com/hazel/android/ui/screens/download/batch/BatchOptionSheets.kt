@@ -27,12 +27,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.annotation.StringRes
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.download.AUDIO_CONTAINERS
 import com.hazel.android.download.VIDEO_CONTAINERS
 
@@ -44,19 +47,25 @@ import com.hazel.android.download.VIDEO_CONTAINERS
  * publish would leave the rest with nothing. Each link resolves the ceiling against its
  * own formats, which is why the rows can end up showing different numbers from each other.
  */
-val BATCH_QUALITY_STEPS: List<Pair<Int, String>> = listOf(
-    0 to "Best quality",
-    2160 to "~ 2160p",
-    1440 to "~ 1440p",
-    1080 to "~ 1080p",
-    720 to "~ 720p",
-    480 to "~ 480p",
-    360 to "~ 360p"
+val BATCH_QUALITY_STEPS: List<Pair<Int, Int>> = listOf(
+    0 to R.string.batch_quality_best,
+    2160 to R.string.batch_quality_2160,
+    1440 to R.string.batch_quality_1440,
+    1080 to R.string.batch_quality_1080,
+    720 to R.string.batch_quality_720,
+    480 to R.string.batch_quality_480,
+    360 to R.string.batch_quality_360
 )
 
-/** The action bar's label for the current ceiling. */
-fun qualityLabelFor(maxHeight: Int): String =
-    BATCH_QUALITY_STEPS.firstOrNull { it.first == maxHeight }?.second ?: "Best quality"
+/**
+ * The action bar's label for the current ceiling, as a resource id rather than as text.
+ * This list is a top level value, built before there is a context to read strings with, so
+ * the name is resolved where it is shown instead.
+ */
+@StringRes
+fun qualityLabelFor(maxHeight: Int): Int =
+    BATCH_QUALITY_STEPS.firstOrNull { it.first == maxHeight }?.second
+        ?: R.string.batch_quality_best
 
 /** Audio or video, for the whole set or for one link. */
 @Composable
@@ -66,18 +75,18 @@ fun BatchDownloadTypeSheet(
     onDismiss: () -> Unit
 ) {
     ChoiceSheet(
-        title = "Preferred download type",
-        subtitle = "What these links download as",
+        title = stringResource(R.string.batch_type_sheet_title),
+        subtitle = stringResource(R.string.batch_type_sheet_subtitle),
         onDismiss = onDismiss
     ) {
         ChoiceRow(
-            label = "Audio",
+            label = stringResource(R.string.batch_type_audio),
             icon = Icons.Filled.MusicNote,
             selected = !isVideo,
             onClick = { onSelect(false) }
         )
         ChoiceRow(
-            label = "Video",
+            label = stringResource(R.string.batch_type_video),
             icon = Icons.Filled.Videocam,
             selected = isVideo,
             onClick = { onSelect(true) }
@@ -101,7 +110,10 @@ fun BatchQualitySheet(
         containerColor = batchSheetColor
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            SheetHeader("Format", "Select format")
+            SheetHeader(
+                stringResource(R.string.batch_format_title),
+                stringResource(R.string.batch_format_subtitle)
+            )
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
@@ -109,9 +121,9 @@ fun BatchQualitySheet(
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(BATCH_QUALITY_STEPS, key = { it.first }) { (height, label) ->
+                items(BATCH_QUALITY_STEPS, key = { it.first }) { (height, labelRes) ->
                     ChoiceRow(
-                        label = label,
+                        label = stringResource(labelRes),
                         selected = height == maxHeight,
                         onClick = { onSelect(height) }
                     )
@@ -132,8 +144,8 @@ fun BatchContainerSheet(
     val choices = if (isVideo) VIDEO_CONTAINERS else AUDIO_CONTAINERS
 
     ChoiceSheet(
-        title = "Container",
-        subtitle = "The file these links are saved as",
+        title = stringResource(R.string.batch_container_title),
+        subtitle = stringResource(R.string.batch_container_subtitle),
         onDismiss = onDismiss
     ) {
         choices.forEach { choice ->
@@ -156,18 +168,18 @@ fun BatchSaveDirSheet(
     onDismiss: () -> Unit
 ) {
     ChoiceSheet(
-        title = "Save location",
+        title = stringResource(R.string.batch_save_dir_title),
         subtitle = saveDirLabel,
         onDismiss = onDismiss
     ) {
         ChoiceRow(
-            label = "Open this folder",
+            label = stringResource(R.string.batch_open_folder),
             icon = Icons.Filled.Folder,
             selected = false,
             onClick = onOpen
         )
         ChoiceRow(
-            label = "Change folder",
+            label = stringResource(R.string.batch_change_folder),
             icon = Icons.Filled.Edit,
             selected = false,
             onClick = onPick

@@ -34,9 +34,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import coil3.compose.AsyncImage
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
@@ -177,7 +179,7 @@ fun BatchDownloadCard(
                 IconButton(onClick = onTypeClick) {
                     Icon(
                         if (isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
-                        contentDescription = "Download type for this link",
+                        contentDescription = stringResource(R.string.batch_card_download_type),
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )

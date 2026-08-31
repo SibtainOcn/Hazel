@@ -36,8 +36,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.download.DownloadOptions
 
 /**
@@ -95,13 +97,13 @@ fun BatchActionBar(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 BarChip(
-                    label = "Thumbnail",
+                    label = stringResource(R.string.batch_bar_thumbnail),
                     icon = Icons.Filled.Image,
                     selected = options.embedThumbnail,
                     onClick = onThumbnail
                 )
                 BarChip(
-                    label = "Chapters",
+                    label = stringResource(R.string.batch_bar_chapters),
                     icon = Icons.Filled.Book,
                     badge = options.chapterBadge(isVideo),
                     onClick = onChapters
@@ -110,20 +112,20 @@ fun BatchActionBar(
                 // yt-dlp to attach them to, which is how the single sheet treats it too.
                 if (isVideo) {
                     BarChip(
-                        label = "Subtitles",
+                        label = stringResource(R.string.batch_bar_subtitles),
                         icon = Icons.Filled.ClosedCaption,
                         badge = options.subtitleBadge,
                         onClick = onSubtitles
                     )
                 }
                 BarChip(
-                    label = "SponsorBlock",
+                    label = stringResource(R.string.batch_bar_sponsorblock),
                     icon = Icons.Filled.Paid,
                     badge = options.sponsorBlockFilters.size,
                     onClick = onSponsorBlock
                 )
                 BarChip(
-                    label = "Filename template",
+                    label = stringResource(R.string.batch_bar_filename_template),
                     icon = Icons.Filled.Edit,
                     onClick = onFilename
                 )
@@ -141,24 +143,24 @@ fun BatchActionBar(
             ) {
                 BarButton(
                     icon = if (isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
-                    description = "Preferred download type",
+                    description = stringResource(R.string.batch_bar_download_type),
                     onClick = onDownloadType
                 )
                 BarButton(
                     icon = Icons.Filled.HighQuality,
-                    description = "Quality: $qualityLabel",
+                    description = stringResource(R.string.batch_bar_quality, qualityLabel),
                     onClick = onQuality
                 )
                 BarButton(
                     icon = Icons.Filled.Folder,
-                    description = "Save location",
+                    description = stringResource(R.string.batch_bar_save_location),
                     onClick = onSaveDir
                 )
                 // Carries its value rather than an icon: a container is a name, and a
                 // picture of one would have to be learned before it said anything.
                 BarButton(
                     text = containerLabel,
-                    description = "Container",
+                    description = stringResource(R.string.batch_bar_container),
                     onClick = onContainer
                 )
             }

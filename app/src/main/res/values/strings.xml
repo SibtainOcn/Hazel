@@ -334,4 +334,62 @@
     <string name="cookies_sheet_get">Get cookies</string>
     <string name="cookies_sheet_update">Update</string>
 
+    <!-- Batch option sheets -->
+    <string name="batch_quality_best">Best quality</string>
+    <!--
+         Resolution ceilings. Digits and a unit suffix, with no word in them, so they read
+         the same in every language and translating them would only introduce errors.
+    -->
+    <string name="batch_quality_2160" translatable="false">~ 2160p</string>
+    <string name="batch_quality_1440" translatable="false">~ 1440p</string>
+    <string name="batch_quality_1080" translatable="false">~ 1080p</string>
+    <string name="batch_quality_720" translatable="false">~ 720p</string>
+    <string name="batch_quality_480" translatable="false">~ 480p</string>
+    <string name="batch_quality_360" translatable="false">~ 360p</string>
+    <string name="batch_type_sheet_title">Preferred download type</string>
+    <string name="batch_type_sheet_subtitle">What these links download as</string>
+    <string name="batch_type_audio">Audio</string>
+    <string name="batch_type_video">Video</string>
+    <string name="batch_format_title">Format</string>
+    <string name="batch_format_subtitle">Select format</string>
+    <string name="batch_container_title">Container</string>
+    <string name="batch_container_subtitle">The file these links are saved as</string>
+    <string name="batch_save_dir_title">Save location</string>
+    <string name="batch_open_folder">Open this folder</string>
+    <string name="batch_change_folder">Change folder</string>
+
+    <!-- Batch action bar -->
+    <string name="batch_bar_thumbnail">Thumbnail</string>
+    <string name="batch_bar_chapters">Chapters</string>
+    <string name="batch_bar_subtitles">Subtitles</string>
+    <string name="batch_bar_sponsorblock">SponsorBlock</string>
+    <string name="batch_bar_filename_template">Filename template</string>
+    <string name="batch_bar_download_type">Preferred download type</string>
+    <!-- Spoken for an icon button. %1$s is the quality name the button currently stands for. -->
+    <string name="batch_bar_quality">Quality: %1$s</string>
+    <string name="batch_bar_save_location">Save location</string>
+    <string name="batch_bar_container">Container</string>
+
+    <!-- Batch download sheet -->
+    <string name="batch_header_title">Download</string>
+    <string name="batch_header_subtitle">Adjust download</string>
+    <string name="batch_download_action">Download</string>
+    <string name="batch_stop_selecting">Stop selecting</string>
+    <string name="batch_start_selecting">Select links</string>
+    <string name="batch_list_options">List options</string>
+    <string name="batch_menu_select_links">Select links</string>
+    <string name="batch_menu_select_all">Select all</string>
+    <string name="batch_menu_invert">Invert selection</string>
+    <string name="batch_menu_remove_selected">Remove selected</string>
+    <string name="batch_menu_done">Done</string>
+    <plurals name="batch_selected">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <plurals name="batch_links">
+        <item quantity="one">%d link</item>
+        <item quantity="other">%d links</item>
+    </plurals>
+    <string name="batch_card_download_type">Download type for this link</string>
+
 </resources>
