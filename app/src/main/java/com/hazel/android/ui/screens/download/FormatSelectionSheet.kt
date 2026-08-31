@@ -40,9 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
 
@@ -125,7 +127,7 @@ fun FormatSelectionSheet(
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.Sort,
-                            contentDescription = "Sort formats",
+                            contentDescription = stringResource(R.string.format_selection_sort),
                             modifier = Modifier.size(20.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -353,7 +355,7 @@ fun FormatRow(
                 Spacer(modifier = Modifier.width(6.dp))
                 Icon(
                     Icons.Filled.UnfoldMore,
-                    contentDescription = "Change format",
+                    contentDescription = stringResource(R.string.format_selection_change),
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                 )

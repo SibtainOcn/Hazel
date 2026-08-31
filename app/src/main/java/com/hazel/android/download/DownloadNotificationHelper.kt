@@ -429,8 +429,8 @@ object DownloadNotificationHelper {
         cancelProgress(context)
         val builder = NotificationCompat.Builder(context, CHANNEL_PROGRESS)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Hazel")
-            .setContentText("Download cancelled")
+            .setContentTitle(context.getString(R.string.app_name))
+            .setContentText(context.getString(R.string.notification_cancelled_text))
             .setAutoCancel(true)
             .setSilent(true)
             .setColorized(true)
@@ -460,8 +460,8 @@ object DownloadNotificationHelper {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_PROGRESS)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Waiting for Wi-Fi")
-            .setContentText("Downloads are set to Wi-Fi only. They start when you are back on Wi-Fi.")
+            .setContentTitle(context.getString(R.string.notification_wifi_title))
+            .setContentText(context.getString(R.string.notification_wifi_text))
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
                     "Downloads are set to Wi-Fi only. They start when you are back on Wi-Fi."

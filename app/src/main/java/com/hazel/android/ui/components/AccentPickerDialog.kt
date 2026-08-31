@@ -25,8 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.ui.theme.AccentColors
 
 /**
@@ -40,7 +42,9 @@ fun AccentPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Accent Color", fontWeight = FontWeight.Bold) },
+        title = {
+            Text(stringResource(R.string.accent_picker_title), fontWeight = FontWeight.Bold)
+        },
         text = {
             Column {
                 AccentColors.forEach { accent ->
@@ -89,7 +93,7 @@ fun AccentPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(stringResource(R.string.accent_picker_close))
             }
         }
     )

@@ -1,5 +1,11 @@
 <resources>
-    <string name="app_name">Hazel</string>
+    <!--
+         The app's own name. Marked non-translatable so it is never carried into a
+         values-xx file: a brand name is the same word in every language, and this one
+         string is what the launcher, the top bar, the splash and the notifications all
+         read, so translating it once would rename the app everywhere.
+    -->
+    <string name="app_name" translatable="false">Hazel</string>
     <!--
          Shown in the system share sheet. Android puts the app name in front of this,
          so naming the app here again would render as "Hazel Hazel direct".
@@ -391,5 +397,52 @@
         <item quantity="other">%d links</item>
     </plurals>
     <string name="batch_card_download_type">Download type for this link</string>
+
+    <!-- Opening a finished file -->
+    <string name="media_open_unknown_location">This file\'s location is unknown</string>
+    <string name="media_open_chooser">Open with</string>
+    <string name="media_open_no_app">Nothing on this device can open it</string>
+
+    <!-- Download notifications -->
+    <string name="notification_cancelled_text">Download cancelled</string>
+    <string name="notification_wifi_title">Waiting for Wi-Fi</string>
+    <string name="notification_wifi_text">Downloads are set to Wi-Fi only. They start when you are back on Wi-Fi.</string>
+
+    <!-- Sign-in web view -->
+    <string name="cookie_webview_close">Close</string>
+    <string name="cookie_webview_desktop_site">Desktop site</string>
+    <string name="cookie_webview_no_cookies">No cookies were collected</string>
+
+    <!-- FormatSelectionSheet -->
+    <string name="format_selection_sort">Sort formats</string>
+    <string name="format_selection_change">Change format</string>
+
+    <!-- AppearanceScreen -->
+    <string name="appearance_back">Back</string>
+    <string name="appearance_dark_theme">Dark Theme</string>
+    <string name="appearance_accent_color">Accent Color</string>
+
+    <!-- AccentPickerDialog -->
+    <string name="accent_picker_title">Accent Color</string>
+    <string name="accent_picker_close">Close</string>
+
+    <!-- FetchSettingsScreen -->
+    <string name="fetch_settings_back">Back</string>
+    <string name="fetch_settings_force_ipv4">Force IPv4</string>
+
+    <!-- ToolsScreen -->
+    <string name="tools_back">Back</string>
+
+    <!-- DirectShareScreen -->
+    <string name="direct_share_back">Back</string>
+    <string name="direct_share_save_as">Save as</string>
+    <string name="direct_share_video">Video</string>
+    <string name="direct_share_audio_only">Audio only</string>
+
+    <!-- StorageLocationsScreen -->
+    <string name="storage_locations_back">Back</string>
+    <string name="storage_locations_downloads">Downloads</string>
+    <string name="storage_locations_wifi_only">Wi-Fi only</string>
+    <string name="storage_locations_speed_limit">Speed limit</string>
 
 </resources>

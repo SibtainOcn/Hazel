@@ -28,8 +28,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import kotlinx.coroutines.launch
 
@@ -62,7 +64,10 @@ fun DirectShareScreen(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.direct_share_back)
+                )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
@@ -81,15 +86,15 @@ fun DirectShareScreen(onBack: () -> Unit) {
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
-        SettingGroup(title = "Save as") {
+        SettingGroup(title = stringResource(R.string.direct_share_save_as)) {
             ChoiceRow(
-                label = "Video",
+                label = stringResource(R.string.direct_share_video),
                 description = "Picture and sound, muxed into one file.",
                 selected = isVideo,
                 onSelect = { scope.launch { SettingsRepository.setQuickIsVideo(context, true) } }
             )
             ChoiceRow(
-                label = "Audio only",
+                label = stringResource(R.string.direct_share_audio_only),
                 description = "Sound alone, at the best the source offers.",
                 selected = !isVideo,
                 onSelect = { scope.launch { SettingsRepository.setQuickIsVideo(context, false) } }

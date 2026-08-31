@@ -29,8 +29,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.FetchMode
 import com.hazel.android.download.extractor.ListingSource
@@ -70,7 +72,10 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.fetch_settings_back)
+                )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
@@ -194,7 +199,10 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Force IPv4", fontWeight = FontWeight.Medium)
+                    Text(
+                        stringResource(R.string.fetch_settings_force_ipv4),
+                        fontWeight = FontWeight.Medium
+                    )
                     Text(
                         "Only turn this on if links hang on your network. It works around a " +
                                 "broken IPv6 route, and is slower everywhere else.",
