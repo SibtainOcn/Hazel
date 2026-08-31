@@ -163,4 +163,19 @@
     <string name="converter_heading_common">The three worth using</string>
     <string name="converter_heading_other">Everything else</string>
 
+    <!-- MoreScreen -->
+    <string name="more_title">More</string>
+    <string name="more_battery_title">Background downloads</string>
+    <string name="more_battery_body">Downloads keep running in the background on their own. Some phones still cut them short to save battery. Allow unrestricted use to rule that out.</string>
+    <string name="more_downloads">Downloads</string>
+    <string name="more_appearance">Appearance</string>
+    <string name="more_cookies">Cookies</string>
+    <string name="more_link_reading">Link Reading</string>
+    <string name="more_hazel_instant">Hazel Instant</string>
+    <string name="more_temporary_files">Temporary Files</string>
+    <string name="more_converter">Offline convert video to audio</string>
+    <string name="more_engine_update">yt-dlp Engine Update</string>
+    <string name="more_source_code">Source code</string>
+    <string name="more_license">License</string>
+
 </resources>

@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.ui.screens.download.isIgnoringBatteryOptimizations
@@ -110,7 +111,7 @@ fun MoreScreen(
         // sit above it in a bar of its own; with that gone this is what the screen opens
         // on, rather than the first card arriving with no introduction.
         Text(
-            "More",
+            stringResource(R.string.more_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
@@ -142,16 +143,14 @@ fun MoreScreen(
                     Spacer(modifier = Modifier.width(14.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            "Background downloads",
+                            stringResource(R.string.more_battery_title),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            "Downloads keep running in the background on their own. Some " +
-                                    "phones still cut them short to save battery. Allow " +
-                                    "unrestricted use to rule that out.",
+                            stringResource(R.string.more_battery_body),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                                 .copy(alpha = 0.8f)
@@ -169,7 +168,7 @@ fun MoreScreen(
         ) {
             // Download location, read-only
             ListItem(
-                headlineContent = { Text("Downloads") },
+                headlineContent = { Text(stringResource(R.string.more_downloads)) },
                 leadingContent = {
                     Icon(Icons.Filled.Folder, null, tint = MaterialTheme.colorScheme.primary)
                 },
@@ -191,7 +190,7 @@ fun MoreScreen(
 
             // Appearance: theme and accent colour
             ListItem(
-                headlineContent = { Text("Appearance") },
+                headlineContent = { Text(stringResource(R.string.more_appearance)) },
                 leadingContent = {
                     Icon(Icons.Filled.Palette, null, tint = MaterialTheme.colorScheme.primary)
                 },
@@ -213,7 +212,7 @@ fun MoreScreen(
 
             // Cookies: saved sign-ins that let the downloader reach gated media
             ListItem(
-                headlineContent = { Text("Cookies") },
+                headlineContent = { Text(stringResource(R.string.more_cookies)) },
                 leadingContent = {
                     Icon(Icons.Filled.Cookie, null, tint = MaterialTheme.colorScheme.primary)
                 },
@@ -235,7 +234,7 @@ fun MoreScreen(
 
             // Link reading: network bounds used while resolving a pasted link
             ListItem(
-                headlineContent = { Text("Link Reading") },
+                headlineContent = { Text(stringResource(R.string.more_link_reading)) },
                 leadingContent = {
                     Icon(Icons.Filled.Speed, null, tint = MaterialTheme.colorScheme.primary)
                 },
@@ -258,7 +257,7 @@ fun MoreScreen(
             // What the second share target does, which is the only place those choices can
             // be made: sharing to it never opens the sheet.
             ListItem(
-                headlineContent = { Text("Hazel Instant") },
+                headlineContent = { Text(stringResource(R.string.more_hazel_instant)) },
                 leadingContent = {
                     Icon(Icons.Filled.Bolt, null, tint = MaterialTheme.colorScheme.primary)
                 },
@@ -281,7 +280,7 @@ fun MoreScreen(
             // Working files the app holds, with the running total so it is visible without
             // opening the screen.
             ListItem(
-                headlineContent = { Text("Temporary Files") },
+                headlineContent = { Text(stringResource(R.string.more_temporary_files)) },
                 leadingContent = {
                     Icon(
                         Icons.Filled.DeleteSweep, null,
@@ -315,7 +314,7 @@ fun MoreScreen(
             // The one tool the app has, reached directly. It used to sit behind a Tools
             // screen that held nothing else, which is a tap and a screen to say one word.
             ListItem(
-                headlineContent = { Text("Offline convert video to audio") },
+                headlineContent = { Text(stringResource(R.string.more_converter)) },
                 leadingContent = {
                     Icon(
                         painterResource(R.drawable.music), null,
@@ -341,7 +340,7 @@ fun MoreScreen(
 
             // Check for updates, which opens the dedicated yt-dlp update screen
             ListItem(
-                headlineContent = { Text("yt-dlp Engine Update") },
+                headlineContent = { Text(stringResource(R.string.more_engine_update)) },
                 leadingContent = {
                     Icon(Icons.Filled.Update, null, tint = MaterialTheme.colorScheme.primary)
                 },
@@ -365,7 +364,7 @@ fun MoreScreen(
             // right: the line under it already says where it goes, and the chevrons above
             // mean "another screen in here", which this is not.
             ListItem(
-                headlineContent = { Text("Source code") },
+                headlineContent = { Text(stringResource(R.string.more_source_code)) },
                 leadingContent = {
                     Icon(Icons.Filled.Code, null, tint = MaterialTheme.colorScheme.primary)
                 },
@@ -382,7 +381,7 @@ fun MoreScreen(
             // is a thing people save, share and read next to something else, and none of
             // that is possible in a window that closes when this screen does.
             ListItem(
-                headlineContent = { Text("License") },
+                headlineContent = { Text(stringResource(R.string.more_license)) },
                 leadingContent = {
                     Icon(
                         Icons.Filled.Gavel, null,
