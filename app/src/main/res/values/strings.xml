@@ -136,4 +136,31 @@
     <string name="format_sheet_reset">Reset</string>
     <string name="format_sheet_change">Change</string>
 
+    <!-- ConverterScreen -->
+    <string name="converter_label_convert_to">Convert to</string>
+    <string name="converter_label_saved_to">Saved to</string>
+    <string name="converter_hazel_storage">Hazel\'s own storage</string>
+    <string name="converter_storage_warning">Without storage access the file stays inside Hazel, where other apps cannot see it.</string>
+    <string name="converter_back">Back</string>
+    <string name="converter_title">Offline Converter</string>
+    <string name="converter_subtitle">Video to audio, nothing leaves the phone</string>
+    <string name="converter_choose_video">Choose a video file</string>
+    <string name="converter_ready">Ready</string>
+    <string name="converter_choose_video_hint">Anything on the phone or an SD card</string>
+    <string name="converter_change">Change</string>
+    <string name="converter_converting">Converting</string>
+    <string name="converter_convert">Convert</string>
+    <string name="converter_saved">Saved</string>
+    <string name="converter_open_folder">Open folder</string>
+    <string name="converter_convert_another">Convert another</string>
+    <string name="converter_error_title">That did not convert</string>
+    <string name="converter_dismiss">Dismiss</string>
+    <string name="converter_save_as_title">Save as</string>
+    <string name="converter_save_as_body">Names the file, and is written into its title tag.</string>
+    <string name="converter_label_name">Name</string>
+    <string name="converter_start">Start</string>
+    <string name="converter_format_sheet_title">Convert to</string>
+    <string name="converter_heading_common">The three worth using</string>
+    <string name="converter_heading_other">Everything else</string>
+
 </resources>

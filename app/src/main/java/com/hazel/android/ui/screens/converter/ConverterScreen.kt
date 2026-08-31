@@ -65,6 +65,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -173,7 +174,7 @@ fun ConverterScreen(
             icon = { tint ->
                 Icon(Icons.Filled.GraphicEq, null, Modifier.size(20.dp), tint = tint)
             },
-            label = "Convert to",
+            label = stringResource(R.string.converter_label_convert_to),
             value = state.format.name,
             trailing = { TagStrip(state.format.tags) },
             enabled = !state.isConverting,
@@ -186,8 +187,8 @@ fun ConverterScreen(
             icon = { tint ->
                 Icon(Icons.Filled.FolderOpen, null, Modifier.size(20.dp), tint = tint)
             },
-            label = "Saved to",
-            value = if (canPublish) StoragePaths.CONVERTED_DISPLAY else "Hazel's own storage",
+            label = stringResource(R.string.converter_label_saved_to),
+            value = if (canPublish) StoragePaths.CONVERTED_DISPLAY else stringResource(R.string.converter_hazel_storage),
             enabled = true,
             onClick = { FolderUtil.open(context, StoragePaths.finalConverted) }
         )
@@ -198,7 +199,7 @@ fun ConverterScreen(
         if (!canPublish && PermissionHelper.needsLegacyStorageWrite()) {
             Spacer(Modifier.height(6.dp))
             Text(
-                "Without storage access the file stays inside Hazel, where other apps cannot see it.",
+                stringResource(R.string.converter_storage_warning),
                 style = MaterialTheme.typography.labelSmall,
                 color = WarningAmber,
                 modifier = Modifier.padding(horizontal = 4.dp)
@@ -291,7 +292,7 @@ private fun Header(onBack: () -> Unit) {
         IconButton(onClick = onBack, modifier = Modifier.size(32.dp)) {
             Icon(
                 painter = painterResource(R.drawable.back),
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.converter_back),
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(18.dp)
             )
@@ -299,13 +300,13 @@ private fun Header(onBack: () -> Unit) {
         Spacer(Modifier.width(10.dp))
         Column {
             Text(
-                "Offline Converter",
+                stringResource(R.string.converter_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                "Video to audio, nothing leaves the phone",
+                stringResource(R.string.converter_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -349,7 +350,7 @@ private fun SourceCard(
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    if (chosen) fileName else "Choose a video file",
+                    if (chosen) fileName else stringResource(R.string.converter_choose_video),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -358,9 +359,9 @@ private fun SourceCard(
                 )
                 Text(
                     if (chosen) {
-                        if (sizeBytes > 0) formatSize(sizeBytes) else "Ready"
+                        if (sizeBytes > 0) formatSize(sizeBytes) else stringResource(R.string.converter_ready)
                     } else {
-                        "Anything on the phone or an SD card"
+                        stringResource(R.string.converter_choose_video_hint)
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -368,7 +369,7 @@ private fun SourceCard(
             }
             if (chosen && enabled) {
                 Text(
-                    "Change",
+                    stringResource(R.string.converter_change),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary
@@ -469,11 +470,11 @@ private fun ConvertButton(isConverting: Boolean, enabled: Boolean, onClick: () -
                 strokeWidth = 2.dp
             )
             Spacer(Modifier.width(10.dp))
-            Text("Converting", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.converter_converting), style = MaterialTheme.typography.titleSmall)
         } else {
             Icon(Icons.Filled.Transform, null, Modifier.size(20.dp))
             Spacer(Modifier.width(10.dp))
-            Text("Convert", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.converter_convert), style = MaterialTheme.typography.titleSmall)
         }
     }
 }
@@ -586,7 +587,7 @@ private fun ResultCard(
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        "Saved",
+                        stringResource(R.string.converter_saved),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = SuccessGreen
@@ -621,12 +622,12 @@ private fun ResultCard(
             // pair of solid buttons under a finished job reads as another decision to make.
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
             Row(modifier = Modifier.height(46.dp)) {
-                FlatAction("Open folder", Modifier.weight(1f), onOpen)
+                FlatAction(stringResource(R.string.converter_open_folder), Modifier.weight(1f), onOpen)
                 VerticalDivider(
                     modifier = Modifier.padding(vertical = 9.dp),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
                 )
-                FlatAction("Convert another", Modifier.weight(1f), onAgain)
+                FlatAction(stringResource(R.string.converter_convert_another), Modifier.weight(1f), onAgain)
             }
         }
     }
@@ -661,7 +662,7 @@ private fun ErrorCard(message: String, onDismiss: () -> Unit) {
     ) {
         Column(Modifier.padding(16.dp)) {
             Text(
-                "That did not convert",
+                stringResource(R.string.converter_error_title),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.error
@@ -674,7 +675,7 @@ private fun ErrorCard(message: String, onDismiss: () -> Unit) {
             )
             Spacer(Modifier.height(6.dp))
             TextButton(onClick = onDismiss, contentPadding = ButtonDefaults.TextButtonContentPadding) {
-                Text("Dismiss", style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(R.string.converter_dismiss), style = MaterialTheme.typography.labelMedium)
             }
         }
     }
@@ -699,14 +700,14 @@ private fun DetailsSheetContent(
 ) {
     Column(modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 28.dp)) {
         Text(
-            "Save as",
+            stringResource(R.string.converter_save_as_title),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            "Names the file, and is written into its title tag.",
+            stringResource(R.string.converter_save_as_body),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -716,7 +717,7 @@ private fun DetailsSheetContent(
         FlatField(
             value = outputName,
             onValueChange = onName,
-            label = "Name",
+            label = stringResource(R.string.converter_label_name),
             // The extension is the format's to decide, so it is shown and not typed.
             suffix = {
                 Text(
@@ -739,7 +740,7 @@ private fun DetailsSheetContent(
         ) {
             // Not "Convert" a second time. The button behind this sheet says that, and two
             // of them in a row reads as the first one not having worked.
-            Text("Start", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.converter_start), style = MaterialTheme.typography.titleSmall)
         }
     }
 }
@@ -809,18 +810,18 @@ private fun FormatSheetContent(selected: AudioFormat, onPick: (AudioFormat) -> U
 
     Column(modifier = Modifier.padding(bottom = 28.dp)) {
         Text(
-            "Convert to",
+            stringResource(R.string.converter_format_sheet_title),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 12.dp)
         )
 
-        SheetHeading("The three worth using")
+        SheetHeading(stringResource(R.string.converter_heading_common))
         common.forEach { FormatRow(it, it.id == selected.id, onPick) }
 
         Spacer(Modifier.height(10.dp))
-        SheetHeading("Everything else")
+        SheetHeading(stringResource(R.string.converter_heading_other))
         rest.forEach { FormatRow(it, it.id == selected.id, onPick) }
     }
 }
