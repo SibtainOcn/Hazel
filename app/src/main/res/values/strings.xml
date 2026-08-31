@@ -127,7 +127,7 @@
     <string name="format_sheet_subtitles">Subtitles</string>
     <string name="format_sheet_sponsorblock">SponsorBlock</string>
     <string name="format_sheet_filename_template">Filename template</string>
-    <string name="format_sheet_change_field">Change %1$s</string>
+    <string name="format_sheet_change_field">Change</string>
     <string name="format_sheet_save_dir">Save dir</string>
     <string name="format_sheet_save_location">Save location</string>
     <string name="format_sheet_save_location_title">Save location</string>
@@ -240,7 +240,22 @@
     <string name="cleanup_title">Temporary Files</string>
     <string name="cleanup_header_description">Working files held by the app. Your downloads are not included and are never removed from here.</string>
     <string name="cleanup_action_clear_everything">Clear everything</string>
-    <string name="cleanup_confirm_category_title">Clear %1$s?</string>
+    <string name="cleanup_category_link_data_label">Link data cache</string>
+    <string name="cleanup_category_link_data_description">Player data yt-dlp keeps so a link read a second time is faster. Safe to clear.</string>
+    <string name="cleanup_category_partial_downloads_label">Unfinished downloads</string>
+    <string name="cleanup_category_partial_downloads_description">Fragments left by a download that was cancelled or failed before its file was saved.</string>
+    <string name="cleanup_category_conversions_label">Unfinished conversions</string>
+    <string name="cleanup_category_conversions_description">Working files from the audio converter that were never moved into your music folder.</string>
+    <string name="cleanup_category_engine_label">yt-dlp engine files</string>
+    <string name="cleanup_category_engine_description">The downloader and its runtime. Clearing frees the most space, but the next download has to unpack them again.</string>
+    <string name="cleanup_category_other_cache_label">Other cached files</string>
+    <string name="cleanup_category_other_cache_description">Thumbnails and anything else cached while browsing links.</string>
+    <!--
+         Deliberately does not name the category. The row the user just tapped is still on
+         screen behind the dialog, and dropping a translated noun into a sentence slot
+         reads as broken grammar in most languages.
+    -->
+    <string name="cleanup_confirm_category_title">Clear these files?</string>
     <string name="cleanup_confirm_category_safe">%1$s will be freed. Nothing you have saved is affected.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s will be freed, and the next download will take longer while these are unpacked again.</string>
     <string name="cleanup_confirm_clear">Clear</string>

@@ -524,7 +524,7 @@ private fun DropdownField(
                 }
                 Icon(
                     Icons.Filled.ArrowDropDown,
-                    contentDescription = stringResource(R.string.format_sheet_change_field, label),
+                    contentDescription = stringResource(R.string.format_sheet_change_field),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
