@@ -235,4 +235,19 @@
     <string name="options_text_input_save">Save</string>
     <string name="options_text_input_cancel">Cancel</string>
 
+    <!-- StorageCleanupScreen -->
+    <string name="cleanup_back">Back</string>
+    <string name="cleanup_title">Temporary Files</string>
+    <string name="cleanup_header_description">Working files held by the app. Your downloads are not included and are never removed from here.</string>
+    <string name="cleanup_action_clear_everything">Clear everything</string>
+    <string name="cleanup_confirm_category_title">Clear %1$s?</string>
+    <string name="cleanup_confirm_category_safe">%1$s will be freed. Nothing you have saved is affected.</string>
+    <string name="cleanup_confirm_category_unsafe">%1$s will be freed, and the next download will take longer while these are unpacked again.</string>
+    <string name="cleanup_confirm_clear">Clear</string>
+    <string name="cleanup_confirm_cancel">Cancel</string>
+    <string name="cleanup_confirm_all_title">Clear everything?</string>
+    <string name="cleanup_confirm_all_body">%1$s will be freed. Your downloads and saved sign-ins are kept, but the next download will take longer while the engine is unpacked again.</string>
+    <string name="cleanup_confirm_all_confirm">Clear everything</string>
+    <string name="cleanup_confirm_all_cancel">Cancel</string>
+
 </resources>

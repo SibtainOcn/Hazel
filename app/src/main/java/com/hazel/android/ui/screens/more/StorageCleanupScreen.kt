@@ -36,8 +36,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.util.TempCategory
 import com.hazel.android.util.TempStorage
@@ -80,11 +82,11 @@ fun StorageCleanupScreen(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cleanup_back))
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Temporary Files",
+                stringResource(R.string.cleanup_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -105,8 +107,7 @@ fun StorageCleanupScreen(onBack: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    "Working files held by the app. Your downloads are not included and " +
-                            "are never removed from here.",
+                    stringResource(R.string.cleanup_header_description),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -180,7 +181,7 @@ fun StorageCleanupScreen(onBack: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    "Clear everything",
+                    stringResource(R.string.cleanup_action_clear_everything),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onErrorContainer
@@ -194,15 +195,19 @@ fun StorageCleanupScreen(onBack: () -> Unit) {
     confirming?.let { category ->
         AlertDialog(
             onDismissRequest = { confirming = null },
-            title = { Text("Clear ${category.label.lowercase()}?", fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.cleanup_confirm_category_title, category.label.lowercase()), fontWeight = FontWeight.Bold) },
             text = {
                 Text(
                     if (category.safeToClear) {
-                        "${formatFileSize(category.bytes)} will be freed. " +
-                                "Nothing you have saved is affected."
+                        stringResource(
+                            R.string.cleanup_confirm_category_safe,
+                            formatFileSize(category.bytes)
+                        )
                     } else {
-                        "${formatFileSize(category.bytes)} will be freed, and the next " +
-                                "download will take longer while these are unpacked again."
+                        stringResource(
+                            R.string.cleanup_confirm_category_unsafe,
+                            formatFileSize(category.bytes)
+                        )
                     }
                 )
             },
@@ -214,10 +219,10 @@ fun StorageCleanupScreen(onBack: () -> Unit) {
                         TempStorage.clear(context, id)
                         refresh()
                     }
-                }) { Text("Clear") }
+                }) { Text(stringResource(R.string.cleanup_confirm_clear)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirming = null }) { Text("Cancel") }
+                TextButton(onClick = { confirming = null }) { Text(stringResource(R.string.cleanup_confirm_cancel)) }
             }
         )
     }
@@ -225,12 +230,13 @@ fun StorageCleanupScreen(onBack: () -> Unit) {
     if (confirmingAll) {
         AlertDialog(
             onDismissRequest = { confirmingAll = false },
-            title = { Text("Clear everything?", fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.cleanup_confirm_all_title), fontWeight = FontWeight.Bold) },
             text = {
                 Text(
-                    "${formatFileSize(total)} will be freed. Your downloads and saved " +
-                            "sign-ins are kept, but the next download will take longer " +
-                            "while the engine is unpacked again."
+                    stringResource(
+                        R.string.cleanup_confirm_all_body,
+                        formatFileSize(total)
+                    )
                 )
             },
             confirmButton = {
@@ -241,10 +247,10 @@ fun StorageCleanupScreen(onBack: () -> Unit) {
                         ids.forEach { TempStorage.clear(context, it) }
                         refresh()
                     }
-                }) { Text("Clear everything") }
+                }) { Text(stringResource(R.string.cleanup_confirm_all_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmingAll = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmingAll = false }) { Text(stringResource(R.string.cleanup_confirm_all_cancel)) }
             }
         )
     }
