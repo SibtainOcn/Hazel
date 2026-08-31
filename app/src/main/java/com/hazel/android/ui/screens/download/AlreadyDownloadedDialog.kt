@@ -32,11 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
+import com.hazel.android.R
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
@@ -76,7 +79,7 @@ fun AlreadyDownloadedDialog(
         shape = RoundedCornerShape(24.dp),
         title = {
             Text(
-                "Already downloaded",
+                stringResource(R.string.already_downloaded_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -84,7 +87,7 @@ fun AlreadyDownloadedDialog(
         text = {
             Column {
                 Text(
-                    "This link is already saved on this device.",
+                    stringResource(R.string.already_downloaded_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -174,7 +177,7 @@ fun AlreadyDownloadedDialog(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                DetailTag(if (entry.isVideo) "Video" else "Audio")
+                                DetailTag(if (entry.isVideo) stringResource(R.string.already_downloaded_video) else stringResource(R.string.already_downloaded_audio))
                                 formatFileSize(entry.sizeBytes)
                                     .takeIf { it.isNotBlank() }
                                     ?.let { DetailTag(it) }
@@ -234,19 +237,19 @@ fun AlreadyDownloadedDialog(
                     onClick = onDismiss,
                     contentPadding = COMPACT_PADDING
                 ) {
-                    Text("Keep it", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.already_downloaded_keep), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 TextButton(
                     onClick = onPlay,
                     contentPadding = COMPACT_PADDING
                 ) {
-                    Text("Play", fontWeight = FontWeight.Medium)
+                    Text(stringResource(R.string.already_downloaded_play), fontWeight = FontWeight.Medium)
                 }
                 FilledTonalButton(
                     onClick = onDownloadAgain,
                     contentPadding = COMPACT_PADDING
                 ) {
-                    Text("Download again", fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.already_downloaded_download_again), fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -280,6 +283,7 @@ private fun DetailTag(text: String) {
  * How long ago the copy was saved, in the roughest unit that still says something. An exact
  * timestamp would be precision nobody reads; "yesterday" is what decides the question.
  */
+@Composable
 private fun relativeAge(completedAt: Long): String {
     val elapsed = System.currentTimeMillis() - completedAt
     val minutes = elapsed / 60_000
@@ -287,11 +291,11 @@ private fun relativeAge(completedAt: Long): String {
     val days = hours / 24
 
     return when {
-        minutes < 1 -> "Just now"
-        minutes < 60 -> "${minutes} min"
-        hours < 24 -> "${hours} hr"
-        days == 1L -> "Yesterday"
-        days < 30 -> "$days days"
-        else -> "${days / 30} mo"
+        minutes < 1 -> stringResource(R.string.already_downloaded_just_now)
+        minutes < 60 -> pluralStringResource(R.plurals.already_downloaded_minutes, minutes.toInt(), minutes.toInt())
+        hours < 24 -> pluralStringResource(R.plurals.already_downloaded_hours, hours.toInt(), hours.toInt())
+        days == 1L -> stringResource(R.string.already_downloaded_yesterday)
+        days < 30 -> pluralStringResource(R.plurals.already_downloaded_days, days.toInt(), days.toInt())
+        else -> pluralStringResource(R.plurals.already_downloaded_months, (days / 30).toInt(), (days / 30).toInt())
     }
 }

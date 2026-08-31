@@ -24,10 +24,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.hazel.android.R
 
 /**
  * What the user sees when a link could not be read.
@@ -74,7 +76,7 @@ fun NoResultsDialog(
         },
         title = {
             Text(
-                if (canFetchCookies) "Sign-in needed" else "Could not read this link",
+                stringResource(if (canFetchCookies) R.string.no_results_sign_in_title else R.string.no_results_error_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -82,15 +84,13 @@ fun NoResultsDialog(
         text = {
             Column {
                 Text(
-                    when {
-                        canFetchCookies ->
-                            "The source wants an account before it will hand this over. " +
-                                    "Signing in saves cookies for the site and tries again."
-                        canContinue ->
-                            "The details could not be read, but the download itself may " +
-                                    "still work. Going ahead offers the best available quality."
-                        else -> "The source refused the request."
-                    },
+                    stringResource(
+                        when {
+                            canFetchCookies -> R.string.no_results_sign_in_body
+                            canContinue -> R.string.no_results_continue_body
+                            else -> R.string.no_results_refused_body
+                        }
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -98,7 +98,7 @@ fun NoResultsDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    "What the engine reported",
+                    stringResource(R.string.no_results_engine_report),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -133,18 +133,18 @@ fun NoResultsDialog(
         confirmButton = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = onCopyLog) {
-                    Text("Copy log", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.no_results_copy_log), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Spacer(modifier = Modifier.width(4.dp))
                 when {
                     canFetchCookies -> TextButton(onClick = onGetCookies) {
-                        Text("Sign in", fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.no_results_sign_in), fontWeight = FontWeight.SemiBold)
                     }
                     canContinue -> TextButton(onClick = onContinueAnyway) {
-                        Text("Try anyway", fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.no_results_try_anyway), fontWeight = FontWeight.SemiBold)
                     }
                     else -> TextButton(onClick = onDismiss) {
-                        Text("Close", fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.no_results_close), fontWeight = FontWeight.SemiBold)
                     }
                 }
             }

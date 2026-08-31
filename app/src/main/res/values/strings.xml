@@ -5,4 +5,104 @@
          so naming the app here again would render as "Hazel Hazel direct".
     -->
     <string name="direct_share_label">Instant</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_history">Downloads</string>
+    <string name="nav_more">More</string>
+    <string name="nav_incognito_on">Incognito on, downloads are not recorded</string>
+    <string name="nav_incognito_off">Incognito off</string>
+
+    <!-- DownloadScreen -->
+    <string name="download_search_hint">Search or insert URL</string>
+    <string name="download_clear">Clear</string>
+    <string name="download_show_large_artwork">Show large artwork</string>
+    <string name="download_show_list">Show as a list</string>
+    <string name="download_instant_source">Instant \u00b7 reading from %1$s</string>
+    <string name="download_incognito_title">You\'re incognito</string>
+    <string name="download_incognito_body">Downloads are not added to your history and links are not remembered. The files themselves still save as usual.</string>
+    <string name="download_download_all">Download all</string>
+    <string name="download_options">Download options</string>
+    <string name="download_pause">Pause</string>
+    <string name="download_resume">Resume</string>
+    <string name="download_cancel">Cancel</string>
+    <string name="download_paused">Paused</string>
+    <string name="download_processing">Processing</string>
+    <string name="download_waiting_wifi">Waiting for Wi-Fi</string>
+    <string name="download_saved">Saved</string>
+    <string name="download_queued">Queued</string>
+    <string name="download_downloaded">Downloaded</string>
+    <string name="download_failed">Failed</string>
+    <string name="download_remove_link">Remove link</string>
+    <string name="download_cancel_action">Cancel download</string>
+    <string name="download_resume_action">Resume download</string>
+    <plurals name="download_links">
+        <item quantity="one">%d link</item>
+        <item quantity="other">%d links</item>
+    </plurals>
+
+    <!-- SearchScreen -->
+    <string name="search_hint">Search or insert URL</string>
+    <string name="search_back">Back</string>
+    <string name="search_more">More</string>
+    <string name="search_add_link">Add another link</string>
+    <string name="search_clear">Clear</string>
+    <string name="search_clear_results">Clear results</string>
+    <string name="search_clear_history">Clear search history</string>
+    <string name="search_empty_history">Links you use will appear here</string>
+    <string name="search_no_matches">No matching links</string>
+    <string name="search_remove">Remove</string>
+    <string name="search_all">Search all</string>
+    <string name="search_forget">Forget</string>
+    <string name="search_edit_before">Edit before searching</string>
+
+    <!-- AlreadyDownloadedDialog -->
+    <string name="already_downloaded_title">Already downloaded</string>
+    <string name="already_downloaded_body">This link is already saved on this device.</string>
+    <string name="already_downloaded_video">Video</string>
+    <string name="already_downloaded_audio">Audio</string>
+    <string name="already_downloaded_keep">Keep it</string>
+    <string name="already_downloaded_play">Play</string>
+    <string name="already_downloaded_download_again">Download again</string>
+    <string name="already_downloaded_just_now">Just now</string>
+    <string name="already_downloaded_yesterday">Yesterday</string>
+    <plurals name="already_downloaded_minutes">
+        <item quantity="one">%d min</item>
+        <item quantity="other">%d min</item>
+    </plurals>
+    <plurals name="already_downloaded_hours">
+        <item quantity="one">%d hr</item>
+        <item quantity="other">%d hr</item>
+    </plurals>
+    <plurals name="already_downloaded_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="already_downloaded_months">
+        <item quantity="one">%d mo</item>
+        <item quantity="other">%d mo</item>
+    </plurals>
+
+    <!-- NoResultsDialog -->
+    <string name="no_results_sign_in_title">Sign-in needed</string>
+    <string name="no_results_error_title">Could not read this link</string>
+    <string name="no_results_sign_in_body">The source wants an account before it will hand this over. Signing in saves cookies for the site and tries again.</string>
+    <string name="no_results_continue_body">The details could not be read, but the download itself may still work. Going ahead offers the best available quality.</string>
+    <string name="no_results_refused_body">The source refused the request.</string>
+    <string name="no_results_engine_report">What the engine reported</string>
+    <string name="no_results_copy_log">Copy log</string>
+    <string name="no_results_sign_in">Sign in</string>
+    <string name="no_results_try_anyway">Try anyway</string>
+    <string name="no_results_close">Close</string>
+
+    <!-- UserGuideDialog -->
+    <string name="guide_title">Getting started</string>
+    <string name="guide_step_paste_link">Paste a link into the search field to download it. You can add multiple links, playlists</string>
+    <string name="guide_step_pick_format">Tap a card to pick the exact format. All available qualities are listed with size and codec.</string>
+    <string name="guide_step_share_instant">Share a link to Hazel Instant from any app to download instantly at your preset quality.</string>
+    <string name="guide_step_finished_downloads">Finished files appear in Downloads. Tap any row to open it in the device\'s default player.</string>
+    <string name="guide_step_battery_unrestricted">Set battery use to unrestricted, otherwise Android may stop downloads when you leave the app.</string>
+    <string name="guide_battery_settings">Battery settings</string>
+    <string name="guide_close">Close</string>
+
 </resources>

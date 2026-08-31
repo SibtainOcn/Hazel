@@ -61,6 +61,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.derivedStateOf
@@ -357,7 +359,7 @@ fun DownloadScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "${state.results.size} links",
+                        pluralStringResource(R.plurals.download_links, state.results.size, state.results.size),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -367,7 +369,7 @@ fun DownloadScreen(
                     // way of putting it down. Plain text rather than another icon: it
                     // throws away work, and that is worth spelling out.
                     Text(
-                        "Clear",
+                        stringResource(R.string.download_clear),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -390,7 +392,7 @@ fun DownloadScreen(
                             if (compact) Icons.Filled.GridView
                             else Icons.AutoMirrored.Filled.List,
                             contentDescription =
-                                if (compact) "Show large artwork" else "Show as a list",
+                                stringResource(if (compact) R.string.download_show_large_artwork else R.string.download_show_list),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -462,7 +464,7 @@ fun DownloadScreen(
                         Column {
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                "Instant \u00b7 reading from ${state.instantSource}",
+                                stringResource(R.string.download_instant_source, state.instantSource),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.primary
@@ -592,15 +594,14 @@ fun DownloadScreen(
                             )
                             Spacer(modifier = Modifier.height(14.dp))
                             Text(
-                                "You\'re incognito",
+                                stringResource(R.string.download_incognito_title),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                "Downloads are not added to your history and links are not " +
-                                        "remembered. The files themselves still save as usual.",
+                                stringResource(R.string.download_incognito_body),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 textAlign = TextAlign.Center,
@@ -790,7 +791,7 @@ private fun UrlSearchBar(
             Spacer(modifier = Modifier.width(12.dp))
 
             Text(
-                url.ifBlank { "Search or insert URL" },
+                url.ifBlank { stringResource(R.string.download_search_hint) },
                 style = MaterialTheme.typography.bodyLarge,
                 color = if (url.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant
                 else MaterialTheme.colorScheme.onSurface,
@@ -822,7 +823,7 @@ private fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifier
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
-                "Download all",
+                stringResource(R.string.download_download_all),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimary
@@ -923,7 +924,7 @@ private fun MediaCard(
                         ) {
                             Icon(
                                 Icons.Filled.MoreVert,
-                                contentDescription = "Download options",
+                                contentDescription = stringResource(R.string.download_options),
                                 modifier = Modifier.size(18.dp),
                                 tint = Color.White
                             )
@@ -935,7 +936,7 @@ private fun MediaCard(
                         ) {
                             if (isPaused) {
                                 DropdownMenuItem(
-                                    text = { Text("Resume") },
+                                    text = { Text(stringResource(R.string.download_resume)) },
                                     onClick = {
                                         menuOpen = false
                                         onResume()
@@ -943,7 +944,7 @@ private fun MediaCard(
                                 )
                             } else {
                                 DropdownMenuItem(
-                                    text = { Text("Pause") },
+                                    text = { Text(stringResource(R.string.download_pause)) },
                                     // Nothing to pause once the transfer is done and the
                                     // engine has moved on to merging or tagging.
                                     enabled = !isProcessing,
@@ -954,7 +955,7 @@ private fun MediaCard(
                                 )
                             }
                             DropdownMenuItem(
-                                text = { Text("Cancel") },
+                                text = { Text(stringResource(R.string.download_cancel)) },
                                 onClick = {
                                     menuOpen = false
                                     onCancel()
@@ -985,7 +986,7 @@ private fun MediaCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (isPaused) {
-                            OverlayChip(text = "Paused", bold = true)
+                            OverlayChip(text = stringResource(R.string.download_paused), bold = true)
                             if (totalBytes > 0) {
                                 val done = (totalBytes * animatedProgress).toLong()
                                 OverlayChip(
@@ -993,7 +994,7 @@ private fun MediaCard(
                                 )
                             }
                         } else if (isProcessing) {
-                            OverlayChip(text = "Processing", bold = true)
+                            OverlayChip(text = stringResource(R.string.download_processing), bold = true)
                         } else {
                             OverlayChip(
                                 text = "%.1f %%".format(animatedProgress * 100),
@@ -1033,7 +1034,7 @@ private fun MediaCard(
                             Icon(
                                 if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Close,
                                 contentDescription =
-                                    if (isPaused) "Resume download" else "Cancel download",
+                                    stringResource(if (isPaused) R.string.download_resume_action else R.string.download_cancel_action),
                                 modifier = Modifier.size(22.dp),
                                 tint = Color.White
                             )
@@ -1070,7 +1071,7 @@ private fun MediaCard(
                                 tint = Color.White
                             )
                             Text(
-                                "Waiting for Wi-Fi",
+                                stringResource(R.string.download_waiting_wifi),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color.White
@@ -1093,7 +1094,7 @@ private fun MediaCard(
                     ) {
                         Icon(
                             Icons.Filled.Close,
-                            contentDescription = "Remove link",
+                            contentDescription = stringResource(R.string.download_remove_link),
                             modifier = Modifier.size(16.dp),
                             tint = Color.White
                         )
@@ -1116,19 +1117,19 @@ private fun MediaCard(
                         }
                         when {
                             batchItem?.state == BatchState.FAILED -> CornerTag(
-                                text = batchItem.error ?: "Failed",
+                                text = batchItem.error ?: stringResource(R.string.download_failed),
                                 background = MaterialTheme.colorScheme.error,
                                 foreground = MaterialTheme.colorScheme.onError
                             )
                             isComplete -> CornerTag(
-                                text = "Saved",
+                                text = stringResource(R.string.download_saved),
                                 background = MaterialTheme.colorScheme.primary,
                                 foreground = MaterialTheme.colorScheme.onPrimary
                             )
-                            batchItem?.state == BatchState.QUEUED -> CornerTag(text = "Queued")
+                            batchItem?.state == BatchState.QUEUED -> CornerTag(text = stringResource(R.string.download_queued))
                             // Marks a link in a set that has been downloaded before, where
                             // there is no dialog to raise it.
-                            alreadyDownloaded -> CornerTag(text = "Downloaded")
+                            alreadyDownloaded -> CornerTag(text = stringResource(R.string.download_downloaded))
                         }
                     }
                 }
@@ -1267,7 +1268,7 @@ private fun MediaRow(
                             ) {
                                 Icon(
                                     Icons.Filled.Close,
-                                    contentDescription = "Cancel download",
+                                    contentDescription = stringResource(R.string.download_cancel_action),
                                     modifier = Modifier.size(16.dp),
                                     tint = Color.White
                                 )
@@ -1316,9 +1317,9 @@ private fun MediaRow(
                     }
 
                     val state = when {
-                        batchItem?.state == BatchState.PAUSED -> "Paused"
-                        waitingForWifi && !isDownloading -> "Waiting for Wi-Fi"
-                        isProcessing -> "Processing"
+                        batchItem?.state == BatchState.PAUSED -> stringResource(R.string.download_paused)
+                        waitingForWifi && !isDownloading -> stringResource(R.string.download_waiting_wifi)
+                        isProcessing -> stringResource(R.string.download_processing)
                         // The same line the card shows: how far along, and how far there is
                         // to go. A percentage on its own says nothing about whether the
                         // wait is thirty seconds or ten minutes.
@@ -1332,10 +1333,10 @@ private fun MediaRow(
                                 append(formatFileSize(totalBytes))
                             }
                         }
-                        batchItem?.state == BatchState.FAILED -> batchItem.error ?: "Failed"
-                        isComplete -> "Saved"
-                        batchItem?.state == BatchState.QUEUED -> "Queued"
-                        alreadyDownloaded -> "Downloaded"
+                        batchItem?.state == BatchState.FAILED -> batchItem.error ?: stringResource(R.string.download_failed)
+                        isComplete -> stringResource(R.string.download_saved)
+                        batchItem?.state == BatchState.QUEUED -> stringResource(R.string.download_queued)
+                        alreadyDownloaded -> stringResource(R.string.download_downloaded)
                         else -> ""
                     }
                     if (state.isNotBlank()) {
@@ -1359,7 +1360,7 @@ private fun MediaRow(
                     IconButton(onClick = onRemove) {
                         Icon(
                             Icons.Filled.Close,
-                            contentDescription = "Remove link",
+                            contentDescription = stringResource(R.string.download_remove_link),
                             modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
