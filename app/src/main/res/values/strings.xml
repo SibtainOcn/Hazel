@@ -250,4 +250,35 @@
     <string name="cleanup_confirm_all_confirm">Clear everything</string>
     <string name="cleanup_confirm_all_cancel">Cancel</string>
 
+    <!-- HistoryScreen -->
+    <string name="history_title">Downloads</string>
+    <string name="history_layout_grid">Show large artwork</string>
+    <string name="history_layout_list">Show as a list</string>
+    <string name="history_search_action">Search downloads</string>
+    <string name="history_sort_action">Sort</string>
+    <string name="history_menu_action">More</string>
+    <string name="history_menu_clear">Clear history</string>
+    <string name="history_search_placeholder">Search downloads</string>
+    <string name="history_search_clear">Clear search</string>
+    <string name="history_empty_initial">Nothing downloaded yet</string>
+    <string name="history_empty_filtered">Nothing matches that</string>
+    <string name="history_clear_dialog_title">Clear history</string>
+    <string name="history_clear_dialog_body">The list is emptied. Your downloaded files are not touched.</string>
+    <string name="history_clear_dialog_confirm">Clear</string>
+    <string name="history_clear_dialog_cancel">Cancel</string>
+    <string name="history_delete_dialog_title">Delete file</string>
+    <string name="history_delete_dialog_body">%1$s will be deleted from your device.</string>
+    <string name="history_toast_file_deleted">File deleted</string>
+    <string name="history_toast_file_delete_failed">Could not delete the file</string>
+    <string name="history_delete_dialog_confirm">Delete</string>
+    <string name="history_delete_dialog_cancel">Cancel</string>
+    <string name="history_card_options">Options</string>
+    <string name="history_card_remove">Remove from list</string>
+    <string name="history_card_delete">Delete file</string>
+    <string name="history_tag_deleted">Deleted</string>
+    <string name="history_row_options">Options</string>
+    <string name="history_row_remove">Remove from list</string>
+    <string name="history_row_delete">Delete file</string>
+    <string name="history_tag_missing">Missing</string>
+
 </resources>
