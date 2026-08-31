@@ -1,5 +1,7 @@
 package com.hazel.android.download.extractor
 
+import androidx.annotation.StringRes
+import com.hazel.android.R
 import com.hazel.android.download.FetchMode
 import com.hazel.android.download.MediaProbe
 import java.io.File
@@ -10,19 +12,19 @@ import java.io.File
  * Only the listing is in question. Formats and the download itself are always yt-dlp's,
  * whichever of these is chosen, because its format ids are what a download is expressed in.
  */
-enum class ListingSource(val label: String, val description: String) {
+enum class ListingSource(
+    @StringRes val labelRes: Int,
+    @StringRes val descriptionRes: Int
+) {
 
     YT_DLP(
-        label = "yt-dlp",
-        description = "The same engine that does the downloading. Works on every site it " +
-                "supports, and updates itself, so it keeps working as sites change."
+        labelRes = R.string.listing_source_ytdlp_label,
+        descriptionRes = R.string.listing_source_ytdlp_description
     ),
 
     NEWPIPE(
-        label = "Prefer the built-in reader",
-        description = "Lists playlists and channels in one request instead of starting the " +
-                "engine, which is quicker on the sites it knows. Falls back to yt-dlp for " +
-                "everything else, and whenever it cannot read a link."
+        labelRes = R.string.listing_source_newpipe_label,
+        descriptionRes = R.string.listing_source_newpipe_description
     );
 
     companion object {

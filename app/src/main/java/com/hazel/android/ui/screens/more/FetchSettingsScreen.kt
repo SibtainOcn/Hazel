@@ -116,9 +116,9 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(option.label, fontWeight = FontWeight.Medium)
+                        Text(stringResource(option.labelRes), fontWeight = FontWeight.Medium)
                         Text(
-                            option.description,
+                            stringResource(option.descriptionRes),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                         )
@@ -171,9 +171,9 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(option.label, fontWeight = FontWeight.Medium)
+                        Text(stringResource(option.labelRes), fontWeight = FontWeight.Medium)
                         Text(
-                            option.description,
+                            stringResource(option.descriptionRes),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                         )

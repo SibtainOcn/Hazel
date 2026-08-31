@@ -429,6 +429,17 @@
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_back">Back</string>
     <string name="fetch_settings_force_ipv4">Force IPv4</string>
+    <string name="fetch_mode_fast_label">Fast</string>
+    <string name="fetch_mode_fast_description">Give up quickly. Fastest on a good network, but more likely to need a second attempt.</string>
+    <string name="fetch_mode_balanced_label">Balanced</string>
+    <string name="fetch_mode_balanced_description">A middle ground between speed and tolerating a poor connection.</string>
+    <string name="fetch_mode_thorough_label">Thorough</string>
+    <string name="fetch_mode_thorough_description">Wait longer and retry more. Slowest, but survives a weak network.</string>
+    <!-- The name of the downloader itself, so the same word in every language. -->
+    <string name="listing_source_ytdlp_label" translatable="false">yt-dlp</string>
+    <string name="listing_source_ytdlp_description">The same engine that does the downloading. Works on every site it supports, and updates itself, so it keeps working as sites change.</string>
+    <string name="listing_source_newpipe_label">Prefer the built-in reader</string>
+    <string name="listing_source_newpipe_description">Lists playlists and channels in one request instead of starting the engine, which is quicker on the sites it knows. Falls back to yt-dlp for everything else, and whenever it cannot read a link.</string>
 
     <!-- ToolsScreen -->
     <string name="tools_back">Back</string>
