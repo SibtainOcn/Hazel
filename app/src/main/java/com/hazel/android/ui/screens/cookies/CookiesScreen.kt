@@ -58,10 +58,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.data.CookieEntry
 import com.hazel.android.data.CookieRepository
 import kotlinx.coroutines.launch
@@ -105,54 +107,63 @@ fun CookiesScreen(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.cookies_back)
+                )
             }
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                "Cookies",
+                stringResource(R.string.cookies_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
             )
             Box {
                 IconButton(onClick = { menuOpen = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = "More")
+                    Icon(
+                        Icons.Filled.MoreVert,
+                        contentDescription = stringResource(R.string.cookies_menu)
+                    )
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
-                        text = { Text("Import from clipboard") },
+                        text = { Text(stringResource(R.string.cookies_menu_import)) },
                         onClick = {
                             menuOpen = false
                             scope.launch {
                                 val text = readClipboard(context)
                                 val imported = CookieRepository.importText(
-                                    context, text, "Imported cookies"
+                                    context, text,
+                                    context.getString(R.string.cookies_imported_title)
                                 )
                                 toast(
                                     context,
-                                    if (imported) "Cookies imported"
-                                    else "Clipboard holds no cookie data"
+                                    context.getString(
+                                        if (imported) R.string.cookies_toast_imported
+                                        else R.string.cookies_toast_no_data
+                                    )
                                 )
                             }
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Export to clipboard") },
+                        text = { Text(stringResource(R.string.cookies_menu_export)) },
                         onClick = {
                             menuOpen = false
                             scope.launch {
                                 val text = CookieRepository.exportText(context)
                                 if (text.isBlank()) {
-                                    toast(context, "Nothing to export")
+                                    toast(context, context.getString(R.string.cookies_toast_nothing_to_export))
                                 } else {
                                     writeClipboard(context, text)
-                                    toast(context, "Copied to clipboard")
+                                    toast(context, context.getString(R.string.cookies_toast_exported))
                                 }
                             }
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Delete all") },
+                        text = { Text(stringResource(R.string.cookies_menu_delete_all)) },
                         onClick = {
                             menuOpen = false
                             confirmDeleteAll = true
@@ -176,9 +187,12 @@ fun CookiesScreen(onBack: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Use cookies", style = MaterialTheme.typography.titleSmall)
                     Text(
-                        "Pass saved sign-ins to the downloader",
+                        stringResource(R.string.cookies_use_title),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Text(
+                        stringResource(R.string.cookies_use_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                     )
@@ -201,7 +215,7 @@ fun CookiesScreen(onBack: () -> Unit) {
         ) {
             Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(6.dp))
-            Text("New cookie")
+            Text(stringResource(R.string.cookies_new))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -222,13 +236,13 @@ fun CookiesScreen(onBack: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    "No cookies saved",
+                    stringResource(R.string.cookies_empty_title),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    "Add one to download age-restricted, private, or members-only media.",
+                    stringResource(R.string.cookies_empty_body),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                 )
@@ -272,7 +286,7 @@ fun CookiesScreen(onBack: () -> Unit) {
             },
             onCopy = { entry ->
                 writeClipboard(context, CookieRepository.FILE_HEADER + "\n" + entry.content)
-                toast(context, "Copied to clipboard")
+                toast(context, context.getString(R.string.cookies_toast_entry_copied))
             },
             onDelete = { entry ->
                 editing = null
@@ -289,16 +303,27 @@ fun CookiesScreen(onBack: () -> Unit) {
     pendingDelete?.let { entry ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Delete cookies", fontWeight = FontWeight.Bold) },
-            text = { Text("Remove the saved sign-in for ${entry.url.ifBlank { entry.title }}?") },
+            title = {
+                Text(stringResource(R.string.cookies_delete_title), fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.cookies_delete_body,
+                        entry.url.ifBlank { entry.title }
+                    )
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch { CookieRepository.delete(context, entry.id) }
                     pendingDelete = null
-                }) { Text("Delete") }
+                }) { Text(stringResource(R.string.cookies_delete_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text("Cancel") }
+                TextButton(onClick = { pendingDelete = null }) {
+                    Text(stringResource(R.string.cookies_delete_cancel))
+                }
             }
         )
     }
@@ -306,16 +331,23 @@ fun CookiesScreen(onBack: () -> Unit) {
     if (confirmDeleteAll) {
         AlertDialog(
             onDismissRequest = { confirmDeleteAll = false },
-            title = { Text("Delete all cookies", fontWeight = FontWeight.Bold) },
-            text = { Text("Every saved sign-in will be removed. This cannot be undone.") },
+            title = {
+                Text(
+                    stringResource(R.string.cookies_delete_all_title),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = { Text(stringResource(R.string.cookies_delete_all_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch { CookieRepository.deleteAll(context) }
                     confirmDeleteAll = false
-                }) { Text("Delete all") }
+                }) { Text(stringResource(R.string.cookies_delete_all_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmDeleteAll = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmDeleteAll = false }) {
+                    Text(stringResource(R.string.cookies_delete_all_cancel))
+                }
             }
         )
     }
@@ -341,8 +373,9 @@ private fun CookieRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
+                val fallbackName = stringResource(R.string.cookies_row_fallback_name)
                 Text(
-                    entry.url.ifBlank { entry.title.ifBlank { "Cookies" } },
+                    entry.url.ifBlank { entry.title.ifBlank { fallbackName } },
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -413,18 +446,21 @@ private fun CookieEditSheet(
             if (entry != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Cookies",
+                        stringResource(R.string.cookies_sheet_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(onClick = { onCopy(entry) }) {
-                        Icon(Icons.Filled.ContentCopy, contentDescription = "Copy cookies")
+                        Icon(
+                            Icons.Filled.ContentCopy,
+                            contentDescription = stringResource(R.string.cookies_sheet_copy)
+                        )
                     }
                     IconButton(onClick = { onDelete(entry) }) {
                         Icon(
                             Icons.Filled.Delete,
-                            contentDescription = "Delete cookies",
+                            contentDescription = stringResource(R.string.cookies_sheet_delete),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -452,7 +488,7 @@ private fun CookieEditSheet(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Title") },
+                    label = { Text(stringResource(R.string.cookies_field_title)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -463,7 +499,7 @@ private fun CookieEditSheet(
             OutlinedTextField(
                 value = url,
                 onValueChange = { url = it },
-                label = { Text("URL") },
+                label = { Text(stringResource(R.string.cookies_field_url)) },
                 singleLine = true,
                 isError = url.isNotBlank() && !urlValid,
                 modifier = Modifier.fillMaxWidth()
@@ -488,7 +524,7 @@ private fun CookieEditSheet(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Save")
+                        Text(stringResource(R.string.cookies_sheet_save))
                     }
                 }
 
@@ -515,7 +551,10 @@ private fun CookieEditSheet(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            if (entry == null) "Get cookies" else "Update",
+                            stringResource(
+                                if (entry == null) R.string.cookies_sheet_get
+                                else R.string.cookies_sheet_update
+                            ),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary

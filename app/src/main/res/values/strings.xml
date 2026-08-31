@@ -296,4 +296,42 @@
     <string name="history_row_delete">Delete file</string>
     <string name="history_tag_missing">Missing</string>
 
+    <!-- CookiesScreen -->
+    <string name="cookies_back">Back</string>
+    <string name="cookies_title">Cookies</string>
+    <string name="cookies_menu">More</string>
+    <string name="cookies_menu_import">Import from clipboard</string>
+    <string name="cookies_menu_export">Export to clipboard</string>
+    <string name="cookies_menu_delete_all">Delete all</string>
+    <!-- The label given to a set of cookies pasted in from the clipboard. -->
+    <string name="cookies_imported_title">Imported cookies</string>
+    <string name="cookies_toast_imported">Cookies imported</string>
+    <string name="cookies_toast_no_data">Clipboard holds no cookie data</string>
+    <string name="cookies_toast_nothing_to_export">Nothing to export</string>
+    <string name="cookies_toast_exported">Copied to clipboard</string>
+    <string name="cookies_toast_entry_copied">Copied to clipboard</string>
+    <string name="cookies_use_title">Use cookies</string>
+    <string name="cookies_use_description">Pass saved sign-ins to the downloader</string>
+    <string name="cookies_new">New cookie</string>
+    <string name="cookies_empty_title">No cookies saved</string>
+    <string name="cookies_empty_body">Add one to download age-restricted, private, or members-only media.</string>
+    <string name="cookies_delete_title">Delete cookies</string>
+    <string name="cookies_delete_body">Remove the saved sign-in for %1$s?</string>
+    <string name="cookies_delete_confirm">Delete</string>
+    <string name="cookies_delete_cancel">Cancel</string>
+    <string name="cookies_delete_all_title">Delete all cookies</string>
+    <string name="cookies_delete_all_body">Every saved sign-in will be removed. This cannot be undone.</string>
+    <string name="cookies_delete_all_confirm">Delete all</string>
+    <string name="cookies_delete_all_cancel">Cancel</string>
+    <!-- Stands in for the address on a row that has neither an address nor a label. -->
+    <string name="cookies_row_fallback_name">Cookies</string>
+    <string name="cookies_sheet_title">Cookies</string>
+    <string name="cookies_sheet_copy">Copy cookies</string>
+    <string name="cookies_sheet_delete">Delete cookies</string>
+    <string name="cookies_field_title">Title</string>
+    <string name="cookies_field_url">URL</string>
+    <string name="cookies_sheet_save">Save</string>
+    <string name="cookies_sheet_get">Get cookies</string>
+    <string name="cookies_sheet_update">Update</string>
+
 </resources>
