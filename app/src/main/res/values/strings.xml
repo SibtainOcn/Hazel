@@ -178,4 +178,39 @@
     <string name="more_source_code">Source code</string>
     <string name="more_license">License</string>
 
+    <!-- UpdateScreen -->
+    <string name="update_title">yt-dlp Update</string>
+    <string name="update_back">Back</string>
+    <string name="update_check_action">Check for updates</string>
+    <string name="update_status_up_to_date">You\'re up to date</string>
+    <string name="update_status_checking">Checking for updates...</string>
+    <string name="update_status_available">Update Available</string>
+    <string name="update_status_installing">Installing yt-dlp...</string>
+    <string name="update_status_installed">Engine Updated</string>
+    <string name="update_status_failed">Update Failed</string>
+    <string name="update_subtitle_idle">Hazel is running the latest yt-dlp build</string>
+    <string name="update_subtitle_checking">Contacting GitHub...</string>
+    <string name="update_subtitle_available">yt-dlp %1$s is available</string>
+    <string name="update_subtitle_updating">Downloading yt-dlp %1$s</string>
+    <string name="update_subtitle_installed">yt-dlp %1$s is now in use</string>
+    <string name="update_installed_version">Installed Version</string>
+    <string name="update_version_unknown">Unknown</string>
+    <string name="update_new_version">New Version</string>
+    <string name="update_installing_binary">Installing Binary</string>
+    <string name="update_installing_body">Downloading from GitHub and replacing the engine. Keep the app open.</string>
+    <string name="update_action_update_now">Update Now</string>
+    <string name="update_action_installing">Installing...</string>
+    <string name="update_action_done">Done</string>
+    <string name="update_action_retry">Retry</string>
+    <string name="update_action_check">Check for Updates</string>
+    <string name="update_action_checking">Checking...</string>
+    <string name="update_info_heading">Information</string>
+    <string name="update_info_component">Component</string>
+    <string name="update_info_repository">Repository</string>
+    <string name="update_info_binary_size">Binary Size</string>
+    <string name="update_info_distribution">Distribution</string>
+    <string name="update_info_github_releases">GitHub Releases</string>
+    <string name="update_release_channel">Release Channel</string>
+    <string name="update_view_changelog">View Changelog</string>
+
 </resources>
