@@ -136,9 +136,9 @@ fun StorageCleanupScreen(onBack: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(category.label, fontWeight = FontWeight.Medium)
+                        Text(stringResource(category.labelRes), fontWeight = FontWeight.Medium)
                         Text(
-                            category.description,
+                            stringResource(category.descriptionRes),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -195,7 +195,7 @@ fun StorageCleanupScreen(onBack: () -> Unit) {
     confirming?.let { category ->
         AlertDialog(
             onDismissRequest = { confirming = null },
-            title = { Text(stringResource(R.string.cleanup_confirm_category_title, category.label.lowercase()), fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.cleanup_confirm_category_title), fontWeight = FontWeight.Bold) },
             text = {
                 Text(
                     if (category.safeToClear) {

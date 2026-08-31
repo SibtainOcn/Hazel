@@ -1,6 +1,8 @@
 package com.hazel.android.util
 
 import android.content.Context
+import androidx.annotation.StringRes
+import com.hazel.android.R
 import com.hazel.android.data.CookieRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -8,11 +10,16 @@ import java.io.File
 
 /**
  * One kind of working file the app leaves behind, and what removing it costs.
+ *
+ * The name and the explanation are held as resource ids rather than as text. This list is
+ * built on a background thread, and resolving the text here would fix it to whichever
+ * language was current at that moment. Reading it in the composable instead means the
+ * screen follows the device language, including when it changes while the app is open.
  */
 data class TempCategory(
     val id: String,
-    val label: String,
-    val description: String,
+    @StringRes val labelRes: Int,
+    @StringRes val descriptionRes: Int,
     val bytes: Long,
     /**
      * True when clearing this makes the app slower rather than losing anything, so the
@@ -47,37 +54,33 @@ object TempStorage {
         listOf(
             TempCategory(
                 id = "ytdlp_cache",
-                label = "Link data cache",
-                description = "Player data yt-dlp keeps so a link read a second time is " +
-                        "faster. Safe to clear.",
+                labelRes = R.string.cleanup_category_link_data_label,
+                descriptionRes = R.string.cleanup_category_link_data_description,
                 bytes = sizeOf(File(cache, "yt-dlp"))
             ),
             TempCategory(
                 id = "partial_downloads",
-                label = "Unfinished downloads",
-                description = "Fragments left by a download that was cancelled or failed " +
-                        "before its file was saved.",
+                labelRes = R.string.cleanup_category_partial_downloads_label,
+                descriptionRes = R.string.cleanup_category_partial_downloads_description,
                 bytes = sizeOf(StoragePaths.tempDownloads)
             ),
             TempCategory(
                 id = "converted",
-                label = "Unfinished conversions",
-                description = "Working files from the audio converter that were never " +
-                        "moved into your music folder.",
+                labelRes = R.string.cleanup_category_conversions_label,
+                descriptionRes = R.string.cleanup_category_conversions_description,
                 bytes = sizeOf(StoragePaths.tempConverted)
             ),
             TempCategory(
                 id = "engine",
-                label = "yt-dlp engine files",
-                description = "The downloader and its runtime. Clearing frees the most " +
-                        "space, but the next download has to unpack them again.",
+                labelRes = R.string.cleanup_category_engine_label,
+                descriptionRes = R.string.cleanup_category_engine_description,
                 bytes = sizeOf(File(files, ENGINE_DIR)) + sizeOf(File(cache, ENGINE_DIR)),
                 safeToClear = false
             ),
             TempCategory(
                 id = "other_cache",
-                label = "Other cached files",
-                description = "Thumbnails and anything else cached while browsing links.",
+                labelRes = R.string.cleanup_category_other_cache_label,
+                descriptionRes = R.string.cleanup_category_other_cache_description,
                 bytes = otherCacheSize(context)
             )
         )
