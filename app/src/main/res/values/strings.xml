@@ -213,4 +213,26 @@
     <string name="update_release_channel">Release Channel</string>
     <string name="update_view_changelog">View Changelog</string>
 
+    <!-- DownloadOptionDialogs -->
+    <string name="options_sponsorblock_title">Select SponsorBlock filtering</string>
+    <string name="options_sponsorblock_ok">OK</string>
+    <string name="options_sponsorblock_cancel">Cancel</string>
+    <string name="options_chapters_title">Chapters</string>
+    <string name="options_chapters_in_videos">Chapters in videos</string>
+    <string name="options_chapters_split">Split by chapters</string>
+    <string name="options_chapters_split_body">Splitting writes one file per chapter instead of a single file.</string>
+    <string name="options_chapters_dismiss">Dismiss</string>
+    <string name="options_subtitles_title">Subtitles</string>
+    <string name="options_subtitles_embed">Embed subtitles</string>
+    <string name="options_subtitles_save">Save subtitles</string>
+    <string name="options_subtitles_save_auto">Save automatic subtitles</string>
+    <string name="options_subtitles_languages_label">Subtitle languages</string>
+    <string name="options_subtitles_dismiss">Dismiss</string>
+    <string name="options_subtitles_languages_title">Subtitle languages</string>
+    <string name="options_subtitles_languages_hint">A yt-dlp language selector, e.g. en.*,.*-orig for English plus the original track. Use all for every language the source offers.</string>
+    <string name="options_filename_title">Filename template</string>
+    <string name="options_filename_hint">yt-dlp output template. Use %(title)s, %(uploader)s, %(id)s and %(ext)s.</string>
+    <string name="options_text_input_save">Save</string>
+    <string name="options_text_input_cancel">Cancel</string>
+
 </resources>
