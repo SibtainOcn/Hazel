@@ -5,6 +5,23 @@ All notable changes to Hazel are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **The app opens sooner.** The wait was the launch window and then the splash screen, one
+  after the other, with the splash always holding for a fixed 1.4 seconds on top of however
+  long the start itself took. The hold is now what is left of a 900 ms budget counted from
+  the moment the process starts, so a slow start spends that budget instead of adding to it,
+  and a fast one still shows the splash long enough to be seen rather than flashed. The
+  highlight sweeping through the wordmark was retimed to finish inside the shorter stay, and
+  the mark in the launch window was moved to sit where the splash screen draws it, so it no
+  longer jumps as one replaces the other.
+- **Unpacking the download engine no longer competes with the launch.** yt-dlp and FFmpeg
+  unpack and check for updates on a background thread, but the work was starting while the
+  app was still drawing its first screen and took CPU and disk from it. It now starts once
+  that screen is up, and still starts on its own for a launch with no UI, such as a
+  notification action resuming a download after the process was killed.
+
 ## [1.0.2] - 2026-08-31
 
 ### Fixed

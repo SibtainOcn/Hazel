@@ -38,7 +38,7 @@ import com.hazel.android.R
  * and a highlight travels through the wordmark beneath it, which is the only thing that
  * separates this from a frozen frame when the wait runs long.
  */
-private const val SWEEP_DURATION_MS = 1400
+private const val SWEEP_DURATION_MS = 900
 
 @Composable
 fun SplashScreen(modifier: Modifier = Modifier) {

@@ -2,6 +2,8 @@ package com.hazel.android
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Process
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.DownloadNotificationHelper
@@ -67,6 +70,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             val scope = rememberCoroutineScope()
 
+            // The download engine unpacks itself on a background thread, but the unpacking
+            // still competes for the same CPU and disk as the first frame. Asked for only
+            // once that frame exists, so the launch is not paying for it.
+            LaunchedEffect(Unit) {
+                withFrameNanos { }
+                HazelApp.instance.startLibraryInit()
+            }
+
             val savedTheme by SettingsRepository.isDarkTheme(this).collectAsState(initial = null)
             val isDark = savedTheme ?: true // Default to dark on first install
 
@@ -76,12 +87,14 @@ class MainActivity : ComponentActivity() {
             // than painting once in the wrong colours and correcting itself.
             val resolvedAccent = accentName
 
-            // The splash is held for one full sweep of its highlight. Preferences usually
-            // load faster than that, and without the floor the splash would appear and
+            // The splash is held for what is left of one short budget counted from the
+            // start of the process, so the time already spent on the system's launch
+            // window counts towards it instead of being added to it. Preferences usually
+            // load faster than that, and without a floor the splash could appear and
             // vanish within a frame or two, which reads as a glitch rather than a launch.
             var minimumShown by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
-                delay(SPLASH_MINIMUM_MS)
+                delay(remainingSplashHoldMs())
                 minimumShown = true
             }
 
@@ -109,6 +122,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * How much longer to hold the splash, in milliseconds.
+     *
+     * What the user waits through is one span, not two: the system's launch window and
+     * then this screen, which are drawn to look the same. So the budget is measured from
+     * the moment the process started, and a slow start spends the budget rather than
+     * extending it. A fast start still gets [SPLASH_FLOOR_MS], because a splash that comes
+     * and goes inside a couple of frames looks like a fault.
+     */
+    private fun remainingSplashHoldMs(): Long {
+        val sinceProcessStart = SystemClock.elapsedRealtime() - Process.getStartElapsedRealtime()
+        return (SPLASH_BUDGET_MS - sinceProcessStart).coerceIn(SPLASH_FLOOR_MS, SPLASH_BUDGET_MS)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -162,5 +189,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/** One sweep of the splash highlight, which is the shortest it is worth showing for. */
-private const val SPLASH_MINIMUM_MS = 1400L
+/** The whole launch, from the process starting to the app being on screen. */
+private const val SPLASH_BUDGET_MS = 900L
+
+/** The least the splash is worth showing for once it is up. */
+private const val SPLASH_FLOOR_MS = 350L

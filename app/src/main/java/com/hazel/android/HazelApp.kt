@@ -15,8 +15,10 @@ import com.yausername.youtubedl_android.YoutubeDL
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 class HazelApp : Application(), SingletonImageLoader.Factory {
 
@@ -33,6 +35,9 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
 
     val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    /** Whether [startLibraryInit] has already run. */
+    private val libraryInitStarted = AtomicBoolean(false)
+
     override fun onCreate() {
         super.onCreate()
         instance = this
@@ -43,10 +48,29 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
         // Install crash logger — captures uncaught exceptions in-memory
         CrashLogger.install(this)
 
-        initLibraries()
+        // Unpacking yt-dlp and FFmpeg is the heaviest thing the app ever does at launch,
+        // and starting it here put it in competition with the work that gets the first
+        // frame on screen. The UI asks for it once it has drawn instead. This is the
+        // fallback for a start with no UI, such as a notification action resuming a
+        // download after the process was killed. Whenever there is a UI it wins this
+        // race, because the call only acts the first time.
+        applicationScope.launch {
+            delay(LIBRARY_INIT_FALLBACK_MS)
+            startLibraryInit()
+        }
     }
 
-    private fun initLibraries() {
+    /**
+     * Unpack and update the download engine, once per process.
+     *
+     * Called from the UI as soon as it has drawn, so the work happens in the gap where the
+     * user is looking at a finished screen rather than in the gap where they are waiting
+     * for one. Safe to call from anywhere and as often as anything likes: every call after
+     * the first returns immediately.
+     */
+    fun startLibraryInit() {
+        if (!libraryInitStarted.compareAndSet(false, true)) return
+
         applicationScope.launch {
             try {
                 YoutubeDL.getInstance().init(this@HazelApp)
@@ -73,5 +97,13 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
     companion object {
         lateinit var instance: HazelApp
             private set
+
+        /**
+         * How long to wait for the UI to ask for the engine before starting it anyway.
+         *
+         * Long enough that a normal launch always gets there first, short enough that a
+         * start with no UI is not left waiting on it.
+         */
+        private const val LIBRARY_INIT_FALLBACK_MS = 2_000L
     }
 }

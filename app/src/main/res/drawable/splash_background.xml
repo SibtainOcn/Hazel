@@ -2,9 +2,15 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Deep black background -->
     <item android:drawable="@color/splash_background" />
-    <!-- Centered white lightning bolt icon -->
+    <!--
+        The white lightning bolt, sitting where the splash screen draws it rather than in
+        the middle of the window. The splash screen puts the wordmark under the mark, which
+        lifts the mark off centre, and matching that here means the mark does not jump when
+        one screen replaces the other.
+    -->
     <item
         android:gravity="center"
+        android:bottom="58dp"
         android:width="112dp"
         android:height="112dp"
         android:drawable="@drawable/splash_icon" />
