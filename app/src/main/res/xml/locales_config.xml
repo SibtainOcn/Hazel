@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     The languages Hazel ships.
+
+     Android 13 and later reads this to decide whether the app gets an entry in the system
+     language settings, and which languages that entry offers. Without it the app is absent
+     from that screen entirely, so a person who expects to set an app's language where they
+     set every other app's would find nothing.
+
+     English leads because it is the source the rest are translated from, and it is what a
+     language with no folder of its own falls back to.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="es" />
+    <locale android:name="zh-CN" />
+    <locale android:name="hi" />
+    <locale android:name="pt-BR" />
+    <locale android:name="fr" />
+    <locale android:name="ru" />
+    <locale android:name="de" />
+    <locale android:name="ja" />
+    <locale android:name="in" />
+</locale-config>

@@ -1,7 +1,10 @@
 package com.hazel.android.ui.screens.more
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.foundation.clickable
@@ -36,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.LaunchedEffect
@@ -58,6 +62,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.compose.ui.text.font.FontWeight
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.update.YtDlpUpdater
+import com.hazel.android.util.AppLocale
 import com.hazel.android.util.TempStorage
 
 @Composable
@@ -98,6 +103,49 @@ fun MoreScreen(
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    // The language picker, and the note that follows a change. The label is read back from
+    // wherever the choice actually lives, which on Android 13 and later is the system rather
+    // than the app, so a change made in the system settings shows here too.
+    var languageDialogOpen by remember { mutableStateOf(false) }
+    // Saved rather than merely remembered. Setting the language on Android 13 and later
+    // hands the work to the platform, which rebuilds the activity on the spot; a flag held
+    // only in composition dies with it, and the note that explains the change never
+    // appeared on exactly the versions where the change is most abrupt.
+    var languageChanged by rememberSaveable { mutableStateOf(false) }
+    var languageTag by remember { mutableStateOf(AppLocale.tag(context)) }
+    val languageLabel = AppLocale.label(context)
+
+    if (languageDialogOpen) {
+        LanguageSheet(
+            current = languageTag,
+            onConfirm = { tag ->
+                languageDialogOpen = false
+                // Confirming without having picked anything different is a no-op, so the
+                // note that follows a change is not shown for a sheet that was only opened.
+                if (tag != languageTag) {
+                    AppLocale.set(context, tag)
+                    languageTag = tag
+                    languageChanged = true
+                }
+            },
+            onDismiss = { languageDialogOpen = false }
+        )
+    }
+
+    if (languageChanged) {
+        LanguageChangedDialog(
+            onDismiss = {
+                languageChanged = false
+                // Android 13 and later has already redrawn everything in the new language.
+                // Below that nothing has changed yet, and rebuilding the activity is what
+                // makes the wrapped context take effect.
+                if (Build.VERSION.SDK_INT < 33) {
+                    (context as? Activity)?.recreate()
+                }
+            }
+        )
     }
 
     // yt-dlp engine version, as recorded by the last in-app engine update
@@ -204,6 +252,30 @@ fun MoreScreen(
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToAppearance() }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            // Language. It sits beside Appearance because both are about how the app looks
+            // rather than what it does, and it says the current choice on the right the way
+            // the temporary files row says its size.
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.more_language)) },
+                leadingContent = {
+                    Icon(Icons.Filled.Language, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                trailingContent = {
+                    Text(
+                        languageLabel,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { languageDialogOpen = true }
             )
 
             HorizontalDivider(

@@ -1,0 +1,562 @@
+<resources>
+    <string name="direct_share_label">इंस्टेंट</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">होम</string>
+    <string name="nav_history">डाउनलोड</string>
+    <string name="nav_more">और</string>
+    <string name="nav_incognito_on">गुप्त मोड चालू है, डाउनलोड दर्ज नहीं होंगे</string>
+    <string name="nav_incognito_off">गुप्त मोड बंद है</string>
+
+    <!-- DownloadScreen -->
+    <string name="download_search_hint">खोजें या लिंक चिपकाएँ</string>
+    <string name="download_clear">हटाएँ</string>
+    <string name="download_show_large_artwork">बड़ी तस्वीरें दिखाएँ</string>
+    <string name="download_show_list">सूची के रूप में दिखाएँ</string>
+    <string name="download_instant_source">इंस्टेंट · %1$s से पढ़ा जा रहा है</string>
+    <string name="download_incognito_title">आप गुप्त मोड में हैं</string>
+    <string name="download_incognito_body">डाउनलोड आपके इतिहास में नहीं जुड़ते और लिंक याद नहीं रखे जाते। फ़ाइलें हमेशा की तरह सहेजी जाती हैं।</string>
+    <string name="download_download_all">सब डाउनलोड करें</string>
+    <string name="download_saved_aside">आपके डाउनलोड सहेज लिए गए हैं। उन्हें डाउनलोड टैब में देखें।</string>
+    <string name="download_options">डाउनलोड विकल्प</string>
+    <string name="download_pause">रोकें</string>
+    <string name="download_resume">फिर शुरू करें</string>
+    <string name="download_cancel">रद्द करें</string>
+    <string name="download_paused">रुका हुआ</string>
+    <string name="download_processing">तैयार किया जा रहा है</string>
+    <string name="download_waiting_wifi">वाई-फ़ाई का इंतज़ार</string>
+    <string name="download_saved">सहेजा गया</string>
+    <string name="download_queued">कतार में</string>
+    <string name="download_downloaded">डाउनलोड हो चुका</string>
+    <string name="download_failed">विफल</string>
+    <string name="download_remove_link">लिंक हटाएँ</string>
+    <string name="download_cancel_action">डाउनलोड रद्द करें</string>
+    <string name="download_resume_action">डाउनलोड फिर शुरू करें</string>
+    <plurals name="download_links">
+        <item quantity="one">%d लिंक</item>
+        <item quantity="other">%d लिंक</item>
+    </plurals>
+
+    <!-- SearchScreen -->
+    <string name="search_hint">खोजें या लिंक चिपकाएँ</string>
+    <string name="search_back">वापस</string>
+    <string name="search_more">और</string>
+    <string name="search_add_link">एक और लिंक जोड़ें</string>
+    <string name="search_clear">मिटाएँ</string>
+    <string name="search_clear_results">परिणाम हटाएँ</string>
+    <string name="search_clear_history">खोज इतिहास मिटाएँ</string>
+    <string name="search_empty_history">आपके इस्तेमाल किए लिंक यहाँ दिखेंगे</string>
+    <string name="search_no_matches">कोई लिंक मेल नहीं खाता</string>
+    <string name="search_remove">हटाएँ</string>
+    <string name="search_all">सब खोजें</string>
+    <string name="search_forget">भूल जाएँ</string>
+    <string name="search_edit_before">खोजने से पहले बदलें</string>
+    <string name="search_paste_and_fetch">चिपकाएँ और खोजें</string>
+    <string name="search_nothing_to_paste">चिपकाने के लिए कुछ नहीं है</string>
+
+    <!-- AlreadyDownloadedDialog -->
+    <string name="already_downloaded_title">पहले से डाउनलोड है</string>
+    <string name="already_downloaded_body">यह लिंक इस डिवाइस पर पहले से सहेजा हुआ है।</string>
+    <string name="already_downloaded_video">वीडियो</string>
+    <string name="already_downloaded_audio">ऑडियो</string>
+    <string name="already_downloaded_keep">रहने दें</string>
+    <string name="already_downloaded_play">चलाएँ</string>
+    <string name="already_downloaded_download_again">फिर से डाउनलोड करें</string>
+    <string name="already_downloaded_just_now">अभी अभी</string>
+    <string name="already_downloaded_yesterday">कल</string>
+    <plurals name="already_downloaded_minutes">
+        <item quantity="one">%d मिनट</item>
+        <item quantity="other">%d मिनट</item>
+    </plurals>
+    <plurals name="already_downloaded_hours">
+        <item quantity="one">%d घंटा</item>
+        <item quantity="other">%d घंटे</item>
+    </plurals>
+    <plurals name="already_downloaded_days">
+        <item quantity="one">%d दिन</item>
+        <item quantity="other">%d दिन</item>
+    </plurals>
+    <plurals name="already_downloaded_months">
+        <item quantity="one">%d माह</item>
+        <item quantity="other">%d माह</item>
+    </plurals>
+
+    <!-- NoResultsDialog -->
+    <string name="no_results_sign_in_title">साइन इन ज़रूरी है</string>
+    <string name="no_results_error_title">यह लिंक पढ़ा नहीं जा सका</string>
+    <string name="no_results_sign_in_body">यह स्रोत देने से पहले खाता माँगता है। साइन इन करने पर साइट की कुकीज़ सहेजी जाती हैं और दोबारा कोशिश होती है।</string>
+    <string name="no_results_continue_body">जानकारी पढ़ी नहीं जा सकी, पर डाउनलोड फिर भी चल सकता है। आगे बढ़ने पर उपलब्ध सबसे अच्छी क्वालिटी दी जाती है।</string>
+    <string name="no_results_refused_body">स्रोत ने अनुरोध ठुकरा दिया।</string>
+    <string name="no_results_engine_report">इंजन ने क्या बताया</string>
+    <string name="no_results_copy_log">लॉग कॉपी करें</string>
+    <string name="no_results_sign_in">साइन इन करें</string>
+    <string name="no_results_try_anyway">फिर भी कोशिश करें</string>
+    <string name="no_results_close">बंद करें</string>
+
+    <!-- UserGuideDialog -->
+    <string name="guide_title">शुरुआत करें</string>
+    <string name="guide_step_paste_link">डाउनलोड करने के लिए खोज बॉक्स में लिंक चिपकाएँ। आप कई लिंक और प्लेलिस्ट भी जोड़ सकते हैं</string>
+    <string name="guide_step_pick_format">सही फ़ॉर्मैट चुनने के लिए किसी कार्ड पर टैप करें। हर उपलब्ध क्वालिटी उसके आकार और कोडेक के साथ दिखाई जाती है।</string>
+    <string name="guide_step_share_instant">किसी भी ऐप से Hazel इंस्टेंट को लिंक साझा करें और तय की गई क्वालिटी में तुरंत डाउनलोड करें।</string>
+    <string name="guide_step_finished_downloads">पूरी हुई फ़ाइलें डाउनलोड में दिखती हैं। डिवाइस के डिफ़ॉल्ट प्लेयर में खोलने के लिए किसी भी पंक्ति पर टैप करें।</string>
+    <string name="guide_step_battery_unrestricted">बैटरी उपयोग को अप्रतिबंधित पर रखें, वरना ऐप से बाहर जाते ही Android डाउनलोड रोक सकता है।</string>
+    <string name="guide_battery_settings">बैटरी सेटिंग</string>
+    <string name="guide_close">बंद करें</string>
+
+    <!-- FormatSheet -->
+    <string name="format_sheet_title">डाउनलोड</string>
+    <string name="format_sheet_subtitle">डाउनलोड सेट करें</string>
+    <string name="format_sheet_play">चलाएँ</string>
+    <string name="format_sheet_ok">ठीक है</string>
+    <string name="format_sheet_download">डाउनलोड</string>
+    <string name="format_sheet_tab_audio">ऑडियो</string>
+    <string name="format_sheet_tab_video">वीडियो</string>
+    <string name="format_sheet_label_title">शीर्षक</string>
+    <string name="format_sheet_label_author">लेखक</string>
+    <string name="format_sheet_label_container">कंटेनर</string>
+    <string name="format_sheet_video_quality">वीडियो क्वालिटी</string>
+    <string name="format_sheet_audio_quality">ऑडियो क्वालिटी</string>
+    <string name="format_sheet_no_video_stream">इस स्रोत में अलग वीडियो स्ट्रीम नहीं है।</string>
+    <string name="format_sheet_no_audio_stream">इस स्रोत में अलग ऑडियो स्ट्रीम नहीं है।</string>
+    <string name="format_sheet_adjust_video">वीडियो सेट करें</string>
+    <string name="format_sheet_adjust_audio">ऑडियो सेट करें</string>
+    <string name="format_sheet_thumbnail">थंबनेल</string>
+    <string name="format_sheet_chapters">अध्याय</string>
+    <string name="format_sheet_subtitles">उपशीर्षक</string>
+    <string name="format_sheet_sponsorblock">SponsorBlock</string>
+    <string name="format_sheet_audio_language">ऑडियो की भाषा</string>
+    <string name="format_sheet_change_audio_language">ऑडियो की भाषा बदलें</string>
+    <string name="format_sheet_filename_template">फ़ाइल नाम टेम्पलेट</string>
+    <string name="format_sheet_change_field">बदलें</string>
+    <string name="format_sheet_save_dir">फ़ोल्डर</string>
+    <string name="format_sheet_save_location">सहेजने की जगह</string>
+    <string name="format_sheet_save_location_title">सहेजने की जगह</string>
+    <string name="format_sheet_save_location_body">इस फ़ोल्डर को अपने फ़ाइल मैनेजर में खोलें, या डाउनलोड सहेजने के लिए दूसरा चुनें।</string>
+    <string name="format_sheet_open_folder">फ़ोल्डर खोलें</string>
+    <string name="format_sheet_reset">रीसेट करें</string>
+    <string name="format_sheet_change">बदलें</string>
+
+    <!-- ConverterScreen -->
+    <string name="converter_label_convert_to">इसमें बदलें</string>
+    <string name="converter_label_saved_to">यहाँ सहेजा गया</string>
+    <string name="converter_hazel_storage">Hazel का अपना स्टोरेज</string>
+    <string name="converter_storage_warning">स्टोरेज की अनुमति के बिना फ़ाइल Hazel के अंदर ही रहती है, जहाँ दूसरे ऐप उसे नहीं देख सकते।</string>
+    <string name="converter_back">वापस</string>
+    <string name="converter_title">ऑफ़लाइन कन्वर्टर</string>
+    <string name="converter_subtitle">वीडियो से ऑडियो, कुछ भी फ़ोन से बाहर नहीं जाता</string>
+    <string name="converter_choose_video">कोई वीडियो फ़ाइल चुनें</string>
+    <string name="converter_ready">तैयार</string>
+    <string name="converter_choose_video_hint">फ़ोन या SD कार्ड की कोई भी फ़ाइल</string>
+    <string name="converter_change">बदलें</string>
+    <string name="converter_converting">बदला जा रहा है</string>
+    <string name="converter_convert">बदलें</string>
+    <string name="converter_saved">सहेजा गया</string>
+    <string name="converter_open_folder">फ़ोल्डर खोलें</string>
+    <string name="converter_convert_another">दूसरा बदलें</string>
+    <string name="converter_error_title">यह नहीं बदला जा सका</string>
+    <string name="converter_dismiss">हटाएँ</string>
+    <string name="converter_save_as_title">इस नाम से सहेजें</string>
+    <string name="converter_save_as_body">फ़ाइल का नाम तय करता है, और उसके शीर्षक टैग में भी लिखा जाता है।</string>
+    <string name="converter_label_name">नाम</string>
+    <string name="converter_start">शुरू करें</string>
+    <string name="converter_format_sheet_title">इसमें बदलें</string>
+    <string name="converter_heading_common">काम के तीन</string>
+    <string name="converter_heading_other">बाकी सब</string>
+
+    <!-- MoreScreen -->
+    <string name="more_title">और</string>
+    <string name="more_battery_title">पृष्ठभूमि में डाउनलोड</string>
+    <string name="more_battery_body">डाउनलोड पृष्ठभूमि में अपने आप चलते रहते हैं। फिर भी कुछ फ़ोन बैटरी बचाने के लिए उन्हें बीच में रोक देते हैं। इसे टालने के लिए अप्रतिबंधित उपयोग की अनुमति दें।</string>
+    <string name="more_downloads">डाउनलोड</string>
+    <string name="more_appearance">दिखावट</string>
+    <string name="more_language">भाषा</string>
+    <string name="more_cookies">कुकीज़</string>
+    <string name="more_link_reading">लिंक पढ़ना</string>
+    <string name="more_hazel_instant">Hazel इंस्टेंट</string>
+    <string name="more_temporary_files">अस्थायी फ़ाइलें</string>
+    <string name="more_converter">ऑफ़लाइन वीडियो को ऑडियो में बदलें</string>
+    <string name="more_engine_update">yt-dlp इंजन अपडेट</string>
+    <string name="more_support">Hazel का साथ दें</string>
+    <string name="more_license">लाइसेंस</string>
+
+    <!-- SponsorScreen -->
+    <string name="sponsor_back">वापस</string>
+    <string name="sponsor_title">Hazel का साथ दें</string>
+    <string name="sponsor_hero_title">मुफ़्त है, और मुफ़्त ही रहेगा</string>
+    <string name="sponsor_hero_body">Hazel शाम और छुट्टियों में बनाया जाता है, और मुफ़्त दिया जाता है क्योंकि डाउनलोड के पैसे लेने वाला डाउनलोडर एक कमज़ोर डाउनलोडर है। साइटें लगातार बदलती रहती हैं, और उनके साथ चलते रहना ही असली काम है।</string>
+    <string name="sponsor_hero_closing">अगर इस ऐप ने आपकी एक दोपहर बचाई है, तो नीचे दिया कोई भी तरीका वह समय वापस लौटा देता है। अगर नहीं बचाई, तो बिना पैसे वाले तरीके भी उतनी ही मदद करते हैं।</string>
+    <string name="sponsor_section_ways">साथ देने के तरीके</string>
+    <string name="sponsor_github_title">GitHub Sponsors</string>
+    <string name="sponsor_github_subtitle">हर महीने या एक बार, जब चाहें बंद करें। पूरा इंतज़ाम GitHub करता है।</string>
+    <string name="sponsor_kofi_title">Ko-fi</string>
+    <string name="sponsor_kofi_subtitle">एक बार का, खाते की ज़रूरत नहीं।</string>
+    <string name="sponsor_kofi_soon">जल्द खुल रहा है</string>
+    <string name="sponsor_section_free">कुछ खर्च नहीं, मदद उतनी ही</string>
+    <string name="sponsor_star_title">प्रोजेक्ट को स्टार दें</string>
+    <string name="sponsor_star_subtitle">ऐप आज़माने से पहले लोग यही एक आँकड़ा देखते हैं।</string>
+    <string name="sponsor_share_title">किसी को इसके बारे में बताएँ</string>
+    <string name="sponsor_share_subtitle">इस ऐप का पूरा प्रचार बस लोगों की बातचीत है।</string>
+    <string name="sponsor_issues_title">जो टूटे, उसकी ख़बर दें</string>
+    <string name="sponsor_issues_subtitle">जो साइट काम करना बंद कर दे, उसका सुधार कोई और नहीं लिख सकता।</string>
+    <string name="sponsor_source_title">कोड पढ़ें</string>
+    <string name="sponsor_source_subtitle">इसकी हर पंक्ति सार्वजनिक है, और पुल रिक्वेस्ट का स्वागत है।</string>
+    <string name="sponsor_footer">कोई विज्ञापन नहीं, आप क्या डाउनलोड करते हैं इसका कोई हिसाब नहीं, और कोई सुविधा किसी के लिए रोकी नहीं गई। साथ देने से यह बदलता है कि Hazel में कितना समय लगता है, यह नहीं कि वह आपके लिए क्या करेगा।</string>
+
+    <!-- UpdateScreen -->
+    <string name="update_title">yt-dlp अपडेट</string>
+    <string name="update_back">वापस</string>
+    <string name="update_check_action">अपडेट देखें</string>
+    <string name="update_status_up_to_date">आप अद्यतन हैं</string>
+    <string name="update_status_checking">अपडेट देखे जा रहे हैं...</string>
+    <string name="update_status_available">अपडेट उपलब्ध है</string>
+    <string name="update_status_installing">yt-dlp इंस्टॉल हो रहा है...</string>
+    <string name="update_status_installed">इंजन अपडेट हुआ</string>
+    <string name="update_status_failed">अपडेट विफल</string>
+    <string name="update_subtitle_idle">Hazel नवीनतम yt-dlp बिल्ड पर चल रहा है</string>
+    <string name="update_subtitle_checking">GitHub से संपर्क हो रहा है...</string>
+    <string name="update_subtitle_available">yt-dlp %1$s उपलब्ध है</string>
+    <string name="update_subtitle_updating">yt-dlp %1$s डाउनलोड हो रहा है</string>
+    <string name="update_subtitle_installed">yt-dlp %1$s अब इस्तेमाल में है</string>
+    <string name="update_installed_version">इंस्टॉल किया संस्करण</string>
+    <string name="update_version_unknown">अज्ञात</string>
+    <string name="update_new_version">नया संस्करण</string>
+    <string name="update_installing_binary">बाइनरी इंस्टॉल हो रही है</string>
+    <string name="update_installing_body">GitHub से डाउनलोड करके इंजन बदला जा रहा है। ऐप खुला रखें।</string>
+    <string name="update_action_update_now">अभी अपडेट करें</string>
+    <string name="update_action_installing">इंस्टॉल हो रहा है...</string>
+    <string name="update_action_done">हो गया</string>
+    <string name="update_action_retry">फिर कोशिश करें</string>
+    <string name="update_action_check">अपडेट देखें</string>
+    <string name="update_action_checking">देखा जा रहा है...</string>
+    <string name="update_info_heading">जानकारी</string>
+    <string name="update_info_component">घटक</string>
+    <string name="update_info_repository">रिपॉज़िटरी</string>
+    <string name="update_info_binary_size">बाइनरी का आकार</string>
+    <string name="update_info_distribution">वितरण</string>
+    <string name="update_info_github_releases">GitHub Releases</string>
+    <string name="update_release_channel">रिलीज़ चैनल</string>
+    <string name="update_view_changelog">बदलावों की सूची देखें</string>
+
+    <!-- DownloadOptionDialogs -->
+    <string name="options_sponsorblock_title">SponsorBlock फ़िल्टर चुनें</string>
+    <string name="options_sponsorblock_ok">ठीक है</string>
+    <string name="options_sponsorblock_cancel">रद्द करें</string>
+    <string name="options_chapters_title">अध्याय</string>
+    <string name="options_chapters_in_videos">वीडियो में अध्याय</string>
+    <string name="options_chapters_split">अध्यायों में बाँटें</string>
+    <string name="options_chapters_split_body">बाँटने पर एक फ़ाइल के बजाय हर अध्याय की अलग फ़ाइल बनती है।</string>
+    <string name="options_chapters_dismiss">हटाएँ</string>
+    <string name="options_subtitles_title">उपशीर्षक</string>
+    <string name="options_subtitles_embed">उपशीर्षक फ़ाइल में जोड़ें</string>
+    <string name="options_subtitles_save">उपशीर्षक सहेजें</string>
+    <string name="options_subtitles_save_auto">अपने आप बने उपशीर्षक सहेजें</string>
+    <string name="options_subtitles_languages_label">उपशीर्षक की भाषाएँ</string>
+    <string name="options_subtitles_dismiss">हटाएँ</string>
+    <string name="options_subtitles_languages_title">उपशीर्षक की भाषाएँ</string>
+    <string name="options_subtitles_languages_hint">yt-dlp का भाषा चयनकर्ता, जैसे en.*,.*-orig अंग्रेज़ी और मूल ट्रैक के लिए। स्रोत की हर भाषा के लिए all इस्तेमाल करें।</string>
+    <string name="options_filename_title">फ़ाइल नाम टेम्पलेट</string>
+    <string name="options_filename_hint">yt-dlp का आउटपुट टेम्पलेट। %(title)s, %(uploader)s, %(id)s और %(ext)s इस्तेमाल करें।</string>
+    <string name="options_text_input_save">सहेजें</string>
+    <string name="options_text_input_cancel">रद्द करें</string>
+
+    <!-- StorageCleanupScreen -->
+    <string name="cleanup_back">वापस</string>
+    <string name="cleanup_title">अस्थायी फ़ाइलें</string>
+    <string name="cleanup_header_description">ऐप के काम की फ़ाइलें। आपके डाउनलोड इसमें शामिल नहीं हैं और यहाँ से कभी नहीं हटते।</string>
+    <string name="cleanup_action_clear_everything">सब कुछ मिटाएँ</string>
+    <string name="cleanup_category_link_data_label">लिंक डेटा कैश</string>
+    <string name="cleanup_category_link_data_description">प्लेयर का वह डेटा जो yt-dlp रखता है ताकि दोबारा पढ़ा गया लिंक जल्दी खुले। मिटाना सुरक्षित है।</string>
+    <string name="cleanup_category_partial_downloads_label">अधूरे डाउनलोड</string>
+    <string name="cleanup_category_partial_downloads_description">फ़ाइल सहेजे जाने से पहले रद्द या विफल हुए डाउनलोड के बचे हुए टुकड़े।</string>
+    <string name="cleanup_category_conversions_label">अधूरे रूपांतरण</string>
+    <string name="cleanup_category_conversions_description">ऑडियो कन्वर्टर की वे फ़ाइलें जो कभी आपके संगीत फ़ोल्डर तक नहीं पहुँचीं।</string>
+    <string name="cleanup_category_engine_label">yt-dlp इंजन की फ़ाइलें</string>
+    <string name="cleanup_category_engine_description">डाउनलोडर और उसका रनटाइम। मिटाने से सबसे ज़्यादा जगह खाली होती है, पर अगले डाउनलोड में उन्हें फिर से खोलना पड़ता है।</string>
+    <string name="cleanup_category_other_cache_label">अन्य कैश की गई फ़ाइलें</string>
+    <string name="cleanup_category_other_cache_description">थंबनेल और लिंक देखते समय कैश हुआ बाकी सब कुछ।</string>
+    <string name="cleanup_confirm_category_title">ये फ़ाइलें मिटाएँ?</string>
+    <string name="cleanup_confirm_category_safe">%1$s खाली हो जाएगा। आपकी सहेजी हुई किसी चीज़ पर असर नहीं पड़ेगा।</string>
+    <string name="cleanup_confirm_category_unsafe">%1$s खाली हो जाएगा, और अगला डाउनलोड इन्हें फिर से खोलने में ज़्यादा समय लेगा।</string>
+    <string name="cleanup_confirm_clear">मिटाएँ</string>
+    <string name="cleanup_confirm_cancel">रद्द करें</string>
+    <string name="cleanup_confirm_all_title">सब कुछ मिटाएँ?</string>
+    <string name="cleanup_confirm_all_body">%1$s खाली हो जाएगा। आपके डाउनलोड और सहेजे गए साइन इन बने रहेंगे, पर अगला डाउनलोड इंजन को फिर से खोलने में ज़्यादा समय लेगा।</string>
+    <string name="cleanup_confirm_all_confirm">सब कुछ मिटाएँ</string>
+    <string name="cleanup_confirm_all_cancel">रद्द करें</string>
+
+    <!-- HistoryScreen -->
+    <string name="history_title">डाउनलोड</string>
+    <string name="history_layout_grid">बड़ी तस्वीरें दिखाएँ</string>
+    <string name="history_layout_list">सूची के रूप में दिखाएँ</string>
+    <string name="history_search_action">डाउनलोड में खोजें</string>
+    <string name="history_sort_action">क्रम</string>
+    <string name="history_menu_action">और</string>
+    <string name="history_menu_clear">इतिहास मिटाएँ</string>
+    <string name="history_search_placeholder">डाउनलोड में खोजें</string>
+    <string name="history_search_clear">खोज मिटाएँ</string>
+    <string name="history_empty_initial">अभी तक कुछ डाउनलोड नहीं हुआ</string>
+    <string name="history_empty_filtered">इससे कुछ मेल नहीं खाता</string>
+    <string name="history_clear_dialog_title">इतिहास मिटाएँ</string>
+    <string name="history_clear_dialog_body">सूची खाली हो जाती है। आपकी डाउनलोड की गई फ़ाइलों को कुछ नहीं होता।</string>
+    <string name="history_clear_dialog_confirm">मिटाएँ</string>
+    <string name="history_clear_dialog_cancel">रद्द करें</string>
+    <string name="history_delete_dialog_title">फ़ाइल हटाएँ</string>
+    <string name="history_delete_dialog_body">%1$s आपके डिवाइस से हटा दी जाएगी।</string>
+    <string name="history_toast_file_deleted">फ़ाइल हटा दी गई</string>
+    <string name="history_toast_file_delete_failed">फ़ाइल हटाई नहीं जा सकी</string>
+    <string name="history_delete_dialog_confirm">हटाएँ</string>
+    <string name="history_delete_dialog_cancel">रद्द करें</string>
+    <string name="history_card_options">विकल्प</string>
+    <string name="history_card_properties">विवरण</string>
+    <string name="history_card_remove">सूची से हटाएँ</string>
+    <string name="history_card_delete">फ़ाइल हटाएँ</string>
+    <string name="history_tag_deleted">हटाई गई</string>
+    <string name="history_row_options">विकल्प</string>
+    <string name="history_row_properties">विवरण</string>
+    <string name="history_row_remove">सूची से हटाएँ</string>
+    <string name="history_row_delete">फ़ाइल हटाएँ</string>
+    <string name="history_toast_file_gone">यह फ़ाइल अब आपके डिवाइस पर नहीं है</string>
+
+    <!-- DownloadPropertiesSheet -->
+    <string name="properties_title">विवरण</string>
+    <string name="properties_status">स्थिति</string>
+    <string name="properties_status_present">इस डिवाइस पर है</string>
+    <string name="properties_status_deleted">इस डिवाइस से हटाई गई</string>
+    <string name="properties_kind">प्रकार</string>
+    <string name="properties_kind_video">वीडियो</string>
+    <string name="properties_kind_audio">ऑडियो</string>
+    <string name="properties_quality">क्वालिटी</string>
+    <string name="properties_resolution">रिज़ॉल्यूशन</string>
+    <string name="properties_length">अवधि</string>
+    <string name="properties_codec">कोडेक</string>
+    <string name="properties_bitrate">बिटरेट</string>
+    <string name="properties_bitrate_value">%1$d kbps</string>
+    <string name="properties_size">आकार</string>
+    <string name="properties_container">कंटेनर</string>
+    <string name="properties_type">फ़ॉर्मैट</string>
+    <string name="properties_embedded">जोड़ा गया</string>
+    <string name="properties_file">फ़ाइल</string>
+    <string name="properties_saved_to">यहाँ सहेजा गया</string>
+    <string name="properties_downloaded">डाउनलोड किया</string>
+    <string name="properties_source">स्रोत</string>
+    <string name="properties_link_copied_opened">लिंक कॉपी करके खोला गया</string>
+    <string name="properties_link_copied">लिंक कॉपी हुआ</string>
+
+    <!-- CookiesScreen -->
+    <string name="cookies_back">वापस</string>
+    <string name="cookies_title">कुकीज़</string>
+    <string name="cookies_menu">और</string>
+    <string name="cookies_menu_import">क्लिपबोर्ड से लाएँ</string>
+    <string name="cookies_menu_export">क्लिपबोर्ड में भेजें</string>
+    <string name="cookies_menu_delete_all">सब हटाएँ</string>
+    <string name="cookies_imported_title">लाई गई कुकीज़</string>
+    <string name="cookies_toast_imported">कुकीज़ ले ली गईं</string>
+    <string name="cookies_toast_no_data">क्लिपबोर्ड में कुकी डेटा नहीं है</string>
+    <string name="cookies_toast_nothing_to_export">भेजने के लिए कुछ नहीं है</string>
+    <string name="cookies_toast_exported">क्लिपबोर्ड में कॉपी हुआ</string>
+    <string name="cookies_toast_entry_copied">क्लिपबोर्ड में कॉपी हुआ</string>
+    <string name="cookies_use_title">कुकीज़ इस्तेमाल करें</string>
+    <string name="cookies_use_description">सहेजे गए साइन इन डाउनलोडर को दें</string>
+    <string name="cookies_new">नई कुकी</string>
+    <string name="cookies_empty_title">कोई कुकी सहेजी नहीं है</string>
+    <string name="cookies_empty_body">आयु प्रतिबंधित, निजी या सिर्फ़ सदस्यों वाला कंटेंट डाउनलोड करने के लिए एक जोड़ें।</string>
+    <string name="cookies_delete_title">कुकीज़ हटाएँ</string>
+    <string name="cookies_delete_body">%1$s का सहेजा हुआ साइन इन हटाएँ?</string>
+    <string name="cookies_delete_confirm">हटाएँ</string>
+    <string name="cookies_delete_cancel">रद्द करें</string>
+    <string name="cookies_delete_all_title">सारी कुकीज़ हटाएँ</string>
+    <string name="cookies_delete_all_body">हर सहेजा हुआ साइन इन हटा दिया जाएगा। इसे वापस नहीं लाया जा सकता।</string>
+    <string name="cookies_delete_all_confirm">सब हटाएँ</string>
+    <string name="cookies_delete_all_cancel">रद्द करें</string>
+    <string name="cookies_row_fallback_name">कुकीज़</string>
+    <string name="cookies_sheet_title">कुकीज़</string>
+    <string name="cookies_sheet_copy">कुकीज़ कॉपी करें</string>
+    <string name="cookies_sheet_delete">कुकीज़ हटाएँ</string>
+    <string name="cookies_field_title">शीर्षक</string>
+    <string name="cookies_field_url">URL</string>
+    <string name="cookies_sheet_save">सहेजें</string>
+    <string name="cookies_sheet_get">कुकीज़ लें</string>
+    <string name="cookies_sheet_update">अपडेट करें</string>
+
+    <!-- Batch option sheets -->
+    <string name="batch_quality_best">सबसे अच्छी क्वालिटी</string>
+    <string name="batch_type_sheet_title">पसंदीदा डाउनलोड प्रकार</string>
+    <string name="batch_type_sheet_subtitle">ये लिंक किस रूप में डाउनलोड होंगे</string>
+    <string name="batch_type_audio">ऑडियो</string>
+    <string name="batch_type_video">वीडियो</string>
+    <string name="batch_format_title">फ़ॉर्मैट</string>
+    <string name="batch_format_subtitle">फ़ॉर्मैट चुनें</string>
+    <string name="batch_container_title">कंटेनर</string>
+    <string name="batch_container_subtitle">ये लिंक जिस फ़ाइल के रूप में सहेजे जाएँगे</string>
+    <string name="batch_save_dir_title">सहेजने की जगह</string>
+    <string name="batch_open_folder">यह फ़ोल्डर खोलें</string>
+    <string name="batch_change_folder">फ़ोल्डर बदलें</string>
+
+    <!-- Batch action bar -->
+    <string name="batch_bar_thumbnail">थंबनेल</string>
+    <string name="batch_bar_chapters">अध्याय</string>
+    <string name="batch_bar_subtitles">उपशीर्षक</string>
+    <string name="batch_bar_sponsorblock">SponsorBlock</string>
+    <string name="batch_bar_filename_template">फ़ाइल नाम टेम्पलेट</string>
+    <string name="batch_bar_download_type">पसंदीदा डाउनलोड प्रकार</string>
+    <string name="batch_bar_quality">क्वालिटी: %1$s</string>
+    <string name="batch_bar_save_location">सहेजने की जगह</string>
+    <string name="batch_bar_container">कंटेनर</string>
+
+    <!-- Batch download sheet -->
+    <string name="batch_header_title">डाउनलोड</string>
+    <string name="batch_header_subtitle">डाउनलोड सेट करें</string>
+    <string name="batch_download_action">डाउनलोड</string>
+    <string name="batch_stop_selecting">चुनना बंद करें</string>
+    <string name="batch_start_selecting">लिंक चुनें</string>
+    <string name="batch_list_options">सूची के विकल्प</string>
+    <string name="batch_menu_select_links">लिंक चुनें</string>
+    <string name="batch_menu_select_all">सब चुनें</string>
+    <string name="batch_menu_invert">चयन उलटें</string>
+    <string name="batch_menu_remove_selected">चुने हुए हटाएँ</string>
+    <string name="batch_menu_done">हो गया</string>
+    <plurals name="batch_selected">
+        <item quantity="one">%d चुना गया</item>
+        <item quantity="other">%d चुने गए</item>
+    </plurals>
+    <plurals name="batch_links">
+        <item quantity="one">%d लिंक</item>
+        <item quantity="other">%d लिंक</item>
+    </plurals>
+    <string name="batch_card_download_type">इस लिंक के लिए डाउनलोड प्रकार</string>
+    <string name="batch_card_remove">हटाएँ</string>
+
+    <!-- Opening a finished file -->
+    <string name="media_open_unknown_location">इस फ़ाइल की जगह पता नहीं है</string>
+    <string name="media_open_chooser">इससे खोलें</string>
+    <string name="media_open_no_app">इस डिवाइस पर इसे खोलने वाला कुछ नहीं है</string>
+
+    <!-- Download notifications -->
+    <string name="notification_cancelled_text">डाउनलोड रद्द हुआ</string>
+    <string name="notification_channel_progress_description">डाउनलोड की प्रगति, स्टेटस बार में आइकन दिखाता है</string>
+    <string name="notification_channel_complete_description">डाउनलोड पूरा होने की सूचनाएँ</string>
+    <string name="notification_action_pause">रोकें</string>
+    <string name="notification_action_resume">फिर शुरू करें</string>
+    <string name="notification_action_cancel">रद्द करें</string>
+    <string name="notification_action_sign_in">साइन इन करें</string>
+    <string name="notification_wifi_title">वाई-फ़ाई का इंतज़ार</string>
+    <string name="notification_wifi_text">डाउनलोड सिर्फ़ वाई-फ़ाई पर सेट हैं। वाई-फ़ाई पर लौटते ही वे शुरू हो जाएँगे।</string>
+
+    <!-- Sign-in web view -->
+    <string name="cookie_webview_close">बंद करें</string>
+    <string name="cookie_webview_desktop_site">डेस्कटॉप साइट</string>
+    <string name="cookie_webview_no_cookies">कोई कुकी नहीं मिली</string>
+    <string name="cookie_webview_done">"  ठीक है"</string>
+
+    <!-- FormatSelectionSheet -->
+    <string name="format_selection_sort">फ़ॉर्मैट क्रम में लगाएँ</string>
+    <string name="format_selection_change">फ़ॉर्मैट बदलें</string>
+    <string name="format_selection_title">फ़ॉर्मैट</string>
+    <string name="format_selection_subtitle">फ़ॉर्मैट चुनें</string>
+    <string name="format_selection_confirm">ठीक है</string>
+    <string name="format_selection_loading">बाकी फ़ॉर्मैट पढ़े जा रहे हैं</string>
+    <string name="format_sort_quality">क्वालिटी</string>
+    <string name="format_sort_file_size">फ़ाइल का आकार</string>
+    <string name="format_sort_container">कंटेनर</string>
+
+    <!-- AudioLanguageSheet -->
+    <string name="audio_language_title">ऑडियो की भाषा</string>
+    <string name="audio_language_subtitle">साउंडट्रैक चुनें</string>
+
+    <!-- AppearanceScreen -->
+    <string name="appearance_back">वापस</string>
+    <string name="appearance_title">दिखावट</string>
+
+    <!-- Language picker -->
+    <string name="language_title">ऐप की भाषा</string>
+    <string name="language_system">सिस्टम की भाषा</string>
+    <string name="language_system_description">डिवाइस के अनुसार</string>
+    <string name="language_current">अभी: %1$s</string>
+    <string name="language_selected">चुनी गई: %1$s</string>
+    <string name="language_cancel">रद्द करें</string>
+    <string name="language_confirm">पक्का करें</string>
+    <string name="language_changed_title">भाषा बदल गई</string>
+    <string name="language_changed_body">Hazel अब इस भाषा में है। ऐप का जो हिस्सा अनूदित नहीं है, वह अंग्रेज़ी में ही रहेगा।</string>
+    <string name="language_changed_ok">ठीक है</string>
+    <string name="appearance_dark_theme">गहरी थीम</string>
+    <string name="appearance_accent_color">एक्सेंट रंग</string>
+
+    <!-- AccentPickerDialog -->
+    <string name="accent_picker_title">एक्सेंट रंग</string>
+    <string name="accent_picker_close">बंद करें</string>
+
+    <!-- FetchSettingsScreen -->
+    <string name="fetch_settings_back">वापस</string>
+    <string name="fetch_settings_title">लिंक पढ़ना</string>
+    <string name="fetch_settings_timeout_description">धीमे स्रोत पर हार मानकर दोबारा कोशिश करने से पहले कितना इंतज़ार करना है।</string>
+    <plurals name="fetch_settings_timing">
+        <item quantity="one">%1$ds इंतज़ार, %2$d कोशिश</item>
+        <item quantity="other">%1$ds इंतज़ार, %2$d कोशिशें</item>
+    </plurals>
+    <string name="fetch_settings_reading_links">लिंक पढ़ना</string>
+    <string name="fetch_settings_reading_links_description">कौन सा रीडर पता लगाए कि लिंक में क्या है। यहाँ जो भी चुना जाए, डाउनलोड हमेशा yt-dlp से ही होते हैं।</string>
+    <string name="fetch_settings_force_ipv4_description">इसे तभी चालू करें जब आपके नेटवर्क पर लिंक अटक जाते हों। यह टूटे हुए IPv6 रास्ते से बचाता है, और बाकी हर जगह धीमा है।</string>
+    <string name="fetch_settings_force_ipv4">IPv4 ज़रूरी करें</string>
+    <string name="fetch_mode_fast_label">तेज़</string>
+    <string name="fetch_mode_fast_description">जल्दी हार मान लेता है। अच्छे नेटवर्क पर सबसे तेज़, पर दूसरी कोशिश की ज़रूरत ज़्यादा पड़ती है।</string>
+    <string name="fetch_mode_balanced_label">संतुलित</string>
+    <string name="fetch_mode_balanced_description">रफ़्तार और कमज़ोर कनेक्शन झेलने के बीच का रास्ता।</string>
+    <string name="fetch_mode_thorough_label">पूरी तरह</string>
+    <string name="fetch_mode_thorough_description">ज़्यादा इंतज़ार और ज़्यादा कोशिशें। सबसे धीमा, पर कमज़ोर नेटवर्क पर टिक जाता है।</string>
+    <string name="listing_source_ytdlp_description">वही इंजन जो डाउनलोड करता है। जिन साइटों को यह समझता है उन सब पर काम करता है, और खुद को अपडेट करता रहता है, इसलिए साइटें बदलने पर भी चलता रहता है।</string>
+    <string name="listing_source_newpipe_label">भीतर बने रीडर को प्राथमिकता दें</string>
+    <string name="listing_source_newpipe_description">इंजन चलाने के बजाय एक ही अनुरोध में प्लेलिस्ट और चैनल की सूची बनाता है, जो जानी-पहचानी साइटों पर तेज़ है। बाकी सब के लिए, और जब भी कोई लिंक न पढ़ पाए, yt-dlp पर लौट आता है।</string>
+
+    <!-- ToolsScreen -->
+    <string name="tools_back">वापस</string>
+    <string name="tools_title">उपकरण</string>
+    <string name="tools_empty">यहाँ अभी कुछ नहीं है।</string>
+
+    <!-- DirectShareScreen -->
+    <string name="direct_share_back">वापस</string>
+    <string name="direct_share_save_as">इस रूप में सहेजें</string>
+    <string name="direct_share_video">वीडियो</string>
+    <string name="direct_share_audio_only">सिर्फ़ ऑडियो</string>
+    <string name="direct_share_title">Hazel इंस्टेंट</string>
+    <string name="direct_share_intro">Hazel इंस्टेंट को लिंक साझा करते ही डाउनलोड तुरंत शुरू हो जाता है, न कोई शीट न कोई सवाल। ये वही जवाब हैं जो वह इस्तेमाल करता है।</string>
+    <string name="direct_share_video_description">तस्वीर और आवाज़, एक ही फ़ाइल में जुड़े हुए।</string>
+    <string name="direct_share_audio_description">सिर्फ़ आवाज़, स्रोत के पास जो सबसे अच्छा हो उसमें।</string>
+    <string name="direct_share_quality_title">क्वालिटी की सीमा</string>
+    <string name="direct_share_quality_description">यह एक ऊपरी हद है, कोई तय आकार नहीं। हर स्रोत एक जैसी ऊँचाइयाँ नहीं देता, इसलिए इससे नीचे जो सबसे बड़ी हो वही ली जाती है, और कोई न हो तो सबसे छोटी उपलब्ध।</string>
+    <string name="direct_share_output_title">आउटपुट</string>
+    <string name="direct_share_output_description">वह फ़ाइल जो डिवाइस पर आती है। डिफ़ॉल्ट वही रखता है जो स्रोत पहले से देता है, और यही सबसे तेज़ विकल्प है क्योंकि कुछ भी दोबारा एनकोड नहीं होता।</string>
+    <string name="direct_share_filename_template">फ़ाइल नाम टेम्पलेट</string>
+    <string name="direct_share_audio_language">ऑडियो की भाषा</string>
+    <string name="direct_share_audio_language_default">स्रोत की अपनी</string>
+    <string name="direct_share_extras_title">अतिरिक्त</string>
+    <string name="direct_share_extras_description">जब स्रोत के पास हों तब लागू होते हैं। जो उसके पास न हो वह उस डाउनलोड में छोड़ दिया जाता है, उसे विफल नहीं किया जाता।</string>
+    <string name="direct_share_cover_art">कवर तस्वीर</string>
+    <string name="direct_share_cover_art_description">थंबनेल को फ़ाइल के अंदर लिखता है, जहाँ कंटेनर उसे रख सकता हो।</string>
+    <string name="direct_share_chapters">अध्याय</string>
+    <string name="direct_share_subtitles">उपशीर्षक</string>
+    <string name="direct_share_sponsorblock">SponsorBlock</string>
+    <string name="direct_share_sponsorblock_off">बंद</string>
+    <plurals name="direct_share_sponsorblock_cut">
+        <item quantity="one">%1$d श्रेणी काटी गई</item>
+        <item quantity="other">%1$d श्रेणियाँ काटी गईं</item>
+    </plurals>
+    <string name="direct_share_signins_title">साइन इन</string>
+    <string name="direct_share_signins_description">इंस्टेंट साझा करने पर उसी साइट की सहेजी हुई कुकीज़ इस्तेमाल होती हैं जिसका लिंक है, ठीक वैसे ही जैसे शीट से शुरू किए डाउनलोड में। साझा करते समय कुछ नहीं पूछा जाता, इसलिए लॉगिन के पीछे वाला लिंक तभी चलेगा जब साइन इन पहले से सहेजा और चालू हो।</string>
+    <string name="direct_share_cookies">कुकीज़</string>
+    <string name="direct_share_cookies_on">चालू, हर इंस्टेंट साझा में इस्तेमाल होती हैं</string>
+    <string name="direct_share_cookies_off">बंद</string>
+    <string name="direct_share_change">%1$s बदलें</string>
+
+    <!-- StorageLocationsScreen -->
+    <string name="storage_locations_back">वापस</string>
+    <string name="storage_locations_downloads">डाउनलोड</string>
+    <string name="storage_locations_title">डाउनलोड</string>
+    <string name="storage_locations_subtitle">डाउनलोड कहाँ सहेजे जाते हैं, और किन सीमाओं में चलते हैं</string>
+    <string name="storage_locations_limits">सीमाएँ</string>
+    <string name="storage_locations_wifi_only_description">डाउनलोड मोबाइल डेटा पर चलने के बजाय इंतज़ार करते हैं</string>
+    <string name="storage_locations_speed_limit_description">डाउनलोड कितनी तेज़ी से चल सकता है</string>
+    <string name="storage_locations_internal_note">सारी फ़ाइलें आपके डिवाइस के आंतरिक स्टोरेज में रखी जाती हैं। आप उन्हें किसी भी फ़ाइल मैनेजर ऐप से कभी भी देख सकते हैं।</string>
+    <string name="storage_locations_wifi_only">सिर्फ़ वाई-फ़ाई</string>
+    <string name="storage_locations_speed_limit">गति सीमा</string>
+
+</resources>

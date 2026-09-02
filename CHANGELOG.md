@@ -5,6 +5,26 @@ All notable changes to Hazel are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Hazel speaks six languages.** Spanish, Hindi, Simplified Chinese, Brazilian Portuguese,
+  French and German, alongside English. Nothing has to be chosen: with no answer stored
+  Android already resolves every string against the device language, so a phone set to
+  Spanish opens a Spanish app on first launch.
+- **A language picker, under More.** For the person whose phone is in one language and who
+  wants the app in another, which is common on a shared or a work device. It opens as a
+  sheet of cards, two to a row, each naming the language in itself with the English
+  underneath: somebody hunting for their own language is looking for the word they would
+  write. Choosing a card does not change anything on its own. The heading says what the app
+  is in now and switches to what has been picked, and only Confirm commits it, because a
+  language is the one setting where a mis-tap leaves you unable to read the screen you would
+  use to undo it. A short note follows in the language just chosen.
+- **The app appears in the system language settings.** From Android 13 the platform owns the
+  per-app language, so the choice is stored by the system, sits beside every other app's,
+  and survives clearing the app's data. Below that the choice is kept by the app itself and
+  applied as each screen is built.
+
 ## [1.0.3] - 2026-09-02
 
 ### Added

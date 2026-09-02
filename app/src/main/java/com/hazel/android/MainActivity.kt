@@ -1,5 +1,6 @@
 package com.hazel.android
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Process
@@ -24,6 +25,7 @@ import com.hazel.android.download.DownloadNotificationHelper
 import com.hazel.android.ui.navigation.AppNavigation
 import com.hazel.android.ui.screens.SplashScreen
 import com.hazel.android.ui.theme.HazelTheme
+import com.hazel.android.util.AppLocale
 import com.hazel.android.util.PermissionHelper
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -54,6 +56,17 @@ class MainActivity : ComponentActivity() {
     /** A failure the user tapped a notification to come back to, or null. */
     var pendingFailure by mutableStateOf<String?>(null)
         private set
+
+    /**
+     * Applies the chosen language before anything is inflated.
+     *
+     * Only Android 12 and earlier need this. From 13 the platform owns the per-app language
+     * and hands the activity a context that already has it, so [AppLocale.wrap] gives that
+     * one straight back rather than arguing with it.
+     */
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLocale.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
