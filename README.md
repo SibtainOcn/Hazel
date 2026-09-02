@@ -1,129 +1,145 @@
+<p align="center">
+  <img src="assets/HAZEL-BANNER.png" alt="Hazel Banner" width="100%" />
+</p>
+
+<div align="center">
+English
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-es.md">Español</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-zh_Hans.md">简体中文</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-zh_Hant.md">繁體中文</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-ar.md">العربية</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-pt_BR.md">Português (Brasil)</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-fr.md">Français</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-de.md">Deutsch</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-ru.md">Русский</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-ja.md">日本語</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-id.md">Bahasa Indonesia</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-hi.md">हिंदी</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-ur.md">اردو</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-uk.md">Українська</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-th.md">ภาษาไทย</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-fa.md">فارسی</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-it.md">Italiano</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-az.md">Azərbaycanca</a>
+&nbsp;&nbsp;| &nbsp;&nbsp;
+<a href="assets/TRANSLATIONS/README-sr.md">Српски</a>
+</div>
+
 <div align="center">
 
-<img src="BRAND/Hazel.png" alt="Hazel" width="96" />
+[![Android](https://img.shields.io/badge/Android-0A0A0A?style=for-the-badge&logo=android&logoColor=3DDC84)](https://github.com/SibtainOcn/Hazel/releases/latest)
+[![Download](https://img.shields.io/badge/Download-0A0A0A?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SibtainOcn/Hazel/releases/latest)
+[![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/packages/com.hazel.android/)
 
-# Hazel
-
-**A media downloader for Android.** Paste one link or several, see exactly what each source
-offers, choose, and download.
+![API](https://img.shields.io/badge/API-24%2B-brightgreen?style=flat-square)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/SibtainOcn/Hazel/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/SibtainOcn/Hazel/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/SibtainOcn/Hazel?style=flat-square&label=release&color=cyan)](https://github.com/SibtainOcn/Hazel/releases/latest)
+[![Changelog](https://img.shields.io/badge/Changelog-orange?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md)
+[![Downloads](https://img.shields.io/github/downloads/SibtainOcn/Hazel/total?style=flat-square)](https://github.com/SibtainOcn/Hazel/releases)
+[![Supported Sites](https://img.shields.io/badge/supported--sites-1000%2B-green?style=flat-square)](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+[![Stars](https://img.shields.io/github/stars/SibtainOcn/Hazel?style=flat-square)](https://github.com/SibtainOcn/Hazel/stargazers)
 
 </div>
 
----
+## 📲 Screenshots
 
-## What it does
+<div>
+<img src="assets/ss_01_mv69.jpg" width="30%" />
+<img src="assets/ss_02_a6e1.jpg" width="30%" />
+<img src="assets/ss_03_fzfv.jpg" width="30%" />
+<img src="assets/ss_04_srx6.jpg" width="30%" />
+<img src="assets/ss_05_f9sz.jpg" width="30%" />
+<img src="assets/ss_06_0cmz.jpg" width="30%" />
+<img src="assets/ss_07_trsv.jpg" width="30%" />
+<img src="assets/ss_08_vnrt.jpg" width="30%" />
+</div>
 
-Hazel shows you what a link actually has, instead of guessing at a quality preset. Every
-format the site offers is listed with its size and quality, and the best one is picked for
-you.
+## 💡 Features:
 
-**One link, many, or a whole playlist.** Queue several links at once and download the set
-with one action, or open any of them and change just that one. A playlist or channel becomes
-one card per video.
-
-**Real formats.** No presets. You see the exact qualities the source has and choose.
-
-**Works nearly everywhere.** YouTube, Instagram, TikTok, X, Reddit, SoundCloud and hundreds
-of other sites.
-
-## Features
-
-### Downloading
-- Paste or share one link, several at once, or a whole playlist
-- **Hazel Direct** — share a link to it and the download starts immediately at a quality you
-  set once
-- Full quality list, sortable by quality, size or format
-- Edit the title, author and file type before saving
-- Save to `Download/Hazel` or any folder you choose, including an SD card
-- Warns before downloading something you already have, and offers to play it instead
-- Progress in the notification shade, with a sound when a download finishes
+- Download audio and video from YouTube, Instagram, TikTok, X, Reddit, SoundCloud and [1000+ other sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+- Paste one link, several at once, or an entire playlist / channel with one-click batch downloading
+- **Hazel Instant** - share a link with any other app and the download begins immediately at a quality you set once
+- Choose specific soundtracks when a source publishes several audio tracks
+- Edit title, author, and file type / metadata before saving
+- Select different download formats and containers
 
 ### Processing
-- **SponsorBlock** — cut out sponsors, intros and other segments
-- **Chapters** — keep them in the file, or split into one file per chapter
-- **Subtitles** — burn in, save alongside, or both, in the languages you pick
-- **Formats**: mp4, webm, mkv, mov, avi, flv for video; mp3, m4a, aac, alac, flac, opus, wav
-  for audio
-- Cover art embedding and custom file naming
+- **Language selection** - Save in any language the source video offers (English, Hindi, Urdu, Arabic, Malayalam, Marathi, German, and more)
+- **SponsorBlock** - cut out sponsors, intros, and other segments
+- **Chapters** - embed in the file, or split into one file per chapter
+- **Subtitles** - burn in, save alongside, or both, in the languages you pick
 
-### Sign-ins
-- Sign in to reach age-restricted, private and members-only media
-- Offered automatically when a link needs an account
-- Stays on your device
-
-### Library
-- Everything you have downloaded, with search, sorting and audio/video filters
-- Switch between large artwork and a compact list
-- Tap to play in your usual app
+### Downloads
+- Long-horizon background downloads supported
+- Pause, resume, and cancel from the card or the notification
+- Wi-Fi only mode - checked at start, so a transfer already going is not cut off
 
 ### Privacy
-- **Incognito** — downloads are not added to your library and links are not remembered
-- No accounts, no analytics, nothing sent anywhere else
+- **Incognito** - downloads are not added to your library and links are not remembered
+- No accounts, no analytics, nothing sent anywhere
 
-### Settings
-- Link reading speed, for slower or unreliable connections
-- Default quality for Hazel Direct
-- Clear temporary files, with a running total
-- Keep the download engine up to date, separately from app updates
-- Dark and light themes, with an accent colour
+### Settings & Customisation
+- Dark and light themes with accent colour
+- App languages - English, Spanish, Hindi, Simplified Chinese, Brazilian Portuguese, French, German, Russian, Japanese, Indonesian, and system default
+- Independent yt-dlp engine updates - Stable, Nightly or Master channel
+- Offline video-to-audio converter
 
-## Install
+---
+## ⬇️ Download
 
-Grab the APK from [Releases](https://github.com/SibtainOcn/Hazel/releases). Universal and
-per-ABI builds are published; the per-ABI build for your device is smaller.
+For most devices, it is recommended to install the **arm64-v8a** version of the apks
 
-Minimum Android 7.0 (API 24).
+- Download the latest stable version from [GitHub releases](https://github.com/SibtainOcn/Hazel/releases/latest)
+  - Install the [pre-release](https://github.com/SibtainOcn/Hazel/releases/) versions to help us test out new features & changes
 
-## Build
+- Stable releases are also available on [F-Droid](https://f-droid.org/packages/com.hazel.android/)
 
-```bash
-git clone https://github.com/SibtainOcn/Hazel.git
-cd Hazel
-./gradlew assembleDebug
-```
+Hazel will always be free and open source for everyone. If you like it, please consider [supporting the project](https://github.com/sponsors/SibtainOcn)!
 
-Release builds are signed from a keystore kept outside the repository. Point
-`HAZEL_SIGNING_DIR` in `local.properties` at a folder holding your keystore and a
-`signing.properties` with `storeFile`, `storePassword`, `keyAlias` and `keyPassword`. Without
-it the release build still succeeds and produces an unsigned APK. On a build server the same
-variable is read from the environment, so no `local.properties` is needed.
+## 🤝 Contributing
 
-APKs are named for what they are, one per architecture plus a universal build:
+Contributions are welcome!
 
-```
-Hazel-v1.0.0-arm64-v8a-stable.apk
-Hazel-v1.0.0-universal-stable.apk
-Hazel-v1.0.0-arm64-v8a-debug.apk
-```
+> [!Note]
+>
+> For submitting bug reports, feature requests, questions, or any other ideas to improve, please read [CONTRIBUTING.md](https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md) for instructions and guidelines first.
 
-`-PVERSION_NAME=1.1.0` names the build something other than the version in the build file,
-which is how a tagged release is versioned by its tag. A version carrying a suffix
-(`1.1.0-beta.1`) is named `beta` instead of `stable`. `-PSPLIT_ABI=false` skips the per-ABI
-split and produces the universal APK alone, which is most of the packaging time saved when
-you only need to know the code builds.
+## 📄 Licence
 
-## Tests
+[GNU GPL v3.0](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
 
-```bash
-./gradlew :app:testDebugUnitTest
-```
+> [!Warning]
+>
+> Except for the source code licensed under the GPLv3 license,
+> all other parties are prohibited from using Hazel's name as a downloader app,
+> and the same is true for Hazel's derivatives.
+> Derivatives include but are not limited to forks and unofficial builds.
 
-Pure JVM, no emulator, a couple of seconds. [docs/TESTING.md](docs/TESTING.md) covers what is
-tested, why only that, and the rules for adding more.
+## 🧱 Credits
 
-## Built with
+Hazel is a GUI for [yt-dlp](https://github.com/yt-dlp/yt-dlp), based on [youtubedl-android](https://github.com/yausername/youtubedl-android).
+[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor)
 
-| | |
-|---|---|
-| Language | Kotlin |
-| UI | Jetpack Compose, Material 3 |
-| Download engine | [yt-dlp](https://github.com/yt-dlp/yt-dlp) via [youtubedl-android](https://github.com/JunkFood02/youtubedl-android) |
-| Media processing | FFmpeg |
-| Metadata | [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) |
-| Storage | DataStore, MediaStore, Storage Access Framework |
-| Images | Coil |
-
-## Licence
-
-See [LICENSE](LICENSE). Hazel is a client for yt-dlp; respect the terms of the sites you
-download from and the rights of the people whose work you are saving.
+<div align="right">
+<table><td>
+<a href="#start-of-content">👆 Scroll to top</a>
+</td></table>
+</div>

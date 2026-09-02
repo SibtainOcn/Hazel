@@ -8,10 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Hazel speaks six languages.** Spanish, Hindi, Simplified Chinese, Brazilian Portuguese,
-  French and German, alongside English. Nothing has to be chosen: with no answer stored
-  Android already resolves every string against the device language, so a phone set to
-  Spanish opens a Spanish app on first launch.
+- **Hazel speaks ten languages.** Spanish, Hindi, Simplified Chinese, Brazilian Portuguese,
+  French, German, Russian, Japanese and Indonesian, alongside English. Nothing has to be
+  chosen: with no answer stored Android already resolves every string against the device
+  language, so a phone set to Spanish opens a Spanish app on first launch. Every one of the
+  nine carries the full set of 461 translatable strings and all 9 plural groups, with the
+  format arguments left in the order the code passes them.
 - **A language picker, under More.** For the person whose phone is in one language and who
   wants the app in another, which is common on a shared or a work device. It opens as a
   sheet of cards, two to a row, each naming the language in itself with the English
@@ -24,6 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   per-app language, so the choice is stored by the system, sits beside every other app's,
   and survives clearing the app's data. Below that the choice is kept by the app itself and
   applied as each screen is built.
+- **The README is readable in eighteen more languages.** Arabic, Azerbaijani, German,
+  Spanish, Persian, French, Hindi, Indonesian, Italian, Japanese, Brazilian Portuguese,
+  Russian, Serbian, Thai, Ukrainian, Urdu, Simplified Chinese and Traditional Chinese, kept
+  under `assets/TRANSLATIONS/`. Each one carries the same headings, badges and screenshots
+  as the English, and a switcher at the top of every file reaches all the others.
+
+### Changed
+- Project images moved from `BRAND/` to `assets/`, next to the screenshots and the README
+  translations that reference them.
 
 ## [1.0.3] - 2026-09-02
 
