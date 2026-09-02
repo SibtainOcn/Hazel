@@ -103,8 +103,8 @@ fun DownloadSheetFooter(
                 modifier = Modifier
                     .weight(1f)
                     .clickable(enabled = copyText.isNotBlank()) {
-                        copyToClipboard(context, copyText)
-                        feedback = if (openLink(context, copyText)) {
+                        copySheetLink(context, copyText)
+                        feedback = if (openSheetLink(context, copyText)) {
                             "Link copied and opened"
                         } else {
                             "Link copied"
@@ -169,9 +169,9 @@ fun DownloadSheetFooter(
 }
 
 /** Long enough to read, short enough that it is gone before it is in the way. */
-private const val FEEDBACK_MS = 2_000L
+internal const val FEEDBACK_MS = 2_000L
 
-private fun copyToClipboard(context: Context, text: String) {
+internal fun copySheetLink(context: Context, text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
     clipboard?.setPrimaryClip(ClipData.newPlainText("Hazel link", text))
 }
@@ -184,7 +184,7 @@ private fun copyToClipboard(context: Context, text: String) {
  * when that app is not installed, and a device with neither is left alone: the address is
  * already on the clipboard by the time this is called.
  */
-private fun openLink(context: Context, url: String): Boolean {
+internal fun openSheetLink(context: Context, url: String): Boolean {
     val uri = runCatching { Uri.parse(url) }.getOrNull() ?: return false
     val host = uri.host.orEmpty().removePrefix("www.").lowercase()
 

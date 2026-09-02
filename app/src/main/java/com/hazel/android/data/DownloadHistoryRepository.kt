@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.hazel.android.util.MediaPresence
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -26,12 +27,33 @@ data class HistoryEntry(
     val savedPath: String,
     val isVideo: Boolean,
     val sizeBytes: Long,
-    val completedAt: Long
+    val completedAt: Long,
+    /**
+     * The quality that was asked for, as the sheet named it, with the stream's own codec
+     * and bitrate behind it. Read off the download rather than off the file, because a
+     * container reports what it holds and not what was chosen.
+     */
+    val formatLabel: String = "",
+    val codec: String = "",
+    val bitrateKbps: Double = 0.0,
+    /**
+     * What was written into the file besides the media: subtitles, chapters, cover art. A
+     * comma separated list, empty for a download that carried none of it.
+     *
+     * Recorded at the time, because none of it can be recovered afterwards without opening
+     * the file and reading its streams, and a record that was never written cannot be
+     * filled in later. Entries made before this existed simply have nothing to say.
+     */
+    val embedded: String = ""
 ) {
     val site: String
         get() = runCatching {
             java.net.URL(url).host.removePrefix("www.")
         }.getOrNull().orEmpty()
+
+    /** The output container, taken off the name it was saved under. */
+    val container: String
+        get() = fileName.substringAfterLast('.', "").uppercase()
 }
 
 /** How the history list is ordered. */
@@ -86,18 +108,12 @@ object DownloadHistoryRepository {
      * Whether the file behind an entry is still on the device.
      *
      * A download can be deleted from a file manager or a gallery app long after it was
-     * made, so the record on its own says nothing about what is there now. The address is
-     * opened rather than merely inspected, because a MediaStore row can outlive the file
-     * it points at.
+     * made, so the record on its own says nothing about what is there now. The reading
+     * itself lives in [MediaPresence], which is also what the screens ask, so a row on the
+     * downloads list and the marker on a link that was fetched again cannot disagree.
      */
     suspend fun fileExists(context: Context, entry: HistoryEntry): Boolean =
-        withContext(Dispatchers.IO) {
-            if (entry.fileUri.isBlank()) return@withContext false
-            runCatching {
-                context.contentResolver.openFileDescriptor(Uri.parse(entry.fileUri), "r")
-                    ?.use { true } ?: false
-            }.getOrDefault(false)
-        }
+        MediaPresence.refresh(context, entry.fileUri)
 
     /** Deletes the file an entry points at, and the entry with it. */
     suspend fun deleteFile(context: Context, entry: HistoryEntry): Boolean =
@@ -107,6 +123,8 @@ object DownloadHistoryRepository {
                         context.contentResolver.delete(Uri.parse(entry.fileUri), null, null) > 0
             }.getOrDefault(false)
             remove(context, entry.id)
+            // What was held about this address described a file that is no longer there.
+            MediaPresence.forget()
             deleted
         }
 
@@ -127,6 +145,10 @@ object DownloadHistoryRepository {
                     put("isVideo", entry.isVideo)
                     put("size", entry.sizeBytes)
                     put("completedAt", entry.completedAt)
+                    put("formatLabel", entry.formatLabel)
+                    put("codec", entry.codec)
+                    put("bitrate", entry.bitrateKbps)
+                    put("embedded", entry.embedded)
                 }
             )
         }
@@ -151,7 +173,11 @@ object DownloadHistoryRepository {
                         savedPath = json.optString("savedPath"),
                         isVideo = json.optBoolean("isVideo", true),
                         sizeBytes = json.optLong("size"),
-                        completedAt = json.optLong("completedAt")
+                        completedAt = json.optLong("completedAt"),
+                        formatLabel = json.optString("formatLabel"),
+                        codec = json.optString("codec"),
+                        bitrateKbps = json.optDouble("bitrate", 0.0),
+                        embedded = json.optString("embedded")
                     )
                 }
             }

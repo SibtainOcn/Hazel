@@ -26,6 +26,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   subtitles and SponsorBlock are set for the share target itself and kept apart from the
   sheet's, so a choice made for a download being watched cannot change what an unattended
   share does with the next link. The screen also says whether saved sign-ins are in use.
+- **Properties, for a finished download.** Held down on a row, or picked from its menu, it
+  says everything the app knows: whether the file is still there, what quality was asked
+  for, how long it runs, its bitrate, resolution, size, container, type, what was written
+  into it besides the media, the name it was saved under, where it landed and when. Two
+  sources feed it and neither is expensive: what was asked for comes from the record, and
+  what arrived is read once from the file's own header, on a background thread, only for a
+  file that is still there. A fact neither source has is left out rather than shown as
+  blank, so an entry made before any of this was recorded is short rather than empty. The
+  sheet closes with the address, which copies and opens the same way the download sheet's
+  does, and for a download whose file has gone that is the way back to the thing itself.
 
 ### Changed
 - **The format list was rebuilt.** It opens half way up the screen, each row leads with its
@@ -58,6 +68,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   app was still drawing its first screen and took CPU and disk from it. It now starts once
   that screen is up, and still starts on its own for a launch with no UI, such as a
   notification action resuming a download after the process was killed.
+- **The link entry screen has a paste control.** A link is nearly always copied somewhere
+  else first, so the opening move on that screen was a paste and then a confirm. The control
+  in the corner is the two of them at once, and it rides above the keyboard rather than
+  under it. It goes through the same submit the field does, so a paste holding several links
+  is split the way a typed one is.
+- **The source is offered in one place.** It was on the More list and on the Support screen,
+  the same address by two routes, and the one that stayed is the one that says why anyone
+  would follow it.
+- **The results layout switch is offered from the first link.** It was held back until there
+  were two, so it was a control that came and went and nobody learned it was there. The
+  count beside it says "1 link" rather than "1 links".
+- **The downloads list dropped a glyph from its rows.** A play or note mark sat in front of
+  the size and the date, saying what the artwork beside it already said and spending the
+  width the date needed to finish.
 
 ### Fixed
 - **Signing in cut the format list down to 360p.** The largest site now answers a signed-in
@@ -80,6 +104,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   default, so the file arrived in the original language whatever the sheet had said.
 - **The set card showed a resolution twice.** The measured size was pushed off the end of
   the row by a headline that repeated what the quality already said.
+- **A download deleted from the phone still counted as downloaded.** The record of a
+  download was taken as proof the file was there, and where it was checked at all, opening
+  the address was the whole test. From Android 11 a gallery delete moves the row to the
+  system bin, which the app that owns it can still open, so a file the user had deleted read
+  as present until they emptied the bin as well. The index is now asked whether the row is
+  binned or half written before the file behind it is opened, the answer is thrown away and
+  taken again every time a screen returns to the foreground, and the downloads list asks
+  once more at the moment of the tap rather than handing a missing file to a player that
+  opens on nothing and comes straight back. A link whose file has gone is offered as
+  something to fetch again: no repeat warning, and no marker on the card.
+- **Download all appeared for a single link, and offered to fetch what was already saved.**
+  Reading a new link added it to what was already on screen, so one new video beside one
+  already downloaded read as a set of two, and the sheet behind the action held both. What
+  has finished downloading is now taken off the list when the next link is read, with a line
+  at the foot of the results saying where it went, and the action itself is offered on what
+  is actually left to fetch rather than on how long the list is. Neither is offered while a
+  run is in hand, including one sitting paused.
+- **A row in the downloads list broke apart once its file was deleted.** The size, the date
+  and the deleted marker shared a row in which neither was allowed to give way, so the text
+  took the full width and the marker beside it was measured into nothing: it collapsed to a
+  red thread down the side and its label wrapped one letter at a time, dragging the row to
+  several times its height. The line is what shortens now. The row was rebuilt around it
+  with larger artwork, room between the title, the author and what the file cost, and the
+  same word for a missing file that the card form uses.
+- **The single-line layout lost every download control.** Pause, resume and the options
+  behind them were on the card form alone, so switching layout mid-download left the row
+  with nothing but a cancel button, and a paused item showed no sign of being paused. The
+  row now carries the same menu in the same order, the artwork holds resume while it is
+  paused, and the progress line stays put with what is already down beside it.
+- **The run summary sat above the links it was about.** A line reporting how a set of
+  downloads went was the first thing on the screen, before any of the cards it counted.
 
 ## [1.0.2] - 2026-08-31
 
