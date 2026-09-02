@@ -304,6 +304,32 @@
     <string name="history_row_delete">Delete file</string>
     <string name="history_toast_file_gone">This file is no longer on your device</string>
 
+    <!-- DownloadPropertiesSheet -->
+    <string name="properties_title">Properties</string>
+    <string name="properties_status">Status</string>
+    <string name="properties_status_present">On this device</string>
+    <string name="properties_status_deleted">Deleted from this device</string>
+    <string name="properties_kind">Kind</string>
+    <string name="properties_kind_video">Video</string>
+    <string name="properties_kind_audio">Audio</string>
+    <string name="properties_quality">Quality</string>
+    <string name="properties_resolution">Resolution</string>
+    <string name="properties_length">Length</string>
+    <string name="properties_codec">Codec</string>
+    <string name="properties_bitrate">Bitrate</string>
+    <!-- The measured rate, in kilobits per second. %1$d is the number. -->
+    <string name="properties_bitrate_value">%1$d kbps</string>
+    <string name="properties_size">Size</string>
+    <string name="properties_container">Container</string>
+    <string name="properties_type">Type</string>
+    <string name="properties_embedded">Embedded</string>
+    <string name="properties_file">File</string>
+    <string name="properties_saved_to">Saved to</string>
+    <string name="properties_downloaded">Downloaded</string>
+    <string name="properties_source">Source</string>
+    <string name="properties_link_copied_opened">Link copied and opened</string>
+    <string name="properties_link_copied">Link copied</string>
+
     <!-- CookiesScreen -->
     <string name="cookies_back">Back</string>
     <string name="cookies_title">Cookies</string>
