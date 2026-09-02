@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -60,11 +61,17 @@ import com.hazel.android.ui.components.FormatListShimmer
 import com.hazel.android.ui.theme.SizeBadgeContainer
 import com.hazel.android.ui.theme.SizeBadgeContent
 
-/** How the format list is ordered. The default is what the probe already sorted for. */
-enum class FormatSort(val label: String) {
-    QUALITY("Quality"),
-    FILE_SIZE("File size"),
-    CONTAINER("Container")
+/**
+ * How the format list is ordered. The default is what the probe already sorted for.
+ *
+ * The name is held as a resource id rather than as text, the same way the fetch mode and
+ * the listing source hold theirs: an enum has no Context, so a label written here is a
+ * label nothing can translate.
+ */
+enum class FormatSort(@StringRes val labelRes: Int) {
+    QUALITY(R.string.format_sort_quality),
+    FILE_SIZE(R.string.format_sort_file_size),
+    CONTAINER(R.string.format_sort_container)
 }
 
 /**
@@ -133,12 +140,12 @@ fun FormatSelectionSheet(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        "Format",
+                        stringResource(R.string.format_selection_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "Select format",
+                        stringResource(R.string.format_selection_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
@@ -166,7 +173,7 @@ fun FormatSelectionSheet(
                     ) {
                         FormatSort.entries.forEach { option ->
                             DropdownMenuItem(
-                                text = { Text(option.label) },
+                                text = { Text(stringResource(option.labelRes)) },
                                 onClick = {
                                     sort = option
                                     sortMenuOpen = false
@@ -195,7 +202,7 @@ fun FormatSelectionSheet(
                         Icon(Icons.Filled.Check, null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "OK",
+                            stringResource(R.string.format_selection_confirm),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -205,7 +212,7 @@ fun FormatSelectionSheet(
 
             if (isLoadingFormats) {
                 Text(
-                    "Reading the rest of the formats",
+                    stringResource(R.string.format_selection_loading),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 20.dp)

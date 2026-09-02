@@ -477,6 +477,13 @@
     <!-- FormatSelectionSheet -->
     <string name="format_selection_sort">Sort formats</string>
     <string name="format_selection_change">Change format</string>
+    <string name="format_selection_title">Format</string>
+    <string name="format_selection_subtitle">Select format</string>
+    <string name="format_selection_confirm">OK</string>
+    <string name="format_selection_loading">Reading the rest of the formats</string>
+    <string name="format_sort_quality">Quality</string>
+    <string name="format_sort_file_size">File size</string>
+    <string name="format_sort_container">Container</string>
 
     <!-- AppearanceScreen -->
     <string name="appearance_back">Back</string>
