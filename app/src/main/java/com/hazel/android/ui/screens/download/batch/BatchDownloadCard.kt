@@ -97,7 +97,7 @@ fun BatchDownloadCard(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Text(
-                    "Remove",
+                    stringResource(R.string.batch_card_remove),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onErrorContainer

@@ -453,6 +453,7 @@
         <item quantity="other">%d links</item>
     </plurals>
     <string name="batch_card_download_type">Download type for this link</string>
+    <string name="batch_card_remove">Remove</string>
 
     <!-- Opening a finished file -->
     <string name="media_open_unknown_location">This file\'s location is unknown</string>
