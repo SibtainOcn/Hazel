@@ -85,7 +85,7 @@ fun AppearanceScreen(
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Appearance",
+                stringResource(R.string.appearance_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary

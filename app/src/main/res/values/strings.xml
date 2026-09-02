@@ -494,6 +494,7 @@
 
     <!-- AppearanceScreen -->
     <string name="appearance_back">Back</string>
+    <string name="appearance_title">Appearance</string>
     <string name="appearance_dark_theme">Dark Theme</string>
     <string name="appearance_accent_color">Accent Color</string>
 
