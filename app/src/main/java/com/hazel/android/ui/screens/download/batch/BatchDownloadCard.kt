@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
+import com.hazel.android.ui.screens.download.BadgeTone
 import com.hazel.android.ui.screens.download.MetaBadge
 
 /**
@@ -168,9 +169,12 @@ fun BatchDownloadCard(
                         if (formatLabel.isNotBlank()) {
                             // Marked when the link carries a choice of its own, so a set
                             // where one link was changed does not look uniform.
-                            MetaBadge(formatLabel.uppercase(), emphasised = isAdjusted)
+                            MetaBadge(
+                                formatLabel.uppercase(),
+                                tone = if (isAdjusted) BadgeTone.SOLID else BadgeTone.NEUTRAL
+                            )
                         }
-                        if (sizeLabel.isNotBlank()) MetaBadge(sizeLabel)
+                        if (sizeLabel.isNotBlank()) MetaBadge(sizeLabel, tone = BadgeTone.SIZE)
                     }
                 }
 

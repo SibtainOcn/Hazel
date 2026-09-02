@@ -7,7 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **A soundtrack can be chosen where a source publishes several.** A row under the quality
+  card names the one the download will take, and tapping it opens the list of what the
+  source actually offers. The choice reaches the download as the track's own id with the
+  engine's language filter behind it, so a track that has since gone is replaced by another
+  in the same language rather than by the original. It is on the single sheet, on the set
+  sheet for a whole run, and in the instant settings as a standing preference; anything that
+  does not carry the chosen language is downloaded with what it has.
+- **A Support screen, reached from More.** It says what the app takes from anyone, which is
+  nothing, and offers the two places money can go alongside the ways of helping that cost
+  none. Everything opens in the in-app browser, so nothing here leaves the app.
+- **The download sheet and the set sheet close with the link and an incognito switch.**
+  Tapping the address copies it and opens it, in the site's own app when that is installed
+  and in the browser otherwise. The switch is the same setting the rest of the app reads,
+  and it says which way it went.
+- **Hazel Instant has its own settings.** Container, filename template, cover art, chapters,
+  subtitles and SponsorBlock are set for the share target itself and kept apart from the
+  sheet's, so a choice made for a download being watched cannot change what an unattended
+  share does with the next link. The screen also says whether saved sign-ins are in use.
+
 ### Changed
+- **The format list was rebuilt.** It opens half way up the screen, each row leads with its
+  container as a block, the quality is the headline with the format id beside it, and what
+  was measured sits under it as pills that scroll rather than wrapping the row into
+  different heights. Rows are laid out once per ordering, which is what makes a fast fling
+  smooth, and the list opens on the row that is currently chosen.
+- **The best row is shown from outside the list.** A source that reports formats no longer
+  gets a synthesised "best" entry mixed in with the real ones: the generic row now only
+  appears where a source listed nothing of that kind, and the sheet shows the best concrete
+  format from the moment it opens, including while the rest are still being read.
+- **The audio tab keeps its own choice.** Each tab holds what it is set to, so switching to
+  audio no longer shows a video resolution, and opening the format list from the audio tab
+  leads with the audio section.
+- **The last ten links are remembered across restarts.** What a read produced is rebuilt
+  from what it wrote, so a link pasted again fills its sheet at once, and a collection opens
+  as the set of cards it opened as last time instead of being walked again.
+- **The dark theme's own container tones.** The search field took Material's dark default,
+  which is derived from a violet neutral and read as a lilac bar across a black screen.
 - **The app opens sooner.** The wait was the launch window and then the splash screen, one
   after the other, with the splash always holding for a fixed 1.4 seconds on top of however
   long the start itself took. The hold is now what is left of a 900 ms budget counted from
@@ -21,6 +58,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   app was still drawing its first screen and took CPU and disk from it. It now starts once
   that screen is up, and still starts on its own for a launch with no UI, such as a
   notification action resuming a download after the process was killed.
+
+### Fixed
+- **Signing in cut the format list down to 360p.** The largest site now answers a signed-in
+  request with a single stream unless it carries a token the app cannot produce. A link is
+  read anonymously first and the sign-in is used only when the media will not open without
+  it, so a public link keeps its full ladder and a private, members-only or age-restricted
+  one still opens. The download asks the same way the read did.
+- **Sign-ins are scoped to the site they were collected on.** One file held every cookie and
+  was sent with every request, so an account on one site was handed to another site's
+  servers. Each site now gets its own, and a site with no saved sign-in is fetched without
+  one.
+- **A finished download could not be opened on older Android versions.** The saved file was
+  recorded under a `file://` address, which the system refuses to pass to another app from
+  Android 7 onwards, so the file was there and the history said it was missing. Files are
+  now handed over as content addresses, a refused direct write falls back to the media
+  index, and anything that cannot be published is kept and offered from where it is rather
+  than recorded as saved somewhere it never reached.
+- **A chosen soundtrack was lost on the way to the download.** A queued item was rebuilt
+  from what was written down for it, and the audio track written down was the source's
+  default, so the file arrived in the original language whatever the sheet had said.
+- **The set card showed a resolution twice.** The measured size was pushed off the end of
+  the row by a headline that repeated what the quality already said.
 
 ## [1.0.2] - 2026-08-31
 

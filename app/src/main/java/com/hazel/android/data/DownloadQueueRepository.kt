@@ -38,6 +38,10 @@ data class QueuedDownload(
     val mergeAudioSelector: String?,
     val mergeAudioSizeBytes: Long,
     val treeUri: String,
+    /** Whether reading this link needed the saved sign-in, which the download needs too. */
+    val requiresSignIn: Boolean = false,
+    /** The soundtrack chosen for it, for a source that published more than one. */
+    val audioLanguage: String? = null,
     /** The settings this link was asked for under, so a later change does not rewrite it. */
     val options: DownloadOptions,
     /**
@@ -143,6 +147,8 @@ object DownloadQueueRepository {
                     put("mergeAudio", item.mergeAudioSelector ?: JSONObject.NULL)
                     put("mergeAudioSize", item.mergeAudioSizeBytes)
                     put("treeUri", item.treeUri)
+                    put("requiresSignIn", item.requiresSignIn)
+                    put("audioLanguage", item.audioLanguage ?: JSONObject.NULL)
                     put("options", encodeOptions(item.options))
                     put("paused", item.paused)
                 }
@@ -181,6 +187,10 @@ object DownloadQueueRepository {
                     },
                     mergeAudioSizeBytes = item.optLong("mergeAudioSize"),
                     treeUri = item.optString("treeUri"),
+                    requiresSignIn = item.optBoolean("requiresSignIn"),
+                    audioLanguage = item.optString("audioLanguage").takeIf {
+                        it.isNotBlank() && it != "null"
+                    },
                     options = decodeOptions(item.optJSONObject("options")),
                     paused = item.optBoolean("paused")
                 )
@@ -254,6 +264,9 @@ fun QueuedDownload.toPlan(): DownloadPlan {
             formatId = it,
             selector = it,
             label = "",
+            // Carries the soundtrack it was chosen for, so looking the track up by
+            // language finds this one rather than falling back to the source's default.
+            language = audioLanguage,
             ext = "",
             vcodec = null,
             acodec = null,
@@ -276,15 +289,20 @@ fun QueuedDownload.toPlan(): DownloadPlan {
         audioFormats = listOfNotNull(
             format.takeIf { !it.hasVideo },
             mergeAudio
-        )
+        ),
+        requiresSignIn = requiresSignIn
     )
 
-    return DownloadPlan(info, format, title, author)
+    return DownloadPlan(info, format, title, author, audioLanguage)
 }
 
 /** What to write down for a link about to be queued. */
 fun DownloadPlan.toQueued(options: DownloadOptions, treeUri: String): QueuedDownload {
-    val mergeAudio = if (format.hasVideo && !format.hasAudio) info.mergeAudio else null
+    // The track for the soundtrack that was chosen, not whichever the source listed
+    // first. A queued item is rebuilt from these fields alone, so a language recorded
+    // here and a track recorded from somewhere else would disagree at download time.
+    val mergeAudio =
+        if (format.hasVideo && !format.hasAudio) info.mergeAudioFor(audioLanguage) else null
     return QueuedDownload(
         url = info.url,
         title = title,
@@ -302,6 +320,8 @@ fun DownloadPlan.toQueued(options: DownloadOptions, treeUri: String): QueuedDown
         mergeAudioSelector = mergeAudio?.selector,
         mergeAudioSizeBytes = mergeAudio?.fileSizeBytes ?: 0L,
         treeUri = treeUri,
+        requiresSignIn = info.requiresSignIn,
+        audioLanguage = audioLanguage,
         options = options
     )
 }

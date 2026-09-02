@@ -45,18 +45,27 @@ object MediaStoreHelper {
     ): File {
         val files = tempDir.listFiles()?.filter { it.isFile } ?: return tempDir
 
+        var leftBehind = false
         for (file in files) {
-            try {
-                if (Build.VERSION.SDK_INT >= 30) {
-                    moveViaMediaStore(context, file, relativePath, isMusic)?.let(onMoved)
-                } else {
-                    moveViaDirect(context, file, relativePath).let(onMoved)
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to move ${file.name}: ${e.message}")
-                // File stays in temp dir, still accessible, just not in public storage
+            val moved = movedUri(context, file, relativePath, isMusic)
+            if (moved != null) {
+                onMoved(moved)
+                continue
             }
+
+            // The move failed, which on older versions usually means the permission that
+            // writes into the user's own folders was refused. The file is finished and
+            // readable where it is, so it is handed back from there rather than reported
+            // as a download that produced nothing.
+            leftBehind = true
+            Log.w(TAG, "Kept ${file.name} in app storage: public move failed")
+            shareableUri(context, file)?.let(onMoved)
         }
+
+        // A run that could not publish everything says where the files actually are, since
+        // the caller writes that into the history and a record pointing at a folder the
+        // file never reached is what makes a finished download look missing.
+        if (leftBehind) return tempDir
 
         // Return the final public directory
         return if (Build.VERSION.SDK_INT >= 30) {
@@ -72,6 +81,47 @@ object MediaStoreHelper {
             File(Environment.getExternalStorageDirectory(), relativePath)
         }
     }
+
+    /**
+     * Publishes one file, by whichever route the platform allows.
+     *
+     * Up to Android 10 a direct write is the quick path and the one that keeps the file
+     * where a file manager expects it. It is not guaranteed: the permission it needs can be
+     * refused, and from Android 10 it depends on legacy storage still being granted. When
+     * it does not work, MediaStore does the same job through the index instead, which needs
+     * no permission at all. Returns null when neither route worked.
+     */
+    private fun movedUri(
+        context: Context,
+        file: File,
+        relativePath: String,
+        isMusic: Boolean
+    ): Uri? {
+        if (Build.VERSION.SDK_INT < 30) {
+            runCatching { moveViaDirect(context, file, relativePath) }
+                .onFailure { Log.w(TAG, "Direct move of ${file.name} failed: ${it.message}") }
+                .getOrNull()
+                ?.let { return it }
+        }
+
+        return runCatching { moveViaMediaStore(context, file, relativePath, isMusic) }
+            .onFailure { Log.w(TAG, "MediaStore move of ${file.name} failed: ${it.message}") }
+            .getOrNull()
+    }
+
+    /**
+     * An address other apps can actually open.
+     *
+     * A `file://` address is refused by the system from Android 7 onwards the moment it
+     * leaves the app, so a download handed to a player that way fails as though the file
+     * were not there. The provider gives out a content address with read access attached,
+     * which is what makes a finished download openable from the history on every version.
+     */
+    private fun shareableUri(context: Context, file: File): Uri? = runCatching {
+        androidx.core.content.FileProvider.getUriForFile(
+            context, "${context.packageName}.fileprovider", file
+        )
+    }.getOrNull()
 
     /**
      * API 30+: Insert file via MediaStore (no MANAGE_EXTERNAL_STORAGE needed).
@@ -180,7 +230,7 @@ object MediaStoreHelper {
                 context, arrayOf(file.absolutePath), arrayOf(getMimeType(file)), null
             )
         }
-        return Uri.fromFile(file)
+        return shareableUri(context, file) ?: Uri.fromFile(file)
     }
 
     /**

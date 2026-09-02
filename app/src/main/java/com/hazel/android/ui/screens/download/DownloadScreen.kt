@@ -702,7 +702,7 @@ fun DownloadScreen(
                 onResetSaveDir = {
                     scope.launch { SettingsRepository.clearDownloadTree(context) }
                 },
-                onDownload = { format, title, author ->
+                onDownload = { format, audioLanguage, title, author ->
                     sheetVisible = false
                     downloadViewModel.startDownload(
                         context = context,
@@ -710,6 +710,7 @@ fun DownloadScreen(
                         options = options,
                         title = title,
                         author = author,
+                        audioLanguage = audioLanguage,
                         treeUri = treeUri
                     )
                 },

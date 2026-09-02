@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.hazel.android.download.SiteAccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -46,6 +47,15 @@ object CookieRepository {
 
     private val USE_COOKIES_KEY = booleanPreferencesKey("use_cookies")
     private val COOKIES_KEY = stringPreferencesKey("cookie_entries")
+
+    /**
+     * The browser identity the last sign-in was made under.
+     *
+     * Recorded because a site issues its cookies to one browser and expects them back from
+     * that same browser. Sending them under the app's own identity is what makes a good
+     * sign-in look like a stranger holding someone else's cookies.
+     */
+    private val USER_AGENT_KEY = stringPreferencesKey("cookie_user_agent")
 
     /** Header yt-dlp expects at the top of a Netscape cookie file. */
     const val FILE_HEADER = "# Netscape HTTP Cookie File\n" +
@@ -161,6 +171,110 @@ object CookieRepository {
         val file = cookieFile(context)
         return file.takeIf { it.exists() && it.length() > 0 }
     }
+
+    /** Records the browser identity a sign-in was collected under. */
+    suspend fun setUserAgent(context: Context, userAgent: String) {
+        context.dataStore.edit { prefs -> prefs[USER_AGENT_KEY] = userAgent }
+    }
+
+    fun getUserAgent(context: Context): Flow<String> =
+        context.dataStore.data.map { prefs -> prefs[USER_AGENT_KEY].orEmpty() }
+
+    /**
+     * The sign-in to send with a fetch of [url], or [SiteAccess.NONE] when nothing saved
+     * covers that site.
+     *
+     * Cookies are scoped to the site they were collected on. One file holding every sign-in
+     * would hand a video site's account cookies to a photo site's servers, which is both a
+     * thing the user never agreed to and a way of making a request look stranger than an
+     * anonymous one. A link to a site with no saved sign-in is fetched without any.
+     *
+     * The single place the rest of the app asks, so a read and the download that follows it
+     * are made under the same identity.
+     */
+    suspend fun accessFor(context: Context, url: String): SiteAccess {
+        if (!getUseCookies(context).first()) return SiteAccess.NONE
+
+        val site = siteKeyOf(hostOf(url)) ?: return SiteAccess.NONE
+        val entries = getEntries(context).first()
+            .filter { it.enabled && it.content.isNotBlank() && covers(it, site) }
+        if (entries.isEmpty()) return SiteAccess.NONE
+
+        val file = writeSiteFile(context, site, entries) ?: return SiteAccess.NONE
+        return SiteAccess(cookieFile = file, userAgent = getUserAgent(context).first())
+    }
+
+    /** Whether a saved sign-in belongs to [site]. */
+    private fun covers(entry: CookieEntry, site: String): Boolean {
+        siteKeyOf(hostOf(entry.url))?.let { return it == site }
+
+        // An imported set names no site, so its own cookies are asked instead. The domain
+        // is the first field of a Netscape line.
+        return entry.content.lineSequence().any { line ->
+            val domain = line.substringBefore('\t').trim().removePrefix(".")
+            domain.isNotBlank() && siteKeyOf(domain) == site
+        }
+    }
+
+    /** The cookie file for one site, written fresh so it always matches the saved list. */
+    private suspend fun writeSiteFile(
+        context: Context,
+        site: String,
+        entries: List<CookieEntry>
+    ): File? = withContext(Dispatchers.IO) {
+        val body = buildString {
+            append(FILE_HEADER)
+            append('\n')
+            entries.forEach { entry ->
+                entry.content.lineSequence().forEach { line ->
+                    if (line.isNotBlank() && !line.startsWith("#")) {
+                        append(line)
+                        append('\n')
+                    }
+                }
+            }
+        }
+
+        val file = File(context.cacheDir, "cookies-$site.txt")
+        runCatching { file.writeText(body) }.getOrNull() ?: return@withContext null
+        file.takeIf { it.length() > 0 }
+    }
+
+    /**
+     * What counts as the same site.
+     *
+     * The registrable domain, with the short forms a site publishes for itself folded into
+     * the name they belong to. Without that, a shortened link looks like a different site
+     * from the one the user signed in to and is fetched as a stranger.
+     */
+    private fun siteKeyOf(url: String): String? {
+        val host = url.takeIf { it.isNotBlank() } ?: return null
+        SITE_ALIASES[host]?.let { return it }
+
+        val registrable = host.split('.').takeLast(2).joinToString(".")
+        return SITE_ALIASES[registrable] ?: registrable.takeIf { it.contains('.') }
+    }
+
+    private fun hostOf(value: String): String {
+        if (value.isBlank()) return ""
+        val withScheme = if ("://" in value) value else "https://$value"
+        return runCatching { java.net.URI(withScheme).host.orEmpty() }
+            .getOrDefault("")
+            .lowercase()
+            .removePrefix("www.")
+    }
+
+    /** Short forms and sister domains, mapped to the site they are part of. */
+    private val SITE_ALIASES = mapOf(
+        "youtu.be" to "youtube.com",
+        "youtube-nocookie.com" to "youtube.com",
+        "instagr.am" to "instagram.com",
+        "x.com" to "twitter.com",
+        "fb.watch" to "facebook.com",
+        "fb.com" to "facebook.com",
+        "vm.tiktok.com" to "tiktok.com",
+        "vt.tiktok.com" to "tiktok.com"
+    )
 
     /** Whole cookie file as text, for copying out. */
     suspend fun exportText(context: Context): String = withContext(Dispatchers.IO) {
