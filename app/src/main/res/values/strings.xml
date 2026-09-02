@@ -187,6 +187,29 @@
     <string name="more_support">Support Hazel</string>
     <string name="more_license">License</string>
 
+    <!-- SponsorScreen -->
+    <string name="sponsor_back">Back</string>
+    <string name="sponsor_title">Support Hazel</string>
+    <string name="sponsor_hero_title">Free, and staying that way</string>
+    <string name="sponsor_hero_body">Hazel is built in evenings and weekends, and it is given away because a downloader that charges for the download is a worse downloader. Sites change constantly, and keeping up with them is the work.</string>
+    <string name="sponsor_hero_closing">If the app saved you an afternoon, anything below puts that time back into it. If it did not, the ways that cost nothing help just as much.</string>
+    <string name="sponsor_section_ways">Ways to support</string>
+    <string name="sponsor_github_title">GitHub Sponsors</string>
+    <string name="sponsor_github_subtitle">Monthly or one off, cancel whenever. Handled entirely by GitHub.</string>
+    <string name="sponsor_kofi_title">Ko-fi</string>
+    <string name="sponsor_kofi_subtitle">A one off, no account needed.</string>
+    <string name="sponsor_kofi_soon">Opening soon</string>
+    <string name="sponsor_section_free">Costs nothing, helps as much</string>
+    <string name="sponsor_star_title">Star the project</string>
+    <string name="sponsor_star_subtitle">The one number people look at before trying an app.</string>
+    <string name="sponsor_share_title">Tell someone about it</string>
+    <string name="sponsor_share_subtitle">Word of mouth is the whole of this app\'s marketing.</string>
+    <string name="sponsor_issues_title">Report what breaks</string>
+    <string name="sponsor_issues_subtitle">A site that stopped working is a fix nobody else can write.</string>
+    <string name="sponsor_source_title">Read the source</string>
+    <string name="sponsor_source_subtitle">Every line of it is public, and pull requests are welcome.</string>
+    <string name="sponsor_footer">No advertisements, nothing measured about what you download, and no feature held back for anyone. Support changes how much time goes into Hazel, not what it will do for you.</string>
+
     <!-- UpdateScreen -->
     <string name="update_title">yt-dlp Update</string>
     <string name="update_back">Back</string>
