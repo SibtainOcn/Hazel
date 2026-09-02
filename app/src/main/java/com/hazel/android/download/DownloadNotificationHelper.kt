@@ -77,7 +77,8 @@ object DownloadNotificationHelper {
                 CHANNEL_PROGRESS, "Download Progress",
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Download progress, shows icon in status bar"
+                description =
+                    context.getString(R.string.notification_channel_progress_description)
                 setShowBadge(false)
                 setSound(null, null)
                 enableVibration(false)
@@ -89,7 +90,8 @@ object DownloadNotificationHelper {
                 CHANNEL_COMPLETE, "Download Complete",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Download completion alerts"
+                description =
+                    context.getString(R.string.notification_channel_complete_description)
                 setShowBadge(true)
             }
             mgr.createNotificationChannel(completeChannel)
@@ -236,12 +238,12 @@ object DownloadNotificationHelper {
             // the card: hold it, or give it up.
             .addAction(
                 R.drawable.ic_notification_pause,
-                "Pause",
+                context.getString(R.string.notification_action_pause),
                 actionIntent(context, DownloadActionReceiver.ACTION_PAUSE, REQUEST_PAUSE)
             )
             .addAction(
                 R.drawable.ic_notification_cancel,
-                "Cancel",
+                context.getString(R.string.notification_action_cancel),
                 actionIntent(context, DownloadActionReceiver.ACTION_CANCEL, REQUEST_CANCEL)
             )
     }
@@ -362,12 +364,12 @@ object DownloadNotificationHelper {
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .addAction(
                 R.drawable.ic_notification_resume,
-                "Resume",
+                context.getString(R.string.notification_action_resume),
                 actionIntent(context, DownloadActionReceiver.ACTION_RESUME, REQUEST_RESUME)
             )
             .addAction(
                 R.drawable.ic_notification_cancel,
-                "Cancel",
+                context.getString(R.string.notification_action_cancel),
                 actionIntent(context, DownloadActionReceiver.ACTION_CANCEL, REQUEST_CANCEL)
             )
 
@@ -532,7 +534,7 @@ object DownloadNotificationHelper {
         if (signInUrl != null) {
             builder.addAction(
                 0,
-                "Sign in",
+                context.getString(R.string.notification_action_sign_in),
                 PendingIntent.getActivity(
                     context,
                     2,

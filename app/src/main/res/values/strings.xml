@@ -459,6 +459,13 @@
 
     <!-- Download notifications -->
     <string name="notification_cancelled_text">Download cancelled</string>
+    <!-- Names the progress channel in the system notification settings. -->
+    <string name="notification_channel_progress_description">Download progress, shows icon in status bar</string>
+    <string name="notification_channel_complete_description">Download completion alerts</string>
+    <string name="notification_action_pause">Pause</string>
+    <string name="notification_action_resume">Resume</string>
+    <string name="notification_action_cancel">Cancel</string>
+    <string name="notification_action_sign_in">Sign in</string>
     <string name="notification_wifi_title">Waiting for Wi-Fi</string>
     <string name="notification_wifi_text">Downloads are set to Wi-Fi only. They start when you are back on Wi-Fi.</string>
 
