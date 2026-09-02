@@ -356,7 +356,7 @@ fun HistoryScreen() {
                                 presence[entry.id] = false
                                 Toast.makeText(
                                     context,
-                                    "This file is no longer on your device",
+                                    context.getString(R.string.history_toast_file_gone),
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
