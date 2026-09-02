@@ -503,6 +503,37 @@
     <string name="direct_share_save_as">Save as</string>
     <string name="direct_share_video">Video</string>
     <string name="direct_share_audio_only">Audio only</string>
+    <string name="direct_share_title">Hazel Instant</string>
+    <string name="direct_share_intro">Sharing a link to Hazel Instant starts the download straight away, with no sheet and no questions. These are the answers it uses.</string>
+    <string name="direct_share_video_description">Picture and sound, muxed into one file.</string>
+    <string name="direct_share_audio_description">Sound alone, at the best the source offers.</string>
+    <string name="direct_share_quality_title">Quality limit</string>
+    <string name="direct_share_quality_description">A ceiling, not an exact size. Sources do not all offer the same heights, so the tallest that fits under this is taken, and the smallest available when nothing does.</string>
+    <string name="direct_share_output_title">Output</string>
+    <string name="direct_share_output_description">The file that lands on the device. Default keeps whatever the source already provides, which is the fastest of the options because nothing is re-encoded.</string>
+    <string name="direct_share_filename_template">Filename template</string>
+    <string name="direct_share_audio_language">Audio language</string>
+    <string name="direct_share_audio_language_default">Source default</string>
+    <string name="direct_share_extras_title">Extras</string>
+    <string name="direct_share_extras_description">Applied when the source has them. Anything it does not have is skipped for that download rather than failing it.</string>
+    <string name="direct_share_cover_art">Cover art</string>
+    <string name="direct_share_cover_art_description">Writes the thumbnail into the file, where the container can carry one.</string>
+    <string name="direct_share_chapters">Chapters</string>
+    <string name="direct_share_subtitles">Subtitles</string>
+    <string name="direct_share_sponsorblock">SponsorBlock</string>
+    <string name="direct_share_sponsorblock_off">Off</string>
+    <!-- How many SponsorBlock categories are being cut. %1$d is the number of them. -->
+    <plurals name="direct_share_sponsorblock_cut">
+        <item quantity="one">%1$d category cut</item>
+        <item quantity="other">%1$d categories cut</item>
+    </plurals>
+    <string name="direct_share_signins_title">Sign-ins</string>
+    <string name="direct_share_signins_description">An instant share uses the saved cookies for whatever site the link belongs to, the same as a download started from the sheet. Nothing is asked at share time, so a link behind a login only works if the sign-in is already saved and switched on.</string>
+    <string name="direct_share_cookies">Cookies</string>
+    <string name="direct_share_cookies_on">On, used for every instant share</string>
+    <string name="direct_share_cookies_off">Off</string>
+    <!-- Spoken by the screen reader on a row that opens a picker. %1$s is the row's label. -->
+    <string name="direct_share_change">Change %1$s</string>
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Back</string>
