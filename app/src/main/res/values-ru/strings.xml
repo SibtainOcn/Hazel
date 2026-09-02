@@ -1,0 +1,580 @@
+<resources>
+    <string name="direct_share_label">Мгновенно</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Главная</string>
+    <string name="nav_history">Загрузки</string>
+    <string name="nav_more">Ещё</string>
+    <string name="nav_incognito_on">Инкогнито включено, загрузки не сохраняются</string>
+    <string name="nav_incognito_off">Инкогнито выключено</string>
+
+    <!-- DownloadScreen -->
+    <string name="download_search_hint">Поиск или вставка URL</string>
+    <string name="download_clear">Очистить</string>
+    <string name="download_show_large_artwork">Крупные обложки</string>
+    <string name="download_show_list">Показать списком</string>
+    <string name="download_instant_source">Мгновенно · чтение из %1$s</string>
+    <string name="download_incognito_title">Режим инкогнито</string>
+    <string name="download_incognito_body">Загрузки не добавляются в историю, а ссылки не запоминаются. Сами файлы сохраняются как обычно.</string>
+    <string name="download_download_all">Скачать всё</string>
+    <string name="download_saved_aside">Загрузки сохранены. Их можно найти во вкладке «Загрузки».</string>
+    <string name="download_options">Параметры загрузки</string>
+    <string name="download_pause">Пауза</string>
+    <string name="download_resume">Продолжить</string>
+    <string name="download_cancel">Отмена</string>
+    <string name="download_paused">Приостановлено</string>
+    <string name="download_processing">Обработка</string>
+    <string name="download_waiting_wifi">Ожидание Wi-Fi</string>
+    <string name="download_saved">Сохранено</string>
+    <string name="download_queued">В очереди</string>
+    <string name="download_downloaded">Загружено</string>
+    <string name="download_failed">Ошибка</string>
+    <string name="download_remove_link">Удалить ссылку</string>
+    <string name="download_cancel_action">Отменить загрузку</string>
+    <string name="download_resume_action">Возобновить загрузку</string>
+    <plurals name="download_links">
+        <item quantity="one">%d ссылка</item>
+        <item quantity="few">%d ссылки</item>
+        <item quantity="many">%d ссылок</item>
+        <item quantity="other">%d ссылок</item>
+    </plurals>
+
+    <!-- SearchScreen -->
+    <string name="search_hint">Поиск или вставка URL</string>
+    <string name="search_back">Назад</string>
+    <string name="search_more">Ещё</string>
+    <string name="search_add_link">Добавить ещё ссылку</string>
+    <string name="search_clear">Очистить</string>
+    <string name="search_clear_results">Очистить результаты</string>
+    <string name="search_clear_history">Очистить историю поиска</string>
+    <string name="search_empty_history">Здесь появятся использованные ссылки</string>
+    <string name="search_no_matches">Нет подходящих ссылок</string>
+    <string name="search_remove">Удалить</string>
+    <string name="search_all">Искать везде</string>
+    <string name="search_forget">Забыть</string>
+    <string name="search_edit_before">Изменить перед поиском</string>
+    <string name="search_paste_and_fetch">Вставить и загрузить</string>
+    <string name="search_nothing_to_paste">Буфер обмена пуст</string>
+
+    <!-- AlreadyDownloadedDialog -->
+    <string name="already_downloaded_title">Уже загружено</string>
+    <string name="already_downloaded_body">Эта ссылка уже сохранена на этом устройстве.</string>
+    <string name="already_downloaded_video">Видео</string>
+    <string name="already_downloaded_audio">Аудио</string>
+    <string name="already_downloaded_keep">Оставить</string>
+    <string name="already_downloaded_play">Воспроизвести</string>
+    <string name="already_downloaded_download_again">Скачать снова</string>
+    <string name="already_downloaded_just_now">Только что</string>
+    <string name="already_downloaded_yesterday">Вчера</string>
+    <plurals name="already_downloaded_minutes">
+        <item quantity="one">%d мин</item>
+        <item quantity="few">%d мин</item>
+        <item quantity="many">%d мин</item>
+        <item quantity="other">%d мин</item>
+    </plurals>
+    <plurals name="already_downloaded_hours">
+        <item quantity="one">%d ч</item>
+        <item quantity="few">%d ч</item>
+        <item quantity="many">%d ч</item>
+        <item quantity="other">%d ч</item>
+    </plurals>
+    <plurals name="already_downloaded_days">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дней</item>
+    </plurals>
+    <plurals name="already_downloaded_months">
+        <item quantity="one">%d мес.</item>
+        <item quantity="few">%d месяца</item>
+        <item quantity="many">%d месяцев</item>
+        <item quantity="other">%d месяцев</item>
+    </plurals>
+
+    <!-- NoResultsDialog -->
+    <string name="no_results_sign_in_title">Требуется вход</string>
+    <string name="no_results_error_title">Не удалось прочитать ссылку</string>
+    <string name="no_results_sign_in_body">Для доступа требуется аккаунт. Вход сохранит файлы cookie сайта и повторит попытку.</string>
+    <string name="no_results_continue_body">Не удалось прочитать сведения, но сама загрузка может сработать. Продолжение загрузит наилучшее доступное качество.</string>
+    <string name="no_results_refused_body">Источник отклонил запрос.</string>
+    <string name="no_results_engine_report">Отчёт движка</string>
+    <string name="no_results_copy_log">Копировать журнал</string>
+    <string name="no_results_sign_in">Войти</string>
+    <string name="no_results_try_anyway">Всё равно попробовать</string>
+    <string name="no_results_close">Закрыть</string>
+
+    <!-- UserGuideDialog -->
+    <string name="guide_title">Начало работы</string>
+    <string name="guide_step_paste_link">Вставьте ссылку в поле поиска, чтобы скачать её. Можно добавлять несколько ссылок и плейлисты</string>
+    <string name="guide_step_pick_format">Нажмите на карточку для выбора точного формата. Все доступные варианты перечислены с размером и кодеком.</string>
+    <string name="guide_step_share_instant">Поделитесь ссылкой в Hazel Мгновенно из любого приложения для быстрой загрузки с заданным качеством.</string>
+    <string name="guide_step_finished_downloads">Готовые файлы появляются в «Загрузках». Нажмите на строку, чтобы открыть файл в проигрывателе по умолчанию.</string>
+    <string name="guide_step_battery_unrestricted">Установите работу от батареи без ограничений, иначе Android может остановить загрузку при выходе из приложения.</string>
+    <string name="guide_battery_settings">Настройки батареи</string>
+    <string name="guide_close">Закрыть</string>
+
+    <!-- FormatSheet -->
+    <string name="format_sheet_title">Загрузка</string>
+    <string name="format_sheet_subtitle">Настроить загрузку</string>
+    <string name="format_sheet_play">Воспроизвести</string>
+    <string name="format_sheet_ok">ОК</string>
+    <string name="format_sheet_download">Скачать</string>
+    <string name="format_sheet_tab_audio">Аудио</string>
+    <string name="format_sheet_tab_video">Видео</string>
+    <string name="format_sheet_label_title">Название</string>
+    <string name="format_sheet_label_author">Автор</string>
+    <string name="format_sheet_label_container">Контейнер</string>
+    <string name="format_sheet_video_quality">Качество видео</string>
+    <string name="format_sheet_audio_quality">Качество аудио</string>
+    <string name="format_sheet_no_video_stream">У этого источника нет отдельного видеопотока.</string>
+    <string name="format_sheet_no_audio_stream">У этого источника нет отдельного аудиопотока.</string>
+    <string name="format_sheet_adjust_video">Настроить видео</string>
+    <string name="format_sheet_adjust_audio">Настроить аудио</string>
+    <string name="format_sheet_thumbnail">Обложка</string>
+    <string name="format_sheet_chapters">Разделы</string>
+    <string name="format_sheet_subtitles">Субтитры</string>
+    <string name="format_sheet_sponsorblock">SponsorBlock</string>
+    <string name="format_sheet_audio_language">Язык аудио</string>
+    <string name="format_sheet_change_audio_language">Сменить язык аудио</string>
+    <string name="format_sheet_filename_template">Шаблон имени файла</string>
+    <string name="format_sheet_change_field">Изменить</string>
+    <string name="format_sheet_save_dir">Папка сохранения</string>
+    <string name="format_sheet_save_location">Место сохранения</string>
+    <string name="format_sheet_save_location_title">Место сохранения</string>
+    <string name="format_sheet_save_location_body">Откройте эту папку в файловом менеджере или выберите другую для сохранения загрузок.</string>
+    <string name="format_sheet_open_folder">Открыть папку</string>
+    <string name="format_sheet_reset">Сбросить</string>
+    <string name="format_sheet_change">Изменить</string>
+
+    <!-- ConverterScreen -->
+    <string name="converter_label_convert_to">Конвертировать в</string>
+    <string name="converter_label_saved_to">Сохранено в</string>
+    <string name="converter_hazel_storage">Хранилище Hazel</string>
+    <string name="converter_storage_warning">Без доступа к памяти файл останется внутри Hazel, и другие приложения не увидят его.</string>
+    <string name="converter_back">Назад</string>
+    <string name="converter_title">Офлайн-конвертер</string>
+    <string name="converter_subtitle">Видео в аудио, всё происходит на устройстве</string>
+    <string name="converter_choose_video">Выберите видеофайл</string>
+    <string name="converter_ready">Готово</string>
+    <string name="converter_choose_video_hint">Любой файл на телефоне или SD-карте</string>
+    <string name="converter_change">Изменить</string>
+    <string name="converter_converting">Конвертация</string>
+    <string name="converter_convert">Конвертировать</string>
+    <string name="converter_saved">Сохранено</string>
+    <string name="converter_open_folder">Открыть папку</string>
+    <string name="converter_convert_another">Конвертировать ещё</string>
+    <string name="converter_error_title">Конвертация не удалась</string>
+    <string name="converter_dismiss">Закрыть</string>
+    <string name="converter_save_as_title">Сохранить как</string>
+    <string name="converter_save_as_body">Задаёт имя файла и записывается в тег заголовка.</string>
+    <string name="converter_label_name">Имя</string>
+    <string name="converter_start">Начать</string>
+    <string name="converter_format_sheet_title">Конвертировать в</string>
+    <string name="converter_heading_common">Три основных формата</string>
+    <string name="converter_heading_other">Все остальные</string>
+
+    <!-- MoreScreen -->
+    <string name="more_title">Ещё</string>
+    <string name="more_battery_title">Фоновые загрузки</string>
+    <string name="more_battery_body">Загрузки продолжаются в фоновом режиме. Некоторые устройства могут прерывать их для экономии батареи. Разрешите работу без ограничений, чтобы избежать этого.</string>
+    <string name="more_downloads">Загрузки</string>
+    <string name="more_appearance">Внешний вид</string>
+    <string name="more_language">Язык</string>
+    <string name="more_cookies">Файлы cookie</string>
+    <string name="more_link_reading">Чтение ссылок</string>
+    <string name="more_hazel_instant">Hazel Мгновенно</string>
+    <string name="more_temporary_files">Временные файлы</string>
+    <string name="more_converter">Офлайн-конвертер видео в аудио</string>
+    <string name="more_engine_update">Обновление движка yt-dlp</string>
+    <string name="more_support">Поддержать Hazel</string>
+    <string name="more_license">Лицензия</string>
+
+    <!-- SponsorScreen -->
+    <string name="sponsor_back">Назад</string>
+    <string name="sponsor_title">Поддержать Hazel</string>
+    <string name="sponsor_hero_title">Бесплатно и навсегда</string>
+    <string name="sponsor_hero_body">Hazel создаётся по вечерам и выходным. Приложение остаётся бесплатным, ведь платный загрузчик только хуже. Сайты постоянно меняются, и адаптация к ним требует времени.</string>
+    <string name="sponsor_hero_closing">Если приложение сэкономило вам время, любая поддержка поможет его развитию. Если нет, бесплатные способы поддержать проект помогут ничуть не меньше.</string>
+    <string name="sponsor_section_ways">Способы поддержки</string>
+    <string name="sponsor_github_title">GitHub Sponsors</string>
+    <string name="sponsor_github_subtitle">Ежемесячно или единоразово, с возможностью отмены в любой момент. Всё обрабатывается через GitHub.</string>
+    <string name="sponsor_kofi_title">Ko-fi</string>
+    <string name="sponsor_kofi_subtitle">Разовый платёж без обязательной регистрации.</string>
+    <string name="sponsor_kofi_soon">Скоро появится</string>
+    <string name="sponsor_section_free">Бесплатно и столь же полезно</string>
+    <string name="sponsor_star_title">Поставить звезду проекту</string>
+    <string name="sponsor_star_subtitle">Главный показатель, на который обращают внимание перед установкой.</string>
+    <string name="sponsor_share_title">Рассказать другим</string>
+    <string name="sponsor_share_subtitle">Рекомендации пользователей — единственный способ распространения приложения.</string>
+    <string name="sponsor_issues_title">Сообщить об ошибке</string>
+    <string name="sponsor_issues_subtitle">Если сайт перестал работать, никто кроме вас не сможет об этом сообщить.</string>
+    <string name="sponsor_source_title">Посмотреть исходный код</string>
+    <string name="sponsor_source_subtitle">Каждая строка кода открыта, а предложения изменений приветствуются.</string>
+    <string name="sponsor_footer">Без рекламы, без сбора данных о загрузках и без ограничений функционала. Поддержка влияет лишь на то, сколько времени уделяется Hazel, но не меняет возможности приложения для вас.</string>
+
+    <!-- UpdateScreen -->
+    <string name="update_title">Обновление yt-dlp</string>
+    <string name="update_back">Назад</string>
+    <string name="update_check_action">Проверить обновления</string>
+    <string name="update_status_up_to_date">Установлена последняя версия</string>
+    <string name="update_status_checking">Проверка обновлений...</string>
+    <string name="update_status_available">Доступно обновление</string>
+    <string name="update_status_installing">Установка yt-dlp...</string>
+    <string name="update_status_installed">Движок обновлён</string>
+    <string name="update_status_failed">Ошибка обновления</string>
+    <string name="update_subtitle_idle">Hazel использует актуальную сборку yt-dlp</string>
+    <string name="update_subtitle_checking">Подключение к GitHub...</string>
+    <string name="update_subtitle_available">Доступна версия yt-dlp %1$s</string>
+    <string name="update_subtitle_updating">Загрузка yt-dlp %1$s</string>
+    <string name="update_subtitle_installed">Используется yt-dlp %1$s</string>
+    <string name="update_installed_version">Установленная версия</string>
+    <string name="update_version_unknown">Неизвестно</string>
+    <string name="update_new_version">Новая версия</string>
+    <string name="update_installing_binary">Установка исполняемого файла</string>
+    <string name="update_installing_body">Загрузка с GitHub и замена движка. Не закрывайте приложение.</string>
+    <string name="update_action_update_now">Обновить сейчас</string>
+    <string name="update_action_installing">Установка...</string>
+    <string name="update_action_done">Готово</string>
+    <string name="update_action_retry">Повторить</string>
+    <string name="update_action_check">Проверить обновления</string>
+    <string name="update_action_checking">Проверка...</string>
+    <string name="update_info_heading">Информация</string>
+    <string name="update_info_component">Компонент</string>
+    <string name="update_info_repository">Репозиторий</string>
+    <string name="update_info_binary_size">Размер файла</string>
+    <string name="update_info_distribution">Дистрибутив</string>
+    <string name="update_info_github_releases">Релизы GitHub</string>
+    <string name="update_release_channel">Канал обновлений</string>
+    <string name="update_view_changelog">Список изменений</string>
+
+    <!-- DownloadOptionDialogs -->
+    <string name="options_sponsorblock_title">Фильтрация SponsorBlock</string>
+    <string name="options_sponsorblock_ok">ОК</string>
+    <string name="options_sponsorblock_cancel">Отмена</string>
+    <string name="options_chapters_title">Разделы</string>
+    <string name="options_chapters_in_videos">Разделы в видео</string>
+    <string name="options_chapters_split">Разделить по разделам</string>
+    <string name="options_chapters_split_body">Разделение сохраняет каждый раздел в отдельный файл вместо одного общего.</string>
+    <string name="options_chapters_dismiss">Закрыть</string>
+    <string name="options_subtitles_title">Субтитры</string>
+    <string name="options_subtitles_embed">Встроить субтитры</string>
+    <string name="options_subtitles_save">Сохранить субтитры</string>
+    <string name="options_subtitles_save_auto">Сохранять автосубтитры</string>
+    <string name="options_subtitles_languages_label">Языки субтитров</string>
+    <string name="options_subtitles_dismiss">Закрыть</string>
+    <string name="options_subtitles_languages_title">Языки субтитров</string>
+    <string name="options_subtitles_languages_hint">Селектор языков yt-dlp, например en.*,.*-orig для английского и оригинальной дорожки. Используйте all для всех доступных языков.</string>
+    <string name="options_filename_title">Шаблон имени файла</string>
+    <string name="options_filename_hint">Шаблон вывода yt-dlp. Используйте %(title)s, %(uploader)s, %(id)s и %(ext)s.</string>
+    <string name="options_text_input_save">Сохранить</string>
+    <string name="options_text_input_cancel">Отмена</string>
+
+    <!-- StorageCleanupScreen -->
+    <string name="cleanup_back">Назад</string>
+    <string name="cleanup_title">Временные файлы</string>
+    <string name="cleanup_header_description">Рабочие файлы приложения. Ваши загрузки не входят сюда и никогда отсюда не удаляются.</string>
+    <string name="cleanup_action_clear_everything">Очистить всё</string>
+    <string name="cleanup_category_link_data_label">Кэш данных о ссылках</string>
+    <string name="cleanup_category_link_data_description">Данные плеера yt-dlp для ускорения повторного чтения ссылок. Можно безопасно очистить.</string>
+    <string name="cleanup_category_partial_downloads_label">Незавершённые загрузки</string>
+    <string name="cleanup_category_partial_downloads_description">Фрагменты отменённых или прерванных загрузок до сохранения файла.</string>
+    <string name="cleanup_category_conversions_label">Незавершённые конвертации</string>
+    <string name="cleanup_category_conversions_description">Рабочие файлы конвертера аудио, которые не были перенесены в папку музыки.</string>
+    <string name="cleanup_category_engine_label">Файлы движка yt-dlp</string>
+    <string name="cleanup_category_engine_description">Загрузчик и среда его выполнения. Очистка освобождает больше всего места, но при следующей загрузке потребуется их распаковка.</string>
+    <string name="cleanup_category_other_cache_label">Прочий кэш</string>
+    <string name="cleanup_category_other_cache_description">Обложки и другие файлы, кэшированные при просмотре ссылок.</string>
+    <string name="cleanup_confirm_category_title">Очистить эти файлы?</string>
+    <string name="cleanup_confirm_category_safe">Будет освобождено %1$s. Сохранённые файлы не будут затронуты.</string>
+    <string name="cleanup_confirm_category_unsafe">Будет освобождено %1$s; следующая загрузка займёт больше времени из-за повторной распаковки.</string>
+    <string name="cleanup_confirm_clear">Очистить</string>
+    <string name="cleanup_confirm_cancel">Отмена</string>
+    <string name="cleanup_confirm_all_title">Очистить всё?</string>
+    <string name="cleanup_confirm_all_body">Будет освобождено %1$s. Загрузки и сохранённые сеансы входа сохранятся, но следующая загрузка займёт больше времени из-за повторной распаковки движка.</string>
+    <string name="cleanup_confirm_all_confirm">Очистить всё</string>
+    <string name="cleanup_confirm_all_cancel">Отмена</string>
+
+    <!-- HistoryScreen -->
+    <string name="history_title">Загрузки</string>
+    <string name="history_layout_grid">Крупные обложки</string>
+    <string name="history_layout_list">Показать списком</string>
+    <string name="history_search_action">Поиск загрузок</string>
+    <string name="history_sort_action">Сортировка</string>
+    <string name="history_menu_action">Ещё</string>
+    <string name="history_menu_clear">Очистить историю</string>
+    <string name="history_search_placeholder">Поиск загрузок</string>
+    <string name="history_search_clear">Очистить поиск</string>
+    <string name="history_empty_initial">Пока ничего не загружено</string>
+    <string name="history_empty_filtered">Ничего не найдено</string>
+    <string name="history_clear_dialog_title">Очистить историю</string>
+    <string name="history_clear_dialog_body">Список будет очищен. Загруженные файлы останутся на месте.</string>
+    <string name="history_clear_dialog_confirm">Очистить</string>
+    <string name="history_clear_dialog_cancel">Отмена</string>
+    <string name="history_delete_dialog_title">Удалить файл</string>
+    <string name="history_delete_dialog_body">Файл %1$s будет удалён с вашего устройства.</string>
+    <string name="history_toast_file_deleted">Файл удалён</string>
+    <string name="history_toast_file_delete_failed">Не удалось удалить файл</string>
+    <string name="history_delete_dialog_confirm">Удалить</string>
+    <string name="history_delete_dialog_cancel">Отмена</string>
+    <string name="history_card_options">Параметры</string>
+    <string name="history_card_properties">Свойства</string>
+    <string name="history_card_remove">Удалить из списка</string>
+    <string name="history_card_delete">Удалить файл</string>
+    <string name="history_tag_deleted">Удалено</string>
+    <string name="history_row_options">Параметры</string>
+    <string name="history_row_properties">Свойства</string>
+    <string name="history_row_remove">Удалить из списка</string>
+    <string name="history_row_delete">Удалить файл</string>
+    <string name="history_toast_file_gone">Этот файл больше не найден на устройстве</string>
+
+    <!-- DownloadPropertiesSheet -->
+    <string name="properties_title">Свойства</string>
+    <string name="properties_status">Статус</string>
+    <string name="properties_status_present">На этом устройстве</string>
+    <string name="properties_status_deleted">Удалено с устройства</string>
+    <string name="properties_kind">Тип</string>
+    <string name="properties_kind_video">Видео</string>
+    <string name="properties_kind_audio">Аудио</string>
+    <string name="properties_quality">Качество</string>
+    <string name="properties_resolution">Разрешение</string>
+    <string name="properties_length">Длительность</string>
+    <string name="properties_codec">Кодек</string>
+    <string name="properties_bitrate">Битрейт</string>
+    <string name="properties_bitrate_value">%1$d кбит/с</string>
+    <string name="properties_size">Размер</string>
+    <string name="properties_container">Контейнер</string>
+    <string name="properties_type">Формат</string>
+    <string name="properties_embedded">Встроено</string>
+    <string name="properties_file">Файл</string>
+    <string name="properties_saved_to">Сохранено в</string>
+    <string name="properties_downloaded">Загружено</string>
+    <string name="properties_source">Источник</string>
+    <string name="properties_link_copied_opened">Ссылка скопирована и открыта</string>
+    <string name="properties_link_copied">Ссылка скопирована</string>
+
+    <!-- CookiesScreen -->
+    <string name="cookies_back">Назад</string>
+    <string name="cookies_title">Файлы cookie</string>
+    <string name="cookies_menu">Ещё</string>
+    <string name="cookies_menu_import">Импортировать из буфера</string>
+    <string name="cookies_menu_export">Экспортировать в буфер</string>
+    <string name="cookies_menu_delete_all">Удалить все</string>
+    <string name="cookies_imported_title">Импортированные cookie</string>
+    <string name="cookies_toast_imported">Cookie импортированы</string>
+    <string name="cookies_toast_no_data">В буфере обмена нет данных cookie</string>
+    <string name="cookies_toast_nothing_to_export">Нечего экспортировать</string>
+    <string name="cookies_toast_exported">Скопировано в буфер обмена</string>
+    <string name="cookies_toast_entry_copied">Скопировано в буфер обмена</string>
+    <string name="cookies_use_title">Использовать cookie</string>
+    <string name="cookies_use_description">Передавать сохранённые данные входа загрузчику</string>
+    <string name="cookies_new">Новые cookie</string>
+    <string name="cookies_empty_title">Нет сохранённых cookie</string>
+    <string name="cookies_empty_body">Добавьте их для загрузки материалов с возрастным ограничением, приватных или доступных только спонсорам.</string>
+    <string name="cookies_delete_title">Удалить cookie</string>
+    <string name="cookies_delete_body">Удалить сохранённые данные входа для %1$s?</string>
+    <string name="cookies_delete_confirm">Удалить</string>
+    <string name="cookies_delete_cancel">Отмена</string>
+    <string name="cookies_delete_all_title">Удалить все cookie</string>
+    <string name="cookies_delete_all_body">Все сохранённые сеансы входа будут удалены. Это действие нельзя отменить.</string>
+    <string name="cookies_delete_all_confirm">Удалить все</string>
+    <string name="cookies_delete_all_cancel">Отмена</string>
+    <string name="cookies_row_fallback_name">Cookie</string>
+    <string name="cookies_sheet_title">Файлы cookie</string>
+    <string name="cookies_sheet_copy">Копировать cookie</string>
+    <string name="cookies_sheet_delete">Удалить cookie</string>
+    <string name="cookies_field_title">Название</string>
+    <string name="cookies_field_url">URL</string>
+    <string name="cookies_sheet_save">Сохранить</string>
+    <string name="cookies_sheet_get">Получить cookie</string>
+    <string name="cookies_sheet_update">Обновить</string>
+
+    <!-- Batch option sheets -->
+    <string name="batch_quality_best">Наилучшее качество</string>
+    <string name="batch_type_sheet_title">Предпочтительный тип загрузки</string>
+    <string name="batch_type_sheet_subtitle">В каком виде сохранять эти ссылки</string>
+    <string name="batch_type_audio">Аудио</string>
+    <string name="batch_type_video">Видео</string>
+    <string name="batch_format_title">Формат</string>
+    <string name="batch_format_subtitle">Выберите формат</string>
+    <string name="batch_container_title">Контейнер</string>
+    <string name="batch_container_subtitle">Формат файла для сохранения ссылок</string>
+    <string name="batch_save_dir_title">Место сохранения</string>
+    <string name="batch_open_folder">Открыть эту папку</string>
+    <string name="batch_change_folder">Сменить папку</string>
+
+    <!-- Batch action bar -->
+    <string name="batch_bar_thumbnail">Обложка</string>
+    <string name="batch_bar_chapters">Разделы</string>
+    <string name="batch_bar_subtitles">Субтитры</string>
+    <string name="batch_bar_sponsorblock">SponsorBlock</string>
+    <string name="batch_bar_filename_template">Шаблон имени файла</string>
+    <string name="batch_bar_download_type">Предпочтительный тип загрузки</string>
+    <string name="batch_bar_quality">Качество: %1$s</string>
+    <string name="batch_bar_save_location">Место сохранения</string>
+    <string name="batch_bar_container">Контейнер</string>
+
+    <!-- Batch download sheet -->
+    <string name="batch_header_title">Загрузка</string>
+    <string name="batch_header_subtitle">Настроить загрузку</string>
+    <string name="batch_download_action">Скачать</string>
+    <string name="batch_stop_selecting">Завершить выбор</string>
+    <string name="batch_start_selecting">Выбрать ссылки</string>
+    <string name="batch_list_options">Параметры списка</string>
+    <string name="batch_menu_select_links">Выбрать ссылки</string>
+    <string name="batch_menu_select_all">Выбрать все</string>
+    <string name="batch_menu_invert">Инвертировать выбор</string>
+    <string name="batch_menu_remove_selected">Удалить выбранные</string>
+    <string name="batch_menu_done">Готово</string>
+    <plurals name="batch_selected">
+        <item quantity="one">%d выбран</item>
+        <item quantity="few">%d выбрано</item>
+        <item quantity="many">%d выбрано</item>
+        <item quantity="other">%d выбрано</item>
+    </plurals>
+    <plurals name="batch_links">
+        <item quantity="one">%d ссылка</item>
+        <item quantity="few">%d ссылки</item>
+        <item quantity="many">%d ссылок</item>
+        <item quantity="other">%d ссылок</item>
+    </plurals>
+    <string name="batch_card_download_type">Тип загрузки для этой ссылки</string>
+    <string name="batch_card_remove">Удалить</string>
+
+    <!-- Opening a finished file -->
+    <string name="media_open_unknown_location">Расположение этого файла неизвестно</string>
+    <string name="media_open_chooser">Открыть с помощью</string>
+    <string name="media_open_no_app">На этом устройстве нет подходящего приложения</string>
+
+    <!-- Download notifications -->
+    <string name="notification_cancelled_text">Загрузка отменена</string>
+    <string name="notification_channel_progress_description">Прогресс загрузки, отображает значок в строке состояния</string>
+    <string name="notification_channel_complete_description">Оповещения о завершении загрузки</string>
+    <string name="notification_action_pause">Пауза</string>
+    <string name="notification_action_resume">Продолжить</string>
+    <string name="notification_action_cancel">Отмена</string>
+    <string name="notification_action_sign_in">Войти</string>
+    <string name="notification_wifi_title">Ожидание Wi-Fi</string>
+    <string name="notification_wifi_text">Загрузки настроены только по Wi-Fi. Они начнутся при подключении к Wi-Fi.</string>
+
+    <!-- Sign-in web view -->
+    <string name="cookie_webview_close">Закрыть</string>
+    <string name="cookie_webview_desktop_site">Версия для ПК</string>
+    <string name="cookie_webview_no_cookies">Файлы cookie не были получены</string>
+    <string name="cookie_webview_done">"  ОК"</string>
+
+    <!-- FormatSelectionSheet -->
+    <string name="format_selection_sort">Сортировка форматов</string>
+    <string name="format_selection_change">Сменить формат</string>
+    <string name="format_selection_title">Формат</string>
+    <string name="format_selection_subtitle">Выберите формат</string>
+    <string name="format_selection_confirm">ОК</string>
+    <string name="format_selection_loading">Чтение остальных форматов</string>
+    <string name="format_sort_quality">Качество</string>
+    <string name="format_sort_file_size">Размер файла</string>
+    <string name="format_sort_container">Контейнер</string>
+
+    <!-- AudioLanguageSheet -->
+    <string name="audio_language_title">Язык аудио</string>
+    <string name="audio_language_subtitle">Выберите звуковую дорожку</string>
+
+    <!-- AppearanceScreen -->
+    <string name="appearance_back">Назад</string>
+    <string name="appearance_title">Внешний вид</string>
+
+    <!-- Language picker -->
+    <string name="language_title">Язык приложения</string>
+    <string name="language_system">Системный по умолчанию</string>
+    <string name="language_system_description">Как на устройстве</string>
+    <string name="language_current">Текущий: %1$s</string>
+    <string name="language_selected">Выбран: %1$s</string>
+    <string name="language_cancel">Отмена</string>
+    <string name="language_confirm">Подтвердить</string>
+    <string name="language_changed_title">Язык изменён</string>
+    <string name="language_changed_body">Язык Hazel изменён. Всё, что ещё не переведено, останется на английском.</string>
+    <string name="language_changed_ok">ОК</string>
+    <string name="appearance_dark_theme">Тёмная тема</string>
+    <string name="appearance_accent_color">Цветовой акцент</string>
+
+    <!-- AccentPickerDialog -->
+    <string name="accent_picker_title">Цветовой акцент</string>
+    <string name="accent_picker_close">Закрыть</string>
+
+    <!-- FetchSettingsScreen -->
+    <string name="fetch_settings_back">Назад</string>
+    <string name="fetch_settings_title">Чтение ссылок</string>
+    <string name="fetch_settings_timeout_description">Сколько ожидать медленный источник перед прекращением и повторной попыткой.</string>
+    <plurals name="fetch_settings_timing">
+        <item quantity="one">тайм-аут %1$d с, %2$d попытка</item>
+        <item quantity="few">тайм-аут %1$d с, %2$d попытки</item>
+        <item quantity="many">тайм-аут %1$d с, %2$d попыток</item>
+        <item quantity="other">тайм-аут %1$d с, %2$d попыток</item>
+    </plurals>
+    <string name="fetch_settings_reading_links">Чтение ссылок</string>
+    <string name="fetch_settings_reading_links_description">Какой модуль определяет содержимое ссылки. Для загрузки всегда используется yt-dlp независимо от выбранного варианта.</string>
+    <string name="fetch_settings_force_ipv4_description">Включайте только при зависании ссылок в вашей сети. Обходит некорректный маршрут IPv6 и замедляет работу во всех остальных сетях.</string>
+    <string name="fetch_settings_force_ipv4">Принудительно IPv4</string>
+    <string name="fetch_mode_fast_label">Быстрый</string>
+    <string name="fetch_mode_fast_description">Быстро завершает попытку. Быстрее всего в стабильной сети, но чаще требует повторной попытки.</string>
+    <string name="fetch_mode_balanced_label">Сбалансированный</string>
+    <string name="fetch_mode_balanced_description">Баланс между скоростью и стабильностью при неидеальном соединении.</string>
+    <string name="fetch_mode_thorough_label">Тщательный</string>
+    <string name="fetch_mode_thorough_description">Дольше ожидает и делает больше попыток. Самый медленный, но справляется со слабым сигналом.</string>
+    <string name="listing_source_ytdlp_description">Тот же движок, что выполняет загрузку. Работает со всеми поддерживаемыми сайтами и обновляется сам, адаптируясь к изменениям сайтов.</string>
+    <string name="listing_source_newpipe_label">Предпочитать встроенный модуль</string>
+    <string name="listing_source_newpipe_description">Получает плейлисты и каналы за один запрос без запуска движка, что быстрее на поддерживаемых сайтах. Для остального и при ошибках переключается на yt-dlp.</string>
+
+    <!-- ToolsScreen -->
+    <string name="tools_back">Назад</string>
+    <string name="tools_title">Инструменты</string>
+    <string name="tools_empty">Здесь пока ничего нет.</string>
+
+    <!-- DirectShareScreen -->
+    <string name="direct_share_back">Назад</string>
+    <string name="direct_share_save_as">Сохранить как</string>
+    <string name="direct_share_video">Видео</string>
+    <string name="direct_share_audio_only">Только аудио</string>
+    <string name="direct_share_title">Hazel Мгновенно</string>
+    <string name="direct_share_intro">Отправка ссылки в Hazel Мгновенно сразу запускает загрузку без диалоговых окон и вопросов. Вот используемые параметры.</string>
+    <string name="direct_share_video_description">Изображение и звук, объединённые в один файл.</string>
+    <string name="direct_share_audio_description">Только аудио наилучшего качества из доступных в источнике.</string>
+    <string name="direct_share_quality_title">Ограничение качества</string>
+    <string name="direct_share_quality_description">Верхний предел, а не точный размер. Не все источники имеют одинаковое разрешение: выбирается максимальное в пределах лимита, либо минимальное из доступных, если ни одно не подошло.</string>
+    <string name="direct_share_output_title">Выходной файл</string>
+    <string name="direct_share_output_description">Файл, который сохраняется на устройстве. По умолчанию сохраняется исходный формат источника — это быстрее всего, так как перекодирование не требуется.</string>
+    <string name="direct_share_filename_template">Шаблон имени файла</string>
+    <string name="direct_share_audio_language">Язык аудио</string>
+    <string name="direct_share_audio_language_default">Как в источнике</string>
+    <string name="direct_share_extras_title">Дополнительно</string>
+    <string name="direct_share_extras_description">Применяются, если они есть у источника. Недоступные элементы просто пропускаются, не вызывая ошибки загрузки.</string>
+    <string name="direct_share_cover_art">Обложка</string>
+    <string name="direct_share_cover_art_description">Записывает обложку в файл, если формат контейнера это поддерживает.</string>
+    <string name="direct_share_chapters">Разделы</string>
+    <string name="direct_share_subtitles">Субтитры</string>
+    <string name="direct_share_sponsorblock">SponsorBlock</string>
+    <string name="direct_share_sponsorblock_off">Выкл.</string>
+    <plurals name="direct_share_sponsorblock_cut">
+        <item quantity="one">вырезана %1$d категория</item>
+        <item quantity="few">вырезано %1$d категории</item>
+        <item quantity="many">вырезано %1$d категорий</item>
+        <item quantity="other">вырезано %1$d категорий</item>
+    </plurals>
+    <string name="direct_share_signins_title">Вход в аккаунт</string>
+    <string name="direct_share_signins_description">Мгновенная отправка использует сохранённые cookie для соответствующего сайта так же, как и загрузка из меню. Запросы при этом не показываются, поэтому загрузка с авторизацией работает, только если вход уже выполнен и включён.</string>
+    <string name="direct_share_cookies">Файлы cookie</string>
+    <string name="direct_share_cookies_on">Вкл., используются для каждой мгновенной загрузки</string>
+    <string name="direct_share_cookies_off">Выкл.</string>
+    <string name="direct_share_change">Изменить %1$s</string>
+
+    <!-- StorageLocationsScreen -->
+    <string name="storage_locations_back">Назад</string>
+    <string name="storage_locations_downloads">Загрузки</string>
+    <string name="storage_locations_title">Загрузки</string>
+    <string name="storage_locations_subtitle">Где сохраняются загрузки и действующие ограничения</string>
+    <string name="storage_locations_limits">Ограничения</string>
+    <string name="storage_locations_wifi_only_description">Загрузки приостанавливаются, чтобы не расходовать мобильные данные</string>
+    <string name="storage_locations_speed_limit_description">Максимально допустимая скорость загрузки</string>
+    <string name="storage_locations_internal_note">Все файлы хранятся во внутренней памяти вашего устройства. Вы можете получить к ним доступ в любое время через любой файловый менеджер.</string>
+    <string name="storage_locations_wifi_only">Только по Wi-Fi</string>
+    <string name="storage_locations_speed_limit">Ограничение скорости</string>
+
+</resources>

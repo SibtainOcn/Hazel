@@ -1,0 +1,553 @@
+<resources>
+    <string name="direct_share_label">Instan</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Beranda</string>
+    <string name="nav_history">Unduhan</string>
+    <string name="nav_more">Lainnya</string>
+    <string name="nav_incognito_on">Mode samaran aktif, unduhan tidak dicatat</string>
+    <string name="nav_incognito_off">Mode samaran nonaktif</string>
+
+    <!-- DownloadScreen -->
+    <string name="download_search_hint">Cari atau masukkan URL</string>
+    <string name="download_clear">Hapus</string>
+    <string name="download_show_large_artwork">Tampilkan gambar besar</string>
+    <string name="download_show_list">Tampilkan sebagai daftar</string>
+    <string name="download_instant_source">Instan · membaca dari %1$s</string>
+    <string name="download_incognito_title">Anda dalam mode samaran</string>
+    <string name="download_incognito_body">Unduhan tidak ditambahkan ke riwayat dan tautan tidak diingat. File tetap disimpan seperti biasa.</string>
+    <string name="download_download_all">Unduh semua</string>
+    <string name="download_saved_aside">Unduhan Anda telah disimpan. Temukan di tab Unduhan.</string>
+    <string name="download_options">Opsi unduhan</string>
+    <string name="download_pause">Jeda</string>
+    <string name="download_resume">Lanjutkan</string>
+    <string name="download_cancel">Batal</string>
+    <string name="download_paused">Dijeda</string>
+    <string name="download_processing">Memproses</string>
+    <string name="download_waiting_wifi">Menunggu Wi-Fi</string>
+    <string name="download_saved">Tersimpan</string>
+    <string name="download_queued">Dalam antrean</string>
+    <string name="download_downloaded">Selesai diunduh</string>
+    <string name="download_failed">Gagal</string>
+    <string name="download_remove_link">Hapus tautan</string>
+    <string name="download_cancel_action">Batalkan unduhan</string>
+    <string name="download_resume_action">Lanjutkan unduhan</string>
+    <plurals name="download_links">
+        <item quantity="other">%d tautan</item>
+    </plurals>
+
+    <!-- SearchScreen -->
+    <string name="search_hint">Cari atau masukkan URL</string>
+    <string name="search_back">Kembali</string>
+    <string name="search_more">Lainnya</string>
+    <string name="search_add_link">Tambah tautan lain</string>
+    <string name="search_clear">Hapus</string>
+    <string name="search_clear_results">Hapus hasil</string>
+    <string name="search_clear_history">Hapus riwayat pencarian</string>
+    <string name="search_empty_history">Tautan yang Anda gunakan akan muncul di sini</string>
+    <string name="search_no_matches">Tidak ada tautan yang cocok</string>
+    <string name="search_remove">Hapus</string>
+    <string name="search_all">Cari semua</string>
+    <string name="search_forget">Lupakan</string>
+    <string name="search_edit_before">Edit sebelum mencari</string>
+    <string name="search_paste_and_fetch">Tempel dan ambil</string>
+    <string name="search_nothing_to_paste">Tidak ada yang bisa ditempel</string>
+
+    <!-- AlreadyDownloadedDialog -->
+    <string name="already_downloaded_title">Sudah diunduh</string>
+    <string name="already_downloaded_body">Tautan ini sudah tersimpan di perangkat ini.</string>
+    <string name="already_downloaded_video">Video</string>
+    <string name="already_downloaded_audio">Audio</string>
+    <string name="already_downloaded_keep">Simpan saja</string>
+    <string name="already_downloaded_play">Putar</string>
+    <string name="already_downloaded_download_again">Unduh lagi</string>
+    <string name="already_downloaded_just_now">Baru saja</string>
+    <string name="already_downloaded_yesterday">Kemarin</string>
+    <plurals name="already_downloaded_minutes">
+        <item quantity="other">%d mnt</item>
+    </plurals>
+    <plurals name="already_downloaded_hours">
+        <item quantity="other">%d jam</item>
+    </plurals>
+    <plurals name="already_downloaded_days">
+        <item quantity="other">%d hari</item>
+    </plurals>
+    <plurals name="already_downloaded_months">
+        <item quantity="other">%d bln</item>
+    </plurals>
+
+    <!-- NoResultsDialog -->
+    <string name="no_results_sign_in_title">Perlu masuk</string>
+    <string name="no_results_error_title">Tidak dapat membaca tautan ini</string>
+    <string name="no_results_sign_in_body">Sumber memerlukan akun sebelum dapat diakses. Masuk akan menyimpan cookie untuk situs tersebut dan mencoba lagi.</string>
+    <string name="no_results_continue_body">Rincian tidak dapat dibaca, tetapi unduhan mungkin tetap berhasil. Melanjutkan akan menggunakan kualitas terbaik yang tersedia.</string>
+    <string name="no_results_refused_body">Sumber menolak permintaan.</string>
+    <string name="no_results_engine_report">Laporan mesin</string>
+    <string name="no_results_copy_log">Salin log</string>
+    <string name="no_results_sign_in">Masuk</string>
+    <string name="no_results_try_anyway">Tetap coba</string>
+    <string name="no_results_close">Tutup</string>
+
+    <!-- UserGuideDialog -->
+    <string name="guide_title">Memulai</string>
+    <string name="guide_step_paste_link">Tempel tautan ke bidang pencarian untuk mengunduhnya. Anda dapat menambahkan beberapa tautan dan daftar putar</string>
+    <string name="guide_step_pick_format">Ketuk kartu untuk memilih format yang tepat. Semua kualitas yang tersedia tercantum beserta ukuran dan codec.</string>
+    <string name="guide_step_share_instant">Bagikan tautan ke Hazel Instan dari aplikasi apa pun untuk mengunduh langsung pada kualitas yang Anda tentukan.</string>
+    <string name="guide_step_finished_downloads">File yang selesai akan muncul di Unduhan. Ketuk baris mana saja untuk membukanya di pemutar default perangkat.</string>
+    <string name="guide_step_battery_unrestricted">Atur penggunaan baterai ke tanpa batas, jika tidak Android dapat menghentikan unduhan saat Anda keluar dari aplikasi.</string>
+    <string name="guide_battery_settings">Pengaturan baterai</string>
+    <string name="guide_close">Tutup</string>
+
+    <!-- FormatSheet -->
+    <string name="format_sheet_title">Unduh</string>
+    <string name="format_sheet_subtitle">Sesuaikan unduhan</string>
+    <string name="format_sheet_play">Putar</string>
+    <string name="format_sheet_ok">OK</string>
+    <string name="format_sheet_download">Unduh</string>
+    <string name="format_sheet_tab_audio">Audio</string>
+    <string name="format_sheet_tab_video">Video</string>
+    <string name="format_sheet_label_title">Judul</string>
+    <string name="format_sheet_label_author">Pembuat</string>
+    <string name="format_sheet_label_container">Wadah</string>
+    <string name="format_sheet_video_quality">Kualitas video</string>
+    <string name="format_sheet_audio_quality">Kualitas audio</string>
+    <string name="format_sheet_no_video_stream">Sumber ini tidak memiliki aliran video terpisah.</string>
+    <string name="format_sheet_no_audio_stream">Sumber ini tidak memiliki aliran audio terpisah.</string>
+    <string name="format_sheet_adjust_video">Sesuaikan video</string>
+    <string name="format_sheet_adjust_audio">Sesuaikan audio</string>
+    <string name="format_sheet_thumbnail">Gambar mini</string>
+    <string name="format_sheet_chapters">Bab</string>
+    <string name="format_sheet_subtitles">Subtitel</string>
+    <string name="format_sheet_sponsorblock">SponsorBlock</string>
+    <string name="format_sheet_audio_language">Bahasa audio</string>
+    <string name="format_sheet_change_audio_language">Ubah bahasa audio</string>
+    <string name="format_sheet_filename_template">Templat nama file</string>
+    <string name="format_sheet_change_field">Ubah</string>
+    <string name="format_sheet_save_dir">Folder penyimpanan</string>
+    <string name="format_sheet_save_location">Lokasi penyimpanan</string>
+    <string name="format_sheet_save_location_title">Lokasi penyimpanan</string>
+    <string name="format_sheet_save_location_body">Buka folder ini di pengelola file Anda, atau pilih folder lain untuk menyimpan unduhan.</string>
+    <string name="format_sheet_open_folder">Buka folder</string>
+    <string name="format_sheet_reset">Reset</string>
+    <string name="format_sheet_change">Ubah</string>
+
+    <!-- ConverterScreen -->
+    <string name="converter_label_convert_to">Konversi ke</string>
+    <string name="converter_label_saved_to">Disimpan ke</string>
+    <string name="converter_hazel_storage">Penyimpanan internal Hazel</string>
+    <string name="converter_storage_warning">Tanpa akses penyimpanan, file tetap berada di dalam Hazel dan tidak dapat dilihat oleh aplikasi lain.</string>
+    <string name="converter_back">Kembali</string>
+    <string name="converter_title">Pengonversi Offline</string>
+    <string name="converter_subtitle">Video ke audio, tidak ada yang keluar dari ponsel</string>
+    <string name="converter_choose_video">Pilih file video</string>
+    <string name="converter_ready">Siap</string>
+    <string name="converter_choose_video_hint">File apa pun di ponsel atau kartu SD</string>
+    <string name="converter_change">Ubah</string>
+    <string name="converter_converting">Mengonversi</string>
+    <string name="converter_convert">Konversi</string>
+    <string name="converter_saved">Tersimpan</string>
+    <string name="converter_open_folder">Buka folder</string>
+    <string name="converter_convert_another">Konversi lainnya</string>
+    <string name="converter_error_title">Gagal mengonversi</string>
+    <string name="converter_dismiss">Tutup</string>
+    <string name="converter_save_as_title">Simpan sebagai</string>
+    <string name="converter_save_as_body">Menamai file dan dituliskan ke dalam tag judulnya.</string>
+    <string name="converter_label_name">Nama</string>
+    <string name="converter_start">Mulai</string>
+    <string name="converter_format_sheet_title">Konversi ke</string>
+    <string name="converter_heading_common">Tiga format utama</string>
+    <string name="converter_heading_other">Format lainnya</string>
+
+    <!-- MoreScreen -->
+    <string name="more_title">Lainnya</string>
+    <string name="more_battery_title">Unduhan latar belakang</string>
+    <string name="more_battery_body">Unduhan tetap berjalan di latar belakang secara mandiri. Beberapa ponsel membatasinya untuk menghemat baterai. Izinkan penggunaan tanpa batas untuk menghindarinya.</string>
+    <string name="more_downloads">Unduhan</string>
+    <string name="more_appearance">Tampilan</string>
+    <string name="more_language">Bahasa</string>
+    <string name="more_cookies">Cookie</string>
+    <string name="more_link_reading">Pembacaan Tautan</string>
+    <string name="more_hazel_instant">Hazel Instan</string>
+    <string name="more_temporary_files">File Sementara</string>
+    <string name="more_converter">Konversi offline video ke audio</string>
+    <string name="more_engine_update">Pembaruan Mesin yt-dlp</string>
+    <string name="more_support">Dukung Hazel</string>
+    <string name="more_license">Lisensi</string>
+
+    <!-- SponsorScreen -->
+    <string name="sponsor_back">Kembali</string>
+    <string name="sponsor_title">Dukung Hazel</string>
+    <string name="sponsor_hero_title">Gratis, dan akan selalu begitu</string>
+    <string name="sponsor_hero_body">Hazel dikembangkan di waktu luang dan akhir pekan, dan diberikan gratis karena aplikasi pengunduh berbayar adalah aplikasi yang buruk. Situs web selalu berubah, dan menyesuaikan dengannya membutuhkan waktu.</string>
+    <string name="sponsor_hero_closing">Jika aplikasi ini menghemat waktu Anda, dukungan di bawah ini sangat berarti bagi kelanjutannya. Jika tidak, bantuan tanpa biaya juga sama berharganya.</string>
+    <string name="sponsor_section_ways">Cara mendukung</string>
+    <string name="sponsor_github_title">GitHub Sponsors</string>
+    <string name="sponsor_github_subtitle">Bulanan atau sekali bayar, dapat dibatalkan kapan saja. Dikelola sepenuhnya oleh GitHub.</string>
+    <string name="sponsor_kofi_title">Ko-fi</string>
+    <string name="sponsor_kofi_subtitle">Sekali bayar, tidak perlu akun.</string>
+    <string name="sponsor_kofi_soon">Segera hadir</string>
+    <string name="sponsor_section_free">Tanpa biaya, sangat membantu</string>
+    <string name="sponsor_star_title">Beri bintang pada proyek</string>
+    <string name="sponsor_star_subtitle">Angka utama yang dilihat orang sebelum mencoba aplikasi.</string>
+    <string name="sponsor_share_title">Beri tahu orang lain</string>
+    <string name="sponsor_share_subtitle">Rekomendasi dari mulut ke mulut adalah seluruh pemasaran aplikasi ini.</string>
+    <string name="sponsor_issues_title">Laporkan kendala</string>
+    <string name="sponsor_issues_subtitle">Situs yang berhenti berfungsi adalah masalah yang perlu Anda laporkan agar bisa diperbaiki.</string>
+    <string name="sponsor_source_title">Lihat kode sumber</string>
+    <string name="sponsor_source_subtitle">Setiap baris kode bersifat terbuka, dan kontribusi sangat disambut.</string>
+    <string name="sponsor_footer">Tanpa iklan, tanpa pelacakan unduhan Anda, dan tanpa fitur yang ditahan untuk siapa pun. Dukungan memengaruhi seberapa banyak waktu yang diberikan untuk Hazel, bukan apa yang dapat dilakukannya untuk Anda.</string>
+
+    <!-- UpdateScreen -->
+    <string name="update_title">Pembaruan yt-dlp</string>
+    <string name="update_back">Kembali</string>
+    <string name="update_check_action">Periksa pembaruan</string>
+    <string name="update_status_up_to_date">Versi terbaru sudah terpasang</string>
+    <string name="update_status_checking">Memeriksa pembaruan...</string>
+    <string name="update_status_available">Pembaruan Tersedia</string>
+    <string name="update_status_installing">Memasang yt-dlp...</string>
+    <string name="update_status_installed">Mesin Diperbarui</string>
+    <string name="update_status_failed">Pembaruan Gagal</string>
+    <string name="update_subtitle_idle">Hazel menggunakan versi yt-dlp terbaru</string>
+    <string name="update_subtitle_checking">Menghubungi GitHub...</string>
+    <string name="update_subtitle_available">yt-dlp %1$s tersedia</string>
+    <string name="update_subtitle_updating">Mengunduh yt-dlp %1$s</string>
+    <string name="update_subtitle_installed">yt-dlp %1$s sekarang digunakan</string>
+    <string name="update_installed_version">Versi Terpasang</string>
+    <string name="update_version_unknown">Tidak diketahui</string>
+    <string name="update_new_version">Versi Baru</string>
+    <string name="update_installing_binary">Memasang Biner</string>
+    <string name="update_installing_body">Mengunduh dari GitHub dan mengganti mesin. Biarkan aplikasi tetap terbuka.</string>
+    <string name="update_action_update_now">Perbarui Sekarang</string>
+    <string name="update_action_installing">Memasang...</string>
+    <string name="update_action_done">Selesai</string>
+    <string name="update_action_retry">Coba Lagi</string>
+    <string name="update_action_check">Periksa Pembaruan</string>
+    <string name="update_action_checking">Memeriksa...</string>
+    <string name="update_info_heading">Informasi</string>
+    <string name="update_info_component">Komponen</string>
+    <string name="update_info_repository">Repositori</string>
+    <string name="update_info_binary_size">Ukuran Biner</string>
+    <string name="update_info_distribution">Distribusi</string>
+    <string name="update_info_github_releases">Rilis GitHub</string>
+    <string name="update_release_channel">Saluran Rilis</string>
+    <string name="update_view_changelog">Lihat Catatan Perubahan</string>
+
+    <!-- DownloadOptionDialogs -->
+    <string name="options_sponsorblock_title">Pilih penyaringan SponsorBlock</string>
+    <string name="options_sponsorblock_ok">OK</string>
+    <string name="options_sponsorblock_cancel">Batal</string>
+    <string name="options_chapters_title">Bab</string>
+    <string name="options_chapters_in_videos">Bab dalam video</string>
+    <string name="options_chapters_split">Bagi berdasarkan bab</string>
+    <string name="options_chapters_split_body">Pembagian akan menyimpan satu file per bab alih-alih satu file tunggal.</string>
+    <string name="options_chapters_dismiss">Tutup</string>
+    <string name="options_subtitles_title">Subtitel</string>
+    <string name="options_subtitles_embed">Sematkan subtitel</string>
+    <string name="options_subtitles_save">Simpan subtitel</string>
+    <string name="options_subtitles_save_auto">Simpan subtitel otomatis</string>
+    <string name="options_subtitles_languages_label">Bahasa subtitel</string>
+    <string name="options_subtitles_dismiss">Tutup</string>
+    <string name="options_subtitles_languages_title">Bahasa subtitel</string>
+    <string name="options_subtitles_languages_hint">Pemilih bahasa yt-dlp, mis. en.*,.*-orig untuk bahasa Inggris ditambah trek asli. Gunakan all untuk semua bahasa yang ditawarkan sumber.</string>
+    <string name="options_filename_title">Templat nama file</string>
+    <string name="options_filename_hint">Templat keluaran yt-dlp. Gunakan %(title)s, %(uploader)s, %(id)s, dan %(ext)s.</string>
+    <string name="options_text_input_save">Simpan</string>
+    <string name="options_text_input_cancel">Batal</string>
+
+    <!-- StorageCleanupScreen -->
+    <string name="cleanup_back">Kembali</string>
+    <string name="cleanup_title">File Sementara</string>
+    <string name="cleanup_header_description">File kerja yang disimpan oleh aplikasi. Unduhan Anda tidak termasuk dan tidak akan pernah dihapus dari sini.</string>
+    <string name="cleanup_action_clear_everything">Hapus semua</string>
+    <string name="cleanup_category_link_data_label">Cache data tautan</string>
+    <string name="cleanup_category_link_data_description">Data pemutar yang disimpan yt-dlp agar pembacaan tautan untuk kedua kalinya lebih cepat. Aman untuk dihapus.</string>
+    <string name="cleanup_category_partial_downloads_label">Unduhan belum selesai</string>
+    <string name="cleanup_category_partial_downloads_description">Fragmen tersisa dari unduhan yang dibatalkan atau gagal sebelum file disimpan.</string>
+    <string name="cleanup_category_conversions_label">Konversi belum selesai</string>
+    <string name="cleanup_category_conversions_description">File kerja dari pengonversi audio yang belum dipindahkan ke folder musik Anda.</string>
+    <string name="cleanup_category_engine_label">File mesin yt-dlp</string>
+    <string name="cleanup_category_engine_description">Pengunduh dan lingkungan eksekusinya. Menghapusnya membebaskan paling banyak ruang, tetapi unduhan berikutnya harus mengekstraknya kembali.</string>
+    <string name="cleanup_category_other_cache_label">File cache lainnya</string>
+    <string name="cleanup_category_other_cache_description">Gambar mini dan file lain yang di-cache saat menjelajahi tautan.</string>
+    <string name="cleanup_confirm_category_title">Hapus file-file ini?</string>
+    <string name="cleanup_confirm_category_safe">%1$s ruang akan dikosongkan. File yang telah disimpan tidak akan terpengaruh.</string>
+    <string name="cleanup_confirm_category_unsafe">%1$s ruang akan dikosongkan, dan unduhan berikutnya akan membutuhkan waktu lebih lama karena komponen harus diekstrak ulang.</string>
+    <string name="cleanup_confirm_clear">Hapus</string>
+    <string name="cleanup_confirm_cancel">Batal</string>
+    <string name="cleanup_confirm_all_title">Hapus semua?</string>
+    <string name="cleanup_confirm_all_body">%1$s ruang akan dikosongkan. Unduhan dan sesi masuk Anda akan tetap tersimpan, tetapi unduhan berikutnya akan membutuhkan waktu lebih lama karena mesin harus diekstrak ulang.</string>
+    <string name="cleanup_confirm_all_confirm">Hapus semua</string>
+    <string name="cleanup_confirm_all_cancel">Batal</string>
+
+    <!-- HistoryScreen -->
+    <string name="history_title">Unduhan</string>
+    <string name="history_layout_grid">Tampilkan gambar besar</string>
+    <string name="history_layout_list">Tampilkan sebagai daftar</string>
+    <string name="history_search_action">Cari unduhan</string>
+    <string name="history_sort_action">Urutkan</string>
+    <string name="history_menu_action">Lainnya</string>
+    <string name="history_menu_clear">Hapus riwayat</string>
+    <string name="history_search_placeholder">Cari unduhan</string>
+    <string name="history_search_clear">Hapus pencarian</string>
+    <string name="history_empty_initial">Belum ada yang diunduh</string>
+    <string name="history_empty_filtered">Tidak ada yang cocok</string>
+    <string name="history_clear_dialog_title">Hapus riwayat</string>
+    <string name="history_clear_dialog_body">Daftar akan dikosongkan. File yang telah diunduh tidak akan terpengaruh.</string>
+    <string name="history_clear_dialog_confirm">Hapus</string>
+    <string name="history_clear_dialog_cancel">Batal</string>
+    <string name="history_delete_dialog_title">Hapus file</string>
+    <string name="history_delete_dialog_body">%1$s akan dihapus dari perangkat Anda.</string>
+    <string name="history_toast_file_deleted">File dihapus</string>
+    <string name="history_toast_file_delete_failed">Tidak dapat menghapus file</string>
+    <string name="history_delete_dialog_confirm">Hapus</string>
+    <string name="history_delete_dialog_cancel">Batal</string>
+    <string name="history_card_options">Opsi</string>
+    <string name="history_card_properties">Properti</string>
+    <string name="history_card_remove">Hapus dari daftar</string>
+    <string name="history_card_delete">Hapus file</string>
+    <string name="history_tag_deleted">Dihapus</string>
+    <string name="history_row_options">Opsi</string>
+    <string name="history_row_properties">Properti</string>
+    <string name="history_row_remove">Hapus dari daftar</string>
+    <string name="history_row_delete">Hapus file</string>
+    <string name="history_toast_file_gone">File ini sudah tidak ada di perangkat Anda</string>
+
+    <!-- DownloadPropertiesSheet -->
+    <string name="properties_title">Properti</string>
+    <string name="properties_status">Status</string>
+    <string name="properties_status_present">Ada di perangkat ini</string>
+    <string name="properties_status_deleted">Dihapus dari perangkat ini</string>
+    <string name="properties_kind">Jenis</string>
+    <string name="properties_kind_video">Video</string>
+    <string name="properties_kind_audio">Audio</string>
+    <string name="properties_quality">Kualitas</string>
+    <string name="properties_resolution">Resolusi</string>
+    <string name="properties_length">Durasi</string>
+    <string name="properties_codec">Codec</string>
+    <string name="properties_bitrate">Bitrate</string>
+    <string name="properties_bitrate_value">%1$d kbps</string>
+    <string name="properties_size">Ukuran</string>
+    <string name="properties_container">Wadah</string>
+    <string name="properties_type">Tipe</string>
+    <string name="properties_embedded">Tertanam</string>
+    <string name="properties_file">File</string>
+    <string name="properties_saved_to">Disimpan ke</string>
+    <string name="properties_downloaded">Waktu diunduh</string>
+    <string name="properties_source">Sumber</string>
+    <string name="properties_link_copied_opened">Tautan disalin dan dibuka</string>
+    <string name="properties_link_copied">Tautan disalin</string>
+
+    <!-- CookiesScreen -->
+    <string name="cookies_back">Kembali</string>
+    <string name="cookies_title">Cookie</string>
+    <string name="cookies_menu">Lainnya</string>
+    <string name="cookies_menu_import">Impor dari papan klip</string>
+    <string name="cookies_menu_export">Ekspor ke papan klip</string>
+    <string name="cookies_menu_delete_all">Hapus semua</string>
+    <string name="cookies_imported_title">Cookie yang diimpor</string>
+    <string name="cookies_toast_imported">Cookie berhasil diimpor</string>
+    <string name="cookies_toast_no_data">Papan klip tidak berisi data cookie</string>
+    <string name="cookies_toast_nothing_to_export">Tidak ada yang bisa diekspor</string>
+    <string name="cookies_toast_exported">Disalin ke papan klip</string>
+    <string name="cookies_toast_entry_copied">Disalin ke papan klip</string>
+    <string name="cookies_use_title">Gunakan cookie</string>
+    <string name="cookies_use_description">Teruskan sesi masuk yang tersimpan ke pengunduh</string>
+    <string name="cookies_new">Cookie baru</string>
+    <string name="cookies_empty_title">Belum ada cookie yang tersimpan</string>
+    <string name="cookies_empty_body">Tambahkan untuk mengunduh media dengan pembatasan usia, privat, atau khusus anggota.</string>
+    <string name="cookies_delete_title">Hapus cookie</string>
+    <string name="cookies_delete_body">Hapus informasi masuk yang tersimpan untuk %1$s?</string>
+    <string name="cookies_delete_confirm">Hapus</string>
+    <string name="cookies_delete_cancel">Batal</string>
+    <string name="cookies_delete_all_title">Hapus semua cookie</string>
+    <string name="cookies_delete_all_body">Semua sesi masuk yang tersimpan akan dihapus. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="cookies_delete_all_confirm">Hapus semua</string>
+    <string name="cookies_delete_all_cancel">Batal</string>
+    <string name="cookies_row_fallback_name">Cookie</string>
+    <string name="cookies_sheet_title">Cookie</string>
+    <string name="cookies_sheet_copy">Salin cookie</string>
+    <string name="cookies_sheet_delete">Hapus cookie</string>
+    <string name="cookies_field_title">Judul</string>
+    <string name="cookies_field_url">URL</string>
+    <string name="cookies_sheet_save">Simpan</string>
+    <string name="cookies_sheet_get">Dapatkan cookie</string>
+    <string name="cookies_sheet_update">Perbarui</string>
+
+    <!-- Batch option sheets -->
+    <string name="batch_quality_best">Kualitas terbaik</string>
+    <string name="batch_type_sheet_title">Jenis unduhan yang diinginkan</string>
+    <string name="batch_type_sheet_subtitle">Format unduhan tautan-tautan ini</string>
+    <string name="batch_type_audio">Audio</string>
+    <string name="batch_type_video">Video</string>
+    <string name="batch_format_title">Format</string>
+    <string name="batch_format_subtitle">Pilih format</string>
+    <string name="batch_container_title">Wadah</string>
+    <string name="batch_container_subtitle">Format file penyimpanan tautan-tautan ini</string>
+    <string name="batch_save_dir_title">Lokasi penyimpanan</string>
+    <string name="batch_open_folder">Buka folder ini</string>
+    <string name="batch_change_folder">Ubah folder</string>
+
+    <!-- Batch action bar -->
+    <string name="batch_bar_thumbnail">Gambar mini</string>
+    <string name="batch_bar_chapters">Bab</string>
+    <string name="batch_bar_subtitles">Subtitel</string>
+    <string name="batch_bar_sponsorblock">SponsorBlock</string>
+    <string name="batch_bar_filename_template">Templat nama file</string>
+    <string name="batch_bar_download_type">Jenis unduhan yang diinginkan</string>
+    <string name="batch_bar_quality">Kualitas: %1$s</string>
+    <string name="batch_bar_save_location">Lokasi penyimpanan</string>
+    <string name="batch_bar_container">Wadah</string>
+
+    <!-- Batch download sheet -->
+    <string name="batch_header_title">Unduh</string>
+    <string name="batch_header_subtitle">Sesuaikan unduhan</string>
+    <string name="batch_download_action">Unduh</string>
+    <string name="batch_stop_selecting">Selesai memilih</string>
+    <string name="batch_start_selecting">Pilih tautan</string>
+    <string name="batch_list_options">Opsi daftar</string>
+    <string name="batch_menu_select_links">Pilih tautan</string>
+    <string name="batch_menu_select_all">Pilih semua</string>
+    <string name="batch_menu_invert">Balikkan pilihan</string>
+    <string name="batch_menu_remove_selected">Hapus yang dipilih</string>
+    <string name="batch_menu_done">Selesai</string>
+    <plurals name="batch_selected">
+        <item quantity="other">%d dipilih</item>
+    </plurals>
+    <plurals name="batch_links">
+        <item quantity="other">%d tautan</item>
+    </plurals>
+    <string name="batch_card_download_type">Jenis unduhan untuk tautan ini</string>
+    <string name="batch_card_remove">Hapus</string>
+
+    <!-- Opening a finished file -->
+    <string name="media_open_unknown_location">Lokasi file ini tidak diketahui</string>
+    <string name="media_open_chooser">Buka dengan</string>
+    <string name="media_open_no_app">Tidak ada aplikasi di perangkat ini yang dapat membukanya</string>
+
+    <!-- Download notifications -->
+    <string name="notification_cancelled_text">Unduhan dibatalkan</string>
+    <string name="notification_channel_progress_description">Kemajuan unduhan, menampilkan ikon di bilah status</string>
+    <string name="notification_channel_complete_description">Pemberitahuan penyelesaian unduhan</string>
+    <string name="notification_action_pause">Jeda</string>
+    <string name="notification_action_resume">Lanjutkan</string>
+    <string name="notification_action_cancel">Batal</string>
+    <string name="notification_action_sign_in">Masuk</string>
+    <string name="notification_wifi_title">Menunggu Wi-Fi</string>
+    <string name="notification_wifi_text">Unduhan diatur hanya untuk Wi-Fi. Unduhan akan dimulai setelah terhubung kembali ke Wi-Fi.</string>
+
+    <!-- Sign-in web view -->
+    <string name="cookie_webview_close">Tutup</string>
+    <string name="cookie_webview_desktop_site">Situs desktop</string>
+    <string name="cookie_webview_no_cookies">Tidak ada cookie yang dikumpulkan</string>
+    <string name="cookie_webview_done">"  OK"</string>
+
+    <!-- FormatSelectionSheet -->
+    <string name="format_selection_sort">Urutkan format</string>
+    <string name="format_selection_change">Ubah format</string>
+    <string name="format_selection_title">Format</string>
+    <string name="format_selection_subtitle">Pilih format</string>
+    <string name="format_selection_confirm">OK</string>
+    <string name="format_selection_loading">Membaca format lainnya</string>
+    <string name="format_sort_quality">Kualitas</string>
+    <string name="format_sort_file_size">Ukuran file</string>
+    <string name="format_sort_container">Wadah</string>
+
+    <!-- AudioLanguageSheet -->
+    <string name="audio_language_title">Bahasa audio</string>
+    <string name="audio_language_subtitle">Pilih trek suara</string>
+
+    <!-- AppearanceScreen -->
+    <string name="appearance_back">Kembali</string>
+    <string name="appearance_title">Tampilan</string>
+
+    <!-- Language picker -->
+    <string name="language_title">Bahasa aplikasi</string>
+    <string name="language_system">Default sistem</string>
+    <string name="language_system_description">Ikuti perangkat</string>
+    <string name="language_current">Saat ini: %1$s</string>
+    <string name="language_selected">Dipilih: %1$s</string>
+    <string name="language_cancel">Batal</string>
+    <string name="language_confirm">Konfirmasi</string>
+    <string name="language_changed_title">Bahasa diubah</string>
+    <string name="language_changed_body">Hazel sekarang menggunakan bahasa ini. Bagian yang belum diterjemahkan akan tetap menggunakan bahasa Inggris.</string>
+    <string name="language_changed_ok">OK</string>
+    <string name="appearance_dark_theme">Tema Gelap</string>
+    <string name="appearance_accent_color">Warna Aksen</string>
+
+    <!-- AccentPickerDialog -->
+    <string name="accent_picker_title">Warna Aksen</string>
+    <string name="accent_picker_close">Tutup</string>
+
+    <!-- FetchSettingsScreen -->
+    <string name="fetch_settings_back">Kembali</string>
+    <string name="fetch_settings_title">Pembacaan Tautan</string>
+    <string name="fetch_settings_timeout_description">Berapa lama menunggu sumber yang lambat sebelum menyerah dan mencoba lagi.</string>
+    <plurals name="fetch_settings_timing">
+        <item quantity="other">Batas waktu %1$d dtk, %2$d percobaan</item>
+    </plurals>
+    <string name="fetch_settings_reading_links">Membaca tautan</string>
+    <string name="fetch_settings_reading_links_description">Pembaca mana yang mengidentifikasi isi tautan. Unduhan selalu menggunakan yt-dlp, apa pun yang dipilih di sini.</string>
+    <string name="fetch_settings_force_ipv4_description">Hanya aktifkan jika tautan terhenti di jaringan Anda. Ini mengatasi rute IPv6 yang bermasalah, dan lebih lambat di tempat lain.</string>
+    <string name="fetch_settings_force_ipv4">Paksa IPv4</string>
+    <string name="fetch_mode_fast_label">Cepat</string>
+    <string name="fetch_mode_fast_description">Cepat menyerah. Paling cepat di jaringan yang baik, tetapi lebih mungkin memerlukan percobaan kedua.</string>
+    <string name="fetch_mode_balanced_label">Seimbang</string>
+    <string name="fetch_mode_balanced_description">Jalan tengah antara kecepatan dan toleransi koneksi yang kurang baik.</string>
+    <string name="fetch_mode_thorough_label">Menyeluruh</string>
+    <string name="fetch_mode_thorough_description">Menunggu lebih lama dan mencoba lebih banyak. Paling lambat, tetapi tahan di jaringan yang lemah.</string>
+    <string name="listing_source_ytdlp_description">Mesin yang sama dengan yang melakukan pengunduhan. Bekerja di setiap situs yang didukungnya, dan memperbarui diri sendiri, sehingga tetap berfungsi saat situs berubah.</string>
+    <string name="listing_source_newpipe_label">Pilih pembaca bawaan</string>
+    <string name="listing_source_newpipe_description">Mendaftar daftar putar dan saluran dalam satu permintaan tanpa memulai mesin, yang lebih cepat di situs yang dikenalnya. Beralih kembali ke yt-dlp untuk hal lain dan setiap kali tidak dapat membaca tautan.</string>
+
+    <!-- ToolsScreen -->
+    <string name="tools_back">Kembali</string>
+    <string name="tools_title">Alat</string>
+    <string name="tools_empty">Belum ada apa-apa di sini.</string>
+
+    <!-- DirectShareScreen -->
+    <string name="direct_share_back">Kembali</string>
+    <string name="direct_share_save_as">Simpan sebagai</string>
+    <string name="direct_share_video">Video</string>
+    <string name="direct_share_audio_only">Hanya audio</string>
+    <string name="direct_share_title">Hazel Instan</string>
+    <string name="direct_share_intro">Membagikan tautan ke Hazel Instan langsung memulai pengunduhan tanpa lembar dialog dan pertanyaan. Pengaturan berikut yang akan digunakan.</string>
+    <string name="direct_share_video_description">Gambar dan suara, digabungkan menjadi satu file.</string>
+    <string name="direct_share_audio_description">Hanya suara, dengan kualitas terbaik yang ditawarkan sumber.</string>
+    <string name="direct_share_quality_title">Batas kualitas</string>
+    <string name="direct_share_quality_description">Batas maksimum, bukan ukuran pasti. Tidak semua sumber menawarkan resolusi yang sama, jadi resolusi tertinggi yang sesuai batas ini akan diambil, atau yang terkecil jika tidak ada yang cocok.</string>
+    <string name="direct_share_output_title">Keluaran</string>
+    <string name="direct_share_output_description">File yang disimpan di perangkat. Standar mempertahankan format yang disediakan sumber, yang merupakan opsi tercepat karena tidak perlu pengkodean ulang.</string>
+    <string name="direct_share_filename_template">Templat nama file</string>
+    <string name="direct_share_audio_language">Bahasa audio</string>
+    <string name="direct_share_audio_language_default">Default sumber</string>
+    <string name="direct_share_extras_title">Tambahan</string>
+    <string name="direct_share_extras_description">Diterapkan jika sumber memilikinya. Apa pun yang tidak tersedia akan dilewati alih-alih menggagalkan unduhan.</string>
+    <string name="direct_share_cover_art">Gambar sampul</string>
+    <string name="direct_share_cover_art_description">Menyematkan gambar mini ke dalam file, jika format wadah mendukungnya.</string>
+    <string name="direct_share_chapters">Bab</string>
+    <string name="direct_share_subtitles">Subtitel</string>
+    <string name="direct_share_sponsorblock">SponsorBlock</string>
+    <string name="direct_share_sponsorblock_off">Mati</string>
+    <plurals name="direct_share_sponsorblock_cut">
+        <item quantity="other">%1$d kategori dipotong</item>
+    </plurals>
+    <string name="direct_share_signins_title">Sesi masuk</string>
+    <string name="direct_share_signins_description">Berbagi instan menggunakan cookie tersimpan untuk situs tautan tersebut, sama seperti unduhan yang dimulai dari menu. Tidak ada pertanyaan saat berbagi, jadi tautan di balik login hanya berfungsi jika sesi masuk sudah disimpan dan diaktifkan.</string>
+    <string name="direct_share_cookies">Cookie</string>
+    <string name="direct_share_cookies_on">Aktif, digunakan untuk setiap berbagi instan</string>
+    <string name="direct_share_cookies_off">Mati</string>
+    <string name="direct_share_change">Ubah %1$s</string>
+
+    <!-- StorageLocationsScreen -->
+    <string name="storage_locations_back">Kembali</string>
+    <string name="storage_locations_downloads">Unduhan</string>
+    <string name="storage_locations_title">Unduhan</string>
+    <string name="storage_locations_subtitle">Tempat unduhan disimpan, dan batas operasionalnya</string>
+    <string name="storage_locations_limits">Batas</string>
+    <string name="storage_locations_wifi_only_description">Unduhan menunggu alih-alih menggunakan data seluler</string>
+    <string name="storage_locations_speed_limit_description">Batas kecepatan unduhan yang diizinkan</string>
+    <string name="storage_locations_internal_note">Semua file disimpan di penyimpanan internal perangkat Anda. Anda dapat mengaksesnya kapan saja menggunakan aplikasi pengelola file.</string>
+    <string name="storage_locations_wifi_only">Hanya Wi-Fi</string>
+    <string name="storage_locations_speed_limit">Batas kecepatan</string>
+
+</resources>
