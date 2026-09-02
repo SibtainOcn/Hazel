@@ -2,14 +2,13 @@
 # Format:  <file>:<line>: <reason>
 # A reason must say why the text never reaches a user's eyes. "Looks fine" is not a reason.
 
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:407: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:518: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:867: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1212: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:993: two formatted byte counts joined by a slash, no words to translate
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1006: two formatted byte counts joined by a slash, no words to translate
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1000: numeric percentage format, no words to translate
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1453: ClipData label, not surfaced in the clipboard UI on any supported version
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:444: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:539: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:941: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1291: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1067: two formatted byte counts joined by a slash, no words to translate
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1080: two formatted byte counts joined by a slash, no words to translate
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1074: numeric percentage format, no words to translate
 
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:492: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:527: Compose animation label, used by the tooling inspector only

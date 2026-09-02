@@ -640,7 +640,7 @@ fun DownloadScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                "Your downloads are saved. Find them in the Downloads tab.",
+                                stringResource(R.string.download_saved_aside),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1466,7 +1466,7 @@ private fun MediaRow(
                         IconButton(onClick = { menuOpen = true }) {
                             Icon(
                                 Icons.Filled.MoreVert,
-                                contentDescription = "Download options",
+                                contentDescription = stringResource(R.string.download_options),
                                 modifier = Modifier.size(18.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1477,7 +1477,7 @@ private fun MediaRow(
                         ) {
                             if (isPaused) {
                                 DropdownMenuItem(
-                                    text = { Text("Resume") },
+                                    text = { Text(stringResource(R.string.download_resume)) },
                                     onClick = {
                                         menuOpen = false
                                         onResume()
@@ -1485,7 +1485,7 @@ private fun MediaRow(
                                 )
                             } else {
                                 DropdownMenuItem(
-                                    text = { Text("Pause") },
+                                    text = { Text(stringResource(R.string.download_pause)) },
                                     // Nothing to pause once the transfer is done and the
                                     // engine has moved on to merging or tagging.
                                     enabled = !isProcessing,
@@ -1496,7 +1496,7 @@ private fun MediaRow(
                                 )
                             }
                             DropdownMenuItem(
-                                text = { Text("Cancel") },
+                                text = { Text(stringResource(R.string.download_cancel)) },
                                 onClick = {
                                     menuOpen = false
                                     onCancel()

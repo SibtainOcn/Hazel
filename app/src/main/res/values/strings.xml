@@ -28,6 +28,7 @@
     <string name="download_incognito_title">You\'re incognito</string>
     <string name="download_incognito_body">Downloads are not added to your history and links are not remembered. The files themselves still save as usual.</string>
     <string name="download_download_all">Download all</string>
+    <string name="download_saved_aside">Your downloads are saved. Find them in the Downloads tab.</string>
     <string name="download_options">Download options</string>
     <string name="download_pause">Pause</string>
     <string name="download_resume">Resume</string>
