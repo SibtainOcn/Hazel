@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.LaunchedEffect
@@ -108,15 +109,21 @@ fun MoreScreen(
     // wherever the choice actually lives, which on Android 13 and later is the system rather
     // than the app, so a change made in the system settings shows here too.
     var languageDialogOpen by remember { mutableStateOf(false) }
-    var languageChanged by remember { mutableStateOf(false) }
+    // Saved rather than merely remembered. Setting the language on Android 13 and later
+    // hands the work to the platform, which rebuilds the activity on the spot; a flag held
+    // only in composition dies with it, and the note that explains the change never
+    // appeared on exactly the versions where the change is most abrupt.
+    var languageChanged by rememberSaveable { mutableStateOf(false) }
     var languageTag by remember { mutableStateOf(AppLocale.tag(context)) }
     val languageLabel = AppLocale.label(context)
 
     if (languageDialogOpen) {
-        LanguageDialog(
+        LanguageSheet(
             current = languageTag,
-            onPick = { tag ->
+            onConfirm = { tag ->
                 languageDialogOpen = false
+                // Confirming without having picked anything different is a no-op, so the
+                // note that follows a change is not shown for a sheet that was only opened.
                 if (tag != languageTag) {
                     AppLocale.set(context, tag)
                     languageTag = tag

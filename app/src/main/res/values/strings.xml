@@ -500,10 +500,15 @@
     <string name="appearance_title">Appearance</string>
 
     <!-- Language picker -->
-    <string name="language_title">Language</string>
+    <string name="language_title">App language</string>
     <string name="language_system">System default</string>
-    <string name="language_system_description">Follow the device language</string>
-    <string name="language_close">Close</string>
+    <string name="language_system_description">Follow the device</string>
+    <!-- Under the sheet title. %1$s is the language the app is in right now. -->
+    <string name="language_current">Current: %1$s</string>
+    <!-- Replaces it once a different card is picked. %1$s is that language. -->
+    <string name="language_selected">Selected: %1$s</string>
+    <string name="language_cancel">Cancel</string>
+    <string name="language_confirm">Confirm</string>
     <string name="language_changed_title">Language changed</string>
     <string name="language_changed_body">Hazel is now in this language. Anything the app has not been translated into stays in English.</string>
     <string name="language_changed_ok">OK</string>

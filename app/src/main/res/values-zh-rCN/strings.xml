@@ -461,10 +461,13 @@
     <string name="appearance_title">外观</string>
 
     <!-- Language picker -->
-    <string name="language_title">语言</string>
+    <string name="language_title">应用语言</string>
     <string name="language_system">跟随系统</string>
-    <string name="language_system_description">使用设备的语言</string>
-    <string name="language_close">关闭</string>
+    <string name="language_system_description">跟随设备</string>
+    <string name="language_current">当前：%1$s</string>
+    <string name="language_selected">已选：%1$s</string>
+    <string name="language_cancel">取消</string>
+    <string name="language_confirm">确认</string>
     <string name="language_changed_title">语言已更改</string>
     <string name="language_changed_body">Hazel 现在使用这种语言。应用中尚未翻译的部分仍会显示英文。</string>
     <string name="language_changed_ok">确定</string>

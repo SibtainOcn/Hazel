@@ -475,10 +475,13 @@
     <string name="appearance_title">Apparence</string>
 
     <!-- Language picker -->
-    <string name="language_title">Langue</string>
+    <string name="language_title">Langue de l\'application</string>
     <string name="language_system">Celle du système</string>
-    <string name="language_system_description">Suivre la langue de l\'appareil</string>
-    <string name="language_close">Fermer</string>
+    <string name="language_system_description">Suivre l\'appareil</string>
+    <string name="language_current">Actuelle : %1$s</string>
+    <string name="language_selected">Choisie : %1$s</string>
+    <string name="language_cancel">Annuler</string>
+    <string name="language_confirm">Confirmer</string>
     <string name="language_changed_title">Langue modifiée</string>
     <string name="language_changed_body">Hazel est maintenant dans cette langue. Ce qui n\'a pas encore été traduit reste en anglais.</string>
     <string name="language_changed_ok">OK</string>

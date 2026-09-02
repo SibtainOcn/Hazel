@@ -475,10 +475,13 @@
     <string name="appearance_title">Apariencia</string>
 
     <!-- Language picker -->
-    <string name="language_title">Idioma</string>
+    <string name="language_title">Idioma de la aplicación</string>
     <string name="language_system">El del sistema</string>
-    <string name="language_system_description">Seguir el idioma del dispositivo</string>
-    <string name="language_close">Cerrar</string>
+    <string name="language_system_description">Seguir al dispositivo</string>
+    <string name="language_current">Actual: %1$s</string>
+    <string name="language_selected">Elegido: %1$s</string>
+    <string name="language_cancel">Cancelar</string>
+    <string name="language_confirm">Confirmar</string>
     <string name="language_changed_title">Idioma cambiado</string>
     <string name="language_changed_body">Hazel ya está en este idioma. Todo lo que la aplicación no tenga traducido se queda en inglés.</string>
     <string name="language_changed_ok">Aceptar</string>

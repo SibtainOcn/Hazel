@@ -468,10 +468,13 @@
     <string name="appearance_title">दिखावट</string>
 
     <!-- Language picker -->
-    <string name="language_title">भाषा</string>
+    <string name="language_title">ऐप की भाषा</string>
     <string name="language_system">सिस्टम की भाषा</string>
-    <string name="language_system_description">डिवाइस की भाषा के अनुसार चलें</string>
-    <string name="language_close">बंद करें</string>
+    <string name="language_system_description">डिवाइस के अनुसार</string>
+    <string name="language_current">अभी: %1$s</string>
+    <string name="language_selected">चुनी गई: %1$s</string>
+    <string name="language_cancel">रद्द करें</string>
+    <string name="language_confirm">पक्का करें</string>
     <string name="language_changed_title">भाषा बदल गई</string>
     <string name="language_changed_body">Hazel अब इस भाषा में है। ऐप का जो हिस्सा अनूदित नहीं है, वह अंग्रेज़ी में ही रहेगा।</string>
     <string name="language_changed_ok">ठीक है</string>
