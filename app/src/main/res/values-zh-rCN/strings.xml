@@ -1,0 +1,550 @@
+<resources>
+    <string name="direct_share_label">即时下载</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">首页</string>
+    <string name="nav_history">下载</string>
+    <string name="nav_more">更多</string>
+    <string name="nav_incognito_on">无痕模式已开启，下载不会被记录</string>
+    <string name="nav_incognito_off">无痕模式已关闭</string>
+
+    <!-- DownloadScreen -->
+    <string name="download_search_hint">搜索或粘贴链接</string>
+    <string name="download_clear">清空</string>
+    <string name="download_show_large_artwork">显示大图</string>
+    <string name="download_show_list">以列表显示</string>
+    <string name="download_instant_source">即时下载 · 正在读取 %1$s</string>
+    <string name="download_incognito_title">你正在无痕模式中</string>
+    <string name="download_incognito_body">下载不会加入历史记录，链接也不会被记住。文件仍会照常保存。</string>
+    <string name="download_download_all">全部下载</string>
+    <string name="download_saved_aside">你的下载已保存，可在「下载」标签页中找到。</string>
+    <string name="download_options">下载选项</string>
+    <string name="download_pause">暂停</string>
+    <string name="download_resume">继续</string>
+    <string name="download_cancel">取消</string>
+    <string name="download_paused">已暂停</string>
+    <string name="download_processing">正在处理</string>
+    <string name="download_waiting_wifi">等待 Wi-Fi</string>
+    <string name="download_saved">已保存</string>
+    <string name="download_queued">排队中</string>
+    <string name="download_downloaded">已下载</string>
+    <string name="download_failed">失败</string>
+    <string name="download_remove_link">移除链接</string>
+    <string name="download_cancel_action">取消下载</string>
+    <string name="download_resume_action">继续下载</string>
+    <plurals name="download_links">
+        <item quantity="other">%d 个链接</item>
+    </plurals>
+
+    <!-- SearchScreen -->
+    <string name="search_hint">搜索或粘贴链接</string>
+    <string name="search_back">返回</string>
+    <string name="search_more">更多</string>
+    <string name="search_add_link">再添加一个链接</string>
+    <string name="search_clear">清除</string>
+    <string name="search_clear_results">清空结果</string>
+    <string name="search_clear_history">清除搜索记录</string>
+    <string name="search_empty_history">你用过的链接会显示在这里</string>
+    <string name="search_no_matches">没有匹配的链接</string>
+    <string name="search_remove">移除</string>
+    <string name="search_all">全部搜索</string>
+    <string name="search_forget">忘记</string>
+    <string name="search_edit_before">搜索前先编辑</string>
+    <string name="search_paste_and_fetch">粘贴并读取</string>
+    <string name="search_nothing_to_paste">没有可粘贴的内容</string>
+
+    <!-- AlreadyDownloadedDialog -->
+    <string name="already_downloaded_title">已经下载过</string>
+    <string name="already_downloaded_body">这个链接已经保存在本设备上。</string>
+    <string name="already_downloaded_video">视频</string>
+    <string name="already_downloaded_audio">音频</string>
+    <string name="already_downloaded_keep">保留</string>
+    <string name="already_downloaded_play">播放</string>
+    <string name="already_downloaded_download_again">再下载一次</string>
+    <string name="already_downloaded_just_now">刚刚</string>
+    <string name="already_downloaded_yesterday">昨天</string>
+    <plurals name="already_downloaded_minutes">
+        <item quantity="other">%d 分钟</item>
+    </plurals>
+    <plurals name="already_downloaded_hours">
+        <item quantity="other">%d 小时</item>
+    </plurals>
+    <plurals name="already_downloaded_days">
+        <item quantity="other">%d 天</item>
+    </plurals>
+    <plurals name="already_downloaded_months">
+        <item quantity="other">%d 个月</item>
+    </plurals>
+
+    <!-- NoResultsDialog -->
+    <string name="no_results_sign_in_title">需要登录</string>
+    <string name="no_results_error_title">无法读取这个链接</string>
+    <string name="no_results_sign_in_body">来源要求先有账号才肯交出内容。登录后会保存该站点的 Cookie 并重试。</string>
+    <string name="no_results_continue_body">详细信息读取失败，但下载本身仍可能成功。继续的话会使用可得的最佳画质。</string>
+    <string name="no_results_refused_body">来源拒绝了这次请求。</string>
+    <string name="no_results_engine_report">引擎的报告</string>
+    <string name="no_results_copy_log">复制日志</string>
+    <string name="no_results_sign_in">登录</string>
+    <string name="no_results_try_anyway">仍然尝试</string>
+    <string name="no_results_close">关闭</string>
+
+    <!-- UserGuideDialog -->
+    <string name="guide_title">开始使用</string>
+    <string name="guide_step_paste_link">把链接粘贴到搜索框即可下载。你可以添加多个链接和播放列表</string>
+    <string name="guide_step_pick_format">点按卡片可以挑选具体格式。所有可用画质都会连同体积和编码一起列出。</string>
+    <string name="guide_step_share_instant">从任意应用把链接分享给 Hazel 即时下载，就会按你设定的画质立刻下载。</string>
+    <string name="guide_step_finished_downloads">完成的文件会出现在「下载」中。点按任意一行即可用设备的默认播放器打开。</string>
+    <string name="guide_step_battery_unrestricted">请把电池用量设为不受限制，否则你离开应用时 Android 可能会中止下载。</string>
+    <string name="guide_battery_settings">电池设置</string>
+    <string name="guide_close">关闭</string>
+
+    <!-- FormatSheet -->
+    <string name="format_sheet_title">下载</string>
+    <string name="format_sheet_subtitle">调整下载</string>
+    <string name="format_sheet_play">播放</string>
+    <string name="format_sheet_ok">确定</string>
+    <string name="format_sheet_download">下载</string>
+    <string name="format_sheet_tab_audio">音频</string>
+    <string name="format_sheet_tab_video">视频</string>
+    <string name="format_sheet_label_title">标题</string>
+    <string name="format_sheet_label_author">作者</string>
+    <string name="format_sheet_label_container">封装格式</string>
+    <string name="format_sheet_video_quality">视频画质</string>
+    <string name="format_sheet_audio_quality">音频质量</string>
+    <string name="format_sheet_no_video_stream">这个来源没有单独的视频流。</string>
+    <string name="format_sheet_no_audio_stream">这个来源没有单独的音频流。</string>
+    <string name="format_sheet_adjust_video">调整视频</string>
+    <string name="format_sheet_adjust_audio">调整音频</string>
+    <string name="format_sheet_thumbnail">缩略图</string>
+    <string name="format_sheet_chapters">章节</string>
+    <string name="format_sheet_subtitles">字幕</string>
+    <string name="format_sheet_sponsorblock">SponsorBlock</string>
+    <string name="format_sheet_audio_language">音轨语言</string>
+    <string name="format_sheet_change_audio_language">更改音轨语言</string>
+    <string name="format_sheet_filename_template">文件名模板</string>
+    <string name="format_sheet_change_field">更改</string>
+    <string name="format_sheet_save_dir">保存目录</string>
+    <string name="format_sheet_save_location">保存位置</string>
+    <string name="format_sheet_save_location_title">保存位置</string>
+    <string name="format_sheet_save_location_body">在文件管理器中打开这个文件夹，或者另选一个用来保存下载。</string>
+    <string name="format_sheet_open_folder">打开文件夹</string>
+    <string name="format_sheet_reset">重置</string>
+    <string name="format_sheet_change">更改</string>
+
+    <!-- ConverterScreen -->
+    <string name="converter_label_convert_to">转换为</string>
+    <string name="converter_label_saved_to">保存到</string>
+    <string name="converter_hazel_storage">Hazel 自己的存储空间</string>
+    <string name="converter_storage_warning">没有存储权限时文件会留在 Hazel 内部，其他应用看不到它。</string>
+    <string name="converter_back">返回</string>
+    <string name="converter_title">离线转换器</string>
+    <string name="converter_subtitle">视频转音频，任何内容都不会离开手机</string>
+    <string name="converter_choose_video">选择一个视频文件</string>
+    <string name="converter_ready">就绪</string>
+    <string name="converter_choose_video_hint">手机或 SD 卡上的任意文件</string>
+    <string name="converter_change">更改</string>
+    <string name="converter_converting">正在转换</string>
+    <string name="converter_convert">转换</string>
+    <string name="converter_saved">已保存</string>
+    <string name="converter_open_folder">打开文件夹</string>
+    <string name="converter_convert_another">再转换一个</string>
+    <string name="converter_error_title">这个没能转换成功</string>
+    <string name="converter_dismiss">知道了</string>
+    <string name="converter_save_as_title">另存为</string>
+    <string name="converter_save_as_body">决定文件的名字，同时也会写进它的标题标签。</string>
+    <string name="converter_label_name">名称</string>
+    <string name="converter_start">开始</string>
+    <string name="converter_format_sheet_title">转换为</string>
+    <string name="converter_heading_common">值得一用的三种</string>
+    <string name="converter_heading_other">其余全部</string>
+
+    <!-- MoreScreen -->
+    <string name="more_title">更多</string>
+    <string name="more_battery_title">后台下载</string>
+    <string name="more_battery_body">下载会自己在后台继续。不过有些手机仍会为了省电中途掐断它们。允许不受限制的用量即可排除这一点。</string>
+    <string name="more_downloads">下载</string>
+    <string name="more_appearance">外观</string>
+    <string name="more_language">语言</string>
+    <string name="more_cookies">Cookie</string>
+    <string name="more_link_reading">链接读取</string>
+    <string name="more_hazel_instant">Hazel 即时下载</string>
+    <string name="more_temporary_files">临时文件</string>
+    <string name="more_converter">离线把视频转成音频</string>
+    <string name="more_engine_update">yt-dlp 引擎更新</string>
+    <string name="more_support">支持 Hazel</string>
+    <string name="more_license">许可证</string>
+
+    <!-- SponsorScreen -->
+    <string name="sponsor_back">返回</string>
+    <string name="sponsor_title">支持 Hazel</string>
+    <string name="sponsor_hero_title">免费，而且会一直免费</string>
+    <string name="sponsor_hero_body">Hazel 是在晚上和周末做出来的，它免费送出，因为一个对下载收费的下载器是更差的下载器。站点在不断变化，跟上它们才是真正的工作。</string>
+    <string name="sponsor_hero_closing">如果这个应用替你省下了一个下午，下面任何一种方式都能把那段时间还回去。如果没有，那些不花钱的方式一样有帮助。</string>
+    <string name="sponsor_section_ways">支持的方式</string>
+    <string name="sponsor_github_title">GitHub Sponsors</string>
+    <string name="sponsor_github_subtitle">按月或只付一次，随时可以取消。全程由 GitHub 处理。</string>
+    <string name="sponsor_kofi_title">Ko-fi</string>
+    <string name="sponsor_kofi_subtitle">只付一次，不需要账号。</string>
+    <string name="sponsor_kofi_soon">即将开放</string>
+    <string name="sponsor_section_free">不花一分钱，帮助一样大</string>
+    <string name="sponsor_star_title">给项目点个星</string>
+    <string name="sponsor_star_subtitle">人们在试一个应用之前，只会看这一个数字。</string>
+    <string name="sponsor_share_title">告诉别人</string>
+    <string name="sponsor_share_subtitle">口口相传就是这个应用的全部宣传。</string>
+    <string name="sponsor_issues_title">报告出错的地方</string>
+    <string name="sponsor_issues_subtitle">一个用不了的站点，别人写不出这个修复。</string>
+    <string name="sponsor_source_title">阅读源代码</string>
+    <string name="sponsor_source_subtitle">每一行都是公开的，也欢迎提交 pull request。</string>
+    <string name="sponsor_footer">没有广告，不统计你下载了什么，也没有任何功能被留给少数人。支持改变的是投入 Hazel 的时间，而不是它会为你做什么。</string>
+
+    <!-- UpdateScreen -->
+    <string name="update_title">yt-dlp 更新</string>
+    <string name="update_back">返回</string>
+    <string name="update_check_action">检查更新</string>
+    <string name="update_status_up_to_date">已是最新</string>
+    <string name="update_status_checking">正在检查更新...</string>
+    <string name="update_status_available">有可用更新</string>
+    <string name="update_status_installing">正在安装 yt-dlp...</string>
+    <string name="update_status_installed">引擎已更新</string>
+    <string name="update_status_failed">更新失败</string>
+    <string name="update_subtitle_idle">Hazel 正在使用最新的 yt-dlp 构建</string>
+    <string name="update_subtitle_checking">正在连接 GitHub...</string>
+    <string name="update_subtitle_available">yt-dlp %1$s 已可用</string>
+    <string name="update_subtitle_updating">正在下载 yt-dlp %1$s</string>
+    <string name="update_subtitle_installed">yt-dlp %1$s 已投入使用</string>
+    <string name="update_installed_version">已安装版本</string>
+    <string name="update_version_unknown">未知</string>
+    <string name="update_new_version">新版本</string>
+    <string name="update_installing_binary">正在安装可执行文件</string>
+    <string name="update_installing_body">正在从 GitHub 下载并替换引擎。请保持应用打开。</string>
+    <string name="update_action_update_now">立即更新</string>
+    <string name="update_action_installing">正在安装...</string>
+    <string name="update_action_done">完成</string>
+    <string name="update_action_retry">重试</string>
+    <string name="update_action_check">检查更新</string>
+    <string name="update_action_checking">正在检查...</string>
+    <string name="update_info_heading">信息</string>
+    <string name="update_info_component">组件</string>
+    <string name="update_info_repository">仓库</string>
+    <string name="update_info_binary_size">文件大小</string>
+    <string name="update_info_distribution">分发方式</string>
+    <string name="update_info_github_releases">GitHub Releases</string>
+    <string name="update_release_channel">发布渠道</string>
+    <string name="update_view_changelog">查看更新日志</string>
+
+    <!-- DownloadOptionDialogs -->
+    <string name="options_sponsorblock_title">选择 SponsorBlock 过滤</string>
+    <string name="options_sponsorblock_ok">确定</string>
+    <string name="options_sponsorblock_cancel">取消</string>
+    <string name="options_chapters_title">章节</string>
+    <string name="options_chapters_in_videos">视频中的章节</string>
+    <string name="options_chapters_split">按章节分割</string>
+    <string name="options_chapters_split_body">分割后会为每一章写一个文件，而不是单独一个文件。</string>
+    <string name="options_chapters_dismiss">知道了</string>
+    <string name="options_subtitles_title">字幕</string>
+    <string name="options_subtitles_embed">把字幕嵌入文件</string>
+    <string name="options_subtitles_save">保存字幕</string>
+    <string name="options_subtitles_save_auto">保存自动生成的字幕</string>
+    <string name="options_subtitles_languages_label">字幕语言</string>
+    <string name="options_subtitles_dismiss">知道了</string>
+    <string name="options_subtitles_languages_title">字幕语言</string>
+    <string name="options_subtitles_languages_hint">yt-dlp 的语言选择器，例如 en.*,.*-orig 表示英语加上原始音轨。用 all 表示来源提供的每一种语言。</string>
+    <string name="options_filename_title">文件名模板</string>
+    <string name="options_filename_hint">yt-dlp 的输出模板。可以使用 %(title)s、%(uploader)s、%(id)s 和 %(ext)s。</string>
+    <string name="options_text_input_save">保存</string>
+    <string name="options_text_input_cancel">取消</string>
+
+    <!-- StorageCleanupScreen -->
+    <string name="cleanup_back">返回</string>
+    <string name="cleanup_title">临时文件</string>
+    <string name="cleanup_header_description">应用保留的工作文件。你的下载不包含在内，也永远不会从这里被清掉。</string>
+    <string name="cleanup_action_clear_everything">全部清除</string>
+    <string name="cleanup_category_link_data_label">链接数据缓存</string>
+    <string name="cleanup_category_link_data_description">yt-dlp 保留的播放器数据，让同一个链接第二次读取时更快。清除是安全的。</string>
+    <string name="cleanup_category_partial_downloads_label">未完成的下载</string>
+    <string name="cleanup_category_partial_downloads_description">下载在保存文件之前被取消或失败时留下的碎片。</string>
+    <string name="cleanup_category_conversions_label">未完成的转换</string>
+    <string name="cleanup_category_conversions_description">音频转换器留下的、从未移入你音乐文件夹的工作文件。</string>
+    <string name="cleanup_category_engine_label">yt-dlp 引擎文件</string>
+    <string name="cleanup_category_engine_description">下载器和它的运行环境。清除能腾出最多空间，但下次下载时必须重新解包。</string>
+    <string name="cleanup_category_other_cache_label">其他缓存文件</string>
+    <string name="cleanup_category_other_cache_description">缩略图，以及浏览链接时缓存下来的其他内容。</string>
+    <string name="cleanup_confirm_category_title">清除这些文件？</string>
+    <string name="cleanup_confirm_category_safe">将腾出 %1$s。你保存过的任何东西都不受影响。</string>
+    <string name="cleanup_confirm_category_unsafe">将腾出 %1$s，下次下载会因为要重新解包而变慢。</string>
+    <string name="cleanup_confirm_clear">清除</string>
+    <string name="cleanup_confirm_cancel">取消</string>
+    <string name="cleanup_confirm_all_title">全部清除？</string>
+    <string name="cleanup_confirm_all_body">将腾出 %1$s。你的下载和已保存的登录信息都会保留，但下次下载会因为要重新解包引擎而变慢。</string>
+    <string name="cleanup_confirm_all_confirm">全部清除</string>
+    <string name="cleanup_confirm_all_cancel">取消</string>
+
+    <!-- HistoryScreen -->
+    <string name="history_title">下载</string>
+    <string name="history_layout_grid">显示大图</string>
+    <string name="history_layout_list">以列表显示</string>
+    <string name="history_search_action">搜索下载</string>
+    <string name="history_sort_action">排序</string>
+    <string name="history_menu_action">更多</string>
+    <string name="history_menu_clear">清除历史记录</string>
+    <string name="history_search_placeholder">搜索下载</string>
+    <string name="history_search_clear">清除搜索</string>
+    <string name="history_empty_initial">还没有下载任何内容</string>
+    <string name="history_empty_filtered">没有匹配的内容</string>
+    <string name="history_clear_dialog_title">清除历史记录</string>
+    <string name="history_clear_dialog_body">列表会被清空。你下载的文件不会被动过。</string>
+    <string name="history_clear_dialog_confirm">清除</string>
+    <string name="history_clear_dialog_cancel">取消</string>
+    <string name="history_delete_dialog_title">删除文件</string>
+    <string name="history_delete_dialog_body">%1$s 将从你的设备上删除。</string>
+    <string name="history_toast_file_deleted">文件已删除</string>
+    <string name="history_toast_file_delete_failed">无法删除这个文件</string>
+    <string name="history_delete_dialog_confirm">删除</string>
+    <string name="history_delete_dialog_cancel">取消</string>
+    <string name="history_card_options">选项</string>
+    <string name="history_card_properties">属性</string>
+    <string name="history_card_remove">从列表中移除</string>
+    <string name="history_card_delete">删除文件</string>
+    <string name="history_tag_deleted">已删除</string>
+    <string name="history_row_options">选项</string>
+    <string name="history_row_properties">属性</string>
+    <string name="history_row_remove">从列表中移除</string>
+    <string name="history_row_delete">删除文件</string>
+    <string name="history_toast_file_gone">这个文件已经不在你的设备上了</string>
+
+    <!-- DownloadPropertiesSheet -->
+    <string name="properties_title">属性</string>
+    <string name="properties_status">状态</string>
+    <string name="properties_status_present">在本设备上</string>
+    <string name="properties_status_deleted">已从本设备删除</string>
+    <string name="properties_kind">类型</string>
+    <string name="properties_kind_video">视频</string>
+    <string name="properties_kind_audio">音频</string>
+    <string name="properties_quality">画质</string>
+    <string name="properties_resolution">分辨率</string>
+    <string name="properties_length">时长</string>
+    <string name="properties_codec">编码</string>
+    <string name="properties_bitrate">码率</string>
+    <string name="properties_bitrate_value">%1$d kbps</string>
+    <string name="properties_size">大小</string>
+    <string name="properties_container">封装格式</string>
+    <string name="properties_type">文件类型</string>
+    <string name="properties_embedded">已嵌入</string>
+    <string name="properties_file">文件</string>
+    <string name="properties_saved_to">保存到</string>
+    <string name="properties_downloaded">下载时间</string>
+    <string name="properties_source">来源</string>
+    <string name="properties_link_copied_opened">链接已复制并打开</string>
+    <string name="properties_link_copied">链接已复制</string>
+
+    <!-- CookiesScreen -->
+    <string name="cookies_back">返回</string>
+    <string name="cookies_title">Cookie</string>
+    <string name="cookies_menu">更多</string>
+    <string name="cookies_menu_import">从剪贴板导入</string>
+    <string name="cookies_menu_export">导出到剪贴板</string>
+    <string name="cookies_menu_delete_all">全部删除</string>
+    <string name="cookies_imported_title">导入的 Cookie</string>
+    <string name="cookies_toast_imported">Cookie 已导入</string>
+    <string name="cookies_toast_no_data">剪贴板里没有 Cookie 数据</string>
+    <string name="cookies_toast_nothing_to_export">没有可导出的内容</string>
+    <string name="cookies_toast_exported">已复制到剪贴板</string>
+    <string name="cookies_toast_entry_copied">已复制到剪贴板</string>
+    <string name="cookies_use_title">使用 Cookie</string>
+    <string name="cookies_use_description">把已保存的登录信息交给下载器</string>
+    <string name="cookies_new">新建 Cookie</string>
+    <string name="cookies_empty_title">没有保存任何 Cookie</string>
+    <string name="cookies_empty_body">添加一个，就能下载有年龄限制、私密或仅会员可见的内容。</string>
+    <string name="cookies_delete_title">删除 Cookie</string>
+    <string name="cookies_delete_body">要移除 %1$s 的已保存登录信息吗？</string>
+    <string name="cookies_delete_confirm">删除</string>
+    <string name="cookies_delete_cancel">取消</string>
+    <string name="cookies_delete_all_title">删除全部 Cookie</string>
+    <string name="cookies_delete_all_body">所有已保存的登录信息都会被移除。此操作无法撤销。</string>
+    <string name="cookies_delete_all_confirm">全部删除</string>
+    <string name="cookies_delete_all_cancel">取消</string>
+    <string name="cookies_row_fallback_name">Cookie</string>
+    <string name="cookies_sheet_title">Cookie</string>
+    <string name="cookies_sheet_copy">复制 Cookie</string>
+    <string name="cookies_sheet_delete">删除 Cookie</string>
+    <string name="cookies_field_title">标题</string>
+    <string name="cookies_field_url">网址</string>
+    <string name="cookies_sheet_save">保存</string>
+    <string name="cookies_sheet_get">获取 Cookie</string>
+    <string name="cookies_sheet_update">更新</string>
+
+    <!-- Batch option sheets -->
+    <string name="batch_quality_best">最佳画质</string>
+    <string name="batch_type_sheet_title">首选下载类型</string>
+    <string name="batch_type_sheet_subtitle">这些链接会以什么形式下载</string>
+    <string name="batch_type_audio">音频</string>
+    <string name="batch_type_video">视频</string>
+    <string name="batch_format_title">格式</string>
+    <string name="batch_format_subtitle">选择格式</string>
+    <string name="batch_container_title">封装格式</string>
+    <string name="batch_container_subtitle">这些链接会保存成哪种文件</string>
+    <string name="batch_save_dir_title">保存位置</string>
+    <string name="batch_open_folder">打开这个文件夹</string>
+    <string name="batch_change_folder">更换文件夹</string>
+
+    <!-- Batch action bar -->
+    <string name="batch_bar_thumbnail">缩略图</string>
+    <string name="batch_bar_chapters">章节</string>
+    <string name="batch_bar_subtitles">字幕</string>
+    <string name="batch_bar_sponsorblock">SponsorBlock</string>
+    <string name="batch_bar_filename_template">文件名模板</string>
+    <string name="batch_bar_download_type">首选下载类型</string>
+    <string name="batch_bar_quality">画质：%1$s</string>
+    <string name="batch_bar_save_location">保存位置</string>
+    <string name="batch_bar_container">封装格式</string>
+
+    <!-- Batch download sheet -->
+    <string name="batch_header_title">下载</string>
+    <string name="batch_header_subtitle">调整下载</string>
+    <string name="batch_download_action">下载</string>
+    <string name="batch_stop_selecting">结束选择</string>
+    <string name="batch_start_selecting">选择链接</string>
+    <string name="batch_list_options">列表选项</string>
+    <string name="batch_menu_select_links">选择链接</string>
+    <string name="batch_menu_select_all">全选</string>
+    <string name="batch_menu_invert">反选</string>
+    <string name="batch_menu_remove_selected">移除所选</string>
+    <string name="batch_menu_done">完成</string>
+    <plurals name="batch_selected">
+        <item quantity="other">已选 %d 个</item>
+    </plurals>
+    <plurals name="batch_links">
+        <item quantity="other">%d 个链接</item>
+    </plurals>
+    <string name="batch_card_download_type">这个链接的下载类型</string>
+    <string name="batch_card_remove">移除</string>
+
+    <!-- Opening a finished file -->
+    <string name="media_open_unknown_location">不知道这个文件在哪里</string>
+    <string name="media_open_chooser">打开方式</string>
+    <string name="media_open_no_app">这台设备上没有能打开它的应用</string>
+
+    <!-- Download notifications -->
+    <string name="notification_cancelled_text">下载已取消</string>
+    <string name="notification_channel_progress_description">下载进度，在状态栏显示图标</string>
+    <string name="notification_channel_complete_description">下载完成提醒</string>
+    <string name="notification_action_pause">暂停</string>
+    <string name="notification_action_resume">继续</string>
+    <string name="notification_action_cancel">取消</string>
+    <string name="notification_action_sign_in">登录</string>
+    <string name="notification_wifi_title">等待 Wi-Fi</string>
+    <string name="notification_wifi_text">下载被限制为仅使用 Wi-Fi。回到 Wi-Fi 后就会开始。</string>
+
+    <!-- Sign-in web view -->
+    <string name="cookie_webview_close">关闭</string>
+    <string name="cookie_webview_desktop_site">桌面版网站</string>
+    <string name="cookie_webview_no_cookies">没有取到任何 Cookie</string>
+    <string name="cookie_webview_done">"  确定"</string>
+
+    <!-- FormatSelectionSheet -->
+    <string name="format_selection_sort">格式排序</string>
+    <string name="format_selection_change">更改格式</string>
+    <string name="format_selection_title">格式</string>
+    <string name="format_selection_subtitle">选择格式</string>
+    <string name="format_selection_confirm">确定</string>
+    <string name="format_selection_loading">正在读取其余的格式</string>
+    <string name="format_sort_quality">画质</string>
+    <string name="format_sort_file_size">文件大小</string>
+    <string name="format_sort_container">封装格式</string>
+
+    <!-- AudioLanguageSheet -->
+    <string name="audio_language_title">音轨语言</string>
+    <string name="audio_language_subtitle">选择音轨</string>
+
+    <!-- AppearanceScreen -->
+    <string name="appearance_back">返回</string>
+    <string name="appearance_title">外观</string>
+
+    <!-- Language picker -->
+    <string name="language_title">语言</string>
+    <string name="language_system">跟随系统</string>
+    <string name="language_system_description">使用设备的语言</string>
+    <string name="language_close">关闭</string>
+    <string name="language_changed_title">语言已更改</string>
+    <string name="language_changed_body">Hazel 现在使用这种语言。应用中尚未翻译的部分仍会显示英文。</string>
+    <string name="language_changed_ok">确定</string>
+    <string name="appearance_dark_theme">深色主题</string>
+    <string name="appearance_accent_color">强调色</string>
+
+    <!-- AccentPickerDialog -->
+    <string name="accent_picker_title">强调色</string>
+    <string name="accent_picker_close">关闭</string>
+
+    <!-- FetchSettingsScreen -->
+    <string name="fetch_settings_back">返回</string>
+    <string name="fetch_settings_title">链接读取</string>
+    <string name="fetch_settings_timeout_description">在放弃并重试之前，要等一个慢来源多久。</string>
+    <plurals name="fetch_settings_timing">
+        <item quantity="other">超时 %1$d 秒，重试 %2$d 次</item>
+    </plurals>
+    <string name="fetch_settings_reading_links">链接读取</string>
+    <string name="fetch_settings_reading_links_description">由哪个读取器判断一个链接里有什么。无论这里选哪个，下载始终使用 yt-dlp。</string>
+    <string name="fetch_settings_force_ipv4_description">只有当链接在你的网络上卡住时才打开它。它能绕开出问题的 IPv6 路由，在其他情况下都更慢。</string>
+    <string name="fetch_settings_force_ipv4">强制使用 IPv4</string>
+    <string name="fetch_mode_fast_label">快速</string>
+    <string name="fetch_mode_fast_description">很快就放弃。在好网络上最快，但更容易需要第二次尝试。</string>
+    <string name="fetch_mode_balanced_label">均衡</string>
+    <string name="fetch_mode_balanced_description">在速度和容忍差连接之间取一个中间点。</string>
+    <string name="fetch_mode_thorough_label">彻底</string>
+    <string name="fetch_mode_thorough_description">等得更久，重试更多。最慢，但能撑过弱网络。</string>
+    <string name="listing_source_ytdlp_description">和执行下载的是同一个引擎。它支持的每个站点都能用，而且会自我更新，所以站点变化时它也能继续工作。</string>
+    <string name="listing_source_newpipe_label">优先使用内置读取器</string>
+    <string name="listing_source_newpipe_description">用一次请求就列出播放列表和频道，而不必启动引擎，在它认识的站点上更快。其余情况，以及任何读不出链接的时候，都会回退到 yt-dlp。</string>
+
+    <!-- ToolsScreen -->
+    <string name="tools_back">返回</string>
+    <string name="tools_title">工具</string>
+    <string name="tools_empty">这里暂时还没有内容。</string>
+
+    <!-- DirectShareScreen -->
+    <string name="direct_share_back">返回</string>
+    <string name="direct_share_save_as">保存为</string>
+    <string name="direct_share_video">视频</string>
+    <string name="direct_share_audio_only">仅音频</string>
+    <string name="direct_share_title">Hazel 即时下载</string>
+    <string name="direct_share_intro">把链接分享给 Hazel 即时下载会立刻开始下载，没有面板也没有提问。这些就是它使用的答案。</string>
+    <string name="direct_share_video_description">画面和声音，合并成一个文件。</string>
+    <string name="direct_share_audio_description">只要声音，用来源提供的最好音质。</string>
+    <string name="direct_share_quality_title">画质上限</string>
+    <string name="direct_share_quality_description">这是一个上限，不是确切尺寸。各个来源提供的分辨率并不相同，所以会取不超过它的最高一档，都不满足时则取可得的最低一档。</string>
+    <string name="direct_share_output_title">输出</string>
+    <string name="direct_share_output_description">最终落到设备上的文件。默认保留来源本来就提供的格式，这也是最快的选项，因为不需要重新编码。</string>
+    <string name="direct_share_filename_template">文件名模板</string>
+    <string name="direct_share_audio_language">音轨语言</string>
+    <string name="direct_share_audio_language_default">来源默认</string>
+    <string name="direct_share_extras_title">附加内容</string>
+    <string name="direct_share_extras_description">来源有的时候才会应用。它没有的部分会在那次下载中跳过，而不会让下载失败。</string>
+    <string name="direct_share_cover_art">封面图</string>
+    <string name="direct_share_cover_art_description">把缩略图写进文件，前提是封装格式能容纳它。</string>
+    <string name="direct_share_chapters">章节</string>
+    <string name="direct_share_subtitles">字幕</string>
+    <string name="direct_share_sponsorblock">SponsorBlock</string>
+    <string name="direct_share_sponsorblock_off">关闭</string>
+    <plurals name="direct_share_sponsorblock_cut">
+        <item quantity="other">已剪掉 %1$d 个类别</item>
+    </plurals>
+    <string name="direct_share_signins_title">登录信息</string>
+    <string name="direct_share_signins_description">即时分享会使用链接所属站点已保存的 Cookie，和从面板发起的下载一样。分享时不会有任何询问，所以需要登录才能看的链接，只有在登录信息已经保存并开启时才能下载。</string>
+    <string name="direct_share_cookies">Cookie</string>
+    <string name="direct_share_cookies_on">已开启，每次即时分享都会使用</string>
+    <string name="direct_share_cookies_off">关闭</string>
+    <string name="direct_share_change">更改%1$s</string>
+
+    <!-- StorageLocationsScreen -->
+    <string name="storage_locations_back">返回</string>
+    <string name="storage_locations_downloads">下载</string>
+    <string name="storage_locations_title">下载</string>
+    <string name="storage_locations_subtitle">下载保存在哪里，以及它们受哪些限制</string>
+    <string name="storage_locations_limits">限制</string>
+    <string name="storage_locations_wifi_only_description">下载会等待，而不使用移动数据</string>
+    <string name="storage_locations_speed_limit_description">允许下载达到多快</string>
+    <string name="storage_locations_internal_note">所有文件都保存在设备的内部存储中。你随时可以用任何文件管理器应用访问它们。</string>
+    <string name="storage_locations_wifi_only">仅 Wi-Fi</string>
+    <string name="storage_locations_speed_limit">速度限制</string>
+
+</resources>
