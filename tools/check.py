@@ -241,9 +241,13 @@ def check_resources():
 LITERAL = re.compile(
     # \b keeps writeText(" from matching the bare Text(" case. Notification setters are
     # listed by name because that text is user visible and \b would otherwise hide it.
-    r'\bText\("|contentDescription = "|text = "|title = "|label = "'
-    r'|hint = "|placeholder = "|supportingText|Toast\.makeText'
-    r'|setContentText\("|setContentTitle\("|setTicker\("|addAction\([^,]*, *"'
+    #
+    # \s* rather than a literal space everywhere a bracket or an equals sign is followed
+    # by the text: \s matches a newline, which is what lets a call written over several
+    # lines be seen at all.
+    r'\bText\(\s*"|contentDescription\s*=\s*"|\btext\s*=\s*"|\btitle\s*=\s*"'
+    r'|\blabel\s*=\s*"|\bhint\s*=\s*"|\bplaceholder\s*=\s*"|supportingText|Toast\.makeText'
+    r'|setContentText\(\s*"|setContentTitle\(\s*"|setTicker\(\s*"|addAction\([^,]*,\s*"'
 )
 
 
@@ -267,19 +271,36 @@ def load_allowlist():
 
 
 def literals_in(path, allow):
-    """Literal hits in one file that nobody has dispositioned."""
+    """
+    Literal hits in one file that nobody has dispositioned.
+
+    The whole file is searched rather than each line on its own. A Compose call almost
+    never fits on one line, and reading line by line saw only the calls whose text happened
+    to sit beside the opening bracket. Everything written the ordinary way, with the text
+    under the call, was invisible: a screen of hardcoded labels could sit at zero and look
+    finished. The hit is reported at the line the call opens on, which is the line an
+    allowlist entry names.
+    """
     rel = str(Path(path).relative_to(ROOT)).replace("\\", "/") if Path(path).is_absolute() else str(path).replace("\\", "/")
+    text = read(path)
+    lines = text.splitlines()
+
     hits = []
-    for i, line in enumerate(read(path).splitlines(), start=1):
-        if line.strip().startswith("//"):
+    seen = set()
+    for m in LITERAL.finditer(text):
+        i = text.count("\n", 0, m.start()) + 1
+        if i in seen:
+            continue
+        line = lines[i - 1].strip() if i - 1 < len(lines) else ""
+        if line.startswith("//"):
             continue
         # An empty string is a reset, not text. Nobody translates "".
-        if re.search(r'=\s*""\s*[,)]?\s*$', line.strip()):
+        if re.search(r'=\s*""\s*[,)]?\s*$', line):
             continue
-        if LITERAL.search(line):
-            if (rel, i) not in allow:
-                hits.append((i, line.strip()))
-    return rel, hits
+        seen.add(i)
+        if (rel, i) not in allow:
+            hits.append((i, line))
+    return rel, sorted(hits)
 
 
 def check_file(target):
