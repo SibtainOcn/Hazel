@@ -10,6 +10,44 @@ it.
 
 ---
 
+## The generic format rows carry their label as text
+
+**Where** `app/src/main/java/com/hazel/android/download/MediaProbe.kt`, `BEST_VIDEO` and
+`BEST_AUDIO`.
+
+**What it does now**
+
+```kotlin
+private val BEST_VIDEO = MediaFormat(
+    formatId = "best",
+    label = "Best quality",
+    ...
+)
+```
+
+`Best quality` and `Best audio` are the rows a source gets when it reported no usable format
+list, so both are read by users, and both are English in the Kotlin.
+
+**Why it cannot be moved as it stands** `MediaFormat.label` is a plain `String`, and for
+every real format it holds text derived from what the engine reported. Only these two
+constants hold English, so the field cannot simply become a resource id.
+
+Resolving them through `HazelApp.instance.getString(...)` was tried and reverted. It
+compiles and it works on a device, but `MediaProbe`'s parser is covered by pure JVM unit
+tests, `HazelApp.instance` is a `lateinit` that no such test initialises, and nine tests
+failed with `UninitializedPropertyAccessException`. The parser is context free on purpose;
+that is what makes it testable, and it is worth more than these two strings.
+
+**What it needs** Either a nullable `@StringRes labelRes` on `MediaFormat` that the six
+display sites prefer over `label` when it is set, or the two rows built by the caller, which
+does have a `Context`. Both are design decisions about a model class rather than text moves.
+
+**Until then** the two literals stay, and `progress` reports 2 rather than 0. They are not
+in the allowlist, because an allowlist entry has to say the text never reaches a user and
+that would be untrue.
+
+---
+
 ## `ActionRow` builds its content description out of a translated label
 
 **Where** `app/src/main/java/com/hazel/android/ui/screens/more/DirectShareScreen.kt`,
