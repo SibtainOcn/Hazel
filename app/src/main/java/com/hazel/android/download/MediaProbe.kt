@@ -1,7 +1,5 @@
 package com.hazel.android.download
 
-import com.hazel.android.HazelApp
-import com.hazel.android.R
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkEntry
 import com.yausername.youtubedl_android.YoutubeDL
@@ -344,10 +342,10 @@ object MediaProbe {
      * what a tab holds when the source reported no usable format list, and the reason a
      * download can still go ahead there.
      */
-    private val BEST_VIDEO get() = MediaFormat(
+    private val BEST_VIDEO = MediaFormat(
         formatId = "best",
         selector = "bv*+ba/b",
-        label = HazelApp.instance.getString(R.string.format_best_quality),
+        label = "Best quality",
         ext = "",
         vcodec = null,
         acodec = null,
@@ -360,10 +358,10 @@ object MediaProbe {
         isGeneric = true
     )
 
-    private val BEST_AUDIO get() = MediaFormat(
+    private val BEST_AUDIO = MediaFormat(
         formatId = "bestaudio",
         selector = "ba/b",
-        label = HazelApp.instance.getString(R.string.format_best_audio),
+        label = "Best audio",
         ext = "",
         vcodec = null,
         acodec = null,
