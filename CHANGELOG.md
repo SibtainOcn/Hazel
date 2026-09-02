@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in the same language rather than by the original. It is on the single sheet, on the set
   sheet for a whole run, and in the instant settings as a standing preference; anything that
   does not carry the chosen language is downloaded with what it has.
+- **A Support screen, reached from More.** It says what the app takes from anyone, which is
+  nothing, and offers the two places money can go alongside the ways of helping that cost
+  none. Everything opens in the in-app browser, so nothing here leaves the app.
 - **The download sheet and the set sheet close with the link and an incognito switch.**
   Tapping the address copies it and opens it, in the site's own app when that is installed
   and in the browser otherwise. The switch is the same setting the rest of the app reads,

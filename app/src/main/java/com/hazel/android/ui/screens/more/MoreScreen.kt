@@ -3,6 +3,7 @@ package com.hazel.android.ui.screens.more
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -69,7 +70,8 @@ fun MoreScreen(
     onNavigateToDirectShare: () -> Unit = {},
     onOpenBatterySettings: () -> Unit = {},
     onNavigateToStorageCleanup: () -> Unit = {},
-    onNavigateToUpdate: () -> Unit = {}
+    onNavigateToUpdate: () -> Unit = {},
+    onNavigateToSponsor: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -354,6 +356,29 @@ fun MoreScreen(
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToUpdate() }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            // Above the two lines that leave the app, since this one is a screen of its
+            // own and the ones under it are addresses.
+            ListItem(
+                headlineContent = { Text("Support Hazel") },
+                leadingContent = {
+                    Icon(Icons.Filled.Favorite, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onNavigateToSponsor() }
             )
 
             HorizontalDivider(
