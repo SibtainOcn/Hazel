@@ -29,11 +29,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import androidx.compose.ui.unit.sp
 import com.hazel.android.download.languageLabel
 
@@ -79,12 +81,12 @@ fun AudioLanguageSheet(
                     .padding(bottom = 12.dp)
             ) {
                 Text(
-                    "Audio language",
+                    stringResource(R.string.audio_language_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Select soundtrack",
+                    stringResource(R.string.audio_language_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )

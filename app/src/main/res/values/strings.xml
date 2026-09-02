@@ -485,6 +485,10 @@
     <string name="format_sort_file_size">File size</string>
     <string name="format_sort_container">Container</string>
 
+    <!-- AudioLanguageSheet -->
+    <string name="audio_language_title">Audio language</string>
+    <string name="audio_language_subtitle">Select soundtrack</string>
+
     <!-- AppearanceScreen -->
     <string name="appearance_back">Back</string>
     <string name="appearance_dark_theme">Dark Theme</string>
