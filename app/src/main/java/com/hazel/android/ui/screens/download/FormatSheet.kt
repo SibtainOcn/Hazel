@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Paid
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -60,7 +61,7 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.VIDEO_CONTAINERS
-import com.hazel.android.ui.components.FormatListShimmer
+import com.hazel.android.download.languageLabel
 
 /**
  * Everything you can adjust before a download starts.
@@ -88,6 +89,8 @@ fun FormatSheet(
     isCustomSaveDir: Boolean,
     isLoadingFormats: Boolean = false,
     initialFormat: MediaFormat? = null,
+    /** The soundtrack this link is already set to, for a link being adjusted again. */
+    initialAudioLanguage: String? = null,
     confirmAsApply: Boolean = false,
     /**
      * Set when this media is already downloaded and still on the device, in which case the
@@ -97,7 +100,12 @@ fun FormatSheet(
     onOpenSaveDir: () -> Unit,
     onPickSaveDir: () -> Unit,
     onResetSaveDir: () -> Unit,
-    onDownload: (format: MediaFormat, title: String, author: String) -> Unit,
+    onDownload: (
+        format: MediaFormat,
+        audioLanguage: String?,
+        title: String,
+        author: String
+    ) -> Unit,
     onDismiss: () -> Unit
 ) {
     // Opened at full height. The sheet's own content is a full screen of format rows and
@@ -110,19 +118,28 @@ fun FormatSheet(
         mutableStateOf(initialFormat?.hasVideo ?: info.videoFormats.isNotEmpty())
     }
 
-    // The best concrete format is preselected, so the row shows what will actually be
-    // downloaded rather than a placeholder. The selection is keyed on the link rather than
-    // the tab, so a format picked from the full list survives the tab switch that picking
-    // it may have caused.
+    // What each tab is set to, held apart rather than as one selection. A single slot
+    // meant the audio tab showed whatever the video tab had chosen, so an audio download
+    // was offered at a video resolution.
     //
-    // It is keyed on whether formats have arrived as well, because a card that came from a
-    // listing opens this sheet before they have. Without that, the sheet would keep the
-    // stand-in it was opened with and never show the real one.
-    var selected by remember(info.url, info.hasResolvedFormats) {
-        mutableStateOf(
-            initialFormat
-                ?: if (info.videoFormats.isNotEmpty()) info.bestVideo else info.bestAudio
-        )
+    // Both are keyed on whether the formats have arrived, because a card that came from a
+    // listing opens this sheet before they have. Without that the sheet would keep the
+    // stand-in it was opened with and never move to the real best.
+    var pickedVideo by remember(info.url, info.hasResolvedFormats) {
+        mutableStateOf(initialFormat?.takeIf { it.hasVideo } ?: info.bestVideo)
+    }
+    var pickedAudio by remember(info.url, info.hasResolvedFormats) {
+        mutableStateOf(initialFormat?.takeIf { !it.hasVideo } ?: info.bestAudio)
+    }
+
+    // The best concrete format is preselected on each tab, so the row shows what will
+    // actually be downloaded rather than a placeholder.
+    val selected = if (videoTab) pickedVideo else pickedAudio
+
+    // Which soundtrack the download takes, for the few sources that publish several. Null
+    // means the one the source itself leads with, which is what almost every link gets.
+    var audioLanguage by remember(info.url, info.hasResolvedFormats) {
+        mutableStateOf(initialAudioLanguage)
     }
 
     // Title and author are editable: they name the saved file and, where the value is
@@ -132,6 +149,7 @@ fun FormatSheet(
 
     var openDialog by remember { mutableStateOf(SheetDialog.NONE) }
     var formatSheetVisible by remember { mutableStateOf(false) }
+    var languageSheetVisible by remember { mutableStateOf(false) }
 
     val container = if (videoTab) options.videoContainer else options.audioContainer
     val containerChoices = if (videoTab) VIDEO_CONTAINERS else AUDIO_CONTAINERS
@@ -191,7 +209,9 @@ fun FormatSheet(
 
                 Surface(
                     onClick = {
-                        selected?.let { onDownload(it, title.trim(), author.trim()) }
+                        selected?.let {
+                            onDownload(it, audioLanguage, title.trim(), author.trim())
+                        }
                     },
                     enabled = selected != null,
                     shape = RoundedCornerShape(20.dp),
@@ -231,19 +251,13 @@ fun FormatSheet(
             ) {
                 Tab(
                     selected = !videoTab,
-                    onClick = {
-                        videoTab = false
-                        selected = info.bestAudio
-                    },
+                    onClick = { videoTab = false },
                     enabled = info.audioFormats.isNotEmpty(),
                     text = { Text("Audio", fontWeight = FontWeight.SemiBold) }
                 )
                 Tab(
                     selected = videoTab,
-                    onClick = {
-                        videoTab = true
-                        selected = info.bestVideo
-                    },
+                    onClick = { videoTab = true },
                     enabled = info.videoFormats.isNotEmpty(),
                     text = { Text("Video", fontWeight = FontWeight.SemiBold) }
                 )
@@ -290,11 +304,10 @@ fun FormatSheet(
 
             val current = selected
             when {
-                // The sheet can open before the source has reported its formats, on the
-                // path that goes ahead without metadata. A skeleton stands in until the
-                // real row is known.
-                isLoadingFormats -> FormatRowShimmerCard()
-
+                // A sheet opened before the source has reported its formats shows the
+                // generic best row, which is what the download would use if it started
+                // now. It is replaced by the real best the moment the formats land, so
+                // the row always names something that can be downloaded.
                 current == null -> Text(
                     "This source has no separate ${if (videoTab) "video" else "audio"} stream.",
                     style = MaterialTheme.typography.bodySmall,
@@ -310,11 +323,21 @@ fun FormatSheet(
                         showChevron = true,
                         // A video-only stream is muxed with an audio track, so the track
                         // that will be used is named alongside it.
-                        mergeAudioId = info.mergeAudio
+                        mergeAudioId = info.mergeAudioFor(audioLanguage)
                             ?.formatId
                             ?.takeIf { videoTab && current.hasVideo && !current.hasAudio }
                     )
                 }
+            }
+
+            // Only where there is a choice. A source with one soundtrack has nothing to
+            // ask about, which is nearly all of them.
+            if (info.audioLanguages.size > 1) {
+                Spacer(modifier = Modifier.height(10.dp))
+                LanguageField(
+                    value = audioLanguage?.let(::languageLabel) ?: "Source default",
+                    onClick = { languageSheetVisible = true }
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -376,6 +399,10 @@ fun FormatSheet(
                 }
             }
 
+            Spacer(modifier = Modifier.height(20.dp))
+
+            DownloadSheetFooter(label = info.url)
+
             Spacer(modifier = Modifier.height(28.dp))
         }
     }
@@ -384,14 +411,31 @@ fun FormatSheet(
         FormatSelectionSheet(
             info = info,
             selected = selected,
+            audioFirst = !videoTab,
+            isLoadingFormats = isLoadingFormats,
             onConfirm = { format ->
-                selected = format
+                if (format.hasVideo) pickedVideo = format else pickedAudio = format
                 // Picking an audio stream from the video tab, or the other way round,
                 // moves the sheet to the tab that entry belongs to.
                 videoTab = format.hasVideo
                 formatSheetVisible = false
             },
             onDismiss = { formatSheetVisible = false }
+        )
+    }
+
+    if (languageSheetVisible) {
+        AudioLanguageSheet(
+            languages = info.audioLanguages,
+            selected = audioLanguage,
+            onPick = { code ->
+                audioLanguage = code
+                // The tab's audio moves to the new soundtrack, since the row above is
+                // what the download will use and it would otherwise still name the old one.
+                pickedAudio = info.bestAudioFor(code)
+                languageSheetVisible = false
+            },
+            onDismiss = { languageSheetVisible = false }
         )
     }
 
@@ -543,6 +587,40 @@ private fun DropdownField(
     }
 }
 
+/** The soundtrack row, shown only for a source that published more than one. */
+@Composable
+private fun LanguageField(value: String, onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Audio language",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(value, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(
+                Icons.Filled.Translate,
+                contentDescription = "Change audio language",
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
 /** The destination row. Tapping it leads to opening or changing the folder. */
 @Composable
 private fun SaveDirField(label: String, onClick: () -> Unit) {
@@ -647,17 +725,5 @@ private fun OptionChip(
         BadgedBox(badge = { Badge { Text("$badge") } }) { chip() }
     } else {
         chip()
-    }
-}
-
-/** Skeleton shown in place of the quality row while the format list is still resolving. */
-@Composable
-private fun FormatRowShimmerCard() {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-    ) {
-        FormatListShimmer(rows = 1, modifier = Modifier.padding(horizontal = 12.dp))
     }
 }

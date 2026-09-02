@@ -258,7 +258,10 @@ fun AppNavigation(
                 FetchSettingsScreen(onBack = { navController.popBackStack() })
             }
             composable("direct_share") {
-                DirectShareScreen(onBack = { navController.popBackStack() })
+                DirectShareScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenCookies = { navController.navigate("cookies") }
+                )
             }
             composable("storage_locations") {
                 StorageLocationsScreen(onBack = { navController.popBackStack() })

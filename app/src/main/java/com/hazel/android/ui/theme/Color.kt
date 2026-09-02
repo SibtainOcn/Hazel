@@ -19,6 +19,18 @@ val DarkOnSurface = Color(0xFFCCCCCC)
  */
 val DarkOnSurfaceVariant = Color(0xFFAFAFAF)
 
+// Container tones for the dark theme, lightest last. Named one by one rather than left to
+// Material, whose dark defaults derive their container tones from a violet neutral: the
+// search field took the highest of them and read as a lilac bar across the top of an
+// otherwise black screen.
+val DarkSurfaceContainerLowest = Color(0xFF070707)
+val DarkSurfaceContainerLow = Color(0xFF101010)
+val DarkSurfaceContainer = Color(0xFF151515)
+val DarkSurfaceContainerHigh = Color(0xFF1A1A1A)
+val DarkSurfaceContainerHighest = Color(0xFF1F1F1F)
+val DarkOutline = Color(0xFF3A3A3A)
+val DarkOutlineVariant = Color(0xFF242424)
+
 // Light Theme — a warm paper ground rather than a neutral white.
 //
 // A pure white background under a full-bleed thumbnail reads as glare, and Material's own
@@ -66,6 +78,15 @@ val ErrorRed = Color(0xFFCF6679)
 val ErrorRedLight = Color(0xFFB00020)
 val WarningAmber = Color(0xFFFFB74D)
 val InfoBlue = Color(0xFF64B5F6)
+
+// Format badges
+//
+// The size is the figure a format list is scanned for, so it carries a colour of its own
+// rather than another tone of the accent, which the codec and the bitrate beside it already
+// use. Fixed rather than themed on purpose: the accent is a personal choice and this is a
+// piece of information, and it should read the same whichever colour the app is set to.
+val SizeBadgeContainer = Color(0xFF4A4458)
+val SizeBadgeContent = Color(0xFFEADDFF)
 
 // Progress
 val ProgressTrackDark = Color(0xFF1A1A1A)

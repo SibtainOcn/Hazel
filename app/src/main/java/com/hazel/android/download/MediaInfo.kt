@@ -10,7 +10,15 @@ data class MediaInfo(
     val thumbnail: String?,
     val durationSeconds: Int,
     val videoFormats: List<MediaFormat>,
-    val audioFormats: List<MediaFormat>
+    val audioFormats: List<MediaFormat>,
+    /**
+     * True when this media would not open without the saved sign-in.
+     *
+     * Set by the read that found out, and carried to the download so it asks the same way.
+     * False is the ordinary case, and it is what keeps a public link away from a signed-in
+     * request on the sites that answer those with less.
+     */
+    val requiresSignIn: Boolean = false
 ) {
     /**
      * The entry the sheet opens on for each tab.
@@ -33,6 +41,28 @@ data class MediaInfo(
     val mergeAudio: MediaFormat?
         get() = audioFormats.firstOrNull { !it.isGeneric }
 
+    /**
+     * The soundtracks this media carries, in the order the source listed them, which puts
+     * the original first.
+     *
+     * Empty for almost everything: a source only names a language when it published more
+     * than one, so an empty list means there is nothing to choose between.
+     */
+    val audioLanguages: List<String>
+        get() = audioFormats.mapNotNull { it.language }.distinct()
+
+    /** The best audio in [language], falling back to the best of any when it has none. */
+    fun bestAudioFor(language: String?): MediaFormat? {
+        if (language.isNullOrBlank()) return bestAudio
+        return audioFormats.firstOrNull { !it.isGeneric && it.language == language } ?: bestAudio
+    }
+
+    /** The track a muxed video download takes its sound from, in [language] where there is one. */
+    fun mergeAudioFor(language: String?): MediaFormat? {
+        if (language.isNullOrBlank()) return mergeAudio
+        return audioFormats.firstOrNull { !it.isGeneric && it.language == language } ?: mergeAudio
+    }
+
     /** True once the source has reported at least one concrete format. */
     val hasResolvedFormats: Boolean
         get() = videoFormats.any { !it.isGeneric } || audioFormats.any { !it.isGeneric }
@@ -46,8 +76,8 @@ data class MediaInfo(
      * clears the ceiling the smallest available is taken, since a download slightly over
      * budget is a better answer than no download at all.
      */
-    fun autoPick(isVideo: Boolean, maxHeight: Int): MediaFormat? {
-        if (!isVideo) return bestAudio
+    fun autoPick(isVideo: Boolean, maxHeight: Int, audioLanguage: String? = null): MediaFormat? {
+        if (!isVideo) return bestAudioFor(audioLanguage)
 
         val concrete = videoFormats.filter { !it.isGeneric }
         if (concrete.isEmpty() || maxHeight <= 0) return bestVideo
@@ -70,6 +100,12 @@ data class MediaFormat(
     val formatId: String,
     val selector: String,
     val label: String,
+    /**
+     * The dubbed track this stream carries, as the source named it, or null where it named
+     * nothing. Most media has one soundtrack and reports no language at all; the field only
+     * has anything to say about the sources that publish several.
+     */
+    val language: String? = null,
     val ext: String,
     val vcodec: String?,
     val acodec: String?,
@@ -84,6 +120,17 @@ data class MediaFormat(
     /** True when the size came from the bitrate rather than from the source itself. */
     val isEstimatedSize: Boolean = false
 ) {
+    /**
+     * The headline without the measured resolution after it.
+     *
+     * The full label belongs in the format list, where a row is wide and the resolution is
+     * what separates two entries with the same note. A card in a set has room for one
+     * badge and a size beside it, and there the resolution pushes the size off the end of
+     * the row to say something "2160P" already said.
+     */
+    val shortLabel: String
+        get() = label.substringBefore(" (").trim().ifBlank { label }
+
     /** Codec badge text, e.g. "AVC1" for video or "OPUS" for audio. */
     val codecLabel: String
         get() {
@@ -103,6 +150,21 @@ data class MediaFormat(
         }
 
     val bitrateLabel: String get() = formatBitrate(bitrateKbps)
+}
+
+/**
+ * What to call a language code on screen.
+ *
+ * Sources write these as tags rather than words, and "hi-IN" says nothing to the person
+ * choosing between soundtracks. The device already knows the names, so the tag is only
+ * shown when it turns out not to be one Android recognises.
+ */
+fun languageLabel(code: String): String {
+    val locale = java.util.Locale.forLanguageTag(code.replace('_', '-'))
+    return locale.getDisplayName(java.util.Locale.getDefault())
+        .takeIf { it.isNotBlank() && it != code }
+        ?.replaceFirstChar { it.uppercase() }
+        ?: code
 }
 
 /** "1.2 GB" / "40.2 MB" / "812 KB", or blank when the size is unknown. */

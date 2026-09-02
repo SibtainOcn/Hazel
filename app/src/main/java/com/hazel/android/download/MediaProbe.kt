@@ -4,6 +4,7 @@ import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkEntry
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -32,19 +33,53 @@ object MediaProbe {
     /**
      * @param cacheDir persistent yt-dlp cache, shared with the download request so the
      *   player data fetched here is reused instead of being resolved a second time.
-     * @param cookieFile saved sign-ins to send with the request, or null for none. Without
-     *   it a source that requires an account reports the media as unavailable.
+     * @param access saved sign-ins to read as, or [SiteAccess.NONE]. Without them a source
+     *   that requires an account reports the media as unavailable.
      */
     suspend fun probe(
         url: String,
         cacheDir: File,
-        cookieFile: File? = null,
+        access: SiteAccess = SiteAccess.NONE,
         fetchMode: FetchMode = FetchMode.DEFAULT,
         forceIpv4: Boolean = false,
         processId: String = PROBE_PROCESS_ID
     ): MediaInfo = withContext(Dispatchers.IO) {
+        // Some sites answer a signed-in request with far less than they answer an
+        // anonymous one: the largest of them now serves a signed-in session a single
+        // 360p stream unless the request carries a token the app cannot produce. So the
+        // sign-in is held back until the media turns out to need it, and the ordinary
+        // link keeps the full ladder it has always had.
+        val attempts = signInAttempts(url, access)
+
+        attempts.forEachIndexed { index, attempt ->
+            try {
+                return@withContext readOne(
+                    url, cacheDir, attempt, fetchMode, forceIpv4, processId,
+                    // True when this is the fallback, which only runs because the
+                    // anonymous read was refused.
+                    signedIn = index > 0
+                )
+            } catch (e: Exception) {
+                val last = index == attempts.lastIndex
+                if (last || e is CancellationException || !isSignInRefusal(e.message)) throw e
+            }
+        }
+
+        error("No metadata returned")
+    }
+
+    /** One read, at one level of access. */
+    private suspend fun readOne(
+        url: String,
+        cacheDir: File,
+        access: SiteAccess,
+        fetchMode: FetchMode,
+        forceIpv4: Boolean,
+        processId: String,
+        signedIn: Boolean
+    ): MediaInfo {
         val request = YoutubeDLRequest(url).apply {
-            applySharedOptions(cacheDir, cookieFile, fetchMode, forceIpv4)
+            applySharedOptions(url, cacheDir, access, fetchMode, forceIpv4)
             addOption("--dump-single-json")
         }
 
@@ -54,16 +89,43 @@ object MediaProbe {
             val payload = response.out.trim().takeIf { it.isNotBlank() }
                 ?: throw IllegalStateException("No metadata returned")
 
-            val parsed = parse(url, JSONObject(payload))
+            val parsed = parse(url, JSONObject(payload)).copy(requiresSignIn = signedIn)
 
             // Kept so a repeat of this link needs no read, and so the download can replay
             // the payload instead of extracting the same thing over again.
             InfoCache.put(url, parsed, payload)
-            parsed
+            return parsed
         } finally {
             activeProcessIds.remove(processId)
         }
     }
+
+    /**
+     * The reads to try, in order.
+     *
+     * One for almost everything: a link with no sign-in to offer, and a site that answers
+     * a signed-in request as fully as an anonymous one, both have a single way of being
+     * read. The two-step only exists for the sites that hold formats back from a signed-in
+     * request, and there the second step is what still reaches private, members-only and
+     * age-restricted media.
+     */
+    private fun signInAttempts(url: String, access: SiteAccess): List<SiteAccess> = when {
+        !access.hasCookies -> listOf(SiteAccess.NONE)
+        cookiesNarrowTheFormats(url) -> listOf(SiteAccess.NONE, access)
+        else -> listOf(access)
+    }
+
+    /** Whether a failure reads as the site asking who is calling. */
+    private fun isSignInRefusal(message: String?): Boolean {
+        val text = message?.lowercase() ?: return false
+        return SIGN_IN_REFUSALS.any { it in text }
+    }
+
+    private val SIGN_IN_REFUSALS = listOf(
+        "sign in", "log in", "login", "private video", "members-only", "members only",
+        "age-restricted", "age restricted", "confirm your age", "not a bot",
+        "this video is unavailable", "video unavailable", "account"
+    )
 
     /**
      * Finds out what a link actually holds: one item, or a collection of them.
@@ -82,13 +144,43 @@ object MediaProbe {
     suspend fun listContents(
         url: String,
         cacheDir: File,
-        cookieFile: File? = null,
+        access: SiteAccess = SiteAccess.NONE,
         fetchMode: FetchMode = FetchMode.DEFAULT,
         forceIpv4: Boolean = false,
         processId: String = PROBE_PROCESS_ID
     ): LinkContents = withContext(Dispatchers.IO) {
+        // The same two-step as a single read, and for the same reason: a public list is
+        // read anonymously, and the sign-in is kept for the one that will not open
+        // without it.
+        val attempts = signInAttempts(url, access)
+
+        attempts.forEachIndexed { index, attempt ->
+            try {
+                return@withContext listOne(
+                    url, cacheDir, attempt, fetchMode, forceIpv4, processId,
+                    signedIn = index > 0
+                )
+            } catch (e: Exception) {
+                val last = index == attempts.lastIndex
+                if (last || e is CancellationException || !isSignInRefusal(e.message)) throw e
+            }
+        }
+
+        error("No metadata returned")
+    }
+
+    /** One listing, at one level of access. */
+    private suspend fun listOne(
+        url: String,
+        cacheDir: File,
+        access: SiteAccess,
+        fetchMode: FetchMode,
+        forceIpv4: Boolean,
+        processId: String,
+        signedIn: Boolean
+    ): LinkContents {
         val request = YoutubeDLRequest(url).apply {
-            applySharedOptions(cacheDir, cookieFile, fetchMode, forceIpv4, singleItem = false)
+            applySharedOptions(url, cacheDir, access, fetchMode, forceIpv4, singleItem = false)
             addOption("--flat-playlist")
             // Entries are emitted as they are found rather than after the whole collection
             // has been walked, which is what stops a long playlist stalling on its own tail.
@@ -110,9 +202,9 @@ object MediaProbe {
         val isCollection = root.optString("_type") == "playlist" && entries != null
 
         if (!isCollection) {
-            val info = parse(url, root)
+            val info = parse(url, root).copy(requiresSignIn = signedIn)
             InfoCache.put(url, info, payload)
-            return@withContext LinkContents.Single(info)
+            return LinkContents.Single(info)
         }
 
         val listed = buildList {
@@ -128,15 +220,19 @@ object MediaProbe {
         if (listed.size == 1) {
             val only = listed.first()
             val resolved = runCatching {
-                probe(only.url, cacheDir, cookieFile, fetchMode, forceIpv4, processId)
+                probe(only.url, cacheDir, access, fetchMode, forceIpv4, processId)
             }.getOrNull()
-            if (resolved != null) return@withContext LinkContents.Single(resolved)
+            if (resolved != null) return LinkContents.Single(resolved)
         }
 
-        LinkContents.Many(
+        val many = LinkContents.Many(
             title = firstNonBlank(root.optString("title"), root.optString("playlist_title")),
             entries = listed
         )
+        // Kept so the same collection pasted again opens as the set of cards it opened as
+        // last time, without walking it a second time.
+        InfoCache.putListing(url, many)
+        return many
     }
 
     /** Reads one entry of a flat listing, which carries no formats by design. */
@@ -199,8 +295,9 @@ object MediaProbe {
 
     /** Options every metadata read uses, whether it covers one link or many. */
     private fun YoutubeDLRequest.applySharedOptions(
+        url: String,
         cacheDir: File,
-        cookieFile: File?,
+        access: SiteAccess,
         fetchMode: FetchMode,
         forceIpv4: Boolean,
         singleItem: Boolean = true
@@ -221,7 +318,9 @@ object MediaProbe {
         addOption("-R", fetchMode.retries.toString())
 
         if (forceIpv4) addOption("--force-ipv4")
-        cookieFile?.let { addOption("--cookies", it.absolutePath) }
+
+        // The sign-in, and everything that has to travel with it for the site to honour it.
+        applySiteAccess(access, url)
     }
 
     const val PROBE_PROCESS_ID = "hazel_probe"
@@ -239,14 +338,14 @@ object MediaProbe {
     )
 
     /**
-     * Rows that do not name a format id and let yt-dlp resolve the stream itself. They head
-     * both tabs, so "best" is always the first option, and they are the reason a download can
-     * still go ahead on a source that reports no usable format list.
+     * Rows that do not name a format id and let yt-dlp resolve the stream itself. They are
+     * what a tab holds when the source reported no usable format list, and the reason a
+     * download can still go ahead there.
      */
     private val BEST_VIDEO = MediaFormat(
         formatId = "best",
         selector = "bv*+ba/b",
-        label = "Best available",
+        label = "Best quality",
         ext = "",
         vcodec = null,
         acodec = null,
@@ -262,7 +361,7 @@ object MediaProbe {
     private val BEST_AUDIO = MediaFormat(
         formatId = "bestaudio",
         selector = "ba/b",
-        label = "BEST AUDIO",
+        label = "Best audio",
         ext = "",
         vcodec = null,
         acodec = null,
@@ -341,9 +440,12 @@ object MediaProbe {
             ),
             thumbnail = resolveThumbnail(media) ?: resolveThumbnail(root),
             durationSeconds = duration,
-            // "Best" always heads each tab, whatever the source did or did not report.
-            videoFormats = listOf(BEST_VIDEO) + video,
-            audioFormats = listOf(BEST_AUDIO) + audio
+            // The generic row stands in only where the source named nothing concrete. A
+            // list that already holds real formats does not need it: it says nothing the
+            // first real entry does not, and it cannot show the size, codec and
+            // resolution that entry can.
+            videoFormats = video.ifEmpty { listOf(BEST_VIDEO) },
+            audioFormats = audio.ifEmpty { listOf(BEST_AUDIO) }
         )
     }
 
@@ -434,6 +536,10 @@ object MediaProbe {
             formatId = id,
             selector = id,
             label = buildLabel(json, note, height, fps, hasVideo, id),
+            // Which dubbed track this is. Reported per format by sources that carry more
+            // than one, and absent everywhere else, which is the ordinary case.
+            language = json.optString("language")
+                .takeIf { it.isNotBlank() && it != "null" && it != "none" },
             ext = ext ?: "",
             vcodec = vcodec,
             acodec = acodec,
@@ -459,18 +565,31 @@ object MediaProbe {
         hasVideo: Boolean,
         id: String
     ): String {
+        val resolution = json.optString("resolution")
+            .takeIf { it.isNotBlank() && it != "null" && it != "audio only" }
+
         if (!hasVideo) {
-            return (note ?: json.optPositiveDouble("abr")?.let { "%.0f kbps".format(it) } ?: "Audio")
-                .uppercase()
+            // A note of "medium" says nothing on its own about what it describes, so the
+            // kind of stream is spelled out unless the source already did.
+            val base = note
+                ?: json.optPositiveDouble("abr")?.let { "%.0f kbps".format(it) }
+                ?: "Audio"
+            return if (base.endsWith("audio", ignoreCase = true)) base else "$base audio"
         }
-        val resolution = json.optString("resolution").takeIf { it.isNotBlank() && it != "null" }
+
         val base = when {
-            height > 0 -> "${height}p"
+            // The source's own note leads, because it names the step on the ladder the way
+            // the site does. The height stands in where there is no note.
             !note.isNullOrBlank() -> note
+            height > 0 -> if (fps > 30) "${height}p$fps" else "${height}p"
             resolution != null -> resolution
             else -> "Format $id"
         }
-        return if (height > 0 && fps > 30) "$base$fps" else base
+
+        // The measured resolution goes next to it, since a note like "premium" says which
+        // step it is and nothing at all about how big the picture is.
+        return if (resolution != null && !base.contains(resolution)) "$base ($resolution)"
+        else base
     }
 
     /** Instagram posts have no title; the caption or the post id stands in for one. */

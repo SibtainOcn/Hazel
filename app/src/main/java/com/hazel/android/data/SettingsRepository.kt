@@ -2,6 +2,7 @@ package com.hazel.android.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -67,48 +68,95 @@ object SettingsRepository {
     // Everything the sheet can adjust is read back as one DownloadOptions so the screen
     // observes a single flow instead of a dozen, and so a new knob only needs a key here.
 
-    private val VIDEO_CONTAINER_KEY = stringPreferencesKey("video_container")
-    private val AUDIO_CONTAINER_KEY = stringPreferencesKey("audio_container")
-    private val SPONSORBLOCK_KEY = stringSetPreferencesKey("sponsorblock_filters")
-    private val ADD_CHAPTERS_KEY = booleanPreferencesKey("add_chapters")
-    private val SPLIT_CHAPTERS_KEY = booleanPreferencesKey("split_by_chapters")
-    private val EMBED_SUBS_KEY = booleanPreferencesKey("embed_subs")
-    private val WRITE_SUBS_KEY = booleanPreferencesKey("write_subs")
-    private val WRITE_AUTO_SUBS_KEY = booleanPreferencesKey("write_auto_subs")
-    private val SUB_LANGUAGES_KEY = stringPreferencesKey("sub_languages")
+    /**
+     * One set of option keys.
+     *
+     * There are two sets, under different names in the same store. The sheet writes one and
+     * the instant share reads the other, so a decision made for a download being watched
+     * cannot silently change what an unattended share does with the next link, which is the
+     * one download nobody is there to correct.
+     *
+     * The unprefixed set keeps the names it has always had, so settings made before the
+     * split are still the sheet's settings.
+     */
+    private class OptionKeys(prefix: String) {
+        val videoContainer = stringPreferencesKey("${prefix}video_container")
+        val audioContainer = stringPreferencesKey("${prefix}audio_container")
+        val embedThumbnail = booleanPreferencesKey("${prefix}embed_thumbnail")
+        val filenameTemplate = stringPreferencesKey("${prefix}filename_template")
+        val sponsorBlock = stringSetPreferencesKey("${prefix}sponsorblock_filters")
+        val addChapters = booleanPreferencesKey("${prefix}add_chapters")
+        val splitChapters = booleanPreferencesKey("${prefix}split_by_chapters")
+        val embedSubs = booleanPreferencesKey("${prefix}embed_subs")
+        val writeSubs = booleanPreferencesKey("${prefix}write_subs")
+        val writeAutoSubs = booleanPreferencesKey("${prefix}write_auto_subs")
+        val subLanguages = stringPreferencesKey("${prefix}sub_languages")
+    }
+
+    private val SHEET_OPTIONS = OptionKeys("")
+    private val INSTANT_OPTIONS = OptionKeys("instant_")
+
+    private fun Preferences.readOptions(keys: OptionKeys): DownloadOptions {
+        val defaults = DownloadOptions()
+        return DownloadOptions(
+            videoContainer = this[keys.videoContainer] ?: defaults.videoContainer,
+            audioContainer = this[keys.audioContainer] ?: defaults.audioContainer,
+            embedThumbnail = this[keys.embedThumbnail] ?: defaults.embedThumbnail,
+            filenameTemplate = this[keys.filenameTemplate] ?: defaults.filenameTemplate,
+            sponsorBlockFilters = this[keys.sponsorBlock] ?: defaults.sponsorBlockFilters,
+            addChapters = this[keys.addChapters] ?: defaults.addChapters,
+            splitByChapters = this[keys.splitChapters] ?: defaults.splitByChapters,
+            embedSubs = this[keys.embedSubs] ?: defaults.embedSubs,
+            writeSubs = this[keys.writeSubs] ?: defaults.writeSubs,
+            writeAutoSubs = this[keys.writeAutoSubs] ?: defaults.writeAutoSubs,
+            subLanguages = this[keys.subLanguages] ?: defaults.subLanguages
+        )
+    }
+
+    private fun MutablePreferences.writeOptions(keys: OptionKeys, options: DownloadOptions) {
+        this[keys.videoContainer] = options.videoContainer
+        this[keys.audioContainer] = options.audioContainer
+        this[keys.embedThumbnail] = options.embedThumbnail
+        this[keys.filenameTemplate] = options.filenameTemplate
+        this[keys.sponsorBlock] = options.sponsorBlockFilters
+        this[keys.addChapters] = options.addChapters
+        this[keys.splitChapters] = options.splitByChapters
+        this[keys.embedSubs] = options.embedSubs
+        this[keys.writeSubs] = options.writeSubs
+        this[keys.writeAutoSubs] = options.writeAutoSubs
+        this[keys.subLanguages] = options.subLanguages
+    }
 
     fun getDownloadOptions(context: Context): Flow<DownloadOptions> =
-        context.dataStore.data.map { prefs ->
-            val defaults = DownloadOptions()
-            DownloadOptions(
-                videoContainer = prefs[VIDEO_CONTAINER_KEY] ?: defaults.videoContainer,
-                audioContainer = prefs[AUDIO_CONTAINER_KEY] ?: defaults.audioContainer,
-                embedThumbnail = prefs[EMBED_THUMBNAIL_KEY] ?: defaults.embedThumbnail,
-                filenameTemplate = prefs[FILENAME_TEMPLATE_KEY] ?: defaults.filenameTemplate,
-                sponsorBlockFilters = prefs[SPONSORBLOCK_KEY] ?: defaults.sponsorBlockFilters,
-                addChapters = prefs[ADD_CHAPTERS_KEY] ?: defaults.addChapters,
-                splitByChapters = prefs[SPLIT_CHAPTERS_KEY] ?: defaults.splitByChapters,
-                embedSubs = prefs[EMBED_SUBS_KEY] ?: defaults.embedSubs,
-                writeSubs = prefs[WRITE_SUBS_KEY] ?: defaults.writeSubs,
-                writeAutoSubs = prefs[WRITE_AUTO_SUBS_KEY] ?: defaults.writeAutoSubs,
-                subLanguages = prefs[SUB_LANGUAGES_KEY] ?: defaults.subLanguages
-            )
-        }
+        context.dataStore.data.map { prefs -> prefs.readOptions(SHEET_OPTIONS) }
 
     suspend fun setDownloadOptions(context: Context, options: DownloadOptions) {
-        context.dataStore.edit { prefs ->
-            prefs[VIDEO_CONTAINER_KEY] = options.videoContainer
-            prefs[AUDIO_CONTAINER_KEY] = options.audioContainer
-            prefs[EMBED_THUMBNAIL_KEY] = options.embedThumbnail
-            prefs[FILENAME_TEMPLATE_KEY] = options.filenameTemplate
-            prefs[SPONSORBLOCK_KEY] = options.sponsorBlockFilters
-            prefs[ADD_CHAPTERS_KEY] = options.addChapters
-            prefs[SPLIT_CHAPTERS_KEY] = options.splitByChapters
-            prefs[EMBED_SUBS_KEY] = options.embedSubs
-            prefs[WRITE_SUBS_KEY] = options.writeSubs
-            prefs[WRITE_AUTO_SUBS_KEY] = options.writeAutoSubs
-            prefs[SUB_LANGUAGES_KEY] = options.subLanguages
-        }
+        context.dataStore.edit { prefs -> prefs.writeOptions(SHEET_OPTIONS, options) }
+    }
+
+    private val INSTANT_AUDIO_LANGUAGE_KEY = stringPreferencesKey("instant_audio_language")
+
+    /**
+     * The soundtrack an instant share prefers, as a language tag, or blank for whichever
+     * the source leads with.
+     *
+     * Nothing is asked at share time, so this is a standing preference rather than a
+     * choice: a source that has the language gets it, and one that does not is downloaded
+     * with what it has.
+     */
+    fun getInstantAudioLanguage(context: Context): Flow<String> =
+        context.dataStore.data.map { prefs -> prefs[INSTANT_AUDIO_LANGUAGE_KEY].orEmpty() }
+
+    suspend fun setInstantAudioLanguage(context: Context, language: String) {
+        context.dataStore.edit { prefs -> prefs[INSTANT_AUDIO_LANGUAGE_KEY] = language }
+    }
+
+    /** The same knobs, kept separately for the share target that asks nothing. */
+    fun getInstantOptions(context: Context): Flow<DownloadOptions> =
+        context.dataStore.data.map { prefs -> prefs.readOptions(INSTANT_OPTIONS) }
+
+    suspend fun setInstantOptions(context: Context, options: DownloadOptions) {
+        context.dataStore.edit { prefs -> prefs.writeOptions(INSTANT_OPTIONS, options) }
     }
 
     // ── Link reading ──
