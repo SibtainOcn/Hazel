@@ -112,7 +112,15 @@ data class DownloadState(
      * screen says during it, and it names the source because "reading a link" is less
      * reassuring than naming the one the user just came from.
      */
-    val instantSource: String = ""
+    val instantSource: String = "",
+    /**
+     * True once a read has taken a finished download off the list.
+     *
+     * It is not lost, and the line at the foot of the results says where it went. Kept for
+     * the rest of the session rather than only for the read that did it, since the cards
+     * stay absent for that long; clearing the results is what puts it back to false.
+     */
+    val savedAside: Boolean = false
 ) {
     /** True once more than one link resolved, which is what turns the screen into a list. */
     val isMultiple: Boolean get() = results.size > 1
@@ -499,15 +507,22 @@ class DownloadViewModel : ViewModel() {
         // A fresh read is a fresh answer, so the sheet is allowed to open on its own again.
         clearAutoOpened()
 
+        // Read before the batch is emptied below, since that is the record of what this
+        // session finished and the merge at the end of the read needs it.
+        val finished = _state.value.batch
+            .filter { it.state == BatchState.DONE }
+            .map { it.url }
+            .toSet()
+
         _state.value = _state.value.copy(
             url = valid.first(),
             isFetching = true,
             error = null,
             errorLog = null,
-            // What is already listed stays. A run's downloads, its queue and its finished
-            // items are all worth keeping in view, and a search is another thing asked for
-            // rather than a reason to forget the last one. The search screen's own clear
-            // action is what empties the list.
+            // What is already listed stays, apart from what has finished downloading:
+            // a run's queue and its failures are worth keeping in view, and a search is
+            // another thing asked for rather than a reason to forget the last one. The
+            // search screen's own clear action is what empties the list.
             info = null,
             batch = emptyList(),
             isComplete = false,
@@ -594,16 +609,29 @@ class DownloadViewModel : ViewModel() {
                     errorLog = lastFailure.ifBlank { "Could not read this link" }
                 )
             } else {
+                // A link that finished downloading is not carried into the new answer. The
+                // list is what the set action acts on, so ten links pasted beside two
+                // already saved read as twelve waiting, and Download all offered to fetch
+                // the saved two a second time. Worse, it turned a single new link into a
+                // set, because the list was two long even though only one of them was
+                // anything to download.
+                //
+                // Nothing is thrown away: they are on the downloads list, and the line at
+                // the foot of the results says so.
+                val kept = _state.value.results.filterNot { existing ->
+                    resolved.any { it.url == existing.url } || existing.url in finished
+                }
+
                 // Newest first, and a link read again keeps its new reading rather than
                 // appearing twice.
-                val merged = resolved + _state.value.results.filterNot { existing ->
-                    resolved.any { it.url == existing.url }
-                }
                 _state.value.copy(
                     isFetching = false,
                     fetchProgress = "",
-                    results = merged,
-                    info = resolved.singleOrNull()
+                    results = resolved + kept,
+                    info = resolved.singleOrNull(),
+                    savedAside = _state.value.savedAside || _state.value.results.any { existing ->
+                        existing.url in finished && resolved.none { it.url == existing.url }
+                    }
                 )
             }
         }
@@ -979,19 +1007,19 @@ class DownloadViewModel : ViewModel() {
                     }
 
                     if (isCancelled || isBatchCancelled) {
-                        finishDownload(app)
+                        finishDownload(app, plan, options)
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         break
                     }
 
-                    finishDownload(app)
+                    finishDownload(app, plan, options)
                     markBatch(plan.info.url, BatchState.DONE)
                 } catch (_: CancellationException) {
                     if (isPaused) {
                         holdForResume(next)
                         break
                     }
-                    finishDownload(app)
+                    finishDownload(app, plan, options)
                     markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                     break
                 } catch (e: Exception) {
@@ -1001,7 +1029,7 @@ class DownloadViewModel : ViewModel() {
                     }
 
                     if (isCancelled || isBatchCancelled) {
-                        finishDownload(app)
+                        finishDownload(app, plan, options)
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         break
                     }
@@ -1499,7 +1527,11 @@ class DownloadViewModel : ViewModel() {
      * Whether the run as a whole is finished is not decided here, because this is called
      * once per item in a batch. [finishBatch] owns that.
      */
-    private fun finishDownload(context: Context) {
+    private fun finishDownload(
+        context: Context,
+        plan: DownloadPlan,
+        options: DownloadOptions
+    ) {
         // Purge fragments first: the move publishes every file it finds, so a leftover
         // .part from a cancelled or failed run would otherwise land in Downloads.
         purgeFragments()
@@ -1567,7 +1599,7 @@ class DownloadViewModel : ViewModel() {
             fileUri = savedUri
         )
 
-        recordHistory(context, fileName, savedPath, savedUri, finalSizeBytes)
+        recordHistory(context, fileName, savedPath, savedUri, finalSizeBytes, plan, options)
     }
 
     /**
@@ -1582,7 +1614,9 @@ class DownloadViewModel : ViewModel() {
         fileName: String,
         savedPath: String,
         savedUri: android.net.Uri?,
-        sizeBytes: Long
+        sizeBytes: Long,
+        plan: DownloadPlan,
+        options: DownloadOptions
     ) {
         val info = _state.value.info ?: return
 
@@ -1605,11 +1639,33 @@ class DownloadViewModel : ViewModel() {
                     savedPath = savedPath,
                     isVideo = downloadIsVideo,
                     sizeBytes = sizeBytes,
-                    completedAt = System.currentTimeMillis()
+                    completedAt = System.currentTimeMillis(),
+                    // Taken from what was asked for rather than from the file. A container
+                    // reports the streams it ended up holding, which after a merge and a
+                    // conversion is not the same thing as the quality that was chosen.
+                    formatLabel = plan.format.shortLabel,
+                    codec = plan.format.codecLabel,
+                    bitrateKbps = plan.format.bitrateKbps,
+                    embedded = embeddedExtras(options, plan.format.hasVideo)
                 )
             )
         }
     }
+
+    /**
+     * What was written into the file alongside the media.
+     *
+     * None of this can be recovered from the file afterwards without opening it and reading
+     * its streams, so it is written down at the moment it is true. Chapters are only asked
+     * for on a video download, which is why the kind is part of the question.
+     */
+    private fun embeddedExtras(options: DownloadOptions, isVideo: Boolean): String =
+        buildList {
+            if (options.embedSubs) add("Subtitles")
+            if (options.addChapters && isVideo) add("Chapters")
+            if (options.embedThumbnail) add("Cover art")
+            if (options.sponsorBlockFilters.isNotEmpty()) add("SponsorBlock")
+        }.joinToString(", ")
 
     /**
      * What fraction of the expected file is sitting in the temp directory right now.
