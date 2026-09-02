@@ -273,6 +273,30 @@ def load_allowlist():
     return entries
 
 
+def literal_lines(path):
+    """
+    Every line a literal hit is reported at, whether or not it is dispositioned.
+
+    One place decides this, because two places disagreed: the hit list matched across the
+    whole file while the stale allowlist check re-read the single line on its own, so a
+    call written over several lines was reported at a line the second check then said held
+    nothing. An entry could not be written that satisfied both.
+    """
+    text = read(path)
+    lines = text.splitlines()
+    found = set()
+    for m in LITERAL.finditer(text):
+        i = text.count("\n", 0, m.start()) + 1
+        line = lines[i - 1].strip() if i - 1 < len(lines) else ""
+        if line.startswith("//"):
+            continue
+        # An empty string is a reset, not text. Nobody translates "".
+        if re.search(r'=\s*""\s*[,)]?\s*$', line):
+            continue
+        found.add(i)
+    return found, lines
+
+
 def literals_in(path, allow):
     """
     Literal hits in one file that nobody has dispositioned.
@@ -285,25 +309,13 @@ def literals_in(path, allow):
     allowlist entry names.
     """
     rel = str(Path(path).relative_to(ROOT)).replace("\\", "/") if Path(path).is_absolute() else str(path).replace("\\", "/")
-    text = read(path)
-    lines = text.splitlines()
-
-    hits = []
-    seen = set()
-    for m in LITERAL.finditer(text):
-        i = text.count("\n", 0, m.start()) + 1
-        if i in seen:
-            continue
-        line = lines[i - 1].strip() if i - 1 < len(lines) else ""
-        if line.startswith("//"):
-            continue
-        # An empty string is a reset, not text. Nobody translates "".
-        if re.search(r'=\s*""\s*[,)]?\s*$', line):
-            continue
-        seen.add(i)
-        if (rel, i) not in allow:
-            hits.append((i, line))
-    return rel, sorted(hits)
+    found, lines = literal_lines(path)
+    hits = [
+        (i, lines[i - 1].strip())
+        for i in sorted(found)
+        if (rel, i) not in allow
+    ]
+    return rel, hits
 
 
 def check_file(target):
@@ -382,12 +394,14 @@ def check_file(target):
 
     section("stale allowlist entries")
     # An allowlist line that no longer matches anything is a reason nobody rechecked.
-    raw_lines = read(path).splitlines()
+    # Asked of the same function that produced the hit list, so an entry that satisfies
+    # one check cannot fail the other.
+    found, _ = literal_lines(path)
     stale = False
     for (afile, anum), reason in sorted(allow.items()):
         if afile != rel:
             continue
-        if anum > len(raw_lines) or not LITERAL.search(raw_lines[anum - 1]):
+        if anum not in found:
             fail("allowlist line no longer matches anything: %s:%d" % (afile, anum))
             stale = True
     if not stale:
