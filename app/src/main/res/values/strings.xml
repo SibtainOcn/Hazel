@@ -574,6 +574,12 @@
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Back</string>
     <string name="storage_locations_downloads">Downloads</string>
+    <string name="storage_locations_title">Downloads</string>
+    <string name="storage_locations_subtitle">Where downloads are saved, and the limits they run under</string>
+    <string name="storage_locations_limits">Limits</string>
+    <string name="storage_locations_wifi_only_description">Downloads wait rather than run on mobile data</string>
+    <string name="storage_locations_speed_limit_description">How fast a download is allowed to go</string>
+    <string name="storage_locations_internal_note">All files are stored in your device\'s internal storage. You can access them anytime using any file manager app.</string>
     <string name="storage_locations_wifi_only">Wi-Fi only</string>
     <string name="storage_locations_speed_limit">Speed limit</string>
 

@@ -95,7 +95,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Downloads",
+                stringResource(R.string.storage_locations_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -104,7 +104,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
 
         // Info text
         Text(
-            "Where downloads are saved, and the limits they run under",
+            stringResource(R.string.storage_locations_subtitle),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
             modifier = Modifier.padding(bottom = 16.dp)
@@ -129,7 +129,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            "Limits",
+            stringResource(R.string.storage_locations_limits),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -163,7 +163,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        "Downloads wait rather than run on mobile data",
+                        stringResource(R.string.storage_locations_wifi_only_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
@@ -202,7 +202,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        "How fast a download is allowed to go",
+                        stringResource(R.string.storage_locations_speed_limit_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
@@ -285,8 +285,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    "All files are stored in your device's internal storage. " +
-                    "You can access them anytime using any file manager app.",
+                    stringResource(R.string.storage_locations_internal_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                     lineHeight = 16.sp
