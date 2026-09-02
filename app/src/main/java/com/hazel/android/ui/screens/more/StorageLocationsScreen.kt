@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import com.hazel.android.data.SettingsRepository
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.clickable
@@ -87,14 +88,14 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
             ) {
                 Icon(
                     painter = painterResource(R.drawable.back),
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.storage_locations_back),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(18.dp)
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Downloads",
+                stringResource(R.string.storage_locations_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -103,7 +104,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
 
         // Info text
         Text(
-            "Where downloads are saved, and the limits they run under",
+            stringResource(R.string.storage_locations_subtitle),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
             modifier = Modifier.padding(bottom = 16.dp)
@@ -118,7 +119,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
             // Downloads
             StorageLocationItem(
                 icon = Icons.Filled.Download,
-                title = "Downloads",
+                title = stringResource(R.string.storage_locations_downloads),
                 path = StoragePaths.DOWNLOADS_DISPLAY,
                 onClick = { FolderUtil.open(context, StoragePaths.finalDownloads) }
             )
@@ -128,7 +129,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            "Limits",
+            stringResource(R.string.storage_locations_limits),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -157,9 +158,12 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Wi-Fi only", fontWeight = FontWeight.Medium)
                     Text(
-                        "Downloads wait rather than run on mobile data",
+                        stringResource(R.string.storage_locations_wifi_only),
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        stringResource(R.string.storage_locations_wifi_only_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
@@ -193,9 +197,12 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Speed limit", fontWeight = FontWeight.Medium)
                     Text(
-                        "How fast a download is allowed to go",
+                        stringResource(R.string.storage_locations_speed_limit),
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        stringResource(R.string.storage_locations_speed_limit_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
@@ -278,8 +285,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    "All files are stored in your device's internal storage. " +
-                    "You can access them anytime using any file manager app.",
+                    stringResource(R.string.storage_locations_internal_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                     lineHeight = 16.sp

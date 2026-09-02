@@ -59,6 +59,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -83,7 +84,7 @@ fun UpdateScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "yt-dlp Update",
+                        stringResource(R.string.update_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -92,7 +93,7 @@ fun UpdateScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.update_back)
                         )
                     }
                 },
@@ -106,7 +107,7 @@ fun UpdateScreen(
                     ) {
                         Icon(
                             Icons.Filled.Refresh,
-                            contentDescription = "Check for updates",
+                            contentDescription = stringResource(R.string.update_check_action),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -270,12 +271,12 @@ private fun StatusHeader(state: UpdateViewModel.UiState) {
         // Status text
         Text(
             text = when (state) {
-                is UpdateViewModel.UiState.Idle -> "You're up to date"
-                is UpdateViewModel.UiState.Checking -> "Checking for updates..."
-                is UpdateViewModel.UiState.Available -> "Update Available"
-                is UpdateViewModel.UiState.Updating -> "Installing yt-dlp..."
-                is UpdateViewModel.UiState.Installed -> "Engine Updated"
-                is UpdateViewModel.UiState.Error -> "Update Failed"
+                is UpdateViewModel.UiState.Idle -> stringResource(R.string.update_status_up_to_date)
+                is UpdateViewModel.UiState.Checking -> stringResource(R.string.update_status_checking)
+                is UpdateViewModel.UiState.Available -> stringResource(R.string.update_status_available)
+                is UpdateViewModel.UiState.Updating -> stringResource(R.string.update_status_installing)
+                is UpdateViewModel.UiState.Installed -> stringResource(R.string.update_status_installed)
+                is UpdateViewModel.UiState.Error -> stringResource(R.string.update_status_failed)
             },
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
@@ -291,14 +292,14 @@ private fun StatusHeader(state: UpdateViewModel.UiState) {
         Text(
             text = when (state) {
                 is UpdateViewModel.UiState.Idle ->
-                    "Hazel is running the latest yt-dlp build"
-                is UpdateViewModel.UiState.Checking -> "Contacting GitHub..."
+                    stringResource(R.string.update_subtitle_idle)
+                is UpdateViewModel.UiState.Checking -> stringResource(R.string.update_subtitle_checking)
                 is UpdateViewModel.UiState.Available ->
-                    "yt-dlp ${state.info.version} is available"
+                    stringResource(R.string.update_subtitle_available, state.info.version)
                 is UpdateViewModel.UiState.Updating ->
-                    "Downloading yt-dlp ${state.info.version}"
+                    stringResource(R.string.update_subtitle_updating, state.info.version)
                 is UpdateViewModel.UiState.Installed ->
-                    "yt-dlp ${state.version} is now in use"
+                    stringResource(R.string.update_subtitle_installed, state.version)
                 is UpdateViewModel.UiState.Error -> state.message
             },
             style = MaterialTheme.typography.bodyMedium,
@@ -328,13 +329,13 @@ private fun VersionCard(
             ) {
                 Column {
                     Text(
-                        "Installed Version",
+                        stringResource(R.string.update_installed_version),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        installedVersion ?: "Unknown",
+                        installedVersion ?: stringResource(R.string.update_version_unknown),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -349,7 +350,7 @@ private fun VersionCard(
                     )
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            "New Version",
+                            stringResource(R.string.update_new_version),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                         )
@@ -383,7 +384,7 @@ private fun InstallProgressCard(binarySize: Long) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Installing Binary",
+                    stringResource(R.string.update_installing_binary),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -413,7 +414,7 @@ private fun InstallProgressCard(binarySize: Long) {
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                "Downloading from GitHub and replacing the engine. Keep the app open.",
+                stringResource(R.string.update_installing_body),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
@@ -435,7 +436,7 @@ private fun ActionButtons(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 ActionChip(
-                    text = "Update Now",
+                    text = stringResource(R.string.update_action_update_now),
                     onClick = { viewModel.startUpdate() },
                     modifier = Modifier.weight(1f),
                     isPrimary = true
@@ -444,7 +445,7 @@ private fun ActionButtons(
         }
         is UpdateViewModel.UiState.Updating -> {
             ActionChip(
-                text = "Installing...",
+                text = stringResource(R.string.update_action_installing),
                 onClick = {},
                 modifier = Modifier.fillMaxWidth(),
                 enabled = false
@@ -452,7 +453,7 @@ private fun ActionButtons(
         }
         is UpdateViewModel.UiState.Installed -> {
             ActionChip(
-                text = "Done",
+                text = stringResource(R.string.update_action_done),
                 onClick = { viewModel.dismissCompletely() },
                 modifier = Modifier.fillMaxWidth(),
                 isPrimary = true
@@ -460,7 +461,7 @@ private fun ActionButtons(
         }
         is UpdateViewModel.UiState.Error -> {
             ActionChip(
-                text = "Retry",
+                text = stringResource(R.string.update_action_retry),
                 onClick = {
                     if (state.info != null) viewModel.startUpdate() else viewModel.checkForUpdate()
                 },
@@ -469,7 +470,7 @@ private fun ActionButtons(
         }
         is UpdateViewModel.UiState.Idle -> {
             ActionChip(
-                text = "Check for Updates",
+                text = stringResource(R.string.update_action_check),
                 onClick = { viewModel.checkForUpdate() },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -477,7 +478,7 @@ private fun ActionButtons(
         is UpdateViewModel.UiState.Checking -> {
             // Show disabled state
             ActionChip(
-                text = "Checking...",
+                text = stringResource(R.string.update_action_checking),
                 onClick = {},
                 modifier = Modifier.fillMaxWidth(),
                 enabled = false
@@ -539,7 +540,7 @@ private fun InfoCard(
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                "Information",
+                stringResource(R.string.update_info_heading),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -547,14 +548,14 @@ private fun InfoCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            InfoRow(label = "Component", value = "yt-dlp")
+            InfoRow(label = stringResource(R.string.update_info_component), value = "yt-dlp")
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            InfoRow(label = "Repository", value = channel.repo)
+            InfoRow(label = stringResource(R.string.update_info_repository), value = channel.repo)
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
@@ -563,7 +564,7 @@ private fun InfoCard(
 
             val binarySize = extractBinarySize(state)
             if (binarySize > 0) {
-                InfoRow(label = "Binary Size", value = formatFileSize(binarySize))
+                InfoRow(label = stringResource(R.string.update_info_binary_size), value = formatFileSize(binarySize))
 
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 8.dp),
@@ -571,13 +572,13 @@ private fun InfoCard(
                 )
             }
 
-            InfoRow(label = "Distribution", value = "GitHub Releases")
+            InfoRow(label = stringResource(R.string.update_info_distribution), value = stringResource(R.string.update_info_github_releases))
 
             Spacer(modifier = Modifier.height(14.dp))
 
             // Release channel picker
             Text(
-                "Release Channel",
+                stringResource(R.string.update_release_channel),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
@@ -612,7 +613,7 @@ private fun InfoCard(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
-                        "View Changelog",
+                        stringResource(R.string.update_view_changelog),
                         fontWeight = FontWeight.SemiBold,
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary

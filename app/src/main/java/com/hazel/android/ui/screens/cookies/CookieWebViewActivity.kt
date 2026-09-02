@@ -44,10 +44,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.lifecycleScope
+import com.hazel.android.R
 import com.hazel.android.data.CookieEntry
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SettingsRepository
@@ -111,7 +113,10 @@ class CookieWebViewActivity : ComponentActivity() {
                 TopAppBar(
                     navigationIcon = {
                         IconButton(onClick = { finish() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close")
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.cookie_webview_close)
+                            )
                         }
                     },
                     title = {
@@ -134,7 +139,7 @@ class CookieWebViewActivity : ComponentActivity() {
                         ) {
                             Icon(
                                 Icons.Filled.DesktopWindows,
-                                contentDescription = "Desktop site",
+                                contentDescription = stringResource(R.string.cookie_webview_desktop_site),
                                 tint = if (desktopMode) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.onSurface
                             )
@@ -172,7 +177,7 @@ class CookieWebViewActivity : ComponentActivity() {
                                             tint = MaterialTheme.colorScheme.primary
                                         )
                                         Text(
-                                            "  OK",
+                                            stringResource(R.string.cookie_webview_done),
                                             style = MaterialTheme.typography.labelLarge,
                                             color = MaterialTheme.colorScheme.primary
                                         )
@@ -261,7 +266,8 @@ class CookieWebViewActivity : ComponentActivity() {
             if (content.isNullOrBlank()) {
                 Toast.makeText(
                     this@CookieWebViewActivity,
-                    result.exceptionOrNull()?.message ?: "No cookies were collected",
+                    result.exceptionOrNull()?.message
+                        ?: getString(R.string.cookie_webview_no_cookies),
                     Toast.LENGTH_LONG
                 ).show()
                 onFailed()

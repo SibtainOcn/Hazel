@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
@@ -59,14 +60,14 @@ fun ToolsScreen(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.back),
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.tools_back),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(18.dp)
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Tools",
+                stringResource(R.string.tools_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -74,7 +75,7 @@ fun ToolsScreen(
         }
 
         Text(
-            "Nothing here yet.",
+            stringResource(R.string.tools_empty),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

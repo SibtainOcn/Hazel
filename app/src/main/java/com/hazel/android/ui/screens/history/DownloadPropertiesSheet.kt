@@ -45,10 +45,12 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.hazel.android.R
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
@@ -123,7 +125,7 @@ fun DownloadPropertiesSheet(
                 .padding(horizontal = 20.dp)
         ) {
             Text(
-                "Properties",
+                stringResource(R.string.properties_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -190,35 +192,68 @@ fun DownloadPropertiesSheet(
             // Gathered first, then drawn, so a section with nothing in it does not leave a
             // heading and an empty panel behind.
             val media = buildList {
-                add("Status" to if (present) "On this device" else "Deleted from this device")
-                add("Kind" to if (entry.isVideo) "Video" else "Audio")
-                entry.formatLabel.ifBlank { null }?.let { add("Quality" to it) }
-                facts.resolution.ifBlank { null }?.let { add("Resolution" to it) }
+                add(
+                    stringResource(R.string.properties_status) to stringResource(
+                        if (present) R.string.properties_status_present
+                        else R.string.properties_status_deleted
+                    )
+                )
+                add(
+                    stringResource(R.string.properties_kind) to stringResource(
+                        if (entry.isVideo) R.string.properties_kind_video
+                        else R.string.properties_kind_audio
+                    )
+                )
+                entry.formatLabel.ifBlank { null }
+                    ?.let { add(stringResource(R.string.properties_quality) to it) }
+                facts.resolution.ifBlank { null }
+                    ?.let { add(stringResource(R.string.properties_resolution) to it) }
                 val length = formatDuration(
                     entry.durationSeconds.takeIf { it > 0 } ?: facts.durationSeconds
                 )
-                length.ifBlank { null }?.let { add("Length" to it) }
-                entry.codec.ifBlank { null }?.let { add("Codec" to it) }
+                length.ifBlank { null }
+                    ?.let { add(stringResource(R.string.properties_length) to it) }
+                entry.codec.ifBlank { null }
+                    ?.let { add(stringResource(R.string.properties_codec) to it) }
 
                 // The file's own figure first: it describes what is on disk, where the
                 // recorded one describes the stream that was asked for.
                 val bitrate = facts.bitrateKbps.takeIf { it > 0 }
                     ?: entry.bitrateKbps.takeIf { it > 0 }?.toInt()
-                bitrate?.let { add("Bitrate" to "$it kbps") }
+                bitrate?.let {
+                    add(
+                        stringResource(R.string.properties_bitrate) to
+                                stringResource(R.string.properties_bitrate_value, it)
+                    )
+                }
             }
 
             val file = buildList {
-                if (entry.sizeBytes > 0) add("Size" to formatFileSize(entry.sizeBytes))
-                entry.container.ifBlank { null }?.let { add("Container" to it) }
-                facts.mimeType.ifBlank { null }?.let { add("Type" to it) }
-                entry.embedded.ifBlank { null }?.let { add("Embedded" to it) }
-                entry.fileName.ifBlank { null }?.let { add("File" to it) }
-                entry.savedPath.ifBlank { null }?.let { add("Saved to" to it) }
+                if (entry.sizeBytes > 0) {
+                    add(
+                        stringResource(R.string.properties_size) to
+                                formatFileSize(entry.sizeBytes)
+                    )
+                }
+                entry.container.ifBlank { null }
+                    ?.let { add(stringResource(R.string.properties_container) to it) }
+                facts.mimeType.ifBlank { null }
+                    ?.let { add(stringResource(R.string.properties_type) to it) }
+                entry.embedded.ifBlank { null }
+                    ?.let { add(stringResource(R.string.properties_embedded) to it) }
+                entry.fileName.ifBlank { null }
+                    ?.let { add(stringResource(R.string.properties_file) to it) }
+                entry.savedPath.ifBlank { null }
+                    ?.let { add(stringResource(R.string.properties_saved_to) to it) }
             }
 
             val origin = buildList {
-                add("Downloaded" to formatStamp(entry.completedAt))
-                entry.site.ifBlank { null }?.let { add("Source" to it) }
+                add(
+                    stringResource(R.string.properties_downloaded) to
+                            formatStamp(entry.completedAt)
+                )
+                entry.site.ifBlank { null }
+                    ?.let { add(stringResource(R.string.properties_source) to it) }
             }
 
             DetailPanel(media, panelColor, missing = !present)
@@ -250,11 +285,13 @@ fun DownloadPropertiesSheet(
                         .weight(1f)
                         .clickable(enabled = entry.url.isNotBlank()) {
                             copySheetLink(context, entry.url)
-                            feedback = if (openSheetLink(context, entry.url)) {
-                                "Link copied and opened"
-                            } else {
-                                "Link copied"
-                            }
+                            feedback = context.getString(
+                                if (openSheetLink(context, entry.url)) {
+                                    R.string.properties_link_copied_opened
+                                } else {
+                                    R.string.properties_link_copied
+                                }
+                            )
                         }
                 )
             }
@@ -317,7 +354,11 @@ private fun DetailPanel(
                 DetailRow(
                     label = label,
                     value = value,
-                    emphasis = missing && label == "Status"
+                    // The status leads the panel, so the first row is the one that says
+                    // the file has gone. Asked by position rather than by matching the
+                    // label against a word, which is a comparison that stops holding the
+                    // moment the label is translated.
+                    emphasis = missing && index == 0
                 )
             }
         }

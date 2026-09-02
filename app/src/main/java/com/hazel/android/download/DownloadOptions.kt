@@ -1,5 +1,8 @@
 package com.hazel.android.download
 
+import androidx.annotation.StringRes
+import com.hazel.android.R
+
 /**
  * Everything the download sheet can adjust before a download starts.
  *
@@ -87,27 +90,26 @@ val AUDIO_CONTAINERS =
  * equally: nothing here is specific to one extractor.
  */
 enum class FetchMode(
-    val label: String,
-    val description: String,
+    @StringRes val labelRes: Int,
+    @StringRes val descriptionRes: Int,
     val socketTimeoutSeconds: Int,
     val retries: Int
 ) {
     FAST(
-        label = "Fast",
-        description = "Give up quickly. Fastest on a good network, but more likely to " +
-                "need a second attempt.",
+        labelRes = R.string.fetch_mode_fast_label,
+        descriptionRes = R.string.fetch_mode_fast_description,
         socketTimeoutSeconds = 5,
         retries = 1
     ),
     BALANCED(
-        label = "Balanced",
-        description = "A middle ground between speed and tolerating a poor connection.",
+        labelRes = R.string.fetch_mode_balanced_label,
+        descriptionRes = R.string.fetch_mode_balanced_description,
         socketTimeoutSeconds = 10,
         retries = 3
     ),
     THOROUGH(
-        label = "Thorough",
-        description = "Wait longer and retry more. Slowest, but survives a weak network.",
+        labelRes = R.string.fetch_mode_thorough_label,
+        descriptionRes = R.string.fetch_mode_thorough_description,
         socketTimeoutSeconds = 20,
         retries = 10
     );

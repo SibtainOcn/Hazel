@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
@@ -77,14 +78,14 @@ fun AppearanceScreen(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.back),
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.appearance_back),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(18.dp)
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Appearance",
+                stringResource(R.string.appearance_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -98,7 +99,7 @@ fun AppearanceScreen(
         ) {
             // Dark theme toggle
             ListItem(
-                headlineContent = { Text("Dark Theme") },
+                headlineContent = { Text(stringResource(R.string.appearance_dark_theme)) },
                 supportingContent = { Text(if (isDarkTheme) "On" else "Off") },
                 leadingContent = {
                     Icon(
@@ -128,7 +129,7 @@ fun AppearanceScreen(
 
             // Accent Color row — opens centered dialog
             ListItem(
-                headlineContent = { Text("Accent Color") },
+                headlineContent = { Text(stringResource(R.string.appearance_accent_color)) },
                 supportingContent = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(

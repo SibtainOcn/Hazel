@@ -42,9 +42,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hazel.android.R
 import com.hazel.android.util.openInAppBrowser
 
 /**
@@ -76,11 +78,14 @@ fun SponsorScreen(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.sponsor_back)
+                )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Support Hazel",
+                stringResource(R.string.sponsor_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -91,12 +96,12 @@ fun SponsorScreen(onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        SectionLabel("Ways to support")
+        SectionLabel(stringResource(R.string.sponsor_section_ways))
 
         SupportCard(
             icon = Icons.Filled.Favorite,
-            title = "GitHub Sponsors",
-            subtitle = "Monthly or one off, cancel whenever. Handled entirely by GitHub.",
+            title = stringResource(R.string.sponsor_github_title),
+            subtitle = stringResource(R.string.sponsor_github_subtitle),
             enabled = SPONSORS_URL.isNotBlank(),
             onClick = { openLink(context, SPONSORS_URL) }
         )
@@ -105,18 +110,21 @@ fun SponsorScreen(onBack: () -> Unit) {
 
         SupportCard(
             icon = Icons.Filled.Coffee,
-            title = "Ko-fi",
+            title = stringResource(R.string.sponsor_kofi_title),
             // The address is not published yet. The card says so rather than being hidden,
             // since a support option that appears later looks like an afterthought and one
             // that is coming reads as a plan.
-            subtitle = if (KOFI_URL.isBlank()) "Opening soon" else "A one off, no account needed.",
+            subtitle = stringResource(
+                if (KOFI_URL.isBlank()) R.string.sponsor_kofi_soon
+                else R.string.sponsor_kofi_subtitle
+            ),
             enabled = KOFI_URL.isNotBlank(),
             onClick = { openLink(context, KOFI_URL) }
         )
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        SectionLabel("Costs nothing, helps as much")
+        SectionLabel(stringResource(R.string.sponsor_section_free))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -126,26 +134,26 @@ fun SponsorScreen(onBack: () -> Unit) {
             Column(modifier = Modifier.padding(vertical = 4.dp)) {
                 HelpRow(
                     icon = Icons.Filled.Star,
-                    title = "Star the project",
-                    subtitle = "The one number people look at before trying an app.",
+                    title = stringResource(R.string.sponsor_star_title),
+                    subtitle = stringResource(R.string.sponsor_star_subtitle),
                     onClick = { openLink(context, SOURCE_URL) }
                 )
                 HelpRow(
                     icon = Icons.Filled.Share,
-                    title = "Tell someone about it",
-                    subtitle = "Word of mouth is the whole of this app's marketing.",
+                    title = stringResource(R.string.sponsor_share_title),
+                    subtitle = stringResource(R.string.sponsor_share_subtitle),
                     onClick = { shareApp(context) }
                 )
                 HelpRow(
                     icon = Icons.Filled.BugReport,
-                    title = "Report what breaks",
-                    subtitle = "A site that stopped working is a fix nobody else can write.",
+                    title = stringResource(R.string.sponsor_issues_title),
+                    subtitle = stringResource(R.string.sponsor_issues_subtitle),
                     onClick = { openLink(context, ISSUES_URL) }
                 )
                 HelpRow(
                     icon = Icons.Filled.Code,
-                    title = "Read the source",
-                    subtitle = "Every line of it is public, and pull requests are welcome.",
+                    title = stringResource(R.string.sponsor_source_title),
+                    subtitle = stringResource(R.string.sponsor_source_subtitle),
                     onClick = { openLink(context, SOURCE_URL) }
                 )
             }
@@ -154,9 +162,7 @@ fun SponsorScreen(onBack: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            "No advertisements, nothing measured about what you download, and no feature " +
-                    "held back for anyone. Support changes how much time goes into Hazel, " +
-                    "not what it will do for you.",
+            stringResource(R.string.sponsor_footer),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
         )
@@ -206,7 +212,7 @@ private fun HeroCard() {
             Spacer(modifier = Modifier.height(18.dp))
 
             Text(
-                "Free, and staying that way",
+                stringResource(R.string.sponsor_hero_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
@@ -215,9 +221,7 @@ private fun HeroCard() {
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                "Hazel is built in evenings and weekends, and it is given away because a " +
-                        "downloader that charges for the download is a worse downloader. " +
-                        "Sites change constantly, and keeping up with them is the work.",
+                stringResource(R.string.sponsor_hero_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )
@@ -225,8 +229,7 @@ private fun HeroCard() {
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                "If the app saved you an afternoon, anything below puts that time back " +
-                        "into it. If it did not, the ways that cost nothing help just as much.",
+                stringResource(R.string.sponsor_hero_closing),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )

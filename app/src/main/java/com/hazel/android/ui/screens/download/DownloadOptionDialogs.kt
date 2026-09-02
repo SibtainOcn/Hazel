@@ -31,8 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.SponsorBlock
 
@@ -61,7 +63,7 @@ fun SponsorBlockDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Filled.Paid, null) },
-        title = { Text("Select SponsorBlock filtering", fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.options_sponsorblock_title), fontWeight = FontWeight.Bold) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 SponsorBlock.CATEGORIES.forEach { (id, label) ->
@@ -89,9 +91,9 @@ fun SponsorBlockDialog(
         confirmButton = {
             TextButton(onClick = {
                 onConfirm(options.copy(sponsorBlockFilters = checked))
-            }) { Text("OK") }
+            }) { Text(stringResource(R.string.options_sponsorblock_ok)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.options_sponsorblock_cancel)) } }
     )
 }
 
@@ -111,30 +113,30 @@ fun ChaptersDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Filled.Book, null) },
-        title = { Text("Chapters", fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.options_chapters_title), fontWeight = FontWeight.Bold) },
         text = {
             Column {
                 if (isVideo) {
                     ToggleRow(
-                        label = "Chapters in videos",
+                        label = stringResource(R.string.options_chapters_in_videos),
                         checked = options.addChapters,
                         onCheckedChange = { onChange(options.copy(addChapters = it)) }
                     )
                 }
                 ToggleRow(
-                    label = "Split by chapters",
+                    label = stringResource(R.string.options_chapters_split),
                     checked = options.splitByChapters,
                     onCheckedChange = { onChange(options.copy(splitByChapters = it)) }
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    "Splitting writes one file per chapter instead of a single file.",
+                    stringResource(R.string.options_chapters_split_body),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                 )
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Dismiss") } }
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.options_chapters_dismiss)) } }
     )
 }
 
@@ -153,21 +155,21 @@ fun SubtitlesDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Filled.ClosedCaption, null) },
-        title = { Text("Subtitles", fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.options_subtitles_title), fontWeight = FontWeight.Bold) },
         text = {
             Column {
                 ToggleRow(
-                    label = "Embed subtitles",
+                    label = stringResource(R.string.options_subtitles_embed),
                     checked = options.embedSubs,
                     onCheckedChange = { onChange(options.copy(embedSubs = it)) }
                 )
                 ToggleRow(
-                    label = "Save subtitles",
+                    label = stringResource(R.string.options_subtitles_save),
                     checked = options.writeSubs,
                     onCheckedChange = { onChange(options.copy(writeSubs = it)) }
                 )
                 ToggleRow(
-                    label = "Save automatic subtitles",
+                    label = stringResource(R.string.options_subtitles_save_auto),
                     checked = options.writeAutoSubs,
                     onCheckedChange = { onChange(options.copy(writeAutoSubs = it)) }
                 )
@@ -180,7 +182,7 @@ fun SubtitlesDialog(
                         .clickable { languageDialog = true }
                         .padding(vertical = 6.dp)
                 ) {
-                    Text("Subtitle languages", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.options_subtitles_languages_label), style = MaterialTheme.typography.bodyMedium)
                     Text(
                         options.subLanguages.ifBlank { DownloadOptions.DEFAULT_SUB_LANGUAGES },
                         style = MaterialTheme.typography.bodySmall,
@@ -189,14 +191,13 @@ fun SubtitlesDialog(
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Dismiss") } }
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.options_subtitles_dismiss)) } }
     )
 
     if (languageDialog) {
         TextInputDialog(
-            title = "Subtitle languages",
-            hint = "A yt-dlp language selector, e.g. en.*,.*-orig for English plus the " +
-                    "original track. Use all for every language the source offers.",
+            title = stringResource(R.string.options_subtitles_languages_title),
+            hint = stringResource(R.string.options_subtitles_languages_hint),
             value = options.subLanguages,
             onConfirm = {
                 onChange(
@@ -219,8 +220,8 @@ fun FilenameTemplateDialog(
     onDismiss: () -> Unit
 ) {
     TextInputDialog(
-        title = "Filename template",
-        hint = "yt-dlp output template. Use %(title)s, %(uploader)s, %(id)s and %(ext)s.",
+        title = stringResource(R.string.options_filename_title),
+        hint = stringResource(R.string.options_filename_hint),
         value = template,
         onConfirm = { onConfirm(it.ifBlank { DownloadOptions.DEFAULT_FILENAME_TEMPLATE }) },
         onDismiss = onDismiss
@@ -283,7 +284,7 @@ private fun TextInputDialog(
                 )
             }
         },
-        confirmButton = { TextButton(onClick = { onConfirm(draft.trim()) }) { Text("Save") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+        confirmButton = { TextButton(onClick = { onConfirm(draft.trim()) }) { Text(stringResource(R.string.options_text_input_save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.options_text_input_cancel)) } }
     )
 }

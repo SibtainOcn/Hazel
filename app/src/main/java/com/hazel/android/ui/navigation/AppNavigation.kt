@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -60,12 +62,12 @@ import com.hazel.android.update.UpdateScreen
 
 sealed class Screen(
     val route: String,
-    val title: String,
+    @StringRes val titleRes: Int,
     @DrawableRes val icon: Int
 ) {
-    data object Download : Screen("download", "Home", R.drawable.home)
-    data object History : Screen("history", "Downloads", R.drawable.downloads_tab)
-    data object More : Screen("more", "More", R.drawable.more_tab)
+    data object Download : Screen("download", R.string.nav_home, R.drawable.home)
+    data object History : Screen("history", R.string.nav_history, R.drawable.downloads_tab)
+    data object More : Screen("more", R.string.nav_more, R.drawable.more_tab)
 }
 
 private val bottomNavItems = listOf(
@@ -117,7 +119,7 @@ fun AppNavigation(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Hazel",
+                                text = stringResource(R.string.app_name),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -140,9 +142,9 @@ fun AppNavigation(
                             Icon(
                                 painter = painterResource(R.drawable.incognito),
                                 contentDescription = if (incognito) {
-                                    "Incognito on, downloads are not recorded"
+                                    stringResource(R.string.nav_incognito_on)
                                 } else {
-                                    "Incognito off"
+                                    stringResource(R.string.nav_incognito_off)
                                 },
                                 modifier = Modifier
                                     .size(34.dp)
@@ -193,11 +195,11 @@ fun AppNavigation(
                             icon = {
                                 Icon(
                                     painter = painterResource(id = screen.icon),
-                                    contentDescription = screen.title,
+                                    contentDescription = stringResource(screen.titleRes),
                                     modifier = Modifier.size(22.dp)
                                 )
                             },
-                            label = { Text(screen.title, style = MaterialTheme.typography.labelSmall) },
+                            label = { Text(stringResource(screen.titleRes), style = MaterialTheme.typography.labelSmall) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,

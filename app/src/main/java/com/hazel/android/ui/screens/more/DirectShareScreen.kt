@@ -47,8 +47,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.AUDIO_CONTAINERS
@@ -110,11 +113,14 @@ fun DirectShareScreen(onBack: () -> Unit, onOpenCookies: () -> Unit = {}) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.direct_share_back)
+                )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Hazel Instant",
+                stringResource(R.string.direct_share_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -122,23 +128,22 @@ fun DirectShareScreen(onBack: () -> Unit, onOpenCookies: () -> Unit = {}) {
         }
 
         Text(
-            "Sharing a link to Hazel Instant starts the download straight away, with no " +
-                    "sheet and no questions. These are the answers it uses.",
+            stringResource(R.string.direct_share_intro),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
-        SettingGroup(title = "Save as") {
+        SettingGroup(title = stringResource(R.string.direct_share_save_as)) {
             ChoiceRow(
-                label = "Video",
-                description = "Picture and sound, muxed into one file.",
+                label = stringResource(R.string.direct_share_video),
+                description = stringResource(R.string.direct_share_video_description),
                 selected = isVideo,
                 onSelect = { scope.launch { SettingsRepository.setQuickIsVideo(context, true) } }
             )
             ChoiceRow(
-                label = "Audio only",
-                description = "Sound alone, at the best the source offers.",
+                label = stringResource(R.string.direct_share_audio_only),
+                description = stringResource(R.string.direct_share_audio_description),
                 selected = !isVideo,
                 onSelect = { scope.launch { SettingsRepository.setQuickIsVideo(context, false) } }
             )
@@ -148,10 +153,8 @@ fun DirectShareScreen(onBack: () -> Unit, onOpenCookies: () -> Unit = {}) {
             Spacer(modifier = Modifier.height(24.dp))
 
             SectionTitle(
-                title = "Quality limit",
-                description = "A ceiling, not an exact size. Sources do not all offer the " +
-                        "same heights, so the tallest that fits under this is taken, and " +
-                        "the smallest available when nothing does."
+                title = stringResource(R.string.direct_share_quality_title),
+                description = stringResource(R.string.direct_share_quality_description)
             )
 
             Card(
@@ -179,10 +182,8 @@ fun DirectShareScreen(onBack: () -> Unit, onOpenCookies: () -> Unit = {}) {
         // ── Output ──
 
         SectionTitle(
-            title = "Output",
-            description = "The file that lands on the device. Default keeps whatever the " +
-                    "source already provides, which is the fastest of the options because " +
-                    "nothing is re-encoded."
+            title = stringResource(R.string.direct_share_output_title),
+            description = stringResource(R.string.direct_share_output_description)
         )
 
         Card(
@@ -206,15 +207,15 @@ fun DirectShareScreen(onBack: () -> Unit, onOpenCookies: () -> Unit = {}) {
                 )
                 ActionRow(
                     icon = Icons.Filled.Edit,
-                    label = "Filename template",
+                    label = stringResource(R.string.direct_share_filename_template),
                     value = options.filenameTemplate,
                     onClick = { openDialog = InstantDialog.FILENAME }
                 )
                 ActionRow(
                     icon = Icons.Filled.Translate,
-                    label = "Audio language",
+                    label = stringResource(R.string.direct_share_audio_language),
                     value = audioLanguage.takeIf { it.isNotBlank() }?.let(::languageLabel)
-                        ?: "Source default",
+                        ?: stringResource(R.string.direct_share_audio_language_default),
                     onClick = { languageSheetVisible = true }
                 )
             }
@@ -225,9 +226,8 @@ fun DirectShareScreen(onBack: () -> Unit, onOpenCookies: () -> Unit = {}) {
         // ── Extras ──
 
         SectionTitle(
-            title = "Extras",
-            description = "Applied when the source has them. Anything it does not have is " +
-                    "skipped for that download rather than failing it."
+            title = stringResource(R.string.direct_share_extras_title),
+            description = stringResource(R.string.direct_share_extras_description)
         )
 
         Card(
@@ -238,31 +238,37 @@ fun DirectShareScreen(onBack: () -> Unit, onOpenCookies: () -> Unit = {}) {
             Column(modifier = Modifier.padding(vertical = 4.dp)) {
                 SwitchRow(
                     icon = Icons.Filled.Image,
-                    label = "Cover art",
-                    description = "Writes the thumbnail into the file, where the container " +
-                            "can carry one.",
+                    label = stringResource(R.string.direct_share_cover_art),
+                    description = stringResource(R.string.direct_share_cover_art_description),
                     checked = options.embedThumbnail,
                     onCheckedChange = { update(options.copy(embedThumbnail = it)) }
                 )
                 ActionRow(
                     icon = Icons.Filled.Book,
-                    label = "Chapters",
+                    label = stringResource(R.string.direct_share_chapters),
                     value = chapterSummary(options, isVideo),
                     onClick = { openDialog = InstantDialog.CHAPTERS }
                 )
                 if (isVideo) {
                     ActionRow(
                         icon = Icons.Filled.ClosedCaption,
-                        label = "Subtitles",
+                        label = stringResource(R.string.direct_share_subtitles),
                         value = subtitleSummary(options),
                         onClick = { openDialog = InstantDialog.SUBTITLES }
                     )
                 }
                 ActionRow(
                     icon = Icons.Filled.Paid,
-                    label = "SponsorBlock",
-                    value = if (options.sponsorBlockFilters.isEmpty()) "Off"
-                    else "${options.sponsorBlockFilters.size} categories cut",
+                    label = stringResource(R.string.direct_share_sponsorblock),
+                    value = if (options.sponsorBlockFilters.isEmpty()) {
+                        stringResource(R.string.direct_share_sponsorblock_off)
+                    } else {
+                        pluralStringResource(
+                            R.plurals.direct_share_sponsorblock_cut,
+                            options.sponsorBlockFilters.size,
+                            options.sponsorBlockFilters.size
+                        )
+                    },
                     onClick = { openDialog = InstantDialog.SPONSORBLOCK }
                 )
             }
@@ -273,11 +279,8 @@ fun DirectShareScreen(onBack: () -> Unit, onOpenCookies: () -> Unit = {}) {
         // ── Sign-ins ──
 
         SectionTitle(
-            title = "Sign-ins",
-            description = "An instant share uses the saved cookies for whatever site the " +
-                    "link belongs to, the same as a download started from the sheet. " +
-                    "Nothing is asked at share time, so a link behind a login only works " +
-                    "if the sign-in is already saved and switched on."
+            title = stringResource(R.string.direct_share_signins_title),
+            description = stringResource(R.string.direct_share_signins_description)
         )
 
         Card(
@@ -287,8 +290,11 @@ fun DirectShareScreen(onBack: () -> Unit, onOpenCookies: () -> Unit = {}) {
         ) {
             ActionRow(
                 icon = Icons.Filled.Cookie,
-                label = "Cookies",
-                value = if (useCookies) "On, used for every instant share" else "Off",
+                label = stringResource(R.string.direct_share_cookies),
+                value = stringResource(
+                    if (useCookies) R.string.direct_share_cookies_on
+                    else R.string.direct_share_cookies_off
+                ),
                 onClick = onOpenCookies
             )
         }
@@ -519,7 +525,7 @@ private fun ContainerRow(
             }
             Icon(
                 Icons.Filled.ArrowDropDown,
-                contentDescription = "Change $label",
+                contentDescription = stringResource(R.string.direct_share_change, label),
                 tint = MaterialTheme.colorScheme.primary
             )
         }

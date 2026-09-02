@@ -26,8 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hazel.android.R
 
 /**
  * Shown once, the first time the app is opened.
@@ -48,7 +50,7 @@ fun UserGuideDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                "Getting started",
+                stringResource(R.string.guide_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -57,39 +59,34 @@ fun UserGuideDialog(
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 GuideStep(
                     icon = Icons.Filled.Link,
-                    text = "Paste a link into the search field to download it. " +
-                            "You can add multiple links, playlists"
+                    text = stringResource(R.string.guide_step_paste_link)
                 )
                 GuideStep(
                     icon = Icons.Filled.Tune,
-                    text = "Tap a card to pick the exact format. All available" +
-                            " qualities are listed with size and codec."
+                    text = stringResource(R.string.guide_step_pick_format)
                 )
                 GuideStep(
                     icon = Icons.Filled.Bolt,
-                    text = "Share a link to Hazel Instant from any app to" +
-                            " download instantly at your preset quality."
+                    text = stringResource(R.string.guide_step_share_instant)
                 )
                 GuideStep(
                     icon = Icons.Filled.Download,
-                    text = "Finished files appear in Downloads. Tap any" +
-                            " row to open it in the device's default player."
+                    text = stringResource(R.string.guide_step_finished_downloads)
                 )
                 GuideStep(
                     icon = Icons.Filled.BatteryChargingFull,
-                    text = "Set battery use to unrestricted, otherwise Android" +
-                            " may stop downloads when you leave the app."
+                    text = stringResource(R.string.guide_step_battery_unrestricted)
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = onOpenBatterySettings) {
-                Text("Battery settings", fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.guide_battery_settings), fontWeight = FontWeight.SemiBold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.guide_close), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     )

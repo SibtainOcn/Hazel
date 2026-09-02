@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import com.hazel.android.R
 
 /**
  * Handing a finished download to whatever the device plays that kind of media with.
@@ -23,7 +24,11 @@ object MediaOpener {
      */
     fun play(context: Context, fileUri: String, isVideo: Boolean) {
         if (fileUri.isBlank()) {
-            Toast.makeText(context, "This file's location is unknown", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.media_open_unknown_location),
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
@@ -36,11 +41,15 @@ object MediaOpener {
         if (runCatching { context.startActivity(intent) }.isSuccess) return
 
         // Nothing claimed it by default, so let the user say what should.
-        val chooser = Intent.createChooser(intent, "Open with")
+        val chooser = Intent.createChooser(intent, context.getString(R.string.media_open_chooser))
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         if (runCatching { context.startActivity(chooser) }.isSuccess) return
 
-        Toast.makeText(context, "Nothing on this device can open it", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            context,
+            context.getString(R.string.media_open_no_app),
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     /**

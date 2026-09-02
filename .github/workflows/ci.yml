@@ -31,6 +31,44 @@ env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true
 
 jobs:
+  # Reads the string resources and nothing else, so it answers in seconds and answers first.
+  # A dangling R.string reference is a crash the compiler does catch, but an orphan key, a
+  # plural with no 'other', an unescaped apostrophe or a sentence assembled out of
+  # translated fragments all compile perfectly and are only visible here.
+  #
+  # Android's own lint owns the half of this that it knows about, which is translation
+  # parity and format strings. Those rules find nothing until a values-* folder exists, so
+  # they run inside the build job's lint rather than being a gate of their own yet.
+  strings:
+    name: String resources
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the source resources
+        run: python3 tools/check.py resources
+
+      # Passes trivially while there are no translations, and starts doing the work the day
+      # the first values-* folder lands: key parity, placeholders, inline markup, escaping
+      # and the plural categories each language actually defines.
+      - name: Check the translations
+        run: python3 tools/check.py translations
+
+      # Reported rather than enforced. The count only falls, so a number that went up is
+      # worth seeing on the pull request without failing it.
+      - name: Count what is left
+        if: always()
+        run: |
+          {
+            echo "## Text still written as a literal"
+            echo
+            echo '```'
+            python3 tools/check.py progress
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
   test:
     name: Unit tests
     runs-on: ubuntu-latest

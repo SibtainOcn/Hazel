@@ -1,8 +1,586 @@
 <resources>
-    <string name="app_name">Hazel</string>
+    <!--
+         The app's own name. Marked non-translatable so it is never carried into a
+         values-xx file: a brand name is the same word in every language, and this one
+         string is what the launcher, the top bar, the splash and the notifications all
+         read, so translating it once would rename the app everywhere.
+    -->
+    <string name="app_name" translatable="false">Hazel</string>
     <!--
          Shown in the system share sheet. Android puts the app name in front of this,
          so naming the app here again would render as "Hazel Hazel direct".
     -->
     <string name="direct_share_label">Instant</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_history">Downloads</string>
+    <string name="nav_more">More</string>
+    <string name="nav_incognito_on">Incognito on, downloads are not recorded</string>
+    <string name="nav_incognito_off">Incognito off</string>
+
+    <!-- DownloadScreen -->
+    <string name="download_search_hint">Search or insert URL</string>
+    <string name="download_clear">Clear</string>
+    <string name="download_show_large_artwork">Show large artwork</string>
+    <string name="download_show_list">Show as a list</string>
+    <string name="download_instant_source">Instant \u00b7 reading from %1$s</string>
+    <string name="download_incognito_title">You\'re incognito</string>
+    <string name="download_incognito_body">Downloads are not added to your history and links are not remembered. The files themselves still save as usual.</string>
+    <string name="download_download_all">Download all</string>
+    <string name="download_saved_aside">Your downloads are saved. Find them in the Downloads tab.</string>
+    <string name="download_options">Download options</string>
+    <string name="download_pause">Pause</string>
+    <string name="download_resume">Resume</string>
+    <string name="download_cancel">Cancel</string>
+    <string name="download_paused">Paused</string>
+    <string name="download_processing">Processing</string>
+    <string name="download_waiting_wifi">Waiting for Wi-Fi</string>
+    <string name="download_saved">Saved</string>
+    <string name="download_queued">Queued</string>
+    <string name="download_downloaded">Downloaded</string>
+    <string name="download_failed">Failed</string>
+    <string name="download_remove_link">Remove link</string>
+    <string name="download_cancel_action">Cancel download</string>
+    <string name="download_resume_action">Resume download</string>
+    <plurals name="download_links">
+        <item quantity="one">%d link</item>
+        <item quantity="other">%d links</item>
+    </plurals>
+
+    <!-- SearchScreen -->
+    <string name="search_hint">Search or insert URL</string>
+    <string name="search_back">Back</string>
+    <string name="search_more">More</string>
+    <string name="search_add_link">Add another link</string>
+    <string name="search_clear">Clear</string>
+    <string name="search_clear_results">Clear results</string>
+    <string name="search_clear_history">Clear search history</string>
+    <string name="search_empty_history">Links you use will appear here</string>
+    <string name="search_no_matches">No matching links</string>
+    <string name="search_remove">Remove</string>
+    <string name="search_all">Search all</string>
+    <string name="search_forget">Forget</string>
+    <string name="search_edit_before">Edit before searching</string>
+    <string name="search_paste_and_fetch">Paste and fetch</string>
+    <string name="search_nothing_to_paste">Nothing to paste</string>
+
+    <!-- AlreadyDownloadedDialog -->
+    <string name="already_downloaded_title">Already downloaded</string>
+    <string name="already_downloaded_body">This link is already saved on this device.</string>
+    <string name="already_downloaded_video">Video</string>
+    <string name="already_downloaded_audio">Audio</string>
+    <string name="already_downloaded_keep">Keep it</string>
+    <string name="already_downloaded_play">Play</string>
+    <string name="already_downloaded_download_again">Download again</string>
+    <string name="already_downloaded_just_now">Just now</string>
+    <string name="already_downloaded_yesterday">Yesterday</string>
+    <plurals name="already_downloaded_minutes">
+        <item quantity="one">%d min</item>
+        <item quantity="other">%d min</item>
+    </plurals>
+    <plurals name="already_downloaded_hours">
+        <item quantity="one">%d hr</item>
+        <item quantity="other">%d hr</item>
+    </plurals>
+    <plurals name="already_downloaded_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="already_downloaded_months">
+        <item quantity="one">%d mo</item>
+        <item quantity="other">%d mo</item>
+    </plurals>
+
+    <!-- NoResultsDialog -->
+    <string name="no_results_sign_in_title">Sign-in needed</string>
+    <string name="no_results_error_title">Could not read this link</string>
+    <string name="no_results_sign_in_body">The source wants an account before it will hand this over. Signing in saves cookies for the site and tries again.</string>
+    <string name="no_results_continue_body">The details could not be read, but the download itself may still work. Going ahead offers the best available quality.</string>
+    <string name="no_results_refused_body">The source refused the request.</string>
+    <string name="no_results_engine_report">What the engine reported</string>
+    <string name="no_results_copy_log">Copy log</string>
+    <string name="no_results_sign_in">Sign in</string>
+    <string name="no_results_try_anyway">Try anyway</string>
+    <string name="no_results_close">Close</string>
+
+    <!-- UserGuideDialog -->
+    <string name="guide_title">Getting started</string>
+    <string name="guide_step_paste_link">Paste a link into the search field to download it. You can add multiple links, playlists</string>
+    <string name="guide_step_pick_format">Tap a card to pick the exact format. All available qualities are listed with size and codec.</string>
+    <string name="guide_step_share_instant">Share a link to Hazel Instant from any app to download instantly at your preset quality.</string>
+    <string name="guide_step_finished_downloads">Finished files appear in Downloads. Tap any row to open it in the device\'s default player.</string>
+    <string name="guide_step_battery_unrestricted">Set battery use to unrestricted, otherwise Android may stop downloads when you leave the app.</string>
+    <string name="guide_battery_settings">Battery settings</string>
+    <string name="guide_close">Close</string>
+
+    <!-- FormatSheet -->
+    <string name="format_sheet_title">Download</string>
+    <string name="format_sheet_subtitle">Adjust download</string>
+    <string name="format_sheet_play">Play</string>
+    <string name="format_sheet_ok">OK</string>
+    <string name="format_sheet_download">Download</string>
+    <string name="format_sheet_tab_audio">Audio</string>
+    <string name="format_sheet_tab_video">Video</string>
+    <string name="format_sheet_label_title">Title</string>
+    <string name="format_sheet_label_author">Author</string>
+    <string name="format_sheet_label_container">Container</string>
+    <string name="format_sheet_video_quality">Video quality</string>
+    <string name="format_sheet_audio_quality">Audio quality</string>
+    <string name="format_sheet_no_video_stream">This source has no separate video stream.</string>
+    <string name="format_sheet_no_audio_stream">This source has no separate audio stream.</string>
+    <string name="format_sheet_adjust_video">Adjust video</string>
+    <string name="format_sheet_adjust_audio">Adjust audio</string>
+    <string name="format_sheet_thumbnail">Thumbnail</string>
+    <string name="format_sheet_chapters">Chapters</string>
+    <string name="format_sheet_subtitles">Subtitles</string>
+    <string name="format_sheet_sponsorblock">SponsorBlock</string>
+    <string name="format_sheet_audio_language">Audio language</string>
+    <string name="format_sheet_change_audio_language">Change audio language</string>
+    <string name="format_sheet_filename_template">Filename template</string>
+    <string name="format_sheet_change_field">Change</string>
+    <string name="format_sheet_save_dir">Save dir</string>
+    <string name="format_sheet_save_location">Save location</string>
+    <string name="format_sheet_save_location_title">Save location</string>
+    <string name="format_sheet_save_location_body">Open this folder in your file manager, or pick a different one to save downloads into.</string>
+    <string name="format_sheet_open_folder">Open folder</string>
+    <string name="format_sheet_reset">Reset</string>
+    <string name="format_sheet_change">Change</string>
+
+    <!-- ConverterScreen -->
+    <string name="converter_label_convert_to">Convert to</string>
+    <string name="converter_label_saved_to">Saved to</string>
+    <string name="converter_hazel_storage">Hazel\'s own storage</string>
+    <string name="converter_storage_warning">Without storage access the file stays inside Hazel, where other apps cannot see it.</string>
+    <string name="converter_back">Back</string>
+    <string name="converter_title">Offline Converter</string>
+    <string name="converter_subtitle">Video to audio, nothing leaves the phone</string>
+    <string name="converter_choose_video">Choose a video file</string>
+    <string name="converter_ready">Ready</string>
+    <string name="converter_choose_video_hint">Anything on the phone or an SD card</string>
+    <string name="converter_change">Change</string>
+    <string name="converter_converting">Converting</string>
+    <string name="converter_convert">Convert</string>
+    <string name="converter_saved">Saved</string>
+    <string name="converter_open_folder">Open folder</string>
+    <string name="converter_convert_another">Convert another</string>
+    <string name="converter_error_title">That did not convert</string>
+    <string name="converter_dismiss">Dismiss</string>
+    <string name="converter_save_as_title">Save as</string>
+    <string name="converter_save_as_body">Names the file, and is written into its title tag.</string>
+    <string name="converter_label_name">Name</string>
+    <string name="converter_start">Start</string>
+    <string name="converter_format_sheet_title">Convert to</string>
+    <string name="converter_heading_common">The three worth using</string>
+    <string name="converter_heading_other">Everything else</string>
+
+    <!-- MoreScreen -->
+    <string name="more_title">More</string>
+    <string name="more_battery_title">Background downloads</string>
+    <string name="more_battery_body">Downloads keep running in the background on their own. Some phones still cut them short to save battery. Allow unrestricted use to rule that out.</string>
+    <string name="more_downloads">Downloads</string>
+    <string name="more_appearance">Appearance</string>
+    <string name="more_cookies">Cookies</string>
+    <string name="more_link_reading">Link Reading</string>
+    <string name="more_hazel_instant">Hazel Instant</string>
+    <string name="more_temporary_files">Temporary Files</string>
+    <string name="more_converter">Offline convert video to audio</string>
+    <string name="more_engine_update">yt-dlp Engine Update</string>
+    <string name="more_support">Support Hazel</string>
+    <string name="more_license">License</string>
+
+    <!-- SponsorScreen -->
+    <string name="sponsor_back">Back</string>
+    <string name="sponsor_title">Support Hazel</string>
+    <string name="sponsor_hero_title">Free, and staying that way</string>
+    <string name="sponsor_hero_body">Hazel is built in evenings and weekends, and it is given away because a downloader that charges for the download is a worse downloader. Sites change constantly, and keeping up with them is the work.</string>
+    <string name="sponsor_hero_closing">If the app saved you an afternoon, anything below puts that time back into it. If it did not, the ways that cost nothing help just as much.</string>
+    <string name="sponsor_section_ways">Ways to support</string>
+    <string name="sponsor_github_title">GitHub Sponsors</string>
+    <string name="sponsor_github_subtitle">Monthly or one off, cancel whenever. Handled entirely by GitHub.</string>
+    <string name="sponsor_kofi_title">Ko-fi</string>
+    <string name="sponsor_kofi_subtitle">A one off, no account needed.</string>
+    <string name="sponsor_kofi_soon">Opening soon</string>
+    <string name="sponsor_section_free">Costs nothing, helps as much</string>
+    <string name="sponsor_star_title">Star the project</string>
+    <string name="sponsor_star_subtitle">The one number people look at before trying an app.</string>
+    <string name="sponsor_share_title">Tell someone about it</string>
+    <string name="sponsor_share_subtitle">Word of mouth is the whole of this app\'s marketing.</string>
+    <string name="sponsor_issues_title">Report what breaks</string>
+    <string name="sponsor_issues_subtitle">A site that stopped working is a fix nobody else can write.</string>
+    <string name="sponsor_source_title">Read the source</string>
+    <string name="sponsor_source_subtitle">Every line of it is public, and pull requests are welcome.</string>
+    <string name="sponsor_footer">No advertisements, nothing measured about what you download, and no feature held back for anyone. Support changes how much time goes into Hazel, not what it will do for you.</string>
+
+    <!-- UpdateScreen -->
+    <string name="update_title">yt-dlp Update</string>
+    <string name="update_back">Back</string>
+    <string name="update_check_action">Check for updates</string>
+    <string name="update_status_up_to_date">You\'re up to date</string>
+    <string name="update_status_checking">Checking for updates...</string>
+    <string name="update_status_available">Update Available</string>
+    <string name="update_status_installing">Installing yt-dlp...</string>
+    <string name="update_status_installed">Engine Updated</string>
+    <string name="update_status_failed">Update Failed</string>
+    <string name="update_subtitle_idle">Hazel is running the latest yt-dlp build</string>
+    <string name="update_subtitle_checking">Contacting GitHub...</string>
+    <string name="update_subtitle_available">yt-dlp %1$s is available</string>
+    <string name="update_subtitle_updating">Downloading yt-dlp %1$s</string>
+    <string name="update_subtitle_installed">yt-dlp %1$s is now in use</string>
+    <string name="update_installed_version">Installed Version</string>
+    <string name="update_version_unknown">Unknown</string>
+    <string name="update_new_version">New Version</string>
+    <string name="update_installing_binary">Installing Binary</string>
+    <string name="update_installing_body">Downloading from GitHub and replacing the engine. Keep the app open.</string>
+    <string name="update_action_update_now">Update Now</string>
+    <string name="update_action_installing">Installing...</string>
+    <string name="update_action_done">Done</string>
+    <string name="update_action_retry">Retry</string>
+    <string name="update_action_check">Check for Updates</string>
+    <string name="update_action_checking">Checking...</string>
+    <string name="update_info_heading">Information</string>
+    <string name="update_info_component">Component</string>
+    <string name="update_info_repository">Repository</string>
+    <string name="update_info_binary_size">Binary Size</string>
+    <string name="update_info_distribution">Distribution</string>
+    <string name="update_info_github_releases">GitHub Releases</string>
+    <string name="update_release_channel">Release Channel</string>
+    <string name="update_view_changelog">View Changelog</string>
+
+    <!-- DownloadOptionDialogs -->
+    <string name="options_sponsorblock_title">Select SponsorBlock filtering</string>
+    <string name="options_sponsorblock_ok">OK</string>
+    <string name="options_sponsorblock_cancel">Cancel</string>
+    <string name="options_chapters_title">Chapters</string>
+    <string name="options_chapters_in_videos">Chapters in videos</string>
+    <string name="options_chapters_split">Split by chapters</string>
+    <string name="options_chapters_split_body">Splitting writes one file per chapter instead of a single file.</string>
+    <string name="options_chapters_dismiss">Dismiss</string>
+    <string name="options_subtitles_title">Subtitles</string>
+    <string name="options_subtitles_embed">Embed subtitles</string>
+    <string name="options_subtitles_save">Save subtitles</string>
+    <string name="options_subtitles_save_auto">Save automatic subtitles</string>
+    <string name="options_subtitles_languages_label">Subtitle languages</string>
+    <string name="options_subtitles_dismiss">Dismiss</string>
+    <string name="options_subtitles_languages_title">Subtitle languages</string>
+    <string name="options_subtitles_languages_hint">A yt-dlp language selector, e.g. en.*,.*-orig for English plus the original track. Use all for every language the source offers.</string>
+    <string name="options_filename_title">Filename template</string>
+    <string name="options_filename_hint">yt-dlp output template. Use %(title)s, %(uploader)s, %(id)s and %(ext)s.</string>
+    <string name="options_text_input_save">Save</string>
+    <string name="options_text_input_cancel">Cancel</string>
+
+    <!-- StorageCleanupScreen -->
+    <string name="cleanup_back">Back</string>
+    <string name="cleanup_title">Temporary Files</string>
+    <string name="cleanup_header_description">Working files held by the app. Your downloads are not included and are never removed from here.</string>
+    <string name="cleanup_action_clear_everything">Clear everything</string>
+    <string name="cleanup_category_link_data_label">Link data cache</string>
+    <string name="cleanup_category_link_data_description">Player data yt-dlp keeps so a link read a second time is faster. Safe to clear.</string>
+    <string name="cleanup_category_partial_downloads_label">Unfinished downloads</string>
+    <string name="cleanup_category_partial_downloads_description">Fragments left by a download that was cancelled or failed before its file was saved.</string>
+    <string name="cleanup_category_conversions_label">Unfinished conversions</string>
+    <string name="cleanup_category_conversions_description">Working files from the audio converter that were never moved into your music folder.</string>
+    <string name="cleanup_category_engine_label">yt-dlp engine files</string>
+    <string name="cleanup_category_engine_description">The downloader and its runtime. Clearing frees the most space, but the next download has to unpack them again.</string>
+    <string name="cleanup_category_other_cache_label">Other cached files</string>
+    <string name="cleanup_category_other_cache_description">Thumbnails and anything else cached while browsing links.</string>
+    <!--
+         Deliberately does not name the category. The row the user just tapped is still on
+         screen behind the dialog, and dropping a translated noun into a sentence slot
+         reads as broken grammar in most languages.
+    -->
+    <string name="cleanup_confirm_category_title">Clear these files?</string>
+    <string name="cleanup_confirm_category_safe">%1$s will be freed. Nothing you have saved is affected.</string>
+    <string name="cleanup_confirm_category_unsafe">%1$s will be freed, and the next download will take longer while these are unpacked again.</string>
+    <string name="cleanup_confirm_clear">Clear</string>
+    <string name="cleanup_confirm_cancel">Cancel</string>
+    <string name="cleanup_confirm_all_title">Clear everything?</string>
+    <string name="cleanup_confirm_all_body">%1$s will be freed. Your downloads and saved sign-ins are kept, but the next download will take longer while the engine is unpacked again.</string>
+    <string name="cleanup_confirm_all_confirm">Clear everything</string>
+    <string name="cleanup_confirm_all_cancel">Cancel</string>
+
+    <!-- HistoryScreen -->
+    <string name="history_title">Downloads</string>
+    <string name="history_layout_grid">Show large artwork</string>
+    <string name="history_layout_list">Show as a list</string>
+    <string name="history_search_action">Search downloads</string>
+    <string name="history_sort_action">Sort</string>
+    <string name="history_menu_action">More</string>
+    <string name="history_menu_clear">Clear history</string>
+    <string name="history_search_placeholder">Search downloads</string>
+    <string name="history_search_clear">Clear search</string>
+    <string name="history_empty_initial">Nothing downloaded yet</string>
+    <string name="history_empty_filtered">Nothing matches that</string>
+    <string name="history_clear_dialog_title">Clear history</string>
+    <string name="history_clear_dialog_body">The list is emptied. Your downloaded files are not touched.</string>
+    <string name="history_clear_dialog_confirm">Clear</string>
+    <string name="history_clear_dialog_cancel">Cancel</string>
+    <string name="history_delete_dialog_title">Delete file</string>
+    <string name="history_delete_dialog_body">%1$s will be deleted from your device.</string>
+    <string name="history_toast_file_deleted">File deleted</string>
+    <string name="history_toast_file_delete_failed">Could not delete the file</string>
+    <string name="history_delete_dialog_confirm">Delete</string>
+    <string name="history_delete_dialog_cancel">Cancel</string>
+    <string name="history_card_options">Options</string>
+    <string name="history_card_properties">Properties</string>
+    <string name="history_card_remove">Remove from list</string>
+    <string name="history_card_delete">Delete file</string>
+    <string name="history_tag_deleted">Deleted</string>
+    <string name="history_row_options">Options</string>
+    <string name="history_row_properties">Properties</string>
+    <string name="history_row_remove">Remove from list</string>
+    <string name="history_row_delete">Delete file</string>
+    <string name="history_toast_file_gone">This file is no longer on your device</string>
+
+    <!-- DownloadPropertiesSheet -->
+    <string name="properties_title">Properties</string>
+    <string name="properties_status">Status</string>
+    <string name="properties_status_present">On this device</string>
+    <string name="properties_status_deleted">Deleted from this device</string>
+    <string name="properties_kind">Kind</string>
+    <string name="properties_kind_video">Video</string>
+    <string name="properties_kind_audio">Audio</string>
+    <string name="properties_quality">Quality</string>
+    <string name="properties_resolution">Resolution</string>
+    <string name="properties_length">Length</string>
+    <string name="properties_codec">Codec</string>
+    <string name="properties_bitrate">Bitrate</string>
+    <!-- The measured rate, in kilobits per second. %1$d is the number. -->
+    <string name="properties_bitrate_value">%1$d kbps</string>
+    <string name="properties_size">Size</string>
+    <string name="properties_container">Container</string>
+    <string name="properties_type">Type</string>
+    <string name="properties_embedded">Embedded</string>
+    <string name="properties_file">File</string>
+    <string name="properties_saved_to">Saved to</string>
+    <string name="properties_downloaded">Downloaded</string>
+    <string name="properties_source">Source</string>
+    <string name="properties_link_copied_opened">Link copied and opened</string>
+    <string name="properties_link_copied">Link copied</string>
+
+    <!-- CookiesScreen -->
+    <string name="cookies_back">Back</string>
+    <string name="cookies_title">Cookies</string>
+    <string name="cookies_menu">More</string>
+    <string name="cookies_menu_import">Import from clipboard</string>
+    <string name="cookies_menu_export">Export to clipboard</string>
+    <string name="cookies_menu_delete_all">Delete all</string>
+    <!-- The label given to a set of cookies pasted in from the clipboard. -->
+    <string name="cookies_imported_title">Imported cookies</string>
+    <string name="cookies_toast_imported">Cookies imported</string>
+    <string name="cookies_toast_no_data">Clipboard holds no cookie data</string>
+    <string name="cookies_toast_nothing_to_export">Nothing to export</string>
+    <string name="cookies_toast_exported">Copied to clipboard</string>
+    <string name="cookies_toast_entry_copied">Copied to clipboard</string>
+    <string name="cookies_use_title">Use cookies</string>
+    <string name="cookies_use_description">Pass saved sign-ins to the downloader</string>
+    <string name="cookies_new">New cookie</string>
+    <string name="cookies_empty_title">No cookies saved</string>
+    <string name="cookies_empty_body">Add one to download age-restricted, private, or members-only media.</string>
+    <string name="cookies_delete_title">Delete cookies</string>
+    <string name="cookies_delete_body">Remove the saved sign-in for %1$s?</string>
+    <string name="cookies_delete_confirm">Delete</string>
+    <string name="cookies_delete_cancel">Cancel</string>
+    <string name="cookies_delete_all_title">Delete all cookies</string>
+    <string name="cookies_delete_all_body">Every saved sign-in will be removed. This cannot be undone.</string>
+    <string name="cookies_delete_all_confirm">Delete all</string>
+    <string name="cookies_delete_all_cancel">Cancel</string>
+    <!-- Stands in for the address on a row that has neither an address nor a label. -->
+    <string name="cookies_row_fallback_name">Cookies</string>
+    <string name="cookies_sheet_title">Cookies</string>
+    <string name="cookies_sheet_copy">Copy cookies</string>
+    <string name="cookies_sheet_delete">Delete cookies</string>
+    <string name="cookies_field_title">Title</string>
+    <string name="cookies_field_url">URL</string>
+    <string name="cookies_sheet_save">Save</string>
+    <string name="cookies_sheet_get">Get cookies</string>
+    <string name="cookies_sheet_update">Update</string>
+
+    <!-- Batch option sheets -->
+    <string name="batch_quality_best">Best quality</string>
+    <!--
+         Resolution ceilings. Digits and a unit suffix, with no word in them, so they read
+         the same in every language and translating them would only introduce errors.
+    -->
+    <string name="batch_quality_2160" translatable="false">~ 2160p</string>
+    <string name="batch_quality_1440" translatable="false">~ 1440p</string>
+    <string name="batch_quality_1080" translatable="false">~ 1080p</string>
+    <string name="batch_quality_720" translatable="false">~ 720p</string>
+    <string name="batch_quality_480" translatable="false">~ 480p</string>
+    <string name="batch_quality_360" translatable="false">~ 360p</string>
+    <string name="batch_type_sheet_title">Preferred download type</string>
+    <string name="batch_type_sheet_subtitle">What these links download as</string>
+    <string name="batch_type_audio">Audio</string>
+    <string name="batch_type_video">Video</string>
+    <string name="batch_format_title">Format</string>
+    <string name="batch_format_subtitle">Select format</string>
+    <string name="batch_container_title">Container</string>
+    <string name="batch_container_subtitle">The file these links are saved as</string>
+    <string name="batch_save_dir_title">Save location</string>
+    <string name="batch_open_folder">Open this folder</string>
+    <string name="batch_change_folder">Change folder</string>
+
+    <!-- Batch action bar -->
+    <string name="batch_bar_thumbnail">Thumbnail</string>
+    <string name="batch_bar_chapters">Chapters</string>
+    <string name="batch_bar_subtitles">Subtitles</string>
+    <string name="batch_bar_sponsorblock">SponsorBlock</string>
+    <string name="batch_bar_filename_template">Filename template</string>
+    <string name="batch_bar_download_type">Preferred download type</string>
+    <!-- Spoken for an icon button. %1$s is the quality name the button currently stands for. -->
+    <string name="batch_bar_quality">Quality: %1$s</string>
+    <string name="batch_bar_save_location">Save location</string>
+    <string name="batch_bar_container">Container</string>
+
+    <!-- Batch download sheet -->
+    <string name="batch_header_title">Download</string>
+    <string name="batch_header_subtitle">Adjust download</string>
+    <string name="batch_download_action">Download</string>
+    <string name="batch_stop_selecting">Stop selecting</string>
+    <string name="batch_start_selecting">Select links</string>
+    <string name="batch_list_options">List options</string>
+    <string name="batch_menu_select_links">Select links</string>
+    <string name="batch_menu_select_all">Select all</string>
+    <string name="batch_menu_invert">Invert selection</string>
+    <string name="batch_menu_remove_selected">Remove selected</string>
+    <string name="batch_menu_done">Done</string>
+    <plurals name="batch_selected">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <plurals name="batch_links">
+        <item quantity="one">%d link</item>
+        <item quantity="other">%d links</item>
+    </plurals>
+    <string name="batch_card_download_type">Download type for this link</string>
+    <string name="batch_card_remove">Remove</string>
+
+    <!-- Opening a finished file -->
+    <string name="media_open_unknown_location">This file\'s location is unknown</string>
+    <string name="media_open_chooser">Open with</string>
+    <string name="media_open_no_app">Nothing on this device can open it</string>
+
+    <!-- Download notifications -->
+    <string name="notification_cancelled_text">Download cancelled</string>
+    <!-- Names the progress channel in the system notification settings. -->
+    <string name="notification_channel_progress_description">Download progress, shows icon in status bar</string>
+    <string name="notification_channel_complete_description">Download completion alerts</string>
+    <string name="notification_action_pause">Pause</string>
+    <string name="notification_action_resume">Resume</string>
+    <string name="notification_action_cancel">Cancel</string>
+    <string name="notification_action_sign_in">Sign in</string>
+    <string name="notification_wifi_title">Waiting for Wi-Fi</string>
+    <string name="notification_wifi_text">Downloads are set to Wi-Fi only. They start when you are back on Wi-Fi.</string>
+
+    <!-- Sign-in web view -->
+    <string name="cookie_webview_close">Close</string>
+    <string name="cookie_webview_desktop_site">Desktop site</string>
+    <string name="cookie_webview_no_cookies">No cookies were collected</string>
+    <!-- The leading spaces sit the label off the icon beside it in the button. -->
+    <string name="cookie_webview_done">"  OK"</string>
+
+    <!-- FormatSelectionSheet -->
+    <string name="format_selection_sort">Sort formats</string>
+    <string name="format_selection_change">Change format</string>
+    <string name="format_selection_title">Format</string>
+    <string name="format_selection_subtitle">Select format</string>
+    <string name="format_selection_confirm">OK</string>
+    <string name="format_selection_loading">Reading the rest of the formats</string>
+    <string name="format_sort_quality">Quality</string>
+    <string name="format_sort_file_size">File size</string>
+    <string name="format_sort_container">Container</string>
+
+    <!-- AudioLanguageSheet -->
+    <string name="audio_language_title">Audio language</string>
+    <string name="audio_language_subtitle">Select soundtrack</string>
+
+    <!-- AppearanceScreen -->
+    <string name="appearance_back">Back</string>
+    <string name="appearance_title">Appearance</string>
+    <string name="appearance_dark_theme">Dark Theme</string>
+    <string name="appearance_accent_color">Accent Color</string>
+
+    <!-- AccentPickerDialog -->
+    <string name="accent_picker_title">Accent Color</string>
+    <string name="accent_picker_close">Close</string>
+
+    <!-- FetchSettingsScreen -->
+    <string name="fetch_settings_back">Back</string>
+    <string name="fetch_settings_title">Link Reading</string>
+    <string name="fetch_settings_timeout_description">How long to wait on a slow source before giving up and retrying.</string>
+    <!-- How patient one mode is. %1$d is the timeout in seconds, %2$d the retry count. -->
+    <plurals name="fetch_settings_timing">
+        <item quantity="one">%1$ds timeout, %2$d try</item>
+        <item quantity="other">%1$ds timeout, %2$d tries</item>
+    </plurals>
+    <string name="fetch_settings_reading_links">Reading links</string>
+    <string name="fetch_settings_reading_links_description">Which reader works out what a link holds. Downloads always use yt-dlp, whichever is chosen here.</string>
+    <string name="fetch_settings_force_ipv4_description">Only turn this on if links hang on your network. It works around a broken IPv6 route, and is slower everywhere else.</string>
+    <string name="fetch_settings_force_ipv4">Force IPv4</string>
+    <string name="fetch_mode_fast_label">Fast</string>
+    <string name="fetch_mode_fast_description">Give up quickly. Fastest on a good network, but more likely to need a second attempt.</string>
+    <string name="fetch_mode_balanced_label">Balanced</string>
+    <string name="fetch_mode_balanced_description">A middle ground between speed and tolerating a poor connection.</string>
+    <string name="fetch_mode_thorough_label">Thorough</string>
+    <string name="fetch_mode_thorough_description">Wait longer and retry more. Slowest, but survives a weak network.</string>
+    <!-- The name of the downloader itself, so the same word in every language. -->
+    <string name="listing_source_ytdlp_label" translatable="false">yt-dlp</string>
+    <string name="listing_source_ytdlp_description">The same engine that does the downloading. Works on every site it supports, and updates itself, so it keeps working as sites change.</string>
+    <string name="listing_source_newpipe_label">Prefer the built-in reader</string>
+    <string name="listing_source_newpipe_description">Lists playlists and channels in one request instead of starting the engine, which is quicker on the sites it knows. Falls back to yt-dlp for everything else, and whenever it cannot read a link.</string>
+
+    <!-- ToolsScreen -->
+    <string name="tools_back">Back</string>
+    <string name="tools_title">Tools</string>
+    <string name="tools_empty">Nothing here yet.</string>
+
+    <!-- DirectShareScreen -->
+    <string name="direct_share_back">Back</string>
+    <string name="direct_share_save_as">Save as</string>
+    <string name="direct_share_video">Video</string>
+    <string name="direct_share_audio_only">Audio only</string>
+    <string name="direct_share_title">Hazel Instant</string>
+    <string name="direct_share_intro">Sharing a link to Hazel Instant starts the download straight away, with no sheet and no questions. These are the answers it uses.</string>
+    <string name="direct_share_video_description">Picture and sound, muxed into one file.</string>
+    <string name="direct_share_audio_description">Sound alone, at the best the source offers.</string>
+    <string name="direct_share_quality_title">Quality limit</string>
+    <string name="direct_share_quality_description">A ceiling, not an exact size. Sources do not all offer the same heights, so the tallest that fits under this is taken, and the smallest available when nothing does.</string>
+    <string name="direct_share_output_title">Output</string>
+    <string name="direct_share_output_description">The file that lands on the device. Default keeps whatever the source already provides, which is the fastest of the options because nothing is re-encoded.</string>
+    <string name="direct_share_filename_template">Filename template</string>
+    <string name="direct_share_audio_language">Audio language</string>
+    <string name="direct_share_audio_language_default">Source default</string>
+    <string name="direct_share_extras_title">Extras</string>
+    <string name="direct_share_extras_description">Applied when the source has them. Anything it does not have is skipped for that download rather than failing it.</string>
+    <string name="direct_share_cover_art">Cover art</string>
+    <string name="direct_share_cover_art_description">Writes the thumbnail into the file, where the container can carry one.</string>
+    <string name="direct_share_chapters">Chapters</string>
+    <string name="direct_share_subtitles">Subtitles</string>
+    <string name="direct_share_sponsorblock">SponsorBlock</string>
+    <string name="direct_share_sponsorblock_off">Off</string>
+    <!-- How many SponsorBlock categories are being cut. %1$d is the number of them. -->
+    <plurals name="direct_share_sponsorblock_cut">
+        <item quantity="one">%1$d category cut</item>
+        <item quantity="other">%1$d categories cut</item>
+    </plurals>
+    <string name="direct_share_signins_title">Sign-ins</string>
+    <string name="direct_share_signins_description">An instant share uses the saved cookies for whatever site the link belongs to, the same as a download started from the sheet. Nothing is asked at share time, so a link behind a login only works if the sign-in is already saved and switched on.</string>
+    <string name="direct_share_cookies">Cookies</string>
+    <string name="direct_share_cookies_on">On, used for every instant share</string>
+    <string name="direct_share_cookies_off">Off</string>
+    <!-- Spoken by the screen reader on a row that opens a picker. %1$s is the row's label. -->
+    <string name="direct_share_change">Change %1$s</string>
+
+    <!-- StorageLocationsScreen -->
+    <string name="storage_locations_back">Back</string>
+    <string name="storage_locations_downloads">Downloads</string>
+    <string name="storage_locations_title">Downloads</string>
+    <string name="storage_locations_subtitle">Where downloads are saved, and the limits they run under</string>
+    <string name="storage_locations_limits">Limits</string>
+    <string name="storage_locations_wifi_only_description">Downloads wait rather than run on mobile data</string>
+    <string name="storage_locations_speed_limit_description">How fast a download is allowed to go</string>
+    <string name="storage_locations_internal_note">All files are stored in your device\'s internal storage. You can access them anytime using any file manager app.</string>
+    <string name="storage_locations_wifi_only">Wi-Fi only</string>
+    <string name="storage_locations_speed_limit">Speed limit</string>
+
 </resources>

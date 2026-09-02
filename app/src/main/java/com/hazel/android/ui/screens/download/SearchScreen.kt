@@ -60,12 +60,14 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.hazel.android.R
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SearchHistoryRepository
@@ -184,7 +186,11 @@ fun SearchScreen(
     fun pasteAndSearch() {
         val pasted = clipboard.getText()?.text.orEmpty().trim()
         if (pasted.isBlank()) {
-            Toast.makeText(context, "Nothing to paste", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.search_nothing_to_paste),
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
         text = pasted
@@ -245,13 +251,13 @@ fun SearchScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.search_back))
                 }
 
                 TextField(
                     value = text,
                     onValueChange = { text = it },
-                    placeholder = { Text("Search or insert URL") },
+                    placeholder = { Text(stringResource(R.string.search_hint)) },
                     singleLine = true,
                     modifier = Modifier
                         .weight(1f)
@@ -273,21 +279,21 @@ fun SearchScreen(
                 if (text.isBlank()) {
                     Box {
                         IconButton(onClick = { menuOpen = true }) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = "More")
+                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.search_more))
                         }
                         DropdownMenu(
                             expanded = menuOpen,
                             onDismissRequest = { menuOpen = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Clear results") },
+                                text = { Text(stringResource(R.string.search_clear_results)) },
                                 onClick = {
                                     menuOpen = false
                                     onClearResults()
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Clear search history") },
+                                text = { Text(stringResource(R.string.search_clear_history)) },
                                 onClick = {
                                     menuOpen = false
                                     scope.launch { SearchHistoryRepository.clear(context) }
@@ -300,7 +306,7 @@ fun SearchScreen(
                 // Parks the typed link so another can be entered.
                 if (text.isNotBlank()) {
                     IconButton(onClick = { queueCurrent() }) {
-                        Icon(Icons.Filled.Add, contentDescription = "Add another link")
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.search_add_link))
                     }
                 }
                 if (text.isNotBlank() || queued.isNotEmpty()) {
@@ -310,7 +316,7 @@ fun SearchScreen(
                             queued = emptyList()
                         }
                     ) {
-                        Icon(Icons.Filled.Close, contentDescription = "Clear")
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_clear))
                     }
                 }
             }
@@ -343,7 +349,7 @@ fun SearchScreen(
                                 trailingIcon = {
                                     Icon(
                                         Icons.Filled.Close,
-                                        contentDescription = "Remove",
+                                        contentDescription = stringResource(R.string.search_remove),
                                         modifier = Modifier.size(InputChipDefaults.IconSize)
                                     )
                                 }
@@ -354,7 +360,7 @@ fun SearchScreen(
                     IconButton(onClick = { submit() }) {
                         Icon(
                             Icons.Filled.Search,
-                            contentDescription = "Search all",
+                            contentDescription = stringResource(R.string.search_all),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -372,8 +378,8 @@ fun SearchScreen(
                     contentAlignment = Alignment.TopCenter
                 ) {
                     Text(
-                        if (history.isEmpty()) "Links you use will appear here"
-                        else "No matching links",
+                        if (history.isEmpty()) stringResource(R.string.search_empty_history)
+                        else stringResource(R.string.search_no_matches),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                     )
@@ -421,7 +427,7 @@ fun SearchScreen(
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             Icons.Filled.ContentPaste,
-                            contentDescription = "Paste and fetch",
+                            contentDescription = stringResource(R.string.search_paste_and_fetch),
                             modifier = Modifier.size(22.dp),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
@@ -469,7 +475,7 @@ private fun HistoryRow(
         IconButton(onClick = onRemove, modifier = Modifier.size(36.dp)) {
             Icon(
                 Icons.Filled.Close,
-                contentDescription = "Forget",
+                contentDescription = stringResource(R.string.search_forget),
                 modifier = Modifier.size(16.dp),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
             )
@@ -477,7 +483,7 @@ private fun HistoryRow(
         IconButton(onClick = onFill, modifier = Modifier.size(36.dp)) {
             Icon(
                 Icons.AutoMirrored.Filled.CallMade,
-                contentDescription = "Edit before searching",
+                contentDescription = stringResource(R.string.search_edit_before),
                 modifier = Modifier.size(18.dp),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )

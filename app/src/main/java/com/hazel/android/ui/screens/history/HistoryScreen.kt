@@ -66,10 +66,12 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.hazel.android.R
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.data.HistoryEntry
@@ -155,7 +157,7 @@ fun HistoryScreen() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "Downloads",
+                stringResource(R.string.history_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
@@ -176,18 +178,18 @@ fun HistoryScreen() {
                         if (compact) Icons.Filled.GridView
                         else Icons.AutoMirrored.Filled.List,
                         contentDescription =
-                            if (compact) "Show large artwork" else "Show as a list"
+                            if (compact) stringResource(R.string.history_layout_grid) else stringResource(R.string.history_layout_list)
                     )
                 }
             }
 
             IconButton(onClick = { searchOpen = !searchOpen }) {
-                Icon(Icons.Filled.Search, contentDescription = "Search downloads")
+                Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.history_search_action))
             }
 
             Box {
                 IconButton(onClick = { sortMenuOpen = true }) {
-                    Icon(Icons.Filled.Sort, contentDescription = "Sort")
+                    Icon(Icons.Filled.Sort, contentDescription = stringResource(R.string.history_sort_action))
                 }
                 DropdownMenu(
                     expanded = sortMenuOpen,
@@ -210,11 +212,11 @@ fun HistoryScreen() {
 
             Box {
                 IconButton(onClick = { menuOpen = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = "More")
+                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.history_menu_action))
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
-                        text = { Text("Clear history") },
+                        text = { Text(stringResource(R.string.history_menu_clear)) } ,
                         onClick = {
                             menuOpen = false
                             confirmClear = true
@@ -257,7 +259,7 @@ fun HistoryScreen() {
                     Box(modifier = Modifier.weight(1f)) {
                         if (query.isEmpty()) {
                             Text(
-                                "Search downloads",
+                                stringResource(R.string.history_search_placeholder),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -279,7 +281,7 @@ fun HistoryScreen() {
                         IconButton(onClick = { query = "" }) {
                             Icon(
                                 Icons.Filled.Close,
-                                contentDescription = "Clear search",
+                                contentDescription = stringResource(R.string.history_search_clear),
                                 modifier = Modifier.size(18.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -325,8 +327,8 @@ fun HistoryScreen() {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    if (history.isEmpty()) "Nothing downloaded yet"
-                    else "Nothing matches that",
+                    if (history.isEmpty()) stringResource(R.string.history_empty_initial)
+                    else stringResource(R.string.history_empty_filtered),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -354,7 +356,7 @@ fun HistoryScreen() {
                                 presence[entry.id] = false
                                 Toast.makeText(
                                     context,
-                                    "This file is no longer on your device",
+                                    context.getString(R.string.history_toast_file_gone),
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -393,16 +395,16 @@ fun HistoryScreen() {
     if (confirmClear) {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
-            title = { Text("Clear history", fontWeight = FontWeight.Bold) },
-            text = { Text("The list is emptied. Your downloaded files are not touched.") },
+            title = { Text(stringResource(R.string.history_clear_dialog_title), fontWeight = FontWeight.Bold) },
+            text = { Text(stringResource(R.string.history_clear_dialog_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch { DownloadHistoryRepository.clear(context) }
                     confirmClear = false
-                }) { Text("Clear") }
+                }) { Text(stringResource(R.string.history_clear_dialog_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmClear = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmClear = false }) { Text(stringResource(R.string.history_clear_dialog_cancel)) }
             }
         )
     }
@@ -418,23 +420,23 @@ fun HistoryScreen() {
     pendingDelete?.let { entry ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Delete file", fontWeight = FontWeight.Bold) },
-            text = { Text("${entry.fileName} will be deleted from your device.") },
+            title = { Text(stringResource(R.string.history_delete_dialog_title), fontWeight = FontWeight.Bold) },
+            text = { Text(stringResource(R.string.history_delete_dialog_body, entry.fileName)) },
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch {
                         val deleted = DownloadHistoryRepository.deleteFile(context, entry)
                         Toast.makeText(
                             context,
-                            if (deleted) "File deleted" else "Could not delete the file",
+                            if (deleted) context.getString(R.string.history_toast_file_deleted) else context.getString(R.string.history_toast_file_delete_failed),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                     pendingDelete = null
-                }) { Text("Delete") }
+                }) { Text(stringResource(R.string.history_delete_dialog_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text("Cancel") }
+                TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.history_delete_dialog_cancel)) }
             }
         )
     }
@@ -530,7 +532,7 @@ private fun HistoryCard(
                     IconButton(onClick = { menuOpen = true }) {
                         Icon(
                             Icons.Filled.MoreVert,
-                            contentDescription = "Options",
+                            contentDescription = stringResource(R.string.history_card_options),
                             tint = Color.White
                         )
                     }
@@ -539,21 +541,21 @@ private fun HistoryCard(
                         onDismissRequest = { menuOpen = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Properties") },
+                            text = { Text(stringResource(R.string.history_card_properties)) },
                             onClick = {
                                 menuOpen = false
                                 onProperties()
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Remove from list") },
+                            text = { Text(stringResource(R.string.history_card_remove)) },
                             onClick = {
                                 menuOpen = false
                                 onRemove()
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Delete file") },
+                            text = { Text(stringResource(R.string.history_card_delete)) },
                             enabled = present,
                             onClick = {
                                 menuOpen = false
@@ -584,7 +586,7 @@ private fun HistoryCard(
                     // "Deleted" rather than "File missing". The file is not mislaid, it is
                     // gone, and almost always because the user removed it themselves.
                     Tag(
-                        "Deleted",
+                        stringResource(R.string.history_tag_deleted),
                         background = MaterialTheme.colorScheme.error,
                         foreground = MaterialTheme.colorScheme.onError
                     )
@@ -746,7 +748,7 @@ private fun HistoryRow(
                         // The same word the card uses. The file is not mislaid, it is gone,
                         // and almost always because the user removed it themselves.
                         Tag(
-                            "Deleted",
+                            stringResource(R.string.history_tag_deleted),
                             background = MaterialTheme.colorScheme.error,
                             foreground = MaterialTheme.colorScheme.onError
                         )
@@ -758,27 +760,27 @@ private fun HistoryRow(
                 IconButton(onClick = { menuOpen = true }) {
                     Icon(
                         Icons.Filled.MoreVert,
-                        contentDescription = "Options",
+                        contentDescription = stringResource(R.string.history_row_options),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
-                        text = { Text("Properties") },
+                        text = { Text(stringResource(R.string.history_row_properties)) },
                         onClick = {
                             menuOpen = false
                             onProperties()
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Remove from list") },
+                        text = { Text(stringResource(R.string.history_row_remove)) },
                         onClick = {
                             menuOpen = false
                             onRemove()
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Delete file") },
+                        text = { Text(stringResource(R.string.history_row_delete)) },
                         enabled = present,
                         onClick = {
                             menuOpen = false
