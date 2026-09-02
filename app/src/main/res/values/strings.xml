@@ -181,7 +181,7 @@
     <string name="more_temporary_files">Temporary Files</string>
     <string name="more_converter">Offline convert video to audio</string>
     <string name="more_engine_update">yt-dlp Engine Update</string>
-    <string name="more_source_code">Source code</string>
+    <string name="more_support">Support Hazel</string>
     <string name="more_license">License</string>
 
     <!-- UpdateScreen -->
@@ -294,13 +294,15 @@
     <string name="history_delete_dialog_confirm">Delete</string>
     <string name="history_delete_dialog_cancel">Cancel</string>
     <string name="history_card_options">Options</string>
+    <string name="history_card_properties">Properties</string>
     <string name="history_card_remove">Remove from list</string>
     <string name="history_card_delete">Delete file</string>
     <string name="history_tag_deleted">Deleted</string>
     <string name="history_row_options">Options</string>
+    <string name="history_row_properties">Properties</string>
     <string name="history_row_remove">Remove from list</string>
     <string name="history_row_delete">Delete file</string>
-    <string name="history_tag_missing">Missing</string>
+    <string name="history_toast_file_gone">This file is no longer on your device</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">Back</string>

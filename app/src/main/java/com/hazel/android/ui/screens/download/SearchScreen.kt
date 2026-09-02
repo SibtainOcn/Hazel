@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,11 +12,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -23,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
@@ -52,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -92,6 +98,7 @@ fun SearchScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val keyboard = LocalSoftwareKeyboardController.current
+    val clipboard = LocalClipboardManager.current
     val focusRequester = remember { FocusRequester() }
 
     val history by SearchHistoryRepository.getHistory(context).collectAsState(initial = emptyList())
@@ -168,6 +175,24 @@ fun SearchScreen(
         }
     }
 
+    /**
+     * Takes whatever is on the clipboard and reads it straight away.
+     *
+     * A link almost always arrives by being copied somewhere else, so the field's first act
+     * is nearly always a paste followed by a confirm. This is those two steps as one. It
+     * goes through [submit], so a paste of several links is split the same way a typed one
+     * is and a link already downloaded still raises the same warning.
+     */
+    fun pasteAndSearch() {
+        val pasted = clipboard.getText()?.text.orEmpty().trim()
+        if (pasted.isBlank()) {
+            Toast.makeText(context, "Nothing to paste", Toast.LENGTH_SHORT).show()
+            return
+        }
+        text = pasted
+        submit()
+    }
+
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     // Shown as a dialog rather than as screen content so it covers the app bar and the
@@ -176,7 +201,13 @@ fun SearchScreen(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
-            dismissOnClickOutside = false
+            dismissOnClickOutside = false,
+            // The dialog is told to lay itself out against the real window rather than
+            // inside what the system leaves over. Without it the keyboard's height is
+            // reported as nothing, which is fine for a screen that only stacks downwards
+            // and wrong for the paste control, which hangs off the bottom corner and was
+            // being drawn underneath the keyboard. The bars are paid for below instead.
+            decorFitsSystemWindows = false
         )
     ) {
         BackHandler(enabled = true) { onDismiss() }
@@ -197,6 +228,14 @@ fun SearchScreen(
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
+        ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                // What the window no longer does for itself. The screen keeps clear of the
+                // status bar at the top and the navigation bar at the foot exactly as it
+                // did, and the keyboard is now something the layout can see.
+                .systemBarsPadding()
         ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
@@ -359,6 +398,39 @@ fun SearchScreen(
                     }
                 }
             }
+
+            // ── Paste ──
+            //
+            // A link is nearly always copied somewhere else first, so the opening move on
+            // this screen is a paste and then a confirm. This is the two of them at once.
+            // It goes through the same submit the field does, so a paste holding several
+            // links is split the way a typed one is and a link already downloaded still
+            // raises the same warning.
+            //
+            // Offered only with nothing entered, which is the moment it stands for, and
+            // held clear of the keyboard that is up for as long as this screen is.
+            if (text.isBlank() && queued.isEmpty()) {
+                Surface(
+                    onClick = { pasteAndSearch() },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .imePadding()
+                        .padding(20.dp)
+                        .size(56.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Filled.ContentPaste,
+                            contentDescription = "Paste and fetch",
+                            modifier = Modifier.size(22.dp),
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            }
+        }
         }
     }
 }

@@ -45,7 +45,10 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadPlan
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatFileSize
+import com.hazel.android.download.languageLabel
+import com.hazel.android.ui.screens.download.AudioLanguageSheet
 import com.hazel.android.ui.screens.download.ChaptersDialog
+import com.hazel.android.ui.screens.download.DownloadSheetFooter
 import com.hazel.android.ui.screens.download.FilenameTemplateDialog
 import com.hazel.android.ui.screens.download.FormatSheet
 import com.hazel.android.ui.screens.download.SponsorBlockDialog
@@ -279,7 +282,7 @@ fun BatchDownloadSheet(
                     val format = state.formatOf(info)
                     BatchDownloadCard(
                         info = info,
-                        formatLabel = format?.label.orEmpty(),
+                        formatLabel = format?.shortLabel.orEmpty(),
                         sizeLabel = format?.sizeLabel.orEmpty(),
                         isVideo = state.isVideo(info),
                         isAdjusted = state.isAdjusted(info),
@@ -326,7 +329,20 @@ fun BatchDownloadSheet(
                 onChapters = { openSheet = BatchSheet.CHAPTERS },
                 onSubtitles = { openSheet = BatchSheet.SUBTITLES },
                 onSponsorBlock = { openSheet = BatchSheet.SPONSORBLOCK },
-                onFilename = { openSheet = BatchSheet.FILENAME }
+                onFilename = { openSheet = BatchSheet.FILENAME },
+                showAudioLanguage = state.audioLanguages.size > 1,
+                audioLanguageLabel = state.audioLanguage?.let(::languageLabel) ?: "Default",
+                onAudioLanguage = { openSheet = BatchSheet.AUDIO_LANGUAGE }
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // A set has no single address, so the one link it holds is named and a larger
+            // set is counted. Incognito applies to the whole run either way.
+            DownloadSheetFooter(
+                label = results.singleOrNull()?.url ?: "${results.size} links",
+                copyText = results.singleOrNull()?.url.orEmpty(),
+                modifier = Modifier.padding(horizontal = 20.dp)
             )
 
             Spacer(modifier = Modifier.navigationBarsPadding())
@@ -347,12 +363,13 @@ fun BatchDownloadSheet(
             isCustomSaveDir = isCustomSaveDir,
             isLoadingFormats = !focused.hasResolvedFormats,
             initialFormat = state.formatOf(focused),
+            initialAudioLanguage = state.languageOf(focused),
             confirmAsApply = true,
             onOpenSaveDir = onOpenSaveDir,
             onPickSaveDir = onPickSaveDir,
             onResetSaveDir = onResetSaveDir,
-            onDownload = { format, title, author ->
-                state.setChoice(focused, format, title, author)
+            onDownload = { format, audioLanguage, title, author ->
+                state.setChoice(focused, format, title, author, audioLanguage)
                 focusedUrl = null
             },
             onDismiss = { focusedUrl = null }
@@ -393,6 +410,17 @@ fun BatchDownloadSheet(
                 )
             }
         }
+
+        // Every soundtrack the set offers, applied to whatever the action bar is aimed at.
+        BatchSheet.AUDIO_LANGUAGE -> AudioLanguageSheet(
+            languages = state.audioLanguages,
+            selected = state.audioLanguage,
+            onPick = {
+                state.applyAudioLanguage(it)
+                openSheet = BatchSheet.NONE
+            },
+            onDismiss = { openSheet = BatchSheet.NONE }
+        )
 
         BatchSheet.QUALITY -> BatchQualitySheet(
             maxHeight = state.maxHeight,
@@ -466,7 +494,7 @@ fun BatchDownloadSheet(
 
 /** Which sheet the action bar or a row's type button has opened, if any. */
 private enum class BatchSheet {
-    NONE, TYPE, ITEM_TYPE, QUALITY, CONTAINER, SAVE_DIR,
+    NONE, TYPE, ITEM_TYPE, QUALITY, CONTAINER, SAVE_DIR, AUDIO_LANGUAGE,
     CHAPTERS, SUBTITLES, SPONSORBLOCK, FILENAME
 }
 

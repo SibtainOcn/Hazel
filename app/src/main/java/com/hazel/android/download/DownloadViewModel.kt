@@ -1,6 +1,7 @@
 package com.hazel.android.download
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hazel.android.HazelApp
@@ -52,7 +53,12 @@ data class DownloadPlan(
     val info: MediaInfo,
     val format: MediaFormat,
     val title: String,
-    val author: String
+    val author: String,
+    /**
+     * The soundtrack to take, for a source that published more than one. Null means the
+     * one the source leads with, which is every ordinary link.
+     */
+    val audioLanguage: String? = null
 )
 
 data class DownloadState(
@@ -106,7 +112,15 @@ data class DownloadState(
      * screen says during it, and it names the source because "reading a link" is less
      * reassuring than naming the one the user just came from.
      */
-    val instantSource: String = ""
+    val instantSource: String = "",
+    /**
+     * True once a read has taken a finished download off the list.
+     *
+     * It is not lost, and the line at the foot of the results says where it went. Kept for
+     * the rest of the session rather than only for the read that did it, since the cards
+     * stay absent for that long; clearing the results is what puts it back to false.
+     */
+    val savedAside: Boolean = false
 ) {
     /** True once more than one link resolved, which is what turns the screen into a list. */
     val isMultiple: Boolean get() = results.size > 1
@@ -378,7 +392,11 @@ class DownloadViewModel : ViewModel() {
 
                 val isVideo = SettingsRepository.getQuickIsVideo(app).first()
                 val maxHeight = SettingsRepository.getQuickMaxHeight(app).first()
-                val format = info.autoPick(isVideo, maxHeight)
+                // A standing preference rather than a question. A source that does not
+                // publish this soundtrack is downloaded with the one it does have.
+                val audioLanguage = SettingsRepository.getInstantAudioLanguage(app).first()
+                    .takeIf { it.isNotBlank() }
+                val format = info.autoPick(isVideo, maxHeight, audioLanguage)
                 if (format == null) {
                     _state.value = _state.value.copy(instantSource = "")
                     DownloadNotificationHelper.showError(app, "Nothing to download from this link")
@@ -401,8 +419,13 @@ class DownloadViewModel : ViewModel() {
 
                 startBatch(
                     context = app,
-                    plans = listOf(DownloadPlan(info, format, info.title, info.uploader)),
-                    options = SettingsRepository.getDownloadOptions(app).first(),
+                    plans = listOf(
+                        DownloadPlan(info, format, info.title, info.uploader, audioLanguage)
+                    ),
+                    // The instant target's own settings, not the sheet's. Nobody is
+                    // watching this download, so it answers to the screen that was set up
+                    // for exactly that.
+                    options = SettingsRepository.getInstantOptions(app).first(),
                     treeUri = SettingsRepository.getDownloadTreeUri(app).first()
                 )
             }
@@ -420,7 +443,7 @@ class DownloadViewModel : ViewModel() {
         val app = HazelApp.instance
         return expand(
             url,
-            CookieRepository.activeCookieFile(app),
+            CookieRepository.accessFor(app, url),
             SettingsRepository.getFetchMode(app).first(),
             SettingsRepository.getForceIpv4(app).first(),
             SettingsRepository.getListingSource(app).first(),
@@ -432,7 +455,7 @@ class DownloadViewModel : ViewModel() {
             else runCatching {
                 probeWithRetry(
                     first.url,
-                    CookieRepository.activeCookieFile(app),
+                    CookieRepository.accessFor(app, first.url),
                     SettingsRepository.getFetchMode(app).first(),
                     SettingsRepository.getForceIpv4(app).first(),
                     "${MediaProbe.PROBE_PROCESS_ID}_direct_formats"
@@ -484,15 +507,22 @@ class DownloadViewModel : ViewModel() {
         // A fresh read is a fresh answer, so the sheet is allowed to open on its own again.
         clearAutoOpened()
 
+        // Read before the batch is emptied below, since that is the record of what this
+        // session finished and the merge at the end of the read needs it.
+        val finished = _state.value.batch
+            .filter { it.state == BatchState.DONE }
+            .map { it.url }
+            .toSet()
+
         _state.value = _state.value.copy(
             url = valid.first(),
             isFetching = true,
             error = null,
             errorLog = null,
-            // What is already listed stays. A run's downloads, its queue and its finished
-            // items are all worth keeping in view, and a search is another thing asked for
-            // rather than a reason to forget the last one. The search screen's own clear
-            // action is what empties the list.
+            // What is already listed stays, apart from what has finished downloading:
+            // a run's queue and its failures are worth keeping in view, and a search is
+            // another thing asked for rather than a reason to forget the last one. The
+            // search screen's own clear action is what empties the list.
             info = null,
             batch = emptyList(),
             isComplete = false,
@@ -502,7 +532,6 @@ class DownloadViewModel : ViewModel() {
 
         fetchJob = viewModelScope.launch {
             val app = HazelApp.instance
-            val cookies = CookieRepository.activeCookieFile(app)
             val fetchMode = SettingsRepository.getFetchMode(app).first()
             val forceIpv4 = SettingsRepository.getForceIpv4(app).first()
 
@@ -526,7 +555,11 @@ class DownloadViewModel : ViewModel() {
                         async(Dispatchers.IO) {
                             runCatching {
                                 expand(
-                                    link, cookies, fetchMode, forceIpv4, listingSource,
+                                    link,
+                                    // Each link is read with the sign-in for its own
+                                    // site, and with none where there is not one.
+                                    CookieRepository.accessFor(app, link),
+                                    fetchMode, forceIpv4, listingSource,
                                     "${MediaProbe.PROBE_PROCESS_ID}_$index"
                                 )
                             }.onFailure { failure ->
@@ -576,16 +609,29 @@ class DownloadViewModel : ViewModel() {
                     errorLog = lastFailure.ifBlank { "Could not read this link" }
                 )
             } else {
+                // A link that finished downloading is not carried into the new answer. The
+                // list is what the set action acts on, so ten links pasted beside two
+                // already saved read as twelve waiting, and Download all offered to fetch
+                // the saved two a second time. Worse, it turned a single new link into a
+                // set, because the list was two long even though only one of them was
+                // anything to download.
+                //
+                // Nothing is thrown away: they are on the downloads list, and the line at
+                // the foot of the results says so.
+                val kept = _state.value.results.filterNot { existing ->
+                    resolved.any { it.url == existing.url } || existing.url in finished
+                }
+
                 // Newest first, and a link read again keeps its new reading rather than
                 // appearing twice.
-                val merged = resolved + _state.value.results.filterNot { existing ->
-                    resolved.any { it.url == existing.url }
-                }
                 _state.value.copy(
                     isFetching = false,
                     fetchProgress = "",
-                    results = merged,
-                    info = resolved.singleOrNull()
+                    results = resolved + kept,
+                    info = resolved.singleOrNull(),
+                    savedAside = _state.value.savedAside || _state.value.results.any { existing ->
+                        existing.url in finished && resolved.none { it.url == existing.url }
+                    }
                 )
             }
         }
@@ -602,18 +648,22 @@ class DownloadViewModel : ViewModel() {
      */
     private suspend fun expand(
         url: String,
-        cookies: File?,
+        access: SiteAccess,
         fetchMode: FetchMode,
         forceIpv4: Boolean,
         source: ListingSource,
         processKey: String
     ): List<MediaInfo> {
-        // A link read a moment ago is not read again. The engine costs seconds to start
-        // before it does any work, so the cheapest read is the one that does not happen.
+        // A link read recently is not read again. The engine costs seconds to start before
+        // it does any work, so the cheapest read is the one that does not happen. This
+        // holds across restarts as well: what the last read wrote is still on disk.
         InfoCache.metadataFor(url)?.let { return listOf(it) }
+        InfoCache.listingFor(url)?.let { listing ->
+            return listing.entries.map(MediaProbe::pendingFor)
+        }
 
         val contents = LinkResolver.resolve(
-            url, ytDlpCacheDir, cookies, fetchMode, forceIpv4, source, processKey
+            url, ytDlpCacheDir, access, fetchMode, forceIpv4, source, processKey
         )
 
         return when (contents) {
@@ -638,7 +688,7 @@ class DownloadViewModel : ViewModel() {
                 InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
                     ?: probeWithRetry(
                         info.url,
-                        CookieRepository.activeCookieFile(app),
+                        CookieRepository.accessFor(app, info.url),
                         SettingsRepository.getFetchMode(app).first(),
                         SettingsRepository.getForceIpv4(app).first(),
                         "${MediaProbe.PROBE_PROCESS_ID}_formats"
@@ -671,16 +721,16 @@ class DownloadViewModel : ViewModel() {
      */
     private suspend fun probeWithRetry(
         url: String,
-        cookies: File?,
+        access: SiteAccess,
         fetchMode: FetchMode,
         forceIpv4: Boolean,
         processKey: String = MediaProbe.PROBE_PROCESS_ID
     ): MediaInfo = try {
-        MediaProbe.probe(url, ytDlpCacheDir, cookies, fetchMode, forceIpv4, processKey)
+        MediaProbe.probe(url, ytDlpCacheDir, access, fetchMode, forceIpv4, processKey)
     } catch (e: Exception) {
         if (isTerminal(e.message?.trim().orEmpty())) throw e
         MediaProbe.probe(
-            url, ytDlpCacheDir, cookies, FetchMode.THOROUGH, forceIpv4, processKey
+            url, ytDlpCacheDir, access, FetchMode.THOROUGH, forceIpv4, processKey
         )
     }
 
@@ -726,12 +776,13 @@ class DownloadViewModel : ViewModel() {
         options: DownloadOptions,
         title: String,
         author: String,
+        audioLanguage: String? = null,
         treeUri: String = ""
     ) {
         val info = _state.value.info ?: return
         startBatch(
             context = context,
-            plans = listOf(DownloadPlan(info, format, title, author)),
+            plans = listOf(DownloadPlan(info, format, title, author, audioLanguage)),
             options = options,
             treeUri = treeUri
         )
@@ -868,7 +919,6 @@ class DownloadViewModel : ViewModel() {
             // needed one in the first place.
             DownloadService.start(app, firstTitle)
 
-            val cookies = CookieRepository.activeCookieFile(app)
             val speedLimit = SettingsRepository.getSpeedLimit(app).first()
 
             while (true) {
@@ -877,6 +927,18 @@ class DownloadViewModel : ViewModel() {
                 val plan = next.toPlan()
                 val options = next.options
                 downloadTreeUri = next.treeUri
+
+                // The download asks the way the read that filled the sheet asked. On a
+                // site that answers a signed-in request with less, a public link is
+                // fetched anonymously and only the media that needed the sign-in carries
+                // it, so a download cannot come back smaller than the sheet promised.
+                val access = CookieRepository.accessFor(app, plan.info.url)
+                val planAccess = when {
+                    !access.hasCookies -> SiteAccess.NONE
+                    plan.info.requiresSignIn -> access
+                    cookiesNarrowTheFormats(plan.info.url) -> SiteAccess.NONE
+                    else -> access
+                }
 
                 isCancelled = false
                 isPaused = false
@@ -906,7 +968,9 @@ class DownloadViewModel : ViewModel() {
                         executeYtDlp(
                             buildRequest(
                                 plan.info.url, plan.format, options, plan.title, plan.author,
-                                cookies, speedLimit
+                                planAccess, speedLimit,
+                                plan.info.mergeAudioFor(plan.audioLanguage)?.selector,
+                                plan.audioLanguage
                             )
                         )
                     } catch (e: Exception) {
@@ -930,7 +994,9 @@ class DownloadViewModel : ViewModel() {
                         executeYtDlp(
                             buildRequest(
                                 plan.info.url, plan.format, options, plan.title, plan.author,
-                                cookies, speedLimit
+                                planAccess, speedLimit,
+                                plan.info.mergeAudioFor(plan.audioLanguage)?.selector,
+                                plan.audioLanguage
                             )
                         )
                     }
@@ -941,19 +1007,19 @@ class DownloadViewModel : ViewModel() {
                     }
 
                     if (isCancelled || isBatchCancelled) {
-                        finishDownload(app)
+                        finishDownload(app, plan, options)
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         break
                     }
 
-                    finishDownload(app)
+                    finishDownload(app, plan, options)
                     markBatch(plan.info.url, BatchState.DONE)
                 } catch (_: CancellationException) {
                     if (isPaused) {
                         holdForResume(next)
                         break
                     }
-                    finishDownload(app)
+                    finishDownload(app, plan, options)
                     markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                     break
                 } catch (e: Exception) {
@@ -963,7 +1029,7 @@ class DownloadViewModel : ViewModel() {
                     }
 
                     if (isCancelled || isBatchCancelled) {
-                        finishDownload(app)
+                        finishDownload(app, plan, options)
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         break
                     }
@@ -1217,8 +1283,20 @@ class DownloadViewModel : ViewModel() {
         options: DownloadOptions,
         title: String,
         author: String,
-        cookieFile: File?,
-        speedLimit: String
+        access: SiteAccess,
+        speedLimit: String,
+        /**
+         * The audio stream to mux into a video-only format. Worked out by the caller from
+         * the plan, so a download of a source with several soundtracks takes the one the
+         * sheet was showing rather than whichever the source listed first.
+         */
+        audioSelector: String?,
+        /**
+         * The soundtrack the sheet was set to, as a language tag. Named as well as
+         * resolved to an id, so the request can still ask for the right language if the id
+         * it was resolved to is not in the list the engine ends up with.
+         */
+        audioLanguage: String?
     ): YoutubeDLRequest = buildDownloadRequest(url).apply {
         val isVideo = format.hasVideo
         val container = (if (isVideo) options.videoContainer else options.audioContainer).trim()
@@ -1235,13 +1313,18 @@ class DownloadViewModel : ViewModel() {
         addOption("--cache-dir", ytDlpCacheDir.absolutePath)
 
         // Saved sign-ins, which are what make age-restricted and members-only media
-        // reachable. The same file serves every download until the user changes it.
-        cookieFile?.let { addOption("--cookies", it.absolutePath) }
+        // reachable, under the identity they were collected with. The read that filled the
+        // sheet used the same ones, so the format ids it showed are the ids this asks for.
+        applySiteAccess(access, url)
 
         // Whether the two streams have to be muxed back together after the download. The
         // container option decides the result when one was chosen, otherwise mp4 is used
         // because it is the container both streams are most likely to fit.
         var needsMerge = false
+
+        val languageFilter = audioLanguage
+            ?.takeIf { it.isNotBlank() }
+            ?.let { "ba[language^=$it]" }
 
         when {
             // Generic rows carry a complete yt-dlp expression already.
@@ -1254,14 +1337,26 @@ class DownloadViewModel : ViewModel() {
             // available audio, then to the bare video, so a track that has since gone
             // missing cannot fail the whole download.
             isVideo && !format.hasAudio -> {
-                val audioId = _state.value.info?.mergeAudio?.selector
+                val audioId = audioSelector
                 val selector = buildString {
                     if (audioId != null) append("${format.selector}+$audioId/")
+                    // The engine's own way of asking for a soundtrack by name, which is
+                    // what still gets the right language when the id above has gone.
+                    languageFilter?.let { append("${format.selector}+$it/") }
                     append("${format.selector}+bestaudio/${format.selector}")
                 }
+                // The one line worth having in the log: what the download actually asked
+                // for. A soundtrack chosen in the sheet only means anything if it reaches
+                // this expression, and this is where that can be seen.
+                Log.i("Hazel", "format expression: $selector")
                 addOption("-f", selector)
                 needsMerge = true
             }
+            // An audio download is already the soundtrack that was chosen, so the filter
+            // only stands in for it if that stream is no longer offered.
+            !isVideo && languageFilter != null ->
+                addOption("-f", "${format.selector}/$languageFilter/ba")
+
             else -> addOption("-f", format.selector)
         }
 
@@ -1432,7 +1527,11 @@ class DownloadViewModel : ViewModel() {
      * Whether the run as a whole is finished is not decided here, because this is called
      * once per item in a batch. [finishBatch] owns that.
      */
-    private fun finishDownload(context: Context) {
+    private fun finishDownload(
+        context: Context,
+        plan: DownloadPlan,
+        options: DownloadOptions
+    ) {
         // Purge fragments first: the move publishes every file it finds, so a leftover
         // .part from a cancelled or failed run would otherwise land in Downloads.
         purgeFragments()
@@ -1500,7 +1599,7 @@ class DownloadViewModel : ViewModel() {
             fileUri = savedUri
         )
 
-        recordHistory(context, fileName, savedPath, savedUri, finalSizeBytes)
+        recordHistory(context, fileName, savedPath, savedUri, finalSizeBytes, plan, options)
     }
 
     /**
@@ -1515,7 +1614,9 @@ class DownloadViewModel : ViewModel() {
         fileName: String,
         savedPath: String,
         savedUri: android.net.Uri?,
-        sizeBytes: Long
+        sizeBytes: Long,
+        plan: DownloadPlan,
+        options: DownloadOptions
     ) {
         val info = _state.value.info ?: return
 
@@ -1538,11 +1639,33 @@ class DownloadViewModel : ViewModel() {
                     savedPath = savedPath,
                     isVideo = downloadIsVideo,
                     sizeBytes = sizeBytes,
-                    completedAt = System.currentTimeMillis()
+                    completedAt = System.currentTimeMillis(),
+                    // Taken from what was asked for rather than from the file. A container
+                    // reports the streams it ended up holding, which after a merge and a
+                    // conversion is not the same thing as the quality that was chosen.
+                    formatLabel = plan.format.shortLabel,
+                    codec = plan.format.codecLabel,
+                    bitrateKbps = plan.format.bitrateKbps,
+                    embedded = embeddedExtras(options, plan.format.hasVideo)
                 )
             )
         }
     }
+
+    /**
+     * What was written into the file alongside the media.
+     *
+     * None of this can be recovered from the file afterwards without opening it and reading
+     * its streams, so it is written down at the moment it is true. Chapters are only asked
+     * for on a video download, which is why the kind is part of the question.
+     */
+    private fun embeddedExtras(options: DownloadOptions, isVideo: Boolean): String =
+        buildList {
+            if (options.embedSubs) add("Subtitles")
+            if (options.addChapters && isVideo) add("Chapters")
+            if (options.embedThumbnail) add("Cover art")
+            if (options.sponsorBlockFilters.isNotEmpty()) add("SponsorBlock")
+        }.joinToString(", ")
 
     /**
      * What fraction of the expected file is sitting in the temp directory right now.

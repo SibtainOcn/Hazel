@@ -110,24 +110,27 @@ object TempStorage {
                 wipe(File(cache, ENGINE_DIR))
             }
             "other_cache" -> {
-                val preserved = setOf(
-                    CookieRepository.cookieFile(context).name,
-                    "yt-dlp",
-                    ENGINE_DIR
-                )
+                val preserved = setOf("yt-dlp", ENGINE_DIR)
                 cache.listFiles()?.forEach { entry ->
-                    if (entry.name !in preserved) entry.deleteRecursively()
+                    // Saved sign-ins live here too, one file per site, and clearing the
+                    // cache is not a request to sign out of everything.
+                    if (entry.name !in preserved && !entry.isCookieFile()) {
+                        entry.deleteRecursively()
+                    }
                 }
             }
         }
         Unit
     }
 
+    /** The whole cookie file and the per-site ones written beside it. */
+    private fun java.io.File.isCookieFile(): Boolean = name.startsWith("cookies")
+
     /** Everything in the cache that is not already counted under its own category. */
     private fun otherCacheSize(context: Context): Long {
-        val counted = setOf("yt-dlp", ENGINE_DIR, CookieRepository.cookieFile(context).name)
+        val counted = setOf("yt-dlp", ENGINE_DIR)
         return context.cacheDir.listFiles()
-            ?.filterNot { it.name in counted }
+            ?.filterNot { it.name in counted || it.isCookieFile() }
             ?.sumOf { sizeOf(it) }
             ?: 0L
     }

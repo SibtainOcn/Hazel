@@ -5,6 +5,137 @@ All notable changes to Hazel are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-08-31
+
+### Added
+- **A soundtrack can be chosen where a source publishes several.** A row under the quality
+  card names the one the download will take, and tapping it opens the list of what the
+  source actually offers. The choice reaches the download as the track's own id with the
+  engine's language filter behind it, so a track that has since gone is replaced by another
+  in the same language rather than by the original. It is on the single sheet, on the set
+  sheet for a whole run, and in the instant settings as a standing preference; anything that
+  does not carry the chosen language is downloaded with what it has.
+- **A Support screen, reached from More.** It says what the app takes from anyone, which is
+  nothing, and offers the two places money can go alongside the ways of helping that cost
+  none. Everything opens in the in-app browser, so nothing here leaves the app.
+- **The download sheet and the set sheet close with the link and an incognito switch.**
+  Tapping the address copies it and opens it, in the site's own app when that is installed
+  and in the browser otherwise. The switch is the same setting the rest of the app reads,
+  and it says which way it went.
+- **Hazel Instant has its own settings.** Container, filename template, cover art, chapters,
+  subtitles and SponsorBlock are set for the share target itself and kept apart from the
+  sheet's, so a choice made for a download being watched cannot change what an unattended
+  share does with the next link. The screen also says whether saved sign-ins are in use.
+- **Properties, for a finished download.** Held down on a row, or picked from its menu, it
+  says everything the app knows: whether the file is still there, what quality was asked
+  for, how long it runs, its bitrate, resolution, size, container, type, what was written
+  into it besides the media, the name it was saved under, where it landed and when. Two
+  sources feed it and neither is expensive: what was asked for comes from the record, and
+  what arrived is read once from the file's own header, on a background thread, only for a
+  file that is still there. A fact neither source has is left out rather than shown as
+  blank, so an entry made before any of this was recorded is short rather than empty. The
+  sheet closes with the address, which copies and opens the same way the download sheet's
+  does, and for a download whose file has gone that is the way back to the thing itself.
+
+### Changed
+- **The format list was rebuilt.** It opens half way up the screen, each row leads with its
+  container as a block, the quality is the headline with the format id beside it, and what
+  was measured sits under it as pills that scroll rather than wrapping the row into
+  different heights. Rows are laid out once per ordering, which is what makes a fast fling
+  smooth, and the list opens on the row that is currently chosen.
+- **The best row is shown from outside the list.** A source that reports formats no longer
+  gets a synthesised "best" entry mixed in with the real ones: the generic row now only
+  appears where a source listed nothing of that kind, and the sheet shows the best concrete
+  format from the moment it opens, including while the rest are still being read.
+- **The audio tab keeps its own choice.** Each tab holds what it is set to, so switching to
+  audio no longer shows a video resolution, and opening the format list from the audio tab
+  leads with the audio section.
+- **The last ten links are remembered across restarts.** What a read produced is rebuilt
+  from what it wrote, so a link pasted again fills its sheet at once, and a collection opens
+  as the set of cards it opened as last time instead of being walked again.
+- **The dark theme's own container tones.** The search field took Material's dark default,
+  which is derived from a violet neutral and read as a lilac bar across a black screen.
+- **The app opens sooner.** The wait was the launch window and then the splash screen, one
+  after the other, with the splash always holding for a fixed 1.4 seconds on top of however
+  long the start itself took. The hold is now what is left of a 900 ms budget counted from
+  the moment the process starts, so a slow start spends that budget instead of adding to it,
+  and a fast one still shows the splash long enough to be seen rather than flashed. The
+  highlight sweeping through the wordmark was retimed to finish inside the shorter stay, and
+  the mark in the launch window was moved to sit where the splash screen draws it, so it no
+  longer jumps as one replaces the other.
+- **Unpacking the download engine no longer competes with the launch.** yt-dlp and FFmpeg
+  unpack and check for updates on a background thread, but the work was starting while the
+  app was still drawing its first screen and took CPU and disk from it. It now starts once
+  that screen is up, and still starts on its own for a launch with no UI, such as a
+  notification action resuming a download after the process was killed.
+- **The link entry screen has a paste control.** A link is nearly always copied somewhere
+  else first, so the opening move on that screen was a paste and then a confirm. The control
+  in the corner is the two of them at once, and it rides above the keyboard rather than
+  under it. It goes through the same submit the field does, so a paste holding several links
+  is split the way a typed one is.
+- **The source is offered in one place.** It was on the More list and on the Support screen,
+  the same address by two routes, and the one that stayed is the one that says why anyone
+  would follow it.
+- **The results layout switch is offered from the first link.** It was held back until there
+  were two, so it was a control that came and went and nobody learned it was there. The
+  count beside it says "1 link" rather than "1 links".
+- **The downloads list dropped a glyph from its rows.** A play or note mark sat in front of
+  the size and the date, saying what the artwork beside it already said and spending the
+  width the date needed to finish.
+
+### Fixed
+- **Signing in cut the format list down to 360p.** The largest site now answers a signed-in
+  request with a single stream unless it carries a token the app cannot produce. A link is
+  read anonymously first and the sign-in is used only when the media will not open without
+  it, so a public link keeps its full ladder and a private, members-only or age-restricted
+  one still opens. The download asks the same way the read did.
+- **Sign-ins are scoped to the site they were collected on.** One file held every cookie and
+  was sent with every request, so an account on one site was handed to another site's
+  servers. Each site now gets its own, and a site with no saved sign-in is fetched without
+  one.
+- **A finished download could not be opened on older Android versions.** The saved file was
+  recorded under a `file://` address, which the system refuses to pass to another app from
+  Android 7 onwards, so the file was there and the history said it was missing. Files are
+  now handed over as content addresses, a refused direct write falls back to the media
+  index, and anything that cannot be published is kept and offered from where it is rather
+  than recorded as saved somewhere it never reached.
+- **A chosen soundtrack was lost on the way to the download.** A queued item was rebuilt
+  from what was written down for it, and the audio track written down was the source's
+  default, so the file arrived in the original language whatever the sheet had said.
+- **The set card showed a resolution twice.** The measured size was pushed off the end of
+  the row by a headline that repeated what the quality already said.
+- **A download deleted from the phone still counted as downloaded.** The record of a
+  download was taken as proof the file was there, and where it was checked at all, opening
+  the address was the whole test. From Android 11 a gallery delete moves the row to the
+  system bin, which the app that owns it can still open, so a file the user had deleted read
+  as present until they emptied the bin as well. The index is now asked whether the row is
+  binned or half written before the file behind it is opened, the answer is thrown away and
+  taken again every time a screen returns to the foreground, and the downloads list asks
+  once more at the moment of the tap rather than handing a missing file to a player that
+  opens on nothing and comes straight back. A link whose file has gone is offered as
+  something to fetch again: no repeat warning, and no marker on the card.
+- **Download all appeared for a single link, and offered to fetch what was already saved.**
+  Reading a new link added it to what was already on screen, so one new video beside one
+  already downloaded read as a set of two, and the sheet behind the action held both. What
+  has finished downloading is now taken off the list when the next link is read, with a line
+  at the foot of the results saying where it went, and the action itself is offered on what
+  is actually left to fetch rather than on how long the list is. Neither is offered while a
+  run is in hand, including one sitting paused.
+- **A row in the downloads list broke apart once its file was deleted.** The size, the date
+  and the deleted marker shared a row in which neither was allowed to give way, so the text
+  took the full width and the marker beside it was measured into nothing: it collapsed to a
+  red thread down the side and its label wrapped one letter at a time, dragging the row to
+  several times its height. The line is what shortens now. The row was rebuilt around it
+  with larger artwork, room between the title, the author and what the file cost, and the
+  same word for a missing file that the card form uses.
+- **The single-line layout lost every download control.** Pause, resume and the options
+  behind them were on the card form alone, so switching layout mid-download left the row
+  with nothing but a cancel button, and a paused item showed no sign of being paused. The
+  row now carries the same menu in the same order, the artwork holds resume while it is
+  paused, and the progress line stays put with what is already down beside it.
+- **The run summary sat above the links it was about.** A line reporting how a set of
+  downloads went was the first thing on the screen, before any of the cards it counted.
+
 ## [1.0.2] - 2026-08-31
 
 ### Fixed

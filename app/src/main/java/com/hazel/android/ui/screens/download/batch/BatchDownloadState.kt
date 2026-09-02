@@ -52,6 +52,9 @@ class BatchDownloadState {
             if (authorFor.keys.any { it !in urls }) {
                 authorFor = authorFor.filterKeys { it in urls }
             }
+            if (languageFor.keys.any { it !in urls }) {
+                languageFor = languageFor.filterKeys { it in urls }
+            }
             if (selected.any { it !in urls }) {
                 selected = selected.filterTo(mutableSetOf()) { it in urls }
             }
@@ -67,6 +70,18 @@ class BatchDownloadState {
 
     /** Links the user has adjusted on their own, keyed by url. */
     var formatFor by mutableStateOf(emptyMap<String, MediaFormat>())
+        private set
+
+    /**
+     * The soundtrack a link takes, keyed by url, for the sources that publish several.
+     * A link with no entry follows [audioLanguage], and null there means the one the
+     * source itself leads with.
+     */
+    var languageFor by mutableStateOf(emptyMap<String, String?>())
+        private set
+
+    /** The batch default soundtrack. Null is whatever each source leads with. */
+    var audioLanguage by mutableStateOf<String?>(null)
         private set
 
     /** Titles and authors edited on one link, which name the file it is saved as. */
@@ -94,7 +109,15 @@ class BatchDownloadState {
 
     /** The format a link will actually download with. */
     fun formatOf(info: MediaInfo): MediaFormat? =
-        formatFor[info.url] ?: info.autoPick(videoTab, maxHeight)
+        formatFor[info.url] ?: info.autoPick(videoTab, maxHeight, languageOf(info))
+
+    /** The soundtrack a link will actually download with. */
+    fun languageOf(info: MediaInfo): String? =
+        if (info.url in languageFor) languageFor[info.url] else audioLanguage
+
+    /** Every soundtrack any link in the set offers, which is what there is to choose from. */
+    val audioLanguages: List<String>
+        get() = results.flatMap { it.audioLanguages }.distinct()
 
     /** What the file will be called, which the link's own sheet can change. */
     fun titleOf(info: MediaInfo): String = titleFor[info.url] ?: info.title
@@ -116,7 +139,9 @@ class BatchDownloadState {
      */
     private val plansState = derivedStateOf {
         results.mapNotNull { info ->
-            formatOf(info)?.let { DownloadPlan(info, it, titleOf(info), authorOf(info)) }
+            formatOf(info)?.let {
+                DownloadPlan(info, it, titleOf(info), authorOf(info), languageOf(info))
+            }
         }
     }
 
@@ -139,6 +164,25 @@ class BatchDownloadState {
     fun setDownloadType(isVideo: Boolean) {
         videoTab = isVideo
         applyToTargets { it.autoPick(isVideo, maxHeight) }
+    }
+
+    /**
+     * Applies one soundtrack to every target.
+     *
+     * An audio download follows it straight away, since the format itself is the
+     * soundtrack; a video download carries it as the track that will be muxed in.
+     */
+    fun applyAudioLanguage(language: String?) {
+        val scope = targets
+        if (scope.size == results.size) {
+            // The whole set follows the new answer, so the per-link entries that were
+            // overriding it have nothing left to override.
+            audioLanguage = language
+            languageFor = emptyMap()
+        } else {
+            languageFor = languageFor + scope.associate { it.url to language }
+        }
+        applyToTargets { it.autoPick(videoTab, maxHeight, language) }
     }
 
     fun setQualityCeiling(height: Int) {
@@ -173,10 +217,17 @@ class BatchDownloadState {
     }
 
     /** Everything one link's own sheet decided, applied together when it is confirmed. */
-    fun setChoice(info: MediaInfo, format: MediaFormat, title: String, author: String) {
+    fun setChoice(
+        info: MediaInfo,
+        format: MediaFormat,
+        title: String,
+        author: String,
+        audioLanguage: String?
+    ) {
         formatFor = formatFor + (info.url to format)
         titleFor = titleFor + (info.url to title.ifBlank { info.title })
         authorFor = authorFor + (info.url to author)
+        languageFor = languageFor + (info.url to audioLanguage)
     }
 
     // ── Selection ──

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Paid
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -77,7 +78,11 @@ fun BatchActionBar(
     onChapters: () -> Unit,
     onSubtitles: () -> Unit,
     onSponsorBlock: () -> Unit,
-    onFilename: () -> Unit
+    onFilename: () -> Unit,
+    /** Only the sets holding a source with several soundtracks have this to offer. */
+    showAudioLanguage: Boolean = false,
+    audioLanguageLabel: String = "",
+    onAudioLanguage: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -116,6 +121,13 @@ fun BatchActionBar(
                         icon = Icons.Filled.ClosedCaption,
                         badge = options.subtitleBadge,
                         onClick = onSubtitles
+                    )
+                }
+                if (showAudioLanguage) {
+                    BarChip(
+                        label = audioLanguageLabel,
+                        icon = Icons.Filled.Translate,
+                        onClick = onAudioLanguage
                     )
                 }
                 BarChip(

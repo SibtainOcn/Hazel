@@ -287,6 +287,13 @@ class CookieWebViewActivity : ComponentActivity() {
                     enabled = true
                 )
             )
+            // Kept with the cookies, because they were issued to this identity and are
+            // only honoured when they come back under it.
+            CookieRepository.setUserAgent(
+                this@CookieWebViewActivity,
+                webView?.settings?.userAgentString.orEmpty()
+            )
+
             // Saving cookies is meaningless while the master switch is off, so confirming
             // here turns it on.
             CookieRepository.setUseCookies(this@CookieWebViewActivity, true)

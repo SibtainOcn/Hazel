@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -90,6 +91,7 @@ import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.ui.components.MediaCardShimmer
+import com.hazel.android.ui.components.rememberPresence
 import com.hazel.android.ui.components.ProcessingShimmer
 import com.hazel.android.ui.motion.M3Motion
 import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
@@ -211,22 +213,51 @@ fun DownloadScreen(
     val history by DownloadHistoryRepository.getHistory(context)
         .collectAsState(initial = emptyList())
 
+    // The records behind the links on screen, so each one can be asked whether the file it
+    // produced is still on the device. Only the links being shown are looked up, rather
+    // than the whole history, which can run to hundreds of rows.
+    val listedEntries = remember(state.results, history) {
+        state.results.mapNotNull { info ->
+            history.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
+        }
+    }
+    val presence = rememberPresence(listedEntries)
+
+    /**
+     * Links in the list that were downloaded before and whose file is still on the device.
+     *
+     * The record on its own was taken as proof, so a link whose file the user had since
+     * deleted came back marked as downloaded and was left out of the set action. The record
+     * is a record of what happened, not of what is there, and a file that has gone is a
+     * link worth fetching again.
+     */
+    val savedUrls by remember(state.results, listedEntries) {
+        derivedStateOf {
+            state.results.filter { info ->
+                listedEntries.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
+                    ?.let { presence[it.id] == true } == true
+            }.map { it.url }.toSet()
+        }
+    }
+
     /**
      * The links the set action still owes a download on.
-     *
-     * A link that has already been fetched keeps its place in the list, marked, because
-     * seeing what arrived is the point of the list. It is not something to fetch a second
-     * time. Reading a new link used to add it to what was already on screen and offer to
-     * download the lot, so one new video alongside one already saved read as two waiting,
-     * and Download all fetched the saved one again.
      *
      * Both records are consulted. The batch says what finished in this run, and the history
      * says what finished in any run, which is what a link read after a restart turns on.
      */
-    val pendingResults = remember(state.results, state.batch, history) {
+    // Whether a run is going on, counting one that is sitting paused. The run's own flag
+    // goes false the moment a pause stops the queue, which is how a paused set came to offer
+    // the action that would start it over, alongside controls for dropping links out of a
+    // queue that is still holding them.
+    val runInHand = state.isDownloading || state.batch.any {
+        it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED
+    }
+
+    val pendingResults = remember(state.results, state.batch, savedUrls) {
         state.results.filterNot { info ->
             state.batch.any { item -> item.url == info.url && item.state == BatchState.DONE } ||
-                history.any { entry -> LinkKey.sameMedia(entry.url, info.url) }
+                info.url in savedUrls
         }
     }
 
@@ -348,9 +379,11 @@ fun DownloadScreen(
             // holds and switches how it is drawn, and both of those are worth reaching
             // without scrolling back to the top of a hundred links first.
             //
-            // Shown from two links up. A single card is not a list: there is no count worth
-            // stating and nothing for a layout to change, and "1 links" reads as a bug.
-            if (state.results.size > 1) {
+            // Shown from the first link. It was held back until there were two, on the
+            // grounds that a single card is not a list, but that made the layout switch a
+            // control which comes and goes, so nobody learns it is there and a single card
+            // cannot be read as a line. The count says "1 link" for one of them.
+            if (state.results.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     modifier = Modifier
@@ -359,7 +392,11 @@ fun DownloadScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        pluralStringResource(R.plurals.download_links, state.results.size, state.results.size),
+                        pluralStringResource(
+                            R.plurals.download_links,
+                            state.results.size,
+                            state.results.size
+                        ),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -432,27 +469,11 @@ fun DownloadScreen(
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     start = 20.dp,
                     end = 20.dp,
-                    // Room for the action that floats over the list.
-                    bottom = if (state.isMultiple) 96.dp else 32.dp
+                    // Room for the action that floats over the list, on the same terms as
+                    // the action itself.
+                    bottom = if (pendingResults.size > 1) 96.dp else 32.dp
                 )
             ) {
-                item(key = "error") {
-                    AnimatedVisibility(
-                        visible = state.error != null,
-                        enter = M3Motion.contentEnter(),
-                        exit = M3Motion.contentExit()
-                    ) {
-                        state.error?.let {
-                            Text(
-                                it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(top = 10.dp, start = 4.dp)
-                            )
-                        }
-                    }
-                }
-
                 // An instant share reads with nothing on screen to show for it, so the
                 // same skeleton stands in, named after where the link came from.
                 item(key = "instant") {
@@ -529,7 +550,7 @@ fun DownloadScreen(
                         downloadViewModel.resolveFormats(info)
                         sheetVisible = true
                     }
-                    val remove = if (state.isMultiple && !state.isDownloading) {
+                    val remove = if (state.isMultiple && !runInHand) {
                         { downloadViewModel.removeResult(info) }
                     } else null
 
@@ -550,10 +571,11 @@ fun DownloadScreen(
                                     (!state.isMultiple && state.isComplete),
                             batchItem = batchItem,
                             waitingForWifi = state.waitingForWifi,
-                            alreadyDownloaded = state.isMultiple &&
-                                    history.any { LinkKey.sameMedia(it.url, info.url) },
+                            alreadyDownloaded = info.url in savedUrls,
                             onOpenSheet = openSheet,
                             onCancel = downloadViewModel::cancelDownload,
+                            onPause = downloadViewModel::pauseDownload,
+                            onResume = downloadViewModel::resumeDownload,
                             onRemove = remove
                         )
                     } else {
@@ -567,8 +589,7 @@ fun DownloadScreen(
                                     (!state.isMultiple && state.isComplete),
                             batchItem = batchItem,
                             waitingForWifi = state.waitingForWifi,
-                            alreadyDownloaded = state.isMultiple &&
-                                    history.any { LinkKey.sameMedia(it.url, info.url) },
+                            alreadyDownloaded = info.url in savedUrls,
                             onOpenSheet = openSheet,
                             onCancel = downloadViewModel::cancelDownload,
                             onPause = downloadViewModel::pauseDownload,
@@ -576,6 +597,54 @@ fun DownloadScreen(
                             onRemove = remove
                         )
                     }
+                    }
+                }
+
+                // How the run as a whole went, under the list rather than over it. It
+                // reports on what the cards above say one by one, so it belongs after them:
+                // above the list it was the first thing read, before there was anything for
+                // it to be about.
+                item(key = "error") {
+                    AnimatedVisibility(
+                        visible = state.error != null,
+                        enter = M3Motion.contentEnter(),
+                        exit = M3Motion.contentExit()
+                    ) {
+                        state.error?.let {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(top = 16.dp, start = 4.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Says where the downloads that used to sit here have gone. Reading a new
+                // link takes what has finished off the list, so without this the cards a
+                // user watched arrive would simply be absent the next time they pasted
+                // something, which reads as the app having lost them.
+                if (state.savedAside && !state.isFetching) {
+                    item(key = "savedAside") {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Filled.CheckCircle,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                "Your downloads are saved. Find them in the Downloads tab.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 
@@ -614,8 +683,12 @@ fun DownloadScreen(
         }
 
         // One action for the whole set, which is the point of collecting links together.
-        // Hidden once there is nothing left in the set to fetch.
-        if (state.isMultiple && !state.isDownloading && pendingResults.isNotEmpty()) {
+        //
+        // Offered on what is actually left to fetch rather than on how long the list is. A
+        // list of two where one is already saved is one download, and a set action that
+        // opens a sheet holding a single card is a set action that should not have been
+        // there at all.
+        if (pendingResults.size > 1 && !runInHand) {
             DownloadAllButton(
                 onClick = { batchSheetVisible = true },
                 modifier = Modifier
@@ -703,7 +776,7 @@ fun DownloadScreen(
                 onResetSaveDir = {
                     scope.launch { SettingsRepository.clearDownloadTree(context) }
                 },
-                onDownload = { format, title, author ->
+                onDownload = { format, audioLanguage, title, author ->
                     sheetVisible = false
                     downloadViewModel.startDownload(
                         context = context,
@@ -711,6 +784,7 @@ fun DownloadScreen(
                         options = options,
                         title = title,
                         author = author,
+                        audioLanguage = audioLanguage,
                         treeUri = treeUri
                     )
                 },
@@ -1080,8 +1154,11 @@ private fun MediaCard(
                     }
                 }
 
-                // Removing a link from the set, offered only while the set is idle.
-                if (onRemove != null) {
+                // Removing a link from the set, offered only while the set is idle. A
+                // paused item counts as busy: the run as a whole has stopped, so the set is
+                // idle by the only measure this screen has, and the remove control was
+                // being drawn straight on top of the menu that resumes it.
+                if (onRemove != null && !isDownloading && !isPaused) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -1204,6 +1281,8 @@ private fun MediaRow(
     alreadyDownloaded: Boolean,
     onOpenSheet: () -> Unit,
     onCancel: () -> Unit,
+    onPause: () -> Unit = {},
+    onResume: () -> Unit = {},
     onRemove: (() -> Unit)?
 ) {
     val animatedProgress by animateFloatAsState(
@@ -1212,13 +1291,17 @@ private fun MediaRow(
         label = "rowProgress"
     )
 
+    var menuOpen by remember { mutableStateOf(false) }
+    val isPaused = batchItem?.state == BatchState.PAUSED
+    val inHand = isDownloading || isPaused
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
     ) {
         Column(
-            modifier = if (isDownloading) Modifier else Modifier.clickable(onClick = onOpenSheet)
+            modifier = if (inHand) Modifier else Modifier.clickable(onClick = onOpenSheet)
         ) {
             Row(
                 modifier = Modifier
@@ -1249,13 +1332,16 @@ private fun MediaRow(
                         )
                     }
 
-                    if (isDownloading) {
+                    // A paused item keeps the treatment that says it is in hand, exactly as
+                    // the card does. Only the control in the middle changes: there is
+                    // nothing to stop any more, and the thing to do is start it again.
+                    if (inHand) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(Color.Black.copy(alpha = 0.4f))
                         )
-                        if (isProcessing) {
+                        if (isProcessing && !isPaused) {
                             ProcessingShimmer(modifier = Modifier.fillMaxSize())
                         } else {
                             Box(
@@ -1263,12 +1349,15 @@ private fun MediaRow(
                                     .size(34.dp)
                                     .clip(CircleShape)
                                     .background(Color.Black.copy(alpha = 0.55f))
-                                    .clickable(onClick = onCancel),
+                                    .clickable(onClick = if (isPaused) onResume else onCancel),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    Icons.Filled.Close,
-                                    contentDescription = stringResource(R.string.download_cancel_action),
+                                    if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Close,
+                                    contentDescription = stringResource(
+                                        if (isPaused) R.string.download_resume_action
+                                        else R.string.download_cancel_action
+                                    ),
                                     modifier = Modifier.size(16.dp),
                                     tint = Color.White
                                 )
@@ -1316,9 +1405,20 @@ private fun MediaRow(
                         )
                     }
 
+                    val pausedLabel = stringResource(R.string.download_paused)
                     val state = when {
-                        batchItem?.state == BatchState.PAUSED -> stringResource(R.string.download_paused)
-                        waitingForWifi && !isDownloading -> stringResource(R.string.download_waiting_wifi)
+                        isPaused -> buildString {
+                            append(pausedLabel)
+                            if (totalBytes > 0) {
+                                val done = (totalBytes * animatedProgress).toLong()
+                                append("  ")
+                                append(formatFileSize(done))
+                                append(" / ")
+                                append(formatFileSize(totalBytes))
+                            }
+                        }
+                        waitingForWifi && !isDownloading ->
+                            stringResource(R.string.download_waiting_wifi)
                         isProcessing -> stringResource(R.string.download_processing)
                         // The same line the card shows: how far along, and how far there is
                         // to go. A percentage on its own says nothing about whether the
@@ -1356,8 +1456,56 @@ private fun MediaRow(
                     }
                 }
 
-                if (onRemove != null) {
-                    IconButton(onClick = onRemove) {
+                // The same options the card offers, in the same order. They used to be on
+                // the card alone, so switching to this layout mid-download took away every
+                // way of pausing or resuming the thing being watched. They sit at the end
+                // of the line rather than over the artwork, which at this size is too small
+                // to hold a control on top of the one already in the middle of it.
+                when {
+                    inHand -> Box {
+                        IconButton(onClick = { menuOpen = true }) {
+                            Icon(
+                                Icons.Filled.MoreVert,
+                                contentDescription = "Download options",
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = menuOpen,
+                            onDismissRequest = { menuOpen = false }
+                        ) {
+                            if (isPaused) {
+                                DropdownMenuItem(
+                                    text = { Text("Resume") },
+                                    onClick = {
+                                        menuOpen = false
+                                        onResume()
+                                    }
+                                )
+                            } else {
+                                DropdownMenuItem(
+                                    text = { Text("Pause") },
+                                    // Nothing to pause once the transfer is done and the
+                                    // engine has moved on to merging or tagging.
+                                    enabled = !isProcessing,
+                                    onClick = {
+                                        menuOpen = false
+                                        onPause()
+                                    }
+                                )
+                            }
+                            DropdownMenuItem(
+                                text = { Text("Cancel") },
+                                onClick = {
+                                    menuOpen = false
+                                    onCancel()
+                                }
+                            )
+                        }
+                    }
+
+                    onRemove != null -> IconButton(onClick = onRemove) {
                         Icon(
                             Icons.Filled.Close,
                             contentDescription = stringResource(R.string.download_remove_link),
@@ -1368,8 +1516,10 @@ private fun MediaRow(
                 }
             }
 
-            if (isDownloading) {
-                if (isProcessing) {
+            // Drawn while the item is paused as well, because a bar that vanishes on a
+            // pause takes with it the only sign of how much of the file is already down.
+            if (inHand) {
+                if (isProcessing && !isPaused) {
                     LinearProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1383,7 +1533,11 @@ private fun MediaRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(3.dp),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = if (isPaused) {
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
                         trackColor = Color.Transparent,
                         drawStopIndicator = {}
                     )

@@ -52,6 +52,7 @@ import com.hazel.android.ui.screens.download.openBatterySettings
 import com.hazel.android.ui.screens.history.HistoryScreen
 import com.hazel.android.ui.screens.more.AppearanceScreen
 import com.hazel.android.ui.screens.more.DirectShareScreen
+import com.hazel.android.ui.screens.more.SponsorScreen
 import com.hazel.android.ui.screens.more.FetchSettingsScreen
 import com.hazel.android.ui.screens.more.MoreScreen
 import com.hazel.android.ui.screens.more.StorageCleanupScreen
@@ -96,7 +97,7 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val isSubScreen = currentRoute in listOf(
-        "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "direct_share"
+        "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "direct_share", "sponsor"
     )
 
     Scaffold(
@@ -245,6 +246,7 @@ fun AppNavigation(
                     onNavigateToCookies = { navController.navigate("cookies") },
                     onNavigateToFetchSettings = { navController.navigate("fetch_settings") },
                     onNavigateToDirectShare = { navController.navigate("direct_share") },
+                    onNavigateToSponsor = { navController.navigate("sponsor") },
                     onOpenBatterySettings = { openBatterySettings(context) },
                     onNavigateToStorageCleanup = { navController.navigate("storage_cleanup") },
                     onNavigateToUpdate = { navController.navigate("update") }
@@ -259,8 +261,15 @@ fun AppNavigation(
             composable("fetch_settings") {
                 FetchSettingsScreen(onBack = { navController.popBackStack() })
             }
+            composable("sponsor") {
+                SponsorScreen(onBack = { navController.popBackStack() })
+            }
+
             composable("direct_share") {
-                DirectShareScreen(onBack = { navController.popBackStack() })
+                DirectShareScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenCookies = { navController.navigate("cookies") }
+                )
             }
             composable("storage_locations") {
                 StorageLocationsScreen(onBack = { navController.popBackStack() })

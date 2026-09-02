@@ -2,7 +2,7 @@ package com.hazel.android.ui.screens.more
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -70,7 +70,8 @@ fun MoreScreen(
     onNavigateToDirectShare: () -> Unit = {},
     onOpenBatterySettings: () -> Unit = {},
     onNavigateToStorageCleanup: () -> Unit = {},
-    onNavigateToUpdate: () -> Unit = {}
+    onNavigateToUpdate: () -> Unit = {},
+    onNavigateToSponsor: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -360,22 +361,33 @@ fun MoreScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Sits at the end, under everything the app can do for itself. No mark on the
-            // right: the line under it already says where it goes, and the chevrons above
-            // mean "another screen in here", which this is not.
+            // Above the two lines that leave the app, since this one is a screen of its
+            // own and the ones under it are addresses.
             ListItem(
-                headlineContent = { Text(stringResource(R.string.more_source_code)) },
+                headlineContent = { Text(stringResource(R.string.more_support)) },
                 leadingContent = {
-                    Icon(Icons.Filled.Code, null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.Filled.Favorite, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        modifier = Modifier.size(16.dp)
+                    )
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { openExternally(context, SOURCE_URL) }
+                modifier = Modifier.clickable { onNavigateToSponsor() }
             )
 
             HorizontalDivider(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
+
+            // The source is offered on the Support screen above, where it sits among the
+            // other ways of helping that cost nothing. It was here as well, so the same
+            // address was reachable by two routes that behaved differently, and the one
+            // that stayed is the one with something to say about why anyone would follow it.
 
             // Opened in the user's own browser rather than in the app's, because a licence
             // is a thing people save, share and read next to something else, and none of
@@ -410,5 +422,4 @@ private fun openExternally(context: android.content.Context, url: String) {
     }
 }
 
-private const val SOURCE_URL = "https://github.com/SibtainOcn/Hazel"
 private const val LICENSE_URL = "https://github.com/SibtainOcn/Hazel/blob/main/LICENSE"

@@ -6,6 +6,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,7 +53,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -80,6 +80,8 @@ import com.hazel.android.data.HistoryFilter
 import com.hazel.android.data.HistorySort
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
+import com.hazel.android.ui.components.rememberPresence
+import com.hazel.android.util.MediaPresence
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -115,17 +117,12 @@ fun HistoryScreen() {
     var menuOpen by remember { mutableStateOf(false) }
     var confirmClear by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<HistoryEntry?>(null) }
+    var properties by remember { mutableStateOf<HistoryEntry?>(null) }
 
-    // Checked once per entry as it appears, rather than on every recomposition, since it
-    // touches the filesystem.
-    val presence = remember { mutableStateMapOf<Long, Boolean>() }
-    LaunchedEffect(history) {
-        history.forEach { entry ->
-            if (entry.id !in presence) {
-                presence[entry.id] = DownloadHistoryRepository.fileExists(context, entry)
-            }
-        }
-    }
+    // Asked once per entry and then asked again on every return to the foreground, since
+    // deleting a download happens in another app and that is when the answer held here
+    // stops being true.
+    val presence = rememberPresence(history)
 
     val visible = remember(history, sort, filter, query) {
         history
@@ -346,7 +343,26 @@ fun HistoryScreen() {
             ) {
                 items(visible, key = { it.id }) { entry ->
                     val present = presence[entry.id] ?: true
-                    val open = { openEntry(context, entry) }
+
+                    // Asked again at the moment of the tap rather than trusted from the
+                    // last sweep. A file deleted since then handed the address to a player,
+                    // which opened on nothing and came straight back, leaving the row still
+                    // claiming the file was there. The row is corrected here instead.
+                    val open = {
+                        scope.launch {
+                            if (MediaPresence.refresh(context, entry.fileUri)) {
+                                openEntry(context, entry)
+                            } else {
+                                presence[entry.id] = false
+                                Toast.makeText(
+                                    context,
+                                    "This file is no longer on your device",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                        Unit
+                    }
                     val remove = {
                         scope.launch { DownloadHistoryRepository.remove(context, entry.id) }
                         Unit
@@ -358,7 +374,8 @@ fun HistoryScreen() {
                             present = present,
                             onOpen = open,
                             onRemove = remove,
-                            onDeleteFile = { pendingDelete = entry }
+                            onDeleteFile = { pendingDelete = entry },
+                            onProperties = { properties = entry }
                         )
                     } else {
                         HistoryCard(
@@ -366,7 +383,8 @@ fun HistoryScreen() {
                             present = present,
                             onOpen = open,
                             onRemove = remove,
-                            onDeleteFile = { pendingDelete = entry }
+                            onDeleteFile = { pendingDelete = entry },
+                            onProperties = { properties = entry }
                         )
                     }
                 }
@@ -388,6 +406,14 @@ fun HistoryScreen() {
             dismissButton = {
                 TextButton(onClick = { confirmClear = false }) { Text(stringResource(R.string.history_clear_dialog_cancel)) }
             }
+        )
+    }
+
+    properties?.let { entry ->
+        DownloadPropertiesSheet(
+            entry = entry,
+            present = presence[entry.id] ?: true,
+            onDismiss = { properties = null }
         )
     }
 
@@ -422,7 +448,8 @@ private fun HistoryCard(
     present: Boolean,
     onOpen: () -> Unit,
     onRemove: () -> Unit,
-    onDeleteFile: () -> Unit
+    onDeleteFile: () -> Unit,
+    onProperties: () -> Unit
 ) {
     var menuOpen by remember { mutableStateOf(false) }
 
@@ -435,7 +462,14 @@ private fun HistoryCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
-                .clickable(enabled = present, onClick = onOpen)
+                // Holding an entry down asks what it is. A tap plays it, which is what the
+                // list is for, so the details cannot have the tap; a long press is where a
+                // thing's properties live everywhere else on the platform. It answers for a
+                // deleted entry too, where it is the only thing left that can.
+                .combinedClickable(
+                    onClick = { if (present) onOpen() },
+                    onLongClick = onProperties
+                )
         ) {
             if (entry.thumbnail != null) {
                 // A row whose file has been deleted elsewhere keeps its place in the list,
@@ -507,6 +541,13 @@ private fun HistoryCard(
                         onDismissRequest = { menuOpen = false }
                     ) {
                         DropdownMenuItem(
+                            text = { Text(stringResource(R.string.history_card_properties)) },
+                            onClick = {
+                                menuOpen = false
+                                onProperties()
+                            }
+                        )
+                        DropdownMenuItem(
                             text = { Text(stringResource(R.string.history_card_remove)) },
                             onClick = {
                                 menuOpen = false
@@ -566,12 +607,19 @@ private fun HistoryCard(
 
 
 /**
- * One download as a single line: small artwork, then what it is.
+ * One download as a single line: artwork, then what it is, then what it cost.
  *
  * The card form leads with the artwork, which is right for browsing but wasteful once the
  * list is long, since four entries fill a screen. This form fits several times as many by
  * moving the text out from over the image onto its own column, where it also stops
  * competing with the picture for contrast.
+ *
+ * The three facts under the title are laid out as a line that gives way and a marker that
+ * does not. They used to share a row where neither was allowed to yield, so the text took
+ * the whole width and the marker beside it was measured into nothing: on a deleted download
+ * it collapsed to a red thread down the side of the row and its label wrapped a letter at a
+ * time, dragging the row to several times its height. The line is what shortens now, and
+ * the marker keeps the width its own words need.
  */
 @Composable
 private fun HistoryRow(
@@ -579,26 +627,31 @@ private fun HistoryRow(
     present: Boolean,
     onOpen: () -> Unit,
     onRemove: () -> Unit,
-    onDeleteFile: () -> Unit
+    onDeleteFile: () -> Unit,
+    onProperties: () -> Unit
 ) {
     var menuOpen by remember { mutableStateOf(false) }
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(enabled = present, onClick = onOpen)
-                .padding(8.dp),
+                // As on the card: a tap plays it, holding it down says what it is.
+                .combinedClickable(
+                    onClick = { if (present) onOpen() },
+                    onLongClick = onProperties
+                )
+                .padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(width = 104.dp, height = 60.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .size(width = 128.dp, height = 78.dp)
+                    .clip(RoundedCornerShape(14.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
@@ -607,7 +660,7 @@ private fun HistoryRow(
                         model = entry.thumbnail,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        alpha = if (present) 1f else 0.7f,
+                        alpha = if (present) 1f else 0.55f,
                         colorFilter = if (present) null else ColorFilter.colorMatrix(
                             ColorMatrix().apply { setToSaturation(0f) }
                         ),
@@ -617,7 +670,7 @@ private fun HistoryRow(
                     Icon(
                         if (entry.isVideo) Icons.Filled.PlayArrow else Icons.Filled.MusicNote,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
                     )
                 }
@@ -627,31 +680,36 @@ private fun HistoryRow(
                     Surface(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(3.dp),
-                        shape = RoundedCornerShape(4.dp),
-                        color = Color.Black.copy(alpha = 0.7f)
+                            .padding(5.dp),
+                        shape = RoundedCornerShape(6.dp),
+                        color = Color.Black.copy(alpha = 0.72f)
                     ) {
                         Text(
                             duration,
                             style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
                             color = Color.White,
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     entry.title,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
+                    color = if (present) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+
                 if (entry.author.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(3.dp))
                     Text(
                         entry.author,
                         style = MaterialTheme.typography.bodySmall,
@@ -661,18 +719,15 @@ private fun HistoryRow(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
+                // No type glyph in front of the figures. The artwork beside them already
+                // says what this is, and on a narrow row the glyph was spending width the
+                // date needed to finish.
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        if (entry.isVideo) Icons.Filled.PlayArrow else Icons.Filled.MusicNote,
-                        contentDescription = null,
-                        modifier = Modifier.size(13.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                     Text(
                         buildString {
                             if (entry.sizeBytes > 0) {
@@ -684,11 +739,16 @@ private fun HistoryRow(
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        // Weighted, so this is the part that gives when the row is narrow.
+                        // Anything unweighted beside it is measured first and in full.
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                     if (!present) {
+                        // The same word the card uses. The file is not mislaid, it is gone,
+                        // and almost always because the user removed it themselves.
                         Tag(
-                            stringResource(R.string.history_tag_missing),
+                            stringResource(R.string.history_tag_deleted),
                             background = MaterialTheme.colorScheme.error,
                             foreground = MaterialTheme.colorScheme.onError
                         )
@@ -705,6 +765,13 @@ private fun HistoryRow(
                     )
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.history_row_properties)) },
+                        onClick = {
+                            menuOpen = false
+                            onProperties()
+                        }
+                    )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.history_row_remove)) },
                         onClick = {

@@ -107,15 +107,19 @@ class MediaProbeParseTest {
     }
 
     @Test
-    fun `every tab is headed by a best row whatever the source reported`() {
+    fun `a best row stands in only where the source named no formats of that kind`() {
+        // One direct stream and no format list: the video tab has a real entry, and the
+        // audio tab has nothing of its own, so the generic row is what makes an audio
+        // download of it possible at all.
         val bare = parse("""{"title": "Bare", "url": "https://cdn/clip.mp4"}""")
-        val full = parse(complete)
+        assertTrue(bare.videoFormats.none { it.isGeneric })
+        assertTrue(bare.audioFormats.single().isGeneric)
+        assertTrue(bare.audioFormats.single().selector.isNotBlank())
 
-        for (info in listOf(bare, full)) {
-            assertTrue(info.videoFormats.first().isGeneric)
-            assertTrue(info.audioFormats.first().isGeneric)
-            assertTrue(info.videoFormats.first().selector.isNotBlank())
-        }
+        // A source that reported both kinds is left as it reported them.
+        val full = parse(complete)
+        assertTrue(full.videoFormats.none { it.isGeneric })
+        assertTrue(full.audioFormats.none { it.isGeneric })
     }
 
     @Test

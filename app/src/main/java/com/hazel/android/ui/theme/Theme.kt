@@ -33,6 +33,13 @@ fun HazelTheme(
             onSurface = DarkOnSurface,
             surfaceVariant = DarkSurfaceVariant,
             onSurfaceVariant = DarkOnSurfaceVariant,
+            outline = DarkOutline,
+            outlineVariant = DarkOutlineVariant,
+            surfaceContainerLowest = DarkSurfaceContainerLowest,
+            surfaceContainerLow = DarkSurfaceContainerLow,
+            surfaceContainer = DarkSurfaceContainer,
+            surfaceContainerHigh = DarkSurfaceContainerHigh,
+            surfaceContainerHighest = DarkSurfaceContainerHighest,
             error = ErrorRed,
             onError = DarkBackground,
         )

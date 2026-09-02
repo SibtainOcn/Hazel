@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.hazel.android.R
 import com.hazel.android.download.FetchMode
 import com.hazel.android.download.MediaProbe
+import com.hazel.android.download.SiteAccess
 import java.io.File
 
 /**
@@ -53,7 +54,7 @@ object LinkResolver {
     suspend fun resolve(
         url: String,
         cacheDir: File,
-        cookieFile: File?,
+        access: SiteAccess,
         fetchMode: FetchMode,
         forceIpv4: Boolean,
         source: ListingSource,
@@ -67,6 +68,6 @@ object LinkResolver {
             NewPipeLister.list(url)?.let { return it }
         }
 
-        return MediaProbe.listContents(url, cacheDir, cookieFile, fetchMode, forceIpv4, processId)
+        return MediaProbe.listContents(url, cacheDir, access, fetchMode, forceIpv4, processId)
     }
 }

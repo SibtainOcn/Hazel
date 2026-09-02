@@ -28,6 +28,20 @@
     -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
+    <!--
+         What the app is allowed to see of the rest of the device. From Android 11 an app
+         cannot resolve an intent at another package without saying so, and the sheet offers
+         to open a link where it belongs: in the site's own app when it is installed, in the
+         browser otherwise.
+    -->
+    <queries>
+        <package android:name="com.google.android.youtube" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
     <application
         android:name=".HazelApp"
         android:allowBackup="true"
