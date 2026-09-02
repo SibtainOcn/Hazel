@@ -177,7 +177,7 @@ class CookieWebViewActivity : ComponentActivity() {
                                             tint = MaterialTheme.colorScheme.primary
                                         )
                                         Text(
-                                            "  OK",
+                                            stringResource(R.string.cookie_webview_done),
                                             style = MaterialTheme.typography.labelLarge,
                                             color = MaterialTheme.colorScheme.primary
                                         )

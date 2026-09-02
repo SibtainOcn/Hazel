@@ -476,6 +476,8 @@
     <string name="cookie_webview_close">Close</string>
     <string name="cookie_webview_desktop_site">Desktop site</string>
     <string name="cookie_webview_no_cookies">No cookies were collected</string>
+    <!-- The leading spaces sit the label off the icon beside it in the button. -->
+    <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->
     <string name="format_selection_sort">Sort formats</string>
