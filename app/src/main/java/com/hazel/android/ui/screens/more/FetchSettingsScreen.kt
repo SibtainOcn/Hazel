@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -79,7 +80,7 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Link Reading",
+                stringResource(R.string.fetch_settings_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -87,7 +88,7 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
         }
 
         Text(
-            "How long to wait on a slow source before giving up and retrying.",
+            stringResource(R.string.fetch_settings_timeout_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
             modifier = Modifier.padding(bottom = 16.dp)
@@ -123,8 +124,12 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                         )
                         Text(
-                            "${option.socketTimeoutSeconds}s timeout, " +
-                                    "${option.retries} ${if (option.retries == 1) "try" else "tries"}",
+                            pluralStringResource(
+                                R.plurals.fetch_settings_timing,
+                                option.retries,
+                                option.socketTimeoutSeconds,
+                                option.retries
+                            ),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                         )
@@ -136,13 +141,12 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            "Reading links",
+            stringResource(R.string.fetch_settings_reading_links),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold
         )
         Text(
-            "Which reader works out what a link holds. Downloads always use yt-dlp, " +
-                    "whichever is chosen here.",
+            stringResource(R.string.fetch_settings_reading_links_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
             modifier = Modifier.padding(bottom = 16.dp)
@@ -204,8 +208,7 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        "Only turn this on if links hang on your network. It works around a " +
-                                "broken IPv6 route, and is slower everywhere else.",
+                        stringResource(R.string.fetch_settings_force_ipv4_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                     )

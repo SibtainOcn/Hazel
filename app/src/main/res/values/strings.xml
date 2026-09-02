@@ -506,6 +506,16 @@
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_back">Back</string>
+    <string name="fetch_settings_title">Link Reading</string>
+    <string name="fetch_settings_timeout_description">How long to wait on a slow source before giving up and retrying.</string>
+    <!-- How patient one mode is. %1$d is the timeout in seconds, %2$d the retry count. -->
+    <plurals name="fetch_settings_timing">
+        <item quantity="one">%1$ds timeout, %2$d try</item>
+        <item quantity="other">%1$ds timeout, %2$d tries</item>
+    </plurals>
+    <string name="fetch_settings_reading_links">Reading links</string>
+    <string name="fetch_settings_reading_links_description">Which reader works out what a link holds. Downloads always use yt-dlp, whichever is chosen here.</string>
+    <string name="fetch_settings_force_ipv4_description">Only turn this on if links hang on your network. It works around a broken IPv6 route, and is slower everywhere else.</string>
     <string name="fetch_settings_force_ipv4">Force IPv4</string>
     <string name="fetch_mode_fast_label">Fast</string>
     <string name="fetch_mode_fast_description">Give up quickly. Fastest on a good network, but more likely to need a second attempt.</string>
