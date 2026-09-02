@@ -519,6 +519,8 @@
 
     <!-- ToolsScreen -->
     <string name="tools_back">Back</string>
+    <string name="tools_title">Tools</string>
+    <string name="tools_empty">Nothing here yet.</string>
 
     <!-- DirectShareScreen -->
     <string name="direct_share_back">Back</string>

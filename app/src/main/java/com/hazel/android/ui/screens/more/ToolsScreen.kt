@@ -67,7 +67,7 @@ fun ToolsScreen(
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Tools",
+                stringResource(R.string.tools_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -75,7 +75,7 @@ fun ToolsScreen(
         }
 
         Text(
-            "Nothing here yet.",
+            stringResource(R.string.tools_empty),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
