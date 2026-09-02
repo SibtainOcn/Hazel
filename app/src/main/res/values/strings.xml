@@ -62,6 +62,8 @@
     <string name="search_all">Search all</string>
     <string name="search_forget">Forget</string>
     <string name="search_edit_before">Edit before searching</string>
+    <string name="search_paste_and_fetch">Paste and fetch</string>
+    <string name="search_nothing_to_paste">Nothing to paste</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Already downloaded</string>

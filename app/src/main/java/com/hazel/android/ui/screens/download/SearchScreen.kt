@@ -186,7 +186,11 @@ fun SearchScreen(
     fun pasteAndSearch() {
         val pasted = clipboard.getText()?.text.orEmpty().trim()
         if (pasted.isBlank()) {
-            Toast.makeText(context, "Nothing to paste", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.search_nothing_to_paste),
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
         text = pasted
@@ -423,7 +427,7 @@ fun SearchScreen(
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             Icons.Filled.ContentPaste,
-                            contentDescription = "Paste and fetch",
+                            contentDescription = stringResource(R.string.search_paste_and_fetch),
                             modifier = Modifier.size(22.dp),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
