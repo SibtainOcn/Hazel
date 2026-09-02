@@ -1,0 +1,568 @@
+<resources>
+    <string name="direct_share_label">Instantané</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Accueil</string>
+    <string name="nav_history">Téléchargements</string>
+    <string name="nav_more">Plus</string>
+    <string name="nav_incognito_on">Navigation privée activée, les téléchargements ne sont pas enregistrés</string>
+    <string name="nav_incognito_off">Navigation privée désactivée</string>
+
+    <!-- DownloadScreen -->
+    <string name="download_search_hint">Cherchez ou collez un lien</string>
+    <string name="download_clear">Vider</string>
+    <string name="download_show_large_artwork">Afficher les grandes images</string>
+    <string name="download_show_list">Afficher en liste</string>
+    <string name="download_instant_source">Instantané · lecture depuis %1$s</string>
+    <string name="download_incognito_title">Vous êtes en navigation privée</string>
+    <string name="download_incognito_body">Les téléchargements ne sont pas ajoutés à votre historique et les liens ne sont pas retenus. Les fichiers sont enregistrés comme d\'habitude.</string>
+    <string name="download_download_all">Tout télécharger</string>
+    <string name="download_saved_aside">Vos téléchargements sont enregistrés. Vous les trouverez dans l\'onglet Téléchargements.</string>
+    <string name="download_options">Options de téléchargement</string>
+    <string name="download_pause">Mettre en pause</string>
+    <string name="download_resume">Reprendre</string>
+    <string name="download_cancel">Annuler</string>
+    <string name="download_paused">En pause</string>
+    <string name="download_processing">Traitement en cours</string>
+    <string name="download_waiting_wifi">En attente du Wi-Fi</string>
+    <string name="download_saved">Enregistré</string>
+    <string name="download_queued">En file d\'attente</string>
+    <string name="download_downloaded">Téléchargé</string>
+    <string name="download_failed">Échec</string>
+    <string name="download_remove_link">Retirer le lien</string>
+    <string name="download_cancel_action">Annuler le téléchargement</string>
+    <string name="download_resume_action">Reprendre le téléchargement</string>
+    <plurals name="download_links">
+        <item quantity="one">%d lien</item>
+        <item quantity="many">%d de liens</item>
+        <item quantity="other">%d liens</item>
+    </plurals>
+
+    <!-- SearchScreen -->
+    <string name="search_hint">Cherchez ou collez un lien</string>
+    <string name="search_back">Retour</string>
+    <string name="search_more">Plus</string>
+    <string name="search_add_link">Ajouter un autre lien</string>
+    <string name="search_clear">Effacer</string>
+    <string name="search_clear_results">Vider les résultats</string>
+    <string name="search_clear_history">Effacer l\'historique de recherche</string>
+    <string name="search_empty_history">Les liens que vous utilisez apparaîtront ici</string>
+    <string name="search_no_matches">Aucun lien ne correspond</string>
+    <string name="search_remove">Retirer</string>
+    <string name="search_all">Tout chercher</string>
+    <string name="search_forget">Oublier</string>
+    <string name="search_edit_before">Modifier avant de chercher</string>
+    <string name="search_paste_and_fetch">Coller et chercher</string>
+    <string name="search_nothing_to_paste">Rien à coller</string>
+
+    <!-- AlreadyDownloadedDialog -->
+    <string name="already_downloaded_title">Déjà téléchargé</string>
+    <string name="already_downloaded_body">Ce lien est déjà enregistré sur cet appareil.</string>
+    <string name="already_downloaded_video">Vidéo</string>
+    <string name="already_downloaded_audio">Audio</string>
+    <string name="already_downloaded_keep">Le garder</string>
+    <string name="already_downloaded_play">Lire</string>
+    <string name="already_downloaded_download_again">Télécharger à nouveau</string>
+    <string name="already_downloaded_just_now">À l\'instant</string>
+    <string name="already_downloaded_yesterday">Hier</string>
+    <plurals name="already_downloaded_minutes">
+        <item quantity="one">%d min</item>
+        <item quantity="many">%d min</item>
+        <item quantity="other">%d min</item>
+    </plurals>
+    <plurals name="already_downloaded_hours">
+        <item quantity="one">%d h</item>
+        <item quantity="many">%d h</item>
+        <item quantity="other">%d h</item>
+    </plurals>
+    <plurals name="already_downloaded_days">
+        <item quantity="one">%d jour</item>
+        <item quantity="many">%d de jours</item>
+        <item quantity="other">%d jours</item>
+    </plurals>
+    <plurals name="already_downloaded_months">
+        <item quantity="one">%d mois</item>
+        <item quantity="many">%d de mois</item>
+        <item quantity="other">%d mois</item>
+    </plurals>
+
+    <!-- NoResultsDialog -->
+    <string name="no_results_sign_in_title">Connexion requise</string>
+    <string name="no_results_error_title">Impossible de lire ce lien</string>
+    <string name="no_results_sign_in_body">La source demande un compte avant de livrer ceci. Se connecter enregistre les cookies du site et réessaie.</string>
+    <string name="no_results_continue_body">Les détails n\'ont pas pu être lus, mais le téléchargement peut tout de même fonctionner. En continuant, la meilleure qualité disponible est proposée.</string>
+    <string name="no_results_refused_body">La source a refusé la demande.</string>
+    <string name="no_results_engine_report">Ce que le moteur a signalé</string>
+    <string name="no_results_copy_log">Copier le journal</string>
+    <string name="no_results_sign_in">Se connecter</string>
+    <string name="no_results_try_anyway">Essayer quand même</string>
+    <string name="no_results_close">Fermer</string>
+
+    <!-- UserGuideDialog -->
+    <string name="guide_title">Pour commencer</string>
+    <string name="guide_step_paste_link">Collez un lien dans le champ de recherche pour le télécharger. Vous pouvez ajouter plusieurs liens et des playlists</string>
+    <string name="guide_step_pick_format">Touchez une carte pour choisir le format exact. Toutes les qualités disponibles sont listées avec leur taille et leur codec.</string>
+    <string name="guide_step_share_instant">Partagez un lien vers Hazel Instantané depuis n\'importe quelle application pour le télécharger aussitôt dans la qualité que vous avez définie.</string>
+    <string name="guide_step_finished_downloads">Les fichiers terminés apparaissent dans Téléchargements. Touchez une ligne pour l\'ouvrir dans le lecteur par défaut de l\'appareil.</string>
+    <string name="guide_step_battery_unrestricted">Réglez l\'usage de la batterie sur illimité, sinon Android peut arrêter les téléchargements quand vous quittez l\'application.</string>
+    <string name="guide_battery_settings">Réglages de la batterie</string>
+    <string name="guide_close">Fermer</string>
+
+    <!-- FormatSheet -->
+    <string name="format_sheet_title">Télécharger</string>
+    <string name="format_sheet_subtitle">Ajuster le téléchargement</string>
+    <string name="format_sheet_play">Lire</string>
+    <string name="format_sheet_ok">OK</string>
+    <string name="format_sheet_download">Télécharger</string>
+    <string name="format_sheet_tab_audio">Audio</string>
+    <string name="format_sheet_tab_video">Vidéo</string>
+    <string name="format_sheet_label_title">Titre</string>
+    <string name="format_sheet_label_author">Auteur</string>
+    <string name="format_sheet_label_container">Conteneur</string>
+    <string name="format_sheet_video_quality">Qualité vidéo</string>
+    <string name="format_sheet_audio_quality">Qualité audio</string>
+    <string name="format_sheet_no_video_stream">Cette source n\'a pas de flux vidéo séparé.</string>
+    <string name="format_sheet_no_audio_stream">Cette source n\'a pas de flux audio séparé.</string>
+    <string name="format_sheet_adjust_video">Ajuster la vidéo</string>
+    <string name="format_sheet_adjust_audio">Ajuster l\'audio</string>
+    <string name="format_sheet_thumbnail">Miniature</string>
+    <string name="format_sheet_chapters">Chapitres</string>
+    <string name="format_sheet_subtitles">Sous-titres</string>
+    <string name="format_sheet_sponsorblock">SponsorBlock</string>
+    <string name="format_sheet_audio_language">Langue de l\'audio</string>
+    <string name="format_sheet_change_audio_language">Changer la langue de l\'audio</string>
+    <string name="format_sheet_filename_template">Modèle de nom de fichier</string>
+    <string name="format_sheet_change_field">Modifier</string>
+    <string name="format_sheet_save_dir">Dossier</string>
+    <string name="format_sheet_save_location">Emplacement</string>
+    <string name="format_sheet_save_location_title">Emplacement</string>
+    <string name="format_sheet_save_location_body">Ouvrez ce dossier dans votre gestionnaire de fichiers, ou choisissez-en un autre où enregistrer les téléchargements.</string>
+    <string name="format_sheet_open_folder">Ouvrir le dossier</string>
+    <string name="format_sheet_reset">Réinitialiser</string>
+    <string name="format_sheet_change">Modifier</string>
+
+    <!-- ConverterScreen -->
+    <string name="converter_label_convert_to">Convertir en</string>
+    <string name="converter_label_saved_to">Enregistré dans</string>
+    <string name="converter_hazel_storage">Le stockage propre à Hazel</string>
+    <string name="converter_storage_warning">Sans accès au stockage, le fichier reste à l\'intérieur de Hazel, où les autres applications ne peuvent pas le voir.</string>
+    <string name="converter_back">Retour</string>
+    <string name="converter_title">Convertisseur hors ligne</string>
+    <string name="converter_subtitle">De la vidéo vers l\'audio, rien ne quitte le téléphone</string>
+    <string name="converter_choose_video">Choisissez un fichier vidéo</string>
+    <string name="converter_ready">Prêt</string>
+    <string name="converter_choose_video_hint">N\'importe quoi sur le téléphone ou une carte SD</string>
+    <string name="converter_change">Changer</string>
+    <string name="converter_converting">Conversion en cours</string>
+    <string name="converter_convert">Convertir</string>
+    <string name="converter_saved">Enregistré</string>
+    <string name="converter_open_folder">Ouvrir le dossier</string>
+    <string name="converter_convert_another">Convertir un autre</string>
+    <string name="converter_error_title">Cela n\'a pas été converti</string>
+    <string name="converter_dismiss">Ignorer</string>
+    <string name="converter_save_as_title">Enregistrer sous</string>
+    <string name="converter_save_as_body">Donne son nom au fichier, et est aussi écrit dans son étiquette de titre.</string>
+    <string name="converter_label_name">Nom</string>
+    <string name="converter_start">Démarrer</string>
+    <string name="converter_format_sheet_title">Convertir en</string>
+    <string name="converter_heading_common">Les trois qui valent le coup</string>
+    <string name="converter_heading_other">Tout le reste</string>
+
+    <!-- MoreScreen -->
+    <string name="more_title">Plus</string>
+    <string name="more_battery_title">Téléchargements en arrière-plan</string>
+    <string name="more_battery_body">Les téléchargements continuent tout seuls en arrière-plan. Certains téléphones les interrompent quand même pour économiser la batterie. Autorisez un usage illimité pour écarter ce risque.</string>
+    <string name="more_downloads">Téléchargements</string>
+    <string name="more_appearance">Apparence</string>
+    <string name="more_language">Langue</string>
+    <string name="more_cookies">Cookies</string>
+    <string name="more_link_reading">Lecture des liens</string>
+    <string name="more_hazel_instant">Hazel Instantané</string>
+    <string name="more_temporary_files">Fichiers temporaires</string>
+    <string name="more_converter">Convertir une vidéo en audio hors ligne</string>
+    <string name="more_engine_update">Mise à jour du moteur yt-dlp</string>
+    <string name="more_support">Soutenir Hazel</string>
+    <string name="more_license">Licence</string>
+
+    <!-- SponsorScreen -->
+    <string name="sponsor_back">Retour</string>
+    <string name="sponsor_title">Soutenir Hazel</string>
+    <string name="sponsor_hero_title">Gratuit, et ça ne changera pas</string>
+    <string name="sponsor_hero_body">Hazel se construit le soir et le week-end, et il est donné parce qu\'un téléchargeur qui fait payer le téléchargement est un moins bon téléchargeur. Les sites changent sans arrêt, et suivre ces changements, c\'est tout le travail.</string>
+    <string name="sponsor_hero_closing">Si l\'application vous a fait gagner un après-midi, n\'importe laquelle des options ci-dessous rend ce temps. Sinon, celles qui ne coûtent rien aident tout autant.</string>
+    <string name="sponsor_section_ways">Façons de soutenir</string>
+    <string name="sponsor_github_title">GitHub Sponsors</string>
+    <string name="sponsor_github_subtitle">Tous les mois ou une seule fois, résiliable quand vous voulez. Entièrement géré par GitHub.</string>
+    <string name="sponsor_kofi_title">Ko-fi</string>
+    <string name="sponsor_kofi_subtitle">Une seule fois, sans compte à créer.</string>
+    <string name="sponsor_kofi_soon">Ouverture prochaine</string>
+    <string name="sponsor_section_free">Ne coûte rien, aide autant</string>
+    <string name="sponsor_star_title">Mettez une étoile au projet</string>
+    <string name="sponsor_star_subtitle">Le seul chiffre que les gens regardent avant d\'essayer une application.</string>
+    <string name="sponsor_share_title">Parlez-en à quelqu\'un</string>
+    <string name="sponsor_share_subtitle">Le bouche-à-oreille est toute la promotion de cette application.</string>
+    <string name="sponsor_issues_title">Signalez ce qui casse</string>
+    <string name="sponsor_issues_subtitle">Un site qui a cessé de fonctionner, c\'est un correctif que personne d\'autre ne peut écrire.</string>
+    <string name="sponsor_source_title">Lisez le code</string>
+    <string name="sponsor_source_subtitle">Chaque ligne est publique, et les pull requests sont les bienvenues.</string>
+    <string name="sponsor_footer">Pas de publicité, aucune mesure de ce que vous téléchargez, et aucune fonction réservée à quelques-uns. Soutenir change le temps consacré à Hazel, pas ce qu\'il fera pour vous.</string>
+
+    <!-- UpdateScreen -->
+    <string name="update_title">Mise à jour de yt-dlp</string>
+    <string name="update_back">Retour</string>
+    <string name="update_check_action">Rechercher des mises à jour</string>
+    <string name="update_status_up_to_date">Vous êtes à jour</string>
+    <string name="update_status_checking">Recherche de mises à jour...</string>
+    <string name="update_status_available">Mise à jour disponible</string>
+    <string name="update_status_installing">Installation de yt-dlp...</string>
+    <string name="update_status_installed">Moteur mis à jour</string>
+    <string name="update_status_failed">La mise à jour a échoué</string>
+    <string name="update_subtitle_idle">Hazel utilise la dernière version de yt-dlp</string>
+    <string name="update_subtitle_checking">Connexion à GitHub...</string>
+    <string name="update_subtitle_available">yt-dlp %1$s est disponible</string>
+    <string name="update_subtitle_updating">Téléchargement de yt-dlp %1$s</string>
+    <string name="update_subtitle_installed">yt-dlp %1$s est maintenant utilisé</string>
+    <string name="update_installed_version">Version installée</string>
+    <string name="update_version_unknown">Inconnue</string>
+    <string name="update_new_version">Nouvelle version</string>
+    <string name="update_installing_binary">Installation du binaire</string>
+    <string name="update_installing_body">Téléchargement depuis GitHub et remplacement du moteur. Gardez l\'application ouverte.</string>
+    <string name="update_action_update_now">Mettre à jour</string>
+    <string name="update_action_installing">Installation...</string>
+    <string name="update_action_done">Terminé</string>
+    <string name="update_action_retry">Réessayer</string>
+    <string name="update_action_check">Rechercher des mises à jour</string>
+    <string name="update_action_checking">Recherche...</string>
+    <string name="update_info_heading">Informations</string>
+    <string name="update_info_component">Composant</string>
+    <string name="update_info_repository">Dépôt</string>
+    <string name="update_info_binary_size">Taille du binaire</string>
+    <string name="update_info_distribution">Distribution</string>
+    <string name="update_info_github_releases">GitHub Releases</string>
+    <string name="update_release_channel">Canal de publication</string>
+    <string name="update_view_changelog">Voir le journal des modifications</string>
+
+    <!-- DownloadOptionDialogs -->
+    <string name="options_sponsorblock_title">Choisir le filtrage SponsorBlock</string>
+    <string name="options_sponsorblock_ok">OK</string>
+    <string name="options_sponsorblock_cancel">Annuler</string>
+    <string name="options_chapters_title">Chapitres</string>
+    <string name="options_chapters_in_videos">Chapitres dans les vidéos</string>
+    <string name="options_chapters_split">Découper par chapitres</string>
+    <string name="options_chapters_split_body">Le découpage écrit un fichier par chapitre au lieu d\'un seul.</string>
+    <string name="options_chapters_dismiss">Ignorer</string>
+    <string name="options_subtitles_title">Sous-titres</string>
+    <string name="options_subtitles_embed">Intégrer les sous-titres</string>
+    <string name="options_subtitles_save">Enregistrer les sous-titres</string>
+    <string name="options_subtitles_save_auto">Enregistrer les sous-titres automatiques</string>
+    <string name="options_subtitles_languages_label">Langues des sous-titres</string>
+    <string name="options_subtitles_dismiss">Ignorer</string>
+    <string name="options_subtitles_languages_title">Langues des sous-titres</string>
+    <string name="options_subtitles_languages_hint">Un sélecteur de langue yt-dlp, par exemple en.*,.*-orig pour l\'anglais plus la piste d\'origine. Utilisez all pour toutes les langues proposées par la source.</string>
+    <string name="options_filename_title">Modèle de nom de fichier</string>
+    <string name="options_filename_hint">Modèle de sortie yt-dlp. Utilisez %(title)s, %(uploader)s, %(id)s et %(ext)s.</string>
+    <string name="options_text_input_save">Enregistrer</string>
+    <string name="options_text_input_cancel">Annuler</string>
+
+    <!-- StorageCleanupScreen -->
+    <string name="cleanup_back">Retour</string>
+    <string name="cleanup_title">Fichiers temporaires</string>
+    <string name="cleanup_header_description">Fichiers de travail conservés par l\'application. Vos téléchargements n\'en font pas partie et ne sont jamais supprimés d\'ici.</string>
+    <string name="cleanup_action_clear_everything">Tout effacer</string>
+    <string name="cleanup_category_link_data_label">Cache des données de liens</string>
+    <string name="cleanup_category_link_data_description">Les données de lecteur que yt-dlp conserve pour qu\'un lien relu une deuxième fois soit plus rapide. Sans risque à effacer.</string>
+    <string name="cleanup_category_partial_downloads_label">Téléchargements inachevés</string>
+    <string name="cleanup_category_partial_downloads_description">Fragments laissés par un téléchargement annulé ou en échec avant l\'enregistrement du fichier.</string>
+    <string name="cleanup_category_conversions_label">Conversions inachevées</string>
+    <string name="cleanup_category_conversions_description">Fichiers de travail du convertisseur audio qui ne sont jamais arrivés dans votre dossier de musique.</string>
+    <string name="cleanup_category_engine_label">Fichiers du moteur yt-dlp</string>
+    <string name="cleanup_category_engine_description">Le téléchargeur et son environnement d\'exécution. Les effacer libère le plus de place, mais le prochain téléchargement doit les décompresser à nouveau.</string>
+    <string name="cleanup_category_other_cache_label">Autres fichiers en cache</string>
+    <string name="cleanup_category_other_cache_description">Les miniatures et tout ce qui a été mis en cache pendant la consultation des liens.</string>
+    <string name="cleanup_confirm_category_title">Effacer ces fichiers ?</string>
+    <string name="cleanup_confirm_category_safe">%1$s seront libérés. Rien de ce que vous avez enregistré n\'est touché.</string>
+    <string name="cleanup_confirm_category_unsafe">%1$s seront libérés, et le prochain téléchargement prendra plus de temps pendant leur décompression.</string>
+    <string name="cleanup_confirm_clear">Effacer</string>
+    <string name="cleanup_confirm_cancel">Annuler</string>
+    <string name="cleanup_confirm_all_title">Tout effacer ?</string>
+    <string name="cleanup_confirm_all_body">%1$s seront libérés. Vos téléchargements et vos connexions enregistrées sont conservés, mais le prochain téléchargement prendra plus de temps pendant la décompression du moteur.</string>
+    <string name="cleanup_confirm_all_confirm">Tout effacer</string>
+    <string name="cleanup_confirm_all_cancel">Annuler</string>
+
+    <!-- HistoryScreen -->
+    <string name="history_title">Téléchargements</string>
+    <string name="history_layout_grid">Afficher les grandes images</string>
+    <string name="history_layout_list">Afficher en liste</string>
+    <string name="history_search_action">Chercher dans les téléchargements</string>
+    <string name="history_sort_action">Trier</string>
+    <string name="history_menu_action">Plus</string>
+    <string name="history_menu_clear">Effacer l\'historique</string>
+    <string name="history_search_placeholder">Chercher dans les téléchargements</string>
+    <string name="history_search_clear">Effacer la recherche</string>
+    <string name="history_empty_initial">Rien n\'a encore été téléchargé</string>
+    <string name="history_empty_filtered">Rien ne correspond</string>
+    <string name="history_clear_dialog_title">Effacer l\'historique</string>
+    <string name="history_clear_dialog_body">La liste est vidée. Vos fichiers téléchargés ne sont pas touchés.</string>
+    <string name="history_clear_dialog_confirm">Effacer</string>
+    <string name="history_clear_dialog_cancel">Annuler</string>
+    <string name="history_delete_dialog_title">Supprimer le fichier</string>
+    <string name="history_delete_dialog_body">%1$s sera supprimé de votre appareil.</string>
+    <string name="history_toast_file_deleted">Fichier supprimé</string>
+    <string name="history_toast_file_delete_failed">Impossible de supprimer le fichier</string>
+    <string name="history_delete_dialog_confirm">Supprimer</string>
+    <string name="history_delete_dialog_cancel">Annuler</string>
+    <string name="history_card_options">Options</string>
+    <string name="history_card_properties">Propriétés</string>
+    <string name="history_card_remove">Retirer de la liste</string>
+    <string name="history_card_delete">Supprimer le fichier</string>
+    <string name="history_tag_deleted">Supprimé</string>
+    <string name="history_row_options">Options</string>
+    <string name="history_row_properties">Propriétés</string>
+    <string name="history_row_remove">Retirer de la liste</string>
+    <string name="history_row_delete">Supprimer le fichier</string>
+    <string name="history_toast_file_gone">Ce fichier n\'est plus sur votre appareil</string>
+
+    <!-- DownloadPropertiesSheet -->
+    <string name="properties_title">Propriétés</string>
+    <string name="properties_status">État</string>
+    <string name="properties_status_present">Sur cet appareil</string>
+    <string name="properties_status_deleted">Supprimé de cet appareil</string>
+    <string name="properties_kind">Type</string>
+    <string name="properties_kind_video">Vidéo</string>
+    <string name="properties_kind_audio">Audio</string>
+    <string name="properties_quality">Qualité</string>
+    <string name="properties_resolution">Résolution</string>
+    <string name="properties_length">Durée</string>
+    <string name="properties_codec">Codec</string>
+    <string name="properties_bitrate">Débit</string>
+    <string name="properties_bitrate_value">%1$d kbps</string>
+    <string name="properties_size">Taille</string>
+    <string name="properties_container">Conteneur</string>
+    <string name="properties_type">Format</string>
+    <string name="properties_embedded">Intégré</string>
+    <string name="properties_file">Fichier</string>
+    <string name="properties_saved_to">Enregistré dans</string>
+    <string name="properties_downloaded">Téléchargé le</string>
+    <string name="properties_source">Source</string>
+    <string name="properties_link_copied_opened">Lien copié et ouvert</string>
+    <string name="properties_link_copied">Lien copié</string>
+
+    <!-- CookiesScreen -->
+    <string name="cookies_back">Retour</string>
+    <string name="cookies_title">Cookies</string>
+    <string name="cookies_menu">Plus</string>
+    <string name="cookies_menu_import">Importer depuis le presse-papiers</string>
+    <string name="cookies_menu_export">Exporter vers le presse-papiers</string>
+    <string name="cookies_menu_delete_all">Tout supprimer</string>
+    <string name="cookies_imported_title">Cookies importés</string>
+    <string name="cookies_toast_imported">Cookies importés</string>
+    <string name="cookies_toast_no_data">Le presse-papiers ne contient aucun cookie</string>
+    <string name="cookies_toast_nothing_to_export">Rien à exporter</string>
+    <string name="cookies_toast_exported">Copié dans le presse-papiers</string>
+    <string name="cookies_toast_entry_copied">Copié dans le presse-papiers</string>
+    <string name="cookies_use_title">Utiliser les cookies</string>
+    <string name="cookies_use_description">Transmettre les connexions enregistrées au téléchargeur</string>
+    <string name="cookies_new">Nouveau cookie</string>
+    <string name="cookies_empty_title">Aucun cookie enregistré</string>
+    <string name="cookies_empty_body">Ajoutez-en un pour télécharger des contenus soumis à une limite d\'âge, privés ou réservés aux membres.</string>
+    <string name="cookies_delete_title">Supprimer les cookies</string>
+    <string name="cookies_delete_body">Retirer la connexion enregistrée pour %1$s ?</string>
+    <string name="cookies_delete_confirm">Supprimer</string>
+    <string name="cookies_delete_cancel">Annuler</string>
+    <string name="cookies_delete_all_title">Supprimer tous les cookies</string>
+    <string name="cookies_delete_all_body">Toutes les connexions enregistrées seront retirées. C\'est irréversible.</string>
+    <string name="cookies_delete_all_confirm">Tout supprimer</string>
+    <string name="cookies_delete_all_cancel">Annuler</string>
+    <string name="cookies_row_fallback_name">Cookies</string>
+    <string name="cookies_sheet_title">Cookies</string>
+    <string name="cookies_sheet_copy">Copier les cookies</string>
+    <string name="cookies_sheet_delete">Supprimer les cookies</string>
+    <string name="cookies_field_title">Titre</string>
+    <string name="cookies_field_url">URL</string>
+    <string name="cookies_sheet_save">Enregistrer</string>
+    <string name="cookies_sheet_get">Obtenir les cookies</string>
+    <string name="cookies_sheet_update">Mettre à jour</string>
+
+    <!-- Batch option sheets -->
+    <string name="batch_quality_best">Meilleure qualité</string>
+    <string name="batch_type_sheet_title">Type de téléchargement préféré</string>
+    <string name="batch_type_sheet_subtitle">Sous quelle forme ces liens sont téléchargés</string>
+    <string name="batch_type_audio">Audio</string>
+    <string name="batch_type_video">Vidéo</string>
+    <string name="batch_format_title">Format</string>
+    <string name="batch_format_subtitle">Choisir le format</string>
+    <string name="batch_container_title">Conteneur</string>
+    <string name="batch_container_subtitle">Le fichier dans lequel ces liens sont enregistrés</string>
+    <string name="batch_save_dir_title">Emplacement</string>
+    <string name="batch_open_folder">Ouvrir ce dossier</string>
+    <string name="batch_change_folder">Changer de dossier</string>
+
+    <!-- Batch action bar -->
+    <string name="batch_bar_thumbnail">Miniature</string>
+    <string name="batch_bar_chapters">Chapitres</string>
+    <string name="batch_bar_subtitles">Sous-titres</string>
+    <string name="batch_bar_sponsorblock">SponsorBlock</string>
+    <string name="batch_bar_filename_template">Modèle de nom de fichier</string>
+    <string name="batch_bar_download_type">Type de téléchargement préféré</string>
+    <string name="batch_bar_quality">Qualité : %1$s</string>
+    <string name="batch_bar_save_location">Emplacement</string>
+    <string name="batch_bar_container">Conteneur</string>
+
+    <!-- Batch download sheet -->
+    <string name="batch_header_title">Télécharger</string>
+    <string name="batch_header_subtitle">Ajuster le téléchargement</string>
+    <string name="batch_download_action">Télécharger</string>
+    <string name="batch_stop_selecting">Arrêter la sélection</string>
+    <string name="batch_start_selecting">Sélectionner des liens</string>
+    <string name="batch_list_options">Options de la liste</string>
+    <string name="batch_menu_select_links">Sélectionner des liens</string>
+    <string name="batch_menu_select_all">Tout sélectionner</string>
+    <string name="batch_menu_invert">Inverser la sélection</string>
+    <string name="batch_menu_remove_selected">Retirer la sélection</string>
+    <string name="batch_menu_done">Terminé</string>
+    <plurals name="batch_selected">
+        <item quantity="one">%d sélectionné</item>
+        <item quantity="many">%d de sélectionnés</item>
+        <item quantity="other">%d sélectionnés</item>
+    </plurals>
+    <plurals name="batch_links">
+        <item quantity="one">%d lien</item>
+        <item quantity="many">%d de liens</item>
+        <item quantity="other">%d liens</item>
+    </plurals>
+    <string name="batch_card_download_type">Type de téléchargement pour ce lien</string>
+    <string name="batch_card_remove">Retirer</string>
+
+    <!-- Opening a finished file -->
+    <string name="media_open_unknown_location">L\'emplacement de ce fichier est inconnu</string>
+    <string name="media_open_chooser">Ouvrir avec</string>
+    <string name="media_open_no_app">Rien sur cet appareil ne peut l\'ouvrir</string>
+
+    <!-- Download notifications -->
+    <string name="notification_cancelled_text">Téléchargement annulé</string>
+    <string name="notification_channel_progress_description">Progression du téléchargement, affiche une icône dans la barre d\'état</string>
+    <string name="notification_channel_complete_description">Alertes de téléchargement terminé</string>
+    <string name="notification_action_pause">Pause</string>
+    <string name="notification_action_resume">Reprendre</string>
+    <string name="notification_action_cancel">Annuler</string>
+    <string name="notification_action_sign_in">Se connecter</string>
+    <string name="notification_wifi_title">En attente du Wi-Fi</string>
+    <string name="notification_wifi_text">Les téléchargements sont limités au Wi-Fi. Ils démarrent dès que vous y êtes de nouveau.</string>
+
+    <!-- Sign-in web view -->
+    <string name="cookie_webview_close">Fermer</string>
+    <string name="cookie_webview_desktop_site">Version ordinateur</string>
+    <string name="cookie_webview_no_cookies">Aucun cookie n\'a été récupéré</string>
+    <string name="cookie_webview_done">"  OK"</string>
+
+    <!-- FormatSelectionSheet -->
+    <string name="format_selection_sort">Trier les formats</string>
+    <string name="format_selection_change">Changer de format</string>
+    <string name="format_selection_title">Format</string>
+    <string name="format_selection_subtitle">Choisir le format</string>
+    <string name="format_selection_confirm">OK</string>
+    <string name="format_selection_loading">Lecture du reste des formats</string>
+    <string name="format_sort_quality">Qualité</string>
+    <string name="format_sort_file_size">Taille du fichier</string>
+    <string name="format_sort_container">Conteneur</string>
+
+    <!-- AudioLanguageSheet -->
+    <string name="audio_language_title">Langue de l\'audio</string>
+    <string name="audio_language_subtitle">Choisir la bande-son</string>
+
+    <!-- AppearanceScreen -->
+    <string name="appearance_back">Retour</string>
+    <string name="appearance_title">Apparence</string>
+
+    <!-- Language picker -->
+    <string name="language_title">Langue</string>
+    <string name="language_system">Celle du système</string>
+    <string name="language_system_description">Suivre la langue de l\'appareil</string>
+    <string name="language_close">Fermer</string>
+    <string name="language_changed_title">Langue modifiée</string>
+    <string name="language_changed_body">Hazel est maintenant dans cette langue. Ce qui n\'a pas encore été traduit reste en anglais.</string>
+    <string name="language_changed_ok">OK</string>
+    <string name="appearance_dark_theme">Thème sombre</string>
+    <string name="appearance_accent_color">Couleur d\'accent</string>
+
+    <!-- AccentPickerDialog -->
+    <string name="accent_picker_title">Couleur d\'accent</string>
+    <string name="accent_picker_close">Fermer</string>
+
+    <!-- FetchSettingsScreen -->
+    <string name="fetch_settings_back">Retour</string>
+    <string name="fetch_settings_title">Lecture des liens</string>
+    <string name="fetch_settings_timeout_description">Combien de temps attendre une source lente avant d\'abandonner et de réessayer.</string>
+    <plurals name="fetch_settings_timing">
+        <item quantity="one">%1$ds d\'attente, %2$d essai</item>
+        <item quantity="many">%1$ds d\'attente, %2$d d\'essais</item>
+        <item quantity="other">%1$ds d\'attente, %2$d essais</item>
+    </plurals>
+    <string name="fetch_settings_reading_links">Lecture des liens</string>
+    <string name="fetch_settings_reading_links_description">Quel lecteur détermine ce que contient un lien. Les téléchargements passent toujours par yt-dlp, quel que soit le choix fait ici.</string>
+    <string name="fetch_settings_force_ipv4_description">N\'activez ceci que si les liens restent bloqués sur votre réseau. Cela contourne une route IPv6 défaillante, et c\'est plus lent partout ailleurs.</string>
+    <string name="fetch_settings_force_ipv4">Forcer l\'IPv4</string>
+    <string name="fetch_mode_fast_label">Rapide</string>
+    <string name="fetch_mode_fast_description">Abandonne vite. Le plus rapide sur un bon réseau, mais une deuxième tentative est plus souvent nécessaire.</string>
+    <string name="fetch_mode_balanced_label">Équilibré</string>
+    <string name="fetch_mode_balanced_description">Un juste milieu entre la vitesse et la tolérance à une mauvaise connexion.</string>
+    <string name="fetch_mode_thorough_label">Minutieux</string>
+    <string name="fetch_mode_thorough_description">Attend plus longtemps et réessaie davantage. Le plus lent, mais il survit à un réseau faible.</string>
+    <string name="listing_source_ytdlp_description">Le moteur qui fait aussi le téléchargement. Il fonctionne sur tous les sites qu\'il prend en charge, et se met à jour tout seul, donc il continue de marcher à mesure que les sites changent.</string>
+    <string name="listing_source_newpipe_label">Préférer le lecteur intégré</string>
+    <string name="listing_source_newpipe_description">Liste les playlists et les chaînes en une seule requête au lieu de lancer le moteur, ce qui est plus rapide sur les sites qu\'il connaît. Il revient à yt-dlp pour tout le reste, et dès qu\'il ne parvient pas à lire un lien.</string>
+
+    <!-- ToolsScreen -->
+    <string name="tools_back">Retour</string>
+    <string name="tools_title">Outils</string>
+    <string name="tools_empty">Il n\'y a encore rien ici.</string>
+
+    <!-- DirectShareScreen -->
+    <string name="direct_share_back">Retour</string>
+    <string name="direct_share_save_as">Enregistrer comme</string>
+    <string name="direct_share_video">Vidéo</string>
+    <string name="direct_share_audio_only">Audio seul</string>
+    <string name="direct_share_title">Hazel Instantané</string>
+    <string name="direct_share_intro">Partager un lien vers Hazel Instantané lance le téléchargement aussitôt, sans panneau et sans question. Voici les réponses qu\'il utilise.</string>
+    <string name="direct_share_video_description">Image et son, réunis dans un seul fichier.</string>
+    <string name="direct_share_audio_description">Le son seul, dans ce que la source propose de mieux.</string>
+    <string name="direct_share_quality_title">Limite de qualité</string>
+    <string name="direct_share_quality_description">Un plafond, pas une taille exacte. Les sources ne proposent pas toutes les mêmes hauteurs, donc la plus grande qui tient en dessous est retenue, et la plus petite disponible quand aucune ne tient.</string>
+    <string name="direct_share_output_title">Sortie</string>
+    <string name="direct_share_output_description">Le fichier qui arrive sur l\'appareil. Par défaut garde ce que la source fournit déjà, ce qui est l\'option la plus rapide puisque rien n\'est réencodé.</string>
+    <string name="direct_share_filename_template">Modèle de nom de fichier</string>
+    <string name="direct_share_audio_language">Langue de l\'audio</string>
+    <string name="direct_share_audio_language_default">Celle de la source</string>
+    <string name="direct_share_extras_title">Suppléments</string>
+    <string name="direct_share_extras_description">Appliqués quand la source les possède. Ce qu\'elle n\'a pas est ignoré pour ce téléchargement plutôt que de le faire échouer.</string>
+    <string name="direct_share_cover_art">Pochette</string>
+    <string name="direct_share_cover_art_description">Écrit la miniature dans le fichier, lorsque le conteneur peut en accueillir une.</string>
+    <string name="direct_share_chapters">Chapitres</string>
+    <string name="direct_share_subtitles">Sous-titres</string>
+    <string name="direct_share_sponsorblock">SponsorBlock</string>
+    <string name="direct_share_sponsorblock_off">Désactivé</string>
+    <plurals name="direct_share_sponsorblock_cut">
+        <item quantity="one">%1$d catégorie coupée</item>
+        <item quantity="many">%1$d de catégories coupées</item>
+        <item quantity="other">%1$d catégories coupées</item>
+    </plurals>
+    <string name="direct_share_signins_title">Connexions</string>
+    <string name="direct_share_signins_description">Un partage instantané utilise les cookies enregistrés du site auquel appartient le lien, comme un téléchargement lancé depuis le panneau. Rien n\'est demandé au moment du partage, donc un lien derrière une connexion ne fonctionne que si celle-ci est déjà enregistrée et activée.</string>
+    <string name="direct_share_cookies">Cookies</string>
+    <string name="direct_share_cookies_on">Activé, utilisés à chaque partage instantané</string>
+    <string name="direct_share_cookies_off">Désactivé</string>
+    <string name="direct_share_change">Modifier %1$s</string>
+
+    <!-- StorageLocationsScreen -->
+    <string name="storage_locations_back">Retour</string>
+    <string name="storage_locations_downloads">Téléchargements</string>
+    <string name="storage_locations_title">Téléchargements</string>
+    <string name="storage_locations_subtitle">Où les téléchargements sont enregistrés, et les limites qui s\'y appliquent</string>
+    <string name="storage_locations_limits">Limites</string>
+    <string name="storage_locations_wifi_only_description">Les téléchargements attendent au lieu d\'utiliser les données mobiles</string>
+    <string name="storage_locations_speed_limit_description">À quelle vitesse un téléchargement peut aller</string>
+    <string name="storage_locations_internal_note">Tous les fichiers sont conservés dans le stockage interne de votre appareil. Vous pouvez y accéder à tout moment avec n\'importe quel gestionnaire de fichiers.</string>
+    <string name="storage_locations_wifi_only">Wi-Fi uniquement</string>
+    <string name="storage_locations_speed_limit">Limite de vitesse</string>
+
+</resources>
