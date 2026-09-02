@@ -248,6 +248,9 @@ LITERAL = re.compile(
     r'\bText\(\s*"|contentDescription\s*=\s*"|\btext\s*=\s*"|\btitle\s*=\s*"'
     r'|\blabel\s*=\s*"|\bhint\s*=\s*"|\bplaceholder\s*=\s*"|supportingText|Toast\.makeText'
     r'|setContentText\(\s*"|setContentTitle\(\s*"|setTicker\(\s*"|addAction\([^,]*,\s*"'
+    # This app's own composables name their visible text with these, and a row's
+    # description or an action's value is read exactly as a title is.
+    r'|\bdescription\s*=\s*"|\bsubtitle\s*=\s*"|\bvalue\s*=\s*"|\bmessage\s*=\s*"'
 )
 
 
