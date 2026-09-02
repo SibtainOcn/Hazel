@@ -607,7 +607,7 @@ private fun LanguageField(value: String, onClick: () -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Audio language",
+                    stringResource(R.string.format_sheet_audio_language),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
@@ -617,7 +617,7 @@ private fun LanguageField(value: String, onClick: () -> Unit) {
             Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 Icons.Filled.Translate,
-                contentDescription = "Change audio language",
+                contentDescription = stringResource(R.string.format_sheet_change_audio_language),
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.primary
             )

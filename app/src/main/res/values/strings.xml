@@ -135,6 +135,8 @@
     <string name="format_sheet_chapters">Chapters</string>
     <string name="format_sheet_subtitles">Subtitles</string>
     <string name="format_sheet_sponsorblock">SponsorBlock</string>
+    <string name="format_sheet_audio_language">Audio language</string>
+    <string name="format_sheet_change_audio_language">Change audio language</string>
     <string name="format_sheet_filename_template">Filename template</string>
     <string name="format_sheet_change_field">Change</string>
     <string name="format_sheet_save_dir">Save dir</string>
