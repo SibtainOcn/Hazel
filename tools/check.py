@@ -312,14 +312,18 @@ def check_file(target):
         return
     rel = str(path.relative_to(ROOT)).replace("\\", "/")
     strings_rel = str(STRINGS.relative_to(ROOT)).replace("\\", "/")
+    allow_rel = str(ALLOWLIST.relative_to(ROOT)).replace("\\", "/")
 
     section("blast radius")
-    # Only this file and strings.xml may differ from the last commit. Commit each file
-    # once it is green, so this check keeps meaning something.
+    # Only this file, strings.xml and the allowlist may differ from the last commit. The
+    # allowlist is on the list because the loop says a literal is either extracted or
+    # dispositioned: refusing the second half of that would leave no legal way to finish a
+    # file that has one. Commit each file once it is green, so this check keeps meaning
+    # something.
     _, out = git("diff", "--name-only")
     _, out2 = git("diff", "--cached", "--name-only")
     changed = sorted({c.strip() for c in (out + out2).splitlines() if c.strip()})
-    stray = [c for c in changed if c not in (rel, strings_rel)]
+    stray = [c for c in changed if c not in (rel, strings_rel, allow_rel)]
     if stray:
         for s in stray:
             fail("changed a file this task did not ask for: " + s)
