@@ -11,7 +11,9 @@
 #   4. Build it the way the server will:  fdroid build -v -l com.hazel.android
 #   5. Open the merge request
 #
-# The versionName and commit in every Builds entry still point at a tag that has to exist.
+# Every versionName and commit below names v1.0.5, which does not exist yet. v1.0.4 cannot
+# be submitted: it predates the removal of the foojay toolchain resolver, and F-Droid's
+# scanner refuses to build a tree containing it.
 
 # Download is the one that matters, since it is where somebody looking for a downloader
 # actually browses. Multimedia and Internet are the broader shelves the app also belongs on.
@@ -46,61 +48,60 @@ Builds:
   # when none of the architecture builds fit; anything matching a real architecture is
   # offered that smaller file instead.
   #
-  # Set versionName and commit to the tag actually cut before submitting.
-  - versionName: 1.0.4
-    versionCode: 100
-    commit: v1.0.4
+  # There is deliberately no build: running ./gradlew here. F-Droid deletes
+  # gradle-wrapper.jar before building, because a binary blob in the source tree is exactly
+  # what they will not run, and supplies its own Gradle instead. The gradle: field is what
+  # asks for that, and gradleprops is how -P arguments reach it. A recipe that calls
+  # ./gradlew itself fails with "No such file or directory" after compiling nothing.
+  - versionName: 1.0.5
+    versionCode: 200
+    commit: v1.0.5
     subdir: app
     gradle:
       - yes
-    output: app/build/outputs/apk/release/Hazel-v1.0.4-universal-stable.apk
-    build:
-      - sed -i -e '/sdk-location/d' ../local.properties || true
-      - ./gradlew :app:assembleRelease -PVERSION_NAME=1.0.4
+    gradleprops:
+      - VERSION_NAME=1.0.5
+    output: app/build/outputs/apk/release/Hazel-v1.0.5-universal-stable.apk
 
-  - versionName: 1.0.4
-    versionCode: 101
-    commit: v1.0.4
+  - versionName: 1.0.5
+    versionCode: 201
+    commit: v1.0.5
     subdir: app
     gradle:
       - yes
-    output: app/build/outputs/apk/release/Hazel-v1.0.4-armeabi-v7a-stable.apk
-    build:
-      - sed -i -e '/sdk-location/d' ../local.properties || true
-      - ./gradlew :app:assembleRelease -PVERSION_NAME=1.0.4
+    gradleprops:
+      - VERSION_NAME=1.0.5
+    output: app/build/outputs/apk/release/Hazel-v1.0.5-armeabi-v7a-stable.apk
 
-  - versionName: 1.0.4
-    versionCode: 102
-    commit: v1.0.4
+  - versionName: 1.0.5
+    versionCode: 202
+    commit: v1.0.5
     subdir: app
     gradle:
       - yes
-    output: app/build/outputs/apk/release/Hazel-v1.0.4-x86-stable.apk
-    build:
-      - sed -i -e '/sdk-location/d' ../local.properties || true
-      - ./gradlew :app:assembleRelease -PVERSION_NAME=1.0.4
+    gradleprops:
+      - VERSION_NAME=1.0.5
+    output: app/build/outputs/apk/release/Hazel-v1.0.5-x86-stable.apk
 
-  - versionName: 1.0.4
-    versionCode: 103
-    commit: v1.0.4
+  - versionName: 1.0.5
+    versionCode: 203
+    commit: v1.0.5
     subdir: app
     gradle:
       - yes
-    output: app/build/outputs/apk/release/Hazel-v1.0.4-x86_64-stable.apk
-    build:
-      - sed -i -e '/sdk-location/d' ../local.properties || true
-      - ./gradlew :app:assembleRelease -PVERSION_NAME=1.0.4
+    gradleprops:
+      - VERSION_NAME=1.0.5
+    output: app/build/outputs/apk/release/Hazel-v1.0.5-x86_64-stable.apk
 
-  - versionName: 1.0.4
-    versionCode: 104
-    commit: v1.0.4
+  - versionName: 1.0.5
+    versionCode: 204
+    commit: v1.0.5
     subdir: app
     gradle:
       - yes
-    output: app/build/outputs/apk/release/Hazel-v1.0.4-arm64-v8a-stable.apk
-    build:
-      - sed -i -e '/sdk-location/d' ../local.properties || true
-      - ./gradlew :app:assembleRelease -PVERSION_NAME=1.0.4
+    gradleprops:
+      - VERSION_NAME=1.0.5
+    output: app/build/outputs/apk/release/Hazel-v1.0.5-arm64-v8a-stable.apk
 
 # Reproducible builds. F-Droid builds from source, compares the result against the APK you
 # published, and where they match it ships YOUR signed file, so an update from GitHub and an
@@ -113,5 +114,5 @@ Builds:
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
-CurrentVersion: 1.0.4
-CurrentVersionCode: 104
+CurrentVersion: 1.0.5
+CurrentVersionCode: 204
