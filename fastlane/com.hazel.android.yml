@@ -77,6 +77,7 @@ Builds:
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-universal-stable.apk
+    binary: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-universal-stable.apk
 
   - versionName: 1.0.6
     versionCode: 301
@@ -85,6 +86,7 @@ Builds:
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-armeabi-v7a-stable.apk
+    binary: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-armeabi-v7a-stable.apk
 
   - versionName: 1.0.6
     versionCode: 302
@@ -93,6 +95,7 @@ Builds:
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-x86-stable.apk
+    binary: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-x86-stable.apk
 
   - versionName: 1.0.6
     versionCode: 303
@@ -101,6 +104,7 @@ Builds:
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-x86_64-stable.apk
+    binary: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-x86_64-stable.apk
 
   - versionName: 1.0.6
     versionCode: 304
@@ -109,15 +113,23 @@ Builds:
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-arm64-v8a-stable.apk
+    binary: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-arm64-v8a-stable.apk
 
-# Reproducible builds. F-Droid builds from source, compares the result against the APK you
-# published, and where they match it ships YOUR signed file, so an update from GitHub and an
-# update from F-Droid are the same install.
+# Reproducible builds. F-Droid builds from source, compares the result against the APK
+# published on GitHub, and where they match it ships that signed file instead of one of its
+# own. An install from GitHub and an install from F-Droid are then the same APK, and a person
+# can move between the two without uninstalling first.
 #
-# Leave this commented out for the first submission. Get published first, then turn it on
-# once a build has been shown to match, because a mismatch here blocks the release outright.
+# This is set at inclusion rather than later. Without it F-Droid signs with its own key, and
+# switching afterwards would change the signature every existing F-Droid install trusts.
 #
-# Binaries: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-%a-stable.apk
+# The URL goes on each build entry rather than in one app level Binaries: field, because
+# there is no placeholder for the architecture. %v is substituted, %a does not exist, so a
+# single field cannot name five different files.
+#
+# The fingerprint is the SHA-256 of the signing certificate, from
+# apksigner verify --print-certs on a published APK.
+AllowedAPKSigningKeys: 0377e9c8352c017e42583cea1715c40c400a51c4045c268825ffc9bae1305c86
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
