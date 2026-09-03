@@ -57,8 +57,8 @@ Builds:
   # each new release by copying these entries and changing only versionName, versionCode
   # and commit. It does not touch output: or gradleprops:, so a literal version in either
   # would be carried forward and the next release would look for a file the build never
-  # produced. $$VERSION$$ is substituted at build time; the version itself comes from
-  # gradle.properties, which the checkout already has.
+  # produced. $$VERSION$$ is substituted at build time, and the version it stands for comes
+  # from the literals in app/build.gradle.kts, which the checkout already has.
   #
   # There is deliberately no build: running ./gradlew here. F-Droid deletes
   # gradle-wrapper.jar before building, because a binary blob in the source tree is exactly

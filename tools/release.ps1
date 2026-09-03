@@ -135,11 +135,17 @@ if ($DryRun) {
 
 Step "Generating the store changelogs"
 
+# No -PVERSION_NAME. The version was just written into app/build.gradle.kts above, and the
+# task reads it from there, which is the same value CI and the F-Droid server build from.
+# Passing it again would let this one path disagree with the other two.
+#
+# Not --quiet either: the task warns when the section is long enough that the listings will
+# truncate it, and that warning is only useful to the person cutting the release.
 $gradlew = Join-Path $repo 'gradlew.bat'
 if ($DryRun) {
-    Info "would run: .\gradlew.bat :app:generateFastlaneChangelogs -PVERSION_NAME=$Version"
+    Info "would run: .\gradlew.bat :app:generateFastlaneChangelogs"
 } else {
-    & $gradlew ':app:generateFastlaneChangelogs' "-PVERSION_NAME=$Version" --quiet
+    & $gradlew ':app:generateFastlaneChangelogs' --console=plain
     if ($LASTEXITCODE -ne 0) { Die "generateFastlaneChangelogs failed. Nothing has been committed." }
     $written = Get-ChildItem 'fastlane/metadata/android/en-US/changelogs' -Filter "$newCode.txt","$($newCode+1).txt" -ErrorAction SilentlyContinue
     if (-not $written) {

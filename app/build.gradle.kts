@@ -84,8 +84,10 @@ gradle.taskGraph.whenReady {
 // The code is a plain counter with two digits kept free at the end for the architecture. Its
 // only rule is that it increases; it says nothing about the version a person reads.
 
-// The name of the release, taken from defaultConfig so there is one copy of it. A tag build
-// may still override it with -PVERSION_NAME, which is how a release is named by its tag.
+// The name of the release, taken from defaultConfig so there is one copy of it. Nothing on
+// the release path overrides it: CI and the F-Droid server both build with the version as
+// it stands in this file, which is what keeps their two APKs in agreement. -PVERSION_NAME
+// stays only for regenerating the store changelogs of a version other than the current one.
 val hazelVersionName: String by lazy {
     (project.findProperty("VERSION_NAME") as String?)
         ?.trim()
@@ -249,6 +251,13 @@ androidComponents {
 //
 //   ./gradlew :app:generateFastlaneChangelogs -PVERSION_NAME=1.0.4
 //
+// A release section may carry a '### Store' subsection, and when it does that subsection is
+// what gets published in place of the rest. The two audiences are not the same one: a
+// release can be entirely build plumbing, which is worth recording here and says nothing to
+// somebody reading a store listing, and the first listing has no earlier version to
+// describe itself against at all. Everything outside '### Store' stays for readers of the
+// repository.
+//
 // The markdown is flattened rather than rendered: F-Droid shows this as plain text, so bold
 // markers and wrapped lines would arrive as literal asterisks and mid-sentence breaks.
 // What the store listings will actually show before they cut it off.
@@ -289,9 +298,20 @@ tasks.register("generateFastlaneChangelogs") {
         val end = Regex("""^##\s*\[""", RegexOption.MULTILINE).find(rest)
         val body = if (end == null) rest else rest.substring(0, end.range.first)
 
+        // '### Store', when the release has one, replaces the section rather than adding to
+        // it: what a store listing shows and what the repository records are written for
+        // different readers. It runs to the next '###' or to the end of the section.
+        val storeStart = Regex("""^###\s+Store\s*$""", RegexOption.MULTILINE).find(body)
+        val published = if (storeStart == null) body else {
+            val lineEnd = body.indexOf('\n', storeStart.range.last)
+            val after = if (lineEnd == -1) "" else body.substring(lineEnd + 1)
+            val next = Regex("""^###\s""", RegexOption.MULTILINE).find(after)
+            if (next == null) after else after.substring(0, next.range.first)
+        }
+
         // Markdown to plain text, one bullet per line however the source wrapped it.
         val lines = mutableListOf<String>()
-        body.trim().lines().forEach { raw ->
+        published.trim().lines().forEach { raw ->
             val line = raw.trim()
             when {
                 line.isEmpty() -> if (lines.isNotEmpty() && lines.last().isNotEmpty()) lines.add("")

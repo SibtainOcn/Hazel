@@ -9,10 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.6] - 2026-09-03
 
+### Store
+- Download audio and video from YouTube, Instagram, TikTok, X, Reddit, SoundCloud and a
+  thousand other sites.
+- Queue a playlist or a whole channel, or share a link from any app and start at once.
+- Choose the audio language, cut sponsor segments, embed chapters and subtitles.
+- Background downloads you can pause, resume and cancel, with a Wi-Fi only mode.
+- No accounts and no analytics, and an incognito mode that records nothing.
+
 ### Fixed
-- The version name and code are literals in `app/build.gradle.kts` again. F-Droid reads them
-  with a regular expression rather than by running Gradle, so holding them in
-  `gradle.properties` left its update check unable to find any version at all.
+- The version name and code are literals in `app/build.gradle.kts` again, the only form
+  F-Droid can read: it greps the file rather than running Gradle, so `gradle.properties`
+  left its update check finding no version at all.
+- The release workflow reads those same literals, and stops if the tag or a store changelog
+  disagrees with them. It no longer passes `-PVERSION_NAME`, so a tag builds to the same
+  version here and on the F-Droid server.
 
 ## [1.0.5] - 2026-09-03
 

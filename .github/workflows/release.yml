@@ -5,9 +5,11 @@ name: Release
 #   git tag v1.0.1
 #   git push origin v1.0.1
 #
-# The tag is the only input. It names the release, it is what the APKs report as their
-# version, and a tag carrying a pre-release suffix (v1.1.0-beta.1) publishes as a
-# pre-release and names its files beta rather than stable.
+# The tag selects the commit to build and names the release. It does not set the version:
+# the version lives in app/build.gradle.kts and the tag is checked against it, so a tag
+# that disagrees stops the release instead of publishing APKs that contradict their name.
+# A tag carrying a pre-release suffix (v1.1.0-beta.1) publishes as a pre-release and its
+# files are named beta rather than stable.
 
 on:
   push:
@@ -75,18 +77,52 @@ jobs:
           ref: ${{ github.event.inputs.tag || github.ref }}
           fetch-depth: 0
 
-      - name: Read the tag
+      # Where the version comes from.
+      #
+      # app/build.gradle.kts is the only place either version is written down, and that is
+      # forced rather than chosen. The F-Droid update check greps that file with a regular
+      # expression and never runs Gradle, so a version it cannot read as plain text in the
+      # file does not exist as far as it is concerned. gradle.properties, a -P argument and
+      # anything computed are all invisible to it, which is what broke the 1.0.5 recipe.
+      #
+      # So this step reads the same two literals the same way, and the tag is checked
+      # against them rather than fed into the build. Nothing here overrides the version:
+      # the build below runs the command the F-Droid server runs, so its APKs and these
+      # carry the same numbers by construction rather than by two copies of a number
+      # happening to agree.
+      - name: Read the version
         id: version
         run: |
           TAG="${{ github.event.inputs.tag || github.ref_name }}"
           VERSION="${TAG#v}"
+          BUILD_FILE=app/build.gradle.kts
 
-          # The version code comes from gradle.properties, where it is bumped by hand as
-          # part of cutting a release. Read here only so the log says which number went out
-          # and so the release can be stopped if the bump was forgotten.
-          VERSION_CODE=$(sed -n 's/^HAZEL_VERSION_CODE=//p' gradle.properties | tr -d '[:space:]')
-          if [ -z "$VERSION_CODE" ]; then
-            echo "::error::HAZEL_VERSION_CODE is missing from gradle.properties"
+          VERSION_NAME=$(sed -n 's/^[[:space:]]*versionName[[:space:]]*=[[:space:]]*"\(.*\)".*$/\1/p' "$BUILD_FILE" | head -n 1)
+          VERSION_CODE=$(sed -n 's/^[[:space:]]*versionCode[[:space:]]*=[[:space:]]*\([0-9][0-9]*\).*$/\1/p' "$BUILD_FILE" | head -n 1)
+
+          if [ -z "$VERSION_NAME" ] || [ -z "$VERSION_CODE" ]; then
+            echo "::error::$BUILD_FILE has no literal versionName and versionCode in defaultConfig. Both have to stay literals there, because F-Droid reads them out of the file as text."
+            exit 1
+          fi
+
+          # A tag names a commit, it does not set the version. When the two disagree either
+          # the wrong commit was tagged or the bump was forgotten, and in both cases the
+          # APKs would not be the ones the tag claims they are.
+          if [ "$VERSION_NAME" != "$VERSION" ]; then
+            echo "::error::Tag $TAG says $VERSION but $BUILD_FILE says $VERSION_NAME. Tag the commit that already carries the version."
+            exit 1
+          fi
+
+          # F-Droid shows the changelog filed under the version code of the exact APK it is
+          # serving, so all five have to exist before the release goes out. A missing one is
+          # silent there: that architecture simply lists no changelog at all.
+          MISSING=
+          for OFFSET in 0 1 2 3 4; do
+            FILE="fastlane/metadata/android/en-US/changelogs/$((VERSION_CODE + OFFSET)).txt"
+            [ -s "$FILE" ] || MISSING="$MISSING $FILE"
+          done
+          if [ -n "$MISSING" ]; then
+            echo "::error::Store changelogs missing:$MISSING. Run ./gradlew :app:generateFastlaneChangelogs."
             exit 1
           fi
 
@@ -95,6 +131,8 @@ jobs:
             *-*) PRERELEASE=true ;;
             *)   PRERELEASE=false ;;
           esac
+
+          echo "Releasing $VERSION as version codes $VERSION_CODE to $((VERSION_CODE + 4))."
 
           {
             echo "tag=$TAG"
@@ -133,17 +171,33 @@ jobs:
           echo "HAZEL_SIGNING_DIR=$RUNNER_TEMP/signing" >> "$GITHUB_ENV"
 
       # One APK per architecture plus a universal one, all from a single assemble.
+      #
+      # Deliberately no -PVERSION_NAME. The version is already in the file, and passing it
+      # again here is exactly how a GitHub APK and an F-Droid APK built from the same tag
+      # end up disagreeing, because the F-Droid build never passes it. Plain assembleRelease
+      # is what its server runs, so this is the same build.
       - name: Build every architecture
-        run: |
-          ./gradlew :app:assembleRelease \
-            -PVERSION_NAME=${{ steps.version.outputs.version }} \
-            --stacktrace
+        run: ./gradlew :app:assembleRelease --stacktrace
 
       - name: Collect the APKs
         id: apks
         run: |
           mkdir -p artifacts
           find app/build/outputs/apk/release -name '*.apk' -exec cp {} artifacts/ \;
+
+          # Every output is named after the version it carries, so checking that the five
+          # expected names are present is also the proof that the version in the file is the
+          # version that got built. Without it a misconfigured build publishes quietly.
+          CHANNEL=stable
+          [ "${{ steps.version.outputs.prerelease }}" = "true" ] && CHANNEL=beta
+          for ABI in universal armeabi-v7a x86 x86_64 arm64-v8a; do
+            APK="artifacts/Hazel-v${{ steps.version.outputs.version }}-$ABI-$CHANNEL.apk"
+            if [ ! -f "$APK" ]; then
+              echo "::error::The build did not produce $APK. It produced: $(ls artifacts | tr '\n' ' ')"
+              exit 1
+            fi
+          done
+
           {
             echo "## Hazel ${{ steps.version.outputs.tag }}"
             echo
