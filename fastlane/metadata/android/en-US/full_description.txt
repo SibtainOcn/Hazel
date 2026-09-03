@@ -1,0 +1,38 @@
+Hazel is a downloader for video and audio, built on yt-dlp. Paste a link and it works out what is behind it, whether that is one video, a playlist or an entire channel.
+
+No account is needed, nothing is tracked, and nothing about what you download is sent anywhere.
+
+Downloading
+
+* Works with YouTube, Instagram, TikTok, X, Reddit, SoundCloud and over 1000 other sites
+* Paste one link, several at once, or a whole playlist or channel and queue them together
+* Hazel Instant: share a link from any other app and the download starts straight away, at a quality you set once
+* Downloads keep going in the background, and can be paused, resumed or cancelled from the card or the notification
+* Wi-Fi only mode, checked when a download starts so a transfer already running is never cut off
+
+Choosing what you get
+
+* Pick from the formats and containers the source actually offers
+* Choose a specific soundtrack where a source publishes more than one
+* Edit the title, author, file type and metadata before anything is saved
+* Save in any language the source provides
+
+Processing
+
+* SponsorBlock: cut out sponsors, intros and other segments
+* Chapters: embed them in the file, or split it into one file per chapter
+* Subtitles: burn them in, save them alongside, or both, in the languages you choose
+* An offline video to audio converter
+
+Privacy
+
+* Incognito mode: downloads are left out of your library and links are not remembered
+* No accounts, no analytics, and no data sent anywhere
+
+Settings
+
+* Dark and light themes with an accent colour of your choosing
+* Available in English, Spanish, Hindi, Simplified Chinese, Brazilian Portuguese, French, German, Russian, Japanese and Indonesian, or whichever of those your device is already set to
+* The yt-dlp engine updates on its own, from the Stable, Nightly or Master channel
+
+Hazel is free software under the GNU GPL v3.0, and it always will be.

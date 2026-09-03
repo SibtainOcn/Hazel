@@ -1,6 +1,5 @@
 import com.android.build.api.variant.FilterConfiguration
 import java.util.Properties
-import java.time.LocalDate
 
 plugins {
     alias(libs.plugins.android.application)
@@ -78,6 +77,43 @@ val hazelVersionName: String =
         ?.takeIf { it.isNotBlank() }
         ?: "1.0.0"
 
+// ── The version code ──
+//
+// A plain counter. One release moves it by one, and nothing else ever touches it.
+//
+// It is deliberately unrelated to the version a person reads. Android treats this as an
+// opaque integer whose only rule is that it must increase, and the store that installs the
+// app compares nothing else. Tying it to the calendar, as this once did, bought nothing and
+// cost the room to number architectures: a date-shaped code is already in the billions, and
+// the arithmetic below would have overflowed a signed 32-bit int on the first release.
+//
+// The number lives in gradle.properties so it is in the repository rather than in whoever
+// cut the last release. A rebuild that has to reuse an old number passes -PVERSION_CODE.
+val hazelVersionCode: Int =
+    ((project.findProperty("VERSION_CODE") ?: project.findProperty("HAZEL_VERSION_CODE"))
+        as String?)
+        ?.trim()
+        ?.toIntOrNull()
+        ?: 1
+
+// How much room each release leaves for its architectures. Two digits, so the last two of
+// any code name the architecture and everything above them names the release.
+val abiCodeSpan = 100
+
+// The architecture numbers themselves.
+//
+// A device offered several APKs installs the one with the highest code it can run, so this
+// order is the choice. Universal is absent and therefore zero, which puts it below all of
+// them: it is the fallback for a device none of the others fit. Each 64-bit entry sits
+// above the 32-bit build it is also capable of running, or a 64-bit phone would be handed
+// the 32-bit APK for having the larger number.
+val abiVersionCodes = mapOf(
+    "armeabi-v7a" to 1,
+    "x86" to 2,
+    "x86_64" to 3,
+    "arm64-v8a" to 4
+)
+
 // Whether to package one APK per architecture. On by default, since that is what a release
 // publishes, and turned off for a build that only has to prove the code compiles.
 val splitAbi: Boolean =
@@ -109,14 +145,10 @@ android {
         minSdk = 24
         targetSdk = 35
 
-        // Date-based versionCode: YYYYMMDDNN, which never exhausts and always increases
-        val date = LocalDate.now()
-        // Clamped to the two digits the code reserves for it, so a build number nobody
-        // expected cannot roll over into the day.
-        val buildNum = (project.findProperty("BUILD_NUM")?.toString()?.toIntOrNull() ?: 1)
-            .coerceIn(1, 99)
-        versionCode = date.year * 1_000_000 + date.monthValue * 10_000 +
-                date.dayOfMonth * 100 + buildNum
+        // The release's own code, with the architecture digits left at zero. This is what
+        // the universal APK keeps and what a build with the splits turned off reports;
+        // every per-architecture output replaces it further down.
+        versionCode = hazelVersionCode * abiCodeSpan
 
         versionName = hazelVersionName
 
@@ -190,10 +222,123 @@ androidComponents {
                 .firstOrNull { it.filterType == FilterConfiguration.FilterType.ABI }
                 ?.identifier
                 ?: "universal"
+
+            // Each architecture gets its own code, in the one place that already knows
+            // which architecture this output is for.
+            output.versionCode.set(hazelVersionCode * abiCodeSpan + (abiVersionCodes[abi] ?: 0))
+
             (output as? com.android.build.api.variant.impl.VariantOutputImpl)
                 ?.outputFileName
                 ?.set("Hazel-v$hazelVersionName-$abi-$channel.apk")
         }
+    }
+}
+
+// ── Fastlane changelogs ──
+//
+// F-Droid looks for a changelog named after the version code of the exact APK it is showing,
+// so a release that publishes five APKs needs the same text under five different names. That
+// is five files nobody can keep in step by hand, and a missing one is silent: the listing
+// just shows no changelog for that architecture.
+//
+// So they are generated. The text is written once in the release's own section of
+// CHANGELOG.md and this fans it out, which also means the changelog a person reads on
+// F-Droid and the one in the repository cannot drift apart.
+//
+//   ./gradlew :app:generateFastlaneChangelogs -PVERSION_NAME=1.0.4
+//
+// The markdown is flattened rather than rendered: F-Droid shows this as plain text, so bold
+// markers and wrapped lines would arrive as literal asterisks and mid-sentence breaks.
+// What the store listings will actually show before they cut it off.
+val FASTLANE_CHANGELOG_LIMIT = 500
+
+val fastlaneChangelogDir =
+    rootProject.layout.projectDirectory.dir("fastlane/metadata/android/en-US/changelogs")
+val rootChangelog = rootProject.layout.projectDirectory.file("CHANGELOG.md")
+
+tasks.register("generateFastlaneChangelogs") {
+    description = "Writes the current release's CHANGELOG.md section to one file per ABI."
+    group = "publishing"
+
+    val versionName = hazelVersionName
+    val baseCode = hazelVersionCode
+    val span = abiCodeSpan
+    // Every code the release publishes, the universal APK's included.
+    val codes = listOf(0) + abiVersionCodes.values.sorted()
+    val source = rootChangelog
+    val outDir = fastlaneChangelogDir
+
+    inputs.file(source)
+    outputs.dir(outDir)
+
+    doLast {
+        val text = source.asFile.readText()
+
+        // The section runs from this version's heading to the next heading of any version.
+        val heading = Regex("""^##\s*\[${Regex.escape(versionName)}]""", RegexOption.MULTILINE)
+        val start = heading.find(text)
+            ?: throw GradleException(
+                "CHANGELOG.md has no section for $versionName. Add a '## [$versionName] - <date>' " +
+                    "heading before cutting the release."
+            )
+        // From the line after the heading, so the date trailing the version does not
+        // survive as a stray first bullet.
+        val headingEnd = text.indexOf('\n', start.range.last + 1)
+        val rest = if (headingEnd == -1) "" else text.substring(headingEnd + 1)
+        val end = Regex("""^##\s*\[""", RegexOption.MULTILINE).find(rest)
+        val body = if (end == null) rest else rest.substring(0, end.range.first)
+
+        // Markdown to plain text, one bullet per line however the source wrapped it.
+        val lines = mutableListOf<String>()
+        body.trim().lines().forEach { raw ->
+            val line = raw.trim()
+            when {
+                line.isEmpty() -> if (lines.isNotEmpty() && lines.last().isNotEmpty()) lines.add("")
+                line.startsWith("###") -> {
+                    if (lines.isNotEmpty() && lines.last().isNotEmpty()) lines.add("")
+                    lines.add(line.removePrefix("###").trim())
+                }
+                line.startsWith("- ") || line.startsWith("* ") ->
+                    lines.add("* " + line.drop(2).trim())
+                // A continuation of the bullet above, rejoined onto it.
+                lines.isNotEmpty() && lines.last().startsWith("* ") ->
+                    lines[lines.lastIndex] = lines.last().trimEnd() + " " + line
+                else -> lines.add(line)
+            }
+        }
+        val plain = lines.joinToString("\n")
+            .replace(Regex("""\*\*(.+?)\*\*"""), "$1")
+            .replace(Regex("""`(.+?)`"""), "$1")
+            .replace(Regex("""\[(.+?)]\((.+?)\)"""), "$1")
+            .replace(Regex("\n{3,}"), "\n\n")
+            .trim()
+
+        if (plain.isBlank()) {
+            throw GradleException("The $versionName section of CHANGELOG.md is empty.")
+        }
+
+        // F-Droid and IzzyOnDroid both truncate a long changelog in the listing, so a
+        // release whose section reads as prose gets cut mid-sentence rather than rejected.
+        // Warned about rather than enforced, because only a person can decide what to cut.
+        if (plain.length > FASTLANE_CHANGELOG_LIMIT) {
+            logger.warn(
+                "The $versionName changelog is ${plain.length} characters, over the " +
+                    "$FASTLANE_CHANGELOG_LIMIT the listings show. It will be truncated there. " +
+                    "Shorten the $versionName section of CHANGELOG.md if that matters."
+            )
+        }
+
+        val dir = outDir.asFile
+        dir.mkdirs()
+        // Codes from earlier releases are left alone: F-Droid still serves the versions
+        // they belong to, and deleting them would blank the changelog on old builds.
+        codes.forEach { abi ->
+            dir.resolve("${baseCode * span + abi}.txt").writeText(plain + "\n")
+        }
+        logger.lifecycle(
+            "Wrote $versionName to ${codes.size} changelogs: " +
+                codes.joinToString(", ") { "${baseCode * span + it}.txt" }
+        )
     }
 }
 

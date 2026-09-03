@@ -69,7 +69,7 @@ jobs:
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
     steps:
-      # Full history, so the tags already in the repository can be counted.
+      # Full history, so anything written about the release can look back past the tag.
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
@@ -81,11 +81,14 @@ jobs:
           TAG="${{ github.event.inputs.tag || github.ref_name }}"
           VERSION="${TAG#v}"
 
-          # The version code is YYYYMMDDNN, and NN separates two releases cut on the same
-          # day. Counting today's tags gives the first release of the day 1, the second 2.
-          TODAY=$(date -u +%Y-%m-%d)
-          BUILD_NUM=$(git tag --format='%(creatordate:short)' | grep -c "^$TODAY$" || true)
-          [ "$BUILD_NUM" -ge 1 ] || BUILD_NUM=1
+          # The version code comes from gradle.properties, where it is bumped by hand as
+          # part of cutting a release. Read here only so the log says which number went out
+          # and so the release can be stopped if the bump was forgotten.
+          VERSION_CODE=$(sed -n 's/^HAZEL_VERSION_CODE=//p' gradle.properties | tr -d '[:space:]')
+          if [ -z "$VERSION_CODE" ]; then
+            echo "::error::HAZEL_VERSION_CODE is missing from gradle.properties"
+            exit 1
+          fi
 
           # Anything after the version number marks a pre-release: v1.1.0-beta.1, v2.0.0-rc1.
           case "$VERSION" in
@@ -96,7 +99,7 @@ jobs:
           {
             echo "tag=$TAG"
             echo "version=$VERSION"
-            echo "build_num=$BUILD_NUM"
+            echo "version_code=$VERSION_CODE"
             echo "prerelease=$PRERELEASE"
           } >> "$GITHUB_OUTPUT"
 
@@ -134,7 +137,6 @@ jobs:
         run: |
           ./gradlew :app:assembleRelease \
             -PVERSION_NAME=${{ steps.version.outputs.version }} \
-            -PBUILD_NUM=${{ steps.version.outputs.build_num }} \
             --stacktrace
 
       - name: Collect the APKs

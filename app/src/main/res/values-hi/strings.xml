@@ -9,7 +9,7 @@
     <string name="nav_incognito_off">गुप्त मोड बंद है</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">खोजें या लिंक चिपकाएँ</string>
+    <string name="download_search_hint">लिंक चिपकाएँ</string>
     <string name="download_clear">हटाएँ</string>
     <string name="download_show_large_artwork">बड़ी तस्वीरें दिखाएँ</string>
     <string name="download_show_list">सूची के रूप में दिखाएँ</string>
@@ -38,7 +38,7 @@
     </plurals>
 
     <!-- SearchScreen -->
-    <string name="search_hint">खोजें या लिंक चिपकाएँ</string>
+    <string name="search_hint">लिंक चिपकाएँ</string>
     <string name="search_back">वापस</string>
     <string name="search_more">और</string>
     <string name="search_add_link">एक और लिंक जोड़ें</string>

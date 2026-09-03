@@ -9,7 +9,7 @@
     <string name="nav_incognito_off">Inkognito aus</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">Suchen oder Link einfügen</string>
+    <string name="download_search_hint">Link einfügen</string>
     <string name="download_clear">Leeren</string>
     <string name="download_show_large_artwork">Große Bilder zeigen</string>
     <string name="download_show_list">Als Liste zeigen</string>
@@ -38,7 +38,7 @@
     </plurals>
 
     <!-- SearchScreen -->
-    <string name="search_hint">Suchen oder Link einfügen</string>
+    <string name="search_hint">Link einfügen</string>
     <string name="search_back">Zurück</string>
     <string name="search_more">Mehr</string>
     <string name="search_add_link">Noch einen Link hinzufügen</string>

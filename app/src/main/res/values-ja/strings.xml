@@ -9,7 +9,7 @@
     <string name="nav_incognito_off">シークレットモード無効</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">検索またはURLを入力</string>
+    <string name="download_search_hint">URLを入力</string>
     <string name="download_clear">消去</string>
     <string name="download_show_large_artwork">大きいサムネイルを表示</string>
     <string name="download_show_list">リスト形式で表示</string>
@@ -37,7 +37,7 @@
     </plurals>
 
     <!-- SearchScreen -->
-    <string name="search_hint">検索またはURLを入力</string>
+    <string name="search_hint">URLを入力</string>
     <string name="search_back">戻る</string>
     <string name="search_more">その他</string>
     <string name="search_add_link">リンクを追加</string>

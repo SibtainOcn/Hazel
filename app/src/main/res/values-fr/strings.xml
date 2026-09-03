@@ -9,7 +9,7 @@
     <string name="nav_incognito_off">Navigation privée désactivée</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">Cherchez ou collez un lien</string>
+    <string name="download_search_hint">Collez un lien</string>
     <string name="download_clear">Vider</string>
     <string name="download_show_large_artwork">Afficher les grandes images</string>
     <string name="download_show_list">Afficher en liste</string>
@@ -39,7 +39,7 @@
     </plurals>
 
     <!-- SearchScreen -->
-    <string name="search_hint">Cherchez ou collez un lien</string>
+    <string name="search_hint">Collez un lien</string>
     <string name="search_back">Retour</string>
     <string name="search_more">Plus</string>
     <string name="search_add_link">Ajouter un autre lien</string>
