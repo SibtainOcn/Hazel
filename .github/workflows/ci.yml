@@ -156,10 +156,15 @@ jobs:
             echo "task=assembleRelease" >> "$GITHUB_OUTPUT"
             echo "variant=release" >> "$GITHUB_OUTPUT"
             echo "split=true" >> "$GITHUB_OUTPUT"
+            # Split, so five APKs exist and only one is worth keeping. The universal build
+            # is 206 MB of the 470 and is the one thing that must not be picked up here.
+            echo "glob=app/build/outputs/apk/**/*arm64-v8a*.apk" >> "$GITHUB_OUTPUT"
           else
             echo "task=assembleDebug" >> "$GITHUB_OUTPUT"
             echo "variant=debug" >> "$GITHUB_OUTPUT"
             echo "split=false" >> "$GITHUB_OUTPUT"
+            # Not split, so there is one APK and this is it.
+            echo "glob=app/build/outputs/apk/**/*.apk" >> "$GITHUB_OUTPUT"
           fi
 
       # Only reachable on a push to main, so a pull request from a fork never sees these.
@@ -210,11 +215,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hazel-${{ steps.target.outputs.variant }}
-          # A debug build is not split by architecture, so it produces one universal APK and
-          # this pattern matches it. A release build is split, and this takes the arm64 one.
-          path: |
-            app/build/outputs/apk/**/*arm64-v8a*.apk
-            app/build/outputs/apk/**/*universal*.apk
+          path: ${{ steps.target.outputs.glob }}
           retention-days: 3
           # Whether the build worked is decided by Assemble, and what it produced is listed
           # in the job summary either way. Not having room to store a copy is not a reason
