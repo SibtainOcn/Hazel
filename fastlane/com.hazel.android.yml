@@ -11,9 +11,10 @@
 #   4. Build it the way the server will:  fdroid build -v -l com.hazel.android
 #   5. Open the merge request
 #
-# Every versionName and commit below names v1.0.5, which does not exist yet. v1.0.4 cannot
-# be submitted: it predates the removal of the foojay toolchain resolver, and F-Droid's
-# scanner refuses to build a tree containing it.
+# Every versionName and commit below names v1.0.6. Earlier tags cannot be submitted:
+# v1.0.4 predates the removal of the foojay toolchain resolver, which F-Droid's scanner
+# refuses outright, and v1.0.5 computes its version rather than stating it, which leaves
+# their update check unable to find any version information.
 
 # Download is the one that matters, since it is where somebody looking for a downloader
 # actually browses. Multimedia and Internet are the broader shelves the app also belongs on.
@@ -64,41 +65,41 @@ Builds:
   # what they will not run, and supplies its own Gradle instead. The gradle: field is what
   # asks for that, and gradleprops is how -P arguments reach it. A recipe that calls
   # ./gradlew itself fails with "No such file or directory" after compiling nothing.
-  - versionName: 1.0.5
-    versionCode: 200
-    commit: v1.0.5
+  - versionName: 1.0.6
+    versionCode: 300
+    commit: v1.0.6
     subdir: app
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-universal-stable.apk
 
-  - versionName: 1.0.5
-    versionCode: 201
-    commit: v1.0.5
+  - versionName: 1.0.6
+    versionCode: 301
+    commit: v1.0.6
     subdir: app
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-armeabi-v7a-stable.apk
 
-  - versionName: 1.0.5
-    versionCode: 202
-    commit: v1.0.5
+  - versionName: 1.0.6
+    versionCode: 302
+    commit: v1.0.6
     subdir: app
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-x86-stable.apk
 
-  - versionName: 1.0.5
-    versionCode: 203
-    commit: v1.0.5
+  - versionName: 1.0.6
+    versionCode: 303
+    commit: v1.0.6
     subdir: app
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-x86_64-stable.apk
 
-  - versionName: 1.0.5
-    versionCode: 204
-    commit: v1.0.5
+  - versionName: 1.0.6
+    versionCode: 304
+    commit: v1.0.6
     subdir: app
     gradle:
       - yes
@@ -115,5 +116,5 @@ Builds:
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
-CurrentVersion: 1.0.5
-CurrentVersionCode: 204
+CurrentVersion: 1.0.6
+CurrentVersionCode: 304

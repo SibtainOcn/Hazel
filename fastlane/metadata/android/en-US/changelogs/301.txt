@@ -1,0 +1,2 @@
+Fixed
+* The version name and code are literals in app/build.gradle.kts again. F-Droid reads them with a regular expression rather than by running Gradle, so holding them in gradle.properties left its update check unable to find any version at all.

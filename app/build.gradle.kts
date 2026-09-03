@@ -68,49 +68,39 @@ gradle.taskGraph.whenReady {
     }
 }
 
-// The version this build reports.
+// ── Versions ──
 //
-// A tag build passes the tag through -PVERSION_NAME, so a release is named by the tag that
-// produced it. Everything else falls back to gradle.properties, which is bumped alongside
-// the version code as part of cutting a release.
+// Both the name and the code are written as literals in defaultConfig below, and that is a
+// requirement rather than a style.
 //
-// The fallback is what lets F-Droid build this without being told the version. Their bot
-// adds each new release to its own recipe by copying the previous entry and changing the
-// tag, and it does not rewrite build arguments, so a recipe that had to pass -PVERSION_NAME
-// would carry the old version forward and produce an APK named after the wrong release.
-// Reading it from the repository means the checkout already knows.
-val hazelVersionName: String =
-    ((project.findProperty("VERSION_NAME") ?: project.findProperty("HAZEL_VERSION_NAME"))
-        as String?)
+// F-Droid reads them out of this file with a regular expression and never runs Gradle to do
+// it, so anything computed is not a value it can see. Holding them in gradle.properties, as
+// this once did, left their update check reporting "Couldn't find any version information"
+// and failing the build. The same is true of reading them from a property: a build argument
+// is not in the file either.
+//
+// tools/release.ps1 rewrites both when a release is cut, so nothing here is edited by hand.
+//
+// The code is a plain counter with two digits kept free at the end for the architecture. Its
+// only rule is that it increases; it says nothing about the version a person reads.
+
+// The name of the release, taken from defaultConfig so there is one copy of it. A tag build
+// may still override it with -PVERSION_NAME, which is how a release is named by its tag.
+val hazelVersionName: String by lazy {
+    (project.findProperty("VERSION_NAME") as String?)
         ?.trim()
         ?.removePrefix("v")
         ?.takeIf { it.isNotBlank() }
+        ?: android.defaultConfig.versionName
         ?: "1.0.0"
+}
 
-// ── The version code ──
-//
-// A plain counter. One release moves it by one, and nothing else ever touches it.
-//
-// It is deliberately unrelated to the version a person reads. Android treats this as an
-// opaque integer whose only rule is that it must increase, and the store that installs the
-// app compares nothing else. Tying it to the calendar, as this once did, bought nothing and
-// cost the room to number architectures: a date-shaped code is already in the billions, and
-// the arithmetic below would have overflowed a signed 32-bit int on the first release.
-//
-// The number lives in gradle.properties so it is in the repository rather than in whoever
-// cut the last release. A rebuild that has to reuse an old number passes -PVERSION_CODE.
-val hazelVersionCode: Int =
-    ((project.findProperty("VERSION_CODE") ?: project.findProperty("HAZEL_VERSION_CODE"))
-        as String?)
-        ?.trim()
-        ?.toIntOrNull()
-        ?: 1
+// The release's own code, without the architecture digits. Read back from defaultConfig for
+// the same reason the name is: one copy of the number, and that copy is the literal F-Droid
+// can read out of the file.
+val hazelBaseVersionCode: Int by lazy { android.defaultConfig.versionCode ?: 100 }
 
-// How much room each release leaves for its architectures. Two digits, so the last two of
-// any code name the architecture and everything above them names the release.
-val abiCodeSpan = 100
-
-// The architecture numbers themselves.
+// The architecture numbers.
 //
 // A device offered several APKs installs the one with the highest code it can run, so this
 // order is the choice. Universal is absent and therefore zero, which puts it below all of
@@ -132,7 +122,9 @@ val splitAbi: Boolean =
 // The word that goes in the APK name next to the version. A pre-release version carries a
 // suffix after the number, and anything with one is a beta as far as a downloader cares.
 // Debug builds override this, because there the build type says more than the version does.
-val hazelChannel: String = if (hazelVersionName.contains('-')) "beta" else "stable"
+val hazelChannel: String by lazy {
+    if (hazelVersionName.contains('-')) "beta" else "stable"
+}
 
 android {
     namespace = "com.hazel.android"
@@ -158,9 +150,9 @@ android {
         // The release's own code, with the architecture digits left at zero. This is what
         // the universal APK keeps and what a build with the splits turned off reports;
         // every per-architecture output replaces it further down.
-        versionCode = hazelVersionCode * abiCodeSpan
+        versionCode = 300
 
-        versionName = hazelVersionName
+        versionName = "1.0.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -235,7 +227,7 @@ androidComponents {
 
             // Each architecture gets its own code, in the one place that already knows
             // which architecture this output is for.
-            output.versionCode.set(hazelVersionCode * abiCodeSpan + (abiVersionCodes[abi] ?: 0))
+            output.versionCode.set(hazelBaseVersionCode + (abiVersionCodes[abi] ?: 0))
 
             (output as? com.android.build.api.variant.impl.VariantOutputImpl)
                 ?.outputFileName
@@ -271,8 +263,7 @@ tasks.register("generateFastlaneChangelogs") {
     group = "publishing"
 
     val versionName = hazelVersionName
-    val baseCode = hazelVersionCode
-    val span = abiCodeSpan
+    val baseCode = hazelBaseVersionCode
     // Every code the release publishes, the universal APK's included.
     val codes = listOf(0) + abiVersionCodes.values.sorted()
     val source = rootChangelog
@@ -343,11 +334,11 @@ tasks.register("generateFastlaneChangelogs") {
         // Codes from earlier releases are left alone: F-Droid still serves the versions
         // they belong to, and deleting them would blank the changelog on old builds.
         codes.forEach { abi ->
-            dir.resolve("${baseCode * span + abi}.txt").writeText(plain + "\n")
+            dir.resolve("${baseCode + abi}.txt").writeText(plain + "\n")
         }
         logger.lifecycle(
             "Wrote $versionName to ${codes.size} changelogs: " +
-                codes.joinToString(", ") { "${baseCode * span + it}.txt" }
+                codes.joinToString(", ") { "${baseCode + it}.txt" }
         )
     }
 }

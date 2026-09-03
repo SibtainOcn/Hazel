@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-09-03
+
+### Fixed
+- The version name and code are literals in `app/build.gradle.kts` again. F-Droid reads them
+  with a regular expression rather than by running Gradle, so holding them in
+  `gradle.properties` left its update check unable to find any version at all.
+
 ## [1.0.5] - 2026-09-03
 
 Nothing in the app itself changes here. This is the release that makes Hazel something
