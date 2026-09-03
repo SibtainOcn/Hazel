@@ -152,9 +152,9 @@ android {
         // The release's own code, with the architecture digits left at zero. This is what
         // the universal APK keeps and what a build with the splits turned off reports;
         // every per-architecture output replaces it further down.
-        versionCode = 300
+        versionCode = 400
 
-        versionName = "1.0.6"
+        versionName = "1.0.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -200,6 +200,19 @@ android {
     packaging {
         jniLibs {
             useLegacyPackaging = true
+
+            // Ship this one prebuilt exactly as the dependency provides it.
+            //
+            // AGP strips the debug symbols out of bundled native libraries using the strip
+            // tool from whichever NDK the machine happens to have, and the result differs
+            // between NDK versions. That is invisible until someone rebuilds the app and
+            // compares: F-Droid does exactly that, and it was the only file out of the nine
+            // in the APK that failed to match, at 7784 bytes here against the 10360 the
+            // dependency ships.
+            //
+            // Named rather than "**/*.so" on purpose. The engine binaries are tens of
+            // megabytes and strip is worth keeping for them; they already reproduce.
+            keepDebugSymbols += "**/libdatastore_shared_counter.so"
         }
     }
 }
