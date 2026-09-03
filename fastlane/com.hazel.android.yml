@@ -40,6 +40,11 @@ AntiFeatures:
   NonFreeNet:
     en-US: Uses the GitHub API to check for and download yt-dlp engine updates
 
+# checkupdates works this out from the app name in AndroidManifest.xml and writes it into
+# the recipe itself. Their CI ends the job with git diff --exit-code, so a field it wants to
+# add and we left out fails the run even though nothing is wrong with it.
+AutoName: Hazel
+
 RepoType: git
 Repo: https://github.com/SibtainOcn/Hazel.git
 
