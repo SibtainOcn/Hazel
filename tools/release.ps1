@@ -50,14 +50,14 @@ function Warn($msg) { Write-Host "    $msg" -ForegroundColor Yellow }
 function Die($msg)  { Write-Host "`nSTOPPED: $msg" -ForegroundColor Red; exit 1 }
 
 $tag = "v$Version"
-$props = Join-Path $repo 'gradle.properties'
+$buildFile = Join-Path $repo 'app/build.gradle.kts'
 $changelog = Join-Path $repo 'CHANGELOG.md'
 
 # ---------------------------------------------------------------- checks
 
 Step "Checking the repository"
 
-if (-not (Test-Path $props))     { Die "gradle.properties not found. Run this from the repo." }
+if (-not (Test-Path $buildFile)) { Die "app/build.gradle.kts not found. Run this from the repo." }
 if (-not (Test-Path $changelog)) { Die "CHANGELOG.md not found." }
 
 $branch = (git rev-parse --abbrev-ref HEAD).Trim()
@@ -75,16 +75,19 @@ git fetch --tags --quiet 2>$null
 $existing = git tag --list $tag
 if ($existing) { Die "Tag $tag already exists. Pick a new version; never move a published tag." }
 
-# The version code only ever increases, so read the current one and add one.
-$propsText = Get-Content $props -Raw
-if ($propsText -notmatch '(?m)^HAZEL_VERSION_CODE=(\d+)\s*$') {
-    Die "HAZEL_VERSION_CODE not found in gradle.properties."
+# Both live in defaultConfig as literals, because F-Droid reads them out of the file with a
+# regular expression rather than by running Gradle. Anything computed there is invisible to
+# it and its update check fails.
+$buildText = Get-Content $buildFile -Raw
+if ($buildText -notmatch '(?m)^\s*versionCode\s*=\s*(\d+)\s*$') {
+    Die "A literal 'versionCode = <number>' was not found in app/build.gradle.kts."
 }
 $oldCode = [int]$Matches[1]
-$newCode = $oldCode + 1
+# The last two digits belong to the architecture, so a release moves the hundreds.
+$newCode = $oldCode + 100
 
-if ($propsText -notmatch '(?m)^HAZEL_VERSION_NAME=(.+?)\s*$') {
-    Die "HAZEL_VERSION_NAME not found in gradle.properties."
+if ($buildText -notmatch '(?m)^\s*versionName\s*=\s*"(.+?)"\s*$') {
+    Die "A literal 'versionName = \"x.y.z\"' was not found in app/build.gradle.kts."
 }
 $oldName = $Matches[1]
 
@@ -95,7 +98,7 @@ Info "version code: $oldCode -> $newCode"
 $abis = [ordered]@{ universal = 0; 'armeabi-v7a' = 1; x86 = 2; x86_64 = 3; 'arm64-v8a' = 4 }
 Info "APK version codes:"
 foreach ($abi in $abis.Keys) {
-    '      {0,-12} {1}' -f $abi, ($newCode * 100 + $abis[$abi]) | Write-Host -ForegroundColor Gray
+    '      {0,-12} {1}' -f $abi, ($newCode + $abis[$abi]) | Write-Host -ForegroundColor Gray
 }
 
 # ---------------------------------------------------------------- changelog
@@ -117,16 +120,16 @@ if ($clText -match "(?m)^##\s*\[$([regex]::Escape($Version))\]") {
 
 # ---------------------------------------------------------------- write
 
-Step "Updating gradle.properties"
+Step "Updating app/build.gradle.kts"
 
-$newProps = $propsText `
-    -replace '(?m)^HAZEL_VERSION_NAME=.*$', "HAZEL_VERSION_NAME=$Version" `
-    -replace '(?m)^HAZEL_VERSION_CODE=\d+\s*$', "HAZEL_VERSION_CODE=$newCode"
+$newBuild = $buildText `
+    -replace '(?m)^(\s*)versionCode\s*=\s*\d+\s*$', "`${1}versionCode = $newCode" `
+    -replace '(?m)^(\s*)versionName\s*=\s*".+?"\s*$', "`${1}versionName = `"$Version`""
 
 if ($DryRun) {
-    Info "would write HAZEL_VERSION_NAME=$Version and HAZEL_VERSION_CODE=$newCode"
+    Info "would write versionCode = $newCode and versionName = `"$Version`""
 } else {
-    Set-Content $props $newProps -NoNewline -Encoding UTF8
+    Set-Content $buildFile $newBuild -NoNewline -Encoding UTF8
     Info "written"
 }
 
@@ -138,9 +141,9 @@ if ($DryRun) {
 } else {
     & $gradlew ':app:generateFastlaneChangelogs' "-PVERSION_NAME=$Version" --quiet
     if ($LASTEXITCODE -ne 0) { Die "generateFastlaneChangelogs failed. Nothing has been committed." }
-    $written = Get-ChildItem 'fastlane/metadata/android/en-US/changelogs' -Filter "$newCode??.txt" -ErrorAction SilentlyContinue
+    $written = Get-ChildItem 'fastlane/metadata/android/en-US/changelogs' -Filter "$newCode.txt","$($newCode+1).txt" -ErrorAction SilentlyContinue
     if (-not $written) {
-        Warn "no changelog files matching $newCode??.txt were produced. Check the task output."
+        Warn "no changelog files for $newCode were produced. Check the task output."
     } else {
         Info ("wrote: " + (($written | ForEach-Object { $_.Name }) -join ', '))
     }
@@ -151,14 +154,14 @@ if ($DryRun) {
 Step "Committing and tagging"
 
 if ($DryRun) {
-    Info "would commit gradle.properties, CHANGELOG.md and the changelogs"
+    Info "would commit app/build.gradle.kts, CHANGELOG.md and the changelogs"
     Info "would tag $tag"
     if (-not $NoPush) { Info "would push the branch and the tag to origin" }
     Write-Host "`nDry run only. Nothing was changed." -ForegroundColor Green
     exit 0
 }
 
-git add gradle.properties CHANGELOG.md fastlane/metadata/android/en-US/changelogs
+git add app/build.gradle.kts CHANGELOG.md fastlane/metadata/android/en-US/changelogs
 $staged = git diff --cached --name-only
 if (-not $staged) { Die "Nothing to commit. Was this release already prepared?" }
 Info ("staged: " + ($staged -join ', '))
