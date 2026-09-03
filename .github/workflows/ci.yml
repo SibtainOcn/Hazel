@@ -194,17 +194,32 @@ jobs:
             [ "$found" = "1" ] || echo "No APK was produced."
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # One APK, not the set.
+      #
+      # The account has 500 MB of artifact storage. A release build produces about 470 MB of
+      # APKs and a debug build about 214 MB, so a single run of either came close to filling
+      # it on its own, and keeping a fortnight of them did fill it: uploads started failing
+      # across every workflow, including a 12 KB test report that had nothing to do with it.
+      #
+      # arm64-v8a is what nearly every device runs and what the README tells people to
+      # install, so it is the one worth having to hand. It is about 68 MB. The rest are a
+      # release concern, and a release attaches all five to the release itself, which is
+      # separate storage and not subject to this quota.
       - name: Upload the APK
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: hazel-${{ steps.target.outputs.variant }}
-          path: app/build/outputs/apk/**/*.apk
-          # A full set of APKs is around 680 MB, so a fortnight of them is what exhausted
-          # the account's artifact storage and started failing unrelated uploads. These are
-          # for trying a branch out before it merges, which happens within days if it
-          # happens at all, and a release keeps its own copies on the release itself.
+          # A debug build is not split by architecture, so it produces one universal APK and
+          # this pattern matches it. A release build is split, and this takes the arm64 one.
+          path: |
+            app/build/outputs/apk/**/*arm64-v8a*.apk
+            app/build/outputs/apk/**/*universal*.apk
           retention-days: 3
-          if-no-files-found: error
+          # Whether the build worked is decided by Assemble, and what it produced is listed
+          # in the job summary either way. Not having room to store a copy is not a reason
+          # to call a build broken, which is what this step did for two days.
+          if-no-files-found: warn
 
       - name: Delete the keystore
         if: always()
