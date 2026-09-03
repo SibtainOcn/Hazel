@@ -9,7 +9,7 @@
     <string name="nav_incognito_off">无痕模式已关闭</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">搜索或粘贴链接</string>
+    <string name="download_search_hint">粘贴链接</string>
     <string name="download_clear">清空</string>
     <string name="download_show_large_artwork">显示大图</string>
     <string name="download_show_list">以列表显示</string>
@@ -37,7 +37,7 @@
     </plurals>
 
     <!-- SearchScreen -->
-    <string name="search_hint">搜索或粘贴链接</string>
+    <string name="search_hint">粘贴链接</string>
     <string name="search_back">返回</string>
     <string name="search_more">更多</string>
     <string name="search_add_link">再添加一个链接</string>

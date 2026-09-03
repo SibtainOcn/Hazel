@@ -9,7 +9,7 @@
     <string name="nav_incognito_off">Anônimo desativado</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">Pesquise ou cole um link</string>
+    <string name="download_search_hint">Cole um link</string>
     <string name="download_clear">Limpar</string>
     <string name="download_show_large_artwork">Mostrar imagens grandes</string>
     <string name="download_show_list">Mostrar como lista</string>
@@ -39,7 +39,7 @@
     </plurals>
 
     <!-- SearchScreen -->
-    <string name="search_hint">Pesquise ou cole um link</string>
+    <string name="search_hint">Cole um link</string>
     <string name="search_back">Voltar</string>
     <string name="search_more">Mais</string>
     <string name="search_add_link">Adicionar outro link</string>

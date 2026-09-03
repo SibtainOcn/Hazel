@@ -9,7 +9,7 @@
     <string name="nav_incognito_off">Mode samaran nonaktif</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">Cari atau masukkan URL</string>
+    <string name="download_search_hint">Masukkan URL</string>
     <string name="download_clear">Hapus</string>
     <string name="download_show_large_artwork">Tampilkan gambar besar</string>
     <string name="download_show_list">Tampilkan sebagai daftar</string>
@@ -37,7 +37,7 @@
     </plurals>
 
     <!-- SearchScreen -->
-    <string name="search_hint">Cari atau masukkan URL</string>
+    <string name="search_hint">Masukkan URL</string>
     <string name="search_back">Kembali</string>
     <string name="search_more">Lainnya</string>
     <string name="search_add_link">Tambah tautan lain</string>

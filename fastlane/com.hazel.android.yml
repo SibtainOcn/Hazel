@@ -1,0 +1,115 @@
+# Draft F-Droid recipe for Hazel.
+#
+# This file does NOT belong in this repository. It is a working copy of what goes into
+# fdroiddata as metadata/com.hazel.android.yml, kept here so it can be reviewed before it
+# is submitted. Delete it once the merge request is open.
+#
+# To submit:
+#   1. Fork https://gitlab.com/fdroid/fdroiddata
+#   2. Put this file at metadata/com.hazel.android.yml
+#   3. Run:  fdroid readmeta && fdroid rewritemeta com.hazel.android && fdroid lint com.hazel.android
+#   4. Build it the way the server will:  fdroid build -v -l com.hazel.android
+#   5. Open the merge request
+#
+# The versionName and commit in every Builds entry still point at a tag that has to exist.
+
+# Download is the one that matters, since it is where somebody looking for a downloader
+# actually browses. Multimedia and Internet are the broader shelves the app also belongs on.
+# Nothing further is listed: F-Droid gains nothing from categories an app only half fits,
+# and a reviewer will ask about any that do not obviously apply.
+Categories:
+  - Download
+  - Multimedia
+  - Internet
+
+License: GPL-3.0-or-later
+
+AuthorName: SibtainOcn
+SourceCode: https://github.com/SibtainOcn/Hazel
+IssueTracker: https://github.com/SibtainOcn/Hazel/issues
+Changelog: https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md
+
+# The app fetches yt-dlp updates from the GitHub API, which F-Droid classes as depending on
+# a non-free network service. It is a label on the listing, not a reason for rejection.
+AntiFeatures:
+  NonFreeNet:
+    en-US: Uses the GitHub API to check for and download yt-dlp engine updates
+
+RepoType: git
+Repo: https://github.com/SibtainOcn/Hazel.git
+
+Builds:
+  # One entry per output, in ascending version code, which is also the order a device
+  # prefers them in. The universal APK is first and lowest, so it is what a device gets only
+  # when none of the architecture builds fit; anything matching a real architecture is
+  # offered that smaller file instead.
+  #
+  # Set versionName and commit to the tag actually cut before submitting.
+  - versionName: 1.0.4
+    versionCode: 100
+    commit: v1.0.4
+    subdir: app
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/Hazel-v1.0.4-universal-stable.apk
+    build:
+      - sed -i -e '/sdk-location/d' ../local.properties || true
+      - ./gradlew :app:assembleRelease -PVERSION_NAME=1.0.4
+
+  - versionName: 1.0.4
+    versionCode: 101
+    commit: v1.0.4
+    subdir: app
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/Hazel-v1.0.4-armeabi-v7a-stable.apk
+    build:
+      - sed -i -e '/sdk-location/d' ../local.properties || true
+      - ./gradlew :app:assembleRelease -PVERSION_NAME=1.0.4
+
+  - versionName: 1.0.4
+    versionCode: 102
+    commit: v1.0.4
+    subdir: app
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/Hazel-v1.0.4-x86-stable.apk
+    build:
+      - sed -i -e '/sdk-location/d' ../local.properties || true
+      - ./gradlew :app:assembleRelease -PVERSION_NAME=1.0.4
+
+  - versionName: 1.0.4
+    versionCode: 103
+    commit: v1.0.4
+    subdir: app
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/Hazel-v1.0.4-x86_64-stable.apk
+    build:
+      - sed -i -e '/sdk-location/d' ../local.properties || true
+      - ./gradlew :app:assembleRelease -PVERSION_NAME=1.0.4
+
+  - versionName: 1.0.4
+    versionCode: 104
+    commit: v1.0.4
+    subdir: app
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/Hazel-v1.0.4-arm64-v8a-stable.apk
+    build:
+      - sed -i -e '/sdk-location/d' ../local.properties || true
+      - ./gradlew :app:assembleRelease -PVERSION_NAME=1.0.4
+
+# Reproducible builds. F-Droid builds from source, compares the result against the APK you
+# published, and where they match it ships YOUR signed file, so an update from GitHub and an
+# update from F-Droid are the same install.
+#
+# Leave this commented out for the first submission. Get published first, then turn it on
+# once a build has been shown to match, because a mismatch here blocks the release outright.
+#
+# Binaries: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-%a-stable.apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 1.0.4
+CurrentVersionCode: 104

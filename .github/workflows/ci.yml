@@ -102,15 +102,21 @@ jobs:
         id: summary
         run: python3 .github/scripts/test_summary.py
 
+      # The report is a convenience, not the result. Whether the tests passed is already
+      # decided by the step that ran them and is written into the job summary either way, so
+      # a failure to store this must not turn a green run red. It does fail on its own from
+      # time to time, because the account's artifact storage is shared and finite, and a run
+      # that could not upload a 12 KB report is not a run that found anything wrong.
       - name: Upload the test report
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: test-report
           path: |
             app/build/reports/tests/
             app/build/test-results/
-          retention-days: 14
+          retention-days: 7
           if-no-files-found: ignore
 
   build:
@@ -193,7 +199,11 @@ jobs:
         with:
           name: hazel-${{ steps.target.outputs.variant }}
           path: app/build/outputs/apk/**/*.apk
-          retention-days: 14
+          # A full set of APKs is around 680 MB, so a fortnight of them is what exhausted
+          # the account's artifact storage and started failing unrelated uploads. These are
+          # for trying a branch out before it merges, which happens within days if it
+          # happens at all, and a release keeps its own copies on the release itself.
+          retention-days: 3
           if-no-files-found: error
 
       - name: Delete the keystore

@@ -49,7 +49,7 @@ Español
 [![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/packages/com.hazel.android/)
 
 ![API](https://img.shields.io/badge/API-24%2B-brightgreen?style=flat-square)
-[![License](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/SibtainOcn/Hazel/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/SibtainOcn/Hazel/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/SibtainOcn/Hazel?style=flat-square&label=release&color=cyan)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Changelog](https://img.shields.io/badge/Changelog-orange?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md)
@@ -62,14 +62,14 @@ Español
 ## 📲 Screenshots
 
 <div>
-<img src="../ss_01_mv69.jpg" width="30%" />
-<img src="../ss_02_a6e1.jpg" width="30%" />
-<img src="../ss_03_fzfv.jpg" width="30%" />
-<img src="../ss_04_srx6.jpg" width="30%" />
-<img src="../ss_05_f9sz.jpg" width="30%" />
-<img src="../ss_06_0cmz.jpg" width="30%" />
-<img src="../ss_07_trsv.jpg" width="30%" />
-<img src="../ss_08_vnrt.jpg" width="30%" />
+<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" width="30%" />
+<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" width="30%" />
+<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/3.jpg" width="30%" />
+<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/4.jpg" width="30%" />
+<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/5.jpg" width="30%" />
+<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/6.jpg" width="30%" />
+<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/7.jpg" width="30%" />
+<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/8.jpg" width="30%" />
 </div>
 
 ## 💡 Características:
@@ -124,7 +124,7 @@ Hazel siempre será gratuito y de código abierto para todos. Si te gusta, por f
 
 ## 📄 Licencia
 
-[GNU GPL v3.0](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
+[GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
 
 > [!Warning]
 >

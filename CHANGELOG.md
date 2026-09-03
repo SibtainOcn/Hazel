@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-09-03
+
 ### Added
 - **Hazel speaks ten languages.** Spanish, Hindi, Simplified Chinese, Brazilian Portuguese,
   French, German, Russian, Japanese and Indonesian, alongside English. Nothing has to be
@@ -33,8 +35,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   as the English, and a switcher at the top of every file reaches all the others.
 
 ### Changed
-- Project images moved from `BRAND/` to `assets/`, next to the screenshots and the README
-  translations that reference them.
+- **The link field no longer offers to search.** It reads "Enter URL", in every language,
+  because searching is not something it has ever done and a field that says it does is a
+  field people try it in.
+- Project images moved from `BRAND/` to `assets/`, and the screenshots now live under
+  `fastlane/metadata/android/en-US/` where the store listing reads them, with the READMEs
+  pointing at that one copy rather than a second one.
+- The version code is a plain counter rather than the date, with two digits appended for the
+  architecture, so one bump per release numbers every APK it publishes.
 
 ## [1.0.3] - 2026-09-02
 

@@ -9,7 +9,7 @@
     <string name="nav_incognito_off">Инкогнито выключено</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">Поиск или вставка URL</string>
+    <string name="download_search_hint">Вставьте URL</string>
     <string name="download_clear">Очистить</string>
     <string name="download_show_large_artwork">Крупные обложки</string>
     <string name="download_show_list">Показать списком</string>
@@ -40,7 +40,7 @@
     </plurals>
 
     <!-- SearchScreen -->
-    <string name="search_hint">Поиск или вставка URL</string>
+    <string name="search_hint">Вставьте URL</string>
     <string name="search_back">Назад</string>
     <string name="search_more">Ещё</string>
     <string name="search_add_link">Добавить ещё ссылку</string>
