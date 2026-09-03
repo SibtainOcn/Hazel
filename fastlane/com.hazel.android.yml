@@ -116,5 +116,25 @@ Builds:
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
+
+# The five APKs of one release, expressed as arithmetic on the single versionCode their
+# update check reads out of app/build.gradle.kts.
+#
+# Without this it reads 300, compares it against CurrentVersionCode 304 and stops with
+# "current version is newer", because it has no way to know that 304 is the same release as
+# 300 rather than a later one. It takes the highest derived code as the release's own, so
+# these five have to end at 304.
+#
+# It is also what keeps a future release correct on its own. On the next tag it clones the
+# last five build entries, keeps each one's output: line, and assigns the derived codes in
+# ascending order. That only lands each ABI on the right file while the entries below stay
+# sorted by version code, so leave them in that order.
+VercodeOperation:
+  - '%c'
+  - '%c + 1'
+  - '%c + 2'
+  - '%c + 3'
+  - '%c + 4'
+
 CurrentVersion: 1.0.6
 CurrentVersionCode: 304
