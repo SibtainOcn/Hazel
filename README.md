@@ -146,6 +146,8 @@ You should have received a copy of the GNU General Public License along with Haz
 Hazel is a GUI for [yt-dlp](https://github.com/yt-dlp/yt-dlp), based on [youtubedl-android](https://github.com/yausername/youtubedl-android).
 [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor)
 
+> *Special thanks to the [yt-dlp](https://github.com/yt-dlp/yt-dlp) team - without their work, Hazel wouldn't exist.*
+> 
 <div align="right">
 <table><td>
 <a href="#start-of-content">👆 Scroll to top</a>
