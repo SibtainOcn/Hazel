@@ -48,6 +48,17 @@ Builds:
   # when none of the architecture builds fit; anything matching a real architecture is
   # offered that smaller file instead.
   #
+  # output: is relative to subdir:, which is already app/. Writing app/build/... here
+  # resolves to app/app/build/... and fails with "No apks match" straight after a build
+  # that in fact succeeded, which reads as a build failure and is not one.
+  #
+  # $$VERSION$$ rather than the literal version, and no gradleprops. F-Droid's bot adds
+  # each new release by copying these entries and changing only versionName, versionCode
+  # and commit. It does not touch output: or gradleprops:, so a literal version in either
+  # would be carried forward and the next release would look for a file the build never
+  # produced. $$VERSION$$ is substituted at build time; the version itself comes from
+  # gradle.properties, which the checkout already has.
+  #
   # There is deliberately no build: running ./gradlew here. F-Droid deletes
   # gradle-wrapper.jar before building, because a binary blob in the source tree is exactly
   # what they will not run, and supplies its own Gradle instead. The gradle: field is what
@@ -59,9 +70,7 @@ Builds:
     subdir: app
     gradle:
       - yes
-    gradleprops:
-      - VERSION_NAME=1.0.5
-    output: app/build/outputs/apk/release/Hazel-v1.0.5-universal-stable.apk
+    output: build/outputs/apk/release/Hazel-v$$VERSION$$-universal-stable.apk
 
   - versionName: 1.0.5
     versionCode: 201
@@ -69,9 +78,7 @@ Builds:
     subdir: app
     gradle:
       - yes
-    gradleprops:
-      - VERSION_NAME=1.0.5
-    output: app/build/outputs/apk/release/Hazel-v1.0.5-armeabi-v7a-stable.apk
+    output: build/outputs/apk/release/Hazel-v$$VERSION$$-armeabi-v7a-stable.apk
 
   - versionName: 1.0.5
     versionCode: 202
@@ -79,9 +86,7 @@ Builds:
     subdir: app
     gradle:
       - yes
-    gradleprops:
-      - VERSION_NAME=1.0.5
-    output: app/build/outputs/apk/release/Hazel-v1.0.5-x86-stable.apk
+    output: build/outputs/apk/release/Hazel-v$$VERSION$$-x86-stable.apk
 
   - versionName: 1.0.5
     versionCode: 203
@@ -89,9 +94,7 @@ Builds:
     subdir: app
     gradle:
       - yes
-    gradleprops:
-      - VERSION_NAME=1.0.5
-    output: app/build/outputs/apk/release/Hazel-v1.0.5-x86_64-stable.apk
+    output: build/outputs/apk/release/Hazel-v$$VERSION$$-x86_64-stable.apk
 
   - versionName: 1.0.5
     versionCode: 204
@@ -99,9 +102,7 @@ Builds:
     subdir: app
     gradle:
       - yes
-    gradleprops:
-      - VERSION_NAME=1.0.5
-    output: app/build/outputs/apk/release/Hazel-v1.0.5-arm64-v8a-stable.apk
+    output: build/outputs/apk/release/Hazel-v$$VERSION$$-arm64-v8a-stable.apk
 
 # Reproducible builds. F-Droid builds from source, compares the result against the APK you
 # published, and where they match it ships YOUR signed file, so an update from GitHub and an

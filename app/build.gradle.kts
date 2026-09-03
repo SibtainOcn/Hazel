@@ -68,10 +68,20 @@ gradle.taskGraph.whenReady {
     }
 }
 
-// The version this build reports. A tag build passes the tag through -PVERSION_NAME, so a
-// release is named by the tag that produced it rather than by whatever this file last said.
+// The version this build reports.
+//
+// A tag build passes the tag through -PVERSION_NAME, so a release is named by the tag that
+// produced it. Everything else falls back to gradle.properties, which is bumped alongside
+// the version code as part of cutting a release.
+//
+// The fallback is what lets F-Droid build this without being told the version. Their bot
+// adds each new release to its own recipe by copying the previous entry and changing the
+// tag, and it does not rewrite build arguments, so a recipe that had to pass -PVERSION_NAME
+// would carry the old version forward and produce an APK named after the wrong release.
+// Reading it from the repository means the checkout already knows.
 val hazelVersionName: String =
-    (project.findProperty("VERSION_NAME") as String?)
+    ((project.findProperty("VERSION_NAME") ?: project.findProperty("HAZEL_VERSION_NAME"))
+        as String?)
         ?.trim()
         ?.removePrefix("v")
         ?.takeIf { it.isNotBlank() }
