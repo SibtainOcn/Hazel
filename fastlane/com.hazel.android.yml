@@ -27,7 +27,9 @@ License: GPL-3.0-or-later
 AuthorName: SibtainOcn
 SourceCode: https://github.com/SibtainOcn/Hazel
 IssueTracker: https://github.com/SibtainOcn/Hazel/issues
-Changelog: https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md
+# /HEAD rather than /main, which is what fdroid lint asks for: it follows the default branch
+# whatever that branch is later renamed to.
+Changelog: https://github.com/SibtainOcn/Hazel/blob/HEAD/CHANGELOG.md
 
 # The app fetches yt-dlp updates from the GitHub API, which F-Droid classes as depending on
 # a non-free network service. It is a label on the listing, not a reason for rejection.
