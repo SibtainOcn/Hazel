@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.8] - 2026-09-03
+
+### Store
+- Download audio and video from YouTube, Instagram, TikTok, X, Reddit, SoundCloud and a
+  thousand other sites.
+- Queue a playlist or a whole channel, or share a link from any app and start at once.
+- Choose the audio language, cut sponsor segments, embed chapters and subtitles.
+- Background downloads you can pause, resume and cancel, with a Wi-Fi only mode.
+- No accounts and no analytics, and an incognito mode that records nothing.
+
+### Fixed
+- The published APKs no longer carry Gradle's dependency-metadata block inside the APK
+  signing block. AGP adds it by default, F-Droid's scanner rejects any APK that has it, and
+  it describes the machine that built the APK rather than the app.
+
 ## [1.0.7] - 2026-09-03
 
 ### Store

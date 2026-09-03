@@ -152,9 +152,9 @@ android {
         // The release's own code, with the architecture digits left at zero. This is what
         // the universal APK keeps and what a build with the splits turned off reports;
         // every per-architecture output replaces it further down.
-        versionCode = 400
+        versionCode = 500
 
-        versionName = "1.0.7"
+        versionName = "1.0.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -197,6 +197,14 @@ android {
             isUniversalApk = true
         }
     }
+    // F-Droid's scanner rejects APKs that carry the Gradle dependency-metadata block
+    // inside the APK Signing Block. AGP injects it by default; turning it off keeps the
+    // binary APKs clean and reproducible.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
     packaging {
         jniLibs {
             useLegacyPackaging = true
