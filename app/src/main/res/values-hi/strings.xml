@@ -188,9 +188,8 @@
     <string name="sponsor_section_ways">साथ देने के तरीके</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">हर महीने या एक बार, जब चाहें बंद करें। पूरा इंतज़ाम GitHub करता है।</string>
-    <string name="sponsor_kofi_title">Ko-fi</string>
-    <string name="sponsor_kofi_subtitle">एक बार का, खाते की ज़रूरत नहीं।</string>
-    <string name="sponsor_kofi_soon">जल्द खुल रहा है</string>
+    <string name="sponsor_bmac_title">Buy Me a Coffee</string>
+    <string name="sponsor_bmac_subtitle">एक बार का, खाते की ज़रूरत नहीं।</string>
     <string name="sponsor_section_free">कुछ खर्च नहीं, मदद उतनी ही</string>
     <string name="sponsor_star_title">प्रोजेक्ट को स्टार दें</string>
     <string name="sponsor_star_subtitle">ऐप आज़माने से पहले लोग यही एक आँकड़ा देखते हैं।</string>

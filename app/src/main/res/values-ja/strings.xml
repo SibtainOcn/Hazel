@@ -183,9 +183,8 @@
     <string name="sponsor_section_ways">支援方法</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">毎月または1回限り、いつでもキャンセル可能。GitHubを通じて安全に処理されます。</string>
-    <string name="sponsor_kofi_title">Ko-fi</string>
-    <string name="sponsor_kofi_subtitle">1回限りの支援。アカウント登録は不要です。</string>
-    <string name="sponsor_kofi_soon">近日対応予定</string>
+    <string name="sponsor_bmac_title">Buy Me a Coffee</string>
+    <string name="sponsor_bmac_subtitle">1回限りの支援。アカウント登録は不要です。</string>
     <string name="sponsor_section_free">無料でできる支援</string>
     <string name="sponsor_star_title">プロジェクトにStarをつける</string>
     <string name="sponsor_star_subtitle">アプリを試す前に多くの人が確認する重要な指標です。</string>

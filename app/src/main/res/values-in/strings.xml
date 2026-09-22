@@ -183,9 +183,8 @@
     <string name="sponsor_section_ways">Cara mendukung</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Bulanan atau sekali bayar, dapat dibatalkan kapan saja. Dikelola sepenuhnya oleh GitHub.</string>
-    <string name="sponsor_kofi_title">Ko-fi</string>
-    <string name="sponsor_kofi_subtitle">Sekali bayar, tidak perlu akun.</string>
-    <string name="sponsor_kofi_soon">Segera hadir</string>
+    <string name="sponsor_bmac_title">Buy Me a Coffee</string>
+    <string name="sponsor_bmac_subtitle">Sekali bayar, tidak perlu akun.</string>
     <string name="sponsor_section_free">Tanpa biaya, sangat membantu</string>
     <string name="sponsor_star_title">Beri bintang pada proyek</string>
     <string name="sponsor_star_subtitle">Angka utama yang dilihat orang sebelum mencoba aplikasi.</string>
