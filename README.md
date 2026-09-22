@@ -41,7 +41,7 @@ English
 &nbsp;&nbsp;| &nbsp;&nbsp;
 <a href="assets/TRANSLATIONS/README-sr.md">Српски</a>
 </div>
-
+<br> <!-- Adds vertical space here -->
 <div align="center">
 
 [![Android](https://img.shields.io/badge/Android-004242?style=for-the-badge&logo=android&logoColor=3DDC84)](https://github.com/SibtainOcn/Hazel/releases/latest)
