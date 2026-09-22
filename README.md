@@ -44,9 +44,10 @@ English
 
 <div align="center">
 
-[![Android](https://img.shields.io/badge/Android-0A0A0A?style=for-the-badge&logo=android&logoColor=3DDC84)](https://github.com/SibtainOcn/Hazel/releases/latest)
+[![Android](https://img.shields.io/badge/Android-004242?style=for-the-badge&logo=android&logoColor=3DDC84)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Download](https://img.shields.io/badge/Download-0A0A0A?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/packages/com.hazel.android/)
+<a href="https://www.buymeacoffee.com/sibtainocean"><img src="https://img.shields.io/badge/-Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" /></a>
 
 ![API](https://img.shields.io/badge/API-24%2B-brightgreen?style=flat-square)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
