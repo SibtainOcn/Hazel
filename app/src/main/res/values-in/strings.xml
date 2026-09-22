@@ -311,6 +311,22 @@
     <string name="history_row_remove">Hapus dari daftar</string>
     <string name="history_row_delete">Hapus file</string>
     <string name="history_toast_file_gone">File ini sudah tidak ada di perangkat Anda</string>
+    <string name="history_tab_downloading">Mengunduh</string>
+    <string name="history_tab_queued">Dalam antrean</string>
+    <string name="history_tab_failed">Gagal</string>
+    <string name="history_empty_downloading">Tidak ada unduhan yang sedang berjalan</string>
+    <string name="history_empty_downloading_sub">Unduhan aktif muncul di sini dengan kecepatan dan progres langsung.</string>
+    <string name="history_empty_queued">Tidak ada unduhan dalam antrean</string>
+    <string name="history_empty_queued_sub">Tautan yang menunggu untuk diunduh akan muncul di sini.</string>
+    <string name="history_empty_failed">Tidak ada unduhan yang gagal</string>
+    <string name="history_empty_failed_sub">Unduhan yang mengalami kesalahan akan muncul di sini dengan catatan kesalahan.</string>
+    <string name="history_failed_error_log">Catatan Kesalahan</string>
+    <string name="history_failed_copy_log">Salin Catatan</string>
+    <string name="history_failed_log_copied">Catatan kesalahan disalin ke papan klip</string>
+    <string name="history_failed_retry">Coba lagi</string>
+    <string name="history_failed_dismiss">Tutup</string>
+    <string name="history_failed_clear_all">Hapus semua yang gagal</string>
+    <string name="history_retrying_toast">Mencoba mengunduh lagi…</string>
 
     <!-- DownloadPropertiesSheet -->
     <string name="properties_title">Properti</string>

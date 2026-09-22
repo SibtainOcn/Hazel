@@ -311,6 +311,22 @@
     <string name="history_row_remove">从列表中移除</string>
     <string name="history_row_delete">删除文件</string>
     <string name="history_toast_file_gone">这个文件已经不在你的设备上了</string>
+    <string name="history_tab_downloading">下载中</string>
+    <string name="history_tab_queued">已排队</string>
+    <string name="history_tab_failed">已失败</string>
+    <string name="history_empty_downloading">没有正在进行的下载</string>
+    <string name="history_empty_downloading_sub">正在进行的下载会在此显示实时速度和进度。</string>
+    <string name="history_empty_queued">队列中没有下载项</string>
+    <string name="history_empty_queued_sub">等待下载的链接会在此显示。</string>
+    <string name="history_empty_failed">没有失败的下载</string>
+    <string name="history_empty_failed_sub">遇到错误的下载项将在此处显示错误日志。</string>
+    <string name="history_failed_error_log">错误日志</string>
+    <string name="history_failed_copy_log">复制日志</string>
+    <string name="history_failed_log_copied">错误日志已复制到剪贴板</string>
+    <string name="history_failed_retry">重试</string>
+    <string name="history_failed_dismiss">关闭</string>
+    <string name="history_failed_clear_all">清除所有失败项</string>
+    <string name="history_retrying_toast">正在重试下载…</string>
 
     <!-- DownloadPropertiesSheet -->
     <string name="properties_title">属性</string>

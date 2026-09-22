@@ -333,16 +333,19 @@ fun HistoryScreen(
                 val label = when (option) {
                     HistoryFilter.ALL -> option.label
                     HistoryFilter.DOWNLOADING -> {
-                        if (downloadState.isDownloading || downloadState.isProcessing) "Downloading (1)"
-                        else "Downloading"
+                        val base = stringResource(R.string.history_tab_downloading)
+                        if (downloadState.isDownloading || downloadState.isProcessing) "$base (1)"
+                        else base
                     }
                     HistoryFilter.QUEUED -> {
-                        if (queueList.isNotEmpty()) "Queued (${queueList.size})"
-                        else "Queued"
+                        val base = stringResource(R.string.history_tab_queued)
+                        if (queueList.isNotEmpty()) "$base (${queueList.size})"
+                        else base
                     }
                     HistoryFilter.FAILED -> {
-                        if (failedList.isNotEmpty()) "Failed (${failedList.size})"
-                        else "Failed"
+                        val base = stringResource(R.string.history_tab_failed)
+                        if (failedList.isNotEmpty()) "$base (${failedList.size})"
+                        else base
                     }
                     HistoryFilter.AUDIO -> option.label
                     HistoryFilter.VIDEO -> option.label

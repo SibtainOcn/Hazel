@@ -321,6 +321,22 @@
     <string name="history_row_remove">Remover da lista</string>
     <string name="history_row_delete">Excluir o arquivo</string>
     <string name="history_toast_file_gone">Este arquivo não está mais no seu aparelho</string>
+    <string name="history_tab_downloading">Baixando</string>
+    <string name="history_tab_queued">Na fila</string>
+    <string name="history_tab_failed">Com falha</string>
+    <string name="history_empty_downloading">Nenhum download em andamento</string>
+    <string name="history_empty_downloading_sub">Downloads ativos aparecem aqui com velocidade e progresso em tempo real.</string>
+    <string name="history_empty_queued">Nenhum download na fila</string>
+    <string name="history_empty_queued_sub">Links aguardando download aparecerão aqui.</string>
+    <string name="history_empty_failed">Nenhum download com falha</string>
+    <string name="history_empty_failed_sub">Downloads com erros aparecerão aqui com o registro de erros.</string>
+    <string name="history_failed_error_log">Registro de erros</string>
+    <string name="history_failed_copy_log">Copiar registro</string>
+    <string name="history_failed_log_copied">Registro de erros copiado para a área de transferência</string>
+    <string name="history_failed_retry">Tentar novamente</string>
+    <string name="history_failed_dismiss">Dispensar</string>
+    <string name="history_failed_clear_all">Limpar todos os que falharam</string>
+    <string name="history_retrying_toast">Tentando baixar novamente…</string>
 
     <!-- DownloadPropertiesSheet -->
     <string name="properties_title">Propriedades</string>

@@ -90,6 +90,9 @@ jobs:
           # the caches stay small and one branch cannot poison another.
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
+      - name: Run artist metadata & format test harness
+        run: python3 tools/test_artist_metadata.py
+
       # The unit tests are pure JVM: no emulator, no device, no Android framework. That is
       # what keeps this job to seconds, and it is the property to protect as the suite grows.
       - name: Run unit tests
