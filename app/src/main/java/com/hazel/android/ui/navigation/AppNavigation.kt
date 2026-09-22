@@ -215,6 +215,9 @@ fun AppNavigation(
             }
         }
     ) { innerPadding ->
+        val downloadViewModel: com.hazel.android.download.DownloadViewModel =
+            androidx.lifecycle.viewmodel.compose.viewModel()
+
         NavHost(
             navController = navController,
             startDestination = Screen.Download.route,
@@ -225,8 +228,6 @@ fun AppNavigation(
             popExitTransition = { M3Motion.backExit() }
         ) {
             composable(Screen.Download.route) {
-                val downloadViewModel: com.hazel.android.download.DownloadViewModel =
-                    androidx.lifecycle.viewmodel.compose.viewModel()
                 DownloadScreen(
                     pendingShares = pendingShares,
                     pendingFailure = pendingFailure,
@@ -236,7 +237,7 @@ fun AppNavigation(
                 )
             }
             composable(Screen.History.route) {
-                HistoryScreen()
+                HistoryScreen(downloadViewModel = downloadViewModel)
             }
             composable(Screen.More.route) {
                 MoreScreen(

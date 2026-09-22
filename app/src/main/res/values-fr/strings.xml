@@ -290,7 +290,7 @@
     <string name="cleanup_confirm_all_cancel">Annuler</string>
 
     <!-- HistoryScreen -->
-    <string name="history_title">Téléchargements</string>
+    <string name="history_title">Tous les téléchargements</string>
     <string name="history_layout_grid">Afficher les grandes images</string>
     <string name="history_layout_list">Afficher en liste</string>
     <string name="history_search_action">Chercher dans les téléchargements</string>
@@ -321,6 +321,23 @@
     <string name="history_row_remove">Retirer de la liste</string>
     <string name="history_row_delete">Supprimer le fichier</string>
     <string name="history_toast_file_gone">Ce fichier n\'est plus sur votre appareil</string>
+    <string name="history_tab_downloading">Téléchargement</string>
+    <string name="history_tab_queued">En attente</string>
+    <string name="history_tab_failed">Échecs</string>
+    <string name="history_empty_downloading">Aucun téléchargement en cours</string>
+    <string name="history_empty_downloading_sub">Les téléchargements actifs s\'affichent ici avec la vitesse et la progression.</string>
+    <string name="history_empty_queued">Aucun téléchargement en file d\'attente</string>
+    <string name="history_empty_queued_sub">Les liens en attente de téléchargement apparaîtront ici.</string>
+    <string name="history_empty_failed">Aucun téléchargement échoué</string>
+    <string name="history_empty_failed_sub">Les téléchargements ayant rencontré des erreurs apparaîtront ici avec leur journal d\'erreurs.</string>
+    <string name="history_failed_error_log">Journal d\'erreurs</string>
+    <string name="history_failed_copy_log">Copier le journal</string>
+    <string name="history_failed_log_copied">Journal d\'erreurs copié dans le presse-papiers</string>
+    <string name="history_failed_retry">Réessayer</string>
+    <string name="history_failed_dismiss">Ignorer</string>
+    <string name="history_failed_clear_all">Tout effacer</string>
+    <string name="history_queue_clear_all">Vider la file d\'attente</string>
+    <string name="history_retrying_toast">Nouvelle tentative de téléchargement…</string>
 
     <!-- DownloadPropertiesSheet -->
     <string name="properties_title">Propriétés</string>

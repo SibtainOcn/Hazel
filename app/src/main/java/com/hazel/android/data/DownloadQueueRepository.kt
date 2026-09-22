@@ -7,7 +7,13 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadPlan
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -70,21 +76,38 @@ object DownloadQueueRepository {
 
     private val QUEUE_KEY = stringPreferencesKey("download_queue")
 
+    /** Observe the current queue as a reactive Flow. */
+    fun getQueue(context: Context): Flow<List<QueuedDownload>> =
+        context.dataStore.data
+            .map { prefs -> prefs[QUEUE_KEY] }
+            .distinctUntilChanged()
+            .map { raw ->
+                withContext(Dispatchers.Default) {
+                    decode(raw)
+                }
+            }
+            .flowOn(Dispatchers.Default)
+
     /** Everything still waiting, oldest first. */
-    suspend fun load(context: Context): List<QueuedDownload> =
-        decode(context.dataStore.data.first()[QUEUE_KEY])
+    suspend fun load(context: Context): List<QueuedDownload> = withContext(Dispatchers.IO) {
+        val raw = context.dataStore.data.first()[QUEUE_KEY]
+        withContext(Dispatchers.Default) {
+            decode(raw)
+        }
+    }
 
     /** Replaces the stored queue with [items]. */
-    suspend fun save(context: Context, items: List<QueuedDownload>) {
+    suspend fun save(context: Context, items: List<QueuedDownload>) = withContext(Dispatchers.IO) {
+        val encoded = withContext(Dispatchers.Default) { encode(items) }
         context.dataStore.edit { prefs ->
             if (items.isEmpty()) prefs.remove(QUEUE_KEY)
-            else prefs[QUEUE_KEY] = encode(items)
+            else prefs[QUEUE_KEY] = encoded
         }
     }
 
     /** Adds to the end of the queue, ignoring a link already waiting there. */
-    suspend fun add(context: Context, items: List<QueuedDownload>) {
-        if (items.isEmpty()) return
+    suspend fun add(context: Context, items: List<QueuedDownload>) = withContext(Dispatchers.IO) {
+        if (items.isEmpty()) return@withContext
         context.dataStore.edit { prefs ->
             val existing = decode(prefs[QUEUE_KEY])
             val known = existing.mapTo(mutableSetOf()) { it.url }
@@ -94,7 +117,7 @@ object DownloadQueueRepository {
     }
 
     /** Takes one link out, whether it finished, failed for good, or was cancelled. */
-    suspend fun remove(context: Context, url: String) {
+    suspend fun remove(context: Context, url: String) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
             val remaining = decode(prefs[QUEUE_KEY]).filterNot { it.url == url }
             if (remaining.isEmpty()) prefs.remove(QUEUE_KEY)
@@ -102,12 +125,12 @@ object DownloadQueueRepository {
         }
     }
 
-    suspend fun clear(context: Context) {
+    suspend fun clear(context: Context) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs -> prefs.remove(QUEUE_KEY) }
     }
 
     /** Marks one link as stopped on purpose, or as owed again. */
-    suspend fun setPaused(context: Context, url: String, paused: Boolean) {
+    suspend fun setPaused(context: Context, url: String, paused: Boolean) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
             val updated = decode(prefs[QUEUE_KEY]).map {
                 if (it.url == url) it.copy(paused = paused) else it
@@ -118,7 +141,7 @@ object DownloadQueueRepository {
     }
 
     /** Clears the paused mark from everything, for a run being started again. */
-    suspend fun clearPaused(context: Context) {
+    suspend fun clearPaused(context: Context) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
             val updated = decode(prefs[QUEUE_KEY]).map { it.copy(paused = false) }
             if (updated.isEmpty()) prefs.remove(QUEUE_KEY)
@@ -126,33 +149,72 @@ object DownloadQueueRepository {
         }
     }
 
+    fun encodeItem(item: QueuedDownload): String = JSONObject().apply {
+        put("url", item.url)
+        put("title", item.title)
+        put("author", item.author)
+        put("thumbnail", item.thumbnail ?: JSONObject.NULL)
+        put("duration", item.durationSeconds)
+        put("formatId", item.formatId)
+        put("selector", item.selector)
+        put("formatLabel", item.formatLabel)
+        put("ext", item.ext)
+        put("hasVideo", item.hasVideo)
+        put("hasAudio", item.hasAudio)
+        put("isGeneric", item.isGeneric)
+        put("size", item.fileSizeBytes)
+        put("mergeAudio", item.mergeAudioSelector ?: JSONObject.NULL)
+        put("mergeAudioSize", item.mergeAudioSizeBytes)
+        put("treeUri", item.treeUri)
+        put("requiresSignIn", item.requiresSignIn)
+        put("audioLanguage", item.audioLanguage ?: JSONObject.NULL)
+        put("options", encodeOptions(item.options))
+        put("paused", item.paused)
+    }.toString()
+
+    fun decodeItem(raw: String?): QueuedDownload? {
+        if (raw.isNullOrBlank()) return null
+        return runCatching {
+            decodeObject(JSONObject(raw))
+        }.getOrNull()
+    }
+
+    private fun decodeObject(item: JSONObject): QueuedDownload? {
+        val url = item.optString("url").takeIf { it.isNotBlank() } ?: return null
+        return QueuedDownload(
+            url = url,
+            title = item.optString("title"),
+            author = item.optString("author"),
+            thumbnail = item.optString("thumbnail").takeIf {
+                it.isNotBlank() && it != "null"
+            },
+            durationSeconds = item.optInt("duration"),
+            formatId = item.optString("formatId"),
+            selector = item.optString("selector"),
+            formatLabel = item.optString("formatLabel"),
+            ext = item.optString("ext"),
+            hasVideo = item.optBoolean("hasVideo"),
+            hasAudio = item.optBoolean("hasAudio"),
+            isGeneric = item.optBoolean("isGeneric"),
+            fileSizeBytes = item.optLong("size"),
+            mergeAudioSelector = item.optString("mergeAudio").takeIf {
+                it.isNotBlank() && it != "null"
+            },
+            mergeAudioSizeBytes = item.optLong("mergeAudioSize"),
+            treeUri = item.optString("treeUri"),
+            requiresSignIn = item.optBoolean("requiresSignIn"),
+            audioLanguage = item.optString("audioLanguage").takeIf {
+                it.isNotBlank() && it != "null"
+            },
+            options = decodeOptions(item.optJSONObject("options")),
+            paused = item.optBoolean("paused")
+        )
+    }
+
     private fun encode(items: List<QueuedDownload>): String {
         val array = JSONArray()
         items.forEach { item ->
-            array.put(
-                JSONObject().apply {
-                    put("url", item.url)
-                    put("title", item.title)
-                    put("author", item.author)
-                    put("thumbnail", item.thumbnail ?: JSONObject.NULL)
-                    put("duration", item.durationSeconds)
-                    put("formatId", item.formatId)
-                    put("selector", item.selector)
-                    put("formatLabel", item.formatLabel)
-                    put("ext", item.ext)
-                    put("hasVideo", item.hasVideo)
-                    put("hasAudio", item.hasAudio)
-                    put("isGeneric", item.isGeneric)
-                    put("size", item.fileSizeBytes)
-                    put("mergeAudio", item.mergeAudioSelector ?: JSONObject.NULL)
-                    put("mergeAudioSize", item.mergeAudioSizeBytes)
-                    put("treeUri", item.treeUri)
-                    put("requiresSignIn", item.requiresSignIn)
-                    put("audioLanguage", item.audioLanguage ?: JSONObject.NULL)
-                    put("options", encodeOptions(item.options))
-                    put("paused", item.paused)
-                }
-            )
+            array.put(JSONObject(encodeItem(item)))
         }
         return array.toString()
     }
@@ -162,38 +224,7 @@ object DownloadQueueRepository {
         return runCatching {
             val array = JSONArray(raw)
             (0 until array.length()).mapNotNull { index ->
-                val item = array.optJSONObject(index) ?: return@mapNotNull null
-                val url = item.optString("url").takeIf { it.isNotBlank() }
-                    ?: return@mapNotNull null
-
-                QueuedDownload(
-                    url = url,
-                    title = item.optString("title"),
-                    author = item.optString("author"),
-                    thumbnail = item.optString("thumbnail").takeIf {
-                        it.isNotBlank() && it != "null"
-                    },
-                    durationSeconds = item.optInt("duration"),
-                    formatId = item.optString("formatId"),
-                    selector = item.optString("selector"),
-                    formatLabel = item.optString("formatLabel"),
-                    ext = item.optString("ext"),
-                    hasVideo = item.optBoolean("hasVideo"),
-                    hasAudio = item.optBoolean("hasAudio"),
-                    isGeneric = item.optBoolean("isGeneric"),
-                    fileSizeBytes = item.optLong("size"),
-                    mergeAudioSelector = item.optString("mergeAudio").takeIf {
-                        it.isNotBlank() && it != "null"
-                    },
-                    mergeAudioSizeBytes = item.optLong("mergeAudioSize"),
-                    treeUri = item.optString("treeUri"),
-                    requiresSignIn = item.optBoolean("requiresSignIn"),
-                    audioLanguage = item.optString("audioLanguage").takeIf {
-                        it.isNotBlank() && it != "null"
-                    },
-                    options = decodeOptions(item.optJSONObject("options")),
-                    paused = item.optBoolean("paused")
-                )
+                array.optJSONObject(index)?.let { decodeObject(it) }
             }
         }.getOrDefault(emptyList())
     }

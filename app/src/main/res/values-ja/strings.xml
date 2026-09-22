@@ -280,7 +280,7 @@
     <string name="cleanup_confirm_all_cancel">キャンセル</string>
 
     <!-- HistoryScreen -->
-    <string name="history_title">ダウンロード</string>
+    <string name="history_title">すべてのダウンロード</string>
     <string name="history_layout_grid">大きいサムネイルを表示</string>
     <string name="history_layout_list">リスト形式で表示</string>
     <string name="history_search_action">ダウンロードを検索</string>
@@ -311,6 +311,23 @@
     <string name="history_row_remove">リストから削除</string>
     <string name="history_row_delete">ファイルを削除</string>
     <string name="history_toast_file_gone">このファイルは端末上に見つかりません</string>
+    <string name="history_tab_downloading">ダウンロード中</string>
+    <string name="history_tab_queued">待機中</string>
+    <string name="history_tab_failed">失敗</string>
+    <string name="history_empty_downloading">進行中のダウンロードはありません</string>
+    <string name="history_empty_downloading_sub">実行中のダウンロードは速度と進捗とともにここに表示されます。</string>
+    <string name="history_empty_queued">待機中のダウンロードはありません</string>
+    <string name="history_empty_queued_sub">ダウンロード待機中のリンクはここに表示されます。</string>
+    <string name="history_empty_failed">失敗したダウンロードはありません</string>
+    <string name="history_empty_failed_sub">エラーが発生したダウンロードはエラーログとともにここに表示されます。</string>
+    <string name="history_failed_error_log">エラーログ</string>
+    <string name="history_failed_copy_log">ログをコピー</string>
+    <string name="history_failed_log_copied">エラーログをクリップボードにコピーしました</string>
+    <string name="history_failed_retry">再試行</string>
+    <string name="history_failed_dismiss">閉じる</string>
+    <string name="history_failed_clear_all">失敗した項目をすべて消去</string>
+    <string name="history_queue_clear_all">キューを消去</string>
+    <string name="history_retrying_toast">ダウンロードを再試行しています…</string>
 
     <!-- DownloadPropertiesSheet -->
     <string name="properties_title">プロパティ</string>

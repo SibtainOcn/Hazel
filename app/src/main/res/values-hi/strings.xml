@@ -285,7 +285,7 @@
     <string name="cleanup_confirm_all_cancel">रद्द करें</string>
 
     <!-- HistoryScreen -->
-    <string name="history_title">डाउनलोड</string>
+    <string name="history_title">सभी डाउनलोड</string>
     <string name="history_layout_grid">बड़ी तस्वीरें दिखाएँ</string>
     <string name="history_layout_list">सूची के रूप में दिखाएँ</string>
     <string name="history_search_action">डाउनलोड में खोजें</string>
@@ -316,6 +316,23 @@
     <string name="history_row_remove">सूची से हटाएँ</string>
     <string name="history_row_delete">फ़ाइल हटाएँ</string>
     <string name="history_toast_file_gone">यह फ़ाइल अब आपके डिवाइस पर नहीं है</string>
+    <string name="history_tab_downloading">डाउनलोड हो रहा है</string>
+    <string name="history_tab_queued">कतार में</string>
+    <string name="history_tab_failed">विफल</string>
+    <string name="history_empty_downloading">कोई डाउनलोड प्रगति में नहीं है</string>
+    <string name="history_empty_downloading_sub">सक्रिय डाउनलोड गति और प्रगति के साथ यहाँ दिखाई देंगे।</string>
+    <string name="history_empty_queued">कतार में कोई डाउनलोड नहीं है</string>
+    <string name="history_empty_queued_sub">डाउनलोड होने की प्रतीक्षा कर रहे लिंक यहाँ दिखाई देंगे।</string>
+    <string name="history_empty_failed">कोई विफल डाउनलोड नहीं है</string>
+    <string name="history_empty_failed_sub">जिन डाउनलोड में त्रुटियाँ आएंगी वे त्रुटि लॉग के साथ यहाँ दिखाई देंगे।</string>
+    <string name="history_failed_error_log">त्रुटि लॉग</string>
+    <string name="history_failed_copy_log">लॉग कॉपी करें</string>
+    <string name="history_failed_log_copied">त्रुटि लॉग क्लिपबोर्ड पर कॉपी किया गया</string>
+    <string name="history_failed_retry">पुनः प्रयास करें</string>
+    <string name="history_failed_dismiss">खारिज करें</string>
+    <string name="history_failed_clear_all">सभी विफल हटाएँ</string>
+    <string name="history_queue_clear_all">कतार साफ़ करें</string>
+    <string name="history_retrying_toast">डाउनलोड का पुनः प्रयास किया जा रहा है…</string>
 
     <!-- DownloadPropertiesSheet -->
     <string name="properties_title">विवरण</string>

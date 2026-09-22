@@ -1014,6 +1014,9 @@ class DownloadViewModel : ViewModel() {
 
                     finishDownload(app, plan, options)
                     markBatch(plan.info.url, BatchState.DONE)
+                    downloadScope.launch {
+                        com.hazel.android.data.FailedDownloadRepository.removeByUrl(app, plan.info.url)
+                    }
                 } catch (_: CancellationException) {
                     if (isPaused) {
                         holdForResume(next)
@@ -1039,6 +1042,21 @@ class DownloadViewModel : ViewModel() {
                         platform = detectPlatform(plan.info.url),
                         error = e.message ?: "Download failed"
                     )
+                    val queuedPayload = DownloadQueueRepository.encodeItem(next)
+                    downloadScope.launch {
+                        com.hazel.android.data.FailedDownloadRepository.record(
+                            app,
+                            com.hazel.android.data.FailedDownload(
+                                url = plan.info.url,
+                                title = plan.info.title.ifBlank { plan.title },
+                                author = plan.author.ifBlank { plan.info.uploader },
+                                thumbnail = plan.info.thumbnail,
+                                isVideo = plan.format.hasVideo,
+                                errorLog = e.message ?: "Download failed",
+                                queuedPayload = queuedPayload
+                            )
+                        )
+                    }
                     // One bad link does not stop the rest: the failure is recorded against
                     // that item and the batch carries on.
                     purgeFragments()
@@ -1255,6 +1273,37 @@ class DownloadViewModel : ViewModel() {
         _state.value = DownloadState()
     }
 
+    /** Removes an item from the waiting queue. */
+    fun removeQueued(context: Context, url: String) {
+        synchronized(queue) {
+            val iterator = queue.iterator()
+            while (iterator.hasNext()) {
+                if (iterator.next().url == url) {
+                    iterator.remove()
+                }
+            }
+        }
+        _state.value = _state.value.copy(
+            batch = _state.value.batch.filterNot { it.url == url }
+        )
+        downloadScope.launch {
+            DownloadQueueRepository.remove(context, url)
+        }
+    }
+
+    /** Retries a failed download, either directly from its queued payload or by fetching anew. */
+    fun retryFailed(context: Context, failed: com.hazel.android.data.FailedDownload) {
+        downloadScope.launch {
+            com.hazel.android.data.FailedDownloadRepository.remove(context, failed.id)
+        }
+        val queued = DownloadQueueRepository.decodeItem(failed.queuedPayload)
+        if (queued != null) {
+            startBatch(context, listOf(queued.toPlan()), queued.options, queued.treeUri)
+        } else {
+            fetchAll(listOf(failed.url))
+        }
+    }
+
     // ── Internals ──
 
     /**
@@ -1434,19 +1483,32 @@ class DownloadViewModel : ViewModel() {
     /**
      * Writes an edited title or author into the file's tags.
      *
-     * yt-dlp reads `--parse-metadata` as `FROM:TO`, so a value containing a colon would be
-     * split in the wrong place. Such a value is left out of the tags; it still reaches the
-     * filename through [outputTemplate], which has no such restriction.
+     * yt-dlp reads `--parse-metadata` as `FROM:TO`, splitting on the first unescaped colon.
+     * Colons inside the user's value are escaped as `\:` so they pass through the split
+     * as literal characters. This fixes the previous approach of skipping values that
+     * contained colons altogether.
+     *
+     * The author is also copied into the `artist` metadata slot, which is what
+     * `FFmpegMetadataPP` writes as the ID3 / Vorbis / MP4 artist tag. Without this,
+     * music platforms that populate `artist` instead of `uploader` (JioSaavn, SoundCloud,
+     * Bandcamp) would leave audio files with no artist tag at all.
      */
     private fun YoutubeDLRequest.applyMetadata(title: String, author: String) {
-        val overrides = buildList {
-            if (title.isNotBlank() && ':' !in title) add("$title:%(title)s")
-            if (author.isNotBlank() && ':' !in author) add("$author:%(uploader)s")
-        }
-        if (overrides.isEmpty()) return
+        if (title.isBlank() && author.isBlank()) return
 
         addOption("--embed-metadata")
-        overrides.forEach { addOption("--parse-metadata", it) }
+
+        if (title.isNotBlank()) {
+            val escaped = title.replace(":", """\:""")
+            addOption("--parse-metadata", "$escaped:%(title)s")
+        }
+
+        if (author.isNotBlank()) {
+            val escaped = author.replace(":", """\:""")
+            addOption("--parse-metadata", "$escaped:%(uploader)s")
+            // Map uploader → artist tag so audio files get a proper artist ID3/Vorbis tag
+            addOption("--parse-metadata", "%(uploader)s:%(artist)s")
+        }
     }
 
     /**

@@ -295,7 +295,7 @@
     <string name="cleanup_confirm_all_cancel">Отмена</string>
 
     <!-- HistoryScreen -->
-    <string name="history_title">Загрузки</string>
+    <string name="history_title">Все загрузки</string>
     <string name="history_layout_grid">Крупные обложки</string>
     <string name="history_layout_list">Показать списком</string>
     <string name="history_search_action">Поиск загрузок</string>
@@ -326,6 +326,23 @@
     <string name="history_row_remove">Удалить из списка</string>
     <string name="history_row_delete">Удалить файл</string>
     <string name="history_toast_file_gone">Этот файл больше не найден на устройстве</string>
+    <string name="history_tab_downloading">Загрузка</string>
+    <string name="history_tab_queued">В очереди</string>
+    <string name="history_tab_failed">С ошибкой</string>
+    <string name="history_empty_downloading">Нет активных загрузок</string>
+    <string name="history_empty_downloading_sub">Текущие загрузки отображаются здесь со скоростью и ходом выполнения.</string>
+    <string name="history_empty_queued">В очереди нет загрузок</string>
+    <string name="history_empty_queued_sub">Ссылки, ожидающие загрузки, появятся здесь.</string>
+    <string name="history_empty_failed">Нет загрузок с ошибками</string>
+    <string name="history_empty_failed_sub">Загрузки с ошибками отображаются здесь с журналом ошибок.</string>
+    <string name="history_failed_error_log">Журнал ошибок</string>
+    <string name="history_failed_copy_log">Копировать журнал</string>
+    <string name="history_failed_log_copied">Журнал ошибок скопирован в буфер обмена</string>
+    <string name="history_failed_retry">Повторить</string>
+    <string name="history_failed_dismiss">Закрыть</string>
+    <string name="history_failed_clear_all">Очистить все ошибки</string>
+    <string name="history_queue_clear_all">Очистить очередь</string>
+    <string name="history_retrying_toast">Повторная попытка загрузки…</string>
 
     <!-- DownloadPropertiesSheet -->
     <string name="properties_title">Свойства</string>

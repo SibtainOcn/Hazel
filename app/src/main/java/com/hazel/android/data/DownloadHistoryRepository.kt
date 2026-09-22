@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.hazel.android.util.MediaPresence
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -66,6 +68,9 @@ enum class HistorySort(val label: String) {
 /** Which kinds of download the list shows. */
 enum class HistoryFilter(val label: String) {
     ALL("All"),
+    DOWNLOADING("Downloading"),
+    QUEUED("Queued"),
+    FAILED("Failed"),
     AUDIO("Audio"),
     VIDEO("Video")
 }
@@ -85,22 +90,32 @@ object DownloadHistoryRepository {
     private val HISTORY_KEY = stringPreferencesKey("download_history")
 
     fun getHistory(context: Context): Flow<List<HistoryEntry>> =
-        context.dataStore.data.map { prefs -> decode(prefs[HISTORY_KEY]) }
+        context.dataStore.data
+            .map { prefs -> prefs[HISTORY_KEY] }
+            .distinctUntilChanged()
+            .map { raw ->
+                withContext(Dispatchers.Default) {
+                    decode(raw)
+                }
+            }
+            .flowOn(Dispatchers.Default)
 
-    suspend fun record(context: Context, entry: HistoryEntry) {
+    suspend fun record(context: Context, entry: HistoryEntry) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
             val existing = decode(prefs[HISTORY_KEY])
             prefs[HISTORY_KEY] = encode((listOf(entry) + existing).take(LIMIT))
         }
     }
 
-    suspend fun remove(context: Context, id: Long) {
+    suspend fun remove(context: Context, id: Long) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
-            prefs[HISTORY_KEY] = encode(decode(prefs[HISTORY_KEY]).filterNot { it.id == id })
+            val remaining = decode(prefs[HISTORY_KEY]).filterNot { it.id == id }
+            if (remaining.isEmpty()) prefs.remove(HISTORY_KEY)
+            else prefs[HISTORY_KEY] = encode(remaining)
         }
     }
 
-    suspend fun clear(context: Context) {
+    suspend fun clear(context: Context) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs -> prefs.remove(HISTORY_KEY) }
     }
 

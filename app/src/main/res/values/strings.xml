@@ -301,7 +301,7 @@
     <string name="cleanup_confirm_all_cancel">Cancel</string>
 
     <!-- HistoryScreen -->
-    <string name="history_title">Downloads</string>
+    <string name="history_title">All Downloads</string>
     <string name="history_layout_grid">Show large artwork</string>
     <string name="history_layout_list">Show as a list</string>
     <string name="history_search_action">Search downloads</string>
@@ -332,6 +332,23 @@
     <string name="history_row_remove">Remove from list</string>
     <string name="history_row_delete">Delete file</string>
     <string name="history_toast_file_gone">This file is no longer on your device</string>
+    <string name="history_tab_downloading">Downloading</string>
+    <string name="history_tab_queued">Queued</string>
+    <string name="history_tab_failed">Failed</string>
+    <string name="history_empty_downloading">No downloads in progress</string>
+    <string name="history_empty_downloading_sub">Active downloads appear here with live speed and progress.</string>
+    <string name="history_empty_queued">No queued downloads</string>
+    <string name="history_empty_queued_sub">Links waiting to be downloaded will appear here.</string>
+    <string name="history_empty_failed">No failed downloads</string>
+    <string name="history_empty_failed_sub">Downloads that encounter errors will appear here with error logs.</string>
+    <string name="history_failed_error_log">Error Log</string>
+    <string name="history_failed_copy_log">Copy Log</string>
+    <string name="history_failed_log_copied">Error log copied to clipboard</string>
+    <string name="history_failed_retry">Retry</string>
+    <string name="history_failed_dismiss">Dismiss</string>
+    <string name="history_failed_clear_all">Clear all failed</string>
+    <string name="history_queue_clear_all">Clear queue</string>
+    <string name="history_retrying_toast">Retrying download…</string>
 
     <!-- DownloadPropertiesSheet -->
     <string name="properties_title">Properties</string>

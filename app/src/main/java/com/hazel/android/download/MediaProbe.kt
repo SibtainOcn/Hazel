@@ -252,6 +252,7 @@ object MediaProbe {
             url = address,
             title = title.ifBlank { address },
             uploader = firstNonBlank(
+                resolveArtist(json),
                 json.optString("uploader"),
                 json.optString("channel"),
                 json.optString("uploader_id")
@@ -431,10 +432,12 @@ object MediaProbe {
             url = firstNonBlank(media.optString("webpage_url"), root.optString("webpage_url"), url),
             title = resolveTitle(media, root),
             uploader = firstNonBlank(
+                resolveArtist(media),
                 media.optString("uploader"),
                 media.optString("channel"),
                 media.optString("creator"),
                 media.optString("uploader_id"),
+                resolveArtist(root),
                 root.optString("uploader"),
                 root.optString("channel")
             ),
@@ -494,6 +497,9 @@ object MediaProbe {
 
         val height = json.optInt("height", 0)
         val fps = json.optInt("fps", 0)
+        val audioExt = json.optString("audio_ext").takeIf { it.isNotBlank() && it != "none" && it != "null" }
+        val resolution = json.optString("resolution").lowercase()
+        val abr = json.optPositiveDouble("abr")
 
         // When neither codec was reported, assume a combined stream rather than dropping a
         // format the source can very likely download.
@@ -507,14 +513,18 @@ object MediaProbe {
         val hasAudio = when {
             acodec != null -> true
             hasAudioKey -> false
+            // yt-dlp extractor handling: extractors like JioSaavn emit vcodec="none" with bitrate/audio_ext
+            // but omit the acodec key entirely. Retain valid audio streams instead of discarding them.
+            audioExt != null || resolution.contains("audio only") || abr != null || ext.isAudioContainer() -> true
             codecsUnknown -> !hasVideo || ext.isVideoContainer() || fallbackId != null
+            !hasVideo -> true
             else -> false
         }
 
         if (!hasVideo && !hasAudio) return null
 
         val bitrate = json.optPositiveDouble("tbr")
-            ?: json.optPositiveDouble("abr")
+            ?: abr
             ?: json.optPositiveDouble("vbr")
             ?: 0.0
 
@@ -542,7 +552,7 @@ object MediaProbe {
                 .takeIf { it.isNotBlank() && it != "null" && it != "none" },
             ext = ext ?: "",
             vcodec = vcodec,
-            acodec = acodec,
+            acodec = acodec ?: if (hasAudio && !hasVideo) (audioExt ?: ext) else null,
             height = height,
             fps = fps,
             bitrateKbps = bitrate,
@@ -590,6 +600,26 @@ object MediaProbe {
         // step it is and nothing at all about how big the picture is.
         return if (resolution != null && !base.contains(resolution)) "$base ($resolution)"
         else base
+    }
+
+    /**
+     * Resolves the artist name from extractor metadata.
+     *
+     * Music extractors (JioSaavn, SoundCloud, Bandcamp, Spotify scrapers) populate `artist`
+     * as a plain string, or `artists` as a JSON array (`["Singer A", "Singer B"]`). The
+     * array is joined into a comma-separated string so a multi-artist track reads naturally.
+     * Returns blank when neither field is present, which lets the caller fall through to
+     * `uploader` or `channel`.
+     */
+    private fun resolveArtist(json: JSONObject): String {
+        val array = json.optJSONArray("artists")
+        if (array != null && array.length() > 0) {
+            val joined = (0 until array.length())
+                .mapNotNull { array.optString(it).takeIf { s -> s.isNotBlank() && s != "null" } }
+                .joinToString(", ")
+            if (joined.isNotBlank()) return joined
+        }
+        return json.optString("artist").takeIf { it.isNotBlank() && it != "null" } ?: ""
     }
 
     /** Instagram posts have no title; the caption or the post id stands in for one. */
@@ -641,6 +671,9 @@ object MediaProbe {
 
     private fun String?.isVideoContainer(): Boolean =
         this != null && this in setOf("mp4", "webm", "mkv", "mov", "flv", "avi", "3gp", "ts")
+
+    private fun String?.isAudioContainer(): Boolean =
+        this != null && this in setOf("m4a", "mp3", "opus", "flac", "wav", "aac", "ogg")
 
     private fun firstNonBlank(vararg values: String): String =
         values.firstOrNull { it.isNotBlank() && it != "null" } ?: ""

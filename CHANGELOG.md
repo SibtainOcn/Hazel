@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Audio downloaded from JioSaavn, SoundCloud, Bandcamp and other music platforms now shows
+  the artist name instead of the record label. The probe reads the `artist` and `artists`
+  fields the extractors actually populate, and the download writes a proper `artist` tag into
+  the file's metadata. (Issue #34)
+- Titles and authors that contain a colon (e.g. "Episode 1: Pilot", "Artist A : Feat B") are
+  no longer silently excluded from metadata tagging. Colons are escaped before they reach
+  `--parse-metadata`, which splits on the first unescaped colon.
+- Multi-artist tracks whose extractor returns an `artists` JSON array (e.g.
+  `["Artist A", "Artist B"]`) are joined into a clean comma-separated string instead of
+  being ignored or shown as raw JSON.
+- Audio formats lacking an explicit `acodec` property in yt-dlp's extractor output (such as
+  JioSaavn's 128 kbps and 320 kbps streams) are recognized as valid audio streams, resolving
+  format lists and preventing the format sheet from staying on a loading skeleton.
+
+### Added
+- Downloads screen workflow dropdown on the title with chevron selector, replacing horizontal button bar.
+- Reusable progressive thumbnail and compact row media components with live progress, pause/resume/cancel actions, and visual parity with the Home screen.
+- Support for both 16:9 thumbnail artwork and compact single-row layouts across all Downloads categories (All, Downloading, Queued, Failed, Audio, Video).
+- Active downloads now appear pinned at the top of the All Downloads list.
+- Diagnostic log modal and one-tap retry for failed downloads.
+- Asynchronous and distinct DataStore flow deserialization on background dispatchers to optimize CPU, I/O, and recomposition.
+
 ## [1.0.8] - 2026-09-03
 
 ### Store
