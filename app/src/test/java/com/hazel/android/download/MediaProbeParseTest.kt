@@ -221,4 +221,98 @@ class MediaProbeParseTest {
         val info = parse("""{"title": "No art", "thumbnails": [], "url": "https://cdn/c.mp4"}""")
         assertNull(info.thumbnail)
     }
+
+    // ---------- Artist resolution (Issues #1, #4) ----------
+
+    @Test
+    fun `artist field is preferred over uploader and channel`() {
+        // JioSaavn shape: artist holds the performer, channel holds the record label.
+        val info = parse(
+            """
+            {
+              "title": "Tum Hi Ho",
+              "artist": "Arijit Singh",
+              "channel": "T-Series",
+              "uploader": "T-Series",
+              "duration": 261,
+              "url": "https://cdn/song.m4a"
+            }
+            """.trimIndent()
+        )
+
+        assertEquals("Arijit Singh", info.uploader)
+    }
+
+    @Test
+    fun `artists array is joined as a comma separated string`() {
+        // Multi-artist track: the artists array is what the extractor sends.
+        val info = parse(
+            """
+            {
+              "title": "Collaboration Track",
+              "artists": ["Artist A", "Artist B", "Artist C"],
+              "channel": "Music Label",
+              "duration": 200,
+              "url": "https://cdn/collab.m4a"
+            }
+            """.trimIndent()
+        )
+
+        assertEquals("Artist A, Artist B, Artist C", info.uploader)
+    }
+
+    @Test
+    fun `uploader is used when no artist fields exist`() {
+        // YouTube shape: uploader is the channel name, no artist field.
+        val info = parse(
+            """
+            {
+              "title": "Tutorial Video",
+              "uploader": "TechChannel",
+              "channel": "TechChannel",
+              "duration": 600,
+              "formats": [
+                {"format_id": "22", "ext": "mp4", "vcodec": "avc1", "acodec": "mp4a",
+                 "height": 720, "tbr": 1000.0}
+              ]
+            }
+            """.trimIndent()
+        )
+
+        assertEquals("TechChannel", info.uploader)
+    }
+
+    @Test
+    fun `artists array with blank entries is cleaned`() {
+        val info = parse(
+            """
+            {
+              "title": "Edge case",
+              "artists": ["", "Real Artist", "null"],
+              "url": "https://cdn/edge.m4a"
+            }
+            """.trimIndent()
+        )
+
+        assertEquals("Real Artist", info.uploader)
+    }
+
+    @Test
+    fun `single artist string wins over artists array when both exist`() {
+        // artists array is checked first; if present and non-empty it wins.
+        val info = parse(
+            """
+            {
+              "title": "Both fields",
+              "artist": "Solo Name",
+              "artists": ["Arr A", "Arr B"],
+              "uploader": "Label Inc",
+              "url": "https://cdn/both.m4a"
+            }
+            """.trimIndent()
+        )
+
+        // artists array takes priority over artist string
+        assertEquals("Arr A, Arr B", info.uploader)
+    }
 }

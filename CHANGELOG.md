@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Audio downloaded from JioSaavn, SoundCloud, Bandcamp and other music platforms now shows
+  the artist name instead of the record label. The probe reads the `artist` and `artists`
+  fields the extractors actually populate, and the download writes a proper `artist` tag into
+  the file's metadata. (Issue #34)
+- Titles and authors that contain a colon (e.g. "Episode 1: Pilot", "Artist A : Feat B") are
+  no longer silently excluded from metadata tagging. Colons are escaped before they reach
+  `--parse-metadata`, which splits on the first unescaped colon.
+- Multi-artist tracks whose extractor returns an `artists` JSON array (e.g.
+  `["Artist A", "Artist B"]`) are joined into a clean comma-separated string instead of
+  being ignored or shown as raw JSON.
+
 ## [1.0.8] - 2026-09-03
 
 ### Store

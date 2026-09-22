@@ -1434,19 +1434,32 @@ class DownloadViewModel : ViewModel() {
     /**
      * Writes an edited title or author into the file's tags.
      *
-     * yt-dlp reads `--parse-metadata` as `FROM:TO`, so a value containing a colon would be
-     * split in the wrong place. Such a value is left out of the tags; it still reaches the
-     * filename through [outputTemplate], which has no such restriction.
+     * yt-dlp reads `--parse-metadata` as `FROM:TO`, splitting on the first unescaped colon.
+     * Colons inside the user's value are escaped as `\:` so they pass through the split
+     * as literal characters. This fixes the previous approach of skipping values that
+     * contained colons altogether.
+     *
+     * The author is also copied into the `artist` metadata slot, which is what
+     * `FFmpegMetadataPP` writes as the ID3 / Vorbis / MP4 artist tag. Without this,
+     * music platforms that populate `artist` instead of `uploader` (JioSaavn, SoundCloud,
+     * Bandcamp) would leave audio files with no artist tag at all.
      */
     private fun YoutubeDLRequest.applyMetadata(title: String, author: String) {
-        val overrides = buildList {
-            if (title.isNotBlank() && ':' !in title) add("$title:%(title)s")
-            if (author.isNotBlank() && ':' !in author) add("$author:%(uploader)s")
-        }
-        if (overrides.isEmpty()) return
+        if (title.isBlank() && author.isBlank()) return
 
         addOption("--embed-metadata")
-        overrides.forEach { addOption("--parse-metadata", it) }
+
+        if (title.isNotBlank()) {
+            val escaped = title.replace(":", """\:""")
+            addOption("--parse-metadata", "$escaped:%(title)s")
+        }
+
+        if (author.isNotBlank()) {
+            val escaped = author.replace(":", """\:""")
+            addOption("--parse-metadata", "$escaped:%(uploader)s")
+            // Map uploader → artist tag so audio files get a proper artist ID3/Vorbis tag
+            addOption("--parse-metadata", "%(uploader)s:%(artist)s")
+        }
     }
 
     /**
