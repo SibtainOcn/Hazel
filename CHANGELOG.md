@@ -23,10 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   format lists and preventing the format sheet from staying on a loading skeleton.
 
 ### Added
-- Downloads screen workflow tabs for `Downloading`, `Queued`, and `Failed`. The `Downloading`
-  tab shows active items with live progress, speed, and cancel action; `Queued` shows pending
-  links with format details and removal; `Failed` records non-cancelled errors with a diagnostic
-  log modal (copyable to clipboard) and one-tap retry.
+- Downloads screen workflow dropdown on the title with chevron selector, replacing horizontal button bar.
+- Reusable progressive thumbnail and compact row media components with live progress, pause/resume/cancel actions, and visual parity with the Home screen.
+- Support for both 16:9 thumbnail artwork and compact single-row layouts across all Downloads categories (All, Downloading, Queued, Failed, Audio, Video).
+- Active downloads now appear pinned at the top of the All Downloads list.
+- Diagnostic log modal and one-tap retry for failed downloads.
+- Asynchronous and distinct DataStore flow deserialization on background dispatchers to optimize CPU, I/O, and recomposition.
 
 ## [1.0.8] - 2026-09-03
 

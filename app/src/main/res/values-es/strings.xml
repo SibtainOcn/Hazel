@@ -290,7 +290,7 @@
     <string name="cleanup_confirm_all_cancel">Cancelar</string>
 
     <!-- HistoryScreen -->
-    <string name="history_title">Descargas</string>
+    <string name="history_title">Todas las descargas</string>
     <string name="history_layout_grid">Mostrar imágenes grandes</string>
     <string name="history_layout_list">Mostrar como lista</string>
     <string name="history_search_action">Buscar en las descargas</string>
@@ -336,6 +336,7 @@
     <string name="history_failed_retry">Reintentar</string>
     <string name="history_failed_dismiss">Descartar</string>
     <string name="history_failed_clear_all">Borrar todos los fallidos</string>
+    <string name="history_queue_clear_all">Borrar la cola</string>
     <string name="history_retrying_toast">Reintentando descarga…</string>
 
     <!-- DownloadPropertiesSheet -->

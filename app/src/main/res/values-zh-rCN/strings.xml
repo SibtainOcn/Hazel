@@ -280,7 +280,7 @@
     <string name="cleanup_confirm_all_cancel">取消</string>
 
     <!-- HistoryScreen -->
-    <string name="history_title">下载</string>
+    <string name="history_title">全部下载</string>
     <string name="history_layout_grid">显示大图</string>
     <string name="history_layout_list">以列表显示</string>
     <string name="history_search_action">搜索下载</string>
@@ -326,6 +326,7 @@
     <string name="history_failed_retry">重试</string>
     <string name="history_failed_dismiss">关闭</string>
     <string name="history_failed_clear_all">清除所有失败项</string>
+    <string name="history_queue_clear_all">清空队列</string>
     <string name="history_retrying_toast">正在重试下载…</string>
 
     <!-- DownloadPropertiesSheet -->

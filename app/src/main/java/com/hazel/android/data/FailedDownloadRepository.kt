@@ -3,8 +3,12 @@ package com.hazel.android.data
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -33,16 +37,24 @@ object FailedDownloadRepository {
     private val FAILED_KEY = stringPreferencesKey("failed_downloads")
 
     fun getFailed(context: Context): Flow<List<FailedDownload>> =
-        context.dataStore.data.map { prefs -> decode(prefs[FAILED_KEY]) }
+        context.dataStore.data
+            .map { prefs -> prefs[FAILED_KEY] }
+            .distinctUntilChanged()
+            .map { raw ->
+                withContext(Dispatchers.Default) {
+                    decode(raw)
+                }
+            }
+            .flowOn(Dispatchers.Default)
 
-    suspend fun record(context: Context, entry: FailedDownload) {
+    suspend fun record(context: Context, entry: FailedDownload) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
             val existing = decode(prefs[FAILED_KEY]).filterNot { it.url == entry.url }
             prefs[FAILED_KEY] = encode((listOf(entry) + existing).take(LIMIT))
         }
     }
 
-    suspend fun remove(context: Context, id: Long) {
+    suspend fun remove(context: Context, id: Long) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
             val remaining = decode(prefs[FAILED_KEY]).filterNot { it.id == id }
             if (remaining.isEmpty()) prefs.remove(FAILED_KEY)
@@ -50,7 +62,7 @@ object FailedDownloadRepository {
         }
     }
 
-    suspend fun removeByUrl(context: Context, url: String) {
+    suspend fun removeByUrl(context: Context, url: String) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
             val remaining = decode(prefs[FAILED_KEY]).filterNot { it.url == url }
             if (remaining.isEmpty()) prefs.remove(FAILED_KEY)
@@ -58,11 +70,11 @@ object FailedDownloadRepository {
         }
     }
 
-    suspend fun clear(context: Context) {
+    suspend fun clear(context: Context) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs -> prefs.remove(FAILED_KEY) }
     }
 
-    private fun encode(entries: List<FailedDownload>): String {
+    internal fun encode(entries: List<FailedDownload>): String {
         val array = JSONArray()
         entries.forEach { entry ->
             array.put(
@@ -82,7 +94,7 @@ object FailedDownloadRepository {
         return array.toString()
     }
 
-    private fun decode(raw: String?): List<FailedDownload> {
+    internal fun decode(raw: String?): List<FailedDownload> {
         if (raw.isNullOrBlank()) return emptyList()
         return runCatching {
             val array = JSONArray(raw)

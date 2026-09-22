@@ -280,7 +280,7 @@
     <string name="cleanup_confirm_all_cancel">キャンセル</string>
 
     <!-- HistoryScreen -->
-    <string name="history_title">ダウンロード</string>
+    <string name="history_title">すべてのダウンロード</string>
     <string name="history_layout_grid">大きいサムネイルを表示</string>
     <string name="history_layout_list">リスト形式で表示</string>
     <string name="history_search_action">ダウンロードを検索</string>
@@ -326,6 +326,7 @@
     <string name="history_failed_retry">再試行</string>
     <string name="history_failed_dismiss">閉じる</string>
     <string name="history_failed_clear_all">失敗した項目をすべて消去</string>
+    <string name="history_queue_clear_all">キューを消去</string>
     <string name="history_retrying_toast">ダウンロードを再試行しています…</string>
 
     <!-- DownloadPropertiesSheet -->

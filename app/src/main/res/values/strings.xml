@@ -301,7 +301,7 @@
     <string name="cleanup_confirm_all_cancel">Cancel</string>
 
     <!-- HistoryScreen -->
-    <string name="history_title">Downloads</string>
+    <string name="history_title">All Downloads</string>
     <string name="history_layout_grid">Show large artwork</string>
     <string name="history_layout_list">Show as a list</string>
     <string name="history_search_action">Search downloads</string>
@@ -347,6 +347,7 @@
     <string name="history_failed_retry">Retry</string>
     <string name="history_failed_dismiss">Dismiss</string>
     <string name="history_failed_clear_all">Clear all failed</string>
+    <string name="history_queue_clear_all">Clear queue</string>
     <string name="history_retrying_toast">Retrying download…</string>
 
     <!-- DownloadPropertiesSheet -->

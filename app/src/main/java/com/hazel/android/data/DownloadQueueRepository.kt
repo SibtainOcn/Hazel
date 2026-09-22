@@ -7,9 +7,13 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadPlan
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -74,23 +78,36 @@ object DownloadQueueRepository {
 
     /** Observe the current queue as a reactive Flow. */
     fun getQueue(context: Context): Flow<List<QueuedDownload>> =
-        context.dataStore.data.map { prefs -> decode(prefs[QUEUE_KEY]) }
+        context.dataStore.data
+            .map { prefs -> prefs[QUEUE_KEY] }
+            .distinctUntilChanged()
+            .map { raw ->
+                withContext(Dispatchers.Default) {
+                    decode(raw)
+                }
+            }
+            .flowOn(Dispatchers.Default)
 
     /** Everything still waiting, oldest first. */
-    suspend fun load(context: Context): List<QueuedDownload> =
-        decode(context.dataStore.data.first()[QUEUE_KEY])
+    suspend fun load(context: Context): List<QueuedDownload> = withContext(Dispatchers.IO) {
+        val raw = context.dataStore.data.first()[QUEUE_KEY]
+        withContext(Dispatchers.Default) {
+            decode(raw)
+        }
+    }
 
     /** Replaces the stored queue with [items]. */
-    suspend fun save(context: Context, items: List<QueuedDownload>) {
+    suspend fun save(context: Context, items: List<QueuedDownload>) = withContext(Dispatchers.IO) {
+        val encoded = withContext(Dispatchers.Default) { encode(items) }
         context.dataStore.edit { prefs ->
             if (items.isEmpty()) prefs.remove(QUEUE_KEY)
-            else prefs[QUEUE_KEY] = encode(items)
+            else prefs[QUEUE_KEY] = encoded
         }
     }
 
     /** Adds to the end of the queue, ignoring a link already waiting there. */
-    suspend fun add(context: Context, items: List<QueuedDownload>) {
-        if (items.isEmpty()) return
+    suspend fun add(context: Context, items: List<QueuedDownload>) = withContext(Dispatchers.IO) {
+        if (items.isEmpty()) return@withContext
         context.dataStore.edit { prefs ->
             val existing = decode(prefs[QUEUE_KEY])
             val known = existing.mapTo(mutableSetOf()) { it.url }
@@ -100,7 +117,7 @@ object DownloadQueueRepository {
     }
 
     /** Takes one link out, whether it finished, failed for good, or was cancelled. */
-    suspend fun remove(context: Context, url: String) {
+    suspend fun remove(context: Context, url: String) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
             val remaining = decode(prefs[QUEUE_KEY]).filterNot { it.url == url }
             if (remaining.isEmpty()) prefs.remove(QUEUE_KEY)
@@ -108,12 +125,12 @@ object DownloadQueueRepository {
         }
     }
 
-    suspend fun clear(context: Context) {
+    suspend fun clear(context: Context) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs -> prefs.remove(QUEUE_KEY) }
     }
 
     /** Marks one link as stopped on purpose, or as owed again. */
-    suspend fun setPaused(context: Context, url: String, paused: Boolean) {
+    suspend fun setPaused(context: Context, url: String, paused: Boolean) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
             val updated = decode(prefs[QUEUE_KEY]).map {
                 if (it.url == url) it.copy(paused = paused) else it
@@ -124,7 +141,7 @@ object DownloadQueueRepository {
     }
 
     /** Clears the paused mark from everything, for a run being started again. */
-    suspend fun clearPaused(context: Context) {
+    suspend fun clearPaused(context: Context) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
             val updated = decode(prefs[QUEUE_KEY]).map { it.copy(paused = false) }
             if (updated.isEmpty()) prefs.remove(QUEUE_KEY)

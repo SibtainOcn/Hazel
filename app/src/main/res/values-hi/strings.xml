@@ -285,7 +285,7 @@
     <string name="cleanup_confirm_all_cancel">रद्द करें</string>
 
     <!-- HistoryScreen -->
-    <string name="history_title">डाउनलोड</string>
+    <string name="history_title">सभी डाउनलोड</string>
     <string name="history_layout_grid">बड़ी तस्वीरें दिखाएँ</string>
     <string name="history_layout_list">सूची के रूप में दिखाएँ</string>
     <string name="history_search_action">डाउनलोड में खोजें</string>
@@ -331,6 +331,7 @@
     <string name="history_failed_retry">पुनः प्रयास करें</string>
     <string name="history_failed_dismiss">खारिज करें</string>
     <string name="history_failed_clear_all">सभी विफल हटाएँ</string>
+    <string name="history_queue_clear_all">कतार साफ़ करें</string>
     <string name="history_retrying_toast">डाउनलोड का पुनः प्रयास किया जा रहा है…</string>
 
     <!-- DownloadPropertiesSheet -->

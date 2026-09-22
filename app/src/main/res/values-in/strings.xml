@@ -280,7 +280,7 @@
     <string name="cleanup_confirm_all_cancel">Batal</string>
 
     <!-- HistoryScreen -->
-    <string name="history_title">Unduhan</string>
+    <string name="history_title">Semua Unduhan</string>
     <string name="history_layout_grid">Tampilkan gambar besar</string>
     <string name="history_layout_list">Tampilkan sebagai daftar</string>
     <string name="history_search_action">Cari unduhan</string>
@@ -326,6 +326,7 @@
     <string name="history_failed_retry">Coba lagi</string>
     <string name="history_failed_dismiss">Tutup</string>
     <string name="history_failed_clear_all">Hapus semua yang gagal</string>
+    <string name="history_queue_clear_all">Hapus antrean</string>
     <string name="history_retrying_toast">Mencoba mengunduh lagi…</string>
 
     <!-- DownloadPropertiesSheet -->
