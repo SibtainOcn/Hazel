@@ -66,6 +66,9 @@ enum class HistorySort(val label: String) {
 /** Which kinds of download the list shows. */
 enum class HistoryFilter(val label: String) {
     ALL("All"),
+    DOWNLOADING("Downloading"),
+    QUEUED("Queued"),
+    FAILED("Failed"),
     AUDIO("Audio"),
     VIDEO("Video")
 }

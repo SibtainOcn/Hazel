@@ -497,6 +497,9 @@ object MediaProbe {
 
         val height = json.optInt("height", 0)
         val fps = json.optInt("fps", 0)
+        val audioExt = json.optString("audio_ext").takeIf { it.isNotBlank() && it != "none" && it != "null" }
+        val resolution = json.optString("resolution").lowercase()
+        val abr = json.optPositiveDouble("abr")
 
         // When neither codec was reported, assume a combined stream rather than dropping a
         // format the source can very likely download.
@@ -510,14 +513,18 @@ object MediaProbe {
         val hasAudio = when {
             acodec != null -> true
             hasAudioKey -> false
+            // yt-dlp extractor handling: extractors like JioSaavn emit vcodec="none" with bitrate/audio_ext
+            // but omit the acodec key entirely. Retain valid audio streams instead of discarding them.
+            audioExt != null || resolution.contains("audio only") || abr != null || ext.isAudioContainer() -> true
             codecsUnknown -> !hasVideo || ext.isVideoContainer() || fallbackId != null
+            !hasVideo -> true
             else -> false
         }
 
         if (!hasVideo && !hasAudio) return null
 
         val bitrate = json.optPositiveDouble("tbr")
-            ?: json.optPositiveDouble("abr")
+            ?: abr
             ?: json.optPositiveDouble("vbr")
             ?: 0.0
 
@@ -545,7 +552,7 @@ object MediaProbe {
                 .takeIf { it.isNotBlank() && it != "null" && it != "none" },
             ext = ext ?: "",
             vcodec = vcodec,
-            acodec = acodec,
+            acodec = acodec ?: if (hasAudio && !hasVideo) (audioExt ?: ext) else null,
             height = height,
             fps = fps,
             bitrateKbps = bitrate,
@@ -664,6 +671,9 @@ object MediaProbe {
 
     private fun String?.isVideoContainer(): Boolean =
         this != null && this in setOf("mp4", "webm", "mkv", "mov", "flv", "avi", "3gp", "ts")
+
+    private fun String?.isAudioContainer(): Boolean =
+        this != null && this in setOf("m4a", "mp3", "opus", "flac", "wav", "aac", "ogg")
 
     private fun firstNonBlank(vararg values: String): String =
         values.firstOrNull { it.isNotBlank() && it != "null" } ?: ""

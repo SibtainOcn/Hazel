@@ -315,4 +315,56 @@ class MediaProbeParseTest {
         // artists array takes priority over artist string
         assertEquals("Arr A, Arr B", info.uploader)
     }
+
+    @Test
+    fun `audio formats without acodec key are recognized as valid audio streams`() {
+        // Shape returned by music extractors where vcodec is "none" but acodec is omitted
+        val info = parse(
+            """
+            {
+              "id": "cli-P2pu",
+              "title": "Arz Kiya Hai",
+              "artist": "Anuv Jain",
+              "channel": "Music Label",
+              "duration": 294,
+              "formats": [
+                {
+                  "format_id": "128",
+                  "ext": "m4a",
+                  "abr": 128,
+                  "tbr": 128,
+                  "vcodec": "none",
+                  "audio_ext": "m4a",
+                  "video_ext": "none",
+                  "resolution": "audio only",
+                  "filesize_approx": 4704000
+                },
+                {
+                  "format_id": "320",
+                  "ext": "m4a",
+                  "abr": 320,
+                  "tbr": 320,
+                  "vcodec": "none",
+                  "audio_ext": "m4a",
+                  "video_ext": "none",
+                  "resolution": "audio only",
+                  "filesize_approx": 11760000
+                }
+              ]
+            }
+            """.trimIndent()
+        )
+
+        assertEquals("Anuv Jain", info.uploader)
+        assertTrue(info.hasResolvedFormats)
+        assertEquals(2, info.audioFormats.size)
+        // Sorted descending by bitrate
+        assertEquals("320", info.audioFormats[0].formatId)
+        assertEquals(320.0, info.audioFormats[0].bitrateKbps)
+        assertEquals("M4A", info.audioFormats[0].codecLabel)
+        assertEquals("128", info.audioFormats[1].formatId)
+        assertEquals(128.0, info.audioFormats[1].bitrateKbps)
+        assertEquals("M4A", info.audioFormats[1].codecLabel)
+    }
 }
+

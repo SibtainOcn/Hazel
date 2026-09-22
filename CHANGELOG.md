@@ -18,6 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multi-artist tracks whose extractor returns an `artists` JSON array (e.g.
   `["Artist A", "Artist B"]`) are joined into a clean comma-separated string instead of
   being ignored or shown as raw JSON.
+- Audio formats lacking an explicit `acodec` property in yt-dlp's extractor output (such as
+  JioSaavn's 128 kbps and 320 kbps streams) are recognized as valid audio streams, resolving
+  format lists and preventing the format sheet from staying on a loading skeleton.
+
+### Added
+- Downloads screen workflow tabs for `Downloading`, `Queued`, and `Failed`. The `Downloading`
+  tab shows active items with live progress, speed, and cancel action; `Queued` shows pending
+  links with format details and removal; `Failed` records non-cancelled errors with a diagnostic
+  log modal (copyable to clipboard) and one-tap retry.
 
 ## [1.0.8] - 2026-09-03
 
