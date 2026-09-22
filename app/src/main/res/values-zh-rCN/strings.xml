@@ -183,9 +183,8 @@
     <string name="sponsor_section_ways">支持的方式</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">按月或只付一次，随时可以取消。全程由 GitHub 处理。</string>
-    <string name="sponsor_kofi_title">Ko-fi</string>
-    <string name="sponsor_kofi_subtitle">只付一次，不需要账号。</string>
-    <string name="sponsor_kofi_soon">即将开放</string>
+    <string name="sponsor_bmac_title">Buy Me a Coffee</string>
+    <string name="sponsor_bmac_subtitle">只付一次，不需要账号。</string>
     <string name="sponsor_section_free">不花一分钱，帮助一样大</string>
     <string name="sponsor_star_title">给项目点个星</string>
     <string name="sponsor_star_subtitle">人们在试一个应用之前，只会看这一个数字。</string>

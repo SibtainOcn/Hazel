@@ -199,9 +199,8 @@
     <string name="sponsor_section_ways">Ways to support</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Monthly or one off, cancel whenever. Handled entirely by GitHub.</string>
-    <string name="sponsor_kofi_title">Ko-fi</string>
-    <string name="sponsor_kofi_subtitle">A one off, no account needed.</string>
-    <string name="sponsor_kofi_soon">Opening soon</string>
+    <string name="sponsor_bmac_title">Buy Me a Coffee</string>
+    <string name="sponsor_bmac_subtitle">A one off, no account needed.</string>
     <string name="sponsor_section_free">Costs nothing, helps as much</string>
     <string name="sponsor_star_title">Star the project</string>
     <string name="sponsor_star_subtitle">The one number people look at before trying an app.</string>

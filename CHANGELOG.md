@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Replaced the Ko-fi sponsor option (which was marked "Opening soon") with a live
+  Buy Me a Coffee link (`buymeacoffee.com/sibtainocean`).
+- Reverted the app launcher icon to a white background with a black bolt foreground.
+
 ### Fixed
 - Audio downloaded from JioSaavn, SoundCloud, Bandcamp and other music platforms now shows
   the artist name instead of the record label. The probe reads the `artist` and `artists`

@@ -193,9 +193,8 @@
     <string name="sponsor_section_ways">Formas de apoyar</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Mensual o una sola vez, cancela cuando quieras. Lo gestiona GitHub por completo.</string>
-    <string name="sponsor_kofi_title">Ko-fi</string>
-    <string name="sponsor_kofi_subtitle">Una sola vez, sin necesidad de cuenta.</string>
-    <string name="sponsor_kofi_soon">Se abre pronto</string>
+    <string name="sponsor_bmac_title">Buy Me a Coffee</string>
+    <string name="sponsor_bmac_subtitle">Una sola vez, sin necesidad de cuenta.</string>
     <string name="sponsor_section_free">No cuesta nada, ayuda igual</string>
     <string name="sponsor_star_title">Dale una estrella al proyecto</string>
     <string name="sponsor_star_subtitle">El único número que mira la gente antes de probar una aplicación.</string>

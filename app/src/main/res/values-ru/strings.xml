@@ -198,9 +198,8 @@
     <string name="sponsor_section_ways">Способы поддержки</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Ежемесячно или единоразово, с возможностью отмены в любой момент. Всё обрабатывается через GitHub.</string>
-    <string name="sponsor_kofi_title">Ko-fi</string>
-    <string name="sponsor_kofi_subtitle">Разовый платёж без обязательной регистрации.</string>
-    <string name="sponsor_kofi_soon">Скоро появится</string>
+    <string name="sponsor_bmac_title">Buy Me a Coffee</string>
+    <string name="sponsor_bmac_subtitle">Разовый платёж без обязательной регистрации.</string>
     <string name="sponsor_section_free">Бесплатно и столь же полезно</string>
     <string name="sponsor_star_title">Поставить звезду проекту</string>
     <string name="sponsor_star_subtitle">Главный показатель, на который обращают внимание перед установкой.</string>

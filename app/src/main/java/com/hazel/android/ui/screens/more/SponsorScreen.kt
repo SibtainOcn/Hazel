@@ -110,16 +110,10 @@ fun SponsorScreen(onBack: () -> Unit) {
 
         SupportCard(
             icon = Icons.Filled.Coffee,
-            title = stringResource(R.string.sponsor_kofi_title),
-            // The address is not published yet. The card says so rather than being hidden,
-            // since a support option that appears later looks like an afterthought and one
-            // that is coming reads as a plan.
-            subtitle = stringResource(
-                if (KOFI_URL.isBlank()) R.string.sponsor_kofi_soon
-                else R.string.sponsor_kofi_subtitle
-            ),
-            enabled = KOFI_URL.isNotBlank(),
-            onClick = { openLink(context, KOFI_URL) }
+            title = stringResource(R.string.sponsor_bmac_title),
+            subtitle = stringResource(R.string.sponsor_bmac_subtitle),
+            enabled = BMAC_URL.isNotBlank(),
+            onClick = { openLink(context, BMAC_URL) }
         )
 
         Spacer(modifier = Modifier.height(28.dp))
@@ -383,5 +377,4 @@ private const val SOURCE_URL = "https://github.com/SibtainOcn/Hazel"
 private const val ISSUES_URL = "https://github.com/SibtainOcn/Hazel/issues"
 private const val SPONSORS_URL = "https://github.com/sponsors/SibtainOcn"
 
-/** Filled in when the page exists. Blank keeps the card on screen and out of reach. */
-private const val KOFI_URL = ""
+private const val BMAC_URL = "https://buymeacoffee.com/sibtainocean"
