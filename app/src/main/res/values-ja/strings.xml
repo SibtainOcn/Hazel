@@ -32,6 +32,14 @@
     <string name="download_remove_link">リンクを削除</string>
     <string name="download_cancel_action">ダウンロードをキャンセル</string>
     <string name="download_resume_action">ダウンロードを再開</string>
+    <string name="download_pause_all">すべて一時停止</string>
+    <string name="download_resume_all">すべて再開</string>
+    <string name="download_cancel_all">すべてキャンセル</string>
+    <string name="download_cancel_dialog_body">進行中および待機中のすべてのダウンロードをキャンセルしてもよろしいですか？</string>
+    <string name="download_cancel_single_dialog_body">このダウンロードをキャンセルしてもよろしいですか？</string>
+    <string name="download_cancel_dialog_dismiss">ダウンロードを続ける</string>
+    <string name="download_clear_confirm_title">結果を消去しますか？</string>
+    <string name="download_clear_confirm_body">画面からすべての結果を消去してもよろしいですか？</string>
     <plurals name="download_links">
         <item quantity="other">%d 件のリンク</item>
     </plurals>
@@ -357,18 +365,22 @@
     <string name="cookies_back">戻る</string>
     <string name="cookies_title">Cookie</string>
     <string name="cookies_menu">その他</string>
+    <string name="cookies_menu_import_file">ファイルからインポート</string>
     <string name="cookies_menu_import">クリップボードからインポート</string>
     <string name="cookies_menu_export">クリップボードにエクスポート</string>
     <string name="cookies_menu_delete_all">すべて削除</string>
     <string name="cookies_imported_title">インポートされたCookie</string>
     <string name="cookies_toast_imported">Cookieをインポートしました</string>
     <string name="cookies_toast_no_data">クリップボードにCookieデータがありません</string>
+    <string name="cookies_toast_file_no_data">ファイルに有効なCookieデータが含まれていません</string>
+    <string name="cookies_toast_import_failed">Cookieファイルのインポートに失敗しました</string>
     <string name="cookies_toast_nothing_to_export">エクスポートするデータがありません</string>
     <string name="cookies_toast_exported">クリップボードにコピーしました</string>
     <string name="cookies_toast_entry_copied">クリップボードにコピーしました</string>
     <string name="cookies_use_title">Cookieを使用</string>
     <string name="cookies_use_description">保存されたログイン情報をダウンローダーに渡す</string>
     <string name="cookies_new">新しいCookie</string>
+    <string name="cookies_import_file_button">ファイルをインポート</string>
     <string name="cookies_empty_title">保存されたCookieはありません</string>
     <string name="cookies_empty_body">年齢制限付き、非公開、またはメンバー限定のコンテンツをダウンロードするには追加してください。</string>
     <string name="cookies_delete_title">Cookieを削除</string>

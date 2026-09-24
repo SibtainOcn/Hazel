@@ -32,6 +32,14 @@
     <string name="download_remove_link">Hapus tautan</string>
     <string name="download_cancel_action">Batalkan unduhan</string>
     <string name="download_resume_action">Lanjutkan unduhan</string>
+    <string name="download_pause_all">Jeda semua</string>
+    <string name="download_resume_all">Lanjutkan semua</string>
+    <string name="download_cancel_all">Batalkan semua</string>
+    <string name="download_cancel_dialog_body">Apakah Anda yakin ingin membatalkan semua unduhan yang sedang berjalan dan dalam antrean?</string>
+    <string name="download_cancel_single_dialog_body">Apakah Anda yakin ingin membatalkan unduhan ini?</string>
+    <string name="download_cancel_dialog_dismiss">Lanjutkan mengunduh</string>
+    <string name="download_clear_confirm_title">Hapus hasil?</string>
+    <string name="download_clear_confirm_body">Yakin ingin menghapus semua hasil dari layar?</string>
     <plurals name="download_links">
         <item quantity="other">%d tautan</item>
     </plurals>
@@ -357,18 +365,22 @@
     <string name="cookies_back">Kembali</string>
     <string name="cookies_title">Cookie</string>
     <string name="cookies_menu">Lainnya</string>
+    <string name="cookies_menu_import_file">Impor dari berkas</string>
     <string name="cookies_menu_import">Impor dari papan klip</string>
     <string name="cookies_menu_export">Ekspor ke papan klip</string>
     <string name="cookies_menu_delete_all">Hapus semua</string>
     <string name="cookies_imported_title">Cookie yang diimpor</string>
     <string name="cookies_toast_imported">Cookie berhasil diimpor</string>
     <string name="cookies_toast_no_data">Papan klip tidak berisi data cookie</string>
+    <string name="cookies_toast_file_no_data">Berkas tidak berisi data cookie yang valid</string>
+    <string name="cookies_toast_import_failed">Gagal mengimpor berkas cookie</string>
     <string name="cookies_toast_nothing_to_export">Tidak ada yang bisa diekspor</string>
     <string name="cookies_toast_exported">Disalin ke papan klip</string>
     <string name="cookies_toast_entry_copied">Disalin ke papan klip</string>
     <string name="cookies_use_title">Gunakan cookie</string>
     <string name="cookies_use_description">Teruskan sesi masuk yang tersimpan ke pengunduh</string>
     <string name="cookies_new">Cookie baru</string>
+    <string name="cookies_import_file_button">Impor berkas</string>
     <string name="cookies_empty_title">Belum ada cookie yang tersimpan</string>
     <string name="cookies_empty_body">Tambahkan untuk mengunduh media dengan pembatasan usia, privat, atau khusus anggota.</string>
     <string name="cookies_delete_title">Hapus cookie</string>

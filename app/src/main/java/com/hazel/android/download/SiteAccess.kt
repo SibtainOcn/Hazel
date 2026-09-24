@@ -32,46 +32,45 @@ data class SiteAccess(
 }
 
 /**
- * Applies the sign-in to a request.
+ * Applies the sign-in to a request, along with client configurations needed to retrieve
+ * full stream formats across different sites.
  *
- * Called on the metadata read and on the download alike. Nothing is added when there are no
- * cookies, so an ordinary fetch carries no extra options.
+ * Called on the metadata read and on the download alike.
  */
 fun YoutubeDLRequest.applySiteAccess(access: SiteAccess, url: String) {
+    if (isYouTube(url)) {
+        // Specify player clients that yield the complete format ladder (up to 1080p+ and full audio)
+        // rather than being throttled to legacy 360p or stripped by YouTube's SABR streaming experiment.
+        // The web_embedded client answers with adaptive video streams without requiring complex PO tokens.
+        addOption("--extractor-args", "youtube:player_client=$YOUTUBE_PLAYER_CLIENTS")
+    }
+
     val cookies = access.cookieFile ?: return
 
     addOption("--cookies", cookies.absolutePath)
 
-    if (access.userAgent.isNotBlank()) {
+    // Do not override User-Agent for YouTube because yt-dlp manages extractor client-specific
+    // user agents internally. Passing mobile WebView user agents forces YouTube to return
+    // stripped-down mobile markup which breaks playlist and tab page extraction.
+    if (access.userAgent.isNotBlank() && !isYouTube(url)) {
         addOption("--add-header", "User-Agent:${access.userAgent}")
-    }
-
-    if (cookiesNarrowTheFormats(url)) {
-        addOption("--extractor-args", "youtube:player_client=$SIGNED_IN_PLAYER_CLIENTS")
     }
 }
 
 /**
- * The clients to ask for the media when the request carries a sign-in.
+ * Player clients to query for YouTube media.
  *
- * The site serves each of its player clients a different list, and most of them hold back
- * everything above 360p unless the request carries a proof-of-origin token the app has no
- * way to produce. These two are the ones that answer a signed-in request with anything
- * worth having: the first needs no token when account cookies are sent, and the second
- * answers with streams that need none at all. Naming them also drops the clients that
- * would be asked and would answer with nothing, which is most of the waiting a signed-in
- * read used to do.
+ * YouTube serves each client type a different stream manifest. Restricting only to legacy clients
+ * like web_safari limits results to 360p (format 18), while tv clients increasingly require PO tokens.
+ * By prioritizing web_embedded with tv_downgraded, tv, and web_safari fallbacks, yt-dlp receives
+ * the full adaptive video ladder (1080p, 720p, 480p) and all audio streams.
  */
-private const val SIGNED_IN_PLAYER_CLIENTS = "tv,web_safari"
+private const val YOUTUBE_PLAYER_CLIENTS = "web_embedded,tv_downgraded,tv,web_safari"
 
 /**
- * Whether sending cookies to [url] costs formats.
- *
- * True for the one site that treats a signed-in request as something to be careful with.
- * Everywhere else a sign-in only ever adds to what is on offer, so it is sent with every
- * request; here it is held back until the media will not open without it.
+ * Whether the URL targets YouTube.
  */
-fun cookiesNarrowTheFormats(url: String): Boolean {
+fun isYouTube(url: String): Boolean {
     val host = runCatching { java.net.URI(url).host.orEmpty() }
         .getOrDefault("")
         .removePrefix("www.")
@@ -81,3 +80,9 @@ fun cookiesNarrowTheFormats(url: String): Boolean {
             host.endsWith("youtu.be") ||
             host.endsWith("youtube-nocookie.com")
 }
+
+/**
+ * Legacy check retained for backwards compatibility.
+ * With web_embedded included in player clients, cookies no longer restrict format availability.
+ */
+fun cookiesNarrowTheFormats(url: String): Boolean = false

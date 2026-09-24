@@ -10,9 +10,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Replaced the Ko-fi sponsor option (which was marked "Opening soon") with a live
   Buy Me a Coffee link (`buymeacoffee.com/sibtainocean`).
+- Replaced icon buttons with clean clickable text buttons ("Pause" / "Resume", "Cancel", and "Clear") in the header bar below the search field for improved clarity and consistency.
+- Kept header Cancel button styled with standard primary tint rather than warning/error red to align with adjacent actions.
+- Added confirmation dialogs before cancelling active downloads and before clearing results to safeguard against accidental wipes.
+- Replaced the search bar search icon.
+- Updated batch download action bar quality button to display real-time chosen quality labels (e.g. HQ: AUTO, HQ: BEST, HQ: 1080p) instead of a static generic icon.
+- Aligned pause, resume, and cancel actions across the header controls, thumbnail center button, and 3-dots menu with full support for cancelling waiting queue items without clearing the batch.
 - Reverted the app launcher icon to a white background with a black bolt foreground.
 
 ### Fixed
+- Fixed Cookies screen master switch event collision where tapping the switch failed to turn back ON; converted row to single-source toggleable semantics and remembered Flow collections across recompositions.
+- Ensured individual cookie switches operate independently without closing off the global master switch when disabled, allowing flexible per-cookie control while preserving global cookie status.
+- Eliminated latency when holding to delete cookie sets; deletion immediately dismisses confirmation dialogs, cleans up site-specific cookie cache files, and updates repository state without blocking Compose recompositions.
+- Fixed multi/playlist download sheet quality ceiling selection where picking a quality from the batch action bar left unresolved items displaying best quality; pending cards now receive bounded generic format selectors with automatic fallback to the closest available lower resolution.
+- Fixed cookie screen master toggle synchronization where disabling all cookies left individual cookie switches displaying as active; the top master toggle and individual cookie switches are now bidirectionally synchronized across storage and UI states.
+- Fixed YouTube playlist and multi-link extraction when cookies are active by avoiding overriding client User-Agent headers on YouTube endpoints, resolving tab page extraction failures.
+- Implemented automatic metadata and listing cache invalidation (`InfoCache.clear()`) on cookie updates, toggles, additions, and deletions, as well as extractor setting changes, preventing stale cached results or expired session states.
+- Prioritized cookie authentication during metadata probes and playlist reads while maintaining automatic fallback to anonymous extraction if signed-in requests encounter failures.
+- Fixed search history persistence where searches and fetched URLs failed to store and display due to coroutine cancellation upon screen dismissal. All queried and fetched links are now recorded on `applicationScope` / `viewModelScope` (when incognito is disabled) even when searching without downloading, via Hazel Instant, or using custom cookies.
 - Audio downloaded from JioSaavn, SoundCloud, Bandcamp and other music platforms now shows
   the artist name instead of the record label. The probe reads the `artist` and `artists`
   fields the extractors actually populate, and the download writes a proper `artist` tag into
@@ -26,8 +41,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Audio formats lacking an explicit `acodec` property in yt-dlp's extractor output (such as
   JioSaavn's 128 kbps and 320 kbps streams) are recognized as valid audio streams, resolving
   format lists and preventing the format sheet from staying on a loading skeleton.
+- Cancelling an individual download item in a multi-link or playlist queue no longer aborts
+  the entire batch. Clicking the thumbnail cancel button ("X") or item cancel now stops only
+  that specific item, purges its temporary fragments, and allows subsequent downloads in the
+  queue to proceed seamlessly.
+- Batch completion reporting (`finishBatch`) no longer counts user-cancelled downloads as
+  failures, eliminating misleading error banners (such as "1 of 49 failed") when items are
+  intentionally cancelled or skipped.
 
 ### Added
+- Direct cookie file import option ("Import file" button and overflow menu item) allowing users to import Netscape cookie files directly with automatic domain recognition, multi-site splitting, and full 10-locale translation parity.
+- Dedicated "Pause All / Resume All" and "Cancel All" batch control buttons in the Downloads
+  screen header row, active whenever a batch or download is running.
+- Granular per-item cancellation (`cancelItem`), allowing items waiting in the queue to be
+  removed from memory and persistent queue storage without disturbing currently downloading items.
 - Downloads screen workflow dropdown on the title with chevron selector, replacing horizontal button bar.
 - Reusable progressive thumbnail and compact row media components with live progress, pause/resume/cancel actions, and visual parity with the Home screen.
 - Support for both 16:9 thumbnail artwork and compact single-row layouts across all Downloads categories (All, Downloading, Queued, Failed, Audio, Video).

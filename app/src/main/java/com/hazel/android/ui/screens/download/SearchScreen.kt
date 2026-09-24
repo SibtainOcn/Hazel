@@ -60,6 +60,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -67,6 +68,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.hazel.android.HazelApp
 import com.hazel.android.R
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
@@ -74,6 +76,7 @@ import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -144,9 +147,10 @@ fun SearchScreen(
 
     fun startSearch(links: List<String>) {
         keyboard?.hide()
-        scope.launch {
-            if (!SettingsRepository.getIncognito(context).first()) {
-                links.forEach { SearchHistoryRepository.record(context, it) }
+        HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
+            val app = context.applicationContext
+            if (!SettingsRepository.getIncognito(app).first()) {
+                links.forEach { SearchHistoryRepository.record(app, it) }
             }
         }
         onSearch(links)
@@ -296,7 +300,9 @@ fun SearchScreen(
                                 text = { Text(stringResource(R.string.search_clear_history)) },
                                 onClick = {
                                     menuOpen = false
-                                    scope.launch { SearchHistoryRepository.clear(context) }
+                                    HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
+                                        SearchHistoryRepository.clear(context.applicationContext)
+                                    }
                                 }
                             )
                         }
@@ -359,7 +365,7 @@ fun SearchScreen(
 
                     IconButton(onClick = { submit() }) {
                         Icon(
-                            Icons.Filled.Search,
+                            painter = painterResource(R.drawable.ic_search),
                             contentDescription = stringResource(R.string.search_all),
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -395,7 +401,9 @@ fun SearchScreen(
                             },
                             onFill = { text = entry },
                             onRemove = {
-                                scope.launch { SearchHistoryRepository.remove(context, entry) }
+                                HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
+                                    SearchHistoryRepository.remove(context.applicationContext, entry)
+                                }
                             }
                         )
                     }

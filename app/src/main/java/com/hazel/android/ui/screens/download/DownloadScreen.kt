@@ -272,6 +272,8 @@ fun DownloadScreen(
     // sheet and the repeat warning, both of which are questions, and the point of that
     // target is that nothing is asked.
     var directPending by remember { mutableStateOf(false) }
+    var showCancelConfirmDialog by remember { mutableStateOf(false) }
+    var showClearConfirmDialog by remember { mutableStateOf(false) }
 
     // A single link goes straight to its sheet. A set of links does not, because the list
     // itself is the thing to look at first.
@@ -402,6 +404,48 @@ fun DownloadScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f)
                     )
+
+                    val isBatchActive = state.isDownloading ||
+                            state.batch.any { it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED || it.state == BatchState.QUEUED }
+
+                    if (isBatchActive) {
+                        val isMulti = state.isMultiple || state.batch.size > 1 || pendingResults.size > 1
+                        Text(
+                            text = stringResource(
+                                if (isMulti) {
+                                    if (state.isDownloading) R.string.download_pause_all
+                                    else R.string.download_resume_all
+                                } else {
+                                    if (state.isDownloading) R.string.download_pause
+                                    else R.string.download_resume
+                                }
+                            ),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(18.dp))
+                                .clickable {
+                                    if (state.isDownloading) downloadViewModel.pauseDownload()
+                                    else downloadViewModel.resumeDownload()
+                                }
+                                .padding(horizontal = 10.dp, vertical = 8.dp)
+                        )
+
+                        Text(
+                            text = stringResource(R.string.download_cancel),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(18.dp))
+                                .clickable {
+                                    showCancelConfirmDialog = true
+                                }
+                                .padding(horizontal = 10.dp, vertical = 8.dp)
+                        )
+                    }
+
                     // The list is kept for as long as the app runs, so there has to be a
                     // way of putting it down. Plain text rather than another icon: it
                     // throws away work, and that is worth spelling out.
@@ -409,11 +453,12 @@ fun DownloadScreen(
                         stringResource(R.string.download_clear),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (!isBatchActive) MaterialTheme.colorScheme.onSurfaceVariant
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
                         modifier = Modifier
                             .clip(RoundedCornerShape(18.dp))
-                            .clickable(enabled = !state.isDownloading) {
-                                downloadViewModel.clearResults()
+                            .clickable(enabled = !isBatchActive) {
+                                showClearConfirmDialog = true
                             }
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                     )
@@ -573,7 +618,7 @@ fun DownloadScreen(
                             waitingForWifi = state.waitingForWifi,
                             alreadyDownloaded = info.url in savedUrls,
                             onOpenSheet = openSheet,
-                            onCancel = downloadViewModel::cancelDownload,
+                            onCancel = { downloadViewModel.cancelItem(info.url) },
                             onPause = downloadViewModel::pauseDownload,
                             onResume = downloadViewModel::resumeDownload,
                             onRemove = remove
@@ -591,7 +636,7 @@ fun DownloadScreen(
                             waitingForWifi = state.waitingForWifi,
                             alreadyDownloaded = info.url in savedUrls,
                             onOpenSheet = openSheet,
-                            onCancel = downloadViewModel::cancelDownload,
+                            onCancel = { downloadViewModel.cancelItem(info.url) },
                             onPause = downloadViewModel::pauseDownload,
                             onResume = downloadViewModel::resumeDownload,
                             onRemove = remove
@@ -818,6 +863,83 @@ fun DownloadScreen(
             onDismiss = { batchSheetVisible = false }
         )
     }
+
+    if (showCancelConfirmDialog) {
+        val isMulti = state.isMultiple || state.batch.size > 1 || pendingResults.size > 1
+        AlertDialog(
+            onDismissRequest = { showCancelConfirmDialog = false },
+            title = {
+                Text(
+                    text = if (isMulti) stringResource(R.string.download_cancel_all)
+                           else stringResource(R.string.download_cancel_action),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = if (isMulti) stringResource(R.string.download_cancel_dialog_body)
+                           else stringResource(R.string.download_cancel_single_dialog_body)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showCancelConfirmDialog = false
+                        downloadViewModel.cancelAllDownloads()
+                    }
+                ) {
+                    Text(
+                        stringResource(R.string.download_cancel),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showCancelConfirmDialog = false }
+                ) {
+                    Text(stringResource(R.string.download_cancel_dialog_dismiss))
+                }
+            }
+        )
+    }
+
+    if (showClearConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearConfirmDialog = false },
+            title = {
+                Text(
+                    text = stringResource(R.string.download_clear_confirm_title),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.download_clear_confirm_body)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showClearConfirmDialog = false
+                        downloadViewModel.clearResults()
+                    }
+                ) {
+                    Text(
+                        stringResource(R.string.download_clear),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showClearConfirmDialog = false }
+                ) {
+                    Text(stringResource(R.string.download_cancel))
+                }
+            }
+        )
+    }
 }
 
 private fun openSaveDir(context: android.content.Context, treeUri: String) {
@@ -857,7 +979,7 @@ private fun UrlSearchBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                Icons.Filled.Search,
+                painter = painterResource(R.drawable.ic_search),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -978,10 +1100,9 @@ private fun MediaCard(
                     )
                 }
 
-                // Offered while the download is in hand, and while it is sitting paused.
-                // It is the only way back from a pause, so it cannot go away with the
-                // thing it undoes.
-                if (isDownloading || isPaused) {
+                // Offered while the download is in hand, and while it is sitting paused or queued.
+                val isQueued = batchItem?.state == BatchState.QUEUED
+                if (isDownloading || isPaused || isQueued) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -1016,7 +1137,7 @@ private fun MediaCard(
                                         onResume()
                                     }
                                 )
-                            } else {
+                            } else if (isDownloading) {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.download_pause)) },
                                     // Nothing to pause once the transfer is done and the
@@ -1461,8 +1582,9 @@ private fun MediaRow(
                 // way of pausing or resuming the thing being watched. They sit at the end
                 // of the line rather than over the artwork, which at this size is too small
                 // to hold a control on top of the one already in the middle of it.
+                val isQueued = batchItem?.state == BatchState.QUEUED
                 when {
-                    inHand -> Box {
+                    inHand || isQueued -> Box {
                         IconButton(onClick = { menuOpen = true }) {
                             Icon(
                                 Icons.Filled.MoreVert,
@@ -1483,7 +1605,7 @@ private fun MediaRow(
                                         onResume()
                                     }
                                 )
-                            } else {
+                            } else if (isDownloading) {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.download_pause)) },
                                     // Nothing to pause once the transfer is done and the

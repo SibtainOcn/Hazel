@@ -82,7 +82,8 @@ fun BatchActionBar(
     /** Only the sets holding a source with several soundtracks have this to offer. */
     showAudioLanguage: Boolean = false,
     audioLanguageLabel: String = "",
-    onAudioLanguage: () -> Unit = {}
+    onAudioLanguage: () -> Unit = {},
+    hqLabel: String = ""
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -159,7 +160,7 @@ fun BatchActionBar(
                     onClick = onDownloadType
                 )
                 BarButton(
-                    icon = Icons.Filled.HighQuality,
+                    text = hqLabel.ifBlank { if (isVideo) "HQ: AUTO" else "HQ: BEST" },
                     description = stringResource(R.string.batch_bar_quality, qualityLabel),
                     onClick = onQuality
                 )
@@ -195,7 +196,7 @@ private fun BarButton(
             .height(52.dp)
             .clip(RoundedCornerShape(26.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         if (icon != null) {

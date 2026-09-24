@@ -128,10 +128,17 @@ fun FormatSheet(
     // listing opens this sheet before they have. Without that the sheet would keep the
     // stand-in it was opened with and never move to the real best.
     var pickedVideo by remember(info.url, info.hasResolvedFormats) {
-        mutableStateOf(initialFormat?.takeIf { it.hasVideo } ?: info.bestVideo)
+        mutableStateOf(
+            initialFormat?.takeIf { !it.isGeneric && it.hasVideo }
+                ?: info.autoPick(true, initialFormat?.height ?: 0)
+                ?: info.bestVideo
+        )
     }
     var pickedAudio by remember(info.url, info.hasResolvedFormats) {
-        mutableStateOf(initialFormat?.takeIf { !it.hasVideo } ?: info.bestAudio)
+        mutableStateOf(
+            initialFormat?.takeIf { !it.isGeneric && !it.hasVideo }
+                ?: info.bestAudio
+        )
     }
 
     // The best concrete format is preselected on each tab, so the row shows what will

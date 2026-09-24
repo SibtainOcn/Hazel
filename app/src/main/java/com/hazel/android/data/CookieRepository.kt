@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.hazel.android.download.InfoCache
 import com.hazel.android.download.SiteAccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -68,8 +69,18 @@ object CookieRepository {
         context.dataStore.data.map { prefs -> prefs[USE_COOKIES_KEY] ?: false }
 
     suspend fun setUseCookies(context: Context, enabled: Boolean) {
-        context.dataStore.edit { prefs -> prefs[USE_COOKIES_KEY] = enabled }
-        writeCookieFile(context)
+        var updatedEntries: List<CookieEntry> = emptyList()
+        context.dataStore.edit { prefs ->
+            prefs[USE_COOKIES_KEY] = enabled
+            val existing = decode(prefs[COOKIES_KEY])
+            if (existing.isNotEmpty()) {
+                val updated = existing.map { it.copy(enabled = enabled) }
+                prefs[COOKIES_KEY] = encode(updated)
+                updatedEntries = updated
+            }
+        }
+        writeCookieFile(context, explicitEntries = updatedEntries, explicitUseCookies = enabled)
+        InfoCache.clear()
     }
 
     // ── Entries ──
@@ -83,6 +94,8 @@ object CookieRepository {
      * leaving two entries behind.
      */
     suspend fun upsert(context: Context, entry: CookieEntry) {
+        var updatedEntries: List<CookieEntry> = emptyList()
+        var updatedUseCookies: Boolean = true
         context.dataStore.edit { prefs ->
             val existing = decode(prefs[COOKIES_KEY])
             val match = existing.indexOfFirst {
@@ -94,30 +107,82 @@ object CookieRepository {
                 existing + entry
             }
             prefs[COOKIES_KEY] = encode(updated)
+            if (entry.enabled) {
+                prefs[USE_COOKIES_KEY] = true
+            }
+            updatedEntries = updated
+            updatedUseCookies = prefs[USE_COOKIES_KEY] ?: true
         }
-        writeCookieFile(context)
+        writeCookieFile(context, explicitEntries = updatedEntries, explicitUseCookies = updatedUseCookies)
+        InfoCache.clear()
     }
 
     suspend fun setEnabled(context: Context, id: Long, enabled: Boolean) {
+        var updatedEntries: List<CookieEntry> = emptyList()
+        var currentUseCookies = false
         context.dataStore.edit { prefs ->
-            val updated = decode(prefs[COOKIES_KEY]).map {
+            val existing = decode(prefs[COOKIES_KEY])
+            val updated = existing.map {
                 if (it.id == id) it.copy(enabled = enabled) else it
             }
             prefs[COOKIES_KEY] = encode(updated)
+            if (enabled) {
+                prefs[USE_COOKIES_KEY] = true
+            }
+            currentUseCookies = prefs[USE_COOKIES_KEY] ?: false
+            updatedEntries = updated
         }
-        writeCookieFile(context)
+        writeCookieFile(context, explicitEntries = updatedEntries, explicitUseCookies = currentUseCookies)
+        InfoCache.clear()
     }
 
     suspend fun delete(context: Context, id: Long) {
+        var remainingEntries: List<CookieEntry> = emptyList()
+        var remainingUseCookies: Boolean = false
+        var deletedSite: String? = null
         context.dataStore.edit { prefs ->
-            prefs[COOKIES_KEY] = encode(decode(prefs[COOKIES_KEY]).filter { it.id != id })
+            val existing = decode(prefs[COOKIES_KEY])
+            val deleted = existing.find { it.id == id }
+            if (deleted != null) {
+                val site = siteKeyOf(hostOf(deleted.url))
+                if (site != null) {
+                    deletedSite = site
+                } else {
+                    val firstDomain = deleted.content.lineSequence()
+                        .map { it.substringBefore('\t').trim().removePrefix(".") }
+                        .firstOrNull { it.isNotBlank() }
+                    deletedSite = firstDomain?.let { siteKeyOf(it) ?: it }
+                }
+            }
+            val remaining = existing.filter { it.id != id }
+            prefs[COOKIES_KEY] = encode(remaining)
+            if (remaining.isEmpty()) {
+                prefs[USE_COOKIES_KEY] = false
+            }
+            remainingEntries = remaining
+            remainingUseCookies = prefs[USE_COOKIES_KEY] ?: false
         }
-        writeCookieFile(context)
+        withContext(Dispatchers.IO) {
+            deletedSite?.let { site ->
+                runCatching { File(context.cacheDir, "cookies-$site.txt").delete() }
+            }
+        }
+        writeCookieFile(context, explicitEntries = remainingEntries, explicitUseCookies = remainingUseCookies)
+        InfoCache.clear()
     }
 
     suspend fun deleteAll(context: Context) {
-        context.dataStore.edit { prefs -> prefs[COOKIES_KEY] = encode(emptyList()) }
-        writeCookieFile(context)
+        context.dataStore.edit { prefs ->
+            prefs[COOKIES_KEY] = encode(emptyList())
+            prefs[USE_COOKIES_KEY] = false
+        }
+        withContext(Dispatchers.IO) {
+            context.cacheDir.listFiles { _, name -> name.startsWith("cookies") }?.forEach {
+                runCatching { it.delete() }
+            }
+        }
+        writeCookieFile(context, explicitEntries = emptyList(), explicitUseCookies = false)
+        InfoCache.clear()
     }
 
     // ── The file yt-dlp reads ──
@@ -132,9 +197,15 @@ object CookieRepository {
      * When cookies are off, or nothing is enabled, the file is emptied rather than deleted,
      * which keeps a stale set from being picked up later.
      */
-    suspend fun writeCookieFile(context: Context) = withContext(Dispatchers.IO) {
-        val enabled = if (getUseCookies(context).first()) {
-            getEntries(context).first().filter { it.enabled && it.content.isNotBlank() }
+    suspend fun writeCookieFile(
+        context: Context,
+        explicitEntries: List<CookieEntry>? = null,
+        explicitUseCookies: Boolean? = null
+    ) = withContext(Dispatchers.IO) {
+        val useCookies = explicitUseCookies ?: getUseCookies(context).first()
+        val enabled = if (useCookies) {
+            val list = explicitEntries ?: getEntries(context).first()
+            list.filter { it.enabled && it.content.isNotBlank() }
         } else {
             emptyList()
         }
@@ -268,6 +339,7 @@ object CookieRepository {
     private val SITE_ALIASES = mapOf(
         "youtu.be" to "youtube.com",
         "youtube-nocookie.com" to "youtube.com",
+        "google.com" to "youtube.com",
         "instagr.am" to "instagram.com",
         "x.com" to "twitter.com",
         "fb.watch" to "facebook.com",
@@ -287,21 +359,84 @@ object CookieRepository {
      * Anything that is not a Netscape cookie file is rejected rather than saved as junk.
      */
     suspend fun importText(context: Context, text: String, title: String): Boolean {
-        val body = text.lineSequence()
+        val lines = text.lineSequence()
+            .map { it.trim() }
             .filter { it.isNotBlank() && !it.startsWith("#") }
-            .joinToString("\n")
-        if (body.isBlank()) return false
+            .toList()
+        if (lines.isEmpty()) return false
 
-        upsert(
-            context,
-            CookieEntry(
-                id = System.currentTimeMillis(),
-                url = "",
-                title = title,
-                content = body,
-                enabled = true
+        // Group cookie lines by recognized site (from 1st column of Netscape line)
+        val siteToLines = mutableMapOf<String, MutableList<String>>()
+        val unmatchedLines = mutableListOf<String>()
+
+        for (line in lines) {
+            val parts = line.split('\t')
+            val rawDomain = parts.firstOrNull()?.trim()?.removePrefix(".")
+            val site = rawDomain?.let { siteKeyOf(it) ?: it }
+            if (!site.isNullOrBlank()) {
+                siteToLines.getOrPut(site) { mutableListOf() }.add(line)
+            } else {
+                unmatchedLines.add(line)
+            }
+        }
+
+        if (siteToLines.isEmpty()) {
+            upsert(
+                context,
+                CookieEntry(
+                    id = System.currentTimeMillis(),
+                    url = "",
+                    title = title,
+                    content = lines.joinToString("\n"),
+                    enabled = true
+                )
             )
-        )
+            return true
+        }
+
+        if (siteToLines.size == 1) {
+            val (site, siteLines) = siteToLines.entries.first()
+            val allSiteLines = siteLines + unmatchedLines
+            val url = if (site.contains(".")) "https://www.$site" else ""
+            upsert(
+                context,
+                CookieEntry(
+                    id = System.currentTimeMillis(),
+                    url = url,
+                    title = title,
+                    content = allSiteLines.joinToString("\n"),
+                    enabled = true
+                )
+            )
+        } else {
+            var offset = 0L
+            for ((site, siteLines) in siteToLines) {
+                val url = if (site.contains(".")) "https://www.$site" else ""
+                val entryTitle = if (title.isNotBlank()) "$title ($site)" else site
+                upsert(
+                    context,
+                    CookieEntry(
+                        id = System.currentTimeMillis() + offset++,
+                        url = url,
+                        title = entryTitle,
+                        content = siteLines.joinToString("\n"),
+                        enabled = true
+                    )
+                )
+            }
+            if (unmatchedLines.isNotEmpty()) {
+                upsert(
+                    context,
+                    CookieEntry(
+                        id = System.currentTimeMillis() + offset,
+                        url = "",
+                        title = title,
+                        content = unmatchedLines.joinToString("\n"),
+                        enabled = true
+                    )
+                )
+            }
+        }
         return true
     }
 
