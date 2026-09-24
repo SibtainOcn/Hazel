@@ -2,9 +2,15 @@ package com.hazel.android.ui.screens.history
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -447,8 +453,14 @@ fun HistoryScreen(
             }
         }
 
-        // Search bar
-        if (searchOpen) {
+        // Search bar — animates smoothly into its own row; tapping outside dismisses it.
+        val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+
+        AnimatedVisibility(
+            visible = searchOpen,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
             val focusRequester = remember { FocusRequester() }
             LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
@@ -501,6 +513,19 @@ fun HistoryScreen(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                    } else {
+                        // X button to close the bar entirely when nothing is typed
+                        IconButton(onClick = {
+                            keyboardController?.hide()
+                            searchOpen = false
+                        }) {
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.history_search_clear),
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -509,7 +534,23 @@ fun HistoryScreen(
         Spacer(modifier = Modifier.height(4.dp))
 
         // ── Screen Content by Selected Filter ──
-        when (filter) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .then(
+                    if (searchOpen) {
+                        Modifier.clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            keyboardController?.hide()
+                            searchOpen = false
+                        }
+                    } else Modifier
+                )
+        ) {
+            when (filter) {
             HistoryFilter.DOWNLOADING -> {
                 HistoryDownloadingView(
                     state = downloadState,
@@ -670,6 +711,7 @@ fun HistoryScreen(
                 }
             }
         }
+    }
     }
 
     viewFailedLog?.let { failed ->

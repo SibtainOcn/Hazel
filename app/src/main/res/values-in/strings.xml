@@ -60,6 +60,9 @@
     <string name="search_edit_before">Edit sebelum mencari</string>
     <string name="search_paste_and_fetch">Tempel dan ambil</string>
     <string name="search_nothing_to_paste">Tidak ada yang bisa ditempel</string>
+    <string name="search_cancel">Batal</string>
+    <string name="search_clear_history_confirm_title">Hapus riwayat pencarian?</string>
+    <string name="search_clear_history_confirm_body">Semua tautan pencarian yang disimpan akan dihapus. Tindakan ini tidak dapat dibatalkan.</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Sudah diunduh</string>

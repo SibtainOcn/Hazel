@@ -62,6 +62,9 @@
     <string name="search_edit_before">Editar antes de pesquisar</string>
     <string name="search_paste_and_fetch">Colar e buscar</string>
     <string name="search_nothing_to_paste">Não há nada para colar</string>
+    <string name="search_cancel">Cancelar</string>
+    <string name="search_clear_history_confirm_title">Apagar o histórico de pesquisa?</string>
+    <string name="search_clear_history_confirm_body">Todos os links de pesquisa salvos serão removidos. Essa ação não pode ser desfeita.</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Já foi baixado</string>

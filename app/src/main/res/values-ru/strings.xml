@@ -63,6 +63,9 @@
     <string name="search_edit_before">Изменить перед поиском</string>
     <string name="search_paste_and_fetch">Вставить и загрузить</string>
     <string name="search_nothing_to_paste">Буфер обмена пуст</string>
+    <string name="search_cancel">Отмена</string>
+    <string name="search_clear_history_confirm_title">Очистить историю поиска?</string>
+    <string name="search_clear_history_confirm_body">Все сохраненные ссылки поиска будут удалены. Это действие нельзя отменить.</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Уже загружено</string>

@@ -2,6 +2,7 @@ package com.hazel.android.ui.screens.download
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -70,6 +72,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -101,6 +104,7 @@ import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.StoragePaths
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -368,12 +372,47 @@ fun DownloadScreen(
             // screen is for, and a set of a hundred links used to carry it off the top of
             // the screen on the first flick.
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Home screen search bar with overflow 3-dot menu (clear results / clear history).
+            // The menu reuses the same actions the full SearchScreen exposes in its own
+            // 3-dot, so the two entry points behave identically.
+            var homeMenuOpen by remember { mutableStateOf(false) }
+            var showClearHistoryConfirm by remember { mutableStateOf(false) }
+            val homeScope = rememberCoroutineScope()
+            val homeClipboard = LocalClipboardManager.current
+
+            if (showClearHistoryConfirm) {
+                AlertDialog(
+                    onDismissRequest = { showClearHistoryConfirm = false },
+                    title = { Text(stringResource(R.string.search_clear_history_confirm_title), fontWeight = FontWeight.Bold) },
+                    text = { Text(stringResource(R.string.search_clear_history_confirm_body)) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showClearHistoryConfirm = false
+                            homeScope.launch(Dispatchers.IO) {
+                                SearchHistoryRepository.clear(context.applicationContext)
+                            }
+                        }) { Text(stringResource(R.string.search_clear_history), color = MaterialTheme.colorScheme.error) }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showClearHistoryConfirm = false }) {
+                            Text(stringResource(R.string.search_cancel))
+                        }
+                    }
+                )
+            }
+
             UrlSearchBar(
                 url = state.url,
                 onOpenSearch = {
                     cameFromShare = false
                     searchOpen = true
                 },
+                onClearResults = downloadViewModel::clearResults,
+                onClearHistory = { showClearHistoryConfirm = true },
+                menuOpen = homeMenuOpen,
+                onMenuOpen = { homeMenuOpen = true },
+                onMenuDismiss = { homeMenuOpen = false },
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
 
@@ -727,6 +766,72 @@ fun DownloadScreen(
             }
         }
 
+        // ── Paste FAB on empty home screen ──
+        //
+        // Shown at the bottom-left corner when there is nothing on screen yet
+        // (no results, not fetching). A link is nearly always copied elsewhere first,
+        // so the first action on this screen is typically a paste. Having it one tap
+        // away without opening the full search screen saves a step.
+        val homeIsEmpty = state.results.isEmpty() && !state.isFetching && state.instantSource.isBlank()
+        val homePasteClipboard = LocalClipboardManager.current
+        var homePastePendingDupe by remember { mutableStateOf<Pair<List<String>, HistoryEntry>?>(null) }
+
+        homePastePendingDupe?.let { (links, existing) ->
+            AlreadyDownloadedDialog(
+                entry = existing,
+                onPlay = { MediaOpener.play(context, existing.fileUri, existing.isVideo) },
+                onOpenLocation = { MediaOpener.openLocation(context, treeUri) },
+                onDownloadAgain = {
+                    homePastePendingDupe = null
+                    downloadViewModel.fetchAll(links)
+                },
+                onDismiss = { homePastePendingDupe = null }
+            )
+        }
+
+
+        if (homeIsEmpty) {
+            Surface(
+                onClick = {
+                    val pasted = homePasteClipboard.getText()?.text.orEmpty().trim()
+                    if (pasted.isBlank()) {
+                        Toast.makeText(context, context.getString(R.string.search_nothing_to_paste), Toast.LENGTH_SHORT).show()
+                        return@Surface
+                    }
+                    val links = pasted.split(Regex("""\s+""")).map { it.trim() }.filter { it.isNotBlank() }.distinct()
+                    if (links.isEmpty()) return@Surface
+                    scope.launch {
+                        val existing = links.firstNotNullOfOrNull { link ->
+                            history
+                                .firstOrNull { LinkKey.sameMedia(it.url, link) }
+                                ?.takeIf { DownloadHistoryRepository.fileExists(context, it) }
+                        }
+                        if (existing != null) {
+                            homePastePendingDupe = links to existing
+                        } else {
+                            cameFromShare = false
+                            downloadViewModel.fetchAll(links)
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(20.dp)
+                    .size(56.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Filled.ContentPaste,
+                        contentDescription = stringResource(R.string.search_paste_and_fetch),
+                        modifier = Modifier.size(22.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            }
+        }
+
         // One action for the whole set, which is the point of collecting links together.
         //
         // Offered on what is actually left to fetch rather than on how long the list is. A
@@ -962,9 +1067,15 @@ private fun openSaveDir(context: android.content.Context, treeUri: String) {
 private fun UrlSearchBar(
     url: String,
     onOpenSearch: () -> Unit,
+    onClearResults: () -> Unit = {},
+    onClearHistory: () -> Unit = {},
+    menuOpen: Boolean = false,
+    onMenuOpen: () -> Unit = {},
+    onMenuDismiss: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(
+        onClick = onOpenSearch,
         modifier = modifier
             .fillMaxWidth()
             .height(52.dp),
@@ -974,8 +1085,8 @@ private fun UrlSearchBar(
     ) {
         Row(
             modifier = Modifier
-                .clickable(onClick = onOpenSearch)
-                .padding(horizontal = 16.dp),
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -985,7 +1096,6 @@ private fun UrlSearchBar(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.width(12.dp))
-
             Text(
                 url.ifBlank { stringResource(R.string.download_search_hint) },
                 style = MaterialTheme.typography.bodyLarge,
@@ -995,6 +1105,37 @@ private fun UrlSearchBar(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
+
+            // Right: 3-dot overflow menu mirroring the full SearchScreen's menu
+            Box {
+                IconButton(onClick = onMenuOpen, modifier = Modifier.size(40.dp)) {
+                    Icon(
+                        Icons.Filled.MoreVert,
+                        contentDescription = stringResource(R.string.search_more),
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                DropdownMenu(
+                    expanded = menuOpen,
+                    onDismissRequest = onMenuDismiss
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.search_clear_results)) },
+                        onClick = {
+                            onMenuDismiss()
+                            onClearResults()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.search_clear_history)) },
+                        onClick = {
+                            onMenuDismiss()
+                            onClearHistory()
+                        }
+                    )
+                }
+            }
         }
     }
 }

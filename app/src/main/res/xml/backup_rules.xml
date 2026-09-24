@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Legacy backup rules (Android 6–11) for Hazel.
+
+    Includes DataStore preferences so cookies, search history, download
+    history, and settings survive cloud restores. Cache is excluded.
+-->
+<full-backup-content>
+    <include domain="sharedpref" path="." />
+    <include domain="file" path="datastore/" />
+    <exclude domain="cache" path="." />
+    <exclude domain="no-backup" path="." />
+</full-backup-content>

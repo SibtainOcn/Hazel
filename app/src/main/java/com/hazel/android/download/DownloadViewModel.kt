@@ -2136,7 +2136,7 @@ class DownloadViewModel : ViewModel() {
             "removed", "deleted", "copyright", "dmca", "404"
         )
 
-        val URL_PATTERN = Regex("^https?://\\S+$")
+        val URL_PATTERN = Regex("^https?://.+", RegexOption.IGNORE_CASE)
 
         /** Containers with no tag atom that can hold cover art. */
         val NO_ARTWORK_CONTAINERS = setOf("webm", "avi", "flv")

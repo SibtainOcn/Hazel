@@ -119,6 +119,7 @@ fun SearchScreen(
     }
 
     var menuOpen by remember { mutableStateOf(false) }
+    var showClearHistoryConfirm by remember { mutableStateOf(false) }
 
     // Needed only to open the folder a repeat warning refers to.
     val saveTreeUri by SettingsRepository.getDownloadTreeUri(context).collectAsState(initial = "")
@@ -233,6 +234,18 @@ fun SearchScreen(
             )
         }
 
+        if (showClearHistoryConfirm) {
+            ClearHistoryDialog(
+                onConfirm = {
+                    showClearHistoryConfirm = false
+                    scope.launch {
+                        SearchHistoryRepository.clear(context)
+                    }
+                },
+                onDismiss = { showClearHistoryConfirm = false }
+            )
+        }
+
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -300,9 +313,7 @@ fun SearchScreen(
                                 text = { Text(stringResource(R.string.search_clear_history)) },
                                 onClick = {
                                     menuOpen = false
-                                    HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
-                                        SearchHistoryRepository.clear(context.applicationContext)
-                                    }
+                                    showClearHistoryConfirm = true
                                 }
                             )
                         }
@@ -445,6 +456,26 @@ fun SearchScreen(
         }
         }
     }
+}
+
+// Clear search history confirmation dialog raised outside the Dialog so it sits on top.
+// Called from within SearchScreen after the user picks "Clear search history" from the
+// 3-dot menu, matching the same guard used on the home screen bar.
+@Composable
+private fun ClearHistoryDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.search_clear_history_confirm_title), style = MaterialTheme.typography.titleMedium) },
+        text = { Text(stringResource(R.string.search_clear_history_confirm_body)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(R.string.search_clear_history), color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.search_cancel)) }
+        }
+    )
 }
 
 /**

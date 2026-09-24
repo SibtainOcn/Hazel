@@ -61,6 +61,9 @@
     <string name="search_edit_before">Vor dem Suchen bearbeiten</string>
     <string name="search_paste_and_fetch">Einfügen und laden</string>
     <string name="search_nothing_to_paste">Nichts zum Einfügen da</string>
+    <string name="search_cancel">Abbrechen</string>
+    <string name="search_clear_history_confirm_title">Suchverlauf löschen?</string>
+    <string name="search_clear_history_confirm_body">Alle gespeicherten Suchlinks werden entfernt. Dies kann nicht rückgängig gemacht werden.</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Schon heruntergeladen</string>

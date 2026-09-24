@@ -72,6 +72,9 @@
     <string name="search_edit_before">Edit before searching</string>
     <string name="search_paste_and_fetch">Paste and fetch</string>
     <string name="search_nothing_to_paste">Nothing to paste</string>
+    <string name="search_cancel">Cancel</string>
+    <string name="search_clear_history_confirm_title">Clear search history?</string>
+    <string name="search_clear_history_confirm_body">All saved search links will be removed. This cannot be undone.</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Already downloaded</string>

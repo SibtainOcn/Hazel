@@ -18,6 +18,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Aligned pause, resume, and cancel actions across the header controls, thumbnail center button, and 3-dots menu with full support for cancelling waiting queue items without clearing the batch.
 - Reverted the app launcher icon to a white background with a black bolt foreground.
 
+### Added
+- Paste Floating Action Button (FAB) on the bottom-left corner of the home screen when empty, allowing one-tap pasting and fetching of links directly from the clipboard.
+- 3-dot overflow menu on the home screen search bar with "Clear search results" and "Clear search history", providing seamless visual and functional parity with the search screen.
+- Confirmation dialog before clearing search history from both home and search screen 3-dot menus to prevent accidental data loss.
+- Smart auto-expanding search bar on the Downloads screen with smooth expansion animation and one-tap dismissal when clicking anywhere on empty screen space.
+- Explicit backup and data extraction rules (`backup_rules.xml` and `data_extraction_rules.xml`) ensuring user cookies, search history, download history, and app preferences are strictly preserved across app updates, cloud restores, and device transfers.
+- Complete 10-locale translation parity for all newly introduced search actions and confirmation dialogs.
+- Direct cookie file import option ("Import file" button and overflow menu item) allowing users to import Netscape cookie files directly with automatic domain recognition, multi-site splitting, and full 10-locale translation parity.
+- Dedicated "Pause All / Resume All" and "Cancel All" batch control buttons in the Downloads
+  screen header row, active whenever a batch or download is running.
+- Granular per-item cancellation (`cancelItem`), allowing items waiting in the queue to be
+  removed from memory and persistent queue storage without disturbing currently downloading items.
+- Downloads screen workflow dropdown on the title with chevron selector, replacing horizontal button bar.
+- Reusable progressive thumbnail and compact row media components with live progress, pause/resume/cancel actions, and visual parity with the Home screen.
+- Support for both 16:9 thumbnail artwork and compact single-row layouts across all Downloads categories (All, Downloading, Queued, Failed, Audio, Video).
+- Active downloads now appear pinned at the top of the All Downloads list.
+- Diagnostic log modal and one-tap retry for failed downloads.
+- Asynchronous and distinct DataStore flow deserialization on background dispatchers to optimize CPU, I/O, and recomposition.
+
 ### Fixed
 - Fixed Cookies screen master switch event collision where tapping the switch failed to turn back ON; converted row to single-source toggleable semantics and remembered Flow collections across recompositions.
 - Ensured individual cookie switches operate independently without closing off the global master switch when disabled, allowing flexible per-cookie control while preserving global cookie status.
@@ -48,19 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Batch completion reporting (`finishBatch`) no longer counts user-cancelled downloads as
   failures, eliminating misleading error banners (such as "1 of 49 failed") when items are
   intentionally cancelled or skipped.
-
-### Added
-- Direct cookie file import option ("Import file" button and overflow menu item) allowing users to import Netscape cookie files directly with automatic domain recognition, multi-site splitting, and full 10-locale translation parity.
-- Dedicated "Pause All / Resume All" and "Cancel All" batch control buttons in the Downloads
-  screen header row, active whenever a batch or download is running.
-- Granular per-item cancellation (`cancelItem`), allowing items waiting in the queue to be
-  removed from memory and persistent queue storage without disturbing currently downloading items.
-- Downloads screen workflow dropdown on the title with chevron selector, replacing horizontal button bar.
-- Reusable progressive thumbnail and compact row media components with live progress, pause/resume/cancel actions, and visual parity with the Home screen.
-- Support for both 16:9 thumbnail artwork and compact single-row layouts across all Downloads categories (All, Downloading, Queued, Failed, Audio, Video).
-- Active downloads now appear pinned at the top of the All Downloads list.
-- Diagnostic log modal and one-tap retry for failed downloads.
-- Asynchronous and distinct DataStore flow deserialization on background dispatchers to optimize CPU, I/O, and recomposition.
+- URL validation now accepts uppercase and mixed-case URI schemes (e.g. `HTTPS://`, `Http://`) and trims leading/trailing whitespace.
 
 ## [1.0.8] - 2026-09-03
 
