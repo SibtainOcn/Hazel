@@ -69,7 +69,14 @@ object CookieRepository {
         context.dataStore.data.map { prefs -> prefs[USE_COOKIES_KEY] ?: false }
 
     suspend fun setUseCookies(context: Context, enabled: Boolean) {
-        context.dataStore.edit { prefs -> prefs[USE_COOKIES_KEY] = enabled }
+        context.dataStore.edit { prefs ->
+            prefs[USE_COOKIES_KEY] = enabled
+            val existing = decode(prefs[COOKIES_KEY])
+            if (existing.isNotEmpty()) {
+                val updated = existing.map { it.copy(enabled = enabled) }
+                prefs[COOKIES_KEY] = encode(updated)
+            }
+        }
         writeCookieFile(context)
         InfoCache.clear()
     }
@@ -96,6 +103,9 @@ object CookieRepository {
                 existing + entry
             }
             prefs[COOKIES_KEY] = encode(updated)
+            if (entry.enabled) {
+                prefs[USE_COOKIES_KEY] = true
+            }
         }
         writeCookieFile(context)
         InfoCache.clear()
@@ -103,10 +113,13 @@ object CookieRepository {
 
     suspend fun setEnabled(context: Context, id: Long, enabled: Boolean) {
         context.dataStore.edit { prefs ->
-            val updated = decode(prefs[COOKIES_KEY]).map {
+            val existing = decode(prefs[COOKIES_KEY])
+            val updated = existing.map {
                 if (it.id == id) it.copy(enabled = enabled) else it
             }
             prefs[COOKIES_KEY] = encode(updated)
+            val anyEnabled = updated.any { it.enabled }
+            prefs[USE_COOKIES_KEY] = anyEnabled
         }
         writeCookieFile(context)
         InfoCache.clear()
@@ -114,14 +127,21 @@ object CookieRepository {
 
     suspend fun delete(context: Context, id: Long) {
         context.dataStore.edit { prefs ->
-            prefs[COOKIES_KEY] = encode(decode(prefs[COOKIES_KEY]).filter { it.id != id })
+            val remaining = decode(prefs[COOKIES_KEY]).filter { it.id != id }
+            prefs[COOKIES_KEY] = encode(remaining)
+            if (remaining.isEmpty() || remaining.none { it.enabled }) {
+                prefs[USE_COOKIES_KEY] = false
+            }
         }
         writeCookieFile(context)
         InfoCache.clear()
     }
 
     suspend fun deleteAll(context: Context) {
-        context.dataStore.edit { prefs -> prefs[COOKIES_KEY] = encode(emptyList()) }
+        context.dataStore.edit { prefs ->
+            prefs[COOKIES_KEY] = encode(emptyList())
+            prefs[USE_COOKIES_KEY] = false
+        }
         writeCookieFile(context)
         InfoCache.clear()
     }

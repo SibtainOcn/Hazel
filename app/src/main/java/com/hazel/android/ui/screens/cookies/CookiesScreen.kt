@@ -210,7 +210,6 @@ fun CookiesScreen(onBack: () -> Unit) {
 
         OutlinedButton(
             onClick = { creating = true },
-            enabled = useCookies,
             modifier = Modifier.padding(horizontal = 20.dp)
         ) {
             Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -258,6 +257,7 @@ fun CookiesScreen(onBack: () -> Unit) {
                 items(entries, key = { it.id }) { entry ->
                     CookieRow(
                         entry = entry,
+                        masterEnabled = useCookies,
                         onClick = { editing = entry },
                         onLongClick = { pendingDelete = entry },
                         onEnabledChange = { enabled ->
@@ -357,6 +357,7 @@ fun CookiesScreen(onBack: () -> Unit) {
 @Composable
 private fun CookieRow(
     entry: CookieEntry,
+    masterEnabled: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onEnabledChange: (Boolean) -> Unit
@@ -401,7 +402,10 @@ private fun CookieRow(
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
-            Switch(checked = entry.enabled, onCheckedChange = onEnabledChange)
+            Switch(
+                checked = entry.enabled && masterEnabled,
+                onCheckedChange = onEnabledChange
+            )
         }
     }
 }

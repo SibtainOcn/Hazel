@@ -163,7 +163,12 @@ class BatchDownloadState {
 
     fun setDownloadType(isVideo: Boolean) {
         videoTab = isVideo
-        applyToTargets { it.autoPick(isVideo, maxHeight) }
+        val scope = targets
+        if (scope.size == results.size) {
+            formatFor = emptyMap()
+        } else {
+            applyToTargets { it.autoPick(isVideo, maxHeight, languageOf(it)) }
+        }
     }
 
     /**
@@ -187,7 +192,12 @@ class BatchDownloadState {
 
     fun setQualityCeiling(height: Int) {
         maxHeight = height
-        applyToTargets { it.autoPick(videoTab, height) }
+        val scope = targets
+        if (scope.size == results.size) {
+            formatFor = emptyMap()
+        } else {
+            applyToTargets { it.autoPick(videoTab, height, languageOf(it)) }
+        }
     }
 
     /**

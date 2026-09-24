@@ -14,10 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Kept header Cancel button styled with standard primary tint rather than warning/error red to align with adjacent actions.
 - Added confirmation dialogs before cancelling active downloads and before clearing results to safeguard against accidental wipes.
 - Replaced the search bar search icon.
+- Updated batch download action bar quality button to display real-time chosen quality labels (e.g. HQ: AUTO, HQ: BEST, HQ: 1080p) instead of a static generic icon.
 - Aligned pause, resume, and cancel actions across the header controls, thumbnail center button, and 3-dots menu with full support for cancelling waiting queue items without clearing the batch.
 - Reverted the app launcher icon to a white background with a black bolt foreground.
 
 ### Fixed
+- Fixed multi/playlist download sheet quality ceiling selection where picking a quality from the batch action bar left unresolved items displaying best quality; pending cards now receive bounded generic format selectors with automatic fallback to the closest available lower resolution.
+- Fixed cookie screen master toggle synchronization where disabling all cookies left individual cookie switches displaying as active; the top master toggle and individual cookie switches are now bidirectionally synchronized across storage and UI states.
 - Fixed YouTube playlist and multi-link extraction when cookies are active by avoiding overriding client User-Agent headers on YouTube endpoints, resolving tab page extraction failures.
 - Implemented automatic metadata and listing cache invalidation (`InfoCache.clear()`) on cookie updates, toggles, additions, and deletions, as well as extractor setting changes, preventing stale cached results or expired session states.
 - Prioritized cookie authentication during metadata probes and playlist reads while maintaining automatic fallback to anonymous extraction if signed-in requests encounter failures.

@@ -78,9 +78,27 @@ data class MediaInfo(
      */
     fun autoPick(isVideo: Boolean, maxHeight: Int, audioLanguage: String? = null): MediaFormat? {
         if (!isVideo) return bestAudioFor(audioLanguage)
+        if (videoFormats.isEmpty()) return null
 
         val concrete = videoFormats.filter { !it.isGeneric }
-        if (concrete.isEmpty() || maxHeight <= 0) return bestVideo
+        if (maxHeight <= 0) return bestVideo
+        if (concrete.isEmpty()) {
+            return MediaFormat(
+                formatId = "bv*[height<=$maxHeight]",
+                selector = "bv*[height<=$maxHeight]+ba/b[height<=$maxHeight]/bv*+ba/b",
+                label = "${maxHeight}p",
+                ext = "",
+                vcodec = null,
+                acodec = null,
+                height = maxHeight,
+                fps = 0,
+                bitrateKbps = 0.0,
+                fileSizeBytes = 0L,
+                hasVideo = true,
+                hasAudio = true,
+                isGeneric = true
+            )
+        }
 
         return concrete.firstOrNull { it.height in 1..maxHeight }
             ?: concrete.minByOrNull { it.height }

@@ -366,5 +366,38 @@ class MediaProbeParseTest {
         assertEquals(128.0, info.audioFormats[1].bitrateKbps)
         assertEquals("M4A", info.audioFormats[1].codecLabel)
     }
+
+    @Test
+    fun `autoPick returns generic bounded format when concrete formats are pending`() {
+        val fallback = MediaProbe.fallbackFor("https://youtube.com/watch?v=pending")
+        assertFalse(fallback.hasResolvedFormats)
+
+        val ceiling480 = fallback.autoPick(isVideo = true, maxHeight = 480)
+        assertNotNull(ceiling480)
+        assertEquals(480, ceiling480.height)
+        assertEquals("480p", ceiling480.shortLabel)
+        assertEquals("bv*[height<=480]+ba/b[height<=480]/bv*+ba/b", ceiling480.selector)
+        assertTrue(ceiling480.isGeneric)
+
+        val autoBest = fallback.autoPick(isVideo = true, maxHeight = 0)
+        assertNotNull(autoBest)
+        assertEquals("Best quality", autoBest.shortLabel)
+        assertEquals("bv*+ba/b", autoBest.selector)
+    }
+
+    @Test
+    fun `autoPick selects closest format under ceiling with fallback`() {
+        val info = parse(complete) // Has 1080p formats (399, 137)
+        assertTrue(info.hasResolvedFormats)
+
+        val picked = info.autoPick(isVideo = true, maxHeight = 1080)
+        assertNotNull(picked)
+        assertEquals(1080, picked.height)
+
+        // When ceiling is 720p but only 1080p exists, falls back to min available (1080p)
+        val fallback = info.autoPick(isVideo = true, maxHeight = 720)
+        assertNotNull(fallback)
+        assertEquals(1080, fallback.height)
+    }
 }
 

@@ -314,9 +314,14 @@ fun BatchDownloadSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            val hqLabel = if (!state.videoTab) "HQ: BEST"
+            else if (state.maxHeight <= 0) "HQ: AUTO"
+            else "HQ: ${state.maxHeight}p"
+
             BatchActionBar(
                 isVideo = state.videoTab,
                 qualityLabel = stringResource(qualityLabelFor(state.maxHeight)),
+                hqLabel = hqLabel,
                 containerLabel = containerLabelFor(options, state.videoTab),
                 options = options,
                 onDownloadType = { openSheet = BatchSheet.TYPE },

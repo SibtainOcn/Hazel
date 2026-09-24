@@ -544,6 +544,29 @@ def main():
     check_true("DownloadViewModel.kt uses available cookies for planAccess", "!access.hasCookies -> SiteAccess.NONE" in view_model_kt and "else -> access" in view_model_kt)
 
     # -----------------------------------------------------------------------
+    print("\n--- 8. Batch Download Quality Ceilings, Realtime HQ Button & Cookie Sync ---")
+    # -----------------------------------------------------------------------
+    media_info_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "download" / "MediaInfo.kt").read_text(encoding="utf-8")
+    check_true("MediaInfo.kt handles generic maxHeight ceiling", "bv*[height<=$maxHeight]+ba/b[height<=$maxHeight]/bv*+ba/b" in media_info_kt)
+    check_true("MediaInfo.kt autoPick returns generic format when concrete is empty", "if (concrete.isEmpty())" in media_info_kt)
+
+    batch_state_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "batch" / "BatchDownloadState.kt").read_text(encoding="utf-8")
+    check_true("BatchDownloadState.kt resets formatFor on batch ceiling change", "if (scope.size == results.size) {" in batch_state_kt and "formatFor = emptyMap()" in batch_state_kt)
+
+    batch_action_bar_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "batch" / "BatchActionBar.kt").read_text(encoding="utf-8")
+    check_true("BatchActionBar.kt accepts hqLabel parameter", "hqLabel: String = \"\"" in batch_action_bar_kt)
+    check_true("BatchActionBar.kt displays dynamic HQ text on quality button", "text = hqLabel" in batch_action_bar_kt)
+
+    batch_sheet_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "batch" / "BatchDownloadSheet.kt").read_text(encoding="utf-8")
+    check_true("BatchDownloadSheet.kt passes dynamic hqLabel", "hqLabel = hqLabel" in batch_sheet_kt and "HQ: ${state.maxHeight}p" in batch_sheet_kt)
+
+    format_sheet_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "FormatSheet.kt").read_text(encoding="utf-8")
+    check_true("FormatSheet.kt resolves generic initialFormat on format load", "initialFormat?.takeIf { !it.isGeneric && it.hasVideo }" in format_sheet_kt)
+
+    check_true("CookieRepository.kt syncs entries on setUseCookies", "existing.map { it.copy(enabled = enabled) }" in cookie_repo_kt)
+    check_true("CookieRepository.kt syncs master toggle on setEnabled", "prefs[USE_COOKIES_KEY] = anyEnabled" in cookie_repo_kt)
+
+    # -----------------------------------------------------------------------
     # Summary
     # -----------------------------------------------------------------------
     print("\n" + "=" * 70)
