@@ -55,13 +55,12 @@ object MediaProbe {
             try {
                 return@withContext readOne(
                     url, cacheDir, attempt, fetchMode, forceIpv4, processId,
-                    // True when this is the fallback, which only runs because the
-                    // anonymous read was refused.
-                    signedIn = index > 0
+                    signedIn = attempt.hasCookies
                 )
             } catch (e: Exception) {
                 val last = index == attempts.lastIndex
-                if (last || e is CancellationException || !isSignInRefusal(e.message)) throw e
+                val canFallback = !last && (attempt.hasCookies || isSignInRefusal(e.message))
+                if (!canFallback || e is CancellationException) throw e
             }
         }
 
@@ -155,11 +154,12 @@ object MediaProbe {
             try {
                 return@withContext listOne(
                     url, cacheDir, attempt, fetchMode, forceIpv4, processId,
-                    signedIn = index > 0
+                    signedIn = attempt.hasCookies
                 )
             } catch (e: Exception) {
                 val last = index == attempts.lastIndex
-                if (last || e is CancellationException || !isSignInRefusal(e.message)) throw e
+                val canFallback = !last && (attempt.hasCookies || isSignInRefusal(e.message))
+                if (!canFallback || e is CancellationException) throw e
             }
         }
 

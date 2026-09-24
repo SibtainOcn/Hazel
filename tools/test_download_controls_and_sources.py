@@ -524,9 +524,22 @@ def main():
     check_true("SiteAccess.kt contains web_embedded player client", "web_embedded" in site_access_kt)
     check_true("SiteAccess.kt contains isYouTube helper function", "fun isYouTube(" in site_access_kt)
     check_true("SiteAccess.kt passes player_client for YouTube URLs", "youtube:player_client" in site_access_kt)
+    check_true("SiteAccess.kt suppresses custom User-Agent on YouTube", "!isYouTube(url)" in site_access_kt)
 
     media_probe_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "download" / "MediaProbe.kt").read_text(encoding="utf-8")
     check_true("MediaProbe.kt prioritizes cookie access when available", "access.hasCookies -> listOf(access, SiteAccess.NONE)" in media_probe_kt)
+    check_true("MediaProbe.kt supports anonymous fallback on cookie failure", "val canFallback = !last && (attempt.hasCookies || isSignInRefusal(e.message))" in media_probe_kt)
+
+    cookie_repo_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "data" / "CookieRepository.kt").read_text(encoding="utf-8")
+    check_true("CookieRepository.kt imports InfoCache", "import com.hazel.android.download.InfoCache" in cookie_repo_kt)
+    check_true("CookieRepository.kt clears InfoCache in setUseCookies", "setUseCookies" in cookie_repo_kt and "InfoCache.clear()" in cookie_repo_kt)
+    check_true("CookieRepository.kt clears InfoCache in upsert", "upsert" in cookie_repo_kt and "InfoCache.clear()" in cookie_repo_kt)
+    check_true("CookieRepository.kt clears InfoCache in setEnabled", "setEnabled" in cookie_repo_kt and "InfoCache.clear()" in cookie_repo_kt)
+    check_true("CookieRepository.kt clears InfoCache in delete", "delete" in cookie_repo_kt and "InfoCache.clear()" in cookie_repo_kt)
+    check_true("CookieRepository.kt clears InfoCache in deleteAll", "deleteAll" in cookie_repo_kt and "InfoCache.clear()" in cookie_repo_kt)
+
+    settings_repo_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "data" / "SettingsRepository.kt").read_text(encoding="utf-8")
+    check_true("SettingsRepository.kt clears InfoCache on setListingSource", "setListingSource" in settings_repo_kt and "InfoCache.clear()" in settings_repo_kt)
 
     check_true("DownloadViewModel.kt uses available cookies for planAccess", "!access.hasCookies -> SiteAccess.NONE" in view_model_kt and "else -> access" in view_model_kt)
 

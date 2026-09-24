@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reverted the app launcher icon to a white background with a black bolt foreground.
 
 ### Fixed
+- Fixed YouTube playlist and multi-link extraction when cookies are active by avoiding overriding client User-Agent headers on YouTube endpoints, resolving tab page extraction failures.
+- Implemented automatic metadata and listing cache invalidation (`InfoCache.clear()`) on cookie updates, toggles, additions, and deletions, as well as extractor setting changes, preventing stale cached results or expired session states.
+- Prioritized cookie authentication during metadata probes and playlist reads while maintaining automatic fallback to anonymous extraction if signed-in requests encounter failures.
 - Fixed search history persistence where searches and fetched URLs failed to store and display due to coroutine cancellation upon screen dismissal. All queried and fetched links are now recorded on `applicationScope` / `viewModelScope` (when incognito is disabled) even when searching without downloading, via Hazel Instant, or using custom cookies.
 - Audio downloaded from JioSaavn, SoundCloud, Bandcamp and other music platforms now shows
   the artist name instead of the record label. The probe reads the `artist` and `artists`

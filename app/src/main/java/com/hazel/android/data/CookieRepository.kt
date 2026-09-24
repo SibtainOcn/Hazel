@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.hazel.android.download.InfoCache
 import com.hazel.android.download.SiteAccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -70,6 +71,7 @@ object CookieRepository {
     suspend fun setUseCookies(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[USE_COOKIES_KEY] = enabled }
         writeCookieFile(context)
+        InfoCache.clear()
     }
 
     // ── Entries ──
@@ -96,6 +98,7 @@ object CookieRepository {
             prefs[COOKIES_KEY] = encode(updated)
         }
         writeCookieFile(context)
+        InfoCache.clear()
     }
 
     suspend fun setEnabled(context: Context, id: Long, enabled: Boolean) {
@@ -106,6 +109,7 @@ object CookieRepository {
             prefs[COOKIES_KEY] = encode(updated)
         }
         writeCookieFile(context)
+        InfoCache.clear()
     }
 
     suspend fun delete(context: Context, id: Long) {
@@ -113,11 +117,13 @@ object CookieRepository {
             prefs[COOKIES_KEY] = encode(decode(prefs[COOKIES_KEY]).filter { it.id != id })
         }
         writeCookieFile(context)
+        InfoCache.clear()
     }
 
     suspend fun deleteAll(context: Context) {
         context.dataStore.edit { prefs -> prefs[COOKIES_KEY] = encode(emptyList()) }
         writeCookieFile(context)
+        InfoCache.clear()
     }
 
     // ── The file yt-dlp reads ──

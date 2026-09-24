@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.FetchMode
+import com.hazel.android.download.InfoCache
 import com.hazel.android.download.extractor.ListingSource
 import kotlinx.coroutines.flow.Flow
 import androidx.datastore.preferences.preferencesDataStore
@@ -177,6 +178,7 @@ object SettingsRepository {
 
     suspend fun setListingSource(context: Context, source: ListingSource) {
         context.dataStore.edit { prefs -> prefs[LISTING_SOURCE_KEY] = source.name }
+        InfoCache.clear()
     }
 
     fun getFetchMode(context: Context): Flow<FetchMode> =
@@ -184,6 +186,7 @@ object SettingsRepository {
 
     suspend fun setFetchMode(context: Context, mode: FetchMode) {
         context.dataStore.edit { prefs -> prefs[FETCH_MODE_KEY] = mode.name }
+        InfoCache.clear()
     }
 
     /**

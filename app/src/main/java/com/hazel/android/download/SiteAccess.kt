@@ -49,7 +49,10 @@ fun YoutubeDLRequest.applySiteAccess(access: SiteAccess, url: String) {
 
     addOption("--cookies", cookies.absolutePath)
 
-    if (access.userAgent.isNotBlank()) {
+    // Do not override User-Agent for YouTube because yt-dlp manages extractor client-specific
+    // user agents internally. Passing mobile WebView user agents forces YouTube to return
+    // stripped-down mobile markup which breaks playlist and tab page extraction.
+    if (access.userAgent.isNotBlank() && !isYouTube(url)) {
         addOption("--add-header", "User-Agent:${access.userAgent}")
     }
 }
