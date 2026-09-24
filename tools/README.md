@@ -21,16 +21,19 @@ thing before writing anything, and read [`BLOCKED.md`](BLOCKED.md) as well.
 
 ```
 tools/
-  check.py                 the gate: run it, believe it
-  literal-allowlist.txt    literals deliberately left in the Kotlin, each with a reason
-  BLOCKED.md               text that needs a code change before it can be extracted
-  README.md                this file
+  check.py                             the gate: run it, believe it
+  test_all.py                          master runner: checks GitHub release versioning & runs all suites
+  test_release_regression_harness.py   comprehensive release readiness & regression harness
+  test_artist_metadata.py              artist metadata and colon handling harness
+  literal-allowlist.txt                literals deliberately left in the Kotlin, each with a reason
+  BLOCKED.md                           text that needs a code change before it can be extracted
+  README.md                            this file
 app/src/main/res/
-  values/strings.xml       the English source. Every key starts life here.
-  values-<lang>/strings.xml  one per language, added in Job 2
+  values/strings.xml                   the English source. Every key starts life here.
+  values-<lang>/strings.xml            one per language, added in Job 2
 ```
 
-`check.py` needs Python 3 and nothing else. Run it from the repository root.
+`check.py` and the test harnesses need Python 3 and nothing else. Run them from the repository root.
 
 ---
 

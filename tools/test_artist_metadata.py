@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test harness for Hazel-DLP artist metadata resolution logic.
+Test harness for Hazel artist metadata resolution logic.
 
 Simulates the same resolution order as MediaProbe.resolveArtist + firstNonBlank
 to verify the logic independently of the Kotlin/Android toolchain. Also validates
@@ -560,7 +560,7 @@ def test_standard_video_and_audio_streams_still_separated():
 
 def main():
     print("=" * 65)
-    print("  Hazel-DLP Artist Metadata Test Harness")
+    print("  Hazel Artist Metadata Test Harness")
     print("=" * 65)
 
     print("\n--- Artist Resolution (MediaProbe.parse) ---")

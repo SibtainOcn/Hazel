@@ -37,14 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.8] - 2026-09-03
 
-### Store
-- Download audio and video from YouTube, Instagram, TikTok, X, Reddit, SoundCloud and a
-  thousand other sites.
-- Queue a playlist or a whole channel, or share a link from any app and start at once.
-- Choose the audio language, cut sponsor segments, embed chapters and subtitles.
-- Background downloads you can pause, resume and cancel, with a Wi-Fi only mode.
-- No accounts and no analytics, and an incognito mode that records nothing.
-
 ### Fixed
 - The published APKs no longer carry Gradle's dependency-metadata block inside the APK
   signing block. AGP adds it by default, F-Droid's scanner rejects any APK that has it, and
@@ -52,28 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.7] - 2026-09-03
 
-### Store
-- Download audio and video from YouTube, Instagram, TikTok, X, Reddit, SoundCloud and a
-  thousand other sites.
-- Queue a playlist or a whole channel, or share a link from any app and start at once.
-- Choose the audio language, cut sponsor segments, embed chapters and subtitles.
-- Background downloads you can pause, resume and cancel, with a Wi-Fi only mode.
-- No accounts and no analytics, and an incognito mode that records nothing.
-
 ### Fixed
 - Builds reproduce on another machine. `libdatastore_shared_counter.so` is now packaged as
   the dependency provides it, because the debug symbols AGP strips out of it come away
   differently under each NDK version, leaving a rebuild unable to match the release.
 
 ## [1.0.6] - 2026-09-03
-
-### Store
-- Download audio and video from YouTube, Instagram, TikTok, X, Reddit, SoundCloud and a
-  thousand other sites.
-- Queue a playlist or a whole channel, or share a link from any app and start at once.
-- Choose the audio language, cut sponsor segments, embed chapters and subtitles.
-- Background downloads you can pause, resume and cancel, with a Wi-Fi only mode.
-- No accounts and no analytics, and an incognito mode that records nothing.
 
 ### Fixed
 - The version name and code are literals in `app/build.gradle.kts` again, the only form
