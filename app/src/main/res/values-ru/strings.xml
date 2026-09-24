@@ -32,6 +32,14 @@
     <string name="download_remove_link">Удалить ссылку</string>
     <string name="download_cancel_action">Отменить загрузку</string>
     <string name="download_resume_action">Возобновить загрузку</string>
+    <string name="download_pause_all">Приостановить все</string>
+    <string name="download_resume_all">Возобновить все</string>
+    <string name="download_cancel_all">Отменить все</string>
+    <string name="download_cancel_dialog_body">Вы уверены, что хотите отменить все текущие и ожидающие загрузки?</string>
+    <string name="download_cancel_single_dialog_body">Вы уверены, что хотите отменить эту загрузку?</string>
+    <string name="download_cancel_dialog_dismiss">Продолжить загрузку</string>
+    <string name="download_clear_confirm_title">Очистить результаты?</string>
+    <string name="download_clear_confirm_body">Вы действительно хотите удалить все результаты с экрана?</string>
     <plurals name="download_links">
         <item quantity="one">%d ссылка</item>
         <item quantity="few">%d ссылки</item>

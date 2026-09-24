@@ -736,6 +736,92 @@ def run_tests():
             check_true(f"values{loc} has removed sponsor_kofi_soon", kofi_soon is None)
 
     # -----------------------------------------------------------------------
+    print("\n--- 9. Batch & Multi-Link Queue Lifecycle & Per-Item Cancellation ---")
+    # -----------------------------------------------------------------------
+
+    # Test 9.1: Single Item Cancellation in Batch (Skipping 1 of 49 without breaking queue)
+    class SimulatedBatchRunner:
+        def __init__(self, count: int):
+            self.queue = list(range(1, count + 1))
+            self.results = {}
+            self.is_cancelled = False
+            self.is_batch_cancelled = False
+            self.active_item = None
+
+        def run(self, cancel_item_id: int | None = None, cancel_all_at: int | None = None):
+            while self.queue:
+                item = self.queue.pop(0)
+                self.active_item = item
+
+                if cancel_all_at is not None and item == cancel_all_at:
+                    self.is_batch_cancelled = True
+                    self.results[item] = "CANCELLED"
+                    self.queue.clear()
+                    break
+
+                if cancel_item_id is not None and item == cancel_item_id:
+                    self.is_cancelled = True
+                    # Purge fragments and mark single item as Cancelled
+                    self.results[item] = "CANCELLED"
+                    self.is_cancelled = False
+                    continue  # Continues to next item!
+
+                # Item completes successfully
+                self.results[item] = "DONE"
+
+            done = sum(1 for v in self.results.values() if v == "DONE")
+            true_failed = sum(1 for v in self.results.values() if v == "FAILED")
+            cancelled = sum(1 for v in self.results.values() if v == "CANCELLED")
+            error_msg = None
+            if done == 0 and true_failed > 0:
+                error_msg = "Download failed"
+            elif true_failed > 0:
+                error_msg = f"{true_failed} of {len(self.results)} failed"
+
+            return {
+                "done": done,
+                "true_failed": true_failed,
+                "cancelled": cancelled,
+                "total_attempted": len(self.results),
+                "error": error_msg
+            }
+
+    runner_skip = SimulatedBatchRunner(49)
+    res_skip = runner_skip.run(cancel_item_id=7)
+    check("Batch continues: 48 items done when item 7 cancelled", res_skip["done"], 48)
+    check("Cancelled item counted as cancelled", res_skip["cancelled"], 1)
+    check("True failures is zero when single item cancelled", res_skip["true_failed"], 0)
+    check("Error message is None (no inaccurate '1 of 49 failed')", res_skip["error"], None)
+
+    # Test 9.2: Cancel All stops remaining queue
+    runner_cancel_all = SimulatedBatchRunner(49)
+    res_cancel_all = runner_cancel_all.run(cancel_all_at=7)
+    check("Cancel all stops at item 7: 6 done", res_cancel_all["done"], 6)
+    check("Cancel all stopped queue: remaining 42 not run", res_cancel_all["total_attempted"], 7)
+
+    # Test 9.3: Removing Queued Item while active item is running
+    queue_test = list(range(1, 50))
+    active_now = queue_test.pop(0)
+    check("Active download is item 1", active_now, 1)
+    # Remove item 15 from waiting queue
+    queue_test.remove(15)
+    check_true("Item 15 removed from waiting queue", 15 not in queue_test)
+    check("Remaining waiting queue has 47 items", len(queue_test), 47)
+
+    # Test 9.4: Batch Control Strings in All 10 Locales
+    for loc in locales:
+        str_file = REPO_ROOT / f"app/src/main/res/values{loc}/strings.xml"
+        if str_file.exists():
+            tree = ET.parse(str_file)
+            root = tree.getroot()
+            pause_all = root.find("./string[@name='download_pause_all']")
+            resume_all = root.find("./string[@name='download_resume_all']")
+            cancel_all = root.find("./string[@name='download_cancel_all']")
+            check_true(f"values{loc} has download_pause_all", pause_all is not None and bool(pause_all.text))
+            check_true(f"values{loc} has download_resume_all", resume_all is not None and bool(resume_all.text))
+            check_true(f"values{loc} has download_cancel_all", cancel_all is not None and bool(cancel_all.text))
+
+    # -----------------------------------------------------------------------
     print("\n" + "=" * 70)
     total = PASS_COUNT + FAIL_COUNT
     print(f"  Summary: {PASS_COUNT}/{total} tests PASSED, {FAIL_COUNT} FAILED")

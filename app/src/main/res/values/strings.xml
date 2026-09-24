@@ -43,6 +43,14 @@
     <string name="download_remove_link">Remove link</string>
     <string name="download_cancel_action">Cancel download</string>
     <string name="download_resume_action">Resume download</string>
+    <string name="download_pause_all">Pause all</string>
+    <string name="download_resume_all">Resume all</string>
+    <string name="download_cancel_all">Cancel all</string>
+    <string name="download_cancel_dialog_body">Are you sure you want to cancel all downloads in progress and in the queue?</string>
+    <string name="download_cancel_single_dialog_body">Are you sure you want to cancel this download?</string>
+    <string name="download_cancel_dialog_dismiss">Keep downloading</string>
+    <string name="download_clear_confirm_title">Clear results?</string>
+    <string name="download_clear_confirm_body">Are you sure you want to clear all results from the screen?</string>
     <plurals name="download_links">
         <item quantity="one">%d link</item>
         <item quantity="other">%d links</item>

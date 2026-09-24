@@ -9,8 +9,8 @@ Executes all verification and test suites locally with a single command:
 4. String literal extraction progress (tools/check.py progress)
 5. Artist metadata test harness (tools/test_artist_metadata.py)
 6. Release readiness & regression harness (tools/test_release_regression_harness.py)
-7. JVM unit tests (gradlew :app:testDebugUnitTest)
-8. Fastlane store changelog generator (gradlew :app:generateFastlaneChangelogs)
+7. Controls & multi-source harness (tools/test_download_controls_and_sources.py)
+8. JVM unit tests (gradlew :app:testDebugUnitTest)
 
 Usage:
     python tools/test_all.py
@@ -205,8 +205,8 @@ def main():
         ("Literal Extraction Progress", [py, "tools/check.py", "progress"]),
         ("Artist Metadata Harness", [py, "tools/test_artist_metadata.py"]),
         ("Release Regression Harness", [py, "tools/test_release_regression_harness.py"]),
+        ("Controls & Multi-Source Harness", [py, "tools/test_download_controls_and_sources.py"]),
         ("Gradle JVM Unit Tests", GRADLE_CMD + [":app:testDebugUnitTest", "--console=plain"]),
-        ("Fastlane Store Changelogs", GRADLE_CMD + [":app:generateFastlaneChangelogs", "--console=plain"]),
     ]
 
     results = []

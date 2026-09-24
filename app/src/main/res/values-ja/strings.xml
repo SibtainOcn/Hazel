@@ -32,6 +32,14 @@
     <string name="download_remove_link">リンクを削除</string>
     <string name="download_cancel_action">ダウンロードをキャンセル</string>
     <string name="download_resume_action">ダウンロードを再開</string>
+    <string name="download_pause_all">すべて一時停止</string>
+    <string name="download_resume_all">すべて再開</string>
+    <string name="download_cancel_all">すべてキャンセル</string>
+    <string name="download_cancel_dialog_body">進行中および待機中のすべてのダウンロードをキャンセルしてもよろしいですか？</string>
+    <string name="download_cancel_single_dialog_body">このダウンロードをキャンセルしてもよろしいですか？</string>
+    <string name="download_cancel_dialog_dismiss">ダウンロードを続ける</string>
+    <string name="download_clear_confirm_title">結果を消去しますか？</string>
+    <string name="download_clear_confirm_body">画面からすべての結果を消去してもよろしいですか？</string>
     <plurals name="download_links">
         <item quantity="other">%d 件のリンク</item>
     </plurals>

@@ -32,6 +32,14 @@
     <string name="download_remove_link">移除链接</string>
     <string name="download_cancel_action">取消下载</string>
     <string name="download_resume_action">继续下载</string>
+    <string name="download_pause_all">全部暂停</string>
+    <string name="download_resume_all">全部继续</string>
+    <string name="download_cancel_all">全部取消</string>
+    <string name="download_cancel_dialog_body">您确定要取消所有进行中和队列中的下载吗？</string>
+    <string name="download_cancel_single_dialog_body">您确定要取消此下载吗？</string>
+    <string name="download_cancel_dialog_dismiss">继续下载</string>
+    <string name="download_clear_confirm_title">清除结果？</string>
+    <string name="download_clear_confirm_body">确定要清除屏幕上的所有结果吗？</string>
     <plurals name="download_links">
         <item quantity="other">%d 个链接</item>
     </plurals>

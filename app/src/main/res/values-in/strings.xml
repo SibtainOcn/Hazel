@@ -32,6 +32,14 @@
     <string name="download_remove_link">Hapus tautan</string>
     <string name="download_cancel_action">Batalkan unduhan</string>
     <string name="download_resume_action">Lanjutkan unduhan</string>
+    <string name="download_pause_all">Jeda semua</string>
+    <string name="download_resume_all">Lanjutkan semua</string>
+    <string name="download_cancel_all">Batalkan semua</string>
+    <string name="download_cancel_dialog_body">Apakah Anda yakin ingin membatalkan semua unduhan yang sedang berjalan dan dalam antrean?</string>
+    <string name="download_cancel_single_dialog_body">Apakah Anda yakin ingin membatalkan unduhan ini?</string>
+    <string name="download_cancel_dialog_dismiss">Lanjutkan mengunduh</string>
+    <string name="download_clear_confirm_title">Hapus hasil?</string>
+    <string name="download_clear_confirm_body">Yakin ingin menghapus semua hasil dari layar?</string>
     <plurals name="download_links">
         <item quantity="other">%d tautan</item>
     </plurals>

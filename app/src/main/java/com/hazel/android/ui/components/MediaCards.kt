@@ -154,7 +154,8 @@ fun MediaCard(
                     )
                 }
 
-                if (isDownloading || isPaused) {
+                val isQueued = batchItem?.state == BatchState.QUEUED
+                if (isDownloading || isPaused || isQueued) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -189,7 +190,7 @@ fun MediaCard(
                                         onResume()
                                     }
                                 )
-                            } else {
+                            } else if (isDownloading) {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.download_pause)) },
                                     enabled = !isProcessing,
@@ -594,8 +595,9 @@ fun MediaRow(
                     }
                 }
 
+                val isQueued = batchItem?.state == BatchState.QUEUED
                 when {
-                    inHand -> Box {
+                    inHand || isQueued -> Box {
                         IconButton(onClick = { menuOpen = true }) {
                             Icon(
                                 Icons.Filled.MoreVert,
@@ -616,7 +618,7 @@ fun MediaRow(
                                         onResume()
                                     }
                                 )
-                            } else {
+                            } else if (isDownloading) {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.download_pause)) },
                                     enabled = !isProcessing,

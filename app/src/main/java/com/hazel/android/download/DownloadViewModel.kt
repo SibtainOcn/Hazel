@@ -12,6 +12,7 @@ import com.hazel.android.data.QueuedDownload
 import com.hazel.android.data.toPlan
 import com.hazel.android.data.toQueued
 import com.hazel.android.data.HistoryEntry
+import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkResolver
@@ -371,6 +372,9 @@ class DownloadViewModel : ViewModel() {
 
         val app = context.applicationContext
         downloadScope.launch {
+            if (!SettingsRepository.getIncognito(app).first()) {
+                SearchHistoryRepository.record(app, link)
+            }
             while (true) {
                 val share = synchronized(directQueue) { directQueue.removeFirstOrNull() } ?: break
                 val next = share.url
@@ -493,7 +497,17 @@ class DownloadViewModel : ViewModel() {
      * nothing to act on.
      */
     fun fetchAll(urls: List<String>, notifyFailure: Boolean = false) {
-        val targets = urls.map { it.trim() }.filter { it.isNotBlank() }.distinct()
+        val targets = urls.map { it.trim() }
+            .map { raw ->
+                if (!raw.startsWith("http://", ignoreCase = true) &&
+                    !raw.startsWith("https://", ignoreCase = true) &&
+                    (raw.startsWith("www.", ignoreCase = true) || (raw.contains(".") && !raw.contains(" ")))
+                ) {
+                    "https://$raw"
+                } else raw
+            }
+            .filter { it.isNotBlank() }
+            .distinct()
         if (targets.isEmpty() || _state.value.isFetching) return
 
         val valid = targets.filter { URL_PATTERN.matches(it) }
@@ -502,6 +516,14 @@ class DownloadViewModel : ViewModel() {
                 error = "Invalid URL, must start with http:// or https://"
             )
             return
+        }
+
+        // Record search history for all valid queried URLs if not incognito
+        val app = HazelApp.instance
+        viewModelScope.launch(Dispatchers.IO) {
+            if (!SettingsRepository.getIncognito(app).first()) {
+                valid.forEach { SearchHistoryRepository.record(app, it) }
+            }
         }
 
         // A fresh read is a fresh answer, so the sheet is allowed to open on its own again.
@@ -1006,10 +1028,17 @@ class DownloadViewModel : ViewModel() {
                         break
                     }
 
-                    if (isCancelled || isBatchCancelled) {
+                    if (isBatchCancelled) {
                         finishDownload(app, plan, options)
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         break
+                    }
+
+                    if (isCancelled) {
+                        purgeFragments()
+                        markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
+                        isCancelled = false
+                        continue
                     }
 
                     finishDownload(app, plan, options)
@@ -1022,6 +1051,17 @@ class DownloadViewModel : ViewModel() {
                         holdForResume(next)
                         break
                     }
+                    if (isBatchCancelled) {
+                        finishDownload(app, plan, options)
+                        markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
+                        break
+                    }
+                    if (isCancelled) {
+                        purgeFragments()
+                        markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
+                        isCancelled = false
+                        continue
+                    }
                     finishDownload(app, plan, options)
                     markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                     break
@@ -1031,10 +1071,17 @@ class DownloadViewModel : ViewModel() {
                         break
                     }
 
-                    if (isCancelled || isBatchCancelled) {
+                    if (isBatchCancelled) {
                         finishDownload(app, plan, options)
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         break
+                    }
+
+                    if (isCancelled) {
+                        purgeFragments()
+                        markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
+                        isCancelled = false
+                        continue
                     }
 
                     com.hazel.android.utils.CrashLogger.logDownloadError(
@@ -1076,7 +1123,16 @@ class DownloadViewModel : ViewModel() {
                 if (isBatchCancelled) emptyList()
                 else synchronized(queue) { queue.toList() }
             DownloadQueueRepository.save(app, remaining)
-            synchronized(queue) { queue.clear() }
+            if (isBatchCancelled) {
+                synchronized(queue) { queue.clear() }
+                _state.value = _state.value.copy(
+                    batch = _state.value.batch.map {
+                        if (it.state == BatchState.PAUSED || it.state == BatchState.QUEUED || it.state == BatchState.DOWNLOADING) {
+                            it.copy(state = BatchState.FAILED, error = "Cancelled")
+                        } else it
+                    }
+                )
+            }
 
             DownloadService.stop(app)
             finishBatch(app)
@@ -1165,8 +1221,9 @@ class DownloadViewModel : ViewModel() {
     /** Reports the run as a whole once every item has been attempted. */
     private fun finishBatch(context: Context) {
         val current = _state.value
-        val failed = current.batchFailed
         val done = current.batchDone
+        // Only count actual failures, NOT user-cancelled items!
+        val trueFailed = current.batch.count { it.state == BatchState.FAILED && it.error != "Cancelled" }
 
         _state.value = current.copy(
             isDownloading = false,
@@ -1174,9 +1231,9 @@ class DownloadViewModel : ViewModel() {
             status = "",
             isProcessing = false,
             error = when {
-                done == 0 && failed > 0 ->
-                    current.batch.firstOrNull { it.error != null }?.error ?: "Download failed"
-                failed > 0 -> "$failed of ${current.batch.size} failed"
+                done == 0 && trueFailed > 0 ->
+                    current.batch.firstOrNull { it.error != null && it.error != "Cancelled" }?.error ?: "Download failed"
+                trueFailed > 0 -> "$trueFailed of ${current.batch.size} failed"
                 else -> null
             }
         )
@@ -1184,10 +1241,8 @@ class DownloadViewModel : ViewModel() {
         when {
             isBatchCancelled && done == 0 -> DownloadNotificationHelper.showCancelled(context)
 
-            // A failure inside a set went unreported: the run ended, the notification was
-            // taken down, and nothing said why the file never arrived.
-            failed > 0 && done == 0 -> {
-                val item = current.batch.firstOrNull { it.state == BatchState.FAILED }
+            trueFailed > 0 && done == 0 -> {
+                val item = current.batch.firstOrNull { it.state == BatchState.FAILED && it.error != "Cancelled" }
                 DownloadNotificationHelper.showError(
                     context,
                     item?.error ?: "Download failed",
@@ -1195,21 +1250,85 @@ class DownloadViewModel : ViewModel() {
                 )
             }
 
-            failed > 0 -> DownloadNotificationHelper.showError(
+            trueFailed > 0 -> DownloadNotificationHelper.showError(
                 context,
-                "$failed of ${current.batch.size} could not be downloaded",
+                "$trueFailed of ${current.batch.size} could not be downloaded",
                 ""
             )
         }
     }
 
     /**
-     * Cancels the running download. yt-dlp is killed, and whatever finished downloading is
-     * still moved into public storage by the coroutine's cleanup path.
+     * Cancels or removes a single item from the batch/results.
+     *
+     * If the item is currently downloading, it stops ONLY this item's process,
+     * marks it cancelled, and the batch runner automatically proceeds to the next
+     * item in the queue without killing the whole batch.
+     *
+     * If the item is still waiting in the queue, it removes it from the queue
+     * and disk queue record, without disturbing the active download.
      */
-    fun cancelDownload() {
+    fun cancelItem(url: String) {
+        val activeInfo = _state.value.info
+        if (_state.value.isDownloading && activeInfo?.url == url) {
+            // Cancel ONLY this active download item (do NOT set isBatchCancelled)
+            isCancelled = true
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    YoutubeDL.getInstance().destroyProcessById(processId)
+                } catch (_: Exception) { /* process may already be done */ }
+            }
+        } else {
+            // It is waiting in the queue or is paused
+            val app = HazelApp.instance
+            val wasHeld = _state.value.batch.any { it.url == url && it.state == BatchState.PAUSED }
+            if (wasHeld) {
+                purgeFragments()
+            }
+            synchronized(queue) {
+                queue.removeAll { it.url == url }
+            }
+            downloadScope.launch {
+                DownloadQueueRepository.remove(app, url)
+            }
+            markBatch(url, BatchState.FAILED, "Cancelled")
+            val remainingPaused = synchronized(queue) { queue.any { it.paused } } ||
+                    _state.value.batch.any { it.url != url && it.state == BatchState.PAUSED }
+            if (!remainingPaused) {
+                DownloadNotificationHelper.cancelPaused(app)
+                downloadScope.launch {
+                    DownloadQueueRepository.clearPaused(app)
+                }
+            }
+            val hasActiveOrQueued = synchronized(queue) { queue.isNotEmpty() } ||
+                    _state.value.batch.any { it.url != url && (it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED || it.state == BatchState.QUEUED) }
+            if (!hasActiveOrQueued && !_state.value.isDownloading) {
+                _state.value = _state.value.copy(
+                    isDownloading = false,
+                    isProcessing = false,
+                    waitingForWifi = false,
+                    status = ""
+                )
+                DownloadNotificationHelper.cancelProgress(app)
+            }
+        }
+    }
+
+    /**
+     * Cancels the running download or entire batch. yt-dlp is killed, and whatever finished
+     * downloading is still moved into public storage by the coroutine's cleanup path.
+     */
+    fun cancelAllDownloads() {
         isCancelled = true
         isBatchCancelled = true
+
+        _state.value = _state.value.copy(
+            batch = _state.value.batch.map {
+                if (it.state == BatchState.PAUSED || it.state == BatchState.QUEUED || it.state == BatchState.DOWNLOADING) {
+                    it.copy(state = BatchState.FAILED, error = "Cancelled")
+                } else it
+            }
+        )
 
         // A paused download has no process left to kill and no run left to tidy up after
         // it, so giving it up has to be done here. Without this the record survived the
@@ -1225,6 +1344,8 @@ class DownloadViewModel : ViewModel() {
             } catch (_: Exception) { /* process may already be done */ }
         }
     }
+
+    fun cancelDownload() = cancelAllDownloads()
 
     /**
      * Stops the download in hand and keeps everything it has fetched so far.

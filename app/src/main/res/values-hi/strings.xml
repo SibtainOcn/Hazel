@@ -32,6 +32,14 @@
     <string name="download_remove_link">लिंक हटाएँ</string>
     <string name="download_cancel_action">डाउनलोड रद्द करें</string>
     <string name="download_resume_action">डाउनलोड फिर शुरू करें</string>
+    <string name="download_pause_all">सभी रोकें</string>
+    <string name="download_resume_all">सभी जारी रखें</string>
+    <string name="download_cancel_all">सभी रद्द करें</string>
+    <string name="download_cancel_dialog_body">क्या आप वाकई सभी चालू और कतारबद्ध डाउनलोड रद्द करना चाहते हैं?</string>
+    <string name="download_cancel_single_dialog_body">क्या आप वाकई यह डाउनलोड रद्द करना चाहते हैं?</string>
+    <string name="download_cancel_dialog_dismiss">डाउनलोड जारी रखें</string>
+    <string name="download_clear_confirm_title">परिणाम साफ़ करें?</string>
+    <string name="download_clear_confirm_body">क्या आप वाकई स्क्रीन से सभी परिणाम साफ़ करना चाहते हैं?</string>
     <plurals name="download_links">
         <item quantity="one">%d लिंक</item>
         <item quantity="other">%d लिंक</item>
