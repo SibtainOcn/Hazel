@@ -3,6 +3,7 @@ package com.hazel.android.ui.screens.cookies
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +33,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
@@ -59,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -82,8 +86,11 @@ fun CookiesScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val useCookies by CookieRepository.getUseCookies(context).collectAsState(initial = false)
-    val entries by CookieRepository.getEntries(context).collectAsState(initial = emptyList())
+    val useCookiesFlow = remember(context) { CookieRepository.getUseCookies(context) }
+    val useCookies by useCookiesFlow.collectAsState(initial = false)
+
+    val entriesFlow = remember(context) { CookieRepository.getEntries(context) }
+    val entries by entriesFlow.collectAsState(initial = emptyList())
 
     var editing by remember { mutableStateOf<CookieEntry?>(null) }
     var creating by remember { mutableStateOf(false) }
@@ -96,6 +103,35 @@ fun CookiesScreen(onBack: () -> Unit) {
     val signInLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { }
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch {
+                try {
+                    val fileName = queryFileName(context, uri) ?: "cookies.txt"
+                    val text = context.contentResolver.openInputStream(uri)?.use { stream ->
+                        stream.bufferedReader(Charsets.UTF_8).readText()
+                    }.orEmpty()
+                    if (text.isBlank()) {
+                        toast(context, context.getString(R.string.cookies_toast_file_no_data))
+                        return@launch
+                    }
+                    val imported = CookieRepository.importText(context, text, fileName)
+                    toast(
+                        context,
+                        context.getString(
+                            if (imported) R.string.cookies_toast_imported
+                            else R.string.cookies_toast_file_no_data
+                        )
+                    )
+                } catch (e: Exception) {
+                    toast(context, context.getString(R.string.cookies_toast_import_failed))
+                }
+            }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -127,6 +163,13 @@ fun CookiesScreen(onBack: () -> Unit) {
                     )
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.cookies_menu_import_file)) },
+                        onClick = {
+                            menuOpen = false
+                            filePickerLauncher.launch(arrayOf("text/*", "*/*"))
+                        }
+                    )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.cookies_menu_import)) },
                         onClick = {
@@ -180,9 +223,13 @@ fun CookiesScreen(onBack: () -> Unit) {
         ) {
             Row(
                 modifier = Modifier
-                    .clickable {
-                        scope.launch { CookieRepository.setUseCookies(context, !useCookies) }
-                    }
+                    .toggleable(
+                        value = useCookies,
+                        role = Role.Switch,
+                        onValueChange = { enabled ->
+                            scope.launch { CookieRepository.setUseCookies(context, enabled) }
+                        }
+                    )
                     .padding(horizontal = 20.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -199,22 +246,31 @@ fun CookiesScreen(onBack: () -> Unit) {
                 }
                 Switch(
                     checked = useCookies,
-                    onCheckedChange = { enabled ->
-                        scope.launch { CookieRepository.setUseCookies(context, enabled) }
-                    }
+                    onCheckedChange = null
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedButton(
-            onClick = { creating = true },
-            modifier = Modifier.padding(horizontal = 20.dp)
+        Row(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(stringResource(R.string.cookies_new))
+            OutlinedButton(
+                onClick = { creating = true }
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(stringResource(R.string.cookies_new))
+            }
+            OutlinedButton(
+                onClick = { filePickerLauncher.launch(arrayOf("text/*", "*/*")) }
+            ) {
+                Icon(Icons.Filled.FolderOpen, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(stringResource(R.string.cookies_import_file_button))
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -316,8 +372,9 @@ fun CookiesScreen(onBack: () -> Unit) {
             },
             confirmButton = {
                 TextButton(onClick = {
-                    scope.launch { CookieRepository.delete(context, entry.id) }
+                    val toDelete = entry
                     pendingDelete = null
+                    scope.launch { CookieRepository.delete(context, toDelete.id) }
                 }) { Text(stringResource(R.string.cookies_delete_confirm)) }
             },
             dismissButton = {
@@ -584,3 +641,16 @@ private fun writeClipboard(context: Context, text: String) {
 private fun toast(context: Context, message: String) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
+
+private fun queryFileName(context: Context, uri: Uri): String? {
+    if (uri.scheme == "content") {
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+            if (nameIndex >= 0 && cursor.moveToFirst()) {
+                return cursor.getString(nameIndex)
+            }
+        }
+    }
+    return uri.lastPathSegment?.substringAfterLast('/')
+}
+

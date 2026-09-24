@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reverted the app launcher icon to a white background with a black bolt foreground.
 
 ### Fixed
+- Fixed Cookies screen master switch event collision where tapping the switch failed to turn back ON; converted row to single-source toggleable semantics and remembered Flow collections across recompositions.
+- Ensured individual cookie switches operate independently without closing off the global master switch when disabled, allowing flexible per-cookie control while preserving global cookie status.
+- Eliminated latency when holding to delete cookie sets; deletion immediately dismisses confirmation dialogs, cleans up site-specific cookie cache files, and updates repository state without blocking Compose recompositions.
 - Fixed multi/playlist download sheet quality ceiling selection where picking a quality from the batch action bar left unresolved items displaying best quality; pending cards now receive bounded generic format selectors with automatic fallback to the closest available lower resolution.
 - Fixed cookie screen master toggle synchronization where disabling all cookies left individual cookie switches displaying as active; the top master toggle and individual cookie switches are now bidirectionally synchronized across storage and UI states.
 - Fixed YouTube playlist and multi-link extraction when cookies are active by avoiding overriding client User-Agent headers on YouTube endpoints, resolving tab page extraction failures.
@@ -47,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   intentionally cancelled or skipped.
 
 ### Added
+- Direct cookie file import option ("Import file" button and overflow menu item) allowing users to import Netscape cookie files directly with automatic domain recognition, multi-site splitting, and full 10-locale translation parity.
 - Dedicated "Pause All / Resume All" and "Cancel All" batch control buttons in the Downloads
   screen header row, active whenever a batch or download is running.
 - Granular per-item cancellation (`cancelItem`), allowing items waiting in the queue to be

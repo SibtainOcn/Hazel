@@ -387,6 +387,7 @@
     <string name="cookies_back">Back</string>
     <string name="cookies_title">Cookies</string>
     <string name="cookies_menu">More</string>
+    <string name="cookies_menu_import_file">Import from file</string>
     <string name="cookies_menu_import">Import from clipboard</string>
     <string name="cookies_menu_export">Export to clipboard</string>
     <string name="cookies_menu_delete_all">Delete all</string>
@@ -394,12 +395,15 @@
     <string name="cookies_imported_title">Imported cookies</string>
     <string name="cookies_toast_imported">Cookies imported</string>
     <string name="cookies_toast_no_data">Clipboard holds no cookie data</string>
+    <string name="cookies_toast_file_no_data">File contains no valid cookie data</string>
+    <string name="cookies_toast_import_failed">Failed to import cookie file</string>
     <string name="cookies_toast_nothing_to_export">Nothing to export</string>
     <string name="cookies_toast_exported">Copied to clipboard</string>
     <string name="cookies_toast_entry_copied">Copied to clipboard</string>
     <string name="cookies_use_title">Use cookies</string>
     <string name="cookies_use_description">Pass saved sign-ins to the downloader</string>
     <string name="cookies_new">New cookie</string>
+    <string name="cookies_import_file_button">Import file</string>
     <string name="cookies_empty_title">No cookies saved</string>
     <string name="cookies_empty_body">Add one to download age-restricted, private, or members-only media.</string>
     <string name="cookies_delete_title">Delete cookies</string>

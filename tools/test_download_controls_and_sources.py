@@ -564,7 +564,7 @@ def main():
     check_true("FormatSheet.kt resolves generic initialFormat on format load", "initialFormat?.takeIf { !it.isGeneric && it.hasVideo }" in format_sheet_kt)
 
     check_true("CookieRepository.kt syncs entries on setUseCookies", "existing.map { it.copy(enabled = enabled) }" in cookie_repo_kt)
-    check_true("CookieRepository.kt syncs master toggle on setEnabled", "prefs[USE_COOKIES_KEY] = anyEnabled" in cookie_repo_kt)
+    check_true("CookieRepository.kt preserves master toggle on setEnabled", "if (enabled)" in cookie_repo_kt and "prefs[USE_COOKIES_KEY] = true" in cookie_repo_kt)
 
     # -----------------------------------------------------------------------
     # Summary
