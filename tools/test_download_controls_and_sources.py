@@ -518,6 +518,19 @@ def main():
     check_true("DownloadViewModel fetchAll normalizes URL prefix", "raw.startsWith(\"www.\"" in view_model_kt)
 
     # -----------------------------------------------------------------------
+    print("\n--- 7. Stream Format Ladder, Player Client & Cookie Access Optimization ---")
+    # -----------------------------------------------------------------------
+    site_access_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "download" / "SiteAccess.kt").read_text(encoding="utf-8")
+    check_true("SiteAccess.kt contains web_embedded player client", "web_embedded" in site_access_kt)
+    check_true("SiteAccess.kt contains isYouTube helper function", "fun isYouTube(" in site_access_kt)
+    check_true("SiteAccess.kt passes player_client for YouTube URLs", "youtube:player_client" in site_access_kt)
+
+    media_probe_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "download" / "MediaProbe.kt").read_text(encoding="utf-8")
+    check_true("MediaProbe.kt prioritizes cookie access when available", "access.hasCookies -> listOf(access, SiteAccess.NONE)" in media_probe_kt)
+
+    check_true("DownloadViewModel.kt uses available cookies for planAccess", "!access.hasCookies -> SiteAccess.NONE" in view_model_kt and "else -> access" in view_model_kt)
+
+    # -----------------------------------------------------------------------
     # Summary
     # -----------------------------------------------------------------------
     print("\n" + "=" * 70)

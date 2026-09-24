@@ -103,16 +103,13 @@ object MediaProbe {
     /**
      * The reads to try, in order.
      *
-     * One for almost everything: a link with no sign-in to offer, and a site that answers
-     * a signed-in request as fully as an anonymous one, both have a single way of being
-     * read. The two-step only exists for the sites that hold formats back from a signed-in
-     * request, and there the second step is what still reaches private, members-only and
-     * age-restricted media.
+     * When cookies are present, query with credentials first so we do not suffer the
+     * 15-20 second timeout caused by YouTube and other sites rate-limiting anonymous requests.
+     * If the signed-in attempt fails, fall back to anonymous read.
      */
     private fun signInAttempts(url: String, access: SiteAccess): List<SiteAccess> = when {
-        !access.hasCookies -> listOf(SiteAccess.NONE)
-        cookiesNarrowTheFormats(url) -> listOf(SiteAccess.NONE, access)
-        else -> listOf(access)
+        access.hasCookies -> listOf(access, SiteAccess.NONE)
+        else -> listOf(SiteAccess.NONE)
     }
 
     /** Whether a failure reads as the site asking who is calling. */

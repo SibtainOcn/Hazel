@@ -950,15 +950,11 @@ class DownloadViewModel : ViewModel() {
                 val options = next.options
                 downloadTreeUri = next.treeUri
 
-                // The download asks the way the read that filled the sheet asked. On a
-                // site that answers a signed-in request with less, a public link is
-                // fetched anonymously and only the media that needed the sign-in carries
-                // it, so a download cannot come back smaller than the sheet promised.
+                // The download uses the site credentials configured for this URL so that
+                // both the metadata probe and the download execute with matching access.
                 val access = CookieRepository.accessFor(app, plan.info.url)
                 val planAccess = when {
                     !access.hasCookies -> SiteAccess.NONE
-                    plan.info.requiresSignIn -> access
-                    cookiesNarrowTheFormats(plan.info.url) -> SiteAccess.NONE
                     else -> access
                 }
 
