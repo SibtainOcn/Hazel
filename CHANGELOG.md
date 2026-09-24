@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reverted the app launcher icon to a white background with a black bolt foreground.
 
 ### Added
-- Paste Floating Action Button (FAB) on the bottom-left corner of the home screen when empty, allowing one-tap pasting and fetching of links directly from the clipboard.
+- Paste button on the bottom-right corner of the home screen when empty, styled with a rounded pill and "Paste" label matching the batch download action, allowing one-tap pasting and fetching of links directly from the clipboard.
 - 3-dot overflow menu on the home screen search bar with "Clear search results" and "Clear search history", providing seamless visual and functional parity with the search screen.
 - Confirmation dialog before clearing search history from both home and search screen 3-dot menus to prevent accidental data loss.
 - Smart auto-expanding search bar on the Downloads screen with smooth expansion animation and one-tap dismissal when clicking anywhere on empty screen space.

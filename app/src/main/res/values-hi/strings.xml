@@ -60,6 +60,7 @@
     <string name="search_forget">भूल जाएँ</string>
     <string name="search_edit_before">खोजने से पहले बदलें</string>
     <string name="search_paste_and_fetch">चिपकाएँ और खोजें</string>
+    <string name="search_paste">चिपकाएँ</string>
     <string name="search_nothing_to_paste">चिपकाने के लिए कुछ नहीं है</string>
     <string name="search_cancel">रद्द करें</string>
     <string name="search_clear_history_confirm_title">खोज इतिहास मिटाएँ?</string>

@@ -71,6 +71,7 @@
     <string name="search_forget">Forget</string>
     <string name="search_edit_before">Edit before searching</string>
     <string name="search_paste_and_fetch">Paste and fetch</string>
+    <string name="search_paste">Paste</string>
     <string name="search_nothing_to_paste">Nothing to paste</string>
     <string name="search_cancel">Cancel</string>
     <string name="search_clear_history_confirm_title">Clear search history?</string>

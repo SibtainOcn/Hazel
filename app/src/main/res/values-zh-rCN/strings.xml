@@ -59,6 +59,7 @@
     <string name="search_forget">忘记</string>
     <string name="search_edit_before">搜索前先编辑</string>
     <string name="search_paste_and_fetch">粘贴并读取</string>
+    <string name="search_paste">粘贴</string>
     <string name="search_nothing_to_paste">没有可粘贴的内容</string>
     <string name="search_cancel">取消</string>
     <string name="search_clear_history_confirm_title">清除搜索记录？</string>

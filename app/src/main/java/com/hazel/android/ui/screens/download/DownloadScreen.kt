@@ -815,18 +815,28 @@ fun DownloadScreen(
                     }
                 },
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
+                    .align(Alignment.BottomEnd)
                     .padding(20.dp)
-                    .size(56.dp),
-                shape = CircleShape,
+                    .height(52.dp),
+                shape = RoundedCornerShape(26.dp),
                 color = MaterialTheme.colorScheme.primary
             ) {
-                Box(contentAlignment = Alignment.Center) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 22.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         Icons.Filled.ContentPaste,
-                        contentDescription = stringResource(R.string.search_paste_and_fetch),
-                        modifier = Modifier.size(22.dp),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        stringResource(R.string.search_paste),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }

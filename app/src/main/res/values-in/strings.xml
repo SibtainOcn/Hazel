@@ -59,6 +59,7 @@
     <string name="search_forget">Lupakan</string>
     <string name="search_edit_before">Edit sebelum mencari</string>
     <string name="search_paste_and_fetch">Tempel dan ambil</string>
+    <string name="search_paste">Tempel</string>
     <string name="search_nothing_to_paste">Tidak ada yang bisa ditempel</string>
     <string name="search_cancel">Batal</string>
     <string name="search_clear_history_confirm_title">Hapus riwayat pencarian?</string>
