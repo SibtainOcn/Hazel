@@ -318,11 +318,11 @@ class DownloadViewModel : ViewModel() {
         _state.value = DownloadState()
     }
 
-    /** Clears the resolved links but keeps the field, for the Clear results menu action. */
+    /** Clears the resolved links and the URL field, for the Clear results menu action. */
     fun clearResults() {
         fetchJob?.cancel()
         MediaProbe.cancel()
-        _state.value = DownloadState(url = _state.value.url)
+        _state.value = DownloadState()
     }
 
     /** Points the sheet at one of several resolved links. */

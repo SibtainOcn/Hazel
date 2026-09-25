@@ -1,14 +1,19 @@
 package com.hazel.android.ui.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.remember
@@ -42,6 +48,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hazel.android.R
+import com.hazel.android.data.DownloadQueueRepository
 import com.hazel.android.data.SettingsRepository
 import kotlinx.coroutines.launch
 import com.hazel.android.ui.motion.M3Motion
@@ -99,6 +106,9 @@ fun AppNavigation(
     val isSubScreen = currentRoute in listOf(
         "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "direct_share", "sponsor"
     )
+
+    val downloadViewModel: com.hazel.android.download.DownloadViewModel =
+        androidx.lifecycle.viewmodel.compose.viewModel()
 
     Scaffold(
         topBar = {
@@ -175,12 +185,24 @@ fun AppNavigation(
                     containerColor = if (isDarkTheme) androidx.compose.ui.graphics.Color(0xFF000000)
                                      else MaterialTheme.colorScheme.surfaceContainerHigh,
                     tonalElevation = 0.dp,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
                 ) {
                     val currentDestination = navBackStackEntry?.destination
 
+                    // Red dot: visible when there are active downloads or queued items
+                    val downloadState by downloadViewModel.state.collectAsState()
+                    val queueList by DownloadQueueRepository.getQueue(context).collectAsState(initial = emptyList())
+                    val hasActiveDownloads by remember(downloadState, queueList) {
+                        derivedStateOf {
+                            downloadState.isDownloading || downloadState.isProcessing || queueList.isNotEmpty()
+                        }
+                    }
+
                     bottomNavItems.forEach { screen ->
                         val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                        val showBadge = screen == Screen.History && hasActiveDownloads
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
@@ -193,11 +215,28 @@ fun AppNavigation(
                                 }
                             },
                             icon = {
-                                Icon(
-                                    painter = painterResource(id = screen.icon),
-                                    contentDescription = stringResource(screen.titleRes),
-                                    modifier = Modifier.size(22.dp)
-                                )
+                                if (showBadge) {
+                                    BadgedBox(
+                                        badge = {
+                                            Badge(
+                                                containerColor = Color(0xFFEF4444),
+                                                modifier = Modifier.size(8.dp)
+                                            )
+                                        }
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = screen.icon),
+                                            contentDescription = stringResource(screen.titleRes),
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                    }
+                                } else {
+                                    Icon(
+                                        painter = painterResource(id = screen.icon),
+                                        contentDescription = stringResource(screen.titleRes),
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
                             },
                             label = { Text(stringResource(screen.titleRes), style = MaterialTheme.typography.labelSmall) },
                             colors = NavigationBarItemDefaults.colors(
@@ -215,8 +254,6 @@ fun AppNavigation(
             }
         }
     ) { innerPadding ->
-        val downloadViewModel: com.hazel.android.download.DownloadViewModel =
-            androidx.lifecycle.viewmodel.compose.viewModel()
 
         NavHost(
             navController = navController,

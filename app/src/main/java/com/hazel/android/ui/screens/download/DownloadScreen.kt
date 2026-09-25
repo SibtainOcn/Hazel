@@ -6,7 +6,10 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,8 +32,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.automirrored.filled.List
+
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.Download
@@ -94,6 +96,8 @@ import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.ui.components.MediaCardShimmer
+import com.hazel.android.ui.components.ShimmerHost
+import com.hazel.android.ui.components.refreshShine
 import com.hazel.android.ui.components.rememberPresence
 import com.hazel.android.ui.components.ProcessingShimmer
 import com.hazel.android.ui.motion.M3Motion
@@ -130,11 +134,6 @@ fun DownloadScreen(
     val treeUri by SettingsRepository.getDownloadTreeUri(context).collectAsState(initial = "")
     val treeLabel by SettingsRepository.getDownloadTreeLabel(context).collectAsState(initial = "")
 
-    // Large artwork or a tight list, for a set of links long enough that the difference
-    // matters. A playlist can resolve to dozens of cards, and at one screen each the list
-    // stops being something that can be looked over.
-    val compact by SettingsRepository.getResultsCompact(context)
-        .collectAsState(initial = false)
 
     // Collected as null until the stored value arrives, so the dialog cannot flash up for
     // a frame on every launch before the real answer loads and dismisses it again.
@@ -204,12 +203,24 @@ fun DownloadScreen(
         }
     }
 
+    val searchBarShine = remember { Animatable(0f) }
+    var wasFetching by remember { mutableStateOf(false) }
+
     // Reading links clears the resolved media, which would otherwise pull a sheet out of
     // the tree mid-animation and show as a box flashing at the bottom of the screen.
+    // When fetching finishes, trigger 1 last refresh shine sweep across the searchbar.
     LaunchedEffect(state.isFetching) {
         if (state.isFetching) {
             sheetVisible = false
             batchSheetVisible = false
+            wasFetching = true
+        } else if (wasFetching) {
+            wasFetching = false
+            searchBarShine.snapTo(0f)
+            searchBarShine.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 850, easing = FastOutSlowInEasing)
+            )
         }
     }
 
@@ -419,18 +430,13 @@ fun DownloadScreen(
 
             UrlSearchBar(
                 url = state.url,
+                shineProgress = searchBarShine.value,
                 onOpenSearch = {
                     cameFromShare = false
                     searchOpen = true
                 },
                 onClearResults = { showClearConfirmDialog = true },
                 onClearHistory = { showClearHistoryConfirm = true },
-                isCompact = compact,
-                onToggleLayout = {
-                    scope.launch {
-                        SettingsRepository.setResultsCompact(context, !compact)
-                    }
-                },
                 menuOpen = homeMenuOpen,
                 onMenuOpen = { homeMenuOpen = true },
                 onMenuDismiss = { homeMenuOpen = false },
@@ -515,20 +521,20 @@ fun DownloadScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            // One placeholder per link being read, so a set of links looks
-                            // like the list it is about to become rather than like a single
-                            // card. Capped, because a hundred placeholders say nothing more
-                            // than a screenful of them does.
-                            repeat(state.fetchCount.coerceIn(1, SHIMMER_CARD_LIMIT)) {
-                                Spacer(modifier = Modifier.height(20.dp))
-                                MediaCardShimmer()
+                            ShimmerHost(modifier = Modifier.fillMaxWidth()) {
+                                Column {
+                                    repeat(state.fetchCount.coerceIn(1, SHIMMER_CARD_LIMIT)) {
+                                        Spacer(modifier = Modifier.height(20.dp))
+                                        MediaCardShimmer()
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
                 items(orderedResults, key = { it.url }) { info ->
-                    Spacer(modifier = Modifier.height(if (compact) 8.dp else 20.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     // Each card arrives rather than appearing: it fades up from slightly
                     // below where it belongs, once, the first time it is composed. A long
@@ -553,9 +559,6 @@ fun DownloadScreen(
                         downloadViewModel.resolveFormats(info)
                         sheetVisible = true
                     }
-                    val remove = if (state.isMultiple && !runInHand) {
-                        { downloadViewModel.removeResult(info) }
-                    } else null
 
                     Box(
                         modifier = Modifier.graphicsLayer {
@@ -563,25 +566,6 @@ fun DownloadScreen(
                             translationY = (1f - entrance) * 28f
                         }
                     ) {
-                    if (compact) {
-                        MediaRow(
-                            info = info,
-                            isDownloading = isActive,
-                            isProcessing = isActive && state.isProcessing,
-                            progress = state.progress,
-                            totalBytes = state.totalBytes,
-                            isComplete = batchItem?.state == BatchState.DONE ||
-                                    (!state.isMultiple && state.isComplete),
-                            batchItem = batchItem,
-                            waitingForWifi = state.waitingForWifi,
-                            alreadyDownloaded = info.url in savedUrls,
-                            onOpenSheet = openSheet,
-                            onCancel = { downloadViewModel.cancelItem(info.url) },
-                            onPause = downloadViewModel::pauseDownload,
-                            onResume = downloadViewModel::resumeDownload,
-                            onRemove = remove
-                        )
-                    } else {
                         MediaCard(
                             info = info,
                             isDownloading = isActive,
@@ -596,10 +580,8 @@ fun DownloadScreen(
                             onOpenSheet = openSheet,
                             onCancel = { downloadViewModel.cancelItem(info.url) },
                             onPause = downloadViewModel::pauseDownload,
-                            onResume = downloadViewModel::resumeDownload,
-                            onRemove = remove
+                            onResume = downloadViewModel::resumeDownload
                         )
-                    }
                     }
                 }
 
@@ -959,8 +941,7 @@ private fun UrlSearchBar(
     onOpenSearch: () -> Unit,
     onClearResults: () -> Unit = {},
     onClearHistory: () -> Unit = {},
-    isCompact: Boolean = false,
-    onToggleLayout: () -> Unit = {},
+    shineProgress: Float = 0f,
     menuOpen: Boolean = false,
     onMenuOpen: () -> Unit = {},
     onMenuDismiss: () -> Unit = {},
@@ -969,6 +950,7 @@ private fun UrlSearchBar(
     Surface(
         onClick = onOpenSearch,
         modifier = modifier
+            .refreshShine(shineProgress, RoundedCornerShape(26.dp))
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(26.dp),
@@ -1012,27 +994,7 @@ private fun UrlSearchBar(
                     expanded = menuOpen,
                     onDismissRequest = onMenuDismiss
                 ) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                stringResource(
-                                    if (isCompact) R.string.download_show_large_artwork
-                                    else R.string.download_show_list
-                                )
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                if (isCompact) Icons.Filled.GridView else Icons.AutoMirrored.Filled.List,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        },
-                        onClick = {
-                            onMenuDismiss()
-                            onToggleLayout()
-                        }
-                    )
+
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.search_clear_results)) },
                         onClick = {
@@ -1108,8 +1070,7 @@ private fun MediaCard(
     onOpenSheet: () -> Unit,
     onCancel: () -> Unit,
     onPause: () -> Unit = {},
-    onResume: () -> Unit = {},
-    onRemove: (() -> Unit)? = null
+    onResume: () -> Unit = {}
 ) {
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -1177,7 +1138,7 @@ private fun MediaCard(
                     .padding(
                         start = 14.dp,
                         top = 12.dp,
-                        end = if (isDownloading || isPaused || isQueued || onRemove != null) 48.dp else 14.dp
+                        end = if (isDownloading || isPaused || isQueued) 48.dp else 14.dp
                     )
             ) {
                 Text(
@@ -1259,29 +1220,7 @@ private fun MediaCard(
                 }
             }
 
-            // Removing a link from the set, offered only while the set is idle. A
-            // paused item counts as busy: the run as a whole has stopped, so the set is
-            // idle by the only measure this screen has, and the remove control was
-            // being drawn straight on top of the menu that resumes it.
-            if (onRemove != null && !isDownloading && !isPaused) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .size(30.dp)
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.55f))
-                        .clickable(onClick = onRemove),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.download_remove_link),
-                        modifier = Modifier.size(16.dp),
-                        tint = Color.White
-                    )
-                }
-            }
+
 
             // A paused download is still a download in hand, so the artwork keeps the
             // treatment that says so. Only the control in the middle changes: there is
@@ -1460,298 +1399,6 @@ private fun MediaCard(
     }
 }
 
-
-/**
- * One resolved link as a single line, for a set too long to browse as artwork.
- *
- * It carries the same controls as the card, in the same order, so switching layout changes
- * how much fits on screen and nothing else. While this item downloads, its progress runs
- * along the bottom edge and the artwork holds the cancel control, exactly as the card does.
- */
-@Composable
-private fun MediaRow(
-    info: MediaInfo,
-    isDownloading: Boolean,
-    isProcessing: Boolean,
-    progress: Float,
-    totalBytes: Long,
-    isComplete: Boolean,
-    batchItem: BatchItem?,
-    waitingForWifi: Boolean = false,
-    alreadyDownloaded: Boolean,
-    onOpenSheet: () -> Unit,
-    onCancel: () -> Unit,
-    onPause: () -> Unit = {},
-    onResume: () -> Unit = {},
-    onRemove: (() -> Unit)?
-) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = M3Motion.emphasized(300),
-        label = "rowProgress"
-    )
-
-    var menuOpen by remember { mutableStateOf(false) }
-    val isPaused = batchItem?.state == BatchState.PAUSED
-    val inHand = isDownloading || isPaused
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    ) {
-        Column(
-            modifier = if (inHand) Modifier else Modifier.clickable(onClick = onOpenSheet)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(width = 128.dp, height = 78.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (info.thumbnail != null) {
-                        AsyncImage(
-                            model = info.thumbnail,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        Icon(
-                            Icons.Filled.MusicNote,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                        )
-                    }
-
-                    // A paused item keeps the treatment that says it is in hand, exactly as
-                    // the card does. Only the control in the middle changes: there is
-                    // nothing to stop any more, and the thing to do is start it again.
-                    if (inHand) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.4f))
-                        )
-                        if (isProcessing && !isPaused) {
-                            ProcessingShimmer(modifier = Modifier.fillMaxSize())
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(34.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.Black.copy(alpha = 0.55f))
-                                    .clickable(onClick = if (isPaused) onResume else onCancel),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Close,
-                                    contentDescription = stringResource(
-                                        if (isPaused) R.string.download_resume_action
-                                        else R.string.download_cancel_action
-                                    ),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = Color.White
-                                )
-                            }
-                        }
-                    } else {
-                        val duration = formatDuration(info.durationSeconds)
-                        if (duration.isNotBlank()) {
-                            Surface(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(3.dp),
-                                shape = RoundedCornerShape(4.dp),
-                                color = Color.Black.copy(alpha = 0.7f)
-                            ) {
-                                Text(
-                                    duration,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White,
-                                    modifier = Modifier
-                                        .padding(horizontal = 4.dp, vertical = 1.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(14.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        info.title,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (info.uploader.isNotBlank()) {
-                        Text(
-                            info.uploader,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
-                    val pausedLabel = stringResource(R.string.download_paused)
-                    val state = when {
-                        isPaused -> buildString {
-                            append(pausedLabel)
-                            if (totalBytes > 0) {
-                                val done = (totalBytes * animatedProgress).toLong()
-                                append("  ")
-                                append(formatFileSize(done))
-                                append(" / ")
-                                append(formatFileSize(totalBytes))
-                            }
-                        }
-                        waitingForWifi && !isDownloading ->
-                            stringResource(R.string.download_waiting_wifi)
-                        isProcessing -> stringResource(R.string.download_processing)
-                        // The same line the card shows: how far along, and how far there is
-                        // to go. A percentage on its own says nothing about whether the
-                        // wait is thirty seconds or ten minutes.
-                        isDownloading -> buildString {
-                            append("%.1f %%".format(animatedProgress * 100))
-                            if (totalBytes > 0) {
-                                val done = (totalBytes * animatedProgress).toLong()
-                                append("  ")
-                                append(formatFileSize(done))
-                                append(" / ")
-                                append(formatFileSize(totalBytes))
-                            }
-                        }
-                        batchItem?.state == BatchState.FAILED -> batchItem.error ?: stringResource(R.string.download_failed)
-                        isComplete -> stringResource(R.string.download_saved)
-                        batchItem?.state == BatchState.QUEUED -> stringResource(R.string.download_queued)
-                        alreadyDownloaded -> stringResource(R.string.download_downloaded)
-                        else -> ""
-                    }
-                    if (state.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(3.dp))
-                        Text(
-                            state,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = if (batchItem?.state == BatchState.FAILED) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.primary
-                            },
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-
-                // The same options the card offers, in the same order. They used to be on
-                // the card alone, so switching to this layout mid-download took away every
-                // way of pausing or resuming the thing being watched. They sit at the end
-                // of the line rather than over the artwork, which at this size is too small
-                // to hold a control on top of the one already in the middle of it.
-                val isQueued = batchItem?.state == BatchState.QUEUED
-                when {
-                    inHand || isQueued -> Box {
-                        IconButton(onClick = { menuOpen = true }) {
-                            Icon(
-                                Icons.Filled.MoreVert,
-                                contentDescription = stringResource(R.string.download_options),
-                                modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = menuOpen,
-                            onDismissRequest = { menuOpen = false }
-                        ) {
-                            if (isPaused) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.download_resume)) },
-                                    onClick = {
-                                        menuOpen = false
-                                        onResume()
-                                    }
-                                )
-                            } else if (isDownloading) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.download_pause)) },
-                                    // Nothing to pause once the transfer is done and the
-                                    // engine has moved on to merging or tagging.
-                                    enabled = !isProcessing,
-                                    onClick = {
-                                        menuOpen = false
-                                        onPause()
-                                    }
-                                )
-                            }
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.download_cancel)) },
-                                onClick = {
-                                    menuOpen = false
-                                    onCancel()
-                                }
-                            )
-                        }
-                    }
-
-                    onRemove != null -> IconButton(onClick = onRemove) {
-                        Icon(
-                            Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.download_remove_link),
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            // Drawn while the item is paused as well, because a bar that vanishes on a
-            // pause takes with it the only sign of how much of the file is already down.
-            if (inHand) {
-                if (isProcessing && !isPaused) {
-                    LinearProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color.Transparent
-                    )
-                } else {
-                    LinearProgressIndicator(
-                        progress = { animatedProgress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp),
-                        color = if (isPaused) {
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                        } else {
-                            MaterialTheme.colorScheme.primary
-                        },
-                        trackColor = Color.Transparent,
-                        drawStopIndicator = {}
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * How many links there have to be before the layout toggle is offered. Below this the two
- * layouts read much the same, and the control is one more thing on screen for no gain.
- */
 /**
  * How many stand-in cards a read shows at most. A long playlist reports its whole
  * length, and a placeholder for every entry of it is a screenful of the same shape

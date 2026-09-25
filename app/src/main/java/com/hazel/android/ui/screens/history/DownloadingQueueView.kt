@@ -50,7 +50,6 @@ import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.ui.components.MediaCard
-import com.hazel.android.ui.components.MediaRow
 
 /**
  * Unified Downloading & Queue view displaying active running downloads
@@ -60,7 +59,6 @@ import com.hazel.android.ui.components.MediaRow
 fun DownloadingQueueView(
     state: DownloadState,
     queueItems: List<QueuedDownload>,
-    compact: Boolean,
     isDownloadingActive: Boolean,
     activeDownloadMatches: Boolean,
     query: String,
@@ -112,7 +110,7 @@ fun DownloadingQueueView(
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
                 start = 20.dp, end = 20.dp, bottom = 24.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (showActive) {
                 item(key = "active_download") {
@@ -125,31 +123,17 @@ fun DownloadingQueueView(
                         videoFormats = emptyList<MediaFormat>(),
                         audioFormats = emptyList<MediaFormat>()
                     )
-                    if (compact) {
-                        MediaRow(
-                            info = info,
-                            isDownloading = true,
-                            isProcessing = state.isProcessing,
-                            progress = state.progress,
-                            totalBytes = state.totalBytes,
-                            waitingForWifi = state.waitingForWifi,
-                            onCancel = onCancelActive,
-                            onPause = onPauseActive,
-                            onResume = onResumeActive
-                        )
-                    } else {
-                        MediaCard(
-                            info = info,
-                            isDownloading = true,
-                            isProcessing = state.isProcessing,
-                            progress = state.progress,
-                            totalBytes = state.totalBytes,
-                            waitingForWifi = state.waitingForWifi,
-                            onCancel = onCancelActive,
-                            onPause = onPauseActive,
-                            onResume = onResumeActive
-                        )
-                    }
+                    MediaCard(
+                        info = info,
+                        isDownloading = true,
+                        isProcessing = state.isProcessing,
+                        progress = state.progress,
+                        totalBytes = state.totalBytes,
+                        waitingForWifi = state.waitingForWifi,
+                        onCancel = onCancelActive,
+                        onPause = onPauseActive,
+                        onResume = onResumeActive
+                    )
                 }
             }
 
@@ -170,11 +154,7 @@ fun DownloadingQueueView(
             }
 
             items(queueItems, key = { it.url }) { item ->
-                if (compact) {
-                    QueuedRow(item = item, onRemove = { onRemoveQueued(item) })
-                } else {
-                    QueuedCard(item = item, onRemove = { onRemoveQueued(item) })
-                }
+                QueuedCard(item = item, onRemove = { onRemoveQueued(item) })
             }
         }
     }
@@ -291,123 +271,6 @@ fun QueuedCard(
     }
 }
 
-@Composable
-fun QueuedRow(
-    item: QueuedDownload,
-    onRemove: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(width = 128.dp, height = 78.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
-            ) {
-                if (item.thumbnail != null) {
-                    AsyncImage(
-                        model = item.thumbnail,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Icon(
-                        if (item.hasVideo) Icons.Filled.PlayArrow else Icons.Filled.MusicNote,
-                        contentDescription = null,
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                0.5f to Color.Transparent,
-                                1f to Color.Black.copy(alpha = 0.6f)
-                            )
-                        )
-                )
-
-                val duration = formatDuration(item.durationSeconds)
-                if (duration.isNotBlank()) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(4.dp)
-                    ) {
-                        QueueTag(duration)
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.width(14.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    item.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (item.author.isNotBlank()) {
-                    Text(
-                        item.author,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (item.formatLabel.isNotBlank()) {
-                        QueueTag(
-                            item.formatLabel,
-                            background = MaterialTheme.colorScheme.surfaceVariant,
-                            foreground = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    if (item.fileSizeBytes > 0) {
-                        QueueTag(
-                            formatFileSize(item.fileSizeBytes),
-                            background = MaterialTheme.colorScheme.surfaceVariant,
-                            foreground = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            IconButton(onClick = onRemove) {
-                Icon(
-                    Icons.Filled.Close,
-                    contentDescription = stringResource(R.string.download_remove_link),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
 
 @Composable
 private fun QueueTag(

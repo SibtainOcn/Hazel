@@ -103,7 +103,6 @@ import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.ui.components.MediaCard
-import com.hazel.android.ui.components.MediaRow
 import com.hazel.android.ui.components.rememberPresence
 import com.hazel.android.util.MediaOpener
 import com.hazel.android.util.MediaPresence
@@ -133,8 +132,6 @@ fun HistoryScreen(
     val queueList by DownloadQueueRepository.getQueue(context).collectAsState(initial = emptyList())
     val failedList by FailedDownloadRepository.getFailed(context).collectAsState(initial = emptyList())
 
-    // Big artwork or a tight list, remembered across launches.
-    val compact by SettingsRepository.getHistoryCompact(context).collectAsState(initial = false)
 
     var sort by remember { mutableStateOf(HistorySort.NEWEST) }
     var filter by remember { mutableStateOf(HistoryFilter.ALL) }
@@ -263,6 +260,17 @@ fun HistoryScreen(
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
+                    // Red activity dot beside the chevron when there are active/queued
+                    // downloads and the user is not already looking at the queue view.
+                    if (filter != HistoryFilter.DOWNLOADING && (isDownloadingActive || queueList.isNotEmpty())) {
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFEF4444))
+                        )
+                    }
                 }
 
                 DropdownMenu(
@@ -285,12 +293,26 @@ fun HistoryScreen(
                             HistoryFilter.VIDEO -> stringResource(R.string.properties_kind_video)
                         }
 
+                        val showDot = option == HistoryFilter.DOWNLOADING &&
+                            option != filter &&
+                            (isDownloadingActive || queueList.isNotEmpty())
                         DropdownMenuItem(
                             text = {
-                                Text(
-                                    label,
-                                    fontWeight = if (option == filter) FontWeight.Bold else FontWeight.Normal
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        label,
+                                        fontWeight = if (option == filter) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                    if (showDot) {
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .size(8.dp)
+                                                .clip(CircleShape)
+                                                .background(Color(0xFFEF4444))
+                                        )
+                                    }
+                                }
                             },
                             onClick = {
                                 filter = option
@@ -304,24 +326,7 @@ fun HistoryScreen(
                 }
             }
 
-            // ── 4 Action Buttons (ALWAYS visible across all tabs) ──
-            // 1. Layout switcher
-            IconButton(
-                onClick = {
-                    scope.launch {
-                        SettingsRepository.setHistoryCompact(context, !compact)
-                    }
-                },
-                modifier = Modifier.size(40.dp)
-            ) {
-                Icon(
-                    if (compact) Icons.Filled.GridView else Icons.AutoMirrored.Filled.List,
-                    contentDescription =
-                        if (compact) stringResource(R.string.history_layout_grid)
-                        else stringResource(R.string.history_layout_list),
-                    modifier = Modifier.size(22.dp)
-                )
-            }
+            // ── 3 Action Buttons (Search, Sort, More) ──
 
             // 2. Search
             IconButton(
@@ -468,29 +473,7 @@ fun HistoryScreen(
                             )
                         }
                     }
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                stringResource(
-                                    if (compact) R.string.download_show_large_artwork
-                                    else R.string.download_show_list
-                                )
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                if (compact) Icons.Filled.GridView else Icons.AutoMirrored.Filled.List,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        },
-                        onClick = {
-                            menuOpen = false
-                            scope.launch {
-                                SettingsRepository.setHistoryCompact(context, !compact)
-                            }
-                        }
-                    )
+
                 }
             }
         }
@@ -597,7 +580,6 @@ fun HistoryScreen(
                 DownloadingQueueView(
                     state = downloadState,
                     queueItems = visibleQueue,
-                    compact = compact,
                     isDownloadingActive = isDownloadingActive,
                     activeDownloadMatches = activeDownloadMatches,
                     query = query,
@@ -611,7 +593,6 @@ fun HistoryScreen(
             HistoryFilter.FAILED -> {
                 HistoryFailedView(
                     items = visibleFailed,
-                    compact = compact,
                     isFiltered = query.isNotBlank() && failedList.isNotEmpty() && visibleFailed.isEmpty(),
                     onViewLog = { item -> viewFailedLog = item },
                     onRetry = { item ->
@@ -662,7 +643,7 @@ fun HistoryScreen(
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(
                             start = 20.dp, end = 20.dp, bottom = 24.dp
                         ),
-                        verticalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 12.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         if (showActiveDownload) {
                             item(key = "active_download") {
@@ -675,31 +656,17 @@ fun HistoryScreen(
                                     videoFormats = emptyList(),
                                     audioFormats = emptyList()
                                 )
-                                if (compact) {
-                                    MediaRow(
-                                        info = info,
-                                        isDownloading = true,
-                                        isProcessing = downloadState.isProcessing,
-                                        progress = downloadState.progress,
-                                        totalBytes = downloadState.totalBytes,
-                                        waitingForWifi = downloadState.waitingForWifi,
-                                        onCancel = { downloadViewModel.cancelDownload() },
-                                        onPause = { downloadViewModel.pauseDownload() },
-                                        onResume = { downloadViewModel.resumeDownload() }
-                                    )
-                                } else {
-                                    MediaCard(
-                                        info = info,
-                                        isDownloading = true,
-                                        isProcessing = downloadState.isProcessing,
-                                        progress = downloadState.progress,
-                                        totalBytes = downloadState.totalBytes,
-                                        waitingForWifi = downloadState.waitingForWifi,
-                                        onCancel = { downloadViewModel.cancelDownload() },
-                                        onPause = { downloadViewModel.pauseDownload() },
-                                        onResume = { downloadViewModel.resumeDownload() }
-                                    )
-                                }
+                                MediaCard(
+                                    info = info,
+                                    isDownloading = true,
+                                    isProcessing = downloadState.isProcessing,
+                                    progress = downloadState.progress,
+                                    totalBytes = downloadState.totalBytes,
+                                    waitingForWifi = downloadState.waitingForWifi,
+                                    onCancel = { downloadViewModel.cancelDownload() },
+                                    onPause = { downloadViewModel.pauseDownload() },
+                                    onResume = { downloadViewModel.resumeDownload() }
+                                )
                             }
                         }
 
@@ -726,25 +693,14 @@ fun HistoryScreen(
                                 Unit
                             }
 
-                            if (compact) {
-                                HistoryRow(
-                                    entry = entry,
-                                    present = present,
-                                    onOpen = open,
-                                    onRemove = remove,
-                                    onDeleteFile = { pendingDelete = entry },
-                                    onProperties = { properties = entry }
-                                )
-                            } else {
-                                HistoryCard(
-                                    entry = entry,
-                                    present = present,
-                                    onOpen = open,
-                                    onRemove = remove,
-                                    onDeleteFile = { pendingDelete = entry },
-                                    onProperties = { properties = entry }
-                                )
-                            }
+                            HistoryCard(
+                                entry = entry,
+                                present = present,
+                                onOpen = open,
+                                onRemove = remove,
+                                onDeleteFile = { pendingDelete = entry },
+                                onProperties = { properties = entry }
+                            )
                         }
                     }
                 }
@@ -937,7 +893,6 @@ fun HistoryScreen(
 @Composable
 private fun HistoryFailedView(
     items: List<FailedDownload>,
-    compact: Boolean,
     isFiltered: Boolean = false,
     onViewLog: (FailedDownload) -> Unit,
     onRetry: (FailedDownload) -> Unit,
@@ -982,7 +937,7 @@ private fun HistoryFailedView(
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
                 start = 20.dp, end = 20.dp, bottom = 24.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item(key = "failed_header") {
                 Row(
@@ -1000,21 +955,12 @@ private fun HistoryFailedView(
             }
 
             items(items, key = { it.id }) { item ->
-                if (compact) {
-                    FailedRow(
-                        item = item,
-                        onViewLog = { onViewLog(item) },
-                        onRetry = { onRetry(item) },
-                        onDismiss = { onDismiss(item) }
-                    )
-                } else {
-                    FailedCard(
-                        item = item,
-                        onViewLog = { onViewLog(item) },
-                        onRetry = { onRetry(item) },
-                        onDismiss = { onDismiss(item) }
-                    )
-                }
+                FailedCard(
+                    item = item,
+                    onViewLog = { onViewLog(item) },
+                    onRetry = { onRetry(item) },
+                    onDismiss = { onDismiss(item) }
+                )
             }
         }
     }
@@ -1197,144 +1143,6 @@ private fun FailedCard(
 }
 
 @Composable
-private fun FailedRow(
-    item: FailedDownload,
-    onViewLog: () -> Unit,
-    onRetry: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (item.thumbnail != null) {
-                    AsyncImage(
-                        model = item.thumbnail,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(width = 96.dp, height = 58.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                } else {
-                    Surface(
-                        modifier = Modifier.size(width = 96.dp, height = 58.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                Icons.Filled.Warning,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = item.title.ifBlank { item.url },
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (item.author.isNotBlank()) {
-                        Text(
-                            text = item.author,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    Text(
-                        text = formatDate(item.failedAt),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.history_failed_dismiss),
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-            ) {
-                val snippet = item.errorLog.lines().firstOrNull { it.isNotBlank() }
-                    ?: stringResource(R.string.history_empty_failed)
-                Text(
-                    text = snippet,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(onClick = onViewLog) {
-                    Icon(
-                        Icons.Filled.Info,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        stringResource(R.string.history_failed_error_log),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
-                Spacer(modifier = Modifier.width(6.dp))
-                FilledTonalButton(
-                    onClick = onRetry,
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                ) {
-                    Icon(
-                        Icons.Filled.Refresh,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        stringResource(R.string.history_failed_retry),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun HistoryCard(
     entry: HistoryEntry,
     present: Boolean,
@@ -1481,170 +1289,6 @@ private fun HistoryCard(
                     .align(Alignment.BottomEnd)
                     .padding(12.dp)
             )
-        }
-    }
-}
-
-@Composable
-private fun HistoryRow(
-    entry: HistoryEntry,
-    present: Boolean,
-    onOpen: () -> Unit,
-    onRemove: () -> Unit,
-    onDeleteFile: () -> Unit,
-    onProperties: () -> Unit
-) {
-    var menuOpen by remember { mutableStateOf(false) }
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .combinedClickable(
-                    onClick = { if (present) onOpen() },
-                    onLongClick = onProperties
-                )
-                .padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(width = 128.dp, height = 78.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
-            ) {
-                if (entry.thumbnail != null) {
-                    AsyncImage(
-                        model = entry.thumbnail,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        alpha = if (present) 1f else 0.55f,
-                        colorFilter = if (present) null else ColorFilter.colorMatrix(
-                            ColorMatrix().apply { setToSaturation(0f) }
-                        ),
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Icon(
-                        if (entry.isVideo) Icons.Filled.PlayArrow else Icons.Filled.MusicNote,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-                    )
-                }
-
-                val duration = formatDuration(entry.durationSeconds)
-                if (duration.isNotBlank()) {
-                    Surface(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(5.dp),
-                        shape = RoundedCornerShape(6.dp),
-                        color = Color.Black.copy(alpha = 0.72f)
-                    ) {
-                        Text(
-                            duration,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.White,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.width(14.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    entry.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (present) MaterialTheme.colorScheme.onSurface
-                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                if (entry.author.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(3.dp))
-                    Text(
-                        entry.author,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        buildString {
-                            if (entry.sizeBytes > 0) {
-                                append(formatFileSize(entry.sizeBytes))
-                                append("  \u00b7  ")
-                            }
-                            append(formatDate(entry.completedAt))
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-                    if (!present) {
-                        Tag(
-                            stringResource(R.string.history_tag_deleted),
-                            background = MaterialTheme.colorScheme.error,
-                            foreground = MaterialTheme.colorScheme.onError
-                        )
-                    }
-                }
-            }
-
-            Box {
-                IconButton(onClick = { menuOpen = true }) {
-                    Icon(
-                        Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.history_row_options),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.history_row_properties)) },
-                        onClick = {
-                            menuOpen = false
-                            onProperties()
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.history_row_remove)) },
-                        onClick = {
-                            menuOpen = false
-                            onRemove()
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.history_row_delete)) },
-                        enabled = present,
-                        onClick = {
-                            menuOpen = false
-                            onDeleteFile()
-                        }
-                    )
-                }
-            }
         }
     }
 }
