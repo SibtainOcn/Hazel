@@ -4,6 +4,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -79,8 +81,6 @@ import com.hazel.android.update.UpdateSwitch
 import com.hazel.android.update.UpdateTokens
 import com.hazel.android.update.UpdateTopBar
 import com.hazel.android.util.openInAppBrowser
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -108,9 +108,18 @@ fun HazelUpdateScreen(
 
     val triggerInstall: () -> Unit = {
         if (HazelUpdater.canInstallApks(context)) {
-            viewModel.installUpdate()
+            viewModel.installUpdate(context)
         } else {
             showInstallPermissionDialog = true
+        }
+    }
+
+    val settingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (HazelUpdater.canInstallApks(context)) {
+            waitingForInstallPermission = false
+            viewModel.installUpdate(context)
         }
     }
 
@@ -120,25 +129,13 @@ fun HazelUpdateScreen(
         }
     }
 
-    LaunchedEffect(waitingForInstallPermission) {
-        if (waitingForInstallPermission) {
-            while (isActive && !HazelUpdater.canInstallApks(context)) {
-                delay(400)
-            }
-            if (HazelUpdater.canInstallApks(context)) {
-                waitingForInstallPermission = false
-                viewModel.installUpdate()
-            }
-        }
-    }
-
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 if (waitingForInstallPermission && HazelUpdater.canInstallApks(context)) {
                     waitingForInstallPermission = false
-                    viewModel.installUpdate()
+                    viewModel.installUpdate(context)
                 }
             }
         }
@@ -177,13 +174,12 @@ fun HazelUpdateScreen(
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             val settingsIntent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
                                 data = Uri.parse("package:${context.packageName}")
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             }
                             try {
-                                context.startActivity(settingsIntent)
+                                settingsLauncher.launch(settingsIntent)
                             } catch (_: Exception) {
                                 waitingForInstallPermission = false
-                                viewModel.installUpdate()
+                                viewModel.installUpdate(context)
                             }
                         }
                     }

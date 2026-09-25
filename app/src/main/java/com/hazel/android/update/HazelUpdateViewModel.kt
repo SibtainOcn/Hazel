@@ -185,14 +185,15 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
         _uiState.value = if (info != null) UiState.Available(info) else UiState.Idle
     }
 
-    fun installUpdate() {
+    fun installUpdate(customContext: android.content.Context? = null) {
         val ready = _uiState.value as? UiState.ReadyToInstall ?: return
-        if (HazelUpdater.canInstallApks(getApplication())) {
+        val targetContext = customContext ?: getApplication()
+        if (HazelUpdater.canInstallApks(targetContext)) {
             viewModelScope.launch {
                 SettingsRepository.setHazelUpdateAvailable(getApplication(), false)
             }
         }
-        HazelUpdater.installApk(getApplication(), ready.apkFile)
+        HazelUpdater.installApk(targetContext, ready.apkFile)
     }
 
     fun dismiss() {
