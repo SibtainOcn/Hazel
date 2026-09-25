@@ -114,15 +114,24 @@
     <string name="no_results_try_anyway">Try anyway</string>
     <string name="no_results_close">Close</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">Getting started</string>
-    <string name="guide_step_paste_link">Paste a link into the search field to download it. You can add multiple links, playlists</string>
-    <string name="guide_step_pick_format">Tap a card to pick the exact format. All available qualities are listed with size and codec.</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">Step %1$d of %2$d</string>
+    <string name="guide_step1_title">Paste &amp; Download</string>
+    <string name="guide_step2_title">Format Selection</string>
+    <string name="guide_step3_title">Hazel Instant</string>
+    <string name="guide_step4_title">Battery Optimization</string>
+    <string name="guide_step5_title">Notifications</string>
+    <string name="guide_step_paste_link">Paste a link into the search field to download it. You can add multiple links or entire playlists at once.</string>
+    <string name="guide_step_pick_format">Tap a card to pick the exact format. All available qualities are listed with size and codec options.</string>
     <string name="guide_step_share_instant">Share a link to Hazel Instant from any app to download instantly at your preset quality.</string>
-    <string name="guide_step_finished_downloads">Finished files appear in Downloads. Tap any row to open it in the device\'s default player.</string>
-    <string name="guide_step_battery_unrestricted">Set battery use to unrestricted, otherwise Android may stop downloads when you leave the app.</string>
+    <string name="guide_step_battery_unrestricted">Set battery use to unrestricted, otherwise Android may stop background downloads when you leave the app.</string>
+    <string name="guide_step_notifications">Get notified about download progress and completions in the background.</string>
     <string name="guide_battery_settings">Battery settings</string>
-    <string name="guide_close">Close</string>
+    <string name="guide_allow_notifications">Allow notifications</string>
+    <string name="guide_later">Later</string>
+    <string name="guide_skip">Skip</string>
+    <string name="guide_next">Next</string>
+    <string name="guide_back">Back</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">Download</string>

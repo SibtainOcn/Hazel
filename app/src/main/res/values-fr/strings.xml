@@ -108,15 +108,24 @@
     <string name="no_results_try_anyway">Essayer quand même</string>
     <string name="no_results_close">Fermer</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">Pour commencer</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">Étape %1$d sur %2$d</string>
+    <string name="guide_step1_title">Coller et télécharger</string>
+    <string name="guide_step2_title">Choix du format</string>
+    <string name="guide_step3_title">Hazel Instantané</string>
+    <string name="guide_step4_title">Optimisation de batterie</string>
+    <string name="guide_step5_title">Notifications</string>
     <string name="guide_step_paste_link">Collez un lien dans le champ de recherche pour le télécharger. Vous pouvez ajouter plusieurs liens et des playlists</string>
     <string name="guide_step_pick_format">Touchez une carte pour choisir le format exact. Toutes les qualités disponibles sont listées avec leur taille et leur codec.</string>
     <string name="guide_step_share_instant">Partagez un lien vers Hazel Instantané depuis n\'importe quelle application pour le télécharger aussitôt dans la qualité que vous avez définie.</string>
-    <string name="guide_step_finished_downloads">Les fichiers terminés apparaissent dans Téléchargements. Touchez une ligne pour l\'ouvrir dans le lecteur par défaut de l\'appareil.</string>
     <string name="guide_step_battery_unrestricted">Réglez l\'usage de la batterie sur illimité, sinon Android peut arrêter les téléchargements quand vous quittez l\'application.</string>
+    <string name="guide_step_notifications">Recevez des notifications sur l\'avancement des téléchargements et les fichiers terminés en arrière-plan.</string>
     <string name="guide_battery_settings">Réglages de la batterie</string>
-    <string name="guide_close">Fermer</string>
+    <string name="guide_allow_notifications">Autoriser les notifications</string>
+    <string name="guide_later">Plus tard</string>
+    <string name="guide_skip">Ignorer</string>
+    <string name="guide_next">Suivant</string>
+    <string name="guide_back">Retour</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">Télécharger</string>

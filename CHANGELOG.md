@@ -23,8 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configurable listing source preference in More > Fetch settings with live status badge indicators.
 - Media search provider interface (`MediaSearchProvider` & `UnifiedSearchCoordinator`) designed for future multi-engine direct search expansion.
 - Automated test harnesses for share overlay isolation, history recording, and NewPipe latency/fallback validation (`tools/test_share_overlay_isolation.py` and `tools/test_newpipe_latency_and_fallback.py`).
+- Material 3 Getting Started stepper carousel dialog (`GettingStartedDialog.kt`) featuring a 5-step animated walkthrough (Paste & Download, Format Selection, Hazel Instant, Battery Optimization, and Notifications), progress dots indicator, skip/back/next controls, "Later" skip buttons for battery and notification steps, flat step badge, Hazel SVG bolt logo, and premium deep blue gradient aesthetics.
+- Complete 10-locale translation parity for all Getting Started dialog strings across German, Spanish, French, Hindi, Indonesian, Japanese, Brazilian Portuguese, Russian, and Simplified Chinese.
 
 ### Changed
+- Deferred runtime notification permission request on first launch until the Getting Started onboarding flow is fully closed or completed, preventing premature system permission popups on app launch while preserving re-prompting when downloads begin if permissions remain ungranted.
+- Cleaned up legacy `UserGuideDialog.kt` and purged stale guide string resources across all 10 localization files.
 - Replaced duplicate distribution channel flavor row with a comprehensive "Device & architecture" card in `SoftwareUpdateScreen` displaying device hardware model, Android OS version and API level, primary architecture, and supported ABIs.
 - Refined Software Update hub and component update screens: removed redundant "Verified binaries" row from distribution overview, removed "Checked recently · Signature/Binary verified" subtitles from hero cards, reduced outer horizontal margins from 20dp to 12dp to utilize available screen width, and made hero cards more compact.
 - Compacted the in-app update downloading card to match the exact size and proportions of the update available card, combining download speed, transfer count, and percentage into a single streamlined row.

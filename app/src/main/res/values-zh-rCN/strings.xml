@@ -98,15 +98,24 @@
     <string name="no_results_try_anyway">仍然尝试</string>
     <string name="no_results_close">关闭</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">开始使用</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">第 %1$d 步（共 %2$d 步）</string>
+    <string name="guide_step1_title">粘贴并下载</string>
+    <string name="guide_step2_title">格式选择</string>
+    <string name="guide_step3_title">Hazel 快捷下载</string>
+    <string name="guide_step4_title">电池优化</string>
+    <string name="guide_step5_title">通知权限</string>
     <string name="guide_step_paste_link">把链接粘贴到搜索框即可下载。你可以添加多个链接和播放列表</string>
     <string name="guide_step_pick_format">点按卡片可以挑选具体格式。所有可用画质都会连同体积和编码一起列出。</string>
     <string name="guide_step_share_instant">从任意应用把链接分享给 Hazel 即时下载，就会按你设定的画质立刻下载。</string>
-    <string name="guide_step_finished_downloads">完成的文件会出现在「下载」中。点按任意一行即可用设备的默认播放器打开。</string>
     <string name="guide_step_battery_unrestricted">请把电池用量设为不受限制，否则你离开应用时 Android 可能会中止下载。</string>
+    <string name="guide_step_notifications">在后台接收下载进度以及文件完成的即时通知。</string>
     <string name="guide_battery_settings">电池设置</string>
-    <string name="guide_close">关闭</string>
+    <string name="guide_allow_notifications">允许通知</string>
+    <string name="guide_later">稍后</string>
+    <string name="guide_skip">跳过</string>
+    <string name="guide_next">下一步</string>
+    <string name="guide_back">返回</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">下载</string>

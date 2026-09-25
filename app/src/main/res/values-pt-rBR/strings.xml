@@ -108,15 +108,24 @@
     <string name="no_results_try_anyway">Tentar mesmo assim</string>
     <string name="no_results_close">Fechar</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">Primeiros passos</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">Passo %1$d de %2$d</string>
+    <string name="guide_step1_title">Colar e baixar</string>
+    <string name="guide_step2_title">Seleção de formato</string>
+    <string name="guide_step3_title">Hazel Instantâneo</string>
+    <string name="guide_step4_title">Otimização de bateria</string>
+    <string name="guide_step5_title">Notificações</string>
     <string name="guide_step_paste_link">Cole um link no campo de pesquisa para baixá-lo. Você pode adicionar vários links e playlists</string>
     <string name="guide_step_pick_format">Toque em um cartão para escolher o formato exato. Todas as qualidades disponíveis são listadas com o tamanho e o codec.</string>
     <string name="guide_step_share_instant">Compartilhe um link com o Hazel Instantâneo de qualquer aplicativo para baixar na hora, na qualidade que você definiu.</string>
-    <string name="guide_step_finished_downloads">Os arquivos prontos aparecem em Downloads. Toque em qualquer linha para abri-lo no reprodutor padrão do aparelho.</string>
     <string name="guide_step_battery_unrestricted">Defina o uso da bateria como irrestrito, senão o Android pode interromper os downloads quando você sair do aplicativo.</string>
+    <string name="guide_step_notifications">Receba avisos sobre o progresso dos downloads e arquivos concluídos em segundo plano.</string>
     <string name="guide_battery_settings">Configurações de bateria</string>
-    <string name="guide_close">Fechar</string>
+    <string name="guide_allow_notifications">Permitir notificações</string>
+    <string name="guide_later">Depois</string>
+    <string name="guide_skip">Pular</string>
+    <string name="guide_next">Avançar</string>
+    <string name="guide_back">Voltar</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">Baixar</string>

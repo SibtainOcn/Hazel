@@ -103,15 +103,24 @@
     <string name="no_results_try_anyway">Trotzdem versuchen</string>
     <string name="no_results_close">Schließen</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">Erste Schritte</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">Schritt %1$d von %2$d</string>
+    <string name="guide_step1_title">Einfügen &amp; Herunterladen</string>
+    <string name="guide_step2_title">Formatauswahl</string>
+    <string name="guide_step3_title">Hazel Sofort</string>
+    <string name="guide_step4_title">Akku-Optimierung</string>
+    <string name="guide_step5_title">Benachrichtigungen</string>
     <string name="guide_step_paste_link">Füge einen Link ins Suchfeld ein, um ihn herunterzuladen. Du kannst mehrere Links und Playlists hinzufügen</string>
     <string name="guide_step_pick_format">Tippe eine Karte an, um das genaue Format zu wählen. Alle verfügbaren Qualitäten stehen mit Größe und Codec dabei.</string>
     <string name="guide_step_share_instant">Teile aus jeder App einen Link mit Hazel Sofort, um ihn gleich in der von dir eingestellten Qualität herunterzuladen.</string>
-    <string name="guide_step_finished_downloads">Fertige Dateien erscheinen unter Downloads. Tippe eine Zeile an, um sie im Standardplayer des Geräts zu öffnen.</string>
     <string name="guide_step_battery_unrestricted">Stelle die Akkunutzung auf uneingeschränkt, sonst kann Android Downloads stoppen, sobald du die App verlässt.</string>
+    <string name="guide_step_notifications">Erhalte Benachrichtigungen über den Downloadfortschritt und abgeschlossene Dateien im Hintergrund.</string>
     <string name="guide_battery_settings">Akku-Einstellungen</string>
-    <string name="guide_close">Schließen</string>
+    <string name="guide_allow_notifications">Benachrichtigungen erlauben</string>
+    <string name="guide_later">Später</string>
+    <string name="guide_skip">Überspringen</string>
+    <string name="guide_next">Weiter</string>
+    <string name="guide_back">Zurück</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">Herunterladen</string>

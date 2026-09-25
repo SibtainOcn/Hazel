@@ -113,15 +113,24 @@
     <string name="no_results_try_anyway">Всё равно попробовать</string>
     <string name="no_results_close">Закрыть</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">Начало работы</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">Шаг %1$d из %2$d</string>
+    <string name="guide_step1_title">Вставить и скачать</string>
+    <string name="guide_step2_title">Выбор формата</string>
+    <string name="guide_step3_title">Hazel Мгновенно</string>
+    <string name="guide_step4_title">Оптимизация батареи</string>
+    <string name="guide_step5_title">Уведомления</string>
     <string name="guide_step_paste_link">Вставьте ссылку в поле поиска, чтобы скачать её. Можно добавлять несколько ссылок и плейлисты</string>
     <string name="guide_step_pick_format">Нажмите на карточку для выбора точного формата. Все доступные варианты перечислены с размером и кодеком.</string>
     <string name="guide_step_share_instant">Поделитесь ссылкой в Hazel Мгновенно из любого приложения для быстрой загрузки с заданным качеством.</string>
-    <string name="guide_step_finished_downloads">Готовые файлы появляются в «Загрузках». Нажмите на строку, чтобы открыть файл в проигрывателе по умолчанию.</string>
     <string name="guide_step_battery_unrestricted">Установите работу от батареи без ограничений, иначе Android может остановить загрузку при выходе из приложения.</string>
+    <string name="guide_step_notifications">Получайте уведомления о ходе и завершении загрузок в фоновом режиме.</string>
     <string name="guide_battery_settings">Настройки батареи</string>
-    <string name="guide_close">Закрыть</string>
+    <string name="guide_allow_notifications">Разрешить уведомления</string>
+    <string name="guide_later">Позже</string>
+    <string name="guide_skip">Пропустить</string>
+    <string name="guide_next">Далее</string>
+    <string name="guide_back">Назад</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">Загрузка</string>

@@ -98,15 +98,24 @@
     <string name="no_results_try_anyway">それでも試す</string>
     <string name="no_results_close">閉じる</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">はじめに</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">ステップ %1$d / %2$d</string>
+    <string name="guide_step1_title">貼り付けてダウンロード</string>
+    <string name="guide_step2_title">フォーマット選択</string>
+    <string name="guide_step3_title">Hazel インスタント</string>
+    <string name="guide_step4_title">バッテリー最適化</string>
+    <string name="guide_step5_title">通知</string>
     <string name="guide_step_paste_link">検索バーにリンクを貼り付けてダウンロードします。複数のリンクやプレイリストの追加も可能です</string>
     <string name="guide_step_pick_format">カードをタップして詳細な形式を選択します。利用可能なすべての画質がサイズとコーデック付きで表示されます。</string>
     <string name="guide_step_share_instant">任意のアプリからHazel 即時にリンクを共有すると、設定した画質ですぐにダウンロードできます。</string>
-    <string name="guide_step_finished_downloads">完了したファイルは「ダウンロード」に表示されます。タップすると端末の標準プレーヤーで開きます。</string>
     <string name="guide_step_battery_unrestricted">バッテリー使用を「無制限」に設定してください。制限されている場合、アプリを離れた際にAndroidがダウンロードを停止することがあります。</string>
+    <string name="guide_step_notifications">バックグラウンドでのダウンロード進捗や完了の通知を受け取ります。</string>
     <string name="guide_battery_settings">バッテリー設定</string>
-    <string name="guide_close">閉じる</string>
+    <string name="guide_allow_notifications">通知を許可</string>
+    <string name="guide_later">後で</string>
+    <string name="guide_skip">スキップ</string>
+    <string name="guide_next">次へ</string>
+    <string name="guide_back">戻る</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">ダウンロード</string>

@@ -103,15 +103,24 @@
     <string name="no_results_try_anyway">फिर भी कोशिश करें</string>
     <string name="no_results_close">बंद करें</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">शुरुआत करें</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">चरण %1$d का %2$d</string>
+    <string name="guide_step1_title">चिपकाएँ और डाउनलोड करें</string>
+    <string name="guide_step2_title">फ़ॉर्मैट चयन</string>
+    <string name="guide_step3_title">Hazel इंस्टेंट</string>
+    <string name="guide_step4_title">बैटरी ऑप्टिमाइज़ेशन</string>
+    <string name="guide_step5_title">सूचनाएं</string>
     <string name="guide_step_paste_link">डाउनलोड करने के लिए खोज बॉक्स में लिंक चिपकाएँ। आप कई लिंक और प्लेलिस्ट भी जोड़ सकते हैं</string>
     <string name="guide_step_pick_format">सही फ़ॉर्मैट चुनने के लिए किसी कार्ड पर टैप करें। हर उपलब्ध क्वालिटी उसके आकार और कोडेक के साथ दिखाई जाती है।</string>
     <string name="guide_step_share_instant">किसी भी ऐप से Hazel इंस्टेंट को लिंक साझा करें और तय की गई क्वालिटी में तुरंत डाउनलोड करें।</string>
-    <string name="guide_step_finished_downloads">पूरी हुई फ़ाइलें डाउनलोड में दिखती हैं। डिवाइस के डिफ़ॉल्ट प्लेयर में खोलने के लिए किसी भी पंक्ति पर टैप करें।</string>
     <string name="guide_step_battery_unrestricted">बैटरी उपयोग को अप्रतिबंधित पर रखें, वरना ऐप से बाहर जाते ही Android डाउनलोड रोक सकता है।</string>
+    <string name="guide_step_notifications">पृष्ठभूमि में डाउनलोड प्रगति और पूरी हुई फ़ाइलों के बारे में सूचनाएं प्राप्त करें।</string>
     <string name="guide_battery_settings">बैटरी सेटिंग</string>
-    <string name="guide_close">बंद करें</string>
+    <string name="guide_allow_notifications">सूचनाएं चालू करें</string>
+    <string name="guide_later">बाद में</string>
+    <string name="guide_skip">छोड़ें</string>
+    <string name="guide_next">आगे</string>
+    <string name="guide_back">पीछे</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">डाउनलोड</string>
