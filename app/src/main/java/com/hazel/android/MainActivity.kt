@@ -100,6 +100,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 withFrameNanos { }
                 HazelApp.instance.startLibraryInit()
+                com.hazel.android.update.HazelUpdater.checkUpdatesSilently(applicationContext)
             }
 
             val savedTheme by SettingsRepository.isDarkTheme(this).collectAsState(initial = null)

@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.core.content.FileProvider
 import com.hazel.android.BuildConfig
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -284,6 +285,55 @@ object HazelUpdater {
     }
 
     /**
+     * Cleans up cached update APK files to reclaim storage and prevent installer file bloat.
+     */
+    fun cleanStaleApks(context: Context) {
+        try {
+            val updatesDir = File(context.cacheDir, "updates")
+            if (updatesDir.exists() && updatesDir.isDirectory) {
+                updatesDir.listFiles()?.forEach { file ->
+                    if (file.isFile && file.extension.equals("apk", ignoreCase = true)) {
+                        file.delete()
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            // Ignore filesystem cleanup exceptions
+        }
+    }
+
+    /**
+     * Asynchronously checks for Hazel and engine updates in the background on app start,
+     * reactively syncing flags so Home top bar Update pill and More screen red dots
+     * appear immediately in real-time without requiring manual user navigation.
+     */
+    suspend fun checkUpdatesSilently(context: Context) = withContext(Dispatchers.IO) {
+        cleanStaleApks(context)
+
+        try {
+            val channelLabel = com.hazel.android.data.SettingsRepository.getHazelChannel(context).first()
+            val channel = Channel.fromLabel(channelLabel)
+            val release = latestRelease(channel)
+            val hasHazelUpdate = release != null && isNewer(release.version)
+            com.hazel.android.data.SettingsRepository.setHazelUpdateAvailable(context, hasHazelUpdate)
+        } catch (_: Exception) {
+            // Ignore silent network check failure
+        }
+
+        try {
+            val installedEngine = YtDlpUpdater.installedVersion(context)
+            if (installedEngine != null) {
+                val channel = YtDlpUpdater.Channel.STABLE
+                val releaseInfo = YtDlpUpdater.latestRelease(channel)
+                val hasYtDlpUpdate = releaseInfo != null && YtDlpUpdater.isNewer(releaseInfo.version, installedEngine)
+                com.hazel.android.data.SettingsRepository.setYtDlpUpdateAvailable(context, hasYtDlpUpdate)
+            }
+        } catch (_: Exception) {
+            // Ignore silent engine check failure
+        }
+    }
+
+    /**
      * Downloads the APK file to cache directory with progress reporting.
      */
     suspend fun downloadApk(
@@ -291,6 +341,8 @@ object HazelUpdater {
         info: ReleaseInfo,
         onProgress: (bytesRead: Long, totalBytes: Long, speedBps: Long, etaSeconds: Long) -> Unit
     ): File = withContext(Dispatchers.IO) {
+        cleanStaleApks(context)
+
         val updatesDir = File(context.cacheDir, "updates")
         if (!updatesDir.exists()) updatesDir.mkdirs()
 

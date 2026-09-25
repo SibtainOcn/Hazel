@@ -318,13 +318,6 @@ fun MoreScreen(
             // Link reading: network bounds used while resolving a pasted link
             ListItem(
                 headlineContent = { Text(stringResource(R.string.more_link_reading)) },
-                supportingContent = {
-                    Text(
-                        stringResource(listingSource.labelRes),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
-                    )
-                },
                 leadingContent = {
                     Icon(Icons.Filled.Speed, null, tint = MaterialTheme.colorScheme.primary)
                 },
@@ -431,7 +424,6 @@ fun MoreScreen(
             // Software update screen (Hazel app & yt-dlp engine)
             ListItem(
                 headlineContent = { Text(stringResource(R.string.more_software_update)) },
-                supportingContent = { Text(stringResource(R.string.more_software_update_subtitle)) },
                 leadingContent = {
                     Box(modifier = Modifier.size(24.dp)) {
                         Icon(

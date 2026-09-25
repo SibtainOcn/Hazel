@@ -247,7 +247,6 @@ def test_navigation_and_hub():
     more_screen = (APP_DIR / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "more" / "MoreScreen.kt").read_text(encoding="utf-8")
     check_true("MoreScreen invokes onNavigateToUpdate", 'onNavigateToUpdate()' in more_screen)
     check_true("MoreScreen references R.string.more_software_update", 'R.string.more_software_update' in more_screen)
-    check_true("MoreScreen references R.string.more_software_update_subtitle", 'R.string.more_software_update_subtitle' in more_screen)
 
 
 # ===========================================================================
@@ -278,10 +277,6 @@ def test_locale_parity():
             check_true(
                 f"{loc} contains more_software_update",
                 'name="more_software_update"' in content
-            )
-            check_true(
-                f"{loc} contains more_software_update_subtitle",
-                'name="more_software_update_subtitle"' in content
             )
 
 
