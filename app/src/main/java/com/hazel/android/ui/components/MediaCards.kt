@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -120,287 +121,323 @@ fun MediaCard(
 
     var menuOpen by remember { mutableStateOf(false) }
     val isPaused = batchItem?.state == BatchState.PAUSED
+    val isQueued = batchItem?.state == BatchState.QUEUED
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
     ) {
-        Column(
-            modifier = if (isDownloading) Modifier
-            else Modifier.clickable(onClick = onOpenSheet)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(16f / 9f)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .then(
+                    if (isDownloading) Modifier
+                    else Modifier.clickable(onClick = onOpenSheet)
+                )
         ) {
+            // Sources without artwork simply show the placeholder glyph.
+            if (info.thumbnail != null) {
+                AsyncImage(
+                    model = info.thumbnail,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Icon(
+                    Icons.Filled.MusicNote,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .align(Alignment.Center),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                )
+            }
+
+            // Dark gradient overlay from top and bottom so text is always readable over thumbnail
             Box(
                 modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Black.copy(alpha = 0.72f),
+                            0.4f to Color.Transparent,
+                            0.7f to Color.Transparent,
+                            1f to Color.Black.copy(alpha = 0.75f)
+                        )
+                    )
+            )
+
+            // Title and author directly overlaid on top of the thumbnail
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
                     .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(
+                        start = 14.dp,
+                        top = 12.dp,
+                        end = if (isDownloading || isPaused || isQueued || onRemove != null) 48.dp else 14.dp
+                    )
             ) {
-                if (info.thumbnail != null) {
-                    AsyncImage(
-                        model = info.thumbnail,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Icon(
-                        Icons.Filled.MusicNote,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .align(Alignment.Center),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                Text(
+                    info.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (info.uploader.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        info.uploader,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.82f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
+            }
 
-                val isQueued = batchItem?.state == BatchState.QUEUED
-                if (isDownloading || isPaused || isQueued) {
+            if (isDownloading || isPaused || isQueued) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
+                        .zIndex(1f)
+                ) {
                     Box(
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(6.dp)
-                            .zIndex(1f)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(Color.Black.copy(alpha = 0.55f))
-                                .clickable { menuOpen = true },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Filled.MoreVert,
-                                contentDescription = stringResource(R.string.download_options),
-                                modifier = Modifier.size(18.dp),
-                                tint = Color.White
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = menuOpen,
-                            onDismissRequest = { menuOpen = false }
-                        ) {
-                            if (isPaused) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.download_resume)) },
-                                    onClick = {
-                                        menuOpen = false
-                                        onResume()
-                                    }
-                                )
-                            } else if (isDownloading) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.download_pause)) },
-                                    enabled = !isProcessing,
-                                    onClick = {
-                                        menuOpen = false
-                                        onPause()
-                                    }
-                                )
-                            }
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.download_cancel)) },
-                                onClick = {
-                                    menuOpen = false
-                                    onCancel()
-                                }
-                            )
-                        }
-                    }
-                }
-
-                if (isDownloading || isPaused) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.35f))
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (isPaused) {
-                            OverlayChip(text = stringResource(R.string.download_paused), bold = true)
-                            if (totalBytes > 0) {
-                                val done = (totalBytes * animatedProgress).toLong()
-                                OverlayChip(
-                                    text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
-                                )
-                            }
-                        } else if (isProcessing) {
-                            OverlayChip(text = stringResource(R.string.download_processing), bold = true)
-                        } else {
-                            OverlayChip(
-                                text = "%.1f %%".format(animatedProgress * 100),
-                                bold = true
-                            )
-                            if (totalBytes > 0) {
-                                val done = (totalBytes * animatedProgress).toLong()
-                                OverlayChip(
-                                    text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
-                                )
-                            }
-                        }
-                    }
-
-                    if (isProcessing && !isPaused) {
-                        ProcessingShimmer(modifier = Modifier.fillMaxSize())
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .size(60.dp)
-                                .clip(CircleShape)
-                                .background(Color.Black.copy(alpha = 0.55f))
-                                .clickable(onClick = if (isPaused) onResume else onCancel),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                progress = { animatedProgress },
-                                modifier = Modifier.size(60.dp),
-                                color = Color.White,
-                                trackColor = Color.Transparent,
-                                strokeWidth = 3.dp
-                            )
-                            Icon(
-                                if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Close,
-                                contentDescription =
-                                    stringResource(if (isPaused) R.string.download_resume_action else R.string.download_cancel_action),
-                                modifier = Modifier.size(22.dp),
-                                tint = Color.White
-                            )
-                        }
-                    }
-                }
-
-                if (waitingForWifi && !isDownloading && !isPaused) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.35f))
-                    )
-
-                    Surface(
-                        modifier = Modifier.align(Alignment.Center),
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color.Black.copy(alpha = 0.6f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                            horizontalArrangement = Arrangement.spacedBy(7.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Filled.WifiOff,
-                                contentDescription = null,
-                                modifier = Modifier.size(17.dp),
-                                tint = Color.White
-                            )
-                            Text(
-                                stringResource(R.string.download_waiting_wifi),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.White
-                            )
-                        }
-                    }
-                }
-
-                if (onRemove != null && !isDownloading && !isPaused) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(8.dp)
-                            .size(30.dp)
+                            .size(32.dp)
                             .clip(CircleShape)
                             .background(Color.Black.copy(alpha = 0.55f))
-                            .clickable(onClick = onRemove),
+                            .clickable { menuOpen = true },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.download_remove_link),
-                            modifier = Modifier.size(16.dp),
+                            Icons.Filled.MoreVert,
+                            contentDescription = stringResource(R.string.download_options),
+                            modifier = Modifier.size(18.dp),
                             tint = Color.White
                         )
                     }
-                }
 
-                if (!isDownloading) {
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    DropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false }
                     ) {
-                        val duration = formatDuration(info.durationSeconds)
-                        if (duration.isNotBlank()) {
-                            CornerTag(text = duration)
-                        }
-                        when {
-                            batchItem?.state == BatchState.FAILED -> CornerTag(
-                                text = batchItem.error ?: stringResource(R.string.download_failed),
-                                background = MaterialTheme.colorScheme.error,
-                                foreground = MaterialTheme.colorScheme.onError
+                        if (isPaused) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.download_resume)) },
+                                onClick = {
+                                    menuOpen = false
+                                    onResume()
+                                }
                             )
-                            isComplete -> CornerTag(
-                                text = stringResource(R.string.download_saved),
-                                background = MaterialTheme.colorScheme.primary,
-                                foreground = MaterialTheme.colorScheme.onPrimary
+                        } else if (isDownloading) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.download_pause)) },
+                                enabled = !isProcessing,
+                                onClick = {
+                                    menuOpen = false
+                                    onPause()
+                                }
                             )
-                            batchItem?.state == BatchState.QUEUED -> CornerTag(text = stringResource(R.string.download_queued))
-                            alreadyDownloaded -> CornerTag(text = stringResource(R.string.download_downloaded))
                         }
-                    }
-                }
-
-                if (isDownloading) {
-                    val lineModifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .height(4.dp)
-
-                    if (isProcessing) {
-                        LinearProgressIndicator(
-                            modifier = lineModifier,
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = Color.White.copy(alpha = 0.25f)
-                        )
-                    } else {
-                        LinearProgressIndicator(
-                            progress = { animatedProgress },
-                            modifier = lineModifier,
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = Color.White.copy(alpha = 0.25f),
-                            drawStopIndicator = {}
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.download_cancel)) },
+                            onClick = {
+                                menuOpen = false
+                                onCancel()
+                            }
                         )
                     }
                 }
             }
 
-            Column(modifier = Modifier.padding(14.dp)) {
-                Text(
-                    info.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+            if (onRemove != null && !isDownloading && !isPaused) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.55f))
+                        .clickable(onClick = onRemove),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.download_remove_link),
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.White
+                    )
+                }
+            }
+
+            if (isDownloading || isPaused) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f))
                 )
-                if (info.uploader.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        info.uploader,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+
+                // Downloading status & percentage readout positioned in the bottom-left corner
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isPaused) {
+                        OverlayChip(text = stringResource(R.string.download_paused), bold = true)
+                        if (totalBytes > 0) {
+                            val done = (totalBytes * animatedProgress).toLong()
+                            OverlayChip(
+                                text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
+                            )
+                        }
+                    } else if (isProcessing) {
+                        OverlayChip(text = stringResource(R.string.download_processing), bold = true)
+                    } else {
+                        OverlayChip(
+                            text = "%.1f %%".format(animatedProgress * 100),
+                            bold = true
+                        )
+                        if (totalBytes > 0) {
+                            val done = (totalBytes * animatedProgress).toLong()
+                            OverlayChip(
+                                text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
+                            )
+                        }
+                    }
+                }
+
+                if (isProcessing && !isPaused) {
+                    ProcessingShimmer(modifier = Modifier.fillMaxSize())
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .clickable(onClick = if (isPaused) onResume else onCancel),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            progress = { animatedProgress },
+                            modifier = Modifier.size(60.dp),
+                            color = Color.White,
+                            trackColor = Color.Transparent,
+                            strokeWidth = 3.dp
+                        )
+                        Icon(
+                            if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Close,
+                            contentDescription =
+                                stringResource(if (isPaused) R.string.download_resume_action else R.string.download_cancel_action),
+                            modifier = Modifier.size(22.dp),
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+
+            if (waitingForWifi && !isDownloading && !isPaused) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f))
+                )
+
+                Surface(
+                    modifier = Modifier.align(Alignment.Center),
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color.Black.copy(alpha = 0.6f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                        horizontalArrangement = Arrangement.spacedBy(7.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Filled.WifiOff,
+                            contentDescription = null,
+                            modifier = Modifier.size(17.dp),
+                            tint = Color.White
+                        )
+                        Text(
+                            stringResource(R.string.download_waiting_wifi),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+
+            // Bottom left corner carries the duration, and bottom right corner carries
+            // whatever this link's state is: queued, failed, saved, or downloaded.
+            if (!isDownloading) {
+                val duration = formatDuration(info.durationSeconds)
+                if (duration.isNotBlank()) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(10.dp)
+                    ) {
+                        CornerTag(text = duration)
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    when {
+                        batchItem?.state == BatchState.FAILED -> CornerTag(
+                            text = batchItem.error ?: stringResource(R.string.download_failed),
+                            background = MaterialTheme.colorScheme.error,
+                            foreground = MaterialTheme.colorScheme.onError
+                        )
+                        isComplete -> CornerTag(
+                            text = stringResource(R.string.download_saved),
+                            background = MaterialTheme.colorScheme.primary,
+                            foreground = MaterialTheme.colorScheme.onPrimary
+                        )
+                        batchItem?.state == BatchState.QUEUED -> CornerTag(text = stringResource(R.string.download_queued))
+                        alreadyDownloaded -> CornerTag(text = stringResource(R.string.download_downloaded))
+                    }
+                }
+            }
+
+            // Filled line along the bottom edge of the thumbnail.
+            if (isDownloading) {
+                val lineModifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(4.dp)
+
+                if (isProcessing) {
+                    LinearProgressIndicator(
+                        modifier = lineModifier,
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = Color.White.copy(alpha = 0.25f)
+                    )
+                } else {
+                    LinearProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = lineModifier,
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = Color.White.copy(alpha = 0.25f),
+                        drawStopIndicator = {}
                     )
                 }
             }

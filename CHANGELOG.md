@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced the search bar search icon.
 - Updated batch download action bar quality button to display real-time chosen quality labels (e.g. HQ: AUTO, HQ: BEST, HQ: 1080p) instead of a static generic icon.
 - Aligned pause, resume, and cancel actions across the header controls, thumbnail center button, and 3-dots menu with full support for cancelling waiting queue items without clearing the batch.
+- Modernized home and download media cards with an edge-to-edge 16:9 full-artwork thumbnail design; title and author are now overlaid directly atop the artwork with a dual gradient scrim for high legibility, duration and active download progress chips are anchored to the bottom-left corner, and status tags remain on the bottom-right.
 - Reverted the app launcher icon to a white background with a black bolt foreground.
 
 ### Added

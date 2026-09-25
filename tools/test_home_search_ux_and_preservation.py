@@ -266,6 +266,39 @@ def test_compact_alignment_and_batch_scroll():
 
 
 # ---------------------------------------------------------------------------
+# Suite 7: Full-Artwork MediaCard & Thumbnail Overlay Architecture
+# ---------------------------------------------------------------------------
+def test_full_artwork_mediacard():
+    print("\n--- Suite 7: Full-Artwork MediaCard & Thumbnail Overlay Architecture ---")
+
+    download_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "DownloadScreen.kt"
+    cards_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "components" / "MediaCards.kt"
+
+    download_content = download_file.read_text(encoding="utf-8")
+    cards_content = cards_file.read_text(encoding="utf-8")
+
+    # 1. MediaCard shape is RoundedCornerShape(20.dp)
+    check_true("DownloadScreen.kt MediaCard uses 20dp surface shape", "shape = RoundedCornerShape(20.dp)" in download_content)
+    check_true("MediaCards.kt MediaCard uses 20dp surface shape", "shape = RoundedCornerShape(20.dp)" in cards_content)
+
+    # 2. Gradient overlay on top of thumbnail
+    check_true("DownloadScreen.kt MediaCard applies vertical gradient scrim", "Brush.verticalGradient(" in download_content)
+    check_true("MediaCards.kt MediaCard applies vertical gradient scrim", "Brush.verticalGradient(" in cards_content)
+
+    # 3. Title and author overlaid on top of thumbnail (Alignment.TopStart)
+    check_true("DownloadScreen.kt MediaCard title/uploader at TopStart", ".align(Alignment.TopStart)" in download_content)
+    check_true("MediaCards.kt MediaCard title/uploader at TopStart", ".align(Alignment.TopStart)" in cards_content)
+
+    # 4. Duration shifted to bottom-left corner (Alignment.BottomStart)
+    check_true("DownloadScreen.kt MediaCard duration at BottomStart", "Box(\n                        modifier = Modifier\n                            .align(Alignment.BottomStart)" in download_content or ".align(Alignment.BottomStart)\n                            .padding(10.dp)\n                    ) {\n                        CornerTag(text = duration)" in download_content)
+    check_true("MediaCards.kt MediaCard duration at BottomStart", "Box(\n                        modifier = Modifier\n                            .align(Alignment.BottomStart)" in cards_content or ".align(Alignment.BottomStart)\n                            .padding(10.dp)\n                    ) {\n                        CornerTag(text = duration)" in cards_content)
+
+    # 5. Saved / Queued / Failed / Downloaded tags preserved at BottomEnd
+    check_true("DownloadScreen.kt MediaCard tags at BottomEnd", ".align(Alignment.BottomEnd)" in download_content)
+    check_true("MediaCards.kt MediaCard tags at BottomEnd", ".align(Alignment.BottomEnd)" in cards_content)
+
+
+# ---------------------------------------------------------------------------
 # Main Runner
 # ---------------------------------------------------------------------------
 def main():
@@ -279,6 +312,7 @@ def main():
     test_home_screen_components()
     test_search_and_history_screen_ux()
     test_compact_alignment_and_batch_scroll()
+    test_full_artwork_mediacard()
 
     print("\n" + "=" * 70)
     print(f"  Summary: {PASS_COUNT}/{PASS_COUNT + FAIL_COUNT} tests PASSED, {FAIL_COUNT} FAILED")
