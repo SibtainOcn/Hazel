@@ -1,13 +1,11 @@
 package com.hazel.android.ui.share
 
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -91,12 +89,12 @@ fun OverlayLoadingSheet(
         } else url
     }
 
-    // Dynamic phase transitions: Steps smoothly through phases without blocking the actual fetch
+    // Dynamic phase transitions: Steps smoothly through phases once and holds on "Almost ready..."
     var stageIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
-        while (true) {
-            delay(1200)
-            stageIndex = (stageIndex + 1) % 4
+        for (i in 1..3) {
+            delay(1000)
+            stageIndex = i
         }
     }
 
@@ -111,15 +109,16 @@ fun OverlayLoadingSheet(
         }
     }
 
-    // Smooth continuous progress rail animation matching CSS animation: rail-grow 3s infinite
-    val infiniteTransition = rememberInfiniteTransition(label = "railAnim")
-    val animatedProgress by infiniteTransition.animateFloat(
-        initialValue = 0.08f,
-        targetValue = 0.96f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
-        ),
+    // Progressive rail animation: fills progressively with stages and holds at 94% on "Almost ready..."
+    val targetProgress = when (stageIndex) {
+        0 -> 0.25f
+        1 -> 0.55f
+        2 -> 0.80f
+        else -> 0.94f
+    }
+    val animatedProgress by animateFloatAsState(
+        targetValue = targetProgress,
+        animationSpec = tween(durationMillis = 900, easing = FastOutSlowInEasing),
         label = "railProgress"
     )
 
@@ -151,29 +150,29 @@ fun OverlayLoadingSheet(
                     .fillMaxWidth()
                     .padding(bottom = 18.dp)
             ) {
-                // Fetch badge with spinning active arc ring around Hazel official SVG logo
+                // Fetch badge with spinning active arc ring around concentric Hazel bolt logo
                 Box(
                     modifier = Modifier.size(44.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(44.dp),
-                        strokeWidth = 3.5.dp,
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                        strokeWidth = 2.5.dp,
+                        color = Color.White,
+                        trackColor = Color.White.copy(alpha = 0.12f)
                     )
                     Box(
                         modifier = Modifier
-                            .size(34.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(MaterialTheme.colorScheme.primaryContainer),
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF161616)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.splash_icon),
+                            painter = painterResource(R.drawable.ic_hazel_bolt),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(18.dp)
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -213,7 +212,7 @@ fun OverlayLoadingSheet(
                         .fillMaxWidth(animatedProgress)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(2.dp))
-                        .background(MaterialTheme.colorScheme.primary)
+                        .background(Color.White)
                 )
             }
 

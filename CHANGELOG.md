@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed unit test execution on CI by registering a forward-compatible `testDebugUnitTest` task alias in `app/build.gradle.kts` mapping to flavor-specific test tasks (`testGithubDebugUnitTest` and `testFdroidDebugUnitTest`).
 - Replaced the Ko-fi sponsor option (which was marked "Opening soon") with a live
   Buy Me a Coffee link (`buymeacoffee.com/sibtainocean`).
+- Refined `OverlayLoadingSheet` circular loader spinner with a concentric circular container and clean vector Hazel bolt (`ic_hazel_bolt.xml`), eliminating the clipped rounded square artifact.
+- Replaced `OverlayLoadingSheet` infinite phase animation loop with a single-pass progression that smoothly advances through status stages to "Almost ready..." and holds at 94% progress rail fill until fetching completes.
+- Overhauled `SponsorScreen` with an independent, theme-adaptive dark luxury aesthetic (`#121418` obsidian surfaces with fine `#F9FAFB` whitish text and `#1A1D24` icon containers) matching `GettingStartedDialog`, completely decoupled from user accent colors while maintaining clean adaptive light theme styling.
 - Streamlined the Home screen by removing the redundant batch action row below the search bar while fully preserving per-media card controls (center play/pause/cancel and 3-dot menu).
 - Merged separate Downloading and Queued screens into a single unified "Downloading queue" view with dedicated component architecture (`DownloadingQueueView.kt`), presenting active downloads and waiting queue items in one cohesive interface with real-time badges.
 - Added batch controls ("Pause all" / "Resume all", "Cancel all" with confirmation dialog, and "Clear queue") into the Downloads screen 3-dot overflow menu.
