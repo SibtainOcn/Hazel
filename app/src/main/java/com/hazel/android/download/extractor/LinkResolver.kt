@@ -61,7 +61,7 @@ object LinkResolver {
         processId: String = MediaProbe.PROBE_PROCESS_ID
     ): LinkContents {
 
-        if (source == ListingSource.NEWPIPE) {
+        if (source == ListingSource.NEWPIPE && !access.hasCookies) {
             // First check collections (playlists & channel tabs) for low-latency listing
             if (NewPipeLister.handlesCollection(url)) {
                 NewPipeLister.list(url)?.let { return it }

@@ -122,12 +122,12 @@ class ResolverEngine:
     YT_DLP = "YT_DLP"
 
 
-def mock_link_resolver(url: str, engine: str, simulate_newpipe_error: bool = False) -> tuple[str, str]:
+def mock_link_resolver(url: str, engine: str, simulate_newpipe_error: bool = False, has_cookies: bool = False) -> tuple[str, str]:
     """
-    Simulates LinkResolver.resolve(url, source = engine)
+    Simulates LinkResolver.resolve(url, access, source = engine)
     Returns tuple: (selected_engine, result_type)
     """
-    if engine == ResolverEngine.NEWPIPE:
+    if engine == ResolverEngine.NEWPIPE and not has_cookies:
         if mock_newpipe_handles_collection(url):
             if simulate_newpipe_error:
                 # Silent fallback to yt-dlp
@@ -139,8 +139,8 @@ def mock_link_resolver(url: str, engine: str, simulate_newpipe_error: bool = Fal
                 return (ResolverEngine.YT_DLP, "Single")
             return (ResolverEngine.NEWPIPE, "Single")
 
-    # Non-supported or fallen back: yt-dlp engine handles it
-    is_playlist = "playlist" in url or "sets" in url or "album" in url
+    # Non-supported, explicitly selected yt-dlp, authenticated session, or fallen back: yt-dlp engine handles it
+    is_playlist = "playlist" in url or "sets" in url or "album" in url or "/videos" in url
     return (ResolverEngine.YT_DLP, "Many" if is_playlist else "Single")
 
 
@@ -177,7 +177,7 @@ def test_multi_source_matrix():
 # ===========================================================================
 
 def test_fallback_and_error_handling():
-    print(f"\n{'='*70}\n  TEST 2: Silent Fallback to yt-dlp & Error Handling\n{'='*70}")
+    print(f"\n{'='*70}\n  TEST 2: Silent Fallback, Settings Toggle & Cookie Routing\n{'='*70}")
 
     # 1. Instagram Reel (not in NewPipe) -> Falls through silently to yt-dlp
     engine, r_type = mock_link_resolver(
@@ -204,6 +204,27 @@ def test_fallback_and_error_handling():
     )
     check("YouTube playlist with network error falls back silently to yt-dlp", engine, ResolverEngine.YT_DLP)
     check("YouTube playlist still produces Many items after fallback", r_type, "Many")
+
+    # 4. Settings Toggle: When user switches to YT_DLP in settings -> Always uses yt-dlp directly
+    engine_toggle, _ = mock_link_resolver(
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        ResolverEngine.YT_DLP
+    )
+    check("Settings toggle to YT_DLP routes YouTube video directly to yt-dlp", engine_toggle, ResolverEngine.YT_DLP)
+
+    engine_toggle_pl, _ = mock_link_resolver(
+        "https://www.youtube.com/playlist?list=PL123",
+        ResolverEngine.YT_DLP
+    )
+    check("Settings toggle to YT_DLP routes YouTube playlist directly to yt-dlp", engine_toggle_pl, ResolverEngine.YT_DLP)
+
+    # 5. Authenticated Sessions / Cookies: When cookies are present, bypass NewPipe to use authenticated yt-dlp
+    engine_cookies, _ = mock_link_resolver(
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        ResolverEngine.NEWPIPE,
+        has_cookies=True
+    )
+    check("Authenticated cookies on YouTube route directly to yt-dlp", engine_cookies, ResolverEngine.YT_DLP)
 
 
 # ===========================================================================
@@ -235,7 +256,7 @@ def test_latency_optimization():
 # ===========================================================================
 
 def test_source_code_structure():
-    print(f"\n{'='*70}\n  TEST 4: Extractor Code Structure & Default Configuration\n{'='*70}")
+    print(f"\n{'='*70}\n  TEST 4: Extractor Code Structure & Settings Wiring\n{'='*70}")
 
     resolver_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/LinkResolver.kt"
     check_true("LinkResolver.kt exists", resolver_file.is_file())
@@ -254,6 +275,10 @@ def test_source_code_structure():
         "NewPipeLister.handlesStream(url)" in resolver_text
     )
     check_true(
+        "LinkResolver checks !access.hasCookies before using NewPipe",
+        "!access.hasCookies" in resolver_text
+    )
+    check_true(
         "MediaProbe listContents is universal silent fallback",
         "MediaProbe.listContents(" in resolver_text
     )
@@ -265,9 +290,28 @@ def test_source_code_structure():
     check_true("NewPipeLister defines handlesStream", "fun handlesStream(url: String)" in lister_text)
     check_true("NewPipeLister defines handlesCollection", "fun handlesCollection(url: String)" in lister_text)
     check_true(
-        "NewPipeLister defines single metadata resolution",
-        "suspend fun single(url: String): MediaInfo?" in lister_text or "suspend fun single(url: String): LinkEntry?" in lister_text
+        "NewPipeLister defines single MediaInfo format resolution",
+        "suspend fun single(url: String): MediaInfo?" in lister_text
     )
+
+    # Settings Wiring Checks
+    settings_repo_file = REPO_ROOT / "app/src/main/java/com/hazel/android/data/SettingsRepository.kt"
+    check_true("SettingsRepository.kt exists", settings_repo_file.is_file())
+    settings_text = settings_repo_file.read_text(encoding="utf-8")
+    check_true("SettingsRepository defines getListingSource", "fun getListingSource" in settings_text)
+    check_true("SettingsRepository defines setListingSource", "fun setListingSource" in settings_text)
+
+    fetch_settings_file = REPO_ROOT / "app/src/main/java/com/hazel/android/ui/screens/more/FetchSettingsScreen.kt"
+    check_true("FetchSettingsScreen.kt exists", fetch_settings_file.is_file())
+    fetch_text = fetch_settings_file.read_text(encoding="utf-8")
+    check_true("FetchSettingsScreen allows toggling ListingSource", "ListingSource.entries.forEach" in fetch_text)
+
+    # DownloadViewModel pipeline wiring
+    vm_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/DownloadViewModel.kt"
+    check_true("DownloadViewModel.kt exists", vm_file.is_file())
+    vm_text = vm_file.read_text(encoding="utf-8")
+    check_true("DownloadViewModel resolveFormats respects source setting and cookies", "source == ListingSource.NEWPIPE && !access.hasCookies" in vm_text)
+    check_true("DownloadViewModel readOne respects listingSource and cookies", "listingSource == ListingSource.NEWPIPE && !access.hasCookies" in vm_text)
 
     search_provider_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/MediaSearchProvider.kt"
     check_true("MediaSearchProvider.kt exists", search_provider_file.is_file())

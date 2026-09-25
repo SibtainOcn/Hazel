@@ -458,26 +458,37 @@ class DownloadViewModel : ViewModel() {
      */
     private suspend fun readOne(url: String): MediaInfo? {
         val app = HazelApp.instance
+        val access = CookieRepository.accessFor(app, url)
+        val fetchMode = SettingsRepository.getFetchMode(app).first()
+        val forceIpv4 = SettingsRepository.getForceIpv4(app).first()
+        val listingSource = SettingsRepository.getListingSource(app).first()
+
         return expand(
             url,
-            CookieRepository.accessFor(app, url),
-            SettingsRepository.getFetchMode(app).first(),
-            SettingsRepository.getForceIpv4(app).first(),
-            SettingsRepository.getListingSource(app).first(),
+            access,
+            fetchMode,
+            forceIpv4,
+            listingSource,
             "${MediaProbe.PROBE_PROCESS_ID}_direct"
         ).firstOrNull()?.let { first ->
             // A listing entry carries no formats, so it is read again on its own before a
             // quality can be picked from it.
             if (first.hasResolvedFormats) first
-            else runCatching {
-                probeWithRetry(
-                    first.url,
-                    CookieRepository.accessFor(app, first.url),
-                    SettingsRepository.getFetchMode(app).first(),
-                    SettingsRepository.getForceIpv4(app).first(),
-                    "${MediaProbe.PROBE_PROCESS_ID}_direct_formats"
-                )
-            }.getOrNull() ?: first
+            else {
+                val fastResolved = if (listingSource == ListingSource.NEWPIPE && !access.hasCookies && NewPipeLister.handlesStream(first.url)) {
+                    NewPipeLister.single(first.url)?.takeIf { it.hasResolvedFormats }
+                } else null
+
+                fastResolved ?: runCatching {
+                    probeWithRetry(
+                        first.url,
+                        access,
+                        fetchMode,
+                        forceIpv4,
+                        "${MediaProbe.PROBE_PROCESS_ID}_direct_formats"
+                    )
+                }.getOrNull() ?: first
+            }
         }
     }
 
@@ -719,14 +730,16 @@ class DownloadViewModel : ViewModel() {
         formatsInFlight += info.url
         viewModelScope.launch(Dispatchers.IO) {
             val app = HazelApp.instance
+            val source = SettingsRepository.getListingSource(app).first()
+            val access = CookieRepository.accessFor(app, info.url)
             val resolved = runCatching {
                 InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
-                    ?: (if (NewPipeLister.handlesStream(info.url)) {
+                    ?: (if (source == ListingSource.NEWPIPE && !access.hasCookies && NewPipeLister.handlesStream(info.url)) {
                         NewPipeLister.single(info.url)?.takeIf { it.hasResolvedFormats }
                     } else null)
                     ?: probeWithRetry(
                         info.url,
-                        CookieRepository.accessFor(app, info.url),
+                        access,
                         SettingsRepository.getFetchMode(app).first(),
                         SettingsRepository.getForceIpv4(app).first(),
                         "${MediaProbe.PROBE_PROCESS_ID}_formats"
