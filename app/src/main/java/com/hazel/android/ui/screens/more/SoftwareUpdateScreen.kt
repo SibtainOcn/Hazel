@@ -3,6 +3,7 @@ package com.hazel.android.ui.screens.more
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,25 +11,32 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import android.os.Build
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hazel.android.R
+import com.hazel.android.data.SettingsRepository
 import com.hazel.android.update.HazelUpdater
 import com.hazel.android.update.UpdateListGroup
 import com.hazel.android.update.UpdateListItem
@@ -53,6 +61,9 @@ fun SoftwareUpdateScreen(
     val hazelVersion = HazelUpdater.installedVersion()
     val ytdlpVersion = YtDlpUpdater.cachedVersion(context) ?: "Default"
 
+    val hazelUpdateAvailable by SettingsRepository.getHazelUpdateAvailable(context).collectAsState(initial = false)
+    val ytDlpUpdateAvailable by SettingsRepository.getYtDlpUpdateAvailable(context).collectAsState(initial = false)
+
     Scaffold(
         topBar = {
             UpdateTopBar(
@@ -67,45 +78,45 @@ fun SoftwareUpdateScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 8.dp)
+                .padding(horizontal = 12.dp, vertical = 4.dp)
         ) {
-            // Hero distribution overview banner
+            // Hero distribution overview banner - sleek, compact, and optimized
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .background(UpdateTokens.Surface)
-                    .padding(20.dp)
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
                 Column {
                     Text(
                         text = if (isFdroid) "F-Droid Distribution" else "GitHub Release",
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = UpdateTokens.AccentStrong
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "System Components",
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Medium,
                         color = UpdateTokens.OnSurface
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = if (isFdroid) {
                             "F-Droid builds adhere strictly to repository policies. App binaries are managed by F-Droid."
                         } else {
                             "Keep your Hazel application and yt-dlp extractor engine updated with the latest improvements."
                         },
-                        fontSize = 13.5.sp,
+                        fontSize = 13.sp,
                         color = UpdateTokens.OnSurfaceVar,
-                        lineHeight = 19.sp
+                        lineHeight = 18.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
             UpdateSectionLabel(text = "Components", isFirst = true)
 
             UpdateListGroup {
@@ -121,12 +132,22 @@ fun SoftwareUpdateScreen(
                     showDivider = false,
                     onClick = onNavigateToHazelUpdate,
                     trailing = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                            contentDescription = null,
-                            tint = UpdateTokens.OnSurfaceDim,
-                            modifier = Modifier.size(16.dp)
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (hazelUpdateAvailable) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(end = 8.dp)
+                                        .size(8.dp)
+                                        .background(Color(0xFFFF3B30), CircleShape)
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = null,
+                                tint = UpdateTokens.OnSurfaceDim,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 )
 
@@ -138,33 +159,56 @@ fun SoftwareUpdateScreen(
                     showDivider = true,
                     onClick = onNavigateToYtDlpUpdate,
                     trailing = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                            contentDescription = null,
-                            tint = UpdateTokens.OnSurfaceDim,
-                            modifier = Modifier.size(16.dp)
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (ytDlpUpdateAvailable) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(end = 8.dp)
+                                        .size(8.dp)
+                                        .background(Color(0xFFFF3B30), CircleShape)
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = null,
+                                tint = UpdateTokens.OnSurfaceDim,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            UpdateSectionLabel(text = "About distribution")
+            Spacer(modifier = Modifier.height(18.dp))
+            UpdateSectionLabel(text = "Device & architecture")
+
+            val primaryAbi = Build.SUPPORTED_ABIS.firstOrNull() ?: "Universal"
+            val allAbis = Build.SUPPORTED_ABIS.joinToString(", ")
+            val deviceModel = "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}"
+            val osVersion = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})"
 
             UpdateListGroup {
                 UpdateListItem(
-                    primary = "Channel flavor",
-                    secondary = if (isFdroid) "F-Droid Open Source" else "GitHub Direct Releases",
+                    painter = painterResource(R.drawable.ic_software_update),
+                    primary = "Device architecture",
+                    secondary = "$primaryAbi · Supports $allAbis",
                     showDivider = false
                 )
                 UpdateListItem(
-                    primary = "Verified binaries",
-                    secondary = "Cryptographic integrity guaranteed",
+                    icon = Icons.Filled.Smartphone,
+                    primary = "Device & system",
+                    secondary = "$deviceModel · $osVersion",
+                    showDivider = true
+                )
+                UpdateListItem(
+                    icon = Icons.Filled.Info,
+                    primary = "Application target",
+                    secondary = "${if (isFdroid) "F-Droid build" else "GitHub Direct release"} · v$hazelVersion",
                     showDivider = true
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

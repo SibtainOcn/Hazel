@@ -88,10 +88,163 @@ object HazelUpdater {
     }
 
     /**
-     * Queries GitHub releases API and finds the latest release matching the channel.
+     * Checks for updates from the official F-Droid package repository with a fallback
+     * to GitHub release metadata, strictly without triggering executable downloads.
+     */
+    suspend fun checkFdroidRelease(): ReleaseInfo? = withContext(Dispatchers.IO) {
+        // First try official F-Droid package metadata API
+        try {
+            val url = "https://f-droid.org/api/v1/packages/com.hazel.android"
+            val request = Request.Builder()
+                .url(url)
+                .header("Accept", "application/json")
+                .header("User-Agent", "Hazel-App-Updater")
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    val bodyStr = response.body.string()
+                    val json = JSONObject(bodyStr)
+                    val suggested = json.optString("suggestedVersionName", "").trim()
+                    if (suggested.isNotBlank()) {
+                        val packages = json.optJSONArray("packages")
+                        var changelog = "Official F-Droid build release"
+                        var publishedAt = ""
+                        if (packages != null && packages.length() > 0) {
+                            val firstPkg = packages.getJSONObject(0)
+                            publishedAt = firstPkg.optString("added", "")
+                        }
+                        return@withContext ReleaseInfo(
+                            version = suggested.removePrefix("v").removePrefix("V"),
+                            channel = Channel.STABLE,
+                            binarySize = 0L,
+                            downloadUrl = FDROID_PACKAGE_URL,
+                            changelog = changelog,
+                            publishedAt = publishedAt,
+                            assetName = ""
+                        )
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            // Network or parsing failure, try repo fallback
+        }
+
+        // Secondary fallback: query repo latest release tag to detect if a newer release exists
+        try {
+            val url = "https://api.github.com/repos/$REPO_NAME/releases/latest"
+            val request = Request.Builder()
+                .url(url)
+                .header("Accept", "application/vnd.github.v3+json")
+                .header("User-Agent", "Hazel-App-Updater")
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    val bodyStr = response.body.string()
+                    val json = JSONObject(bodyStr)
+                    val tagName = json.optString("tag_name", "").trim()
+                    val version = tagName.removePrefix("v").removePrefix("V")
+                    val changelog = json.optString("body", "").trim()
+                    val publishedAt = json.optString("published_at", "")
+                    if (version.isNotBlank()) {
+                        return@withContext ReleaseInfo(
+                            version = version,
+                            channel = Channel.STABLE,
+                            binarySize = 0L,
+                            downloadUrl = FDROID_PACKAGE_URL,
+                            changelog = changelog,
+                            publishedAt = publishedAt,
+                            assetName = ""
+                        )
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            // Ignore
+        }
+
+        null
+    }
+
+    /**
+     * Finds the latest release object in the JSON array matching the specified channel.
+     */
+    fun findReleaseMatchingChannel(releases: JSONArray, channel: Channel): ReleaseInfo? {
+        for (i in 0 until releases.length()) {
+            val rel = releases.getJSONObject(i)
+            if (rel.optBoolean("draft", false)) continue
+
+            val tagName = rel.optString("tag_name", "").trim()
+            val isPrerelease = rel.optBoolean("prerelease", false)
+            val isBetaTag = tagName.contains("beta", ignoreCase = true)
+            val isNightlyTag = tagName.contains("nightly", ignoreCase = true)
+
+            val matchesChannel = when (channel) {
+                Channel.STABLE -> !isPrerelease && !isBetaTag && !isNightlyTag
+                Channel.BETA -> (isPrerelease || isBetaTag) && !isNightlyTag
+                Channel.NIGHTLY -> isNightlyTag || (channel == Channel.NIGHTLY && isPrerelease)
+            }
+
+            if (!matchesChannel && releases.length() > 1) {
+                continue
+            }
+
+            val version = tagName.removePrefix("v").removePrefix("V")
+            val changelog = rel.optString("body", "").trim()
+            val publishedAt = rel.optString("published_at", "")
+
+            val (assetName, assetUrl, assetSize) = findBestApkAsset(rel)
+            if (assetUrl.isNotBlank()) {
+                return ReleaseInfo(
+                    version = version,
+                    channel = channel,
+                    binarySize = assetSize,
+                    downloadUrl = assetUrl,
+                    changelog = changelog,
+                    publishedAt = publishedAt,
+                    assetName = assetName
+                )
+            }
+        }
+        return null
+    }
+
+    /**
+     * Queries releases API and finds the latest release matching the channel.
+     * In F-Droid builds, queries F-Droid release feed metadata instead of APK downloads.
      */
     suspend fun latestRelease(channel: Channel): ReleaseInfo? = withContext(Dispatchers.IO) {
-        if (isFdroid()) return@withContext null
+        if (isFdroid()) {
+            return@withContext checkFdroidRelease()
+        }
+
+        // Local development/test feed check (e.g. over adb reverse tcp:8998)
+        try {
+            val localTestUrl = "http://127.0.0.1:8998/releases.json"
+            val localReq = Request.Builder()
+                .url(localTestUrl)
+                .header("Accept", "application/json")
+                .header("User-Agent", "Hazel-App-Updater")
+                .build()
+
+            client.newBuilder()
+                .connectTimeout(400, TimeUnit.MILLISECONDS)
+                .readTimeout(800, TimeUnit.MILLISECONDS)
+                .build()
+                .newCall(localReq).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val bodyStr = response.body.string()
+                        if (bodyStr.isNotBlank()) {
+                            val parsed = findReleaseMatchingChannel(JSONArray(bodyStr), channel)
+                            if (parsed != null) return@withContext parsed
+                        }
+                    }
+                }
+        } catch (_: Exception) {
+            // Local dev server not running; fall through to GitHub endpoint
+        }
+
         try {
             val url = "https://api.github.com/repos/$REPO_NAME/releases"
             val request = Request.Builder()
@@ -102,46 +255,9 @@ object HazelUpdater {
 
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) return@withContext null
-                val bodyStr = response.body?.string() ?: return@withContext null
+                val bodyStr = response.body.string()
                 val releases = JSONArray(bodyStr)
-
-                for (i in 0 until releases.length()) {
-                    val rel = releases.getJSONObject(i)
-                    if (rel.optBoolean("draft", false)) continue
-
-                    val tagName = rel.optString("tag_name", "").trim()
-                    val isPrerelease = rel.optBoolean("prerelease", false)
-                    val isBetaTag = tagName.contains("beta", ignoreCase = true)
-                    val isNightlyTag = tagName.contains("nightly", ignoreCase = true)
-
-                    val matchesChannel = when (channel) {
-                        Channel.STABLE -> !isPrerelease && !isBetaTag && !isNightlyTag
-                        Channel.BETA -> (isPrerelease || isBetaTag) && !isNightlyTag
-                        Channel.NIGHTLY -> isNightlyTag || (channel == Channel.NIGHTLY && isPrerelease)
-                    }
-
-                    if (!matchesChannel && releases.length() > 1) {
-                        continue
-                    }
-
-                    val version = tagName.removePrefix("v").removePrefix("V")
-                    val changelog = rel.optString("body", "").trim()
-                    val publishedAt = rel.optString("published_at", "")
-
-                    val (assetName, assetUrl, assetSize) = findBestApkAsset(rel)
-                    if (assetUrl.isNotBlank()) {
-                        return@withContext ReleaseInfo(
-                            version = version,
-                            channel = channel,
-                            binarySize = assetSize,
-                            downloadUrl = assetUrl,
-                            changelog = changelog,
-                            publishedAt = publishedAt,
-                            assetName = assetName
-                        )
-                    }
-                }
-                null
+                findReleaseMatchingChannel(releases, channel)
             }
         } catch (_: Exception) {
             null
@@ -214,7 +330,7 @@ object HazelUpdater {
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IllegalStateException("Download failed with HTTP ${response.code}")
-            val body = response.body ?: throw IllegalStateException("Empty response body")
+            val body = response.body
             val totalBytes = if (info.binarySize > 0) info.binarySize else body.contentLength()
 
             val buffer = ByteArray(8192)
@@ -252,10 +368,35 @@ object HazelUpdater {
         targetFile
     }
 
+    fun canInstallApks(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.packageManager.canRequestPackageInstalls()
+        } else {
+            true
+        }
+    }
+
     /**
      * Prompts the system package installer to install the downloaded APK.
+     * Accurately requests unknown sources permission on API 26+ if not yet granted,
+     * ensuring installations never fail silently across all supported Android SDKs.
      */
     fun installApk(context: Context, apkFile: File) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!context.packageManager.canRequestPackageInstalls()) {
+                val settingsIntent = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                    data = android.net.Uri.parse("package:${context.packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                try {
+                    context.startActivity(settingsIntent)
+                    return
+                } catch (_: Exception) {
+                    // Fallback to direct install intent
+                }
+            }
+        }
+
         val uri = FileProvider.getUriForFile(
             context,
             "${context.packageName}.fileprovider",
@@ -265,6 +406,14 @@ object HazelUpdater {
             setDataAndType(uri, "application/vnd.android.package-archive")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        val resolveList = context.packageManager.queryIntentActivities(
+            intent,
+            android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
+        )
+        for (resolveInfo in resolveList) {
+            val pkg = resolveInfo.activityInfo.packageName
+            context.grantUriPermission(pkg, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         context.startActivity(intent)
     }

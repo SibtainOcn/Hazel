@@ -140,10 +140,12 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             refreshInstalledVersion()
             val info = YtDlpUpdater.latestRelease(_channel.value)
+            val isAvailable = info != null && YtDlpUpdater.isNewer(info.version, _installedVersion.value)
+            SettingsRepository.setYtDlpUpdateAvailable(getApplication(), isAvailable)
             _uiState.value = when {
                 info == null ->
                     UiState.Error("Couldn't reach GitHub. Check your connection.")
-                YtDlpUpdater.isNewer(info.version, _installedVersion.value) ->
+                isAvailable ->
                     UiState.Available(info)
                 else -> UiState.Idle
             }
@@ -165,6 +167,7 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
             try {
                 YtDlpUpdater.install(getApplication(), info.channel)
                 refreshInstalledVersion()
+                SettingsRepository.setYtDlpUpdateAvailable(getApplication(), false)
                 _uiState.value = UiState.Installed(_installedVersion.value ?: info.version)
             } catch (_: Exception) {
                 _uiState.value = UiState.Error("Update failed. Please try again.", info)

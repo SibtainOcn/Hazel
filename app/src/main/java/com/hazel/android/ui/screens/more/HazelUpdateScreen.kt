@@ -120,7 +120,7 @@ fun HazelUpdateScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 8.dp)
+                .padding(horizontal = 12.dp, vertical = 4.dp)
         ) {
             // ── Hero Status Card ──
             HazelStatusCard(
@@ -147,8 +147,8 @@ fun HazelUpdateScreen(
                 }
             )
 
-            // ── Update Channel ──
-            if (uiState !is HazelUpdateViewModel.UiState.FdroidManaged) {
+            // ── Update Channel (GitHub release builds only; F-Droid relies strictly on F-Droid repo releases) ──
+            if (!HazelUpdater.isFdroid()) {
                 UpdateSectionLabel(text = "Update channel", isFirst = true)
                 val channels = listOf("Stable", "Beta", "Nightly")
                 val selectedIdx = when (channel) {
@@ -331,9 +331,9 @@ private fun HazelStatusCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(containerColor)
-            .padding(24.dp)
+            .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         Column {
             Row(
@@ -350,19 +350,13 @@ private fun HazelStatusCard(
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.AccentStrong
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "Version $installedVersion installed",
-                                fontSize = 24.sp,
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.OnSurface,
-                                lineHeight = 30.sp
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Checked recently · Signature verified",
-                                fontSize = 14.sp,
-                                color = UpdateTokens.OnSurfaceVar
+                                lineHeight = 26.sp
                             )
                         }
                         is HazelUpdateViewModel.UiState.Available -> {
@@ -372,18 +366,18 @@ private fun HazelStatusCard(
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.UpdateStrong
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "Version ${state.info.version} is ready",
-                                fontSize = 24.sp,
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.OnSurface,
-                                lineHeight = 30.sp
+                                lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "You have $installedVersion",
-                                fontSize = 14.sp,
+                                fontSize = 13.sp,
                                 color = UpdateTokens.OnSurfaceVar
                             )
                         }
@@ -442,18 +436,18 @@ private fun HazelStatusCard(
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.RunStrong
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Connecting to GitHub…",
-                                fontSize = 24.sp,
+                                text = if (HazelUpdater.isFdroid()) "Connecting to F-Droid…" else "Connecting to GitHub…",
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.OnSurface,
-                                lineHeight = 30.sp
+                                lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Querying repository releases",
-                                fontSize = 14.sp,
+                                text = if (HazelUpdater.isFdroid()) "Querying F-Droid release feed" else "Querying repository releases",
+                                fontSize = 13.sp,
                                 color = UpdateTokens.OnSurfaceVar
                             )
                         }
@@ -464,18 +458,18 @@ private fun HazelStatusCard(
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.AccentStrong
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Managed by F-Droid",
-                                fontSize = 24.sp,
+                                text = "Up to date",
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.OnSurface,
-                                lineHeight = 30.sp
+                                lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Version $installedVersion · Updates delivered via F-Droid",
-                                fontSize = 14.sp,
+                                text = "Version $installedVersion installed",
+                                fontSize = 13.sp,
                                 color = UpdateTokens.OnSurfaceVar
                             )
                         }
@@ -605,7 +599,7 @@ private fun HazelStatusCard(
             }
 
             // ── Actions Row ──
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 when (state) {
                     is HazelUpdateViewModel.UiState.Idle -> {
@@ -627,17 +621,18 @@ private fun HazelStatusCard(
                         }
                     }
                     is HazelUpdateViewModel.UiState.Available -> {
+                        val isFdroid = HazelUpdater.isFdroid()
                         Box(
                             modifier = Modifier
                                 .height(40.dp)
                                 .clip(RoundedCornerShape(20.dp))
                                 .background(UpdateTokens.Update)
-                                .clickable(onClick = onDownload)
+                                .clickable(onClick = if (isFdroid) onOpenFdroid else onDownload)
                                 .padding(horizontal = 20.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Download update",
+                                text = if (isFdroid) "Open in F-Droid" else "Download update",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = UpdateTokens.UpdateOn

@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dedicated Hazel in-app updater (`HazelUpdateScreen` & `HazelUpdater`) with GitHub release parsing, semver comparison (`isNewer`), architecture-aware APK matching (`arm64-v8a`, `armeabi-v7a`, `x86_64`, `universal`), release channel selection (Stable, Beta, Nightly), and download speed/ETA reporting.
 - Rebuilt yt-dlp extractor updater (`YtDlpUpdateScreen`) adhering to the dark design tokens (Emerald `#8FD6B8`, Warm Amber `#FFCB80`, Soft Blue `#A8CDFF`, deep background `#000000`).
 - Product flavors `github` (default, in-app self-updater with `REQUEST_INSTALL_PACKAGES`) and `fdroid` (strict F-Droid policy compliance with no self-updating binaries or package install permissions).
+- Dedicated CPU vector icon (`ic_software_update.xml`) for the Software update row in More settings, with a dynamic red notification dot badge indicating available updates.
+- Home screen top bar theme-adaptive, accent-independent "Update" pill button next to the incognito icon for GitHub builds when an app update is available.
+- F-Droid flavor release check integration querying the official F-Droid package repository metadata, with an "Open in F-Droid" action button.
 - Automated test harness `tools/test_software_update_and_flavors.py` integrated into the master test runner (`tools/test_all.py`).
 - 10-locale translation parity for `more_software_update` and `more_software_update_subtitle`.
 - Transparent share overlay activity (`ShareOverlayActivity`) with quick one-tap confirmation for Hazel Instant and in-place `FormatSheet` selection over host apps without app switching.
@@ -22,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automated test harnesses for share overlay isolation, history recording, and NewPipe latency/fallback validation (`tools/test_share_overlay_isolation.py` and `tools/test_newpipe_latency_and_fallback.py`).
 
 ### Changed
+- Refined Software Update hub and component update screens: removed redundant "Verified binaries" row from distribution overview, removed "Checked recently · Signature/Binary verified" subtitles from hero cards, reduced outer horizontal margins from 20dp to 12dp to utilize available screen width, and made hero cards more compact.
 - Replaced the Ko-fi sponsor option (which was marked "Opening soon") with a live
   Buy Me a Coffee link (`buymeacoffee.com/sibtainocean`).
 - Streamlined the Home screen by removing the redundant batch action row below the search bar while fully preserving per-media card controls (center play/pause/cancel and 3-dot menu).

@@ -418,4 +418,39 @@ object SettingsRepository {
     suspend fun setUpdateVerifySignature(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[UPDATE_VERIFY_SIGNATURE_KEY] = enabled }
     }
+
+    // Dynamic update availability indicators for UI red dot badges
+    private val HAS_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("has_update_available")
+    private val HAZEL_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("hazel_update_available")
+    private val YTDLP_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("ytdlp_update_available")
+
+    fun getHasUpdateAvailable(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[HAS_UPDATE_AVAILABLE_KEY] ?: false }
+    }
+    suspend fun setHasUpdateAvailable(context: Context, available: Boolean) {
+        context.dataStore.edit { prefs -> prefs[HAS_UPDATE_AVAILABLE_KEY] = available }
+    }
+
+    fun getHazelUpdateAvailable(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false }
+    }
+    suspend fun setHazelUpdateAvailable(context: Context, available: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[HAZEL_UPDATE_AVAILABLE_KEY] = available
+            val ytdlpAvail = prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || ytdlpAvail
+        }
+    }
+
+    fun getYtDlpUpdateAvailable(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false }
+    }
+    suspend fun setYtDlpUpdateAvailable(context: Context, available: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[YTDLP_UPDATE_AVAILABLE_KEY] = available
+            val hazelAvail = prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || hazelAvail
+        }
+    }
 }
+

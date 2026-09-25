@@ -58,11 +58,6 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
 
     init {
         viewModelScope.launch {
-            if (HazelUpdater.isFdroid()) {
-                _uiState.value = UiState.FdroidManaged
-                return@launch
-            }
-
             _channel.value = HazelUpdater.Channel.fromLabel(
                 SettingsRepository.getHazelChannel(getApplication()).first()
             )
@@ -118,18 +113,19 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun checkForUpdate() {
-        if (HazelUpdater.isFdroid()) {
-            _uiState.value = UiState.FdroidManaged
-            return
-        }
         if (_uiState.value is UiState.Downloading) return
         _uiState.value = UiState.Checking
 
         viewModelScope.launch {
             val info = HazelUpdater.latestRelease(_channel.value)
+            val isAvailable = info != null && HazelUpdater.isNewer(info.version)
+            SettingsRepository.setHazelUpdateAvailable(getApplication(), isAvailable)
             _uiState.value = when {
-                info == null -> UiState.Error("Couldn't reach GitHub. Check your connection.")
-                HazelUpdater.isNewer(info.version) -> UiState.Available(info)
+                info == null -> UiState.Error(
+                    if (HazelUpdater.isFdroid()) "Couldn't reach F-Droid repository. Check your connection."
+                    else "Couldn't reach GitHub. Check your connection."
+                )
+                isAvailable -> UiState.Available(info)
                 else -> UiState.Idle
             }
         }
@@ -169,6 +165,11 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
 
     fun installUpdate() {
         val ready = _uiState.value as? UiState.ReadyToInstall ?: return
+        if (HazelUpdater.canInstallApks(getApplication())) {
+            viewModelScope.launch {
+                SettingsRepository.setHazelUpdateAvailable(getApplication(), false)
+            }
+        }
         HazelUpdater.installApk(getApplication(), ready.apkFile)
     }
 

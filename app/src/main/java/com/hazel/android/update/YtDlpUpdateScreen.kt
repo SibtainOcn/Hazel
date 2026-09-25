@@ -110,7 +110,7 @@ fun YtDlpUpdateScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 8.dp)
+                .padding(horizontal = 12.dp, vertical = 4.dp)
         ) {
             // ── Hero Status Card ──
             YtDlpStatusCard(
@@ -335,9 +335,9 @@ private fun YtDlpStatusCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(containerColor)
-            .padding(24.dp)
+            .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         Column {
             Row(
@@ -354,19 +354,13 @@ private fun YtDlpStatusCard(
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.AccentStrong
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "Version $installedVersion installed",
-                                fontSize = 24.sp,
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.OnSurface,
-                                lineHeight = 30.sp
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Checked recently · Binary verified",
-                                fontSize = 14.sp,
-                                color = UpdateTokens.OnSurfaceVar
+                                lineHeight = 26.sp
                             )
                         }
                         is UpdateViewModel.UiState.Available -> {
@@ -376,18 +370,18 @@ private fun YtDlpStatusCard(
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.UpdateStrong
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "Version ${state.info.version} is ready",
-                                fontSize = 24.sp,
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.OnSurface,
-                                lineHeight = 30.sp
+                                lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "You have $installedVersion",
-                                fontSize = 14.sp,
+                                fontSize = 13.sp,
                                 color = UpdateTokens.OnSurfaceVar
                             )
                         }
@@ -558,7 +552,7 @@ private fun YtDlpStatusCard(
             }
 
             // Actions row
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 when (state) {
                     is UpdateViewModel.UiState.Idle -> {

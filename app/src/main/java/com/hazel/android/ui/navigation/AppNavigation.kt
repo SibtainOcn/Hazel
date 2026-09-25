@@ -36,6 +36,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -43,6 +48,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hazel.android.R
+import com.hazel.android.update.HazelUpdater
+import com.hazel.android.update.UpdateTokens
 import com.hazel.android.data.SettingsRepository
 import kotlinx.coroutines.launch
 import com.hazel.android.ui.motion.M3Motion
@@ -97,6 +104,7 @@ fun AppNavigation(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
+    val hazelUpdateAvailable by SettingsRepository.getHazelUpdateAvailable(context).collectAsState(initial = false)
 
     val navController = rememberNavController()
 
@@ -111,7 +119,7 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val isSubScreen = currentRoute in listOf(
-        "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "direct_share", "sponsor"
+        "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "direct_share", "sponsor", "software_update", "hazel_update", "ytdlp_update"
     )
 
     val downloadViewModel: com.hazel.android.download.DownloadViewModel =
@@ -144,6 +152,40 @@ fun AppNavigation(
                         }
                     },
                     actions = {
+                        // For GitHub release builds only (not yt-dlp): when Hazel app update is available,
+                        // display a theme-adaptive, accent-independent "Update" pill next to incognito icon
+                        if (!HazelUpdater.isFdroid() && hazelUpdateAvailable) {
+                            val isDark = isSystemInDarkTheme()
+                            val pillBg = if (isDark) UpdateTokens.UpdateContainer else Color(0xFFFFEECC)
+                            val pillFg = if (isDark) UpdateTokens.Update else Color(0xFF8F4D00)
+
+                            Row(
+                                modifier = Modifier
+                                    .padding(end = 6.dp)
+                                    .clip(CircleShape)
+                                    .background(pillBg)
+                                    .clickable {
+                                        navController.navigate("hazel_update")
+                                    }
+                                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Download,
+                                    contentDescription = "Update Available",
+                                    tint = pillFg,
+                                    modifier = Modifier.size(15.dp)
+                                )
+                                Spacer(modifier = Modifier.width(5.dp))
+                                Text(
+                                    text = "Update",
+                                    color = pillFg,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+
                         // Reads as on or off at a glance: lit and on a filled ground while
                         // it is active, plain and muted while it is not. A mode that
                         // silently changes what the app records has to be visible from the

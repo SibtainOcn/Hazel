@@ -7,15 +7,20 @@ import android.os.Build
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -83,6 +88,7 @@ fun MoreScreen(
 ) {
     val context = LocalContext.current
     val listingSource by SettingsRepository.getListingSource(context).collectAsState(initial = ListingSource.DEFAULT)
+    val hasUpdateAvailable by SettingsRepository.getHasUpdateAvailable(context).collectAsState(initial = false)
 
     // Read when the screen appears so the row can show what clearing would free.
     var tempBytes by remember { mutableStateOf(0L) }
@@ -427,7 +433,22 @@ fun MoreScreen(
                 headlineContent = { Text(stringResource(R.string.more_software_update)) },
                 supportingContent = { Text(stringResource(R.string.more_software_update_subtitle)) },
                 leadingContent = {
-                    Icon(Icons.Filled.Update, null, tint = MaterialTheme.colorScheme.primary)
+                    Box(modifier = Modifier.size(24.dp)) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_software_update),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        if (hasUpdateAvailable) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .align(Alignment.TopEnd)
+                                    .background(Color(0xFFFF3B30), CircleShape)
+                            )
+                        }
+                    }
                 },
                 trailingContent = {
                     Icon(

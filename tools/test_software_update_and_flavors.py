@@ -286,6 +286,49 @@ def test_locale_parity():
 
 
 # ===========================================================================
+# 8. Refinements & User Feedback Validation
+# ===========================================================================
+
+def test_refinements_and_user_feedback():
+    print(f"\n{'='*70}\n  TEST 8: Refinements & User Feedback Validation\n{'='*70}")
+
+    # CPU Icon Drawable
+    cpu_icon_file = RES_DIR / "drawable" / "ic_software_update.xml"
+    check_true("ic_software_update.xml exists", cpu_icon_file.exists())
+
+    more_screen = (APP_DIR / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "more" / "MoreScreen.kt").read_text(encoding="utf-8")
+    check_true("MoreScreen uses R.drawable.ic_software_update", "R.drawable.ic_software_update" in more_screen)
+    check_true("MoreScreen renders red dot badge when update available", "0xFFFF3B30" in more_screen and "hasUpdateAvailable" in more_screen)
+
+    # SoftwareUpdateScreen checks
+    software_update_screen = (APP_DIR / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "more" / "SoftwareUpdateScreen.kt").read_text(encoding="utf-8")
+    check_true("SoftwareUpdateScreen does NOT contain 'Verified binaries'", "Verified binaries" not in software_update_screen)
+    check_true("SoftwareUpdateScreen renders Hazel update indicator", "hazelUpdateAvailable" in software_update_screen)
+    check_true("SoftwareUpdateScreen renders yt-dlp update indicator", "ytDlpUpdateAvailable" in software_update_screen)
+    check_true("SoftwareUpdateScreen displays Device & architecture card", "Device & architecture" in software_update_screen)
+    check_true("SoftwareUpdateScreen displays Device architecture", "Device architecture" in software_update_screen)
+
+    # Hero card subtitle removal
+    hazel_screen = (APP_DIR / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "more" / "HazelUpdateScreen.kt").read_text(encoding="utf-8")
+    check_true("HazelUpdateScreen does NOT contain 'Signature verified'", "Signature verified" not in hazel_screen)
+    check_true("HazelUpdateScreen does NOT contain 'Checked recently'", "Checked recently" not in hazel_screen)
+
+    ytdlp_screen = (APP_DIR / "src" / "main" / "java" / "com" / "hazel" / "android" / "update" / "YtDlpUpdateScreen.kt").read_text(encoding="utf-8")
+    check_true("YtDlpUpdateScreen does NOT contain 'Binary verified'", "Binary verified" not in ytdlp_screen)
+    check_true("YtDlpUpdateScreen does NOT contain 'Checked recently'", "Checked recently" not in ytdlp_screen)
+
+    # F-Droid checking, APK installation permissions, & Home bar Update pill
+    updater_kt = (APP_DIR / "src" / "main" / "java" / "com" / "hazel" / "android" / "update" / "HazelUpdater.kt").read_text(encoding="utf-8")
+    check_true("HazelUpdater defines checkFdroidRelease", "suspend fun checkFdroidRelease(" in updater_kt)
+    check_true("HazelUpdater defines canInstallApks", "fun canInstallApks(" in updater_kt)
+    check_true("HazelUpdater verifies canRequestPackageInstalls", "canRequestPackageInstalls()" in updater_kt)
+
+    app_nav = (APP_DIR / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "navigation" / "AppNavigation.kt").read_text(encoding="utf-8")
+    check_true("AppNavigation shows Update pill for GitHub builds only", "!HazelUpdater.isFdroid() && hazelUpdateAvailable" in app_nav)
+    check_true("AppNavigation Update pill navigates to hazel_update", 'navController.navigate("hazel_update")' in app_nav)
+
+
+# ===========================================================================
 # Main
 # ===========================================================================
 
@@ -301,6 +344,7 @@ def main():
     test_semver_and_abi_matching()
     test_navigation_and_hub()
     test_locale_parity()
+    test_refinements_and_user_feedback()
 
     print("\n" + "=" * 70)
     print(f"  TOTAL CHECKS: {PASS_COUNT + FAIL_COUNT}")
