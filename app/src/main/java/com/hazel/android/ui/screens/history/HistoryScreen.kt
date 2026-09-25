@@ -260,15 +260,14 @@ fun HistoryScreen(
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
-                    // Red activity dot beside the chevron when there are active/queued
-                    // downloads and the user is not already looking at the queue view.
+                    // Theme-adaptive unread indicator mark (vertically centered with title and chevron)
                     if (filter != HistoryFilter.DOWNLOADING && (isDownloadingActive || queueList.isNotEmpty())) {
+                        Spacer(modifier = Modifier.width(4.dp))
                         Box(
                             modifier = Modifier
-                                .padding(start = 4.dp)
-                                .size(8.dp)
+                                .size(6.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFEF4444))
+                                .background(MaterialTheme.colorScheme.error)
                         )
                     }
                 }
@@ -307,9 +306,9 @@ fun HistoryScreen(
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Box(
                                             modifier = Modifier
-                                                .size(8.dp)
+                                                .size(6.dp)
                                                 .clip(CircleShape)
-                                                .background(Color(0xFFEF4444))
+                                                .background(MaterialTheme.colorScheme.error)
                                         )
                                     }
                                 }

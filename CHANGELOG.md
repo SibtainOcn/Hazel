@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Aligned pause, resume, and cancel actions across the header controls, thumbnail center button, and 3-dots menu with full support for cancelling waiting queue items without clearing the batch.
 - Modernized home and download media cards with an edge-to-edge 16:9 full-artwork thumbnail design; title and author are now overlaid directly atop the artwork with a dual gradient scrim for high legibility, duration and active download progress chips are anchored to the bottom-left corner, and status tags remain on the bottom-right.
 - Reverted the app launcher icon to a white background with a black bolt foreground.
-- Compacted the bottom navigation bar height for a tighter, more space-efficient layout.
+- Modernized the Downloads screen title with an unread activity indicator mark beside the dropdown chevron and on the "Downloading queue" filter when active downloads or queued items exist.
 
 ### Added
 - Synchronized 16:9 skeleton shimmer loading animation (`ShimmerHost` & `shimmerCard`) with rounded card placeholders and dark gradient scrim during metadata fetching.
@@ -42,7 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Active downloads now appear pinned at the top of the All Downloads list.
 - Diagnostic log modal and one-tap retry for failed downloads.
 - Asynchronous and distinct DataStore flow deserialization on background dispatchers to optimize CPU, I/O, and recomposition.
-- Red activity dot badge on the Downloads bottom navigation tab and the "Downloading queue" dropdown item when active downloads or queued items exist, following standard Android UX for unread/active indicators.
 
 ### Removed
 - Removed single-row compact layout ("Show as list") across all screens (Home, All Downloads, Queue, and Failed), standardizing strictly on the modern 16:9 full-artwork card layout.
@@ -51,6 +50,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed top-right 'X' (dismiss/remove) button from multi-video and playlist cards on the Home screen to streamline card presentation.
 
 ### Fixed
+- Fixed search bar "Clear search results" action to cleanly clear both resolved media cards and the active search URL.
+- Resolved bottom navigation bar clipping on devices with 3-button navigation by restoring dynamic window insets handling in Material 3 NavigationBar.
+- Made unread activity indicator dot theme-adaptive using `MaterialTheme.colorScheme.error` for proper contrast across dark and light themes, and aligned it directly on the horizontal centerline with the screen title and dropdown chevron.
 - Fixed Cookies screen master switch event collision where tapping the switch failed to turn back ON; converted row to single-source toggleable semantics and remembered Flow collections across recompositions.
 - Ensured individual cookie switches operate independently without closing off the global master switch when disabled, allowing flexible per-cookie control while preserving global cookie status.
 - Eliminated latency when holding to delete cookie sets; deletion immediately dismisses confirmation dialogs, cleans up site-specific cookie cache files, and updates repository state without blocking Compose recompositions.
