@@ -581,4 +581,15 @@
     <string name="storage_locations_wifi_only">सिर्फ़ वाई-फ़ाई</string>
     <string name="storage_locations_speed_limit">गति सीमा</string>
 
+    <!-- Share Overlay & Instant Share -->
+    <string name="share_overlay_loading_title">मीडिया लिंक पढ़ा जा रहा है…</string>
+    <string name="share_overlay_loading_subtitle">उपलब्ध वीडियो और ऑडियो विकल्प प्राप्त किए जा रहे हैं</string>
+    <string name="share_overlay_instant_title">Hazel Instant</string>
+    <string name="share_overlay_instant_subtitle">अपनी सहेजी गई त्वरित सेटिंग्स पर डाउनलोड करें</string>
+    <string name="share_overlay_instant_download">अभी डाउनलोड करें</string>
+    <string name="share_overlay_instant_cancel">रद्द करें</string>
+    <string name="share_overlay_download_started">डाउनलोड कतार में जोड़ा गया</string>
+    <string name="share_overlay_invalid_link">साझा की गई सामग्री में कोई मान्य वेब लिंक नहीं मिला</string>
+    <string name="share_overlay_cancel_fetch">रद्द करें</string>
+
 </resources>

@@ -572,4 +572,15 @@
     <string name="storage_locations_wifi_only">Wi-Fi のみ</string>
     <string name="storage_locations_speed_limit">速度制限</string>
 
+    <!-- Share Overlay & Instant Share -->
+    <string name="share_overlay_loading_title">メディアリンクを読み込み中…</string>
+    <string name="share_overlay_loading_subtitle">利用可能な動画と音声のオプションを取得中</string>
+    <string name="share_overlay_instant_title">Hazel Instant</string>
+    <string name="share_overlay_instant_subtitle">保存されたクイック設定でダウンロード</string>
+    <string name="share_overlay_instant_download">今すぐダウンロード</string>
+    <string name="share_overlay_instant_cancel">キャンセル</string>
+    <string name="share_overlay_download_started">ダウンロードをキューに追加しました</string>
+    <string name="share_overlay_invalid_link">共有されたコンテンツに有効なウェブリンクが見つかりません</string>
+    <string name="share_overlay_cancel_fetch">キャンセル</string>
+
 </resources>

@@ -572,4 +572,15 @@
     <string name="storage_locations_wifi_only">Hanya Wi-Fi</string>
     <string name="storage_locations_speed_limit">Batas kecepatan</string>
 
+    <!-- Share Overlay & Instant Share -->
+    <string name="share_overlay_loading_title">Membaca tautan media…</string>
+    <string name="share_overlay_loading_subtitle">Mengambil opsi video dan audio yang tersedia</string>
+    <string name="share_overlay_instant_title">Hazel Instant</string>
+    <string name="share_overlay_instant_subtitle">Unduh dengan pengaturan cepat tersimpan</string>
+    <string name="share_overlay_instant_download">Unduh Sekarang</string>
+    <string name="share_overlay_instant_cancel">Batal</string>
+    <string name="share_overlay_download_started">Unduhan ditambahkan ke antrean</string>
+    <string name="share_overlay_invalid_link">Tidak ada tautan web valid yang ditemukan dalam konten bersama</string>
+    <string name="share_overlay_cancel_fetch">Batal</string>
+
 </resources>

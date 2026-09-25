@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -81,6 +82,8 @@ private val bottomNavItems = listOf(
 fun AppNavigation(
     pendingShares: List<com.hazel.android.MainActivity.SharedLink> = emptyList(),
     pendingFailure: String? = null,
+    pendingRoute: String? = null,
+    onPendingRouteConsumed: () -> Unit = {},
     onPendingFailureConsumed: () -> Unit = {},
     onSharesConsumed: () -> Unit = {},
     isDarkTheme: Boolean,
@@ -94,6 +97,14 @@ fun AppNavigation(
 
     val navController = rememberNavController()
 
+    // Handle deep navigation triggered from shortcuts or share overlay
+    LaunchedEffect(pendingRoute) {
+        pendingRoute?.let { route ->
+            navController.navigate(route)
+            onPendingRouteConsumed()
+        }
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val isSubScreen = currentRoute in listOf(
@@ -101,7 +112,7 @@ fun AppNavigation(
     )
 
     val downloadViewModel: com.hazel.android.download.DownloadViewModel =
-        androidx.lifecycle.viewmodel.compose.viewModel()
+        remember { com.hazel.android.download.DownloadViewModelHolder.get() }
 
     Scaffold(
         topBar = {

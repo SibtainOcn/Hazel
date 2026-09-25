@@ -590,4 +590,15 @@
     <string name="storage_locations_wifi_only">Solo con Wi-Fi</string>
     <string name="storage_locations_speed_limit">Límite de velocidad</string>
 
+    <!-- Share Overlay & Instant Share -->
+    <string name="share_overlay_loading_title">Leyendo enlace multimedia…</string>
+    <string name="share_overlay_loading_subtitle">Obteniendo opciones de vídeo y audio disponibles</string>
+    <string name="share_overlay_instant_title">Hazel Instant</string>
+    <string name="share_overlay_instant_subtitle">Descargar con tus ajustes rápidos guardados</string>
+    <string name="share_overlay_instant_download">Descargar ahora</string>
+    <string name="share_overlay_instant_cancel">Cancelar</string>
+    <string name="share_overlay_download_started">Descarga añadida a la cola</string>
+    <string name="share_overlay_invalid_link">No se encontró ningún enlace web válido en el contenido compartido</string>
+    <string name="share_overlay_cancel_fetch">Cancelar</string>
+
 </resources>

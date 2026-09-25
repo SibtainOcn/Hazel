@@ -599,4 +599,15 @@
     <string name="storage_locations_wifi_only">Только по Wi-Fi</string>
     <string name="storage_locations_speed_limit">Ограничение скорости</string>
 
+    <!-- Share Overlay & Instant Share -->
+    <string name="share_overlay_loading_title">Чтение медиа-ссылки…</string>
+    <string name="share_overlay_loading_subtitle">Получение доступных вариантов видео и аудио</string>
+    <string name="share_overlay_instant_title">Hazel Instant</string>
+    <string name="share_overlay_instant_subtitle">Скачать с сохраненными быстрыми настройками</string>
+    <string name="share_overlay_instant_download">Скачать сейчас</string>
+    <string name="share_overlay_instant_cancel">Отмена</string>
+    <string name="share_overlay_download_started">Загрузка добавлена в очередь</string>
+    <string name="share_overlay_invalid_link">В общем содержимом не найдено допустимой веб-ссылки</string>
+    <string name="share_overlay_cancel_fetch">Отмена</string>
+
 </resources>

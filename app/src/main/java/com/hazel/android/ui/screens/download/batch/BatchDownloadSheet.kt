@@ -272,7 +272,8 @@ fun BatchDownloadSheet(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 380.dp),
+                    .weight(1f, fill = false)
+                    .heightIn(max = 280.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     horizontal = 20.dp
                 ),
@@ -347,10 +348,12 @@ fun BatchDownloadSheet(
             DownloadSheetFooter(
                 label = results.singleOrNull()?.url ?: "${results.size} links",
                 copyText = results.singleOrNull()?.url.orEmpty(),
-                modifier = Modifier.padding(horizontal = 20.dp)
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 8.dp)
             )
 
-            Spacer(modifier = Modifier.navigationBarsPadding())
+            Spacer(modifier = Modifier.navigationBarsPadding().height(16.dp))
         }
     }
 

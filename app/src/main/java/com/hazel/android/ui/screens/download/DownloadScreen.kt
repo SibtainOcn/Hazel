@@ -500,7 +500,9 @@ fun DownloadScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.height(12.dp))
-                            MediaCardShimmer()
+                            ShimmerHost(modifier = Modifier.fillMaxWidth()) {
+                                MediaCardShimmer()
+                            }
                         }
                     }
                 }

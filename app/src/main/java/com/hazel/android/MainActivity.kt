@@ -57,6 +57,14 @@ class MainActivity : ComponentActivity() {
     var pendingFailure by mutableStateOf<String?>(null)
         private set
 
+    /** Direct navigation target requested by shortcuts or share overlay, or null. */
+    var pendingRoute by mutableStateOf<String?>(null)
+        private set
+
+    companion object {
+        const val EXTRA_NAVIGATE_TO = "hazel.navigate.to"
+    }
+
     /**
      * Applies the chosen language before anything is inflated.
      *
@@ -121,6 +129,8 @@ class MainActivity : ComponentActivity() {
                     AppNavigation(
                         pendingShares = pendingShares,
                         pendingFailure = pendingFailure,
+                        pendingRoute = pendingRoute,
+                        onPendingRouteConsumed = { pendingRoute = null },
                         onPendingFailureConsumed = { pendingFailure = null },
                         onSharesConsumed = { pendingShares.clear() },
                         isDarkTheme = isDark,
@@ -172,6 +182,10 @@ class MainActivity : ComponentActivity() {
         intent?.getStringExtra(DownloadNotificationHelper.EXTRA_FAILURE_MESSAGE)
             ?.takeIf { it.isNotBlank() }
             ?.let { pendingFailure = it }
+
+        intent?.getStringExtra(EXTRA_NAVIGATE_TO)
+            ?.takeIf { it.isNotBlank() }
+            ?.let { pendingRoute = it }
     }
 
     /**
