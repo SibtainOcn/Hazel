@@ -53,6 +53,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Modernized the Downloads screen title with an unread activity indicator mark beside the dropdown chevron and on the "Downloading queue" filter when active downloads or queued items exist.
 
 ### Fixed
+- Resolved GitHub API unauthenticated 403 rate limiting (`API rate limit exceeded`) on in-app update checks by implementing dual-layer resilient fetching with automatic fallback to public, CDN-cached GitHub Releases Atom feeds (`releases.atom`) and release redirects (`releases/latest`), making update checks for Hazel and yt-dlp completely immune to 403 errors across all network environments.
+- Fixed F-Droid flavor release check by correctly reading `packages[0].versionName` from the official F-Droid package repository metadata, ensuring F-Droid builds accurately discover updates without falling back to GitHub API rate limits.
+- Fixed release channel error reporting: when switching to channels without published releases (e.g. Beta or Nightly), the updater now gracefully displays "Up to date: No updates available on this channel" instead of incorrectly showing network connection errors or 403 rate limit banners.
+- Resolved top inset spacing gap across all 3 update screens (`SoftwareUpdateScreen`, `HazelUpdateScreen`, `YtDlpUpdateScreen`) by preventing redundant status bar window inset accumulation.
+- Fixed Light/Dark theme adaptiveness for the Software Update hub and component update screens: implemented dynamic high-contrast light theme surface tokens (`UpdateTokens`) while strictly preserving dark theme aesthetics and independent emerald green toggle switch accents.
+- Defaulted "Install on Wi-Fi only" to off (`false`) across settings repository and update view models.
+- Added comprehensive unit and integration test suite (`UpdaterTest.kt`) covering semver comparison, architecture APK resolution (`arm64-v8a`, `armeabi-v7a`, `x86_64`, `x86`, `universal`), Atom feed parsing, channel filtering, F-Droid metadata parsing, and live rate-limit resilience.
 - Fixed in-app updater download cancellation: aborts active network calls immediately, purges partial files, and gracefully resets to the available state without showing coroutine cancellation error banners.
 - Added permission confirmation dialog prior to opening unknown app sources settings, with real-time polling and lifecycle resume detection to automatically launch the installer once permission is granted.
 - Added automatic installation prompt upon download completion so users are not required to manually tap install.

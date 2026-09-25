@@ -71,6 +71,7 @@ fun SoftwareUpdateScreen(
                 onBack = onBack
             )
         },
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         containerColor = UpdateTokens.Bg
     ) { innerPadding ->
         Column(
@@ -78,7 +79,7 @@ fun SoftwareUpdateScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .padding(horizontal = 12.dp)
         ) {
             // Hero distribution overview banner - sleek, compact, and optimized
             Box(

@@ -225,6 +225,7 @@ fun HazelUpdateScreen(
                 }
             )
         },
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         containerColor = UpdateTokens.Bg
     ) { innerPadding ->
         Column(
@@ -232,12 +233,13 @@ fun HazelUpdateScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .padding(horizontal = 12.dp)
         ) {
             // ── Hero Status Card ──
             HazelStatusCard(
                 state = uiState,
                 installedVersion = installedVersion,
+                channel = channel,
                 onCheckNow = { viewModel.checkForUpdate() },
                 onDownload = { viewModel.startDownload() },
                 onCancel = { viewModel.cancelDownload() },
@@ -425,6 +427,7 @@ fun HazelUpdateScreen(
 private fun HazelStatusCard(
     state: HazelUpdateViewModel.UiState,
     installedVersion: String,
+    channel: HazelUpdater.Channel,
     onCheckNow: () -> Unit,
     onDownload: () -> Unit,
     onCancel: () -> Unit,
@@ -469,6 +472,12 @@ private fun HazelStatusCard(
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.OnSurface,
                                 lineHeight = 26.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "No updates available on ${channel.label} channel",
+                                fontSize = 13.sp,
+                                color = UpdateTokens.OnSurfaceVar
                             )
                         }
                         is HazelUpdateViewModel.UiState.Available -> {
@@ -616,9 +625,9 @@ private fun HazelStatusCard(
                         .clip(RoundedCornerShape(16.dp))
                         .background(
                             when (state) {
-                                is HazelUpdateViewModel.UiState.Available -> Color(0xFFFFCB80).copy(alpha = 0.14f)
-                                is HazelUpdateViewModel.UiState.Downloading -> Color(0xFFA8CDFF).copy(alpha = 0.14f)
-                                else -> Color(0xFF8FD6B8).copy(alpha = 0.14f)
+                                is HazelUpdateViewModel.UiState.Available -> Color(0xFFFFCB80).copy(alpha = if (UpdateTokens.isDark) 0.14f else 0.35f)
+                                is HazelUpdateViewModel.UiState.Downloading -> Color(0xFFA8CDFF).copy(alpha = if (UpdateTokens.isDark) 0.14f else 0.35f)
+                                else -> Color(0xFF8FD6B8).copy(alpha = if (UpdateTokens.isDark) 0.14f else 0.35f)
                             }
                         ),
                     contentAlignment = Alignment.Center
@@ -665,7 +674,7 @@ private fun HazelStatusCard(
                         .height(5.dp)
                         .clip(RoundedCornerShape(3.dp)),
                     color = UpdateTokens.RunStrong,
-                    trackColor = Color.White.copy(alpha = 0.10f)
+                    trackColor = if (UpdateTokens.isDark) Color.White.copy(alpha = 0.10f) else Color.Black.copy(alpha = 0.08f)
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))

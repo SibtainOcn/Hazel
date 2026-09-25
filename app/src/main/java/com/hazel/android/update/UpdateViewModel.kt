@@ -57,7 +57,7 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
     private val _autoDownload = MutableStateFlow(true)
     val autoDownload: StateFlow<Boolean> = _autoDownload.asStateFlow()
 
-    private val _wifiOnly = MutableStateFlow(true)
+    private val _wifiOnly = MutableStateFlow(false)
     val wifiOnly: StateFlow<Boolean> = _wifiOnly.asStateFlow()
 
     private val _notifyAvailable = MutableStateFlow(true)
@@ -139,15 +139,20 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
         _uiState.value = UiState.Checking
         viewModelScope.launch {
             refreshInstalledVersion()
-            val info = YtDlpUpdater.latestRelease(_channel.value)
-            val isAvailable = info != null && YtDlpUpdater.isNewer(info.version, _installedVersion.value)
-            SettingsRepository.setYtDlpUpdateAvailable(getApplication(), isAvailable)
-            _uiState.value = when {
-                info == null ->
-                    UiState.Error("Couldn't reach GitHub. Check your connection.")
-                isAvailable ->
-                    UiState.Available(info)
-                else -> UiState.Idle
+            when (val result = YtDlpUpdater.latestReleaseResult(_channel.value)) {
+                is YtDlpUpdater.CheckResult.Success -> {
+                    val info = result.info
+                    val isAvailable = YtDlpUpdater.isNewer(info.version, _installedVersion.value)
+                    SettingsRepository.setYtDlpUpdateAvailable(getApplication(), isAvailable)
+                    _uiState.value = if (isAvailable) UiState.Available(info) else UiState.Idle
+                }
+                is YtDlpUpdater.CheckResult.NoReleaseFound -> {
+                    SettingsRepository.setYtDlpUpdateAvailable(getApplication(), false)
+                    _uiState.value = UiState.Idle
+                }
+                is YtDlpUpdater.CheckResult.NetworkError -> {
+                    _uiState.value = UiState.Error(result.message)
+                }
             }
         }
     }

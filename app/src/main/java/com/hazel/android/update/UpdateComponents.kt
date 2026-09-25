@@ -27,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -37,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -44,40 +46,68 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * These tokens are strictly independent of user-configured app accent colors.
+ * These tokens adapt to light and dark theme while remaining strictly
+ * independent of user-configured app accent colors (toggle buttons & update hero states).
  */
 object UpdateTokens {
-    val Bg = Color(0xFF0A0A0A)
-    val BgDeep = Color(0xFF000000)
-    val Surface = Color(0xFF141414)
-    val Surface1 = Color(0xFF1A1A1A)
-    val Surface2 = Color(0xFF202020)
-    val Surface3 = Color(0xFF262626)
-    val Outline = Color(0xFF2C2C2C)
-    val OutlineSoft = Color(0xFF1F1F1F)
-    val OnSurface = Color(0xFFF2F2F0)
-    val OnSurfaceVar = Color(0xFFB8B8B4)
-    val OnSurfaceDim = Color(0xFF7A7A77)
+    val isDark: Boolean
+        @Composable get() = MaterialTheme.colorScheme.surface.luminance() < 0.5f
 
-    // Up-to-date hero state (Emerald Green)
-    val Accent = Color(0xFF8FD6B8)
-    val AccentStrong = Color(0xFFA9E6CC)
-    val AccentOn = Color(0xFF003824)
-    val AccentContainer = Color(0xFF0E3327)
+    val Bg: Color
+        @Composable get() = if (isDark) Color(0xFF0A0A0A) else Color(0xFFF7F5F1)
+    val BgDeep: Color
+        @Composable get() = if (isDark) Color(0xFF000000) else Color(0xFFEDE9E3)
+    val Surface: Color
+        @Composable get() = if (isDark) Color(0xFF141414) else Color(0xFFFFFFFF)
+    val Surface1: Color
+        @Composable get() = if (isDark) Color(0xFF1A1A1A) else Color(0xFFF5F2EE)
+    val Surface2: Color
+        @Composable get() = if (isDark) Color(0xFF202020) else Color(0xFFEAE6E0)
+    val Surface3: Color
+        @Composable get() = if (isDark) Color(0xFF262626) else Color(0xFFE0DDD7)
+    val Outline: Color
+        @Composable get() = if (isDark) Color(0xFF2C2C2C) else Color(0xFFDEDAD2)
+    val OutlineSoft: Color
+        @Composable get() = if (isDark) Color(0xFF1F1F1F) else Color(0xFFECE8E1)
+    val OnSurface: Color
+        @Composable get() = if (isDark) Color(0xFFF2F2F0) else Color(0xFF1F1D1A)
+    val OnSurfaceVar: Color
+        @Composable get() = if (isDark) Color(0xFFB8B8B4) else Color(0xFF5E5A53)
+    val OnSurfaceDim: Color
+        @Composable get() = if (isDark) Color(0xFF7A7A77) else Color(0xFF8D8880)
+
+    // Up-to-date hero state & independent emerald green toggle buttons
+    val Accent: Color
+        @Composable get() = if (isDark) Color(0xFF8FD6B8) else Color(0xFF1B6B4A)
+    val AccentStrong: Color
+        @Composable get() = if (isDark) Color(0xFFA9E6CC) else Color(0xFF106841)
+    val AccentOn: Color
+        @Composable get() = if (isDark) Color(0xFF003824) else Color(0xFFFFFFFF)
+    val AccentContainer: Color
+        @Composable get() = if (isDark) Color(0xFF0E3327) else Color(0xFFE2F4EC)
 
     // Update available hero state (Warm Amber / Gold)
-    val Update = Color(0xFFFFCB80)
-    val UpdateStrong = Color(0xFFFFDCA6)
-    val UpdateOn = Color(0xFF402D00)
-    val UpdateContainer = Color(0xFF3A2C0C)
+    val Update: Color
+        @Composable get() = if (isDark) Color(0xFFFFCB80) else Color(0xFFC77700)
+    val UpdateStrong: Color
+        @Composable get() = if (isDark) Color(0xFFFFDCA6) else Color(0xFF8F4D00)
+    val UpdateOn: Color
+        @Composable get() = if (isDark) Color(0xFF402D00) else Color(0xFFFFFFFF)
+    val UpdateContainer: Color
+        @Composable get() = if (isDark) Color(0xFF3A2C0C) else Color(0xFFFFF0D6)
 
     // Downloading / Installing hero state (Soft Blue)
-    val Run = Color(0xFFA8CDFF)
-    val RunStrong = Color(0xFFA8CDFF)
-    val RunOn = Color(0xFF00315F)
-    val RunContainer = Color(0xFF0C2847)
+    val Run: Color
+        @Composable get() = if (isDark) Color(0xFFA8CDFF) else Color(0xFF005FB8)
+    val RunStrong: Color
+        @Composable get() = if (isDark) Color(0xFFA8CDFF) else Color(0xFF005FB8)
+    val RunOn: Color
+        @Composable get() = if (isDark) Color(0xFF00315F) else Color(0xFFFFFFFF)
+    val RunContainer: Color
+        @Composable get() = if (isDark) Color(0xFF0C2847) else Color(0xFFE1F0FF)
 
-    val Danger = Color(0xFFFFB4A9)
+    val Danger: Color
+        @Composable get() = if (isDark) Color(0xFFFFB4A9) else Color(0xFFBA1A1A)
 }
 
 typealias UpdaterTokens = UpdateTokens
@@ -108,6 +138,7 @@ fun UpdateTopBar(
             }
         },
         actions = { actions() },
+        windowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = UpdateTokens.Bg
         )

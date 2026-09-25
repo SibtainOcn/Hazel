@@ -60,6 +60,12 @@ object HazelUpdater {
         val assetName: String
     )
 
+    sealed interface CheckResult {
+        data class Success(val info: ReleaseInfo) : CheckResult
+        data object NoReleaseFound : CheckResult
+        data class NetworkError(val message: String) : CheckResult
+    }
+
     private val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
@@ -102,6 +108,118 @@ object HazelUpdater {
     }
 
     /**
+     * Resolves the optimal APK filename and direct download URL for the target device architecture.
+     */
+    fun resolveBestApkForDevice(
+        version: String,
+        channel: Channel,
+        supportedAbis: List<String> = try { Build.SUPPORTED_ABIS?.toList() ?: emptyList() } catch (_: Throwable) { emptyList() }
+    ): Pair<String, String> {
+        val channelSuffix = channel.name.lowercase()
+        val abiAliases = mapOf(
+            "arm64-v8a" to listOf("arm64-v8a", "arm64", "v8a"),
+            "armeabi-v7a" to listOf("armeabi-v7a", "armv7", "v7a"),
+            "x86_64" to listOf("x86_64", "x64"),
+            "x86" to listOf("x86")
+        )
+
+        var selectedAbi: String? = null
+        for (abi in supportedAbis) {
+            val matched = abiAliases.entries.firstOrNull { (_, aliases) ->
+                aliases.any { it.equals(abi, ignoreCase = true) }
+            }
+            if (matched != null) {
+                selectedAbi = matched.key
+                break
+            }
+        }
+
+        val targetAbi = selectedAbi ?: "universal"
+        val assetName = "Hazel-v${version}-${targetAbi}-${channelSuffix}.apk"
+        val downloadUrl = "https://github.com/$REPO_NAME/releases/download/v${version}/$assetName"
+        return Pair(assetName, downloadUrl)
+    }
+
+    /**
+     * Parses the public GitHub releases Atom feed, completely immune to GitHub API 403 rate limits.
+     */
+    fun parseReleasesAtom(
+        xml: String,
+        channel: Channel,
+        supportedAbis: List<String> = try { Build.SUPPORTED_ABIS?.toList() ?: emptyList() } catch (_: Throwable) { emptyList() }
+    ): ReleaseInfo? {
+        val entryRegex = Regex("<entry[\\s\\S]*?</entry>", RegexOption.MULTILINE)
+        val entries = entryRegex.findAll(xml)
+
+        for (match in entries) {
+            val entryStr = match.value
+
+            val tagFromLink = Regex("""href=["'][^"']*/releases/tag/([^"']+)["']""").find(entryStr)?.groupValues?.get(1)
+            val tagFromId = Regex("""<id>[^<]*/([^/<]+)</id>""").find(entryStr)?.groupValues?.get(1)
+            val rawTag = tagFromLink ?: tagFromId ?: continue
+            val tag = rawTag.trim()
+
+            val title = Regex("""<title[^>]*>([\s\S]*?)</title>""").find(entryStr)?.groupValues?.get(1)?.trim() ?: ""
+            val updated = Regex("""<updated[^>]*>([\s\S]*?)</updated>""").find(entryStr)?.groupValues?.get(1)?.trim() ?: ""
+            val content = Regex("""<content[^>]*>([\s\S]*?)</content>""").find(entryStr)?.groupValues?.get(1)?.trim() ?: ""
+
+            val isBetaTag = tag.contains("beta", ignoreCase = true) || title.contains("beta", ignoreCase = true)
+            val isNightlyTag = tag.contains("nightly", ignoreCase = true) || title.contains("nightly", ignoreCase = true)
+
+            val matchesChannel = when (channel) {
+                Channel.STABLE -> !isBetaTag && !isNightlyTag
+                Channel.BETA -> isBetaTag && !isNightlyTag
+                Channel.NIGHTLY -> isNightlyTag
+            }
+
+            if (!matchesChannel) continue
+
+            val version = tag.removePrefix("v").removePrefix("V")
+            val (assetName, assetUrl) = resolveBestApkForDevice(version, channel, supportedAbis)
+
+            val changelog = content
+                .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
+                .replace(Regex("<li[^>]*>", RegexOption.IGNORE_CASE), "• ")
+                .replace(Regex("</li>", RegexOption.IGNORE_CASE), "\n")
+                .replace(Regex("<[^>]+>"), "")
+                .replace("&quot;", "\"")
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .trim()
+
+            return ReleaseInfo(
+                version = version,
+                channel = channel,
+                binarySize = 0L,
+                downloadUrl = assetUrl,
+                changelog = if (changelog.isNotBlank()) changelog else title,
+                publishedAt = updated,
+                assetName = assetName
+            )
+        }
+        return null
+    }
+
+    suspend fun queryReleasesAtom(channel: Channel): ReleaseInfo? = withContext(Dispatchers.IO) {
+        try {
+            val url = "https://github.com/$REPO_NAME/releases.atom"
+            val request = Request.Builder()
+                .url(url)
+                .header("User-Agent", "Mozilla/5.0")
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@withContext null
+                val xml = response.body.string()
+                parseReleasesAtom(xml, channel)
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /**
      * Checks for updates from the official F-Droid package repository with a fallback
      * to GitHub release metadata, strictly without triggering executable downloads.
      */
@@ -119,21 +237,21 @@ object HazelUpdater {
                 if (response.isSuccessful) {
                     val bodyStr = response.body.string()
                     val json = JSONObject(bodyStr)
-                    val suggested = json.optString("suggestedVersionName", "").trim()
+                    var suggested = json.optString("suggestedVersionName", "").trim()
+                    val packages = json.optJSONArray("packages")
+                    var publishedAt = ""
+                    if (suggested.isBlank() && packages != null && packages.length() > 0) {
+                        val firstPkg = packages.getJSONObject(0)
+                        suggested = firstPkg.optString("versionName", "").trim()
+                        publishedAt = firstPkg.optString("added", "")
+                    }
                     if (suggested.isNotBlank()) {
-                        val packages = json.optJSONArray("packages")
-                        var changelog = "Official F-Droid build release"
-                        var publishedAt = ""
-                        if (packages != null && packages.length() > 0) {
-                            val firstPkg = packages.getJSONObject(0)
-                            publishedAt = firstPkg.optString("added", "")
-                        }
                         return@withContext ReleaseInfo(
                             version = suggested.removePrefix("v").removePrefix("V"),
                             channel = Channel.STABLE,
                             binarySize = 0L,
                             downloadUrl = FDROID_PACKAGE_URL,
-                            changelog = changelog,
+                            changelog = "Official F-Droid repository release",
                             publishedAt = publishedAt,
                             assetName = ""
                         )
@@ -144,35 +262,15 @@ object HazelUpdater {
             // Network or parsing failure, try repo fallback
         }
 
-        // Secondary fallback: query repo latest release tag to detect if a newer release exists
+        // Secondary fallback: query repo latest release tag via Atom feed (never hits 403)
         try {
-            val url = "https://api.github.com/repos/$REPO_NAME/releases/latest"
-            val request = Request.Builder()
-                .url(url)
-                .header("Accept", "application/vnd.github.v3+json")
-                .header("User-Agent", "Hazel-App-Updater")
-                .build()
-
-            client.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    val bodyStr = response.body.string()
-                    val json = JSONObject(bodyStr)
-                    val tagName = json.optString("tag_name", "").trim()
-                    val version = tagName.removePrefix("v").removePrefix("V")
-                    val changelog = json.optString("body", "").trim()
-                    val publishedAt = json.optString("published_at", "")
-                    if (version.isNotBlank()) {
-                        return@withContext ReleaseInfo(
-                            version = version,
-                            channel = Channel.STABLE,
-                            binarySize = 0L,
-                            downloadUrl = FDROID_PACKAGE_URL,
-                            changelog = changelog,
-                            publishedAt = publishedAt,
-                            assetName = ""
-                        )
-                    }
-                }
+            val atomRelease = queryReleasesAtom(Channel.STABLE)
+            if (atomRelease != null) {
+                return@withContext atomRelease.copy(
+                    downloadUrl = FDROID_PACKAGE_URL,
+                    assetName = "",
+                    binarySize = 0L
+                )
             }
         } catch (_: Exception) {
             // Ignore
@@ -184,7 +282,11 @@ object HazelUpdater {
     /**
      * Finds the latest release object in the JSON array matching the specified channel.
      */
-    fun findReleaseMatchingChannel(releases: JSONArray, channel: Channel): ReleaseInfo? {
+    fun findReleaseMatchingChannel(
+        releases: JSONArray,
+        channel: Channel,
+        supportedAbis: List<String> = try { Build.SUPPORTED_ABIS?.toList() ?: emptyList() } catch (_: Throwable) { emptyList() }
+    ): ReleaseInfo? {
         for (i in 0 until releases.length()) {
             val rel = releases.getJSONObject(i)
             if (rel.optBoolean("draft", false)) continue
@@ -197,10 +299,10 @@ object HazelUpdater {
             val matchesChannel = when (channel) {
                 Channel.STABLE -> !isPrerelease && !isBetaTag && !isNightlyTag
                 Channel.BETA -> (isPrerelease || isBetaTag) && !isNightlyTag
-                Channel.NIGHTLY -> isNightlyTag || (channel == Channel.NIGHTLY && isPrerelease)
+                Channel.NIGHTLY -> isNightlyTag
             }
 
-            if (!matchesChannel && releases.length() > 1) {
+            if (!matchesChannel) {
                 continue
             }
 
@@ -208,7 +310,7 @@ object HazelUpdater {
             val changelog = rel.optString("body", "").trim()
             val publishedAt = rel.optString("published_at", "")
 
-            val (assetName, assetUrl, assetSize) = findBestApkAsset(rel)
+            val (assetName, assetUrl, assetSize) = findBestApkAsset(rel, supportedAbis)
             if (assetUrl.isNotBlank()) {
                 return ReleaseInfo(
                     version = version,
@@ -226,13 +328,18 @@ object HazelUpdater {
 
     /**
      * Queries releases API and finds the latest release matching the channel.
-     * In F-Droid builds, queries F-Droid release feed metadata instead of APK downloads.
+     * Uses resilient Atom feed fallback so it is immune to GitHub API 403 rate limits.
      */
-    suspend fun latestRelease(channel: Channel): ReleaseInfo? = withContext(Dispatchers.IO) {
+    suspend fun latestReleaseResult(channel: Channel): CheckResult = withContext(Dispatchers.IO) {
         if (isFdroid()) {
-            return@withContext checkFdroidRelease()
+            if (channel != Channel.STABLE) {
+                return@withContext CheckResult.NoReleaseFound
+            }
+            val rel = checkFdroidRelease()
+            return@withContext if (rel != null) CheckResult.Success(rel) else CheckResult.NoReleaseFound
         }
 
+        // 1. Try GitHub Releases API first
         try {
             val url = "https://api.github.com/repos/$REPO_NAME/releases"
             val request = Request.Builder()
@@ -242,22 +349,56 @@ object HazelUpdater {
                 .build()
 
             client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) return@withContext null
-                val bodyStr = response.body.string()
-                val releases = JSONArray(bodyStr)
-                findReleaseMatchingChannel(releases, channel)
+                if (response.isSuccessful) {
+                    val bodyStr = response.body.string()
+                    val releases = JSONArray(bodyStr)
+                    val release = findReleaseMatchingChannel(releases, channel)
+                    if (release != null) return@withContext CheckResult.Success(release)
+                    return@withContext CheckResult.NoReleaseFound
+                }
             }
         } catch (_: Exception) {
-            null
+            // Fall back to Atom feed
         }
+
+        // 2. Resilient fallback: GitHub Releases Atom feed (zero API rate limits, 403-proof)
+        try {
+            val atomRelease = queryReleasesAtom(channel)
+            if (atomRelease != null) {
+                return@withContext CheckResult.Success(atomRelease)
+            }
+
+            // Verify if Atom feed is reachable
+            val feedCheck = Request.Builder()
+                .url("https://github.com/$REPO_NAME/releases.atom")
+                .header("User-Agent", "Mozilla/5.0")
+                .build()
+            val feedReachable = try {
+                client.newCall(feedCheck).execute().use { it.isSuccessful }
+            } catch (_: Exception) {
+                false
+            }
+            if (feedReachable) {
+                return@withContext CheckResult.NoReleaseFound
+            }
+        } catch (_: Exception) {
+            // Network failure
+        }
+
+        CheckResult.NetworkError("Couldn't reach GitHub. Check your connection.")
     }
+
+    suspend fun latestRelease(channel: Channel): ReleaseInfo? =
+        (latestReleaseResult(channel) as? CheckResult.Success)?.info
 
     /**
      * Identifies the optimal APK asset for the current device architecture.
      */
-    private fun findBestApkAsset(releaseJson: JSONObject): Triple<String, String, Long> {
+    fun findBestApkAsset(
+        releaseJson: JSONObject,
+        supportedAbis: List<String> = try { Build.SUPPORTED_ABIS?.toList() ?: emptyList() } catch (_: Throwable) { emptyList() }
+    ): Triple<String, String, Long> {
         val assets = releaseJson.optJSONArray("assets") ?: return Triple("", "", 0L)
-        val supportedAbis = Build.SUPPORTED_ABIS.toList()
         val abiAliases = mapOf(
             "arm64-v8a" to listOf("arm64-v8a", "arm64", "v8a"),
             "armeabi-v7a" to listOf("armeabi-v7a", "armv7", "v7a"),

@@ -385,7 +385,7 @@ object SettingsRepository {
     }
 
     fun getUpdateWifiOnly(context: Context): Flow<Boolean> {
-        return context.dataStore.data.map { prefs -> prefs[UPDATE_WIFI_ONLY_KEY] ?: true }
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_WIFI_ONLY_KEY] ?: false }
     }
     suspend fun setUpdateWifiOnly(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[UPDATE_WIFI_ONLY_KEY] = enabled }

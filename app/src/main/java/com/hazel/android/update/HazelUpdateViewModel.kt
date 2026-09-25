@@ -46,7 +46,7 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
     private val _autoDownload = MutableStateFlow(true)
     val autoDownload: StateFlow<Boolean> = _autoDownload.asStateFlow()
 
-    private val _wifiOnly = MutableStateFlow(true)
+    private val _wifiOnly = MutableStateFlow(false)
     val wifiOnly: StateFlow<Boolean> = _wifiOnly.asStateFlow()
 
     private val _notifyAvailable = MutableStateFlow(true)
@@ -124,23 +124,32 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
         _uiState.value = UiState.Checking
 
         viewModelScope.launch {
-            val info = HazelUpdater.latestRelease(_channel.value)
-            val isAvailable = info != null && HazelUpdater.isNewer(info.version)
-            SettingsRepository.setHazelUpdateAvailable(getApplication(), isAvailable)
-            _uiState.value = when {
-                info == null -> UiState.Error(
-                    if (HazelUpdater.isFdroid()) "Couldn't reach F-Droid repository. Check your connection."
-                    else "Couldn't reach GitHub. Check your connection."
-                )
-                isAvailable -> {
-                    val cachedApk = HazelUpdater.getCachedApk(getApplication(), info)
-                    if (cachedApk != null) {
-                        UiState.ReadyToInstall(info, cachedApk)
+            when (val result = HazelUpdater.latestReleaseResult(_channel.value)) {
+                is HazelUpdater.CheckResult.Success -> {
+                    val info = result.info
+                    val isAvailable = HazelUpdater.isNewer(info.version)
+                    SettingsRepository.setHazelUpdateAvailable(getApplication(), isAvailable)
+                    _uiState.value = if (isAvailable) {
+                        val cachedApk = HazelUpdater.getCachedApk(getApplication(), info)
+                        if (cachedApk != null) {
+                            UiState.ReadyToInstall(info, cachedApk)
+                        } else {
+                            UiState.Available(info)
+                        }
                     } else {
-                        UiState.Available(info)
+                        UiState.Idle
                     }
                 }
-                else -> UiState.Idle
+                is HazelUpdater.CheckResult.NoReleaseFound -> {
+                    SettingsRepository.setHazelUpdateAvailable(getApplication(), false)
+                    _uiState.value = UiState.Idle
+                }
+                is HazelUpdater.CheckResult.NetworkError -> {
+                    _uiState.value = UiState.Error(
+                        if (HazelUpdater.isFdroid()) "Couldn't reach F-Droid repository. Check your connection."
+                        else result.message
+                    )
+                }
             }
         }
     }
