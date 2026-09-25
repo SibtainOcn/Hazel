@@ -292,7 +292,6 @@ fun DownloadScreen(
     // sheet and the repeat warning, both of which are questions, and the point of that
     // target is that nothing is asked.
     var directPending by remember { mutableStateOf(false) }
-    var showCancelConfirmDialog by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
 
     // A single link goes straight to its sheet. A set of links does not, because the list
@@ -424,117 +423,21 @@ fun DownloadScreen(
                     cameFromShare = false
                     searchOpen = true
                 },
-                onClearResults = downloadViewModel::clearResults,
+                onClearResults = { showClearConfirmDialog = true },
                 onClearHistory = { showClearHistoryConfirm = true },
+                isCompact = compact,
+                onToggleLayout = {
+                    scope.launch {
+                        SettingsRepository.setResultsCompact(context, !compact)
+                    }
+                },
                 menuOpen = homeMenuOpen,
                 onMenuOpen = { homeMenuOpen = true },
                 onMenuDismiss = { homeMenuOpen = false },
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
 
-            // Kept out of the list with the field above it. It says how much the list
-            // holds and switches how it is drawn, and both of those are worth reaching
-            // without scrolling back to the top of a hundred links first.
-            //
-            // Shown from the first link. It was held back until there were two, on the
-            // grounds that a single card is not a list, but that made the layout switch a
-            // control which comes and goes, so nobody learns it is there and a single card
-            // cannot be read as a line. The count says "1 link" for one of them.
-            if (state.results.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        pluralStringResource(
-                            R.plurals.download_links,
-                            state.results.size,
-                            state.results.size
-                        ),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    val isBatchActive = state.isDownloading ||
-                            state.batch.any { it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED || it.state == BatchState.QUEUED }
-
-                    if (isBatchActive) {
-                        val isMulti = state.isMultiple || state.batch.size > 1 || pendingResults.size > 1
-                        Text(
-                            text = stringResource(
-                                if (isMulti) {
-                                    if (state.isDownloading) R.string.download_pause_all
-                                    else R.string.download_resume_all
-                                } else {
-                                    if (state.isDownloading) R.string.download_pause
-                                    else R.string.download_resume
-                                }
-                            ),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(18.dp))
-                                .clickable {
-                                    if (state.isDownloading) downloadViewModel.pauseDownload()
-                                    else downloadViewModel.resumeDownload()
-                                }
-                                .padding(horizontal = 10.dp, vertical = 8.dp)
-                        )
-
-                        Text(
-                            text = stringResource(R.string.download_cancel),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(18.dp))
-                                .clickable {
-                                    showCancelConfirmDialog = true
-                                }
-                                .padding(horizontal = 10.dp, vertical = 8.dp)
-                        )
-                    }
-
-                    // The list is kept for as long as the app runs, so there has to be a
-                    // way of putting it down. Plain text rather than another icon: it
-                    // throws away work, and that is worth spelling out.
-                    Text(
-                        stringResource(R.string.download_clear),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (!isBatchActive) MaterialTheme.colorScheme.onSurfaceVariant
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(18.dp))
-                            .clickable(enabled = !isBatchActive) {
-                                showClearConfirmDialog = true
-                            }
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                    )
-
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                SettingsRepository.setResultsCompact(context, !compact)
-                            }
-                        }
-                    ) {
-                        Icon(
-                            if (compact) Icons.Filled.GridView
-                            else Icons.AutoMirrored.Filled.List,
-                            contentDescription =
-                                stringResource(if (compact) R.string.download_show_large_artwork else R.string.download_show_list),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Drawn only once there is something underneath it to separate from, so a
             // short list keeps the plain unbroken background it looks better on.
@@ -995,45 +898,6 @@ fun DownloadScreen(
         )
     }
 
-    if (showCancelConfirmDialog) {
-        val isMulti = state.isMultiple || state.batch.size > 1 || pendingResults.size > 1
-        AlertDialog(
-            onDismissRequest = { showCancelConfirmDialog = false },
-            title = {
-                Text(
-                    text = if (isMulti) stringResource(R.string.download_cancel_all)
-                           else stringResource(R.string.download_cancel_action),
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Text(
-                    text = if (isMulti) stringResource(R.string.download_cancel_dialog_body)
-                           else stringResource(R.string.download_cancel_single_dialog_body)
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showCancelConfirmDialog = false
-                        downloadViewModel.cancelAllDownloads()
-                    }
-                ) {
-                    Text(
-                        stringResource(R.string.download_cancel),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showCancelConfirmDialog = false }
-                ) {
-                    Text(stringResource(R.string.download_cancel_dialog_dismiss))
-                }
-            }
-        )
-    }
 
     if (showClearConfirmDialog) {
         AlertDialog(
@@ -1095,6 +959,8 @@ private fun UrlSearchBar(
     onOpenSearch: () -> Unit,
     onClearResults: () -> Unit = {},
     onClearHistory: () -> Unit = {},
+    isCompact: Boolean = false,
+    onToggleLayout: () -> Unit = {},
     menuOpen: Boolean = false,
     onMenuOpen: () -> Unit = {},
     onMenuDismiss: () -> Unit = {},
@@ -1146,6 +1012,27 @@ private fun UrlSearchBar(
                     expanded = menuOpen,
                     onDismissRequest = onMenuDismiss
                 ) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                stringResource(
+                                    if (isCompact) R.string.download_show_large_artwork
+                                    else R.string.download_show_list
+                                )
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                if (isCompact) Icons.Filled.GridView else Icons.AutoMirrored.Filled.List,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        },
+                        onClick = {
+                            onMenuDismiss()
+                            onToggleLayout()
+                        }
+                    )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.search_clear_results)) },
                         onClick = {

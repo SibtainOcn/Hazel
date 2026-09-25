@@ -1408,6 +1408,20 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
+    /** Clears all pending items from the waiting queue while preserving any active download. */
+    fun clearQueue(context: Context) {
+        val activeUrl = _state.value.info?.url
+        synchronized(queue) {
+            queue.clear()
+        }
+        _state.value = _state.value.copy(
+            batch = _state.value.batch.filter { it.url == activeUrl && it.state == BatchState.DOWNLOADING }
+        )
+        downloadScope.launch {
+            DownloadQueueRepository.clear(context)
+        }
+    }
+
     /** Retries a failed download, either directly from its queued payload or by fetching anew. */
     fun retryFailed(context: Context, failed: com.hazel.android.data.FailedDownload) {
         downloadScope.launch {

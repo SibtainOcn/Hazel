@@ -333,12 +333,10 @@
     <string name="history_row_delete">Eliminar el archivo</string>
     <string name="history_toast_file_gone">Este archivo ya no está en tu dispositivo</string>
     <string name="history_tab_downloading">Descargando</string>
-    <string name="history_tab_queued">En cola</string>
+    <string name="history_tab_downloading_queue">Cola de descargas</string>
     <string name="history_tab_failed">Fallidos</string>
-    <string name="history_empty_downloading">No hay descargas en curso</string>
-    <string name="history_empty_downloading_sub">Las descargas activas aparecen aquí con velocidad y progreso en directo.</string>
-    <string name="history_empty_queued">No hay descargas en cola</string>
-    <string name="history_empty_queued_sub">Los enlaces pendientes de descarga aparecerán aquí.</string>
+    <string name="history_empty_downloading_queue">No hay descargas en progreso ni en cola</string>
+    <string name="history_empty_downloading_queue_sub">Las descargas activas y los elementos en cola aparecerán aquí.</string>
     <string name="history_empty_failed">No hay descargas fallidas</string>
     <string name="history_empty_failed_sub">Las descargas que encuentren errores aparecerán aquí con su registro de errores.</string>
     <string name="history_failed_error_log">Registro de errores</string>

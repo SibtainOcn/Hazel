@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Replaced the Ko-fi sponsor option (which was marked "Opening soon") with a live
   Buy Me a Coffee link (`buymeacoffee.com/sibtainocean`).
+- Streamlined the Home screen by removing the redundant batch action row below the search bar, consolidating layout switching into the search bar 3-dot overflow menu while fully preserving per-media card controls (center play/pause/cancel, 3-dot menu, and link removal).
+- Merged separate Downloading and Queued screens into a single unified "Downloading queue" view with dedicated component architecture (`DownloadingQueueView.kt`), presenting active downloads and waiting queue items in one cohesive interface with real-time badges.
+- Added batch controls ("Pause all" / "Resume all", "Cancel all" with confirmation dialog, and "Clear queue") into the Downloads screen 3-dot overflow menu.
 - Replaced icon buttons with clean clickable text buttons ("Pause" / "Resume", "Cancel", and "Clear") in the header bar below the search field for improved clarity and consistency.
 - Kept header Cancel button styled with standard primary tint rather than warning/error red to align with adjacent actions.
 - Added confirmation dialogs before cancelling active downloads and before clearing results to safeguard against accidental wipes.

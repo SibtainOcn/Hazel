@@ -344,12 +344,10 @@
     <string name="history_row_delete">Delete file</string>
     <string name="history_toast_file_gone">This file is no longer on your device</string>
     <string name="history_tab_downloading">Downloading</string>
-    <string name="history_tab_queued">Queued</string>
+    <string name="history_tab_downloading_queue">Downloading queue</string>
     <string name="history_tab_failed">Failed</string>
-    <string name="history_empty_downloading">No downloads in progress</string>
-    <string name="history_empty_downloading_sub">Active downloads appear here with live speed and progress.</string>
-    <string name="history_empty_queued">No queued downloads</string>
-    <string name="history_empty_queued_sub">Links waiting to be downloaded will appear here.</string>
+    <string name="history_empty_downloading_queue">No downloads in progress or queued</string>
+    <string name="history_empty_downloading_queue_sub">Active downloads and queued items will appear here.</string>
     <string name="history_empty_failed">No failed downloads</string>
     <string name="history_empty_failed_sub">Downloads that encounter errors will appear here with error logs.</string>
     <string name="history_failed_error_log">Error Log</string>

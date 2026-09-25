@@ -333,12 +333,10 @@
     <string name="history_row_delete">Supprimer le fichier</string>
     <string name="history_toast_file_gone">Ce fichier n\'est plus sur votre appareil</string>
     <string name="history_tab_downloading">Téléchargement</string>
-    <string name="history_tab_queued">En attente</string>
+    <string name="history_tab_downloading_queue">File de téléchargement</string>
     <string name="history_tab_failed">Échecs</string>
-    <string name="history_empty_downloading">Aucun téléchargement en cours</string>
-    <string name="history_empty_downloading_sub">Les téléchargements actifs s\'affichent ici avec la vitesse et la progression.</string>
-    <string name="history_empty_queued">Aucun téléchargement en file d\'attente</string>
-    <string name="history_empty_queued_sub">Les liens en attente de téléchargement apparaîtront ici.</string>
+    <string name="history_empty_downloading_queue">Aucun téléchargement en cours ou en attente</string>
+    <string name="history_empty_downloading_queue_sub">Les téléchargements actifs et les éléments en attente apparaîtront ici.</string>
     <string name="history_empty_failed">Aucun téléchargement échoué</string>
     <string name="history_empty_failed_sub">Les téléchargements ayant rencontré des erreurs apparaîtront ici avec leur journal d\'erreurs.</string>
     <string name="history_failed_error_log">Journal d\'erreurs</string>

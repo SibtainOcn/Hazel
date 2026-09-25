@@ -68,11 +68,15 @@ enum class HistorySort(val label: String) {
 /** Which kinds of download the list shows. */
 enum class HistoryFilter(val label: String) {
     ALL("All"),
-    DOWNLOADING("Downloading"),
-    QUEUED("Queued"),
+    DOWNLOADING("Downloading queue"),
     FAILED("Failed"),
     AUDIO("Audio"),
-    VIDEO("Video")
+    VIDEO("Video");
+
+    @Deprecated("Merged into DOWNLOADING", ReplaceWith("DOWNLOADING"))
+    companion object {
+        val QUEUED get() = DOWNLOADING
+    }
 }
 
 /**

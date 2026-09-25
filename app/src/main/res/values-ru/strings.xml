@@ -338,12 +338,10 @@
     <string name="history_row_delete">Удалить файл</string>
     <string name="history_toast_file_gone">Этот файл больше не найден на устройстве</string>
     <string name="history_tab_downloading">Загрузка</string>
-    <string name="history_tab_queued">В очереди</string>
+    <string name="history_tab_downloading_queue">Очередь загрузок</string>
     <string name="history_tab_failed">С ошибкой</string>
-    <string name="history_empty_downloading">Нет активных загрузок</string>
-    <string name="history_empty_downloading_sub">Текущие загрузки отображаются здесь со скоростью и ходом выполнения.</string>
-    <string name="history_empty_queued">В очереди нет загрузок</string>
-    <string name="history_empty_queued_sub">Ссылки, ожидающие загрузки, появятся здесь.</string>
+    <string name="history_empty_downloading_queue">Нет загрузок в процессе или очереди</string>
+    <string name="history_empty_downloading_queue_sub">Здесь будут отображаться активные загрузки и элементы очереди.</string>
     <string name="history_empty_failed">Нет загрузок с ошибками</string>
     <string name="history_empty_failed_sub">Загрузки с ошибками отображаются здесь с журналом ошибок.</string>
     <string name="history_failed_error_log">Журнал ошибок</string>

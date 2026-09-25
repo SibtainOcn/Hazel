@@ -299,6 +299,59 @@ def test_full_artwork_mediacard():
 
 
 # ---------------------------------------------------------------------------
+# Suite 8: Streamlined Home Top & Downloading Queue Architecture
+# ---------------------------------------------------------------------------
+def test_streamlined_home_and_downloading_queue():
+    print("\n--- Suite 8: Streamlined Home Top & Downloading Queue Architecture ---")
+
+    download_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "DownloadScreen.kt"
+    history_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "history" / "HistoryScreen.kt"
+    queue_view_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "history" / "DownloadingQueueView.kt"
+    repo_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "data" / "DownloadHistoryRepository.kt"
+
+    dl_content = download_file.read_text(encoding="utf-8")
+    hist_content = history_file.read_text(encoding="utf-8")
+    repo_content = repo_file.read_text(encoding="utf-8")
+
+    # 1. Clean Home top: redundant sub-search row removed
+    check_true("Redundant link counter row removed from DownloadScreen header", "pluralStringResource(\n                            R.plurals.download_links" not in dl_content and "pluralStringResource(R.plurals.download_links" not in dl_content)
+    check_true("Dead showCancelConfirmDialog removed from DownloadScreen", "showCancelConfirmDialog" not in dl_content)
+
+    # 2. UrlSearchBar menu offers layout switch
+    check_true("UrlSearchBar overflow menu offers layout toggle", "onToggleLayout" in dl_content)
+    check_true("UrlSearchBar provides large artwork switch", "R.string.download_show_large_artwork" in dl_content)
+    check_true("UrlSearchBar provides list switch", "R.string.download_show_list" in dl_content)
+
+    # 3. Dedicated DownloadingQueueView component
+    check_true("DownloadingQueueView.kt exists", queue_view_file.is_file())
+    if queue_view_file.is_file():
+        q_content = queue_view_file.read_text(encoding="utf-8")
+        check_true("DownloadingQueueView composable defined", "fun DownloadingQueueView(" in q_content)
+        check_true("QueuedCard composable defined in DownloadingQueueView.kt", "fun QueuedCard(" in q_content)
+        check_true("QueuedRow composable defined in DownloadingQueueView.kt", "fun QueuedRow(" in q_content)
+
+    # 4. HistoryFilter combines Downloading & Queued
+    check_true("HistoryFilter DOWNLOADING is labeled Downloading queue", 'DOWNLOADING("Downloading queue")' in repo_content)
+    check_true("HistoryFilter has QUEUED compatibility alias", "val QUEUED get() = DOWNLOADING" in repo_content)
+
+    # 5. HistoryScreen uses DownloadingQueueView
+    check_true("HistoryScreen integrates DownloadingQueueView", "DownloadingQueueView(" in hist_content)
+    check_true("HistoryScreen header shows downloading queue string", "history_tab_downloading_queue" in hist_content)
+
+    # 6. HistoryScreen 3-dots overflow menu offers batch controls
+    check_true("HistoryScreen 3-dots menu offers pause all", "R.string.download_pause_all" in hist_content)
+    check_true("HistoryScreen 3-dots menu offers resume all", "R.string.download_resume_all" in hist_content)
+    check_true("HistoryScreen 3-dots menu offers cancel all", "R.string.download_cancel_all" in hist_content)
+    check_true("HistoryScreen 3-dots menu offers clear queue", "R.string.history_queue_clear_all" in hist_content)
+
+    # 7. Per-video controls on Home screen intact
+    check_true("Home MediaRow retains onCancel action", "onCancel = { downloadViewModel.cancelItem(info.url) }" in dl_content)
+    check_true("Home MediaRow retains onPause action", "onPause = downloadViewModel::pauseDownload" in dl_content)
+    check_true("Home MediaRow retains onResume action", "onResume = downloadViewModel::resumeDownload" in dl_content)
+    check_true("Home MediaRow retains onRemove action", "onRemove = remove" in dl_content)
+
+
+# ---------------------------------------------------------------------------
 # Main Runner
 # ---------------------------------------------------------------------------
 def main():
@@ -313,6 +366,7 @@ def main():
     test_search_and_history_screen_ux()
     test_compact_alignment_and_batch_scroll()
     test_full_artwork_mediacard()
+    test_streamlined_home_and_downloading_queue()
 
     print("\n" + "=" * 70)
     print(f"  Summary: {PASS_COUNT}/{PASS_COUNT + FAIL_COUNT} tests PASSED, {FAIL_COUNT} FAILED")
