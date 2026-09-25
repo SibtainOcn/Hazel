@@ -11,8 +11,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">粘贴链接</string>
     <string name="download_clear">清空</string>
-    <string name="download_show_large_artwork">显示大图</string>
-    <string name="download_show_list">以列表显示</string>
     <string name="download_instant_source">即时下载 · 正在读取 %1$s</string>
     <string name="download_incognito_title">你正在无痕模式中</string>
     <string name="download_incognito_body">下载不会加入历史记录，链接也不会被记住。文件仍会照常保存。</string>
@@ -292,8 +290,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">全部下载</string>
-    <string name="history_layout_grid">显示大图</string>
-    <string name="history_layout_list">以列表显示</string>
     <string name="history_search_action">搜索下载</string>
     <string name="history_sort_action">排序</string>
     <string name="history_menu_action">更多</string>
@@ -317,10 +313,6 @@
     <string name="history_card_remove">从列表中移除</string>
     <string name="history_card_delete">删除文件</string>
     <string name="history_tag_deleted">已删除</string>
-    <string name="history_row_options">选项</string>
-    <string name="history_row_properties">属性</string>
-    <string name="history_row_remove">从列表中移除</string>
-    <string name="history_row_delete">删除文件</string>
     <string name="history_toast_file_gone">这个文件已经不在你的设备上了</string>
     <string name="history_tab_downloading">下载中</string>
     <string name="history_tab_downloading_queue">下载队列</string>

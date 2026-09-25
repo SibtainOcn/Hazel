@@ -11,8 +11,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">URLを入力</string>
     <string name="download_clear">消去</string>
-    <string name="download_show_large_artwork">大きいサムネイルを表示</string>
-    <string name="download_show_list">リスト形式で表示</string>
     <string name="download_instant_source">即時 · %1$s から読み込み中</string>
     <string name="download_incognito_title">シークレットモード</string>
     <string name="download_incognito_body">ダウンロードは履歴に追加されず、リンクも保存されません。ファイル自体は通常どおり保存されます。</string>
@@ -292,8 +290,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">すべてのダウンロード</string>
-    <string name="history_layout_grid">大きいサムネイルを表示</string>
-    <string name="history_layout_list">リスト形式で表示</string>
     <string name="history_search_action">ダウンロードを検索</string>
     <string name="history_sort_action">並べ替え</string>
     <string name="history_menu_action">その他</string>
@@ -317,10 +313,6 @@
     <string name="history_card_remove">リストから削除</string>
     <string name="history_card_delete">ファイルを削除</string>
     <string name="history_tag_deleted">削除済み</string>
-    <string name="history_row_options">オプション</string>
-    <string name="history_row_properties">プロパティ</string>
-    <string name="history_row_remove">リストから削除</string>
-    <string name="history_row_delete">ファイルを削除</string>
     <string name="history_toast_file_gone">このファイルは端末上に見つかりません</string>
     <string name="history_tab_downloading">ダウンロード中</string>
     <string name="history_tab_downloading_queue">ダウンロード待機列</string>

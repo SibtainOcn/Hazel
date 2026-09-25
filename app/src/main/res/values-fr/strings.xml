@@ -11,8 +11,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Collez un lien</string>
     <string name="download_clear">Vider</string>
-    <string name="download_show_large_artwork">Afficher les grandes images</string>
-    <string name="download_show_list">Afficher en liste</string>
     <string name="download_instant_source">Instantané · lecture depuis %1$s</string>
     <string name="download_incognito_title">Vous êtes en navigation privée</string>
     <string name="download_incognito_body">Les téléchargements ne sont pas ajoutés à votre historique et les liens ne sont pas retenus. Les fichiers sont enregistrés comme d\'habitude.</string>
@@ -302,8 +300,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">Tous les téléchargements</string>
-    <string name="history_layout_grid">Afficher les grandes images</string>
-    <string name="history_layout_list">Afficher en liste</string>
     <string name="history_search_action">Chercher dans les téléchargements</string>
     <string name="history_sort_action">Trier</string>
     <string name="history_menu_action">Plus</string>
@@ -327,10 +323,6 @@
     <string name="history_card_remove">Retirer de la liste</string>
     <string name="history_card_delete">Supprimer le fichier</string>
     <string name="history_tag_deleted">Supprimé</string>
-    <string name="history_row_options">Options</string>
-    <string name="history_row_properties">Propriétés</string>
-    <string name="history_row_remove">Retirer de la liste</string>
-    <string name="history_row_delete">Supprimer le fichier</string>
     <string name="history_toast_file_gone">Ce fichier n\'est plus sur votre appareil</string>
     <string name="history_tab_downloading">Téléchargement</string>
     <string name="history_tab_downloading_queue">File de téléchargement</string>

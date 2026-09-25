@@ -11,8 +11,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">लिंक चिपकाएँ</string>
     <string name="download_clear">हटाएँ</string>
-    <string name="download_show_large_artwork">बड़ी तस्वीरें दिखाएँ</string>
-    <string name="download_show_list">सूची के रूप में दिखाएँ</string>
     <string name="download_instant_source">इंस्टेंट · %1$s से पढ़ा जा रहा है</string>
     <string name="download_incognito_title">आप गुप्त मोड में हैं</string>
     <string name="download_incognito_body">डाउनलोड आपके इतिहास में नहीं जुड़ते और लिंक याद नहीं रखे जाते। फ़ाइलें हमेशा की तरह सहेजी जाती हैं।</string>
@@ -297,8 +295,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">सभी डाउनलोड</string>
-    <string name="history_layout_grid">बड़ी तस्वीरें दिखाएँ</string>
-    <string name="history_layout_list">सूची के रूप में दिखाएँ</string>
     <string name="history_search_action">डाउनलोड में खोजें</string>
     <string name="history_sort_action">क्रम</string>
     <string name="history_menu_action">और</string>
@@ -322,10 +318,6 @@
     <string name="history_card_remove">सूची से हटाएँ</string>
     <string name="history_card_delete">फ़ाइल हटाएँ</string>
     <string name="history_tag_deleted">हटाई गई</string>
-    <string name="history_row_options">विकल्प</string>
-    <string name="history_row_properties">विवरण</string>
-    <string name="history_row_remove">सूची से हटाएँ</string>
-    <string name="history_row_delete">फ़ाइल हटाएँ</string>
     <string name="history_toast_file_gone">यह फ़ाइल अब आपके डिवाइस पर नहीं है</string>
     <string name="history_tab_downloading">डाउनलोड हो रहा है</string>
     <string name="history_tab_downloading_queue">डाउनलोड कतार</string>

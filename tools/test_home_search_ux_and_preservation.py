@@ -237,10 +237,10 @@ def test_search_and_history_screen_ux():
 
 
 # ---------------------------------------------------------------------------
-# Suite 6: Compact MediaRow Alignment & Batch Auto-Scroll UX
+# Suite 6: Full-Artwork Card Architecture & Batch Auto-Scroll UX
 # ---------------------------------------------------------------------------
 def test_compact_alignment_and_batch_scroll():
-    print("\n--- Suite 6: Compact MediaRow Alignment & Batch Auto-Scroll UX ---")
+    print("\n--- Suite 6: Full-Artwork Card Architecture & Batch Auto-Scroll UX ---")
 
     cards_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "components" / "MediaCards.kt"
     download_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "DownloadScreen.kt"
@@ -248,19 +248,15 @@ def test_compact_alignment_and_batch_scroll():
     cards_content = cards_file.read_text(encoding="utf-8")
     download_content = download_file.read_text(encoding="utf-8")
 
-    # 1. MediaCards.kt MediaRow dimensions must match HistoryRow / QueuedRow (128x78dp, 14dp clip, 20dp surface)
-    check_true("MediaCards.kt MediaRow uses 128x78dp thumbnail", ".size(width = 128.dp, height = 78.dp)" in cards_content)
-    check_true("MediaCards.kt MediaRow uses 14dp thumbnail corner clip", ".clip(RoundedCornerShape(14.dp))" in cards_content)
-    check_true("MediaCards.kt MediaRow uses 20dp surface shape", "shape = RoundedCornerShape(20.dp)" in cards_content)
-    check_true("MediaCards.kt MediaRow uses 14dp spacer between thumbnail and text", "Spacer(modifier = Modifier.width(14.dp))" in cards_content)
+    # 1. MediaRow removed from both files — only full-artwork MediaCard remains
+    check_true("MediaCards.kt MediaRow removed (compact layout purged)", "fun MediaRow(" not in cards_content)
+    check_true("MediaCards.kt retains MediaCard composable", "fun MediaCard(" in cards_content)
+    check_true("MediaCards.kt MediaCard uses 20dp surface shape", "shape = RoundedCornerShape(20.dp)" in cards_content)
+    check_true("DownloadScreen.kt MediaRow removed (compact layout purged)", "fun MediaRow(" not in download_content and "private fun MediaRow(" not in download_content)
+    check_true("DownloadScreen.kt retains MediaCard usage", "MediaCard(" in download_content)
+    check_true("DownloadScreen.kt MediaCard uses 20dp surface shape", "shape = RoundedCornerShape(20.dp)" in download_content)
 
-    # 2. DownloadScreen.kt private MediaRow dimensions
-    check_true("DownloadScreen.kt MediaRow uses 128x78dp thumbnail", ".size(width = 128.dp, height = 78.dp)" in download_content)
-    check_true("DownloadScreen.kt MediaRow uses 14dp thumbnail corner clip", ".clip(RoundedCornerShape(14.dp))" in download_content)
-    check_true("DownloadScreen.kt MediaRow uses 20dp surface shape", "shape = RoundedCornerShape(20.dp)" in download_content)
-    check_true("DownloadScreen.kt MediaRow uses 14dp spacer between thumbnail and text", "Spacer(modifier = Modifier.width(14.dp))" in download_content)
-
-    # 3. Batch / Playlist Auto-Scroll on Active Download Transition
+    # 2. Batch / Playlist Auto-Scroll on Active Download Transition
     check_true("DownloadScreen.kt has LaunchedEffect watching activeUrl and isDownloading", "LaunchedEffect(activeUrl, isDownloading)" in download_content)
     check_true("DownloadScreen.kt animates scroll to top item on batch transition", "listState.animateScrollToItem(0)" in download_content)
 
@@ -317,10 +313,10 @@ def test_streamlined_home_and_downloading_queue():
     check_true("Redundant link counter row removed from DownloadScreen header", "pluralStringResource(\n                            R.plurals.download_links" not in dl_content and "pluralStringResource(R.plurals.download_links" not in dl_content)
     check_true("Dead showCancelConfirmDialog removed from DownloadScreen", "showCancelConfirmDialog" not in dl_content)
 
-    # 2. UrlSearchBar menu offers layout switch
-    check_true("UrlSearchBar overflow menu offers layout toggle", "onToggleLayout" in dl_content)
-    check_true("UrlSearchBar provides large artwork switch", "R.string.download_show_large_artwork" in dl_content)
-    check_true("UrlSearchBar provides list switch", "R.string.download_show_list" in dl_content)
+    # 2. UrlSearchBar compact layout toggle removed (standardized on full-artwork card)
+    check_true("UrlSearchBar layout toggle removed", "onToggleLayout" not in dl_content)
+    check_true("download_show_large_artwork string removed from UrlSearchBar", "R.string.download_show_large_artwork" not in dl_content)
+    check_true("download_show_list string removed from UrlSearchBar", "R.string.download_show_list" not in dl_content)
 
     # 3. Dedicated DownloadingQueueView component
     check_true("DownloadingQueueView.kt exists", queue_view_file.is_file())
@@ -328,7 +324,7 @@ def test_streamlined_home_and_downloading_queue():
         q_content = queue_view_file.read_text(encoding="utf-8")
         check_true("DownloadingQueueView composable defined", "fun DownloadingQueueView(" in q_content)
         check_true("QueuedCard composable defined in DownloadingQueueView.kt", "fun QueuedCard(" in q_content)
-        check_true("QueuedRow composable defined in DownloadingQueueView.kt", "fun QueuedRow(" in q_content)
+        check_true("QueuedRow removed from DownloadingQueueView.kt (compact purge)", "fun QueuedRow(" not in q_content)
 
     # 4. HistoryFilter combines Downloading & Queued
     check_true("HistoryFilter DOWNLOADING is labeled Downloading queue", 'DOWNLOADING("Downloading queue")' in repo_content)
@@ -344,11 +340,10 @@ def test_streamlined_home_and_downloading_queue():
     check_true("HistoryScreen 3-dots menu offers cancel all", "R.string.download_cancel_all" in hist_content)
     check_true("HistoryScreen 3-dots menu offers clear queue", "R.string.history_queue_clear_all" in hist_content)
 
-    # 7. Per-video controls on Home screen intact
-    check_true("Home MediaRow retains onCancel action", "onCancel = { downloadViewModel.cancelItem(info.url) }" in dl_content)
-    check_true("Home MediaRow retains onPause action", "onPause = downloadViewModel::pauseDownload" in dl_content)
-    check_true("Home MediaRow retains onResume action", "onResume = downloadViewModel::resumeDownload" in dl_content)
-    check_true("Home MediaRow retains onRemove action", "onRemove = remove" in dl_content)
+    # 7. Per-video controls on Home screen intact (via MediaCard, not MediaRow)
+    check_true("Home screen retains onCancel action", "onCancel = { downloadViewModel.cancelItem(info.url) }" in dl_content)
+    check_true("Home screen retains onPause action", "onPause = downloadViewModel::pauseDownload" in dl_content)
+    check_true("Home screen retains onResume action", "onResume = downloadViewModel::resumeDownload" in dl_content)
 
 
 # ---------------------------------------------------------------------------

@@ -11,8 +11,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Masukkan URL</string>
     <string name="download_clear">Hapus</string>
-    <string name="download_show_large_artwork">Tampilkan gambar besar</string>
-    <string name="download_show_list">Tampilkan sebagai daftar</string>
     <string name="download_instant_source">Instan · membaca dari %1$s</string>
     <string name="download_incognito_title">Anda dalam mode samaran</string>
     <string name="download_incognito_body">Unduhan tidak ditambahkan ke riwayat dan tautan tidak diingat. File tetap disimpan seperti biasa.</string>
@@ -292,8 +290,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">Semua Unduhan</string>
-    <string name="history_layout_grid">Tampilkan gambar besar</string>
-    <string name="history_layout_list">Tampilkan sebagai daftar</string>
     <string name="history_search_action">Cari unduhan</string>
     <string name="history_sort_action">Urutkan</string>
     <string name="history_menu_action">Lainnya</string>
@@ -317,10 +313,6 @@
     <string name="history_card_remove">Hapus dari daftar</string>
     <string name="history_card_delete">Hapus file</string>
     <string name="history_tag_deleted">Dihapus</string>
-    <string name="history_row_options">Opsi</string>
-    <string name="history_row_properties">Properti</string>
-    <string name="history_row_remove">Hapus dari daftar</string>
-    <string name="history_row_delete">Hapus file</string>
     <string name="history_toast_file_gone">File ini sudah tidak ada di perangkat Anda</string>
     <string name="history_tab_downloading">Mengunduh</string>
     <string name="history_tab_downloading_queue">Antrean unduhan</string>

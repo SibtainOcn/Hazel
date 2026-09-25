@@ -22,8 +22,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Enter URL</string>
     <string name="download_clear">Clear</string>
-    <string name="download_show_large_artwork">Show large artwork</string>
-    <string name="download_show_list">Show as a list</string>
     <string name="download_instant_source">Instant \u00b7 reading from %1$s</string>
     <string name="download_incognito_title">You\'re incognito</string>
     <string name="download_incognito_body">Downloads are not added to your history and links are not remembered. The files themselves still save as usual.</string>
@@ -313,8 +311,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">All Downloads</string>
-    <string name="history_layout_grid">Show large artwork</string>
-    <string name="history_layout_list">Show as a list</string>
     <string name="history_search_action">Search downloads</string>
     <string name="history_sort_action">Sort</string>
     <string name="history_menu_action">More</string>
@@ -338,10 +334,6 @@
     <string name="history_card_remove">Remove from list</string>
     <string name="history_card_delete">Delete file</string>
     <string name="history_tag_deleted">Deleted</string>
-    <string name="history_row_options">Options</string>
-    <string name="history_row_properties">Properties</string>
-    <string name="history_row_remove">Remove from list</string>
-    <string name="history_row_delete">Delete file</string>
     <string name="history_toast_file_gone">This file is no longer on your device</string>
     <string name="history_tab_downloading">Downloading</string>
     <string name="history_tab_downloading_queue">Downloading queue</string>

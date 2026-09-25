@@ -11,8 +11,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Link einfügen</string>
     <string name="download_clear">Leeren</string>
-    <string name="download_show_large_artwork">Große Bilder zeigen</string>
-    <string name="download_show_list">Als Liste zeigen</string>
     <string name="download_instant_source">Sofort · liest von %1$s</string>
     <string name="download_incognito_title">Du bist inkognito</string>
     <string name="download_incognito_body">Downloads landen nicht in deinem Verlauf und Links werden nicht gemerkt. Die Dateien werden wie gewohnt gespeichert.</string>
@@ -297,8 +295,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">Alle Downloads</string>
-    <string name="history_layout_grid">Große Bilder zeigen</string>
-    <string name="history_layout_list">Als Liste zeigen</string>
     <string name="history_search_action">Downloads durchsuchen</string>
     <string name="history_sort_action">Sortieren</string>
     <string name="history_menu_action">Mehr</string>
@@ -322,10 +318,6 @@
     <string name="history_card_remove">Aus der Liste entfernen</string>
     <string name="history_card_delete">Datei löschen</string>
     <string name="history_tag_deleted">Gelöscht</string>
-    <string name="history_row_options">Optionen</string>
-    <string name="history_row_properties">Eigenschaften</string>
-    <string name="history_row_remove">Aus der Liste entfernen</string>
-    <string name="history_row_delete">Datei löschen</string>
     <string name="history_toast_file_gone">Diese Datei ist nicht mehr auf deinem Gerät</string>
     <string name="history_tab_downloading">Wird heruntergeladen</string>
     <string name="history_tab_downloading_queue">Download-Warteschlange</string>

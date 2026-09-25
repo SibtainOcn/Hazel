@@ -11,8 +11,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Pega un enlace</string>
     <string name="download_clear">Vaciar</string>
-    <string name="download_show_large_artwork">Mostrar imágenes grandes</string>
-    <string name="download_show_list">Mostrar como lista</string>
     <string name="download_instant_source">Instantáneo · leyendo desde %1$s</string>
     <string name="download_incognito_title">Estás en incógnito</string>
     <string name="download_incognito_body">Las descargas no se añaden a tu historial y los enlaces no se recuerdan. Los archivos se guardan igual que siempre.</string>
@@ -302,8 +300,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">Todas las descargas</string>
-    <string name="history_layout_grid">Mostrar imágenes grandes</string>
-    <string name="history_layout_list">Mostrar como lista</string>
     <string name="history_search_action">Buscar en las descargas</string>
     <string name="history_sort_action">Ordenar</string>
     <string name="history_menu_action">Más</string>
@@ -327,10 +323,6 @@
     <string name="history_card_remove">Quitar de la lista</string>
     <string name="history_card_delete">Eliminar el archivo</string>
     <string name="history_tag_deleted">Eliminado</string>
-    <string name="history_row_options">Opciones</string>
-    <string name="history_row_properties">Propiedades</string>
-    <string name="history_row_remove">Quitar de la lista</string>
-    <string name="history_row_delete">Eliminar el archivo</string>
     <string name="history_toast_file_gone">Este archivo ya no está en tu dispositivo</string>
     <string name="history_tab_downloading">Descargando</string>
     <string name="history_tab_downloading_queue">Cola de descargas</string>

@@ -11,8 +11,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Вставьте URL</string>
     <string name="download_clear">Очистить</string>
-    <string name="download_show_large_artwork">Крупные обложки</string>
-    <string name="download_show_list">Показать списком</string>
     <string name="download_instant_source">Мгновенно · чтение из %1$s</string>
     <string name="download_incognito_title">Режим инкогнито</string>
     <string name="download_incognito_body">Загрузки не добавляются в историю, а ссылки не запоминаются. Сами файлы сохраняются как обычно.</string>
@@ -307,8 +305,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">Все загрузки</string>
-    <string name="history_layout_grid">Крупные обложки</string>
-    <string name="history_layout_list">Показать списком</string>
     <string name="history_search_action">Поиск загрузок</string>
     <string name="history_sort_action">Сортировка</string>
     <string name="history_menu_action">Ещё</string>
@@ -332,10 +328,6 @@
     <string name="history_card_remove">Удалить из списка</string>
     <string name="history_card_delete">Удалить файл</string>
     <string name="history_tag_deleted">Удалено</string>
-    <string name="history_row_options">Параметры</string>
-    <string name="history_row_properties">Свойства</string>
-    <string name="history_row_remove">Удалить из списка</string>
-    <string name="history_row_delete">Удалить файл</string>
     <string name="history_toast_file_gone">Этот файл больше не найден на устройстве</string>
     <string name="history_tab_downloading">Загрузка</string>
     <string name="history_tab_downloading_queue">Очередь загрузок</string>
