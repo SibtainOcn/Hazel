@@ -204,6 +204,7 @@ def main():
         ("10-Locale Translation Parity", [py, "tools/check.py", "translations"]),
         ("Literal Extraction Progress", [py, "tools/check.py", "progress"]),
         ("Artist Metadata Harness", [py, "tools/test_artist_metadata.py"]),
+        ("Home Search UX & Data Preservation Harness", [py, "tools/test_home_search_ux_and_preservation.py"]),
         ("Release Regression Harness", [py, "tools/test_release_regression_harness.py"]),
         ("Controls & Multi-Source Harness", [py, "tools/test_download_controls_and_sources.py"]),
         ("Gradle JVM Unit Tests", GRADLE_CMD + [":app:testDebugUnitTest", "--console=plain"]),

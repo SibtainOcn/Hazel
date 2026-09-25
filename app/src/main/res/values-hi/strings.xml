@@ -11,8 +11,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">लिंक चिपकाएँ</string>
     <string name="download_clear">हटाएँ</string>
-    <string name="download_show_large_artwork">बड़ी तस्वीरें दिखाएँ</string>
-    <string name="download_show_list">सूची के रूप में दिखाएँ</string>
     <string name="download_instant_source">इंस्टेंट · %1$s से पढ़ा जा रहा है</string>
     <string name="download_incognito_title">आप गुप्त मोड में हैं</string>
     <string name="download_incognito_body">डाउनलोड आपके इतिहास में नहीं जुड़ते और लिंक याद नहीं रखे जाते। फ़ाइलें हमेशा की तरह सहेजी जाती हैं।</string>
@@ -60,7 +58,11 @@
     <string name="search_forget">भूल जाएँ</string>
     <string name="search_edit_before">खोजने से पहले बदलें</string>
     <string name="search_paste_and_fetch">चिपकाएँ और खोजें</string>
+    <string name="search_paste">चिपकाएँ</string>
     <string name="search_nothing_to_paste">चिपकाने के लिए कुछ नहीं है</string>
+    <string name="search_cancel">रद्द करें</string>
+    <string name="search_clear_history_confirm_title">खोज इतिहास मिटाएँ?</string>
+    <string name="search_clear_history_confirm_body">सभी सहेजे गए खोज लिंक हटा दिए जाएँगे। इसे पहले जैसा नहीं किया जा सकता।</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">पहले से डाउनलोड है</string>
@@ -293,8 +295,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">सभी डाउनलोड</string>
-    <string name="history_layout_grid">बड़ी तस्वीरें दिखाएँ</string>
-    <string name="history_layout_list">सूची के रूप में दिखाएँ</string>
     <string name="history_search_action">डाउनलोड में खोजें</string>
     <string name="history_sort_action">क्रम</string>
     <string name="history_menu_action">और</string>
@@ -318,18 +318,12 @@
     <string name="history_card_remove">सूची से हटाएँ</string>
     <string name="history_card_delete">फ़ाइल हटाएँ</string>
     <string name="history_tag_deleted">हटाई गई</string>
-    <string name="history_row_options">विकल्प</string>
-    <string name="history_row_properties">विवरण</string>
-    <string name="history_row_remove">सूची से हटाएँ</string>
-    <string name="history_row_delete">फ़ाइल हटाएँ</string>
     <string name="history_toast_file_gone">यह फ़ाइल अब आपके डिवाइस पर नहीं है</string>
     <string name="history_tab_downloading">डाउनलोड हो रहा है</string>
-    <string name="history_tab_queued">कतार में</string>
+    <string name="history_tab_downloading_queue">डाउनलोड कतार</string>
     <string name="history_tab_failed">विफल</string>
-    <string name="history_empty_downloading">कोई डाउनलोड प्रगति में नहीं है</string>
-    <string name="history_empty_downloading_sub">सक्रिय डाउनलोड गति और प्रगति के साथ यहाँ दिखाई देंगे।</string>
-    <string name="history_empty_queued">कतार में कोई डाउनलोड नहीं है</string>
-    <string name="history_empty_queued_sub">डाउनलोड होने की प्रतीक्षा कर रहे लिंक यहाँ दिखाई देंगे।</string>
+    <string name="history_empty_downloading_queue">कोई डाउनलोड प्रगति में या कतार में नहीं है</string>
+    <string name="history_empty_downloading_queue_sub">सक्रिय डाउनलोड और कतारबद्ध आइटम यहाँ दिखाई देंगे।</string>
     <string name="history_empty_failed">कोई विफल डाउनलोड नहीं है</string>
     <string name="history_empty_failed_sub">जिन डाउनलोड में त्रुटियाँ आएंगी वे त्रुटि लॉग के साथ यहाँ दिखाई देंगे।</string>
     <string name="history_failed_error_log">त्रुटि लॉग</string>

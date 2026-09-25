@@ -318,11 +318,11 @@ class DownloadViewModel : ViewModel() {
         _state.value = DownloadState()
     }
 
-    /** Clears the resolved links but keeps the field, for the Clear results menu action. */
+    /** Clears the resolved links and the URL field, for the Clear results menu action. */
     fun clearResults() {
         fetchJob?.cancel()
         MediaProbe.cancel()
-        _state.value = DownloadState(url = _state.value.url)
+        _state.value = DownloadState()
     }
 
     /** Points the sheet at one of several resolved links. */
@@ -1408,6 +1408,20 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
+    /** Clears all pending items from the waiting queue while preserving any active download. */
+    fun clearQueue(context: Context) {
+        val activeUrl = _state.value.info?.url
+        synchronized(queue) {
+            queue.clear()
+        }
+        _state.value = _state.value.copy(
+            batch = _state.value.batch.filter { it.url == activeUrl && it.state == BatchState.DOWNLOADING }
+        )
+        downloadScope.launch {
+            DownloadQueueRepository.clear(context)
+        }
+    }
+
     /** Retries a failed download, either directly from its queued payload or by fetching anew. */
     fun retryFailed(context: Context, failed: com.hazel.android.data.FailedDownload) {
         downloadScope.launch {
@@ -2136,7 +2150,7 @@ class DownloadViewModel : ViewModel() {
             "removed", "deleted", "copyright", "dmca", "404"
         )
 
-        val URL_PATTERN = Regex("^https?://\\S+$")
+        val URL_PATTERN = Regex("^https?://.+", RegexOption.IGNORE_CASE)
 
         /** Containers with no tag atom that can hold cover art. */
         val NO_ARTWORK_CONTAINERS = setOf("webm", "avi", "flv")

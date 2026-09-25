@@ -11,8 +11,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Pega un enlace</string>
     <string name="download_clear">Vaciar</string>
-    <string name="download_show_large_artwork">Mostrar imágenes grandes</string>
-    <string name="download_show_list">Mostrar como lista</string>
     <string name="download_instant_source">Instantáneo · leyendo desde %1$s</string>
     <string name="download_incognito_title">Estás en incógnito</string>
     <string name="download_incognito_body">Las descargas no se añaden a tu historial y los enlaces no se recuerdan. Los archivos se guardan igual que siempre.</string>
@@ -61,7 +59,11 @@
     <string name="search_forget">Olvidar</string>
     <string name="search_edit_before">Editar antes de buscar</string>
     <string name="search_paste_and_fetch">Pegar y buscar</string>
+    <string name="search_paste">Pegar</string>
     <string name="search_nothing_to_paste">No hay nada que pegar</string>
+    <string name="search_cancel">Cancelar</string>
+    <string name="search_clear_history_confirm_title">¿Borrar el historial de búsqueda?</string>
+    <string name="search_clear_history_confirm_body">Se eliminarán todos los enlaces de búsqueda guardados. Esta acción no se puede deshacer.</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Ya descargado</string>
@@ -298,8 +300,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">Todas las descargas</string>
-    <string name="history_layout_grid">Mostrar imágenes grandes</string>
-    <string name="history_layout_list">Mostrar como lista</string>
     <string name="history_search_action">Buscar en las descargas</string>
     <string name="history_sort_action">Ordenar</string>
     <string name="history_menu_action">Más</string>
@@ -323,18 +323,12 @@
     <string name="history_card_remove">Quitar de la lista</string>
     <string name="history_card_delete">Eliminar el archivo</string>
     <string name="history_tag_deleted">Eliminado</string>
-    <string name="history_row_options">Opciones</string>
-    <string name="history_row_properties">Propiedades</string>
-    <string name="history_row_remove">Quitar de la lista</string>
-    <string name="history_row_delete">Eliminar el archivo</string>
     <string name="history_toast_file_gone">Este archivo ya no está en tu dispositivo</string>
     <string name="history_tab_downloading">Descargando</string>
-    <string name="history_tab_queued">En cola</string>
+    <string name="history_tab_downloading_queue">Cola de descargas</string>
     <string name="history_tab_failed">Fallidos</string>
-    <string name="history_empty_downloading">No hay descargas en curso</string>
-    <string name="history_empty_downloading_sub">Las descargas activas aparecen aquí con velocidad y progreso en directo.</string>
-    <string name="history_empty_queued">No hay descargas en cola</string>
-    <string name="history_empty_queued_sub">Los enlaces pendientes de descarga aparecerán aquí.</string>
+    <string name="history_empty_downloading_queue">No hay descargas en progreso ni en cola</string>
+    <string name="history_empty_downloading_queue_sub">Las descargas activas y los elementos en cola aparecerán aquí.</string>
     <string name="history_empty_failed">No hay descargas fallidas</string>
     <string name="history_empty_failed_sub">Las descargas que encuentren errores aparecerán aquí con su registro de errores.</string>
     <string name="history_failed_error_log">Registro de errores</string>

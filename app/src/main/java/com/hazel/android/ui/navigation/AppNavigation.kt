@@ -100,6 +100,9 @@ fun AppNavigation(
         "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "direct_share", "sponsor"
     )
 
+    val downloadViewModel: com.hazel.android.download.DownloadViewModel =
+        androidx.lifecycle.viewmodel.compose.viewModel()
+
     Scaffold(
         topBar = {
             // Only over the home screen. The other two carry their own headings, and the
@@ -172,13 +175,14 @@ fun AppNavigation(
         bottomBar = {
             if (!isSubScreen) {
                 NavigationBar(
-                    containerColor = if (isDarkTheme) androidx.compose.ui.graphics.Color(0xFF000000)
+                    containerColor = if (isDarkTheme) Color(0xFF000000)
                                      else MaterialTheme.colorScheme.surfaceContainerHigh,
                     tonalElevation = 0.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     val currentDestination = navBackStackEntry?.destination
 
+                    // Red dot: visible when there are active downloads or queued items
                     bottomNavItems.forEach { screen ->
                         val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
                         NavigationBarItem(
@@ -203,9 +207,9 @@ fun AppNavigation(
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
-                                unselectedIconColor = if (isDarkTheme) androidx.compose.ui.graphics.Color.White.copy(alpha = 0.5f)
+                                unselectedIconColor = if (isDarkTheme) Color.White.copy(alpha = 0.5f)
                                                       else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
-                                unselectedTextColor = if (isDarkTheme) androidx.compose.ui.graphics.Color.White.copy(alpha = 0.5f)
+                                unselectedTextColor = if (isDarkTheme) Color.White.copy(alpha = 0.5f)
                                                       else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                                 indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                             )
@@ -215,8 +219,6 @@ fun AppNavigation(
             }
         }
     ) { innerPadding ->
-        val downloadViewModel: com.hazel.android.download.DownloadViewModel =
-            androidx.lifecycle.viewmodel.compose.viewModel()
 
         NavHost(
             navController = navController,

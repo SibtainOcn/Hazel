@@ -2,10 +2,14 @@ package com.hazel.android.ui.screens.download
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,8 +32,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.automirrored.filled.List
+
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.Download
@@ -37,6 +40,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -70,6 +74,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -91,6 +96,8 @@ import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.ui.components.MediaCardShimmer
+import com.hazel.android.ui.components.ShimmerHost
+import com.hazel.android.ui.components.refreshShine
 import com.hazel.android.ui.components.rememberPresence
 import com.hazel.android.ui.components.ProcessingShimmer
 import com.hazel.android.ui.motion.M3Motion
@@ -101,6 +108,7 @@ import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.StoragePaths
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -126,11 +134,6 @@ fun DownloadScreen(
     val treeUri by SettingsRepository.getDownloadTreeUri(context).collectAsState(initial = "")
     val treeLabel by SettingsRepository.getDownloadTreeLabel(context).collectAsState(initial = "")
 
-    // Large artwork or a tight list, for a set of links long enough that the difference
-    // matters. A playlist can resolve to dozens of cards, and at one screen each the list
-    // stops being something that can be looked over.
-    val compact by SettingsRepository.getResultsCompact(context)
-        .collectAsState(initial = false)
 
     // Collected as null until the stored value arrives, so the dialog cannot flash up for
     // a frame on every launch before the real answer loads and dismisses it again.
@@ -200,12 +203,40 @@ fun DownloadScreen(
         }
     }
 
+    val searchBarShine = remember { Animatable(0f) }
+    var wasFetching by remember { mutableStateOf(false) }
+
     // Reading links clears the resolved media, which would otherwise pull a sheet out of
     // the tree mid-animation and show as a box flashing at the bottom of the screen.
+    // When fetching finishes, trigger 1 last refresh shine sweep across the searchbar.
     LaunchedEffect(state.isFetching) {
         if (state.isFetching) {
             sheetVisible = false
             batchSheetVisible = false
+            wasFetching = true
+        } else if (wasFetching) {
+            wasFetching = false
+            searchBarShine.snapTo(0f)
+            searchBarShine.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 850, easing = FastOutSlowInEasing)
+            )
+        }
+    }
+
+    // When the active download switches (e.g. current item finishes, next starts),
+    // scroll the list so the new active card is visible at the top. Without this the
+    // viewport stays anchored on the old completed card and the user has to scroll
+    // manually to find the one that is running now.
+    val activeUrl = state.info?.url
+    val isDownloading = state.isDownloading
+    LaunchedEffect(activeUrl, isDownloading) {
+        if (isDownloading && activeUrl != null && (state.isMultiple || state.batch.size > 1)) {
+            // Item 0 is "instant", item 1 is "fetching", then the results follow.
+            // orderedResults places the active URL first, so scrolling to index 0
+            // brings the currently-downloading card into view without jumping past
+            // the header or controls.
+            listState.animateScrollToItem(0)
         }
     }
 
@@ -272,7 +303,6 @@ fun DownloadScreen(
     // sheet and the repeat warning, both of which are questions, and the point of that
     // target is that nothing is asked.
     var directPending by remember { mutableStateOf(false) }
-    var showCancelConfirmDialog by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
 
     // A single link goes straight to its sheet. A set of links does not, because the list
@@ -368,118 +398,52 @@ fun DownloadScreen(
             // screen is for, and a set of a hundred links used to carry it off the top of
             // the screen on the first flick.
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Home screen search bar with overflow 3-dot menu (clear results / clear history).
+            // The menu reuses the same actions the full SearchScreen exposes in its own
+            // 3-dot, so the two entry points behave identically.
+            var homeMenuOpen by remember { mutableStateOf(false) }
+            var showClearHistoryConfirm by remember { mutableStateOf(false) }
+            val homeScope = rememberCoroutineScope()
+            val homeClipboard = LocalClipboardManager.current
+
+            if (showClearHistoryConfirm) {
+                AlertDialog(
+                    onDismissRequest = { showClearHistoryConfirm = false },
+                    title = { Text(stringResource(R.string.search_clear_history_confirm_title), fontWeight = FontWeight.Bold) },
+                    text = { Text(stringResource(R.string.search_clear_history_confirm_body)) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showClearHistoryConfirm = false
+                            homeScope.launch(Dispatchers.IO) {
+                                SearchHistoryRepository.clear(context.applicationContext)
+                            }
+                        }) { Text(stringResource(R.string.search_clear_history), color = MaterialTheme.colorScheme.error) }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showClearHistoryConfirm = false }) {
+                            Text(stringResource(R.string.search_cancel))
+                        }
+                    }
+                )
+            }
+
             UrlSearchBar(
                 url = state.url,
+                shineProgress = searchBarShine.value,
                 onOpenSearch = {
                     cameFromShare = false
                     searchOpen = true
                 },
+                onClearResults = { showClearConfirmDialog = true },
+                onClearHistory = { showClearHistoryConfirm = true },
+                menuOpen = homeMenuOpen,
+                onMenuOpen = { homeMenuOpen = true },
+                onMenuDismiss = { homeMenuOpen = false },
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
 
-            // Kept out of the list with the field above it. It says how much the list
-            // holds and switches how it is drawn, and both of those are worth reaching
-            // without scrolling back to the top of a hundred links first.
-            //
-            // Shown from the first link. It was held back until there were two, on the
-            // grounds that a single card is not a list, but that made the layout switch a
-            // control which comes and goes, so nobody learns it is there and a single card
-            // cannot be read as a line. The count says "1 link" for one of them.
-            if (state.results.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        pluralStringResource(
-                            R.plurals.download_links,
-                            state.results.size,
-                            state.results.size
-                        ),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    val isBatchActive = state.isDownloading ||
-                            state.batch.any { it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED || it.state == BatchState.QUEUED }
-
-                    if (isBatchActive) {
-                        val isMulti = state.isMultiple || state.batch.size > 1 || pendingResults.size > 1
-                        Text(
-                            text = stringResource(
-                                if (isMulti) {
-                                    if (state.isDownloading) R.string.download_pause_all
-                                    else R.string.download_resume_all
-                                } else {
-                                    if (state.isDownloading) R.string.download_pause
-                                    else R.string.download_resume
-                                }
-                            ),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(18.dp))
-                                .clickable {
-                                    if (state.isDownloading) downloadViewModel.pauseDownload()
-                                    else downloadViewModel.resumeDownload()
-                                }
-                                .padding(horizontal = 10.dp, vertical = 8.dp)
-                        )
-
-                        Text(
-                            text = stringResource(R.string.download_cancel),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(18.dp))
-                                .clickable {
-                                    showCancelConfirmDialog = true
-                                }
-                                .padding(horizontal = 10.dp, vertical = 8.dp)
-                        )
-                    }
-
-                    // The list is kept for as long as the app runs, so there has to be a
-                    // way of putting it down. Plain text rather than another icon: it
-                    // throws away work, and that is worth spelling out.
-                    Text(
-                        stringResource(R.string.download_clear),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (!isBatchActive) MaterialTheme.colorScheme.onSurfaceVariant
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(18.dp))
-                            .clickable(enabled = !isBatchActive) {
-                                showClearConfirmDialog = true
-                            }
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                    )
-
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                SettingsRepository.setResultsCompact(context, !compact)
-                            }
-                        }
-                    ) {
-                        Icon(
-                            if (compact) Icons.Filled.GridView
-                            else Icons.AutoMirrored.Filled.List,
-                            contentDescription =
-                                stringResource(if (compact) R.string.download_show_large_artwork else R.string.download_show_list),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Drawn only once there is something underneath it to separate from, so a
             // short list keeps the plain unbroken background it looks better on.
@@ -557,20 +521,20 @@ fun DownloadScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            // One placeholder per link being read, so a set of links looks
-                            // like the list it is about to become rather than like a single
-                            // card. Capped, because a hundred placeholders say nothing more
-                            // than a screenful of them does.
-                            repeat(state.fetchCount.coerceIn(1, SHIMMER_CARD_LIMIT)) {
-                                Spacer(modifier = Modifier.height(20.dp))
-                                MediaCardShimmer()
+                            ShimmerHost(modifier = Modifier.fillMaxWidth()) {
+                                Column {
+                                    repeat(state.fetchCount.coerceIn(1, SHIMMER_CARD_LIMIT)) {
+                                        Spacer(modifier = Modifier.height(20.dp))
+                                        MediaCardShimmer()
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
                 items(orderedResults, key = { it.url }) { info ->
-                    Spacer(modifier = Modifier.height(if (compact) 8.dp else 20.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     // Each card arrives rather than appearing: it fades up from slightly
                     // below where it belongs, once, the first time it is composed. A long
@@ -595,9 +559,6 @@ fun DownloadScreen(
                         downloadViewModel.resolveFormats(info)
                         sheetVisible = true
                     }
-                    val remove = if (state.isMultiple && !runInHand) {
-                        { downloadViewModel.removeResult(info) }
-                    } else null
 
                     Box(
                         modifier = Modifier.graphicsLayer {
@@ -605,25 +566,6 @@ fun DownloadScreen(
                             translationY = (1f - entrance) * 28f
                         }
                     ) {
-                    if (compact) {
-                        MediaRow(
-                            info = info,
-                            isDownloading = isActive,
-                            isProcessing = isActive && state.isProcessing,
-                            progress = state.progress,
-                            totalBytes = state.totalBytes,
-                            isComplete = batchItem?.state == BatchState.DONE ||
-                                    (!state.isMultiple && state.isComplete),
-                            batchItem = batchItem,
-                            waitingForWifi = state.waitingForWifi,
-                            alreadyDownloaded = info.url in savedUrls,
-                            onOpenSheet = openSheet,
-                            onCancel = { downloadViewModel.cancelItem(info.url) },
-                            onPause = downloadViewModel::pauseDownload,
-                            onResume = downloadViewModel::resumeDownload,
-                            onRemove = remove
-                        )
-                    } else {
                         MediaCard(
                             info = info,
                             isDownloading = isActive,
@@ -638,10 +580,8 @@ fun DownloadScreen(
                             onOpenSheet = openSheet,
                             onCancel = { downloadViewModel.cancelItem(info.url) },
                             onPause = downloadViewModel::pauseDownload,
-                            onResume = downloadViewModel::resumeDownload,
-                            onRemove = remove
+                            onResume = downloadViewModel::resumeDownload
                         )
-                    }
                     }
                 }
 
@@ -723,6 +663,82 @@ fun DownloadScreen(
                             )
                         }
                     }
+                }
+            }
+        }
+
+        // ── Paste FAB on empty home screen ──
+        //
+        // Shown at the bottom-left corner when there is nothing on screen yet
+        // (no results, not fetching). A link is nearly always copied elsewhere first,
+        // so the first action on this screen is typically a paste. Having it one tap
+        // away without opening the full search screen saves a step.
+        val homeIsEmpty = state.results.isEmpty() && !state.isFetching && state.instantSource.isBlank()
+        val homePasteClipboard = LocalClipboardManager.current
+        var homePastePendingDupe by remember { mutableStateOf<Pair<List<String>, HistoryEntry>?>(null) }
+
+        homePastePendingDupe?.let { (links, existing) ->
+            AlreadyDownloadedDialog(
+                entry = existing,
+                onPlay = { MediaOpener.play(context, existing.fileUri, existing.isVideo) },
+                onOpenLocation = { MediaOpener.openLocation(context, treeUri) },
+                onDownloadAgain = {
+                    homePastePendingDupe = null
+                    downloadViewModel.fetchAll(links)
+                },
+                onDismiss = { homePastePendingDupe = null }
+            )
+        }
+
+
+        if (homeIsEmpty) {
+            Surface(
+                onClick = {
+                    val pasted = homePasteClipboard.getText()?.text.orEmpty().trim()
+                    if (pasted.isBlank()) {
+                        Toast.makeText(context, context.getString(R.string.search_nothing_to_paste), Toast.LENGTH_SHORT).show()
+                        return@Surface
+                    }
+                    val links = pasted.split(Regex("""\s+""")).map { it.trim() }.filter { it.isNotBlank() }.distinct()
+                    if (links.isEmpty()) return@Surface
+                    scope.launch {
+                        val existing = links.firstNotNullOfOrNull { link ->
+                            history
+                                .firstOrNull { LinkKey.sameMedia(it.url, link) }
+                                ?.takeIf { DownloadHistoryRepository.fileExists(context, it) }
+                        }
+                        if (existing != null) {
+                            homePastePendingDupe = links to existing
+                        } else {
+                            cameFromShare = false
+                            downloadViewModel.fetchAll(links)
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(20.dp)
+                    .height(52.dp),
+                shape = RoundedCornerShape(26.dp),
+                color = MaterialTheme.colorScheme.primary
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 22.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Filled.ContentPaste,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        stringResource(R.string.search_paste),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
             }
         }
@@ -864,45 +880,6 @@ fun DownloadScreen(
         )
     }
 
-    if (showCancelConfirmDialog) {
-        val isMulti = state.isMultiple || state.batch.size > 1 || pendingResults.size > 1
-        AlertDialog(
-            onDismissRequest = { showCancelConfirmDialog = false },
-            title = {
-                Text(
-                    text = if (isMulti) stringResource(R.string.download_cancel_all)
-                           else stringResource(R.string.download_cancel_action),
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Text(
-                    text = if (isMulti) stringResource(R.string.download_cancel_dialog_body)
-                           else stringResource(R.string.download_cancel_single_dialog_body)
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showCancelConfirmDialog = false
-                        downloadViewModel.cancelAllDownloads()
-                    }
-                ) {
-                    Text(
-                        stringResource(R.string.download_cancel),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showCancelConfirmDialog = false }
-                ) {
-                    Text(stringResource(R.string.download_cancel_dialog_dismiss))
-                }
-            }
-        )
-    }
 
     if (showClearConfirmDialog) {
         AlertDialog(
@@ -962,10 +939,18 @@ private fun openSaveDir(context: android.content.Context, treeUri: String) {
 private fun UrlSearchBar(
     url: String,
     onOpenSearch: () -> Unit,
+    onClearResults: () -> Unit = {},
+    onClearHistory: () -> Unit = {},
+    shineProgress: Float = 0f,
+    menuOpen: Boolean = false,
+    onMenuOpen: () -> Unit = {},
+    onMenuDismiss: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(
+        onClick = onOpenSearch,
         modifier = modifier
+            .refreshShine(shineProgress, RoundedCornerShape(26.dp))
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(26.dp),
@@ -974,8 +959,8 @@ private fun UrlSearchBar(
     ) {
         Row(
             modifier = Modifier
-                .clickable(onClick = onOpenSearch)
-                .padding(horizontal = 16.dp),
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -985,7 +970,6 @@ private fun UrlSearchBar(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.width(12.dp))
-
             Text(
                 url.ifBlank { stringResource(R.string.download_search_hint) },
                 style = MaterialTheme.typography.bodyLarge,
@@ -995,6 +979,38 @@ private fun UrlSearchBar(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
+
+            // Right: 3-dot overflow menu mirroring the full SearchScreen's menu
+            Box {
+                IconButton(onClick = onMenuOpen, modifier = Modifier.size(40.dp)) {
+                    Icon(
+                        Icons.Filled.MoreVert,
+                        contentDescription = stringResource(R.string.search_more),
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                DropdownMenu(
+                    expanded = menuOpen,
+                    onDismissRequest = onMenuDismiss
+                ) {
+
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.search_clear_results)) },
+                        onClick = {
+                            onMenuDismiss()
+                            onClearResults()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.search_clear_history)) },
+                        onClick = {
+                            onMenuDismiss()
+                            onClearHistory()
+                        }
+                    )
+                }
+            }
         }
     }
 }
@@ -1054,8 +1070,7 @@ private fun MediaCard(
     onOpenSheet: () -> Unit,
     onCancel: () -> Unit,
     onPause: () -> Unit = {},
-    onResume: () -> Unit = {},
-    onRemove: (() -> Unit)? = null
+    onResume: () -> Unit = {}
 ) {
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -1065,602 +1080,317 @@ private fun MediaCard(
 
     var menuOpen by remember { mutableStateOf(false) }
     val isPaused = batchItem?.state == BatchState.PAUSED
+    val isQueued = batchItem?.state == BatchState.QUEUED
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
     ) {
-        Column(
-            modifier = if (isDownloading) Modifier
-            else Modifier.clickable(onClick = onOpenSheet)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(16f / 9f)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .then(
+                    if (isDownloading) Modifier
+                    else Modifier.clickable(onClick = onOpenSheet)
+                )
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                // Sources without artwork simply show the placeholder glyph.
-                if (info.thumbnail != null) {
-                    AsyncImage(
-                        model = info.thumbnail,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Icon(
-                        Icons.Filled.MusicNote,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .align(Alignment.Center),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                    )
-                }
-
-                // Offered while the download is in hand, and while it is sitting paused or queued.
-                val isQueued = batchItem?.state == BatchState.QUEUED
-                if (isDownloading || isPaused || isQueued) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(6.dp)
-                            .zIndex(1f)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(Color.Black.copy(alpha = 0.55f))
-                                .clickable { menuOpen = true },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Filled.MoreVert,
-                                contentDescription = stringResource(R.string.download_options),
-                                modifier = Modifier.size(18.dp),
-                                tint = Color.White
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = menuOpen,
-                            onDismissRequest = { menuOpen = false }
-                        ) {
-                            if (isPaused) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.download_resume)) },
-                                    onClick = {
-                                        menuOpen = false
-                                        onResume()
-                                    }
-                                )
-                            } else if (isDownloading) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.download_pause)) },
-                                    // Nothing to pause once the transfer is done and the
-                                    // engine has moved on to merging or tagging.
-                                    enabled = !isProcessing,
-                                    onClick = {
-                                        menuOpen = false
-                                        onPause()
-                                    }
-                                )
-                            }
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.download_cancel)) },
-                                onClick = {
-                                    menuOpen = false
-                                    onCancel()
-                                }
-                            )
-                        }
-                    }
-                }
-
-                // A paused download is still a download in hand, so the artwork keeps the
-                // treatment that says so. Only the control in the middle changes: there is
-                // nothing to stop any more, and the thing to do is start it again.
-                if (isDownloading || isPaused) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.35f))
-                    )
-
-                    // Percentage readout, with the transferred size beside it once
-                    // yt-dlp has reported a total. Both are about the transfer, so once
-                    // that is done the corner just names the stage that follows.
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (isPaused) {
-                            OverlayChip(text = stringResource(R.string.download_paused), bold = true)
-                            if (totalBytes > 0) {
-                                val done = (totalBytes * animatedProgress).toLong()
-                                OverlayChip(
-                                    text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
-                                )
-                            }
-                        } else if (isProcessing) {
-                            OverlayChip(text = stringResource(R.string.download_processing), bold = true)
-                        } else {
-                            OverlayChip(
-                                text = "%.1f %%".format(animatedProgress * 100),
-                                bold = true
-                            )
-                            if (totalBytes > 0) {
-                                val done = (totalBytes * animatedProgress).toLong()
-                                OverlayChip(
-                                    text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
-                                )
-                            }
-                        }
-                    }
-
-                    if (isProcessing && !isPaused) {
-                        ProcessingShimmer(modifier = Modifier.fillMaxSize())
-                    } else {
-                        // A progress ring wrapping the cancel control. It is the only
-                        // tappable area while a download runs, so a stray tap cannot
-                        // reopen the sheet.
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .size(60.dp)
-                                .clip(CircleShape)
-                                .background(Color.Black.copy(alpha = 0.55f))
-                                .clickable(onClick = if (isPaused) onResume else onCancel),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                progress = { animatedProgress },
-                                modifier = Modifier.size(60.dp),
-                                color = Color.White,
-                                trackColor = Color.Transparent,
-                                strokeWidth = 3.dp
-                            )
-                            Icon(
-                                if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Close,
-                                contentDescription =
-                                    stringResource(if (isPaused) R.string.download_resume_action else R.string.download_cancel_action),
-                                modifier = Modifier.size(22.dp),
-                                tint = Color.White
-                            )
-                        }
-                    }
-                }
-
-                // Held back for want of Wi-Fi. The artwork is darkened exactly as a
-                // running download darkens it, because the card is in hand either way, and
-                // the middle says what it is waiting for. Said here rather than as a line of
-                // red text above the list: nothing failed, and the wait belongs to this item
-                // rather than to the screen.
-                if (waitingForWifi && !isDownloading && !isPaused) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.35f))
-                    )
-
-                    Surface(
-                        modifier = Modifier.align(Alignment.Center),
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color.Black.copy(alpha = 0.6f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                            horizontalArrangement = Arrangement.spacedBy(7.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Filled.WifiOff,
-                                contentDescription = null,
-                                modifier = Modifier.size(17.dp),
-                                tint = Color.White
-                            )
-                            Text(
-                                stringResource(R.string.download_waiting_wifi),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.White
-                            )
-                        }
-                    }
-                }
-
-                // Removing a link from the set, offered only while the set is idle. A
-                // paused item counts as busy: the run as a whole has stopped, so the set is
-                // idle by the only measure this screen has, and the remove control was
-                // being drawn straight on top of the menu that resumes it.
-                if (onRemove != null && !isDownloading && !isPaused) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(8.dp)
-                            .size(30.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.55f))
-                            .clickable(onClick = onRemove),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.download_remove_link),
-                            modifier = Modifier.size(16.dp),
-                            tint = Color.White
-                        )
-                    }
-                }
-
-                // Bottom right corner carries the duration, and whatever this link's state
-                // is worth saying: queued, failed, or saved.
-                if (!isDownloading) {
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        val duration = formatDuration(info.durationSeconds)
-                        if (duration.isNotBlank()) {
-                            CornerTag(text = duration)
-                        }
-                        when {
-                            batchItem?.state == BatchState.FAILED -> CornerTag(
-                                text = batchItem.error ?: stringResource(R.string.download_failed),
-                                background = MaterialTheme.colorScheme.error,
-                                foreground = MaterialTheme.colorScheme.onError
-                            )
-                            isComplete -> CornerTag(
-                                text = stringResource(R.string.download_saved),
-                                background = MaterialTheme.colorScheme.primary,
-                                foreground = MaterialTheme.colorScheme.onPrimary
-                            )
-                            batchItem?.state == BatchState.QUEUED -> CornerTag(text = stringResource(R.string.download_queued))
-                            // Marks a link in a set that has been downloaded before, where
-                            // there is no dialog to raise it.
-                            alreadyDownloaded -> CornerTag(text = stringResource(R.string.download_downloaded))
-                        }
-                    }
-                }
-
-                // Filled line along the bottom edge of the thumbnail. Processing has no
-                // figure to fill it with, so the line runs on its own there.
-                if (isDownloading) {
-                    val lineModifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .height(4.dp)
-
-                    if (isProcessing) {
-                        LinearProgressIndicator(
-                            modifier = lineModifier,
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = Color.White.copy(alpha = 0.25f)
-                        )
-                    } else {
-                        LinearProgressIndicator(
-                            progress = { animatedProgress },
-                            modifier = lineModifier,
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = Color.White.copy(alpha = 0.25f),
-                            drawStopIndicator = {}
-                        )
-                    }
-                }
+            // Sources without artwork simply show the placeholder glyph.
+            if (info.thumbnail != null) {
+                AsyncImage(
+                    model = info.thumbnail,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Icon(
+                    Icons.Filled.MusicNote,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .align(Alignment.Center),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                )
             }
 
-            Column(modifier = Modifier.padding(14.dp)) {
+            // Dark gradient overlay from top and bottom so text is always readable over thumbnail
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Black.copy(alpha = 0.72f),
+                            0.4f to Color.Transparent,
+                            0.7f to Color.Transparent,
+                            1f to Color.Black.copy(alpha = 0.75f)
+                        )
+                    )
+            )
+
+            // Title and author directly overlaid on top of the thumbnail
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .fillMaxWidth()
+                    .padding(
+                        start = 14.dp,
+                        top = 12.dp,
+                        end = if (isDownloading || isPaused || isQueued) 48.dp else 14.dp
+                    )
+            ) {
                 Text(
                     info.title,
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 if (info.uploader.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         info.uploader,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                        color = Color.White.copy(alpha = 0.82f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
             }
-        }
-    }
-}
 
-
-/**
- * One resolved link as a single line, for a set too long to browse as artwork.
- *
- * It carries the same controls as the card, in the same order, so switching layout changes
- * how much fits on screen and nothing else. While this item downloads, its progress runs
- * along the bottom edge and the artwork holds the cancel control, exactly as the card does.
- */
-@Composable
-private fun MediaRow(
-    info: MediaInfo,
-    isDownloading: Boolean,
-    isProcessing: Boolean,
-    progress: Float,
-    totalBytes: Long,
-    isComplete: Boolean,
-    batchItem: BatchItem?,
-    waitingForWifi: Boolean = false,
-    alreadyDownloaded: Boolean,
-    onOpenSheet: () -> Unit,
-    onCancel: () -> Unit,
-    onPause: () -> Unit = {},
-    onResume: () -> Unit = {},
-    onRemove: (() -> Unit)?
-) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = M3Motion.emphasized(300),
-        label = "rowProgress"
-    )
-
-    var menuOpen by remember { mutableStateOf(false) }
-    val isPaused = batchItem?.state == BatchState.PAUSED
-    val inHand = isDownloading || isPaused
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-    ) {
-        Column(
-            modifier = if (inHand) Modifier else Modifier.clickable(onClick = onOpenSheet)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            // Offered while the download is in hand, and while it is sitting paused or queued.
+            if (isDownloading || isPaused || isQueued) {
                 Box(
                     modifier = Modifier
-                        .size(width = 104.dp, height = 60.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
+                        .zIndex(1f)
                 ) {
-                    if (info.thumbnail != null) {
-                        AsyncImage(
-                            model = info.thumbnail,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .clickable { menuOpen = true },
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
-                            Icons.Filled.MusicNote,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                            Icons.Filled.MoreVert,
+                            contentDescription = stringResource(R.string.download_options),
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.White
                         )
                     }
 
-                    // A paused item keeps the treatment that says it is in hand, exactly as
-                    // the card does. Only the control in the middle changes: there is
-                    // nothing to stop any more, and the thing to do is start it again.
-                    if (inHand) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.4f))
-                        )
-                        if (isProcessing && !isPaused) {
-                            ProcessingShimmer(modifier = Modifier.fillMaxSize())
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(34.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.Black.copy(alpha = 0.55f))
-                                    .clickable(onClick = if (isPaused) onResume else onCancel),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Close,
-                                    contentDescription = stringResource(
-                                        if (isPaused) R.string.download_resume_action
-                                        else R.string.download_cancel_action
-                                    ),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = Color.White
-                                )
-                            }
-                        }
-                    } else {
-                        val duration = formatDuration(info.durationSeconds)
-                        if (duration.isNotBlank()) {
-                            Surface(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(3.dp),
-                                shape = RoundedCornerShape(4.dp),
-                                color = Color.Black.copy(alpha = 0.7f)
-                            ) {
-                                Text(
-                                    duration,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White,
-                                    modifier = Modifier
-                                        .padding(horizontal = 4.dp, vertical = 1.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        info.title,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (info.uploader.isNotBlank()) {
-                        Text(
-                            info.uploader,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
-                    val pausedLabel = stringResource(R.string.download_paused)
-                    val state = when {
-                        isPaused -> buildString {
-                            append(pausedLabel)
-                            if (totalBytes > 0) {
-                                val done = (totalBytes * animatedProgress).toLong()
-                                append("  ")
-                                append(formatFileSize(done))
-                                append(" / ")
-                                append(formatFileSize(totalBytes))
-                            }
-                        }
-                        waitingForWifi && !isDownloading ->
-                            stringResource(R.string.download_waiting_wifi)
-                        isProcessing -> stringResource(R.string.download_processing)
-                        // The same line the card shows: how far along, and how far there is
-                        // to go. A percentage on its own says nothing about whether the
-                        // wait is thirty seconds or ten minutes.
-                        isDownloading -> buildString {
-                            append("%.1f %%".format(animatedProgress * 100))
-                            if (totalBytes > 0) {
-                                val done = (totalBytes * animatedProgress).toLong()
-                                append("  ")
-                                append(formatFileSize(done))
-                                append(" / ")
-                                append(formatFileSize(totalBytes))
-                            }
-                        }
-                        batchItem?.state == BatchState.FAILED -> batchItem.error ?: stringResource(R.string.download_failed)
-                        isComplete -> stringResource(R.string.download_saved)
-                        batchItem?.state == BatchState.QUEUED -> stringResource(R.string.download_queued)
-                        alreadyDownloaded -> stringResource(R.string.download_downloaded)
-                        else -> ""
-                    }
-                    if (state.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(3.dp))
-                        Text(
-                            state,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = if (batchItem?.state == BatchState.FAILED) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.primary
-                            },
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-
-                // The same options the card offers, in the same order. They used to be on
-                // the card alone, so switching to this layout mid-download took away every
-                // way of pausing or resuming the thing being watched. They sit at the end
-                // of the line rather than over the artwork, which at this size is too small
-                // to hold a control on top of the one already in the middle of it.
-                val isQueued = batchItem?.state == BatchState.QUEUED
-                when {
-                    inHand || isQueued -> Box {
-                        IconButton(onClick = { menuOpen = true }) {
-                            Icon(
-                                Icons.Filled.MoreVert,
-                                contentDescription = stringResource(R.string.download_options),
-                                modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = menuOpen,
-                            onDismissRequest = { menuOpen = false }
-                        ) {
-                            if (isPaused) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.download_resume)) },
-                                    onClick = {
-                                        menuOpen = false
-                                        onResume()
-                                    }
-                                )
-                            } else if (isDownloading) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.download_pause)) },
-                                    // Nothing to pause once the transfer is done and the
-                                    // engine has moved on to merging or tagging.
-                                    enabled = !isProcessing,
-                                    onClick = {
-                                        menuOpen = false
-                                        onPause()
-                                    }
-                                )
-                            }
+                    DropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false }
+                    ) {
+                        if (isPaused) {
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.download_cancel)) },
+                                text = { Text(stringResource(R.string.download_resume)) },
                                 onClick = {
                                     menuOpen = false
-                                    onCancel()
+                                    onResume()
+                                }
+                            )
+                        } else if (isDownloading) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.download_pause)) },
+                                // Nothing to pause once the transfer is done and the
+                                // engine has moved on to merging or tagging.
+                                enabled = !isProcessing,
+                                onClick = {
+                                    menuOpen = false
+                                    onPause()
                                 }
                             )
                         }
-                    }
-
-                    onRemove != null -> IconButton(onClick = onRemove) {
-                        Icon(
-                            Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.download_remove_link),
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.download_cancel)) },
+                            onClick = {
+                                menuOpen = false
+                                onCancel()
+                            }
                         )
                     }
                 }
             }
 
-            // Drawn while the item is paused as well, because a bar that vanishes on a
-            // pause takes with it the only sign of how much of the file is already down.
-            if (inHand) {
+
+
+            // A paused download is still a download in hand, so the artwork keeps the
+            // treatment that says so. Only the control in the middle changes: there is
+            // nothing to stop any more, and the thing to do is start it again.
+            if (isDownloading || isPaused) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f))
+                )
+
+                // Downloading status & percentage readout positioned in the bottom-left corner
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isPaused) {
+                        OverlayChip(text = stringResource(R.string.download_paused), bold = true)
+                        if (totalBytes > 0) {
+                            val done = (totalBytes * animatedProgress).toLong()
+                            OverlayChip(
+                                text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
+                            )
+                        }
+                    } else if (isProcessing) {
+                        OverlayChip(text = stringResource(R.string.download_processing), bold = true)
+                    } else {
+                        OverlayChip(
+                            text = "%.1f %%".format(animatedProgress * 100),
+                            bold = true
+                        )
+                        if (totalBytes > 0) {
+                            val done = (totalBytes * animatedProgress).toLong()
+                            OverlayChip(
+                                text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
+                            )
+                        }
+                    }
+                }
+
                 if (isProcessing && !isPaused) {
-                    LinearProgressIndicator(
+                    ProcessingShimmer(modifier = Modifier.fillMaxSize())
+                } else {
+                    // A progress ring wrapping the cancel control. It is the only
+                    // tappable area while a download runs, so a stray tap cannot
+                    // reopen the sheet.
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp),
+                            .align(Alignment.Center)
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .clickable(onClick = if (isPaused) onResume else onCancel),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            progress = { animatedProgress },
+                            modifier = Modifier.size(60.dp),
+                            color = Color.White,
+                            trackColor = Color.Transparent,
+                            strokeWidth = 3.dp
+                        )
+                        Icon(
+                            if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Close,
+                            contentDescription =
+                                stringResource(if (isPaused) R.string.download_resume_action else R.string.download_cancel_action),
+                            modifier = Modifier.size(22.dp),
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+
+            // Held back for want of Wi-Fi. The artwork is darkened exactly as a
+            // running download darkens it, because the card is in hand either way, and
+            // the middle says what it is waiting for.
+            if (waitingForWifi && !isDownloading && !isPaused) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f))
+                )
+
+                Surface(
+                    modifier = Modifier.align(Alignment.Center),
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color.Black.copy(alpha = 0.6f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                        horizontalArrangement = Arrangement.spacedBy(7.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Filled.WifiOff,
+                            contentDescription = null,
+                            modifier = Modifier.size(17.dp),
+                            tint = Color.White
+                        )
+                        Text(
+                            stringResource(R.string.download_waiting_wifi),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+
+            // Bottom left corner carries the duration, and bottom right corner carries
+            // whatever this link's state is: queued, failed, saved, or downloaded.
+            if (!isDownloading) {
+                val duration = formatDuration(info.durationSeconds)
+                if (duration.isNotBlank()) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(10.dp)
+                    ) {
+                        CornerTag(text = duration)
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    when {
+                        batchItem?.state == BatchState.FAILED -> CornerTag(
+                            text = batchItem.error ?: stringResource(R.string.download_failed),
+                            background = MaterialTheme.colorScheme.error,
+                            foreground = MaterialTheme.colorScheme.onError
+                        )
+                        isComplete -> CornerTag(
+                            text = stringResource(R.string.download_saved),
+                            background = MaterialTheme.colorScheme.primary,
+                            foreground = MaterialTheme.colorScheme.onPrimary
+                        )
+                        batchItem?.state == BatchState.QUEUED -> CornerTag(text = stringResource(R.string.download_queued))
+                        alreadyDownloaded -> CornerTag(text = stringResource(R.string.download_downloaded))
+                    }
+                }
+            }
+
+            // Filled line along the bottom edge of the thumbnail. Processing has no
+            // figure to fill it with, so the line runs on its own there.
+            if (isDownloading) {
+                val lineModifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(4.dp)
+
+                if (isProcessing) {
+                    LinearProgressIndicator(
+                        modifier = lineModifier,
                         color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color.Transparent
+                        trackColor = Color.White.copy(alpha = 0.25f)
                     )
                 } else {
                     LinearProgressIndicator(
                         progress = { animatedProgress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp),
-                        color = if (isPaused) {
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                        } else {
-                            MaterialTheme.colorScheme.primary
-                        },
-                        trackColor = Color.Transparent,
+                        modifier = lineModifier,
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = Color.White.copy(alpha = 0.25f),
                         drawStopIndicator = {}
                     )
                 }
@@ -1669,10 +1399,6 @@ private fun MediaRow(
     }
 }
 
-/**
- * How many links there have to be before the layout toggle is offered. Below this the two
- * layouts read much the same, and the control is one more thing on screen for no gain.
- */
 /**
  * How many stand-in cards a read shows at most. A long playlist reports its whole
  * length, and a placeholder for every entry of it is a screenful of the same shape

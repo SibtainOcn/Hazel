@@ -11,8 +11,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">粘贴链接</string>
     <string name="download_clear">清空</string>
-    <string name="download_show_large_artwork">显示大图</string>
-    <string name="download_show_list">以列表显示</string>
     <string name="download_instant_source">即时下载 · 正在读取 %1$s</string>
     <string name="download_incognito_title">你正在无痕模式中</string>
     <string name="download_incognito_body">下载不会加入历史记录，链接也不会被记住。文件仍会照常保存。</string>
@@ -59,7 +57,11 @@
     <string name="search_forget">忘记</string>
     <string name="search_edit_before">搜索前先编辑</string>
     <string name="search_paste_and_fetch">粘贴并读取</string>
+    <string name="search_paste">粘贴</string>
     <string name="search_nothing_to_paste">没有可粘贴的内容</string>
+    <string name="search_cancel">取消</string>
+    <string name="search_clear_history_confirm_title">清除搜索记录？</string>
+    <string name="search_clear_history_confirm_body">所有已保存的搜索链接都将被移除。此操作无法撤消。</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">已经下载过</string>
@@ -288,8 +290,6 @@
 
     <!-- HistoryScreen -->
     <string name="history_title">全部下载</string>
-    <string name="history_layout_grid">显示大图</string>
-    <string name="history_layout_list">以列表显示</string>
     <string name="history_search_action">搜索下载</string>
     <string name="history_sort_action">排序</string>
     <string name="history_menu_action">更多</string>
@@ -313,18 +313,12 @@
     <string name="history_card_remove">从列表中移除</string>
     <string name="history_card_delete">删除文件</string>
     <string name="history_tag_deleted">已删除</string>
-    <string name="history_row_options">选项</string>
-    <string name="history_row_properties">属性</string>
-    <string name="history_row_remove">从列表中移除</string>
-    <string name="history_row_delete">删除文件</string>
     <string name="history_toast_file_gone">这个文件已经不在你的设备上了</string>
     <string name="history_tab_downloading">下载中</string>
-    <string name="history_tab_queued">已排队</string>
+    <string name="history_tab_downloading_queue">下载队列</string>
     <string name="history_tab_failed">已失败</string>
-    <string name="history_empty_downloading">没有正在进行的下载</string>
-    <string name="history_empty_downloading_sub">正在进行的下载会在此显示实时速度和进度。</string>
-    <string name="history_empty_queued">队列中没有下载项</string>
-    <string name="history_empty_queued_sub">等待下载的链接会在此显示。</string>
+    <string name="history_empty_downloading_queue">没有正在进行或排队的下载</string>
+    <string name="history_empty_downloading_queue_sub">正在进行的下载和排队的项目将显示在此处。</string>
     <string name="history_empty_failed">没有失败的下载</string>
     <string name="history_empty_failed_sub">遇到错误的下载项将在此处显示错误日志。</string>
     <string name="history_failed_error_log">错误日志</string>

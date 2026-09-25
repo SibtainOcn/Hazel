@@ -10,15 +10,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Replaced the Ko-fi sponsor option (which was marked "Opening soon") with a live
   Buy Me a Coffee link (`buymeacoffee.com/sibtainocean`).
+- Streamlined the Home screen by removing the redundant batch action row below the search bar while fully preserving per-media card controls (center play/pause/cancel and 3-dot menu).
+- Merged separate Downloading and Queued screens into a single unified "Downloading queue" view with dedicated component architecture (`DownloadingQueueView.kt`), presenting active downloads and waiting queue items in one cohesive interface with real-time badges.
+- Added batch controls ("Pause all" / "Resume all", "Cancel all" with confirmation dialog, and "Clear queue") into the Downloads screen 3-dot overflow menu.
 - Replaced icon buttons with clean clickable text buttons ("Pause" / "Resume", "Cancel", and "Clear") in the header bar below the search field for improved clarity and consistency.
 - Kept header Cancel button styled with standard primary tint rather than warning/error red to align with adjacent actions.
 - Added confirmation dialogs before cancelling active downloads and before clearing results to safeguard against accidental wipes.
 - Replaced the search bar search icon.
 - Updated batch download action bar quality button to display real-time chosen quality labels (e.g. HQ: AUTO, HQ: BEST, HQ: 1080p) instead of a static generic icon.
 - Aligned pause, resume, and cancel actions across the header controls, thumbnail center button, and 3-dots menu with full support for cancelling waiting queue items without clearing the batch.
+- Modernized home and download media cards with an edge-to-edge 16:9 full-artwork thumbnail design; title and author are now overlaid directly atop the artwork with a dual gradient scrim for high legibility, duration and active download progress chips are anchored to the bottom-left corner, and status tags remain on the bottom-right.
 - Reverted the app launcher icon to a white background with a black bolt foreground.
+- Modernized the Downloads screen title with an unread activity indicator mark beside the dropdown chevron and on the "Downloading queue" filter when active downloads or queued items exist.
+
+### Added
+- Synchronized 16:9 skeleton shimmer loading animation (`ShimmerHost` & `shimmerCard`) with rounded card placeholders and dark gradient scrim during metadata fetching.
+- One-shot search bar refresh shine highlight sweep animation (`refreshShine`) that illuminates the search bar upon completing metadata extraction.
+- Paste button on the bottom-right corner of the home screen when empty, styled with a rounded pill and "Paste" label matching the batch download action, allowing one-tap pasting and fetching of links directly from the clipboard.
+- 3-dot overflow menu on the home screen search bar with "Clear search results" and "Clear search history", providing seamless visual and functional parity with the search screen.
+- Confirmation dialog before clearing search history from both home and search screen 3-dot menus to prevent accidental data loss.
+- Smart auto-expanding search bar on the Downloads screen with smooth expansion animation and one-tap dismissal when clicking anywhere on empty screen space.
+- Explicit backup and data extraction rules (`backup_rules.xml` and `data_extraction_rules.xml`) ensuring user cookies, search history, download history, and app preferences are strictly preserved across app updates, cloud restores, and device transfers.
+- Complete 10-locale translation parity for all newly introduced search actions and confirmation dialogs.
+- Direct cookie file import option ("Import file" button and overflow menu item) allowing users to import Netscape cookie files directly with automatic domain recognition, multi-site splitting, and full 10-locale translation parity.
+- Dedicated "Pause All / Resume All" and "Cancel All" batch control buttons in the Downloads
+  screen header row, active whenever a batch or download is running.
+- Granular per-item cancellation (`cancelItem`), allowing items waiting in the queue to be
+  removed from memory and persistent queue storage without disturbing currently downloading items.
+- Downloads screen workflow dropdown on the title with chevron selector, replacing horizontal button bar.
+- Reusable progressive thumbnail media components with live progress, pause/resume/cancel actions, and visual parity with the Home screen.
+- Active downloads now appear pinned at the top of the All Downloads list.
+- Diagnostic log modal and one-tap retry for failed downloads.
+- Asynchronous and distinct DataStore flow deserialization on background dispatchers to optimize CPU, I/O, and recomposition.
+
+### Removed
+- Removed single-row compact layout ("Show as list") across all screens (Home, All Downloads, Queue, and Failed), standardizing strictly on the modern 16:9 full-artwork card layout.
+- Purged all obsolete compact row implementations (`MediaRow`, `QueuedRow`, `FailedRow`, `HistoryRow`) and cleaned up related dead code and toggle actions from the 3-dot overflow menus.
+- Removed obsolete layout preferences (`RESULTS_COMPACT_KEY` and `HISTORY_COMPACT_KEY`) from `SettingsRepository`.
+- Removed top-right 'X' (dismiss/remove) button from multi-video and playlist cards on the Home screen to streamline card presentation.
 
 ### Fixed
+- Fixed search bar "Clear search results" action to cleanly clear both resolved media cards and the active search URL.
+- Resolved bottom navigation bar clipping on devices with 3-button navigation by restoring dynamic window insets handling in Material 3 NavigationBar.
+- Made unread activity indicator dot theme-adaptive using `MaterialTheme.colorScheme.error` for proper contrast across dark and light themes, and aligned it directly on the horizontal centerline with the screen title and dropdown chevron.
 - Fixed Cookies screen master switch event collision where tapping the switch failed to turn back ON; converted row to single-source toggleable semantics and remembered Flow collections across recompositions.
 - Ensured individual cookie switches operate independently without closing off the global master switch when disabled, allowing flexible per-cookie control while preserving global cookie status.
 - Eliminated latency when holding to delete cookie sets; deletion immediately dismisses confirmation dialogs, cleans up site-specific cookie cache files, and updates repository state without blocking Compose recompositions.
@@ -48,19 +82,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Batch completion reporting (`finishBatch`) no longer counts user-cancelled downloads as
   failures, eliminating misleading error banners (such as "1 of 49 failed") when items are
   intentionally cancelled or skipped.
-
-### Added
-- Direct cookie file import option ("Import file" button and overflow menu item) allowing users to import Netscape cookie files directly with automatic domain recognition, multi-site splitting, and full 10-locale translation parity.
-- Dedicated "Pause All / Resume All" and "Cancel All" batch control buttons in the Downloads
-  screen header row, active whenever a batch or download is running.
-- Granular per-item cancellation (`cancelItem`), allowing items waiting in the queue to be
-  removed from memory and persistent queue storage without disturbing currently downloading items.
-- Downloads screen workflow dropdown on the title with chevron selector, replacing horizontal button bar.
-- Reusable progressive thumbnail and compact row media components with live progress, pause/resume/cancel actions, and visual parity with the Home screen.
-- Support for both 16:9 thumbnail artwork and compact single-row layouts across all Downloads categories (All, Downloading, Queued, Failed, Audio, Video).
-- Active downloads now appear pinned at the top of the All Downloads list.
-- Diagnostic log modal and one-tap retry for failed downloads.
-- Asynchronous and distinct DataStore flow deserialization on background dispatchers to optimize CPU, I/O, and recomposition.
+- URL validation now accepts uppercase and mixed-case URI schemes (e.g. `HTTPS://`, `Http://`) and trims leading/trailing whitespace.
+- Fixed home screen search bar click target where tapping outer segments failed to open search; expanded clickable surface across the entire bar container while isolating the 3-dot overflow menu.
+- Fixed compact single-row visual misalignment across Downloads and History screens where active downloading items displayed a smaller thumbnail (`104×60dp`) and mismatched corner radius (`12dp`) compared to completed and queued rows; aligned `MediaRow` with `HistoryRow` and `QueuedRow` (`128×78dp` thumbnail, `20dp` surface shape, `14dp` corner clip, and `14dp` spacer).
+- Fixed home screen batch and playlist downloads where advancing from one completed item to the next active download left the viewport anchored on the previous completed item; added smooth automatic scroll to the top active item whenever the running download advances.
+- Clearing search results from the 3-dot menu now also clears the URL from the search bar, so no stale link lingers after results are wiped.
 
 ## [1.0.8] - 2026-09-03
 
