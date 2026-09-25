@@ -138,7 +138,7 @@ def main():
     print(f"\nMock release feed server live at http://127.0.0.1:{PORT}/releases.json")
     print("\nNext steps on your connected device:")
     print("  1. Launch Hazel on your device.")
-    print("  2. Open the Home screen: observe the [ ⤓ Update ] pill button beside incognito.")
+    print("  2. Open the Home screen: observe the [ Update ] pill button beside incognito.")
     print("  3. Open 'More' tab: observe the red notification dot badge on the CPU icon.")
     print("  4. Tap 'Software update': observe the red dot on the Hazel component row.")
     print("  5. Tap 'Hazel': observe 'Version 1.0.9 is ready' hero card.")
