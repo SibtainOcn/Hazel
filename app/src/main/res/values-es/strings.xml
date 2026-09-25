@@ -120,9 +120,8 @@
     <string name="guide_step_share_instant">Comparte un enlace con Hazel Instantáneo desde cualquier aplicación para descargar al instante con la calidad que hayas fijado.</string>
     <string name="guide_step_battery_unrestricted">Pon el uso de batería en sin restricciones; si no, Android puede detener las descargas cuando salgas de la aplicación.</string>
     <string name="guide_step_notifications">Recibe avisos sobre el progreso de descarga y archivos completados en segundo plano.</string>
-    <string name="guide_battery_settings">Ajustes de batería</string>
-    <string name="guide_allow_notifications">Permitir notificaciones</string>
-    <string name="guide_later">Más tarde</string>
+    <string name="guide_allow">Permitir</string>
+    <string name="guide_deny">Denegar</string>
     <string name="guide_skip">Omitir</string>
     <string name="guide_next">Siguiente</string>
     <string name="guide_back">Atrás</string>

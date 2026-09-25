@@ -125,9 +125,8 @@
     <string name="guide_step_share_instant">Поделитесь ссылкой в Hazel Мгновенно из любого приложения для быстрой загрузки с заданным качеством.</string>
     <string name="guide_step_battery_unrestricted">Установите работу от батареи без ограничений, иначе Android может остановить загрузку при выходе из приложения.</string>
     <string name="guide_step_notifications">Получайте уведомления о ходе и завершении загрузок в фоновом режиме.</string>
-    <string name="guide_battery_settings">Настройки батареи</string>
-    <string name="guide_allow_notifications">Разрешить уведомления</string>
-    <string name="guide_later">Позже</string>
+    <string name="guide_allow">Разрешить</string>
+    <string name="guide_deny">Отклонить</string>
     <string name="guide_skip">Пропустить</string>
     <string name="guide_next">Далее</string>
     <string name="guide_back">Назад</string>

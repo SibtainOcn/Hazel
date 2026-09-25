@@ -65,10 +65,11 @@ import com.hazel.android.util.PermissionHelper
  * 1. Paste and Download
  * 2. Format Selection
  * 3. Hazel Instant
- * 4. Battery Optimization (with optional Later skip)
- * 5. Notifications (with direct Allow action)
+ * 4. Battery Optimization (Deny or Allow options of equal size)
+ * 5. Notifications (Deny or Allow options of equal size)
  *
- * Styled with a rich dark blue gradient and glassmorphism elements.
+ * Designed with a deep dark (#000000 / #0A0A0A) background, fine subtle blue
+ * gradient, crisp white primary actions, and clean minimalist styling.
  */
 @Composable
 fun GettingStartedDialog(
@@ -110,55 +111,27 @@ fun GettingStartedDialog(
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
-                                Color(0xFF0F172A), // Slate 900 / dark navy
-                                Color(0xFF0B132B), // Deep midnight blue
-                                Color(0xFF050811)  // Dark void navy
+                                Color(0xFF0D111A), // Fine subtle dark blue tone at top
+                                Color(0xFF07090E), // Deep dark surface
+                                Color(0xFF000000)  // Pitch black
                             )
                         )
                     )
                     .border(
                         width = 1.dp,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFF38BDF8).copy(alpha = 0.35f),
-                                Color(0xFF1E293B).copy(alpha = 0.20f)
-                            )
-                        ),
+                        color = Color.White.copy(alpha = 0.08f),
                         shape = RoundedCornerShape(32.dp)
                     )
             ) {
-                // Subtle ambient blue/cyan glow in top-right
+                // Subtle ambient glow in top-right
                 Box(
                     modifier = Modifier
-                        .size(160.dp)
+                        .size(150.dp)
                         .offset(x = 40.dp, y = (-48).dp)
                         .align(Alignment.TopEnd)
                         .blur(36.dp)
                         .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    Color(0xFF0284C7).copy(alpha = 0.22f),
-                                    Color.Transparent
-                                )
-                            ),
-                            CircleShape
-                        )
-                )
-
-                // Subtle ambient deep blue glow in bottom-left
-                Box(
-                    modifier = Modifier
-                        .size(140.dp)
-                        .offset(x = (-40).dp, y = 48.dp)
-                        .align(Alignment.BottomStart)
-                        .blur(36.dp)
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    Color(0xFF1D4ED8).copy(alpha = 0.16f),
-                                    Color.Transparent
-                                )
-                            ),
+                            Color(0xFF1E293B).copy(alpha = 0.12f),
                             CircleShape
                         )
                 )
@@ -176,7 +149,7 @@ fun GettingStartedDialog(
                         // Flat badge without border
                         Surface(
                             shape = CircleShape,
-                            color = Color(0xFF1E293B)
+                            color = Color(0xFF161616)
                         ) {
                             Text(
                                 text = stringResource(R.string.guide_step_badge, currentStep, totalSteps),
@@ -184,7 +157,7 @@ fun GettingStartedDialog(
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.8.sp,
-                                color = Color(0xFF38BDF8)
+                                color = Color(0xFFE2E8F0)
                             )
                         }
 
@@ -200,7 +173,7 @@ fun GettingStartedDialog(
                                 text = stringResource(R.string.guide_skip),
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF94A3B8)
+                                color = Color(0xFF8E8E93)
                             )
                         }
                     }
@@ -226,14 +199,14 @@ fun GettingStartedDialog(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            // Icon container with subtle cyan rim
+                            // Icon container with subtle border
                             Surface(
                                 modifier = Modifier.size(80.dp),
                                 shape = RoundedCornerShape(26.dp),
-                                color = Color(0xFF1E293B).copy(alpha = 0.8f),
+                                color = Color(0xFF141414),
                                 border = androidx.compose.foundation.BorderStroke(
                                     1.dp,
-                                    Color(0xFF38BDF8).copy(alpha = 0.35f)
+                                    Color.White.copy(alpha = 0.08f)
                                 )
                             ) {
                                 Box(
@@ -244,7 +217,7 @@ fun GettingStartedDialog(
                                         painter = painterResource(data.iconRes),
                                         contentDescription = null,
                                         modifier = Modifier.size(40.dp),
-                                        tint = Color(0xFF38BDF8)
+                                        tint = Color.White
                                     )
                                 }
                             }
@@ -256,7 +229,7 @@ fun GettingStartedDialog(
                                 text = stringResource(data.titleRes),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFF8FAFC),
+                                color = Color.White,
                                 textAlign = TextAlign.Center,
                                 letterSpacing = (-0.5).sp
                             )
@@ -267,7 +240,7 @@ fun GettingStartedDialog(
                             Text(
                                 text = stringResource(data.descRes),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFF94A3B8),
+                                color = Color(0xFFA0A0A0),
                                 textAlign = TextAlign.Center,
                                 lineHeight = 18.sp,
                                 modifier = Modifier
@@ -300,8 +273,8 @@ fun GettingStartedDialog(
                                     .height(8.dp)
                                     .clip(CircleShape)
                                     .background(
-                                        if (i == currentStep) Color(0xFF38BDF8)
-                                        else Color(0xFF334155)
+                                        if (i == currentStep) Color.White
+                                        else Color(0xFF262626)
                                     )
                             )
                         }
@@ -319,10 +292,10 @@ fun GettingStartedDialog(
                             onClick = { if (currentStep > 1) currentStep-- },
                             modifier = Modifier.size(48.dp),
                             shape = CircleShape,
-                            color = Color(0xFF1E293B),
+                            color = Color(0xFF141414),
                             border = androidx.compose.foundation.BorderStroke(
                                 0.5.dp,
-                                Color(0xFF334155)
+                                Color.White.copy(alpha = 0.08f)
                             ),
                             enabled = currentStep > 1
                         ) {
@@ -331,116 +304,142 @@ fun GettingStartedDialog(
                                     painter = painterResource(R.drawable.back),
                                     contentDescription = stringResource(R.string.guide_back),
                                     modifier = Modifier.size(20.dp),
-                                    tint = if (currentStep > 1) Color(0xFFF1F5F9)
-                                    else Color(0xFF475569)
+                                    tint = if (currentStep > 1) Color.White
+                                    else Color(0xFF404040)
                                 )
                             }
                         }
 
                         Spacer(modifier = Modifier.width(10.dp))
 
-                        // When on step 4 (Battery), show a "Later" button to let the user skip
                         if (currentStep == 4) {
+                            // Step 4 (Battery Optimization): Deny & Allow buttons of equal size
                             Surface(
                                 onClick = { currentStep++ },
                                 modifier = Modifier
-                                    .height(48.dp)
-                                    .padding(end = 8.dp),
+                                    .weight(1f)
+                                    .height(48.dp),
                                 shape = CircleShape,
-                                color = Color(0xFF1E293B),
+                                color = Color(0xFF161616),
                                 border = androidx.compose.foundation.BorderStroke(
-                                    0.5.dp,
-                                    Color(0xFF334155)
+                                    1.dp,
+                                    Color.White.copy(alpha = 0.12f)
                                 )
                             ) {
                                 Box(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = stringResource(R.string.guide_later),
+                                        text = stringResource(R.string.guide_deny),
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = Color(0xFF94A3B8)
+                                        color = Color.White
                                     )
                                 }
                             }
-                        }
 
-                        // When on step 5 (Notifications), show a "Later" button
-                        if (currentStep == 5) {
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            Surface(
+                                onClick = {
+                                    onOpenBatterySettings()
+                                    currentStep++
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
+                                shape = CircleShape,
+                                color = Color.White,
+                                shadowElevation = 4.dp
+                            ) {
+                                Box(
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.guide_allow),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black
+                                    )
+                                }
+                            }
+                        } else if (currentStep == 5) {
+                            // Step 5 (Notifications): Deny & Allow buttons of equal size
                             Surface(
                                 onClick = dismissNoPermission,
                                 modifier = Modifier
-                                    .height(48.dp)
-                                    .padding(end = 8.dp),
+                                    .weight(1f)
+                                    .height(48.dp),
                                 shape = CircleShape,
-                                color = Color(0xFF1E293B),
+                                color = Color(0xFF161616),
                                 border = androidx.compose.foundation.BorderStroke(
-                                    0.5.dp,
-                                    Color(0xFF334155)
+                                    1.dp,
+                                    Color.White.copy(alpha = 0.12f)
                                 )
                             ) {
                                 Box(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = stringResource(R.string.guide_later),
+                                        text = stringResource(R.string.guide_deny),
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = Color(0xFF94A3B8)
+                                        color = Color.White
                                     )
                                 }
                             }
-                        }
 
-                        // Primary action button (Next, Battery Settings, or Allow Notifications)
-                        Surface(
-                            onClick = {
-                                when (currentStep) {
-                                    in 1..3 -> currentStep++
-                                    4 -> {
-                                        onOpenBatterySettings()
-                                        currentStep++
-                                    }
-                                    5 -> dismissWithPermission()
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            shape = CircleShape,
-                            color = Color(0xFF0284C7),
-                            shadowElevation = 6.dp
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            Surface(
+                                onClick = dismissWithPermission,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
+                                shape = CircleShape,
+                                color = Color.White,
+                                shadowElevation = 4.dp
                             ) {
-                                Text(
-                                    text = when (currentStep) {
-                                        4 -> stringResource(R.string.guide_battery_settings)
-                                        5 -> stringResource(R.string.guide_allow_notifications)
-                                        else -> stringResource(R.string.guide_next)
-                                    },
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Icon(
-                                    painter = painterResource(
-                                        when (currentStep) {
-                                            4 -> R.drawable.settings
-                                            5 -> R.drawable.ic_bell
-                                            else -> R.drawable.small_chevron
-                                        }
-                                    ),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = Color.White
-                                )
+                                Box(
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.guide_allow),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black
+                                    )
+                                }
+                            }
+                        } else {
+                            // Steps 1..3: Primary Next button
+                            Surface(
+                                onClick = { currentStep++ },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
+                                shape = CircleShape,
+                                color = Color.White,
+                                shadowElevation = 4.dp
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.guide_next),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Icon(
+                                        painter = painterResource(R.drawable.small_chevron),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = Color.Black
+                                    )
+                                }
                             }
                         }
                     }
@@ -512,13 +511,15 @@ fun isIgnoringBatteryOptimizations(context: Context): Boolean {
 }
 
 /**
- * Opens the system's own exemption screen.
+ * Direct request to ignore battery optimizations, triggering the system grant dialog
+ * directly on top of the app.
  *
- * The request is made through the settings screen rather than the direct grant dialog where
- * possible, because the direct one is a prompt some builders reject outright, and landing on
- * a screen the user recognises is better than a request that silently does nothing.
+ * Tested across min to max SDK. On devices that reject the direct prompt, falls back
+ * gracefully to battery optimization settings and app details.
  */
 fun openBatterySettings(context: Context) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+
     val direct = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
         data = android.net.Uri.parse("package:${context.packageName}")
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

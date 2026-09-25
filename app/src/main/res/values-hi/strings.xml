@@ -115,9 +115,8 @@
     <string name="guide_step_share_instant">किसी भी ऐप से Hazel इंस्टेंट को लिंक साझा करें और तय की गई क्वालिटी में तुरंत डाउनलोड करें।</string>
     <string name="guide_step_battery_unrestricted">बैटरी उपयोग को अप्रतिबंधित पर रखें, वरना ऐप से बाहर जाते ही Android डाउनलोड रोक सकता है।</string>
     <string name="guide_step_notifications">पृष्ठभूमि में डाउनलोड प्रगति और पूरी हुई फ़ाइलों के बारे में सूचनाएं प्राप्त करें।</string>
-    <string name="guide_battery_settings">बैटरी सेटिंग</string>
-    <string name="guide_allow_notifications">सूचनाएं चालू करें</string>
-    <string name="guide_later">बाद में</string>
+    <string name="guide_allow">अनुमति दें</string>
+    <string name="guide_deny">अस्वीकार करें</string>
     <string name="guide_skip">छोड़ें</string>
     <string name="guide_next">आगे</string>
     <string name="guide_back">पीछे</string>

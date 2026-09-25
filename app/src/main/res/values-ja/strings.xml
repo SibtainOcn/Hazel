@@ -110,9 +110,8 @@
     <string name="guide_step_share_instant">任意のアプリからHazel 即時にリンクを共有すると、設定した画質ですぐにダウンロードできます。</string>
     <string name="guide_step_battery_unrestricted">バッテリー使用を「無制限」に設定してください。制限されている場合、アプリを離れた際にAndroidがダウンロードを停止することがあります。</string>
     <string name="guide_step_notifications">バックグラウンドでのダウンロード進捗や完了の通知を受け取ります。</string>
-    <string name="guide_battery_settings">バッテリー設定</string>
-    <string name="guide_allow_notifications">通知を許可</string>
-    <string name="guide_later">後で</string>
+    <string name="guide_allow">許可</string>
+    <string name="guide_deny">許可しない</string>
     <string name="guide_skip">スキップ</string>
     <string name="guide_next">次へ</string>
     <string name="guide_back">戻る</string>

@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configurable listing source preference in More > Fetch settings with live status badge indicators.
 - Media search provider interface (`MediaSearchProvider` & `UnifiedSearchCoordinator`) designed for future multi-engine direct search expansion.
 - Automated test harnesses for share overlay isolation, history recording, and NewPipe latency/fallback validation (`tools/test_share_overlay_isolation.py` and `tools/test_newpipe_latency_and_fallback.py`).
-- Material 3 Getting Started stepper carousel dialog (`GettingStartedDialog.kt`) featuring a 5-step animated walkthrough (Paste & Download, Format Selection, Hazel Instant, Battery Optimization, and Notifications), progress dots indicator, skip/back/next controls, "Later" skip buttons for battery and notification steps, flat step badge, Hazel SVG bolt logo, and premium deep blue gradient aesthetics.
+- Material 3 Getting Started stepper carousel dialog (`GettingStartedDialog.kt`) featuring a 5-step animated walkthrough (Paste & Download, Format Selection, Hazel Instant, Battery Optimization, and Notifications), progress dots indicator, skip/back/next controls, equal-sized Allow and Deny action buttons for battery and notification permissions, direct system battery optimization overlay prompt without dialog unmounting, flat step badge, Hazel SVG bolt logo, and deep black aesthetics (`#000000`/`#0A0A0A`) with subtle ambient tint.
 - Complete 10-locale translation parity for all Getting Started dialog strings across German, Spanish, French, Hindi, Indonesian, Japanese, Brazilian Portuguese, Russian, and Simplified Chinese.
 
 ### Changed

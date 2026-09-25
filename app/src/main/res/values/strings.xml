@@ -126,9 +126,8 @@
     <string name="guide_step_share_instant">Share a link to Hazel Instant from any app to download instantly at your preset quality.</string>
     <string name="guide_step_battery_unrestricted">Set battery use to unrestricted, otherwise Android may stop background downloads when you leave the app.</string>
     <string name="guide_step_notifications">Get notified about download progress and completions in the background.</string>
-    <string name="guide_battery_settings">Battery settings</string>
-    <string name="guide_allow_notifications">Allow notifications</string>
-    <string name="guide_later">Later</string>
+    <string name="guide_allow">Allow</string>
+    <string name="guide_deny">Deny</string>
     <string name="guide_skip">Skip</string>
     <string name="guide_next">Next</string>
     <string name="guide_back">Back</string>

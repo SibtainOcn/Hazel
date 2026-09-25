@@ -383,10 +383,7 @@ fun DownloadScreen(
 
     if (guideSeen == false) {
         GettingStartedDialog(
-            onOpenBatterySettings = {
-                scope.launch { SettingsRepository.setGuideSeen(context) }
-                openBatterySettings(context)
-            },
+            onOpenBatterySettings = { openBatterySettings(context) },
             onDismiss = { scope.launch { SettingsRepository.setGuideSeen(context) } }
         )
     }

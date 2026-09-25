@@ -115,9 +115,8 @@
     <string name="guide_step_share_instant">Teile aus jeder App einen Link mit Hazel Sofort, um ihn gleich in der von dir eingestellten Qualität herunterzuladen.</string>
     <string name="guide_step_battery_unrestricted">Stelle die Akkunutzung auf uneingeschränkt, sonst kann Android Downloads stoppen, sobald du die App verlässt.</string>
     <string name="guide_step_notifications">Erhalte Benachrichtigungen über den Downloadfortschritt und abgeschlossene Dateien im Hintergrund.</string>
-    <string name="guide_battery_settings">Akku-Einstellungen</string>
-    <string name="guide_allow_notifications">Benachrichtigungen erlauben</string>
-    <string name="guide_later">Später</string>
+    <string name="guide_allow">Zulassen</string>
+    <string name="guide_deny">Ablehnen</string>
     <string name="guide_skip">Überspringen</string>
     <string name="guide_next">Weiter</string>
     <string name="guide_back">Zurück</string>

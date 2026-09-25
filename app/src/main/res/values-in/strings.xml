@@ -110,9 +110,8 @@
     <string name="guide_step_share_instant">Bagikan tautan ke Hazel Instan dari aplikasi apa pun untuk mengunduh langsung pada kualitas yang Anda tentukan.</string>
     <string name="guide_step_battery_unrestricted">Atur penggunaan baterai ke tanpa batas, jika tidak Android dapat menghentikan unduhan saat Anda keluar dari aplikasi.</string>
     <string name="guide_step_notifications">Dapatkan pemberitahuan tentang kemajuan unduhan dan file yang selesai di latar belakang.</string>
-    <string name="guide_battery_settings">Pengaturan baterai</string>
-    <string name="guide_allow_notifications">Izinkan notifikasi</string>
-    <string name="guide_later">Nanti</string>
+    <string name="guide_allow">Izinkan</string>
+    <string name="guide_deny">Tolak</string>
     <string name="guide_skip">Lewati</string>
     <string name="guide_next">Berikutnya</string>
     <string name="guide_back">Kembali</string>
