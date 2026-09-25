@@ -14,13 +14,9 @@
     <cloud-backup>
         <include domain="sharedpref" path="." />
         <include domain="file" path="datastore/" />
-        <exclude domain="cache" path="." />
-        <exclude domain="no-backup" path="." />
     </cloud-backup>
     <device-transfer>
         <include domain="sharedpref" path="." />
         <include domain="file" path="datastore/" />
-        <exclude domain="cache" path="." />
-        <exclude domain="no-backup" path="." />
     </device-transfer>
 </data-extraction-rules>

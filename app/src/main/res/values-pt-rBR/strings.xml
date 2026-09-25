@@ -269,7 +269,7 @@
     <string name="options_subtitles_languages_title">Idiomas das legendas</string>
     <string name="options_subtitles_languages_hint">Um seletor de idioma do yt-dlp, por exemplo en.*,.*-orig para o inglês mais a faixa original. Use all para todos os idiomas que a fonte oferecer.</string>
     <string name="options_filename_title">Modelo do nome do arquivo</string>
-    <string name="options_filename_hint">Modelo de saída do yt-dlp. Use %(title)s, %(uploader)s, %(id)s e %(ext)s.</string>
+    <string name="options_filename_hint" formatted="false">Modelo de saída do yt-dlp. Use %(title)s, %(uploader)s, %(id)s e %(ext)s.</string>
     <string name="options_text_input_save">Salvar</string>
     <string name="options_text_input_cancel">Cancelar</string>
 

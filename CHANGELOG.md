@@ -50,6 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed top-right 'X' (dismiss/remove) button from multi-video and playlist cards on the Home screen to streamline card presentation.
 
 ### Fixed
+- Fixed CI release build failure caused by AAPT2 non-positional format string validation on `options_filename_hint` across all 10 locales by specifying `formatted="false"`.
+- Resolved release `lintVitalRelease` fatal validation errors by removing invalid and redundant `cache` and `no-backup` domain exclusions from `backup_rules.xml` and `data_extraction_rules.xml` (which are automatically excluded by Android's backup framework).
 - Fixed search bar "Clear search results" action to cleanly clear both resolved media cards and the active search URL.
 - Resolved bottom navigation bar clipping on devices with 3-button navigation by restoring dynamic window insets handling in Material 3 NavigationBar.
 - Made unread activity indicator dot theme-adaptive using `MaterialTheme.colorScheme.error` for proper contrast across dark and light themes, and aligned it directly on the horizontal centerline with the screen title and dropdown chevron.

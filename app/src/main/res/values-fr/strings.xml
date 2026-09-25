@@ -269,7 +269,7 @@
     <string name="options_subtitles_languages_title">Langues des sous-titres</string>
     <string name="options_subtitles_languages_hint">Un sélecteur de langue yt-dlp, par exemple en.*,.*-orig pour l\'anglais plus la piste d\'origine. Utilisez all pour toutes les langues proposées par la source.</string>
     <string name="options_filename_title">Modèle de nom de fichier</string>
-    <string name="options_filename_hint">Modèle de sortie yt-dlp. Utilisez %(title)s, %(uploader)s, %(id)s et %(ext)s.</string>
+    <string name="options_filename_hint" formatted="false">Modèle de sortie yt-dlp. Utilisez %(title)s, %(uploader)s, %(id)s et %(ext)s.</string>
     <string name="options_text_input_save">Enregistrer</string>
     <string name="options_text_input_cancel">Annuler</string>
 

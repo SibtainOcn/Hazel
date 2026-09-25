@@ -264,7 +264,7 @@
     <string name="options_subtitles_languages_title">Untertitelsprachen</string>
     <string name="options_subtitles_languages_hint">Ein yt-dlp-Sprachfilter, zum Beispiel en.*,.*-orig für Englisch plus die Originalspur. Nimm all für jede Sprache, die die Quelle anbietet.</string>
     <string name="options_filename_title">Dateinamen-Vorlage</string>
-    <string name="options_filename_hint">yt-dlp-Ausgabevorlage. Nutze %(title)s, %(uploader)s, %(id)s und %(ext)s.</string>
+    <string name="options_filename_hint" formatted="false">yt-dlp-Ausgabevorlage. Nutze %(title)s, %(uploader)s, %(id)s und %(ext)s.</string>
     <string name="options_text_input_save">Speichern</string>
     <string name="options_text_input_cancel">Abbrechen</string>
 

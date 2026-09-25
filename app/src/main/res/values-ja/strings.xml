@@ -259,7 +259,7 @@
     <string name="options_subtitles_languages_title">字幕の言語</string>
     <string name="options_subtitles_languages_hint">yt-dlp の言語指定（例: 英語と元言語なら en.*,.*-orig）。すべての言語なら all を使用します。</string>
     <string name="options_filename_title">ファイル名テンプレート</string>
-    <string name="options_filename_hint">yt-dlp の出力テンプレート。%(title)s、%(uploader)s、%(id)s、%(ext)s が使用できます。</string>
+    <string name="options_filename_hint" formatted="false">yt-dlp の出力テンプレート。%(title)s、%(uploader)s、%(id)s、%(ext)s が使用できます。</string>
     <string name="options_text_input_save">保存</string>
     <string name="options_text_input_cancel">キャンセル</string>
 

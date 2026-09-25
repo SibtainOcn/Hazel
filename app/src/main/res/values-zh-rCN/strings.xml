@@ -259,7 +259,7 @@
     <string name="options_subtitles_languages_title">字幕语言</string>
     <string name="options_subtitles_languages_hint">yt-dlp 的语言选择器，例如 en.*,.*-orig 表示英语加上原始音轨。用 all 表示来源提供的每一种语言。</string>
     <string name="options_filename_title">文件名模板</string>
-    <string name="options_filename_hint">yt-dlp 的输出模板。可以使用 %(title)s、%(uploader)s、%(id)s 和 %(ext)s。</string>
+    <string name="options_filename_hint" formatted="false">yt-dlp 的输出模板。可以使用 %(title)s、%(uploader)s、%(id)s 和 %(ext)s。</string>
     <string name="options_text_input_save">保存</string>
     <string name="options_text_input_cancel">取消</string>
 

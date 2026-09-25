@@ -259,7 +259,7 @@
     <string name="options_subtitles_languages_title">Bahasa subtitel</string>
     <string name="options_subtitles_languages_hint">Pemilih bahasa yt-dlp, mis. en.*,.*-orig untuk bahasa Inggris ditambah trek asli. Gunakan all untuk semua bahasa yang ditawarkan sumber.</string>
     <string name="options_filename_title">Templat nama file</string>
-    <string name="options_filename_hint">Templat keluaran yt-dlp. Gunakan %(title)s, %(uploader)s, %(id)s, dan %(ext)s.</string>
+    <string name="options_filename_hint" formatted="false">Templat keluaran yt-dlp. Gunakan %(title)s, %(uploader)s, %(id)s, dan %(ext)s.</string>
     <string name="options_text_input_save">Simpan</string>
     <string name="options_text_input_cancel">Batal</string>
 

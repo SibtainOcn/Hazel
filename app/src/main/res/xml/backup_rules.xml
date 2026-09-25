@@ -8,6 +8,4 @@
 <full-backup-content>
     <include domain="sharedpref" path="." />
     <include domain="file" path="datastore/" />
-    <exclude domain="cache" path="." />
-    <exclude domain="no-backup" path="." />
 </full-backup-content>

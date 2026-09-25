@@ -274,7 +274,7 @@
     <string name="options_subtitles_languages_title">Языки субтитров</string>
     <string name="options_subtitles_languages_hint">Селектор языков yt-dlp, например en.*,.*-orig для английского и оригинальной дорожки. Используйте all для всех доступных языков.</string>
     <string name="options_filename_title">Шаблон имени файла</string>
-    <string name="options_filename_hint">Шаблон вывода yt-dlp. Используйте %(title)s, %(uploader)s, %(id)s и %(ext)s.</string>
+    <string name="options_filename_hint" formatted="false">Шаблон вывода yt-dlp. Используйте %(title)s, %(uploader)s, %(id)s и %(ext)s.</string>
     <string name="options_text_input_save">Сохранить</string>
     <string name="options_text_input_cancel">Отмена</string>
 

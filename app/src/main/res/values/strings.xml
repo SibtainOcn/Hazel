@@ -275,7 +275,7 @@
     <string name="options_subtitles_languages_title">Subtitle languages</string>
     <string name="options_subtitles_languages_hint">A yt-dlp language selector, e.g. en.*,.*-orig for English plus the original track. Use all for every language the source offers.</string>
     <string name="options_filename_title">Filename template</string>
-    <string name="options_filename_hint">yt-dlp output template. Use %(title)s, %(uploader)s, %(id)s and %(ext)s.</string>
+    <string name="options_filename_hint" formatted="false">yt-dlp output template. Use %(title)s, %(uploader)s, %(id)s and %(ext)s.</string>
     <string name="options_text_input_save">Save</string>
     <string name="options_text_input_cancel">Cancel</string>
 

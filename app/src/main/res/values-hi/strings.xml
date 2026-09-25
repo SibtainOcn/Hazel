@@ -264,7 +264,7 @@
     <string name="options_subtitles_languages_title">उपशीर्षक की भाषाएँ</string>
     <string name="options_subtitles_languages_hint">yt-dlp का भाषा चयनकर्ता, जैसे en.*,.*-orig अंग्रेज़ी और मूल ट्रैक के लिए। स्रोत की हर भाषा के लिए all इस्तेमाल करें।</string>
     <string name="options_filename_title">फ़ाइल नाम टेम्पलेट</string>
-    <string name="options_filename_hint">yt-dlp का आउटपुट टेम्पलेट। %(title)s, %(uploader)s, %(id)s और %(ext)s इस्तेमाल करें।</string>
+    <string name="options_filename_hint" formatted="false">yt-dlp का आउटपुट टेम्पलेट। %(title)s, %(uploader)s, %(id)s और %(ext)s इस्तेमाल करें।</string>
     <string name="options_text_input_save">सहेजें</string>
     <string name="options_text_input_cancel">रद्द करें</string>
 
