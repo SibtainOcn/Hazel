@@ -111,6 +111,12 @@ class ShareOverlayActivity : ComponentActivity() {
         // Ensure window is completely transparent so the caller app remains fully visible
         window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
+        // Register permission launcher for notifications and shared storage
+        com.hazel.android.util.PermissionHelper.register(this)
+        if (Build.VERSION.SDK_INT >= 33) {
+            com.hazel.android.util.PermissionHelper.ensureNotificationPermission(this)
+        }
+
         // Ensure download engine (yt-dlp and ffmpeg) is initialized
         HazelApp.instance.startLibraryInit()
 
@@ -251,7 +257,8 @@ class ShareOverlayActivity : ComponentActivity() {
                                             title = title,
                                             author = author,
                                             audioLanguage = audioLanguage,
-                                            treeUri = treeUri
+                                            treeUri = treeUri,
+                                            info = currentInfo
                                         )
                                         Toast.makeText(
                                             applicationContext,
@@ -333,7 +340,8 @@ class ShareOverlayActivity : ComponentActivity() {
                                             title = title,
                                             author = author,
                                             audioLanguage = audioLanguage,
-                                            treeUri = treeUri
+                                            treeUri = treeUri,
+                                            info = currentInfo
                                         )
                                         Toast.makeText(
                                             applicationContext,
@@ -372,7 +380,7 @@ class ShareOverlayActivity : ComponentActivity() {
 
 
     private fun closeOverlay() {
-        finish()
+        finishAndRemoveTask()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
         } else {

@@ -87,6 +87,9 @@ class MainActivity : ComponentActivity() {
 
         // Register permission launcher (used lazily for the notification permission)
         PermissionHelper.register(this)
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            PermissionHelper.ensureNotificationPermission(this)
+        }
 
         setContent {
             val scope = rememberCoroutineScope()

@@ -44,7 +44,9 @@ object PermissionHelper {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED
             ) {
-                runtimeLauncher?.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
+                runCatching {
+                    runtimeLauncher?.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
+                }
             }
         }
     }
@@ -75,7 +77,9 @@ object PermissionHelper {
      */
     fun ensureSharedStorageWrite(context: Context) {
         if (needsLegacyStorageWrite() && !canWriteSharedStorage(context)) {
-            runtimeLauncher?.launch(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            runCatching {
+                runtimeLauncher?.launch(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            }
         }
     }
 }
