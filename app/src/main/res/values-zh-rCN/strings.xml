@@ -98,15 +98,23 @@
     <string name="no_results_try_anyway">仍然尝试</string>
     <string name="no_results_close">关闭</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">开始使用</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">第 %1$d 步（共 %2$d 步）</string>
+    <string name="guide_step1_title">粘贴并下载</string>
+    <string name="guide_step2_title">格式选择</string>
+    <string name="guide_step3_title">Hazel 快捷下载</string>
+    <string name="guide_step4_title">电池优化</string>
+    <string name="guide_step5_title">通知权限</string>
     <string name="guide_step_paste_link">把链接粘贴到搜索框即可下载。你可以添加多个链接和播放列表</string>
     <string name="guide_step_pick_format">点按卡片可以挑选具体格式。所有可用画质都会连同体积和编码一起列出。</string>
     <string name="guide_step_share_instant">从任意应用把链接分享给 Hazel 即时下载，就会按你设定的画质立刻下载。</string>
-    <string name="guide_step_finished_downloads">完成的文件会出现在「下载」中。点按任意一行即可用设备的默认播放器打开。</string>
     <string name="guide_step_battery_unrestricted">请把电池用量设为不受限制，否则你离开应用时 Android 可能会中止下载。</string>
-    <string name="guide_battery_settings">电池设置</string>
-    <string name="guide_close">关闭</string>
+    <string name="guide_step_notifications">在后台接收下载进度以及文件完成的即时通知。</string>
+    <string name="guide_allow">允许</string>
+    <string name="guide_deny">拒绝</string>
+    <string name="guide_skip">跳过</string>
+    <string name="guide_next">下一步</string>
+    <string name="guide_back">返回</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">下载</string>
@@ -180,7 +188,7 @@
     <string name="more_hazel_instant">Hazel 即时下载</string>
     <string name="more_temporary_files">临时文件</string>
     <string name="more_converter">离线把视频转成音频</string>
-    <string name="more_engine_update">yt-dlp 引擎更新</string>
+    <string name="more_software_update">软件更新</string>
     <string name="more_support">支持 Hazel</string>
     <string name="more_license">许可证</string>
 
@@ -206,40 +214,6 @@
     <string name="sponsor_source_subtitle">每一行都是公开的，也欢迎提交 pull request。</string>
     <string name="sponsor_footer">没有广告，不统计你下载了什么，也没有任何功能被留给少数人。支持改变的是投入 Hazel 的时间，而不是它会为你做什么。</string>
 
-    <!-- UpdateScreen -->
-    <string name="update_title">yt-dlp 更新</string>
-    <string name="update_back">返回</string>
-    <string name="update_check_action">检查更新</string>
-    <string name="update_status_up_to_date">已是最新</string>
-    <string name="update_status_checking">正在检查更新...</string>
-    <string name="update_status_available">有可用更新</string>
-    <string name="update_status_installing">正在安装 yt-dlp...</string>
-    <string name="update_status_installed">引擎已更新</string>
-    <string name="update_status_failed">更新失败</string>
-    <string name="update_subtitle_idle">Hazel 正在使用最新的 yt-dlp 构建</string>
-    <string name="update_subtitle_checking">正在连接 GitHub...</string>
-    <string name="update_subtitle_available">yt-dlp %1$s 已可用</string>
-    <string name="update_subtitle_updating">正在下载 yt-dlp %1$s</string>
-    <string name="update_subtitle_installed">yt-dlp %1$s 已投入使用</string>
-    <string name="update_installed_version">已安装版本</string>
-    <string name="update_version_unknown">未知</string>
-    <string name="update_new_version">新版本</string>
-    <string name="update_installing_binary">正在安装可执行文件</string>
-    <string name="update_installing_body">正在从 GitHub 下载并替换引擎。请保持应用打开。</string>
-    <string name="update_action_update_now">立即更新</string>
-    <string name="update_action_installing">正在安装...</string>
-    <string name="update_action_done">完成</string>
-    <string name="update_action_retry">重试</string>
-    <string name="update_action_check">检查更新</string>
-    <string name="update_action_checking">正在检查...</string>
-    <string name="update_info_heading">信息</string>
-    <string name="update_info_component">组件</string>
-    <string name="update_info_repository">仓库</string>
-    <string name="update_info_binary_size">文件大小</string>
-    <string name="update_info_distribution">分发方式</string>
-    <string name="update_info_github_releases">GitHub Releases</string>
-    <string name="update_release_channel">发布渠道</string>
-    <string name="update_view_changelog">查看更新日志</string>
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">选择 SponsorBlock 过滤</string>

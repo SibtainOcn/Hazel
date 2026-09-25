@@ -12,8 +12,6 @@ app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1195: 
 
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:492: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:527: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/update/UpdateScreen.kt:196: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/update/UpdateScreen.kt:204: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/screens/history/HistoryScreen.kt:538: Toast.makeText uses a resource reference, no literal string
 app/src/main/java/com/hazel/android/ui/screens/history/HistoryScreen.kt:635: Toast.makeText uses a resource reference, no literal string
 app/src/main/java/com/hazel/android/ui/screens/history/HistoryScreen.kt:723: Toast.makeText uses resource references, no literal string
@@ -31,7 +29,6 @@ app/src/main/java/com/hazel/android/ui/screens/download/batch/BatchDownloadSheet
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:542: a numeric percentage, no words to translate
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:723: a file extension, which is the same in every language
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:859: a file extension, which is the same in every language
-app/src/main/java/com/hazel/android/update/UpdateScreen.kt:551: the engine's own name, the same word in every language
 
 app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:93: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:101: Compose animation label, used by the tooling inspector only

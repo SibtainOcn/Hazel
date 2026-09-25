@@ -103,15 +103,23 @@
     <string name="no_results_try_anyway">फिर भी कोशिश करें</string>
     <string name="no_results_close">बंद करें</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">शुरुआत करें</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">चरण %1$d का %2$d</string>
+    <string name="guide_step1_title">चिपकाएँ और डाउनलोड करें</string>
+    <string name="guide_step2_title">फ़ॉर्मैट चयन</string>
+    <string name="guide_step3_title">Hazel इंस्टेंट</string>
+    <string name="guide_step4_title">बैटरी ऑप्टिमाइज़ेशन</string>
+    <string name="guide_step5_title">सूचनाएं</string>
     <string name="guide_step_paste_link">डाउनलोड करने के लिए खोज बॉक्स में लिंक चिपकाएँ। आप कई लिंक और प्लेलिस्ट भी जोड़ सकते हैं</string>
     <string name="guide_step_pick_format">सही फ़ॉर्मैट चुनने के लिए किसी कार्ड पर टैप करें। हर उपलब्ध क्वालिटी उसके आकार और कोडेक के साथ दिखाई जाती है।</string>
     <string name="guide_step_share_instant">किसी भी ऐप से Hazel इंस्टेंट को लिंक साझा करें और तय की गई क्वालिटी में तुरंत डाउनलोड करें।</string>
-    <string name="guide_step_finished_downloads">पूरी हुई फ़ाइलें डाउनलोड में दिखती हैं। डिवाइस के डिफ़ॉल्ट प्लेयर में खोलने के लिए किसी भी पंक्ति पर टैप करें।</string>
     <string name="guide_step_battery_unrestricted">बैटरी उपयोग को अप्रतिबंधित पर रखें, वरना ऐप से बाहर जाते ही Android डाउनलोड रोक सकता है।</string>
-    <string name="guide_battery_settings">बैटरी सेटिंग</string>
-    <string name="guide_close">बंद करें</string>
+    <string name="guide_step_notifications">पृष्ठभूमि में डाउनलोड प्रगति और पूरी हुई फ़ाइलों के बारे में सूचनाएं प्राप्त करें।</string>
+    <string name="guide_allow">अनुमति दें</string>
+    <string name="guide_deny">अस्वीकार करें</string>
+    <string name="guide_skip">छोड़ें</string>
+    <string name="guide_next">आगे</string>
+    <string name="guide_back">पीछे</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">डाउनलोड</string>
@@ -185,7 +193,7 @@
     <string name="more_hazel_instant">Hazel इंस्टेंट</string>
     <string name="more_temporary_files">अस्थायी फ़ाइलें</string>
     <string name="more_converter">ऑफ़लाइन वीडियो को ऑडियो में बदलें</string>
-    <string name="more_engine_update">yt-dlp इंजन अपडेट</string>
+    <string name="more_software_update">सॉफ़्टवेयर अपडेट</string>
     <string name="more_support">Hazel का साथ दें</string>
     <string name="more_license">लाइसेंस</string>
 
@@ -211,40 +219,6 @@
     <string name="sponsor_source_subtitle">इसकी हर पंक्ति सार्वजनिक है, और पुल रिक्वेस्ट का स्वागत है।</string>
     <string name="sponsor_footer">कोई विज्ञापन नहीं, आप क्या डाउनलोड करते हैं इसका कोई हिसाब नहीं, और कोई सुविधा किसी के लिए रोकी नहीं गई। साथ देने से यह बदलता है कि Hazel में कितना समय लगता है, यह नहीं कि वह आपके लिए क्या करेगा।</string>
 
-    <!-- UpdateScreen -->
-    <string name="update_title">yt-dlp अपडेट</string>
-    <string name="update_back">वापस</string>
-    <string name="update_check_action">अपडेट देखें</string>
-    <string name="update_status_up_to_date">आप अद्यतन हैं</string>
-    <string name="update_status_checking">अपडेट देखे जा रहे हैं...</string>
-    <string name="update_status_available">अपडेट उपलब्ध है</string>
-    <string name="update_status_installing">yt-dlp इंस्टॉल हो रहा है...</string>
-    <string name="update_status_installed">इंजन अपडेट हुआ</string>
-    <string name="update_status_failed">अपडेट विफल</string>
-    <string name="update_subtitle_idle">Hazel नवीनतम yt-dlp बिल्ड पर चल रहा है</string>
-    <string name="update_subtitle_checking">GitHub से संपर्क हो रहा है...</string>
-    <string name="update_subtitle_available">yt-dlp %1$s उपलब्ध है</string>
-    <string name="update_subtitle_updating">yt-dlp %1$s डाउनलोड हो रहा है</string>
-    <string name="update_subtitle_installed">yt-dlp %1$s अब इस्तेमाल में है</string>
-    <string name="update_installed_version">इंस्टॉल किया संस्करण</string>
-    <string name="update_version_unknown">अज्ञात</string>
-    <string name="update_new_version">नया संस्करण</string>
-    <string name="update_installing_binary">बाइनरी इंस्टॉल हो रही है</string>
-    <string name="update_installing_body">GitHub से डाउनलोड करके इंजन बदला जा रहा है। ऐप खुला रखें।</string>
-    <string name="update_action_update_now">अभी अपडेट करें</string>
-    <string name="update_action_installing">इंस्टॉल हो रहा है...</string>
-    <string name="update_action_done">हो गया</string>
-    <string name="update_action_retry">फिर कोशिश करें</string>
-    <string name="update_action_check">अपडेट देखें</string>
-    <string name="update_action_checking">देखा जा रहा है...</string>
-    <string name="update_info_heading">जानकारी</string>
-    <string name="update_info_component">घटक</string>
-    <string name="update_info_repository">रिपॉज़िटरी</string>
-    <string name="update_info_binary_size">बाइनरी का आकार</string>
-    <string name="update_info_distribution">वितरण</string>
-    <string name="update_info_github_releases">GitHub Releases</string>
-    <string name="update_release_channel">रिलीज़ चैनल</string>
-    <string name="update_view_changelog">बदलावों की सूची देखें</string>
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">SponsorBlock फ़िल्टर चुनें</string>

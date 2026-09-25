@@ -382,11 +382,8 @@ fun DownloadScreen(
     // here, so it survives this screen and so several shares in a row can queue up.
 
     if (guideSeen == false) {
-        UserGuideDialog(
-            onOpenBatterySettings = {
-                scope.launch { SettingsRepository.setGuideSeen(context) }
-                openBatterySettings(context)
-            },
+        GettingStartedDialog(
+            onOpenBatterySettings = { openBatterySettings(context) },
             onDismiss = { scope.launch { SettingsRepository.setGuideSeen(context) } }
         )
     }

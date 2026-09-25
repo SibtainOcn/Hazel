@@ -103,15 +103,23 @@
     <string name="no_results_try_anyway">Trotzdem versuchen</string>
     <string name="no_results_close">Schließen</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">Erste Schritte</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">Schritt %1$d von %2$d</string>
+    <string name="guide_step1_title">Einfügen &amp; Herunterladen</string>
+    <string name="guide_step2_title">Formatauswahl</string>
+    <string name="guide_step3_title">Hazel Sofort</string>
+    <string name="guide_step4_title">Akku-Optimierung</string>
+    <string name="guide_step5_title">Benachrichtigungen</string>
     <string name="guide_step_paste_link">Füge einen Link ins Suchfeld ein, um ihn herunterzuladen. Du kannst mehrere Links und Playlists hinzufügen</string>
     <string name="guide_step_pick_format">Tippe eine Karte an, um das genaue Format zu wählen. Alle verfügbaren Qualitäten stehen mit Größe und Codec dabei.</string>
     <string name="guide_step_share_instant">Teile aus jeder App einen Link mit Hazel Sofort, um ihn gleich in der von dir eingestellten Qualität herunterzuladen.</string>
-    <string name="guide_step_finished_downloads">Fertige Dateien erscheinen unter Downloads. Tippe eine Zeile an, um sie im Standardplayer des Geräts zu öffnen.</string>
     <string name="guide_step_battery_unrestricted">Stelle die Akkunutzung auf uneingeschränkt, sonst kann Android Downloads stoppen, sobald du die App verlässt.</string>
-    <string name="guide_battery_settings">Akku-Einstellungen</string>
-    <string name="guide_close">Schließen</string>
+    <string name="guide_step_notifications">Erhalte Benachrichtigungen über den Downloadfortschritt und abgeschlossene Dateien im Hintergrund.</string>
+    <string name="guide_allow">Zulassen</string>
+    <string name="guide_deny">Ablehnen</string>
+    <string name="guide_skip">Überspringen</string>
+    <string name="guide_next">Weiter</string>
+    <string name="guide_back">Zurück</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">Herunterladen</string>
@@ -185,7 +193,7 @@
     <string name="more_hazel_instant">Hazel Sofort</string>
     <string name="more_temporary_files">Temporäre Dateien</string>
     <string name="more_converter">Video offline in Audio umwandeln</string>
-    <string name="more_engine_update">yt-dlp-Engine aktualisieren</string>
+    <string name="more_software_update">Software-Update</string>
     <string name="more_support">Hazel unterstützen</string>
     <string name="more_license">Lizenz</string>
 
@@ -211,40 +219,6 @@
     <string name="sponsor_source_subtitle">Jede Zeile davon ist öffentlich, und Pull Requests sind willkommen.</string>
     <string name="sponsor_footer">Keine Werbung, nichts wird darüber gemessen, was du herunterlädst, und keine Funktion bleibt jemandem vorbehalten. Unterstützung ändert, wie viel Zeit in Hazel fließt, nicht was es für dich tut.</string>
 
-    <!-- UpdateScreen -->
-    <string name="update_title">yt-dlp-Update</string>
-    <string name="update_back">Zurück</string>
-    <string name="update_check_action">Nach Updates suchen</string>
-    <string name="update_status_up_to_date">Du bist auf dem neuesten Stand</string>
-    <string name="update_status_checking">Suche nach Updates...</string>
-    <string name="update_status_available">Update verfügbar</string>
-    <string name="update_status_installing">yt-dlp wird installiert...</string>
-    <string name="update_status_installed">Engine aktualisiert</string>
-    <string name="update_status_failed">Update fehlgeschlagen</string>
-    <string name="update_subtitle_idle">Hazel nutzt den neuesten yt-dlp-Build</string>
-    <string name="update_subtitle_checking">Verbinde mit GitHub...</string>
-    <string name="update_subtitle_available">yt-dlp %1$s ist verfügbar</string>
-    <string name="update_subtitle_updating">yt-dlp %1$s wird geladen</string>
-    <string name="update_subtitle_installed">yt-dlp %1$s ist jetzt im Einsatz</string>
-    <string name="update_installed_version">Installierte Version</string>
-    <string name="update_version_unknown">Unbekannt</string>
-    <string name="update_new_version">Neue Version</string>
-    <string name="update_installing_binary">Binary wird installiert</string>
-    <string name="update_installing_body">Wird von GitHub geladen und ersetzt die Engine. Lass die App offen.</string>
-    <string name="update_action_update_now">Jetzt aktualisieren</string>
-    <string name="update_action_installing">Wird installiert...</string>
-    <string name="update_action_done">Fertig</string>
-    <string name="update_action_retry">Erneut versuchen</string>
-    <string name="update_action_check">Nach Updates suchen</string>
-    <string name="update_action_checking">Suche läuft...</string>
-    <string name="update_info_heading">Informationen</string>
-    <string name="update_info_component">Komponente</string>
-    <string name="update_info_repository">Repository</string>
-    <string name="update_info_binary_size">Größe des Binaries</string>
-    <string name="update_info_distribution">Vertrieb</string>
-    <string name="update_info_github_releases">GitHub Releases</string>
-    <string name="update_release_channel">Release-Kanal</string>
-    <string name="update_view_changelog">Änderungsprotokoll ansehen</string>
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">SponsorBlock-Filterung wählen</string>

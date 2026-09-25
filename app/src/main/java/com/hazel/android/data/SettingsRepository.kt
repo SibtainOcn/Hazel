@@ -360,4 +360,97 @@ object SettingsRepository {
     suspend fun setYtDlpChannel(context: Context, channel: String) {
         context.dataStore.edit { prefs -> prefs[YTDLP_CHANNEL_KEY] = channel }
     }
+
+    // Hazel update channel persistence ("Stable" / "Beta" / "Nightly")
+    private val HAZEL_CHANNEL_KEY = stringPreferencesKey("hazel_channel")
+    private val UPDATE_AUTO_DOWNLOAD_KEY = booleanPreferencesKey("update_auto_download")
+    private val UPDATE_WIFI_ONLY_KEY = booleanPreferencesKey("update_wifi_only")
+    private val UPDATE_NOTIFY_AVAILABLE_KEY = booleanPreferencesKey("update_notify_available")
+    private val UPDATE_NOTIFY_COMPLETE_KEY = booleanPreferencesKey("update_notify_complete")
+    private val UPDATE_NOTIFY_FAILED_KEY = booleanPreferencesKey("update_notify_failed")
+    private val UPDATE_VERIFY_SIGNATURE_KEY = booleanPreferencesKey("update_verify_signature")
+
+    fun getHazelChannel(context: Context): Flow<String> {
+        return context.dataStore.data.map { prefs -> prefs[HAZEL_CHANNEL_KEY] ?: "Stable" }
+    }
+    suspend fun setHazelChannel(context: Context, channel: String) {
+        context.dataStore.edit { prefs -> prefs[HAZEL_CHANNEL_KEY] = channel }
+    }
+
+    fun getUpdateAutoDownload(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_AUTO_DOWNLOAD_KEY] ?: true }
+    }
+    suspend fun setUpdateAutoDownload(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[UPDATE_AUTO_DOWNLOAD_KEY] = enabled }
+    }
+
+    fun getUpdateWifiOnly(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_WIFI_ONLY_KEY] ?: false }
+    }
+    suspend fun setUpdateWifiOnly(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[UPDATE_WIFI_ONLY_KEY] = enabled }
+    }
+
+    fun getUpdateNotifyAvailable(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_AVAILABLE_KEY] ?: true }
+    }
+    suspend fun setUpdateNotifyAvailable(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[UPDATE_NOTIFY_AVAILABLE_KEY] = enabled }
+    }
+
+    fun getUpdateNotifyComplete(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_COMPLETE_KEY] ?: true }
+    }
+    suspend fun setUpdateNotifyComplete(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[UPDATE_NOTIFY_COMPLETE_KEY] = enabled }
+    }
+
+    fun getUpdateNotifyFailed(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_FAILED_KEY] ?: true }
+    }
+    suspend fun setUpdateNotifyFailed(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[UPDATE_NOTIFY_FAILED_KEY] = enabled }
+    }
+
+    fun getUpdateVerifySignature(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_VERIFY_SIGNATURE_KEY] ?: true }
+    }
+    suspend fun setUpdateVerifySignature(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[UPDATE_VERIFY_SIGNATURE_KEY] = enabled }
+    }
+
+    // Dynamic update availability indicators for UI red dot badges
+    private val HAS_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("has_update_available")
+    private val HAZEL_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("hazel_update_available")
+    private val YTDLP_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("ytdlp_update_available")
+
+    fun getHasUpdateAvailable(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[HAS_UPDATE_AVAILABLE_KEY] ?: false }
+    }
+    suspend fun setHasUpdateAvailable(context: Context, available: Boolean) {
+        context.dataStore.edit { prefs -> prefs[HAS_UPDATE_AVAILABLE_KEY] = available }
+    }
+
+    fun getHazelUpdateAvailable(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false }
+    }
+    suspend fun setHazelUpdateAvailable(context: Context, available: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[HAZEL_UPDATE_AVAILABLE_KEY] = available
+            val ytdlpAvail = prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || ytdlpAvail
+        }
+    }
+
+    fun getYtDlpUpdateAvailable(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false }
+    }
+    suspend fun setYtDlpUpdateAvailable(context: Context, available: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[YTDLP_UPDATE_AVAILABLE_KEY] = available
+            val hazelAvail = prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || hazelAvail
+        }
+    }
 }
+

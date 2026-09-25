@@ -87,9 +87,6 @@ class MainActivity : ComponentActivity() {
 
         // Register permission launcher (used lazily for the notification permission)
         PermissionHelper.register(this)
-        if (android.os.Build.VERSION.SDK_INT >= 33) {
-            PermissionHelper.ensureNotificationPermission(this)
-        }
 
         setContent {
             val scope = rememberCoroutineScope()
@@ -100,6 +97,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 withFrameNanos { }
                 HazelApp.instance.startLibraryInit()
+                com.hazel.android.update.HazelUpdater.checkUpdatesSilently(applicationContext)
             }
 
             val savedTheme by SettingsRepository.isDarkTheme(this).collectAsState(initial = null)

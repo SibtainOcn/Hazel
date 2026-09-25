@@ -8,16 +8,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Software Update hub (`SoftwareUpdateScreen`) presenting two distinct component updaters: Hazel application updates and yt-dlp extractor engine updates.
+- Dedicated Hazel in-app updater (`HazelUpdateScreen` & `HazelUpdater`) with GitHub release parsing, semver comparison (`isNewer`), architecture-aware APK matching (`arm64-v8a`, `armeabi-v7a`, `x86_64`, `universal`), release channel selection (Stable, Beta, Nightly), and download speed/ETA reporting.
+- Rebuilt yt-dlp extractor updater (`YtDlpUpdateScreen`) adhering to the dark design tokens (Emerald `#8FD6B8`, Warm Amber `#FFCB80`, Soft Blue `#A8CDFF`, deep background `#000000`).
+- Product flavors `github` (default, in-app self-updater with `REQUEST_INSTALL_PACKAGES`) and `fdroid` (strict F-Droid policy compliance with no self-updating binaries or package install permissions).
+- Dedicated CPU vector icon (`ic_software_update.xml`) for the Software update row in More settings, with a dynamic red notification dot badge indicating available updates.
+- Home screen top bar theme-adaptive, accent-independent "Update" pill button next to the incognito icon for GitHub builds when an app update is available.
+- F-Droid flavor release check integration querying the official F-Droid package repository metadata, with an "Open in F-Droid" action button.
+- Automated test harness `tools/test_software_update_and_flavors.py` integrated into the master test runner (`tools/test_all.py`).
+- 10-locale translation parity for `more_software_update` and `more_software_update_subtitle`.
 - Transparent share overlay activity (`ShareOverlayActivity`) with quick one-tap confirmation for Hazel Instant and in-place `FormatSheet` selection over host apps without app switching.
 - Pixel-perfect `InstantShareSheet` and `OverlayLoadingSheet` matching modern dark specifications (`sheet-instant.html` & `sheet-fetching.html`) with Hazel SVG logo, dynamic progress indicators, and independent emerald `#8FD6B8` & `#0A0A0A` theme tokens.
 - Built-in Java reader (NewPipe extractor) as the default listing source (`ListingSource.NEWPIPE`) with fast-path in-process stream and collection recognition (~200ms latency) and transparent silent fallback to the yt-dlp binary engine.
 - Configurable listing source preference in More > Fetch settings with live status badge indicators.
 - Media search provider interface (`MediaSearchProvider` & `UnifiedSearchCoordinator`) designed for future multi-engine direct search expansion.
 - Automated test harnesses for share overlay isolation, history recording, and NewPipe latency/fallback validation (`tools/test_share_overlay_isolation.py` and `tools/test_newpipe_latency_and_fallback.py`).
+- Material 3 Getting Started stepper carousel dialog (`GettingStartedDialog.kt`) featuring a 5-step animated walkthrough (Paste & Download, Format Selection, Hazel Instant, Battery Optimization, and Notifications), progress dots indicator, skip/back/next controls, equal-sized Allow and Deny action buttons for battery and notification permissions, direct system battery optimization overlay prompt without dialog unmounting, flat step badge, Hazel SVG bolt logo, and deep black aesthetics (`#000000`/`#0A0A0A`) with subtle ambient tint.
+- Complete 10-locale translation parity for all Getting Started dialog strings across German, Spanish, French, Hindi, Indonesian, Japanese, Brazilian Portuguese, Russian, and Simplified Chinese.
 
 ### Changed
+- Deferred runtime notification permission request on first launch until the Getting Started onboarding flow is fully closed or completed, preventing premature system permission popups on app launch while preserving re-prompting when downloads begin if permissions remain ungranted.
+- Cleaned up legacy `UserGuideDialog.kt` and purged stale guide string resources across all 10 localization files.
+- Replaced duplicate distribution channel flavor row with a comprehensive "Device & architecture" card in `SoftwareUpdateScreen` displaying device hardware model, Android OS version and API level, primary architecture, and supported ABIs.
+- Refined Software Update hub and component update screens: removed redundant "Verified binaries" row from distribution overview, removed "Checked recently · Signature/Binary verified" subtitles from hero cards, reduced outer horizontal margins from 20dp to 12dp to utilize available screen width, and made hero cards more compact.
+- Compacted the in-app update downloading card to match the exact size and proportions of the update available card, combining download speed, transfer count, and percentage into a single streamlined row.
+- Retained downloaded APKs in cache across screen visits, allowing users who defer installation to return and install immediately without re-downloading.
+- Fail-safe APK auto-installation: verified package install permissions on API 26+ (`canRequestPackageInstalls()`) and prompted the system unknown sources toggle rather than failing silently, granting explicit URI permissions to the resolved package installer.
+- Removed description subtitles from "Software update" and "Link reading" rows in More settings for consistent visual density across all setting items.
+- Fixed unit test execution on CI by registering a forward-compatible `testDebugUnitTest` task alias in `app/build.gradle.kts` mapping to flavor-specific test tasks (`testGithubDebugUnitTest` and `testFdroidDebugUnitTest`).
 - Replaced the Ko-fi sponsor option (which was marked "Opening soon") with a live
   Buy Me a Coffee link (`buymeacoffee.com/sibtainocean`).
+- Refined `OverlayLoadingSheet` circular loader spinner with a concentric circular container and clean vector Hazel bolt (`ic_hazel_bolt.xml`), eliminating the clipped rounded square artifact.
+- Replaced `OverlayLoadingSheet` infinite phase animation loop with a single-pass progression that smoothly advances through status stages to "Almost ready..." and holds at 94% progress rail fill until fetching completes.
+- Overhauled `SponsorScreen` with an independent, theme-adaptive dark luxury aesthetic (`#121418` obsidian surfaces with fine `#F9FAFB` whitish text and `#1A1D24` icon containers) matching `GettingStartedDialog`, completely decoupled from user accent colors while maintaining clean adaptive light theme styling.
 - Streamlined the Home screen by removing the redundant batch action row below the search bar while fully preserving per-media card controls (center play/pause/cancel and 3-dot menu).
 - Merged separate Downloading and Queued screens into a single unified "Downloading queue" view with dedicated component architecture (`DownloadingQueueView.kt`), presenting active downloads and waiting queue items in one cohesive interface with real-time badges.
 - Added batch controls ("Pause all" / "Resume all", "Cancel all" with confirmation dialog, and "Clear queue") into the Downloads screen 3-dot overflow menu.
@@ -33,6 +56,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Modernized the Downloads screen title with an unread activity indicator mark beside the dropdown chevron and on the "Downloading queue" filter when active downloads or queued items exist.
 
 ### Fixed
+- Resolved GitHub API unauthenticated 403 rate limiting (`API rate limit exceeded`) on in-app update checks by implementing dual-layer resilient fetching with automatic fallback to public, CDN-cached GitHub Releases Atom feeds (`releases.atom`) and release redirects (`releases/latest`), making update checks for Hazel and yt-dlp completely immune to 403 errors across all network environments.
+- Fixed F-Droid flavor release check by correctly reading `packages[0].versionName` from the official F-Droid package repository metadata, ensuring F-Droid builds accurately discover updates without falling back to GitHub API rate limits.
+- Fixed release channel error reporting: when switching to channels without published releases (e.g. Beta or Nightly), the updater now gracefully displays "Up to date: No updates available on this channel" instead of incorrectly showing network connection errors or 403 rate limit banners.
+- Resolved top inset spacing gap across all 3 update screens (`SoftwareUpdateScreen`, `HazelUpdateScreen`, `YtDlpUpdateScreen`) by preventing redundant status bar window inset accumulation.
+- Fixed Light/Dark theme adaptiveness for the Software Update hub and component update screens: implemented dynamic high-contrast light theme surface tokens (`UpdateTokens`) while strictly preserving dark theme aesthetics and independent emerald green toggle switch accents.
+- Defaulted "Install on Wi-Fi only" to off (`false`) across settings repository and update view models.
+- Added comprehensive unit and integration test suite (`UpdaterTest.kt`) covering semver comparison, architecture APK resolution (`arm64-v8a`, `armeabi-v7a`, `x86_64`, `x86`, `universal`), Atom feed parsing, channel filtering, F-Droid metadata parsing, and live rate-limit resilience.
+- Fixed in-app updater download cancellation: aborts active network calls immediately, purges partial files, and gracefully resets to the available state without showing coroutine cancellation error banners.
+- Added permission confirmation dialog prior to opening unknown app sources settings, with real-time polling and lifecycle resume detection to automatically launch the installer once permission is granted.
+- Added automatic installation prompt upon download completion so users are not required to manually tap install.
 - Background download execution: Fixed a critical issue where initiating downloads from `ShareOverlayActivity` (both Normal Share and Instant Share) caused downloads to remain suspended in pending state until `MainActivity` was manually launched; resolved by passing target `MediaInfo` explicitly to `startDownload` and starting `DownloadService` synchronously before closing the activity, preventing Android and OEM process freezers (e.g. `OplusHansManager`) from suspending background execution.
 - Foreground service start lifecycle: Started `DownloadService` synchronously and immediately on the UI thread when initiating downloads from both `ShareOverlayActivity` and `InstantShareSheet`, ensuring the process enters the foreground before `finishAndRemoveTask()` destroys the calling activity and preventing `ForegroundServiceStartNotAllowedException` or process freezing on Android 12+.
 - Notification permission & shade delivery: Registered `PermissionHelper` in `ShareOverlayActivity.onCreate()` and prompted for `POST_NOTIFICATIONS` permission on Android 13+, ensuring download progress notifications appear in the status bar and notification drawer immediately upon queuing.

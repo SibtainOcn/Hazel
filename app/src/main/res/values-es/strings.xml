@@ -108,15 +108,23 @@
     <string name="no_results_try_anyway">Intentarlo igualmente</string>
     <string name="no_results_close">Cerrar</string>
 
-    <!-- UserGuideDialog -->
-    <string name="guide_title">Primeros pasos</string>
+    <!-- GettingStartedDialog -->
+    <string name="guide_step_badge">Paso %1$d de %2$d</string>
+    <string name="guide_step1_title">Pegar y descargar</string>
+    <string name="guide_step2_title">Selección de formato</string>
+    <string name="guide_step3_title">Hazel Instantáneo</string>
+    <string name="guide_step4_title">Optimización de batería</string>
+    <string name="guide_step5_title">Notificaciones</string>
     <string name="guide_step_paste_link">Pega un enlace en el campo de búsqueda para descargarlo. Puedes añadir varios enlaces y listas de reproducción</string>
     <string name="guide_step_pick_format">Toca una tarjeta para elegir el formato exacto. Se listan todas las calidades disponibles con su tamaño y su códec.</string>
-    <string name="guide_step_share_instant">Comparte un enlace con Hazel Instantáneo desde cualquier aplicación para descargarlo al instante con la calidad que hayas fijado.</string>
-    <string name="guide_step_finished_downloads">Los archivos terminados aparecen en Descargas. Toca cualquier fila para abrirlo en el reproductor predeterminado del dispositivo.</string>
+    <string name="guide_step_share_instant">Comparte un enlace con Hazel Instantáneo desde cualquier aplicación para descargar al instante con la calidad que hayas fijado.</string>
     <string name="guide_step_battery_unrestricted">Pon el uso de batería en sin restricciones; si no, Android puede detener las descargas cuando salgas de la aplicación.</string>
-    <string name="guide_battery_settings">Ajustes de batería</string>
-    <string name="guide_close">Cerrar</string>
+    <string name="guide_step_notifications">Recibe avisos sobre el progreso de descarga y archivos completados en segundo plano.</string>
+    <string name="guide_allow">Permitir</string>
+    <string name="guide_deny">Denegar</string>
+    <string name="guide_skip">Omitir</string>
+    <string name="guide_next">Siguiente</string>
+    <string name="guide_back">Atrás</string>
 
     <!-- FormatSheet -->
     <string name="format_sheet_title">Descargar</string>
@@ -190,7 +198,7 @@
     <string name="more_hazel_instant">Hazel Instantáneo</string>
     <string name="more_temporary_files">Archivos temporales</string>
     <string name="more_converter">Convertir vídeo a audio sin conexión</string>
-    <string name="more_engine_update">Actualización del motor yt-dlp</string>
+    <string name="more_software_update">Actualización de software</string>
     <string name="more_support">Apoyar a Hazel</string>
     <string name="more_license">Licencia</string>
 
@@ -216,40 +224,6 @@
     <string name="sponsor_source_subtitle">Cada línea es pública, y las pull requests son bienvenidas.</string>
     <string name="sponsor_footer">Sin anuncios, sin medir nada de lo que descargas y sin ninguna función guardada para unos pocos. Apoyar cambia cuánto tiempo se le dedica a Hazel, no lo que hará por ti.</string>
 
-    <!-- UpdateScreen -->
-    <string name="update_title">Actualización de yt-dlp</string>
-    <string name="update_back">Atrás</string>
-    <string name="update_check_action">Buscar actualizaciones</string>
-    <string name="update_status_up_to_date">Estás al día</string>
-    <string name="update_status_checking">Buscando actualizaciones...</string>
-    <string name="update_status_available">Actualización disponible</string>
-    <string name="update_status_installing">Instalando yt-dlp...</string>
-    <string name="update_status_installed">Motor actualizado</string>
-    <string name="update_status_failed">La actualización falló</string>
-    <string name="update_subtitle_idle">Hazel está usando la última versión de yt-dlp</string>
-    <string name="update_subtitle_checking">Contactando con GitHub...</string>
-    <string name="update_subtitle_available">yt-dlp %1$s está disponible</string>
-    <string name="update_subtitle_updating">Descargando yt-dlp %1$s</string>
-    <string name="update_subtitle_installed">yt-dlp %1$s ya está en uso</string>
-    <string name="update_installed_version">Versión instalada</string>
-    <string name="update_version_unknown">Desconocida</string>
-    <string name="update_new_version">Versión nueva</string>
-    <string name="update_installing_binary">Instalando el binario</string>
-    <string name="update_installing_body">Descargando desde GitHub y sustituyendo el motor. Mantén la aplicación abierta.</string>
-    <string name="update_action_update_now">Actualizar ahora</string>
-    <string name="update_action_installing">Instalando...</string>
-    <string name="update_action_done">Hecho</string>
-    <string name="update_action_retry">Reintentar</string>
-    <string name="update_action_check">Buscar actualizaciones</string>
-    <string name="update_action_checking">Buscando...</string>
-    <string name="update_info_heading">Información</string>
-    <string name="update_info_component">Componente</string>
-    <string name="update_info_repository">Repositorio</string>
-    <string name="update_info_binary_size">Tamaño del binario</string>
-    <string name="update_info_distribution">Distribución</string>
-    <string name="update_info_github_releases">GitHub Releases</string>
-    <string name="update_release_channel">Canal de versiones</string>
-    <string name="update_view_changelog">Ver el registro de cambios</string>
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Elige el filtrado de SponsorBlock</string>

@@ -177,6 +177,22 @@ android {
         }
     }
 
+    flavorDimensions += "distribution"
+
+    productFlavors {
+        create("github") {
+            dimension = "distribution"
+            isDefault = true
+            buildConfigField("boolean", "IS_FDROID", "false")
+            buildConfigField("String", "DISTRIBUTION_FLAVOR", "\"github\"")
+        }
+        create("fdroid") {
+            dimension = "distribution"
+            buildConfigField("boolean", "IS_FDROID", "true")
+            buildConfigField("String", "DISTRIBUTION_FLAVOR", "\"fdroid\"")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -184,6 +200,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     // Five APKs take five times as long to package, which is worth it for a release and
@@ -242,6 +259,7 @@ android {
 androidComponents {
     onVariants { variant ->
         val channel = if (variant.buildType == "debug") "debug" else hazelChannel
+        val flavor = variant.flavorName ?: "github"
         variant.outputs.forEach { output ->
             val abi = output.filters
                 .firstOrNull { it.filterType == FilterConfiguration.FilterType.ABI }
@@ -252,9 +270,15 @@ androidComponents {
             // which architecture this output is for.
             output.versionCode.set(hazelBaseVersionCode + (abiVersionCodes[abi] ?: 0))
 
+            val apkName = if (flavor == "github") {
+                "Hazel-v$hazelVersionName-$abi-$channel.apk"
+            } else {
+                "Hazel-v$hazelVersionName-$flavor-$abi-$channel.apk"
+            }
+
             (output as? com.android.build.api.variant.impl.VariantOutputImpl)
                 ?.outputFileName
-                ?.set("Hazel-v$hazelVersionName-$abi-$channel.apk")
+                ?.set(apkName)
         }
     }
 }
@@ -445,4 +469,11 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
+}
+
+// Forward compatibility: map legacy testDebugUnitTest to flavor test tasks for CI and tooling
+tasks.register("testDebugUnitTest") {
+    dependsOn("testGithubDebugUnitTest", "testFdroidDebugUnitTest")
+    description = "Runs unit tests for all debug variants."
+    group = "verification"
 }

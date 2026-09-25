@@ -311,10 +311,18 @@ def test_loading_sheet_performance():
         "delay(2200)" not in loading_content
     )
 
-    # Check that infiniteTransition drives rail progress smoothly
+    # Check that progressive animation drives rail progress smoothly
     check_true(
-        "Infinite transition drives railProgress smoothly",
-        "rememberInfiniteTransition" in loading_content and "railProgress" in loading_content
+        "Progressive animation drives railProgress smoothly",
+        "animateFloatAsState" in loading_content and "railProgress" in loading_content
+    )
+    check_true(
+        "Concentric bolt icon used in loader",
+        "R.drawable.ic_hazel_bolt" in loading_content
+    )
+    check_true(
+        "Concentric circle badge used for loader",
+        "CircleShape" in loading_content
     )
     check_true(
         "progressMessage is supported dynamically",

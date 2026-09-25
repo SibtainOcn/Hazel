@@ -209,7 +209,8 @@ def main():
         ("Controls & Multi-Source Harness", [py, "tools/test_download_controls_and_sources.py"]),
         ("Share Overlay Isolation & Safety Harness", [py, "tools/test_share_overlay_isolation.py"]),
         ("NewPipe Latency & Multi-Source Harness", [py, "tools/test_newpipe_latency_and_fallback.py"]),
-        ("Gradle JVM Unit Tests", GRADLE_CMD + [":app:testDebugUnitTest", "--console=plain"]),
+        ("Software Update & Flavors Harness", [py, "tools/test_software_update_and_flavors.py"]),
+        ("Gradle JVM Unit Tests", GRADLE_CMD + [":app:test", "--console=plain"]),
     ]
 
     results = []

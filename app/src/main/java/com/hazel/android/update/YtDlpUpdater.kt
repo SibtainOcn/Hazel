@@ -86,35 +86,114 @@ object YtDlpUpdater {
         null
     }
 
+    sealed interface CheckResult {
+        data class Success(val info: ReleaseInfo) : CheckResult
+        data object NoReleaseFound : CheckResult
+        data class NetworkError(val message: String) : CheckResult
+    }
+
+    /**
+     * Extracts the first release tag from a GitHub Atom feed.
+     */
+    fun parseFirstTagFromAtom(xml: String): String? {
+        val match = Regex("""href=["'][^"']*/releases/tag/([^"']+)["']""").find(xml)
+            ?: Regex("""<id>[^<]*/([^/<]+)</id>""").find(xml)
+        return match?.groupValues?.get(1)?.trim()
+    }
+
     /**
      * Fetches the latest release of [channel] from GitHub without installing anything.
-     * Returns null when the release can't be read.
+     * Uses resilient redirect and Atom feed resolution to be immune to GitHub API 403 rate limits.
      */
-    suspend fun latestRelease(channel: Channel): ReleaseInfo? = withContext(Dispatchers.IO) {
+    suspend fun latestReleaseResult(channel: Channel): CheckResult = withContext(Dispatchers.IO) {
+        // 1. Direct release redirect check (instantaneous, zero API rate limits, 403-proof)
+        try {
+            val noRedirectClient = client.newBuilder()
+                .followRedirects(false)
+                .followSslRedirects(false)
+                .build()
+            val request = Request.Builder()
+                .url("https://github.com/${channel.repo}/releases/latest")
+                .header("User-Agent", "Mozilla/5.0")
+                .build()
+
+            noRedirectClient.newCall(request).execute().use { response ->
+                val location = response.header("Location")
+                if (location != null && location.contains("/releases/tag/")) {
+                    val tag = location.substringAfterLast("/releases/tag/").trim()
+                    if (tag.isNotBlank()) {
+                        return@withContext CheckResult.Success(
+                            ReleaseInfo(
+                                version = tag,
+                                channel = channel,
+                                binarySize = 0L
+                            )
+                        )
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            // Fall back to Atom feed
+        }
+
+        // 2. Releases Atom feed check (CDN cached, zero rate limits)
+        try {
+            val atomRequest = Request.Builder()
+                .url("https://github.com/${channel.repo}/releases.atom")
+                .header("User-Agent", "Mozilla/5.0")
+                .build()
+
+            client.newCall(atomRequest).execute().use { response ->
+                if (response.isSuccessful) {
+                    val xml = response.body.string()
+                    val tag = parseFirstTagFromAtom(xml)
+                    if (tag != null && tag.isNotBlank()) {
+                        return@withContext CheckResult.Success(
+                            ReleaseInfo(
+                                version = tag,
+                                channel = channel,
+                                binarySize = 0L
+                            )
+                        )
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            // Fall back to API
+        }
+
+        // 3. Fallback to API if available (when not rate limited)
         try {
             val request = Request.Builder()
                 .url(channel.ytdlChannel.apiUrl)
                 .header("Accept", "application/vnd.github.v3+json")
+                .header("User-Agent", "Hazel-App-Updater")
                 .build()
 
             client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) return@withContext null
-
-                val json = JSONObject(response.body.string())
-
-                val tag = json.optString("tag_name", "").trim()
-                if (tag.isBlank()) return@withContext null
-
-                ReleaseInfo(
-                    version = tag,
-                    channel = channel,
-                    binarySize = findBinarySize(json)
-                )
+                if (response.isSuccessful) {
+                    val json = JSONObject(response.body.string())
+                    val tag = json.optString("tag_name", "").trim()
+                    if (tag.isNotBlank()) {
+                        return@withContext CheckResult.Success(
+                            ReleaseInfo(
+                                version = tag,
+                                channel = channel,
+                                binarySize = findBinarySize(json)
+                            )
+                        )
+                    }
+                }
             }
         } catch (_: Exception) {
-            null
+            // Network failure
         }
+
+        CheckResult.NetworkError("Couldn't reach GitHub. Check your connection.")
     }
+
+    suspend fun latestRelease(channel: Channel): ReleaseInfo? =
+        (latestReleaseResult(channel) as? CheckResult.Success)?.info
 
     /**
      * Downloads and installs the latest yt-dlp binary of [channel].
