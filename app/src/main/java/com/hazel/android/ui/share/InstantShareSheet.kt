@@ -25,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -50,15 +51,11 @@ import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.DownloadOptions
 import java.net.URI
 
-// Theme color tokens matching sheet-instant.html design specifications
+// Structural dark-theme color tokens (not accent-dependent)
 private val SheetBgColor = Color(0xFF0A0A0A)
 private val SurfaceCardColor = Color(0xFF141414)
 private val GrabberColor = Color(0xFF2C2C2C)
 private val OutlineBorderColor = Color(0xFF2C2C2C)
-private val AccentColor = Color(0xFF8FD6B8)
-private val AccentContainerColor = Color(0xFF0E3327)
-private val AccentOnColor = Color(0xFF003824)
-private val AccentStrongColor = Color(0xFFA9E6CC)
 private val TextOnSurfaceColor = Color(0xFFF2F2F0)
 private val TextMutedColor = Color(0xFFB8B8B4)
 private val TextDimColor = Color(0xFF7A7A77)
@@ -127,13 +124,13 @@ fun InstantShareSheet(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(AccentContainerColor),
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.splash_icon),
                         contentDescription = stringResource(R.string.share_overlay_instant_title),
-                        tint = AccentColor,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -211,7 +208,7 @@ fun InstantShareSheet(
                         // Media Type (Video vs Audio)
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = AccentContainerColor
+                            color = MaterialTheme.colorScheme.primaryContainer
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -221,14 +218,14 @@ fun InstantShareSheet(
                                     imageVector = if (isVideo) Icons.Default.Videocam else Icons.Default.Audiotrack,
                                     contentDescription = null,
                                     modifier = Modifier.size(14.dp),
-                                    tint = AccentStrongColor
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = if (isVideo) "Video" else "Audio only",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = AccentStrongColor
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
                         }
@@ -236,7 +233,7 @@ fun InstantShareSheet(
                         // Quality Ceiling badge
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = AccentContainerColor
+                            color = MaterialTheme.colorScheme.primaryContainer
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -246,7 +243,7 @@ fun InstantShareSheet(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = null,
                                     modifier = Modifier.size(13.dp),
-                                    tint = AccentStrongColor
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                                 Spacer(modifier = Modifier.width(5.dp))
                                 Text(
@@ -255,7 +252,7 @@ fun InstantShareSheet(
                                     } else "Best Audio",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = AccentStrongColor
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
                         }
@@ -344,14 +341,14 @@ fun InstantShareSheet(
                     shape = RoundedCornerShape(26.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = AccentColor,
-                        contentColor = AccentOnColor
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.download),
                         contentDescription = null,
-                        tint = AccentOnColor,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))

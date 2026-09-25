@@ -46,6 +46,7 @@ import com.hazel.android.download.DownloadViewModelHolder
 import com.hazel.android.ui.screens.download.FormatSheet
 import com.hazel.android.ui.screens.download.NoResultsDialog
 import com.hazel.android.ui.screens.download.batch.BatchDownloadSheet
+import com.hazel.android.ui.theme.AccentColors
 import com.hazel.android.ui.theme.HazelTypography
 import com.hazel.android.util.AppLocale
 import com.hazel.android.util.LinkKey
@@ -59,31 +60,38 @@ import kotlinx.coroutines.launch
 import java.net.URI
 
 
-// Strictly independent of user-configured app theme or accent color.
-private val ShareOverlayDarkColorScheme = darkColorScheme(
-    primary = androidx.compose.ui.graphics.Color(0xFF8FD6B8),
-    onPrimary = androidx.compose.ui.graphics.Color(0xFF003824),
-    primaryContainer = androidx.compose.ui.graphics.Color(0xFF0E3327),
-    onPrimaryContainer = androidx.compose.ui.graphics.Color(0xFFA9E6CC),
-    secondary = androidx.compose.ui.graphics.Color(0xFF8FD6B8),
-    onSecondary = androidx.compose.ui.graphics.Color(0xFF003824),
-    secondaryContainer = androidx.compose.ui.graphics.Color(0xFF0E3327),
-    onSecondaryContainer = androidx.compose.ui.graphics.Color(0xFFA9E6CC),
-    tertiary = androidx.compose.ui.graphics.Color(0xFF8FD6B8),
-    background = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
-    onBackground = androidx.compose.ui.graphics.Color(0xFFF2F2F0),
-    surface = androidx.compose.ui.graphics.Color(0xFF141414),
-    onSurface = androidx.compose.ui.graphics.Color(0xFFF2F2F0),
-    surfaceVariant = androidx.compose.ui.graphics.Color(0xFF1A1A1A),
-    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFFB8B8B4),
-    outline = androidx.compose.ui.graphics.Color(0xFF2C2C2C),
-    outlineVariant = androidx.compose.ui.graphics.Color(0xFF1F1F1F),
-    surfaceContainerLowest = androidx.compose.ui.graphics.Color(0xFF000000),
-    surfaceContainerLow = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
-    surfaceContainer = androidx.compose.ui.graphics.Color(0xFF141414),
-    surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFF1E1E1E),
-    surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFF262626)
-)
+/**
+ * Builds a dark-only color scheme using the user's selected accent color.
+ * The overlay always renders in dark mode regardless of system setting,
+ * but picks up the user's accent from Settings.
+ */
+private fun overlayColorScheme(accentName: String): androidx.compose.material3.ColorScheme {
+    val accent = AccentColors.find { it.name == accentName } ?: AccentColors.first()
+    return darkColorScheme(
+        primary = accent.dark,
+        onPrimary = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
+        primaryContainer = accent.containerDark,
+        onPrimaryContainer = accent.dark,
+        secondary = accent.dark.copy(alpha = 0.8f),
+        onSecondary = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
+        secondaryContainer = accent.containerDark,
+        onSecondaryContainer = accent.dark,
+        tertiary = accent.dark,
+        background = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
+        onBackground = androidx.compose.ui.graphics.Color(0xFFF2F2F0),
+        surface = androidx.compose.ui.graphics.Color(0xFF141414),
+        onSurface = androidx.compose.ui.graphics.Color(0xFFF2F2F0),
+        surfaceVariant = androidx.compose.ui.graphics.Color(0xFF1A1A1A),
+        onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFFB8B8B4),
+        outline = androidx.compose.ui.graphics.Color(0xFF2C2C2C),
+        outlineVariant = androidx.compose.ui.graphics.Color(0xFF1F1F1F),
+        surfaceContainerLowest = androidx.compose.ui.graphics.Color(0xFF000000),
+        surfaceContainerLow = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
+        surfaceContainer = androidx.compose.ui.graphics.Color(0xFF141414),
+        surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFF1E1E1E),
+        surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFF262626)
+    )
+}
 
 /**
  * Transparent floating overlay activity that catches share intents from external apps.
@@ -146,6 +154,10 @@ class ShareOverlayActivity : ComponentActivity() {
                 .collectAsState(initial = "")
             val saveDirLabel = treeLabel.ifBlank { StoragePaths.DOWNLOADS_DISPLAY }
 
+            // Read user's accent preference so the overlay matches the app's accent
+            val accentName by SettingsRepository.getAccentColor(this)
+                .collectAsState(initial = "Cyan")
+
             // Immediately capture and save shared URL into search history (if not incognito)
             LaunchedEffect(url) {
                 val app = applicationContext
@@ -179,9 +191,9 @@ class ShareOverlayActivity : ComponentActivity() {
                 }
             }
 
-            // Strictly independent of user-selected app theme & accent colors (Green & Black #0A0A0A & #8FD6B8)
+            // Always dark overlay, but uses the user's chosen accent color
             androidx.compose.material3.MaterialTheme(
-                colorScheme = ShareOverlayDarkColorScheme,
+                colorScheme = overlayColorScheme(accentName),
                 typography = HazelTypography
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {

@@ -27,6 +27,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -53,14 +54,11 @@ import com.hazel.android.ui.components.shimmerBlock
 import kotlinx.coroutines.delay
 import java.net.URI
 
-// Theme color tokens matching sheet-fetching.html
+// Structural dark-theme color tokens (not accent-dependent)
 private val SheetBgColor = Color(0xFF0A0A0A)
 private val GrabberColor = Color(0xFF2C2C2C)
 private val OutlineBorderColor = Color(0xFF2C2C2C)
 private val RailTrackColor = Color(0xFF1F1F1F)
-private val AccentColor = Color(0xFF8FD6B8)
-private val AccentContainerColor = Color(0xFF0E3327)
-private val AccentTrackColor = Color(0x2E8FD6B8)
 private val TextOnSurfaceColor = Color(0xFFF2F2F0)
 private val TextMutedColor = Color(0xFFB8B8B4)
 private val TextDimColor = Color(0xFF7A7A77)
@@ -161,20 +159,20 @@ fun OverlayLoadingSheet(
                     CircularProgressIndicator(
                         modifier = Modifier.size(44.dp),
                         strokeWidth = 3.5.dp,
-                        color = AccentColor,
-                        trackColor = AccentTrackColor
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
                     )
                     Box(
                         modifier = Modifier
                             .size(34.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(AccentContainerColor),
+                            .background(MaterialTheme.colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.splash_icon),
                             contentDescription = null,
-                            tint = AccentColor,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -215,7 +213,7 @@ fun OverlayLoadingSheet(
                         .fillMaxWidth(animatedProgress)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(2.dp))
-                        .background(AccentColor)
+                        .background(MaterialTheme.colorScheme.primary)
                 )
             }
 
