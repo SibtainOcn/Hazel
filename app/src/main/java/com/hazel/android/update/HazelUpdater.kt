@@ -6,8 +6,11 @@ import android.os.Build
 import androidx.core.content.FileProvider
 import com.hazel.android.BuildConfig
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
+import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -25,6 +28,16 @@ object HazelUpdater {
     const val REPO_NAME = "SibtainOcn/Hazel"
     const val GITHUB_REPO_URL = "https://github.com/SibtainOcn/Hazel"
     const val FDROID_PACKAGE_URL = "https://f-droid.org/packages/com.hazel.android/"
+
+    @Volatile
+    private var currentDownloadCall: Call? = null
+
+    fun cancelActiveDownload() {
+        try {
+            currentDownloadCall?.cancel()
+        } catch (_: Exception) {}
+        currentDownloadCall = null
+    }
 
     enum class Channel(val label: String) {
         STABLE("Stable"),
@@ -286,14 +299,24 @@ object HazelUpdater {
 
     /**
      * Cleans up cached update APK files to reclaim storage and prevent installer file bloat.
+     * When preserveVersion is specified, keeps the downloaded APK matching that version.
      */
-    fun cleanStaleApks(context: Context) {
+    fun cleanStaleApks(context: Context, preserveVersion: String? = null) {
         try {
             val updatesDir = File(context.cacheDir, "updates")
             if (updatesDir.exists() && updatesDir.isDirectory) {
                 updatesDir.listFiles()?.forEach { file ->
-                    if (file.isFile && file.extension.equals("apk", ignoreCase = true)) {
-                        file.delete()
+                    if (file.isFile) {
+                        val isPart = file.extension.equals("part", ignoreCase = true) || file.name.endsWith(".part")
+                        val isApk = file.extension.equals("apk", ignoreCase = true)
+                        if (isPart) {
+                            file.delete()
+                        } else if (isApk) {
+                            if (preserveVersion != null && file.name.contains(preserveVersion)) {
+                                return@forEach
+                            }
+                            file.delete()
+                        }
                     }
                 }
             }
@@ -303,19 +326,34 @@ object HazelUpdater {
     }
 
     /**
+     * Retrieves an already downloaded and verified APK from cache, if available.
+     */
+    fun getCachedApk(context: Context, info: ReleaseInfo): File? {
+        val updatesDir = File(context.cacheDir, "updates")
+        if (!updatesDir.exists()) return null
+        val safeName = info.assetName.ifBlank { "Hazel-v${info.version}.apk" }
+        val targetFile = File(updatesDir, safeName)
+        if (targetFile.exists() && targetFile.isFile && targetFile.length() > 0) {
+            if (info.binarySize <= 0L || targetFile.length() == info.binarySize) {
+                return targetFile
+            }
+        }
+        return null
+    }
+
+    /**
      * Asynchronously checks for Hazel and engine updates in the background on app start,
      * reactively syncing flags so Home top bar Update pill and More screen red dots
      * appear immediately in real-time without requiring manual user navigation.
      */
     suspend fun checkUpdatesSilently(context: Context) = withContext(Dispatchers.IO) {
-        cleanStaleApks(context)
-
         try {
             val channelLabel = com.hazel.android.data.SettingsRepository.getHazelChannel(context).first()
             val channel = Channel.fromLabel(channelLabel)
             val release = latestRelease(channel)
             val hasHazelUpdate = release != null && isNewer(release.version)
             com.hazel.android.data.SettingsRepository.setHazelUpdateAvailable(context, hasHazelUpdate)
+            cleanStaleApks(context, preserveVersion = if (hasHazelUpdate) release.version else null)
         } catch (_: Exception) {
             // Ignore silent network check failure
         }
@@ -334,64 +372,92 @@ object HazelUpdater {
     }
 
     /**
-     * Downloads the APK file to cache directory with progress reporting.
+     * Downloads the APK file to cache directory with progress reporting and immediate cancellation.
      */
     suspend fun downloadApk(
         context: Context,
         info: ReleaseInfo,
         onProgress: (bytesRead: Long, totalBytes: Long, speedBps: Long, etaSeconds: Long) -> Unit
     ): File = withContext(Dispatchers.IO) {
-        cleanStaleApks(context)
+        cleanStaleApks(context, preserveVersion = info.version)
 
         val updatesDir = File(context.cacheDir, "updates")
         if (!updatesDir.exists()) updatesDir.mkdirs()
 
         val safeName = info.assetName.ifBlank { "Hazel-v${info.version}.apk" }
         val targetFile = File(updatesDir, safeName)
+        val tempFile = File(updatesDir, "$safeName.part")
+
+        if (tempFile.exists()) tempFile.delete()
 
         val request = Request.Builder()
             .url(info.downloadUrl)
             .header("User-Agent", "Hazel-App-Updater")
             .build()
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw IllegalStateException("Download failed with HTTP ${response.code}")
-            val body = response.body
-            val totalBytes = if (info.binarySize > 0) info.binarySize else body.contentLength()
+        val call = client.newCall(request)
+        currentDownloadCall = call
 
-            val buffer = ByteArray(8192)
-            var bytesReadTotal = 0L
-            var lastSampleTime = System.currentTimeMillis()
-            var lastSampleBytes = 0L
-            var currentSpeed = 0L
-
-            body.byteStream().use { input ->
-                FileOutputStream(targetFile).use { output ->
-                    var read: Int
-                    while (input.read(buffer).also { read = it } != -1) {
-                        output.write(buffer, 0, read)
-                        bytesReadTotal += read
-
-                        val now = System.currentTimeMillis()
-                        val elapsed = now - lastSampleTime
-                        if (elapsed >= 400) {
-                            val bytesDelta = bytesReadTotal - lastSampleBytes
-                            currentSpeed = if (elapsed > 0) (bytesDelta * 1000) / elapsed else 0L
-                            val remainingBytes = (totalBytes - bytesReadTotal).coerceAtLeast(0L)
-                            val eta = if (currentSpeed > 0) remainingBytes / currentSpeed else 0L
-
-                            onProgress(bytesReadTotal, totalBytes, currentSpeed, eta)
-                            lastSampleTime = now
-                            lastSampleBytes = bytesReadTotal
-                        }
-                    }
-                    output.flush()
-                }
-            }
-            onProgress(bytesReadTotal, totalBytes, currentSpeed, 0L)
+        val completionHandle = coroutineContext.job.invokeOnCompletion {
+            call.cancel()
         }
 
-        targetFile
+        try {
+            call.execute().use { response ->
+                if (!response.isSuccessful) throw IllegalStateException("Download failed with HTTP ${response.code}")
+                val body = response.body
+                val totalBytes = if (info.binarySize > 0) info.binarySize else body.contentLength()
+
+                val buffer = ByteArray(8192)
+                var bytesReadTotal = 0L
+                var lastSampleTime = System.currentTimeMillis()
+                var lastSampleBytes = 0L
+                var currentSpeed = 0L
+
+                body.byteStream().use { input ->
+                    FileOutputStream(tempFile).use { output ->
+                        var read: Int
+                        while (input.read(buffer).also { read = it } != -1) {
+                            coroutineContext.ensureActive()
+                            output.write(buffer, 0, read)
+                            bytesReadTotal += read
+
+                            val now = System.currentTimeMillis()
+                            val elapsed = now - lastSampleTime
+                            if (elapsed >= 300) {
+                                val bytesDelta = bytesReadTotal - lastSampleBytes
+                                currentSpeed = if (elapsed > 0) (bytesDelta * 1000) / elapsed else 0L
+                                val remainingBytes = (totalBytes - bytesReadTotal).coerceAtLeast(0L)
+                                val eta = if (currentSpeed > 0) remainingBytes / currentSpeed else 0L
+
+                                onProgress(bytesReadTotal, totalBytes, currentSpeed, eta)
+                                lastSampleTime = now
+                                lastSampleBytes = bytesReadTotal
+                            }
+                        }
+                        output.flush()
+                    }
+                }
+                coroutineContext.ensureActive()
+
+                if (targetFile.exists()) targetFile.delete()
+                if (!tempFile.renameTo(targetFile)) {
+                    tempFile.copyTo(targetFile, overwrite = true)
+                    tempFile.delete()
+                }
+
+                onProgress(bytesReadTotal, totalBytes, currentSpeed, 0L)
+            }
+            targetFile
+        } catch (e: Throwable) {
+            if (tempFile.exists()) tempFile.delete()
+            throw e
+        } finally {
+            completionHandle.dispose()
+            if (currentDownloadCall === call) {
+                currentDownloadCall = null
+            }
+        }
     }
 
     fun canInstallApks(context: Context): Boolean {
@@ -404,25 +470,8 @@ object HazelUpdater {
 
     /**
      * Prompts the system package installer to install the downloaded APK.
-     * Accurately requests unknown sources permission on API 26+ if not yet granted,
-     * ensuring installations never fail silently across all supported Android SDKs.
      */
     fun installApk(context: Context, apkFile: File) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (!context.packageManager.canRequestPackageInstalls()) {
-                val settingsIntent = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                    data = android.net.Uri.parse("package:${context.packageName}")
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                try {
-                    context.startActivity(settingsIntent)
-                    return
-                } catch (_: Exception) {
-                    // Fallback to direct install intent
-                }
-            }
-        }
-
         val uri = FileProvider.getUriForFile(
             context,
             "${context.packageName}.fileprovider",
@@ -444,3 +493,4 @@ object HazelUpdater {
         context.startActivity(intent)
     }
 }
+

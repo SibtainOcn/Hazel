@@ -2,6 +2,8 @@ package com.hazel.android.ui.screens.more
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -36,6 +38,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,8 +47,11 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +65,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hazel.android.update.HazelUpdateViewModel
 import com.hazel.android.update.HazelUpdater
@@ -70,6 +79,8 @@ import com.hazel.android.update.UpdateSwitch
 import com.hazel.android.update.UpdateTokens
 import com.hazel.android.update.UpdateTopBar
 import com.hazel.android.util.openInAppBrowser
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,7 +103,112 @@ fun HazelUpdateScreen(
     var changelogText by remember { mutableStateOf("") }
     var changelogVersion by remember { mutableStateOf("") }
 
+    var showInstallPermissionDialog by remember { mutableStateOf(false) }
+    var waitingForInstallPermission by remember { mutableStateOf(false) }
+
+    val triggerInstall: () -> Unit = {
+        if (HazelUpdater.canInstallApks(context)) {
+            viewModel.installUpdate()
+        } else {
+            showInstallPermissionDialog = true
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.installEvent.collect {
+            triggerInstall()
+        }
+    }
+
+    LaunchedEffect(waitingForInstallPermission) {
+        if (waitingForInstallPermission) {
+            while (isActive && !HazelUpdater.canInstallApks(context)) {
+                delay(400)
+            }
+            if (HazelUpdater.canInstallApks(context)) {
+                waitingForInstallPermission = false
+                viewModel.installUpdate()
+            }
+        }
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (waitingForInstallPermission && HazelUpdater.canInstallApks(context)) {
+                    waitingForInstallPermission = false
+                    viewModel.installUpdate()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     val installedVersion = HazelUpdater.installedVersion()
+
+    if (showInstallPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showInstallPermissionDialog = false },
+            title = {
+                Text(
+                    text = "Permission required",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = UpdateTokens.OnSurface
+                )
+            },
+            text = {
+                Text(
+                    text = "Hazel requires permission to install unknown apps to complete this update. You will be redirected to Settings to allow this.",
+                    fontSize = 14.sp,
+                    color = UpdateTokens.OnSurfaceVar,
+                    lineHeight = 20.sp
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showInstallPermissionDialog = false
+                        waitingForInstallPermission = true
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            val settingsIntent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                                data = Uri.parse("package:${context.packageName}")
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            try {
+                                context.startActivity(settingsIntent)
+                            } catch (_: Exception) {
+                                waitingForInstallPermission = false
+                                viewModel.installUpdate()
+                            }
+                        }
+                    }
+                ) {
+                    Text(
+                        text = "Settings",
+                        color = UpdateTokens.AccentStrong,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showInstallPermissionDialog = false }
+                ) {
+                    Text(
+                        text = "Cancel",
+                        color = UpdateTokens.OnSurfaceDim
+                    )
+                }
+            },
+            containerColor = UpdateTokens.Surface,
+            shape = RoundedCornerShape(18.dp)
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -129,7 +245,7 @@ fun HazelUpdateScreen(
                 onCheckNow = { viewModel.checkForUpdate() },
                 onDownload = { viewModel.startDownload() },
                 onCancel = { viewModel.cancelDownload() },
-                onInstall = { viewModel.installUpdate() },
+                onInstall = { triggerInstall() },
                 onOpenFdroid = {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(HazelUpdater.FDROID_PACKAGE_URL)).apply {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -392,18 +508,18 @@ private fun HazelStatusCard(
                                     color = UpdateTokens.RunStrong
                                 )
                             }
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "Version ${state.info.version}",
-                                fontSize = 24.sp,
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.OnSurface,
-                                lineHeight = 30.sp
+                                lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "Downloading release package",
-                                fontSize = 14.sp,
+                                fontSize = 13.sp,
                                 color = UpdateTokens.OnSurfaceVar
                             )
                         }
@@ -414,18 +530,18 @@ private fun HazelStatusCard(
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.AccentStrong
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Ready to install v${state.info.version}",
-                                fontSize = 24.sp,
+                                text = "Version ${state.info.version} is ready",
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = UpdateTokens.OnSurface,
-                                lineHeight = 30.sp
+                                lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Verified against project public key",
-                                fontSize = 14.sp,
+                                text = "Package is verified and ready",
+                                fontSize = 13.sp,
                                 color = UpdateTokens.OnSurfaceVar
                             )
                         }
@@ -541,7 +657,7 @@ private fun HazelStatusCard(
 
             // ── Download Progress Figures ──
             if (state is HazelUpdateViewModel.UiState.Downloading) {
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 val pct = if (state.totalBytes > 0) {
                     (state.progressBytes.toFloat() / state.totalBytes.toFloat()).coerceIn(0f, 1f)
                 } else 0f
@@ -550,56 +666,50 @@ private fun HazelStatusCard(
                     progress = { pct },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(6.dp)
+                        .height(5.dp)
                         .clip(RoundedCornerShape(3.dp)),
                     color = UpdateTokens.RunStrong,
                     trackColor = Color.White.copy(alpha = 0.10f)
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     val downloadedMb = state.progressBytes / (1024f * 1024f)
                     val totalMb = state.totalBytes / (1024f * 1024f)
+                    val speedMb = state.speedBps / (1024f * 1024f)
+                    val speedText = if (state.speedBps > 0) String.format(Locale.US, "%.1f MB/s", speedMb) else "Connecting…"
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = String.format(Locale.US, "%.1f / %.1f MB", downloadedMb, totalMb),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = UpdateTokens.OnSurface
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "·  $speedText",
+                            fontSize = 12.sp,
+                            color = UpdateTokens.OnSurfaceDim
+                        )
+                    }
+                    val pctText = "${(pct * 100).toInt()}%"
+                    val etaText = if (state.etaSeconds > 0) " (${state.etaSeconds}s)" else ""
                     Text(
-                        text = String.format(Locale.US, "%.1f MB / %.1f MB", downloadedMb, totalMb),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = UpdateTokens.OnSurface
-                    )
-                    Text(
-                        text = "${(pct * 100).toInt()}%",
-                        fontSize = 15.sp,
+                        text = "$pctText$etaText",
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = UpdateTokens.RunStrong
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    val speedMb = state.speedBps / (1024f * 1024f)
-                    Text(
-                        text = if (state.speedBps > 0) String.format(Locale.US, "%.1f MB/s", speedMb) else "Connecting...",
-                        fontSize = 12.5.sp,
-                        color = UpdateTokens.OnSurfaceDim
-                    )
-                    Text(
-                        text = if (state.etaSeconds > 0) "${state.etaSeconds}s remaining" else "",
-                        fontSize = 12.5.sp,
-                        color = UpdateTokens.OnSurfaceDim
                     )
                 }
             }
 
             // ── Actions Row ──
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 when (state) {
                     is HazelUpdateViewModel.UiState.Idle -> {

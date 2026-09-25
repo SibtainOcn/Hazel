@@ -4,9 +4,13 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hazel.android.data.SettingsRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -32,6 +36,9 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Checking)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private val _installEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val installEvent: SharedFlow<Unit> = _installEvent.asSharedFlow()
 
     private val _channel = MutableStateFlow(HazelUpdater.Channel.STABLE)
     val channel: StateFlow<HazelUpdater.Channel> = _channel.asStateFlow()
@@ -125,7 +132,14 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
                     if (HazelUpdater.isFdroid()) "Couldn't reach F-Droid repository. Check your connection."
                     else "Couldn't reach GitHub. Check your connection."
                 )
-                isAvailable -> UiState.Available(info)
+                isAvailable -> {
+                    val cachedApk = HazelUpdater.getCachedApk(getApplication(), info)
+                    if (cachedApk != null) {
+                        UiState.ReadyToInstall(info, cachedApk)
+                    } else {
+                        UiState.Available(info)
+                    }
+                }
                 else -> UiState.Idle
             }
         }
@@ -147,19 +161,27 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
                     _uiState.value = UiState.Downloading(info, bytes, total, speed, eta)
                 }
                 _uiState.value = UiState.ReadyToInstall(info, apkFile)
+                _installEvent.tryEmit(Unit)
+            } catch (e: CancellationException) {
+                val current = _uiState.value
+                if (current is UiState.Downloading) {
+                    _uiState.value = UiState.Available(info)
+                }
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 _uiState.value = UiState.Error(e.message ?: "Download failed. Please try again.", info)
             }
         }
     }
 
     fun cancelDownload() {
-        downloadJob?.cancel()
-        downloadJob = null
         val info = when (val s = _uiState.value) {
             is UiState.Downloading -> s.info
             else -> null
         }
+        HazelUpdater.cancelActiveDownload()
+        downloadJob?.cancel()
+        downloadJob = null
         _uiState.value = if (info != null) UiState.Available(info) else UiState.Idle
     }
 

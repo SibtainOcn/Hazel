@@ -27,7 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Replaced duplicate distribution channel flavor row with a comprehensive "Device & architecture" card in `SoftwareUpdateScreen` displaying device hardware model, Android OS version and API level, primary architecture, and supported ABIs.
 - Refined Software Update hub and component update screens: removed redundant "Verified binaries" row from distribution overview, removed "Checked recently · Signature/Binary verified" subtitles from hero cards, reduced outer horizontal margins from 20dp to 12dp to utilize available screen width, and made hero cards more compact.
+- Compacted the in-app update downloading card to match the exact size and proportions of the update available card, combining download speed, transfer count, and percentage into a single streamlined row.
+- Retained downloaded APKs in cache across screen visits, allowing users who defer installation to return and install immediately without re-downloading.
 - Fail-safe APK auto-installation: verified package install permissions on API 26+ (`canRequestPackageInstalls()`) and prompted the system unknown sources toggle rather than failing silently, granting explicit URI permissions to the resolved package installer.
+- Removed description subtitles from "Software update" and "Link reading" rows in More settings for consistent visual density across all setting items.
 - Fixed unit test execution on CI by registering a forward-compatible `testDebugUnitTest` task alias in `app/build.gradle.kts` mapping to flavor-specific test tasks (`testGithubDebugUnitTest` and `testFdroidDebugUnitTest`).
 - Replaced the Ko-fi sponsor option (which was marked "Opening soon") with a live
   Buy Me a Coffee link (`buymeacoffee.com/sibtainocean`).
@@ -46,6 +49,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Modernized the Downloads screen title with an unread activity indicator mark beside the dropdown chevron and on the "Downloading queue" filter when active downloads or queued items exist.
 
 ### Fixed
+- Fixed in-app updater download cancellation: aborts active network calls immediately, purges partial files, and gracefully resets to the available state without showing coroutine cancellation error banners.
+- Added permission confirmation dialog prior to opening unknown app sources settings, with real-time polling and lifecycle resume detection to automatically launch the installer once permission is granted.
+- Added automatic installation prompt upon download completion so users are not required to manually tap install.
 - Background download execution: Fixed a critical issue where initiating downloads from `ShareOverlayActivity` (both Normal Share and Instant Share) caused downloads to remain suspended in pending state until `MainActivity` was manually launched; resolved by passing target `MediaInfo` explicitly to `startDownload` and starting `DownloadService` synchronously before closing the activity, preventing Android and OEM process freezers (e.g. `OplusHansManager`) from suspending background execution.
 - Foreground service start lifecycle: Started `DownloadService` synchronously and immediately on the UI thread when initiating downloads from both `ShareOverlayActivity` and `InstantShareSheet`, ensuring the process enters the foreground before `finishAndRemoveTask()` destroys the calling activity and preventing `ForegroundServiceStartNotAllowedException` or process freezing on Android 12+.
 - Notification permission & shade delivery: Registered `PermissionHelper` in `ShareOverlayActivity.onCreate()` and prompted for `POST_NOTIFICATIONS` permission on Android 13+, ensuring download progress notifications appear in the status bar and notification drawer immediately upon queuing.
