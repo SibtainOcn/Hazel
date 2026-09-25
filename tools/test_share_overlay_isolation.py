@@ -184,23 +184,23 @@ def test_source_code_integrity():
         "Shared URLs must be saved to history"
     )
 
-    # 3. Independent Black & Green Theme
+    # 3. Dynamic Accent Dark Theme
     check_true(
-        "ShareOverlayDarkColorScheme defined in ShareOverlayActivity",
-        "ShareOverlayDarkColorScheme = darkColorScheme" in overlay_content,
-        "Must use independent darkColorScheme"
+        "overlayColorScheme defined in ShareOverlayActivity",
+        "private fun overlayColorScheme" in overlay_content,
+        "Must use overlayColorScheme function"
     )
     check_true(
-        "Primary color is #8FD6B8 (Mint green)",
-        "0xFF8FD6B8" in overlay_content
+        "SettingsRepository.getAccentColor used for share overlay",
+        "SettingsRepository.getAccentColor" in overlay_content
     )
     check_true(
         "Background color is #0A0A0A (Deep black)",
         "0xFF0A0A0A" in overlay_content
     )
     check_true(
-        "Container color is #0E3327 (Dark green container)",
-        "0xFF0E3327" in overlay_content
+        "Theme uses accent colors dynamically",
+        "accent.dark" in overlay_content and "accent.containerDark" in overlay_content
     )
 
     # 4. Sheet display ordering: state.info != null checked for single item

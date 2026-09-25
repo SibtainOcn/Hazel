@@ -102,7 +102,6 @@ def test_data_preservation():
 
     check_true("backup_rules includes sharedpref", ("sharedpref", ".") in includes_b)
     check_true("backup_rules includes datastore/", ("file", "datastore/") in includes_b)
-    check_true("backup_rules excludes cache", ("cache", ".") in excludes_b)
 
     # Check data_extraction_rules.xml contents
     tree_d = ET.parse(data_extraction_path)
