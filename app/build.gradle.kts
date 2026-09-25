@@ -470,3 +470,10 @@ dependencies {
     implementation(libs.coil.network.okhttp)
 
 }
+
+// Forward compatibility: map legacy testDebugUnitTest to flavor test tasks for CI and tooling
+tasks.register("testDebugUnitTest") {
+    dependsOn("testGithubDebugUnitTest", "testFdroidDebugUnitTest")
+    description = "Runs unit tests for all debug variants."
+    group = "verification"
+}

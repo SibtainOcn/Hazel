@@ -28,15 +28,29 @@ PORT = 8998
 
 
 def find_apk() -> Path:
-    debug_dir = REPO_ROOT / "app" / "build" / "outputs" / "apk" / "github" / "debug"
-    for candidate in [
-        debug_dir / "Hazel-v1.0.8-arm64-v8a-debug.apk",
-        debug_dir / "Hazel-v1.0.8-universal-debug.apk",
-    ]:
-        if candidate.exists():
-            return candidate
-    apks = list(debug_dir.glob("*.apk"))
-    return apks[0] if apks else debug_dir / "Hazel-v1.0.8-arm64-v8a-debug.apk"
+    candidates = [
+        REPO_ROOT / "app" / "build" / "outputs" / "apk" / "github" / "debug",
+        REPO_ROOT / "app" / "build" / "outputs" / "apk" / "debug",
+        REPO_ROOT / "app" / "build" / "outputs" / "apk" / "fdroid" / "debug",
+    ]
+    for d in candidates:
+        if not d.exists():
+            continue
+        for name in [
+            "Hazel-v1.0.8-arm64-v8a-debug.apk",
+            "Hazel-v1.0.8-universal-debug.apk",
+        ]:
+            p = d / name
+            if p.exists():
+                return p
+        apks = list(d.glob("*.apk"))
+        if apks:
+            return apks[0]
+
+    all_apks = list((REPO_ROOT / "app" / "build" / "outputs").glob("**/*.apk"))
+    if all_apks:
+        return all_apks[0]
+    return REPO_ROOT / "app" / "build" / "outputs" / "apk" / "debug" / "Hazel-v1.0.8-arm64-v8a-debug.apk"
 
 
 class UpdateHandler(http.server.SimpleHTTPRequestHandler):
@@ -109,7 +123,7 @@ def main():
     if not apk_path.exists():
         print("Building GithubDebug APK for test release...")
         gradlew = REPO_ROOT / ("gradlew.bat" if sys.platform == "win32" else "gradlew")
-        subprocess.run([str(gradlew), ":app:assembleGithubDebug"], check=True)
+        subprocess.run([str(gradlew), ":app:assembleGithubDebug"], check=True, cwd=str(REPO_ROOT))
         apk_path = find_apk()
 
     print(f"APK ready: {apk_path} ({apk_path.stat().st_size / (1024*1024):.1f} MB)")
