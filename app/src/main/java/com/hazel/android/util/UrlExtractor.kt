@@ -39,4 +39,13 @@ object UrlExtractor {
 
         return trimmed.takeIf { it.isNotBlank() }
     }
+
+    /**
+     * Extracts the 11-character YouTube video ID from any watch, short, embed, or youtu.be link.
+     */
+    fun extractYouTubeId(url: String?): String? {
+        if (url.isNullOrBlank()) return null
+        val pattern = Regex("""(?:youtu\.be/|youtube\.com/(?:embed/|v/|watch\?v=|watch\?.+&v=|shorts/))([\w-]{11})""", RegexOption.IGNORE_CASE)
+        return pattern.find(url.trim())?.groupValues?.get(1)
+    }
 }

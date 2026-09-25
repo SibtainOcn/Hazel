@@ -306,6 +306,8 @@ object MediaProbe {
         if (singleItem) addOption("--no-playlist")
         addOption("--no-warnings")
         addOption("--no-check-certificates")
+        addOption("--skip-download")
+        addOption("--compat-options", "manifest-filesize-approx")
         addOption("--cache-dir", cacheDir.absolutePath)
 
         // Metadata is almost entirely network waiting. yt-dlp defaults to a twenty second
@@ -340,7 +342,7 @@ object MediaProbe {
      * what a tab holds when the source reported no usable format list, and the reason a
      * download can still go ahead there.
      */
-    private val BEST_VIDEO = MediaFormat(
+    internal val BEST_VIDEO = MediaFormat(
         formatId = "best",
         selector = "bv*+ba/b",
         label = "Best quality",
@@ -356,7 +358,7 @@ object MediaProbe {
         isGeneric = true
     )
 
-    private val BEST_AUDIO = MediaFormat(
+    internal val BEST_AUDIO = MediaFormat(
         formatId = "bestaudio",
         selector = "ba/b",
         label = "Best audio",

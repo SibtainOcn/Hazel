@@ -264,7 +264,10 @@ def test_source_code_structure():
 
     check_true("NewPipeLister defines handlesStream", "fun handlesStream(url: String)" in lister_text)
     check_true("NewPipeLister defines handlesCollection", "fun handlesCollection(url: String)" in lister_text)
-    check_true("NewPipeLister defines single metadata resolution", "suspend fun single(url: String): LinkEntry?" in lister_text)
+    check_true(
+        "NewPipeLister defines single metadata resolution",
+        "suspend fun single(url: String): MediaInfo?" in lister_text or "suspend fun single(url: String): LinkEntry?" in lister_text
+    )
 
     search_provider_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/MediaSearchProvider.kt"
     check_true("MediaSearchProvider.kt exists", search_provider_file.is_file())

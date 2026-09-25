@@ -66,9 +66,9 @@ object LinkResolver {
             if (NewPipeLister.handlesCollection(url)) {
                 NewPipeLister.list(url)?.let { return it }
             } else if (NewPipeLister.handlesStream(url)) {
-                // Single media stream: Extract descriptive metadata instantly in ~200ms
-                NewPipeLister.single(url)?.let { entry ->
-                    return LinkContents.Single(MediaProbe.pendingFor(entry))
+                // Single media stream: Extract metadata and resolved formats instantly in ~200ms
+                NewPipeLister.single(url)?.let { info ->
+                    return LinkContents.Single(info)
                 }
             }
         }

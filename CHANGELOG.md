@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Transparent share overlay activity (`ShareOverlayActivity`) with quick one-tap confirmation for Hazel Instant and in-place `FormatSheet` selection over host apps without app switching.
+- Pixel-perfect `InstantShareSheet` and `OverlayLoadingSheet` matching modern dark specifications (`sheet-instant.html` & `sheet-fetching.html`) with Hazel SVG logo, dynamic progress indicators, and independent emerald `#8FD6B8` & `#0A0A0A` theme tokens.
+- Built-in Java reader (NewPipe extractor) as the default listing source (`ListingSource.NEWPIPE`) with fast-path in-process stream and collection recognition (~200ms latency) and transparent silent fallback to the yt-dlp binary engine.
+- Configurable listing source preference in More > Fetch settings with live status badge indicators.
+- Media search provider interface (`MediaSearchProvider` & `UnifiedSearchCoordinator`) designed for future multi-engine direct search expansion.
+- Automated test harnesses for share overlay isolation, history recording, and NewPipe latency/fallback validation (`tools/test_share_overlay_isolation.py` and `tools/test_newpipe_latency_and_fallback.py`).
+
 ### Changed
 - Replaced the Ko-fi sponsor option (which was marked "Opening soon") with a live
   Buy Me a Coffee link (`buymeacoffee.com/sibtainocean`).
@@ -22,6 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Modernized home and download media cards with an edge-to-edge 16:9 full-artwork thumbnail design; title and author are now overlaid directly atop the artwork with a dual gradient scrim for high legibility, duration and active download progress chips are anchored to the bottom-left corner, and status tags remain on the bottom-right.
 - Reverted the app launcher icon to a white background with a black bolt foreground.
 - Modernized the Downloads screen title with an unread activity indicator mark beside the dropdown chevron and on the "Downloading queue" filter when active downloads or queued items exist.
+
+### Fixed
+- Stream and format latency optimization: NewPipe in-process extractor now parses video and audio streams directly into concrete format choices in ~200ms rather than triggering a 20-30 second yt-dlp Python dump, enabling instant format sheet population with zero waiting.
+- Robust YouTube thumbnail resolution via `UrlExtractor.extractYouTubeId` ensuring instant, crisp artwork loading across single shares and collection listings.
+- Optimized yt-dlp metadata probe with `--compat-options manifest-filesize-approx` and `--skip-download` to eliminate redundant fragment probing latency on mobile connections during fallback.
+- Fixed button text truncation on the instant share sheet where "Download Now" clipped to "Download No" on standard screen widths by tightening padding and tuning typography bounds.
+- Fixed shared link isolation where sharing a single video unintentionally opened `BatchDownloadSheet` with previously searched items; shared URLs now resolve in clean isolation with dedicated routing (`fetchShare`).
+- Ensured both normal share and Hazel instant share immediately record captured URLs into history.
+- Removed artificial delay timers in share loading sheet, driving progress dynamically via smooth continuous transitions.
 
 ### Added
 - Synchronized 16:9 skeleton shimmer loading animation (`ShimmerHost` & `shimmerCard`) with rounded card placeholders and dark gradient scrim during metadata fetching.

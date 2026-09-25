@@ -17,6 +17,7 @@ import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkResolver
 import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.NewPipeLister
 import com.hazel.android.util.StoragePaths
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
@@ -720,6 +721,9 @@ class DownloadViewModel : ViewModel() {
             val app = HazelApp.instance
             val resolved = runCatching {
                 InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
+                    ?: (if (NewPipeLister.handlesStream(info.url)) {
+                        NewPipeLister.single(info.url)?.takeIf { it.hasResolvedFormats }
+                    } else null)
                     ?: probeWithRetry(
                         info.url,
                         CookieRepository.accessFor(app, info.url),

@@ -222,6 +222,11 @@ class ShareOverlayActivity : ComponentActivity() {
                             // Single media item resolved -> Open FormatSheet directly (never multi-sheet for single video)
                             state.info != null -> {
                                 val currentInfo = state.info!!
+                                LaunchedEffect(currentInfo.url) {
+                                    if (!currentInfo.hasResolvedFormats) {
+                                        downloadViewModel.resolveFormats(currentInfo)
+                                    }
+                                }
                                 FormatSheet(
                                     info = currentInfo,
                                     options = options,
@@ -299,6 +304,11 @@ class ShareOverlayActivity : ComponentActivity() {
                             // Fallback if 1 item in results and info was null
                             state.results.size == 1 -> {
                                 val currentInfo = state.results.first()
+                                LaunchedEffect(currentInfo.url) {
+                                    if (!currentInfo.hasResolvedFormats) {
+                                        downloadViewModel.resolveFormats(currentInfo)
+                                    }
+                                }
                                 FormatSheet(
                                     info = currentInfo,
                                     options = options,
