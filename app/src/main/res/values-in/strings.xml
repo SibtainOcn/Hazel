@@ -180,7 +180,8 @@
     <string name="more_hazel_instant">Hazel Instan</string>
     <string name="more_temporary_files">File Sementara</string>
     <string name="more_converter">Konversi offline video ke audio</string>
-    <string name="more_engine_update">Pembaruan Mesin yt-dlp</string>
+    <string name="more_software_update">Pembaruan perangkat lunak</string>
+    <string name="more_software_update_subtitle">Aplikasi Hazel &amp; mesin yt-dlp</string>
     <string name="more_support">Dukung Hazel</string>
     <string name="more_license">Lisensi</string>
 
@@ -206,40 +207,6 @@
     <string name="sponsor_source_subtitle">Setiap baris kode bersifat terbuka, dan kontribusi sangat disambut.</string>
     <string name="sponsor_footer">Tanpa iklan, tanpa pelacakan unduhan Anda, dan tanpa fitur yang ditahan untuk siapa pun. Dukungan memengaruhi seberapa banyak waktu yang diberikan untuk Hazel, bukan apa yang dapat dilakukannya untuk Anda.</string>
 
-    <!-- UpdateScreen -->
-    <string name="update_title">Pembaruan yt-dlp</string>
-    <string name="update_back">Kembali</string>
-    <string name="update_check_action">Periksa pembaruan</string>
-    <string name="update_status_up_to_date">Versi terbaru sudah terpasang</string>
-    <string name="update_status_checking">Memeriksa pembaruan...</string>
-    <string name="update_status_available">Pembaruan Tersedia</string>
-    <string name="update_status_installing">Memasang yt-dlp...</string>
-    <string name="update_status_installed">Mesin Diperbarui</string>
-    <string name="update_status_failed">Pembaruan Gagal</string>
-    <string name="update_subtitle_idle">Hazel menggunakan versi yt-dlp terbaru</string>
-    <string name="update_subtitle_checking">Menghubungi GitHub...</string>
-    <string name="update_subtitle_available">yt-dlp %1$s tersedia</string>
-    <string name="update_subtitle_updating">Mengunduh yt-dlp %1$s</string>
-    <string name="update_subtitle_installed">yt-dlp %1$s sekarang digunakan</string>
-    <string name="update_installed_version">Versi Terpasang</string>
-    <string name="update_version_unknown">Tidak diketahui</string>
-    <string name="update_new_version">Versi Baru</string>
-    <string name="update_installing_binary">Memasang Biner</string>
-    <string name="update_installing_body">Mengunduh dari GitHub dan mengganti mesin. Biarkan aplikasi tetap terbuka.</string>
-    <string name="update_action_update_now">Perbarui Sekarang</string>
-    <string name="update_action_installing">Memasang...</string>
-    <string name="update_action_done">Selesai</string>
-    <string name="update_action_retry">Coba Lagi</string>
-    <string name="update_action_check">Periksa Pembaruan</string>
-    <string name="update_action_checking">Memeriksa...</string>
-    <string name="update_info_heading">Informasi</string>
-    <string name="update_info_component">Komponen</string>
-    <string name="update_info_repository">Repositori</string>
-    <string name="update_info_binary_size">Ukuran Biner</string>
-    <string name="update_info_distribution">Distribusi</string>
-    <string name="update_info_github_releases">Rilis GitHub</string>
-    <string name="update_release_channel">Saluran Rilis</string>
-    <string name="update_view_changelog">Lihat Catatan Perubahan</string>
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Pilih penyaringan SponsorBlock</string>

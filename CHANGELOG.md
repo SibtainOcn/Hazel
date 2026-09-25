@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Software Update hub (`SoftwareUpdateScreen`) presenting two distinct component updaters: Hazel application updates and yt-dlp extractor engine updates.
+- Dedicated Hazel in-app updater (`HazelUpdateScreen` & `HazelUpdater`) with GitHub release parsing, semver comparison (`isNewer`), architecture-aware APK matching (`arm64-v8a`, `armeabi-v7a`, `x86_64`, `universal`), release channel selection (Stable, Beta, Nightly), and download speed/ETA reporting.
+- Rebuilt yt-dlp extractor updater (`YtDlpUpdateScreen`) adhering to the dark design tokens (Emerald `#8FD6B8`, Warm Amber `#FFCB80`, Soft Blue `#A8CDFF`, deep background `#000000`).
+- Product flavors `github` (default, in-app self-updater with `REQUEST_INSTALL_PACKAGES`) and `fdroid` (strict F-Droid policy compliance with no self-updating binaries or package install permissions).
+- Automated test harness `tools/test_software_update_and_flavors.py` integrated into the master test runner (`tools/test_all.py`).
+- 10-locale translation parity for `more_software_update` and `more_software_update_subtitle`.
 - Transparent share overlay activity (`ShareOverlayActivity`) with quick one-tap confirmation for Hazel Instant and in-place `FormatSheet` selection over host apps without app switching.
 - Pixel-perfect `InstantShareSheet` and `OverlayLoadingSheet` matching modern dark specifications (`sheet-instant.html` & `sheet-fetching.html`) with Hazel SVG logo, dynamic progress indicators, and independent emerald `#8FD6B8` & `#0A0A0A` theme tokens.
 - Built-in Java reader (NewPipe extractor) as the default listing source (`ListingSource.NEWPIPE`) with fast-path in-process stream and collection recognition (~200ms latency) and transparent silent fallback to the yt-dlp binary engine.

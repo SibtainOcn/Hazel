@@ -190,7 +190,8 @@
     <string name="more_hazel_instant">Hazel Instantâneo</string>
     <string name="more_temporary_files">Arquivos temporários</string>
     <string name="more_converter">Converter vídeo em áudio offline</string>
-    <string name="more_engine_update">Atualização do motor yt-dlp</string>
+    <string name="more_software_update">Atualização de software</string>
+    <string name="more_software_update_subtitle">Aplicativo Hazel e motor yt-dlp</string>
     <string name="more_support">Apoiar o Hazel</string>
     <string name="more_license">Licença</string>
 
@@ -216,40 +217,6 @@
     <string name="sponsor_source_subtitle">Cada linha dele é pública, e pull requests são bem-vindas.</string>
     <string name="sponsor_footer">Sem anúncios, sem medir nada do que você baixa e sem nenhum recurso guardado para poucos. Apoiar muda quanto tempo entra no Hazel, não o que ele vai fazer por você.</string>
 
-    <!-- UpdateScreen -->
-    <string name="update_title">Atualização do yt-dlp</string>
-    <string name="update_back">Voltar</string>
-    <string name="update_check_action">Procurar atualizações</string>
-    <string name="update_status_up_to_date">Você está em dia</string>
-    <string name="update_status_checking">Procurando atualizações...</string>
-    <string name="update_status_available">Atualização disponível</string>
-    <string name="update_status_installing">Instalando o yt-dlp...</string>
-    <string name="update_status_installed">Motor atualizado</string>
-    <string name="update_status_failed">A atualização falhou</string>
-    <string name="update_subtitle_idle">O Hazel está usando a versão mais recente do yt-dlp</string>
-    <string name="update_subtitle_checking">Contatando o GitHub...</string>
-    <string name="update_subtitle_available">yt-dlp %1$s está disponível</string>
-    <string name="update_subtitle_updating">Baixando o yt-dlp %1$s</string>
-    <string name="update_subtitle_installed">yt-dlp %1$s já está em uso</string>
-    <string name="update_installed_version">Versão instalada</string>
-    <string name="update_version_unknown">Desconhecida</string>
-    <string name="update_new_version">Nova versão</string>
-    <string name="update_installing_binary">Instalando o binário</string>
-    <string name="update_installing_body">Baixando do GitHub e substituindo o motor. Mantenha o aplicativo aberto.</string>
-    <string name="update_action_update_now">Atualizar agora</string>
-    <string name="update_action_installing">Instalando...</string>
-    <string name="update_action_done">Pronto</string>
-    <string name="update_action_retry">Tentar de novo</string>
-    <string name="update_action_check">Procurar atualizações</string>
-    <string name="update_action_checking">Procurando...</string>
-    <string name="update_info_heading">Informações</string>
-    <string name="update_info_component">Componente</string>
-    <string name="update_info_repository">Repositório</string>
-    <string name="update_info_binary_size">Tamanho do binário</string>
-    <string name="update_info_distribution">Distribuição</string>
-    <string name="update_info_github_releases">GitHub Releases</string>
-    <string name="update_release_channel">Canal de versões</string>
-    <string name="update_view_changelog">Ver o registro de mudanças</string>
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Escolha a filtragem do SponsorBlock</string>

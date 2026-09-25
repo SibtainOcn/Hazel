@@ -15,4 +15,8 @@
     <external-path
         name="public_music"
         path="Music/Hazel/" />
+    <!-- App updates cache: getCacheDir()/updates/ -->
+    <cache-path
+        name="updates"
+        path="updates/" />
 </paths>

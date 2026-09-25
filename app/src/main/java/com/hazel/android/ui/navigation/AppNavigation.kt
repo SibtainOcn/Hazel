@@ -59,6 +59,9 @@ import com.hazel.android.ui.screens.more.MoreScreen
 import com.hazel.android.ui.screens.more.StorageCleanupScreen
 import com.hazel.android.ui.screens.more.StorageLocationsScreen
 import com.hazel.android.ui.screens.more.ToolsScreen
+import com.hazel.android.ui.screens.more.SoftwareUpdateScreen
+import com.hazel.android.ui.screens.more.HazelUpdateScreen
+import com.hazel.android.update.YtDlpUpdateScreen
 import com.hazel.android.update.UpdateScreen
 
 sealed class Screen(
@@ -263,7 +266,7 @@ fun AppNavigation(
                     onNavigateToSponsor = { navController.navigate("sponsor") },
                     onOpenBatterySettings = { openBatterySettings(context) },
                     onNavigateToStorageCleanup = { navController.navigate("storage_cleanup") },
-                    onNavigateToUpdate = { navController.navigate("update") }
+                    onNavigateToUpdate = { navController.navigate("software_update") }
                 )
             }
             composable("cookies") {
@@ -303,8 +306,25 @@ fun AppNavigation(
             composable("converter") {
                 ConverterScreen(onBack = { navController.popBackStack() })
             }
+            composable("software_update") {
+                SoftwareUpdateScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToHazelUpdate = { navController.navigate("hazel_update") },
+                    onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") }
+                )
+            }
+            composable("hazel_update") {
+                HazelUpdateScreen(onBack = { navController.popBackStack() })
+            }
+            composable("ytdlp_update") {
+                YtDlpUpdateScreen(onBack = { navController.popBackStack() })
+            }
             composable("update") {
-                UpdateScreen(onBack = { navController.popBackStack() })
+                SoftwareUpdateScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToHazelUpdate = { navController.navigate("hazel_update") },
+                    onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") }
+                )
             }
         }
     }

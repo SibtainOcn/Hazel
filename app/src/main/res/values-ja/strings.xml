@@ -180,7 +180,8 @@
     <string name="more_hazel_instant">Hazel 即時</string>
     <string name="more_temporary_files">一時ファイル</string>
     <string name="more_converter">動画から音声へのオフライン変換</string>
-    <string name="more_engine_update">yt-dlp エンジンの更新</string>
+    <string name="more_software_update">ソフトウェアの更新</string>
+    <string name="more_software_update_subtitle">Hazel アプリと yt-dlp エンジン</string>
     <string name="more_support">Hazel を支援</string>
     <string name="more_license">ライセンス</string>
 
@@ -206,40 +207,6 @@
     <string name="sponsor_source_subtitle">すべてのコードが公開されており、プルリクエストを歓迎しています。</string>
     <string name="sponsor_footer">広告なし、ダウンロードデータの追跡なし、機能制限なし。支援の有無は開発時間に関わるものであり、アプリの機能が変わることはありません。</string>
 
-    <!-- UpdateScreen -->
-    <string name="update_title">yt-dlp の更新</string>
-    <string name="update_back">戻る</string>
-    <string name="update_check_action">更新を確認</string>
-    <string name="update_status_up_to_date">最新の状態です</string>
-    <string name="update_status_checking">更新を確認中...</string>
-    <string name="update_status_available">利用可能な更新があります</string>
-    <string name="update_status_installing">yt-dlp をインストール中...</string>
-    <string name="update_status_installed">エンジンを更新しました</string>
-    <string name="update_status_failed">更新に失敗しました</string>
-    <string name="update_subtitle_idle">Hazel は最新の yt-dlp ビルドを使用しています</string>
-    <string name="update_subtitle_checking">GitHub に接続中...</string>
-    <string name="update_subtitle_available">yt-dlp %1$s が利用可能です</string>
-    <string name="update_subtitle_updating">yt-dlp %1$s をダウンロード中</string>
-    <string name="update_subtitle_installed">yt-dlp %1$s を使用中</string>
-    <string name="update_installed_version">インストール済みバージョン</string>
-    <string name="update_version_unknown">不明</string>
-    <string name="update_new_version">新しいバージョン</string>
-    <string name="update_installing_binary">バイナリをインストール中</string>
-    <string name="update_installing_body">GitHubからダウンロードしてエンジンを置き換えています。アプリを開いたままにしてください。</string>
-    <string name="update_action_update_now">今すぐ更新</string>
-    <string name="update_action_installing">インストール中...</string>
-    <string name="update_action_done">完了</string>
-    <string name="update_action_retry">再試行</string>
-    <string name="update_action_check">更新を確認</string>
-    <string name="update_action_checking">確認中...</string>
-    <string name="update_info_heading">情報</string>
-    <string name="update_info_component">コンポーネント</string>
-    <string name="update_info_repository">リポジトリ</string>
-    <string name="update_info_binary_size">ファイルサイズ</string>
-    <string name="update_info_distribution">配布形式</string>
-    <string name="update_info_github_releases">GitHub Releases</string>
-    <string name="update_release_channel">配信チャンネル</string>
-    <string name="update_view_changelog">更新履歴を見る</string>
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">SponsorBlock フィルタの選択</string>

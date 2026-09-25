@@ -422,9 +422,10 @@ fun MoreScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Check for updates, which opens the dedicated yt-dlp update screen
+            // Software update screen (Hazel app & yt-dlp engine)
             ListItem(
-                headlineContent = { Text(stringResource(R.string.more_engine_update)) },
+                headlineContent = { Text(stringResource(R.string.more_software_update)) },
+                supportingContent = { Text(stringResource(R.string.more_software_update_subtitle)) },
                 leadingContent = {
                     Icon(Icons.Filled.Update, null, tint = MaterialTheme.colorScheme.primary)
                 },

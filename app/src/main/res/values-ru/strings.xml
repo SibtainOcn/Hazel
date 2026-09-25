@@ -195,7 +195,8 @@
     <string name="more_hazel_instant">Hazel Мгновенно</string>
     <string name="more_temporary_files">Временные файлы</string>
     <string name="more_converter">Офлайн-конвертер видео в аудио</string>
-    <string name="more_engine_update">Обновление движка yt-dlp</string>
+    <string name="more_software_update">Обновление ПО</string>
+    <string name="more_software_update_subtitle">Приложение Hazel и движок yt-dlp</string>
     <string name="more_support">Поддержать Hazel</string>
     <string name="more_license">Лицензия</string>
 
@@ -221,40 +222,6 @@
     <string name="sponsor_source_subtitle">Каждая строка кода открыта, а предложения изменений приветствуются.</string>
     <string name="sponsor_footer">Без рекламы, без сбора данных о загрузках и без ограничений функционала. Поддержка влияет лишь на то, сколько времени уделяется Hazel, но не меняет возможности приложения для вас.</string>
 
-    <!-- UpdateScreen -->
-    <string name="update_title">Обновление yt-dlp</string>
-    <string name="update_back">Назад</string>
-    <string name="update_check_action">Проверить обновления</string>
-    <string name="update_status_up_to_date">Установлена последняя версия</string>
-    <string name="update_status_checking">Проверка обновлений...</string>
-    <string name="update_status_available">Доступно обновление</string>
-    <string name="update_status_installing">Установка yt-dlp...</string>
-    <string name="update_status_installed">Движок обновлён</string>
-    <string name="update_status_failed">Ошибка обновления</string>
-    <string name="update_subtitle_idle">Hazel использует актуальную сборку yt-dlp</string>
-    <string name="update_subtitle_checking">Подключение к GitHub...</string>
-    <string name="update_subtitle_available">Доступна версия yt-dlp %1$s</string>
-    <string name="update_subtitle_updating">Загрузка yt-dlp %1$s</string>
-    <string name="update_subtitle_installed">Используется yt-dlp %1$s</string>
-    <string name="update_installed_version">Установленная версия</string>
-    <string name="update_version_unknown">Неизвестно</string>
-    <string name="update_new_version">Новая версия</string>
-    <string name="update_installing_binary">Установка исполняемого файла</string>
-    <string name="update_installing_body">Загрузка с GitHub и замена движка. Не закрывайте приложение.</string>
-    <string name="update_action_update_now">Обновить сейчас</string>
-    <string name="update_action_installing">Установка...</string>
-    <string name="update_action_done">Готово</string>
-    <string name="update_action_retry">Повторить</string>
-    <string name="update_action_check">Проверить обновления</string>
-    <string name="update_action_checking">Проверка...</string>
-    <string name="update_info_heading">Информация</string>
-    <string name="update_info_component">Компонент</string>
-    <string name="update_info_repository">Репозиторий</string>
-    <string name="update_info_binary_size">Размер файла</string>
-    <string name="update_info_distribution">Дистрибутив</string>
-    <string name="update_info_github_releases">Релизы GitHub</string>
-    <string name="update_release_channel">Канал обновлений</string>
-    <string name="update_view_changelog">Список изменений</string>
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Фильтрация SponsorBlock</string>
