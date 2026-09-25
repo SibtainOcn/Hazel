@@ -1,53 +1,74 @@
 package com.hazel.android.ui.share
 
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Language
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hazel.android.R
-import com.hazel.android.ui.components.MediaCardShimmer
 import com.hazel.android.ui.components.ShimmerHost
+import com.hazel.android.ui.components.shimmerBlock
+import kotlinx.coroutines.delay
 import java.net.URI
 
+// Theme color tokens matching sheet-fetching.html
+private val SheetBgColor = Color(0xFF0A0A0A)
+private val GrabberColor = Color(0xFF2C2C2C)
+private val OutlineBorderColor = Color(0xFF2C2C2C)
+private val RailTrackColor = Color(0xFF1F1F1F)
+private val AccentColor = Color(0xFF8FD6B8)
+private val AccentContainerColor = Color(0xFF0E3327)
+private val AccentTrackColor = Color(0x2E8FD6B8)
+private val TextOnSurfaceColor = Color(0xFFF2F2F0)
+private val TextMutedColor = Color(0xFFB8B8B4)
+private val TextDimColor = Color(0xFF7A7A77)
+
 /**
- * Modern loading sheet using Hazel's canonical [ShimmerHost] and [MediaCardShimmer].
+ * Modern loading bottom sheet strictly matching sheet-fetching.html.
  *
- * Employs the app's standard design-system shimmer skeleton so that layout proportions
- * match the real media card perfectly when metadata arrives. Displays an animated live
- * connection beacon, connecting domain tag, and dismiss action with safe insets.
+ * Renders an active spinner badge, dynamic progress status stage messages ("Connecting to...",
+ * "Reading media details...", "Finding source qualities...", "Almost ready..."), a progressively
+ * filling accent progress rail, full media-card skeleton preview with Hazel's canonical
+ * ShimmerHost sweep, and a full-width Cancel button.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,124 +78,246 @@ fun OverlayLoadingSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
     val host = runCatching { URI(url).host }.getOrNull()?.removePrefix("www.") ?: sourceLabel
+    val shortDisplayUrl = remember(url) {
+        val uri = runCatching { URI(url) }.getOrNull()
+        if (uri != null) {
+            val h = uri.host?.removePrefix("www.").orEmpty()
+            val p = uri.path.orEmpty()
+            (h + p).trimEnd('/')
+        } else url
+    }
 
-    // Pulsing radar ring for live connection beacon
-    val transition = rememberInfiniteTransition(label = "pulse_transition")
-    val pulseScale by transition.animateFloat(
-        initialValue = 0.9f,
-        targetValue = 1.4f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulse_scale"
-    )
+    // Dynamic phase transitions: Automatically steps through connection and extraction phases
+    var stageIndex by remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        delay(850)
+        stageIndex = 1
+        delay(1350)
+        stageIndex = 2
+        delay(2200)
+        stageIndex = 3
+    }
 
-    val pulseAlpha by transition.animateFloat(
-        initialValue = 0.7f,
-        targetValue = 0.15f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulse_alpha"
+    val currentStatusText = when (stageIndex) {
+        0 -> stringResource(R.string.share_overlay_stage_connecting, host.ifBlank { "source" })
+        1 -> stringResource(R.string.share_overlay_stage_reading)
+        2 -> stringResource(R.string.share_overlay_stage_qualities)
+        else -> stringResource(R.string.share_overlay_stage_ready)
+    }
+
+    // Smooth progress rail animation advancing dynamically with stages
+    val targetProgress = when (stageIndex) {
+        0 -> 0.25f
+        1 -> 0.52f
+        2 -> 0.78f
+        else -> 0.95f
+    }
+    val animatedProgress by animateFloatAsState(
+        targetValue = targetProgress,
+        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+        label = "railProgress"
     )
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 8.dp
+        containerColor = SheetBgColor,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(top = 10.dp, bottom = 14.dp)
+                    .size(width = 36.dp, height = 4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(GrabberColor)
+            )
+        }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
                 .navigationBarsPadding()
-                .padding(bottom = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(bottom = 24.dp)
         ) {
-            // Header: Pulsing connection beacon + titles
+            // Header Row: Active animated spinner badge + status headline & link path
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 18.dp)
             ) {
+                // Fetch badge with spinning active arc ring around Hazel official SVG logo
                 Box(
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(44.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Animated outer pulse ripple
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(44.dp),
+                        strokeWidth = 3.5.dp,
+                        color = AccentColor,
+                        trackColor = AccentTrackColor
+                    )
                     Box(
                         modifier = Modifier
-                            .size(28.dp * pulseScale)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = pulseAlpha))
-                    )
-                    // Inner solid beacon dot
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                    )
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(AccentContainerColor),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.splash_icon),
+                            contentDescription = null,
+                            tint = AccentColor,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(14.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.share_overlay_loading_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        text = currentStatusText,
+                        fontSize = 15.5.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = TextOnSurfaceColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = shortDisplayUrl,
+                        fontSize = 13.sp,
+                        color = TextDimColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
 
+            // Progress Rail: Thin track with animated dynamic fill
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(RailTrackColor)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(animatedProgress)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(AccentColor)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Skeleton Preview: Exact match with sheet-fetching.html layout using Hazel's ShimmerHost
+            ShimmerHost(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    // Skeleton media card layout
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 2.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Language,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(13.dp)
+                        // Square thumbnail placeholder
+                        Box(
+                            modifier = Modifier
+                                .size(92.dp)
+                                .shimmerBlock(RoundedCornerShape(16.dp))
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = if (host.isNotBlank()) "Connecting to $host…" else stringResource(R.string.share_overlay_loading_subtitle),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+
+                        // Headline & detail lines
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(top = 4.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.80f)
+                                    .height(12.dp)
+                                    .shimmerBlock(RoundedCornerShape(6.dp))
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.50f)
+                                    .height(12.dp)
+                                    .shimmerBlock(RoundedCornerShape(6.dp))
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.35f)
+                                    .height(10.dp)
+                                    .shimmerBlock(RoundedCornerShape(6.dp))
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Skeleton chips row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(58.dp)
+                                .height(32.dp)
+                                .shimmerBlock(RoundedCornerShape(16.dp))
+                        )
+                        Box(
+                            modifier = Modifier
+                                .width(72.dp)
+                                .height(32.dp)
+                                .shimmerBlock(RoundedCornerShape(16.dp))
+                        )
+                        Box(
+                            modifier = Modifier
+                                .width(66.dp)
+                                .height(32.dp)
+                                .shimmerBlock(RoundedCornerShape(16.dp))
+                        )
+                        Box(
+                            modifier = Modifier
+                                .width(50.dp)
+                                .height(32.dp)
+                                .shimmerBlock(RoundedCornerShape(16.dp))
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(26.dp))
 
-            // Standard Hazel Design System Shimmer: Exact match with MediaCard layout
-            ShimmerHost(modifier = Modifier.fillMaxWidth()) {
-                MediaCardShimmer()
-            }
-
-            Spacer(modifier = Modifier.height(18.dp))
-
-            // Cancel action pill
+            // Action Button: Full-width Cancel button
             OutlinedButton(
                 onClick = onDismiss,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(14.dp)
+                    .height(52.dp),
+                shape = RoundedCornerShape(26.dp),
+                border = BorderStroke(1.dp, OutlineBorderColor),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = TextMutedColor
+                )
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.share_overlay_cancel_fetch),
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }

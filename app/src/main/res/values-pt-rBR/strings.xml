@@ -591,8 +591,6 @@
     <string name="storage_locations_speed_limit">Limite de velocidade</string>
 
     <!-- Share Overlay & Instant Share -->
-    <string name="share_overlay_loading_title">Lendo link de mídia…</string>
-    <string name="share_overlay_loading_subtitle">Buscando opções disponíveis de vídeo e áudio</string>
     <string name="share_overlay_instant_title">Hazel Instant</string>
     <string name="share_overlay_instant_subtitle">Baixar nas suas configurações rápidas salvas</string>
     <string name="share_overlay_instant_download">Baixar agora</string>
@@ -600,5 +598,9 @@
     <string name="share_overlay_download_started">Download adicionado à fila</string>
     <string name="share_overlay_invalid_link">Nenhum link web válido encontrado no conteúdo compartilhado</string>
     <string name="share_overlay_cancel_fetch">Cancelar</string>
+    <string name="share_overlay_stage_connecting">Conectando a %s…</string>
+    <string name="share_overlay_stage_reading">Lendo detalhes da mídia…</string>
+    <string name="share_overlay_stage_qualities">Buscando qualidades da fonte…</string>
+    <string name="share_overlay_stage_ready">Quase pronto…</string>
 
 </resources>
