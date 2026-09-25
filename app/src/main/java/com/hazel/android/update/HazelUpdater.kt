@@ -219,32 +219,6 @@ object HazelUpdater {
             return@withContext checkFdroidRelease()
         }
 
-        // Local development/test feed check (e.g. over adb reverse tcp:8998)
-        try {
-            val localTestUrl = "http://127.0.0.1:8998/releases.json"
-            val localReq = Request.Builder()
-                .url(localTestUrl)
-                .header("Accept", "application/json")
-                .header("User-Agent", "Hazel-App-Updater")
-                .build()
-
-            client.newBuilder()
-                .connectTimeout(400, TimeUnit.MILLISECONDS)
-                .readTimeout(800, TimeUnit.MILLISECONDS)
-                .build()
-                .newCall(localReq).execute().use { response ->
-                    if (response.isSuccessful) {
-                        val bodyStr = response.body.string()
-                        if (bodyStr.isNotBlank()) {
-                            val parsed = findReleaseMatchingChannel(JSONArray(bodyStr), channel)
-                            if (parsed != null) return@withContext parsed
-                        }
-                    }
-                }
-        } catch (_: Exception) {
-            // Local dev server not running; fall through to GitHub endpoint
-        }
-
         try {
             val url = "https://api.github.com/repos/$REPO_NAME/releases"
             val request = Request.Builder()

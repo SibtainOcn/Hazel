@@ -25,7 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automated test harnesses for share overlay isolation, history recording, and NewPipe latency/fallback validation (`tools/test_share_overlay_isolation.py` and `tools/test_newpipe_latency_and_fallback.py`).
 
 ### Changed
+- Replaced duplicate distribution channel flavor row with a comprehensive "Device & architecture" card in `SoftwareUpdateScreen` displaying device hardware model, Android OS version and API level, primary architecture, and supported ABIs.
 - Refined Software Update hub and component update screens: removed redundant "Verified binaries" row from distribution overview, removed "Checked recently · Signature/Binary verified" subtitles from hero cards, reduced outer horizontal margins from 20dp to 12dp to utilize available screen width, and made hero cards more compact.
+- Fail-safe APK auto-installation: verified package install permissions on API 26+ (`canRequestPackageInstalls()`) and prompted the system unknown sources toggle rather than failing silently, granting explicit URI permissions to the resolved package installer.
+- Fixed unit test execution on CI by registering a forward-compatible `testDebugUnitTest` task alias in `app/build.gradle.kts` mapping to flavor-specific test tasks (`testGithubDebugUnitTest` and `testFdroidDebugUnitTest`).
 - Replaced the Ko-fi sponsor option (which was marked "Opening soon") with a live
   Buy Me a Coffee link (`buymeacoffee.com/sibtainocean`).
 - Streamlined the Home screen by removing the redundant batch action row below the search bar while fully preserving per-media card controls (center play/pause/cancel and 3-dot menu).
