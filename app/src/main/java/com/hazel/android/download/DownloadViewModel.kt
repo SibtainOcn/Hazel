@@ -325,6 +325,18 @@ class DownloadViewModel : ViewModel() {
         _state.value = DownloadState()
     }
 
+    /**
+     * Resolves a shared URL in complete isolation from previous search/download queries.
+     *
+     * Clears any existing search results so single videos present [FormatSheet] directly,
+     * while collections and playlists present [BatchDownloadSheet].
+     */
+    fun fetchShare(url: String) {
+        clearResults()
+        onUrlChange(url)
+        fetchAll(listOf(url))
+    }
+
     /** Points the sheet at one of several resolved links. */
     fun selectResult(info: MediaInfo) {
         _state.value = _state.value.copy(info = info)

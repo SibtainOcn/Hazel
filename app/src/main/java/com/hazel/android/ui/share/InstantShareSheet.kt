@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -312,6 +313,7 @@ fun InstantShareSheet(
                         .weight(1f)
                         .height(52.dp),
                     shape = RoundedCornerShape(26.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                     border = BorderStroke(1.dp, OutlineBorderColor),
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = Color.Transparent,
@@ -321,14 +323,15 @@ fun InstantShareSheet(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = stringResource(R.string.share_overlay_instant_cancel),
                         maxLines = 1,
                         softWrap = false,
-                        fontSize = 15.sp,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -339,6 +342,7 @@ fun InstantShareSheet(
                         .weight(1f)
                         .height(52.dp),
                     shape = RoundedCornerShape(26.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = AccentColor,
                         contentColor = AccentOnColor
@@ -348,14 +352,15 @@ fun InstantShareSheet(
                         painter = painterResource(R.drawable.download),
                         contentDescription = null,
                         tint = AccentOnColor,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = stringResource(R.string.share_overlay_instant_download),
                         maxLines = 1,
                         softWrap = false,
-                        fontSize = 15.5.sp,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }

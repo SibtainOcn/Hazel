@@ -1,7 +1,10 @@
 package com.hazel.android.ui.share
 
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -75,6 +78,7 @@ private val TextDimColor = Color(0xFF7A7A77)
 fun OverlayLoadingSheet(
     url: String,
     sourceLabel: String,
+    progressMessage: String = "",
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -89,34 +93,35 @@ fun OverlayLoadingSheet(
         } else url
     }
 
-    // Dynamic phase transitions: Automatically steps through connection and extraction phases
+    // Dynamic phase transitions: Steps smoothly through phases without blocking the actual fetch
     var stageIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
-        delay(850)
-        stageIndex = 1
-        delay(1350)
-        stageIndex = 2
-        delay(2200)
-        stageIndex = 3
+        while (true) {
+            delay(1200)
+            stageIndex = (stageIndex + 1) % 4
+        }
     }
 
-    val currentStatusText = when (stageIndex) {
-        0 -> stringResource(R.string.share_overlay_stage_connecting, host.ifBlank { "source" })
-        1 -> stringResource(R.string.share_overlay_stage_reading)
-        2 -> stringResource(R.string.share_overlay_stage_qualities)
-        else -> stringResource(R.string.share_overlay_stage_ready)
+    val currentStatusText = if (progressMessage.isNotBlank()) {
+        progressMessage
+    } else {
+        when (stageIndex) {
+            0 -> stringResource(R.string.share_overlay_stage_connecting, host.ifBlank { "source" })
+            1 -> stringResource(R.string.share_overlay_stage_reading)
+            2 -> stringResource(R.string.share_overlay_stage_qualities)
+            else -> stringResource(R.string.share_overlay_stage_ready)
+        }
     }
 
-    // Smooth progress rail animation advancing dynamically with stages
-    val targetProgress = when (stageIndex) {
-        0 -> 0.25f
-        1 -> 0.52f
-        2 -> 0.78f
-        else -> 0.95f
-    }
-    val animatedProgress by animateFloatAsState(
-        targetValue = targetProgress,
-        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+    // Smooth continuous progress rail animation matching CSS animation: rail-grow 3s infinite
+    val infiniteTransition = rememberInfiniteTransition(label = "railAnim")
+    val animatedProgress by infiniteTransition.animateFloat(
+        initialValue = 0.08f,
+        targetValue = 0.96f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Restart
+        ),
         label = "railProgress"
     )
 

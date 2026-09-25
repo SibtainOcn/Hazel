@@ -27,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,23 +38,52 @@ import androidx.lifecycle.lifecycleScope
 import com.hazel.android.HazelApp
 import com.hazel.android.R
 import com.hazel.android.data.DownloadHistoryRepository
-import com.hazel.android.download.DownloadOptions
 import com.hazel.android.data.HistoryEntry
+import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
+import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadViewModelHolder
 import com.hazel.android.ui.screens.download.FormatSheet
 import com.hazel.android.ui.screens.download.NoResultsDialog
 import com.hazel.android.ui.screens.download.batch.BatchDownloadSheet
-import com.hazel.android.ui.theme.HazelTheme
+import com.hazel.android.ui.theme.HazelTypography
 import com.hazel.android.util.AppLocale
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.StoragePaths
 import com.hazel.android.util.UrlExtractor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.net.URI
+
+
+// Strictly independent of user-configured app theme or accent color.
+private val ShareOverlayDarkColorScheme = darkColorScheme(
+    primary = androidx.compose.ui.graphics.Color(0xFF8FD6B8),
+    onPrimary = androidx.compose.ui.graphics.Color(0xFF003824),
+    primaryContainer = androidx.compose.ui.graphics.Color(0xFF0E3327),
+    onPrimaryContainer = androidx.compose.ui.graphics.Color(0xFFA9E6CC),
+    secondary = androidx.compose.ui.graphics.Color(0xFF8FD6B8),
+    onSecondary = androidx.compose.ui.graphics.Color(0xFF003824),
+    secondaryContainer = androidx.compose.ui.graphics.Color(0xFF0E3327),
+    onSecondaryContainer = androidx.compose.ui.graphics.Color(0xFFA9E6CC),
+    tertiary = androidx.compose.ui.graphics.Color(0xFF8FD6B8),
+    background = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
+    onBackground = androidx.compose.ui.graphics.Color(0xFFF2F2F0),
+    surface = androidx.compose.ui.graphics.Color(0xFF141414),
+    onSurface = androidx.compose.ui.graphics.Color(0xFFF2F2F0),
+    surfaceVariant = androidx.compose.ui.graphics.Color(0xFF1A1A1A),
+    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFFB8B8B4),
+    outline = androidx.compose.ui.graphics.Color(0xFF2C2C2C),
+    outlineVariant = androidx.compose.ui.graphics.Color(0xFF1F1F1F),
+    surfaceContainerLowest = androidx.compose.ui.graphics.Color(0xFF000000),
+    surfaceContainerLow = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
+    surfaceContainer = androidx.compose.ui.graphics.Color(0xFF141414),
+    surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFF1E1E1E),
+    surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFF262626)
+)
 
 /**
  * Transparent floating overlay activity that catches share intents from external apps.
@@ -99,10 +129,6 @@ class ShareOverlayActivity : ComponentActivity() {
 
         setContent {
             val scope = rememberCoroutineScope()
-            val savedTheme by SettingsRepository.isDarkTheme(this).collectAsState(initial = null)
-            val isDark = savedTheme ?: true
-            val accentName by SettingsRepository.getAccentColor(this).collectAsState(initial = "White")
-
             val downloadViewModel = remember { DownloadViewModelHolder.get() }
             val state by downloadViewModel.state.collectAsState()
 
@@ -113,6 +139,16 @@ class ShareOverlayActivity : ComponentActivity() {
             val treeLabel by SettingsRepository.getDownloadTreeLabel(this)
                 .collectAsState(initial = "")
             val saveDirLabel = treeLabel.ifBlank { StoragePaths.DOWNLOADS_DISPLAY }
+
+            // Immediately capture and save shared URL into search history (if not incognito)
+            LaunchedEffect(url) {
+                val app = applicationContext
+                scope.launch(Dispatchers.IO) {
+                    if (!SettingsRepository.getIncognito(app).first()) {
+                        SearchHistoryRepository.record(app, url)
+                    }
+                }
+            }
 
             // SAF Document tree picker for custom download folders
             val folderPicker = rememberLauncherForActivityResult(
@@ -137,7 +173,11 @@ class ShareOverlayActivity : ComponentActivity() {
                 }
             }
 
-            HazelTheme(darkTheme = isDark, accentName = accentName) {
+            // Strictly independent of user-selected app theme & accent colors (Green & Black #0A0A0A & #8FD6B8)
+            androidx.compose.material3.MaterialTheme(
+                colorScheme = ShareOverlayDarkColorScheme,
+                typography = HazelTypography
+            ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (isDirect) {
                         InstantShareSheet(
@@ -163,24 +203,64 @@ class ShareOverlayActivity : ComponentActivity() {
                             onDismiss = { closeOverlay() }
                         )
                     } else {
-                        // Regular share target: Probe metadata and render real-time FormatSheet
+                        // Regular share target: Fetch in complete isolation without merging previous results
                         LaunchedEffect(url) {
-                            downloadViewModel.onUrlChange(url)
-                            downloadViewModel.fetchAll(listOf(url))
+                            downloadViewModel.fetchShare(url)
                         }
 
                         when {
                             // Fetching in progress and formats not ready yet
-                            state.isFetching && state.info == null -> {
+                            state.isFetching && state.info == null && state.results.isEmpty() -> {
                                 OverlayLoadingSheet(
                                     url = url,
                                     sourceLabel = sourceLabel,
+                                    progressMessage = state.fetchProgress,
                                     onDismiss = { closeOverlay() }
                                 )
                             }
 
-                            // Multiple links or playlist resolved
-                            state.isMultiple && state.results.isNotEmpty() -> {
+                            // Single media item resolved -> Open FormatSheet directly (never multi-sheet for single video)
+                            state.info != null -> {
+                                val currentInfo = state.info!!
+                                FormatSheet(
+                                    info = currentInfo,
+                                    options = options,
+                                    onOptionsChange = { changed ->
+                                        scope.launch { SettingsRepository.setDownloadOptions(this@ShareOverlayActivity, changed) }
+                                    },
+                                    saveDirLabel = saveDirLabel,
+                                    isCustomSaveDir = treeUri.isNotBlank(),
+                                    isLoadingFormats = state.isFetching || !currentInfo.hasResolvedFormats,
+                                    onOpenSaveDir = { MediaOpener.openLocation(this@ShareOverlayActivity, treeUri) },
+                                    onPickSaveDir = {
+                                        folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse))
+                                    },
+                                    onResetSaveDir = {
+                                        scope.launch { SettingsRepository.clearDownloadTree(this@ShareOverlayActivity) }
+                                    },
+                                    onDownload = { format, audioLanguage, title, author ->
+                                        downloadViewModel.startDownload(
+                                            context = applicationContext,
+                                            format = format,
+                                            options = options,
+                                            title = title,
+                                            author = author,
+                                            audioLanguage = audioLanguage,
+                                            treeUri = treeUri
+                                        )
+                                        Toast.makeText(
+                                            applicationContext,
+                                            getString(R.string.share_overlay_download_started),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        closeOverlay()
+                                    },
+                                    onDismiss = { closeOverlay() }
+                                )
+                            }
+
+                            // Multiple links or playlist resolved -> Open BatchDownloadSheet
+                            state.results.size > 1 -> {
                                 BatchDownloadSheet(
                                     results = state.results,
                                     options = options,
@@ -216,9 +296,9 @@ class ShareOverlayActivity : ComponentActivity() {
                                 )
                             }
 
-                            // Single media item resolved
-                            state.info != null -> {
-                                val currentInfo = state.info!!
+                            // Fallback if 1 item in results and info was null
+                            state.results.size == 1 -> {
+                                val currentInfo = state.results.first()
                                 FormatSheet(
                                     info = currentInfo,
                                     options = options,
