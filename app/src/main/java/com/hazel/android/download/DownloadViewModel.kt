@@ -17,6 +17,7 @@ import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkResolver
 import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.NewPipeLister
 import com.hazel.android.util.StoragePaths
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
@@ -325,6 +326,18 @@ class DownloadViewModel : ViewModel() {
         _state.value = DownloadState()
     }
 
+    /**
+     * Resolves a shared URL in complete isolation from previous search/download queries.
+     *
+     * Clears any existing search results so single videos present [FormatSheet] directly,
+     * while collections and playlists present [BatchDownloadSheet].
+     */
+    fun fetchShare(url: String) {
+        clearResults()
+        onUrlChange(url)
+        fetchAll(listOf(url))
+    }
+
     /** Points the sheet at one of several resolved links. */
     fun selectResult(info: MediaInfo) {
         _state.value = _state.value.copy(info = info)
@@ -371,6 +384,9 @@ class DownloadViewModel : ViewModel() {
         directRunning = true
 
         val app = context.applicationContext
+        val initialSource = source.ifBlank { "the link" }
+        DownloadService.start(app, "Preparing download from $initialSource...")
+
         downloadScope.launch {
             if (!SettingsRepository.getIncognito(app).first()) {
                 SearchHistoryRepository.record(app, link)
@@ -391,6 +407,7 @@ class DownloadViewModel : ViewModel() {
                 if (info == null) {
                     _state.value = _state.value.copy(instantSource = "")
                     DownloadNotificationHelper.showError(app, "Could not read this link")
+                    DownloadService.stop(app)
                     continue
                 }
 
@@ -404,6 +421,7 @@ class DownloadViewModel : ViewModel() {
                 if (format == null) {
                     _state.value = _state.value.copy(instantSource = "")
                     DownloadNotificationHelper.showError(app, "Nothing to download from this link")
+                    DownloadService.stop(app)
                     continue
                 }
 
@@ -445,26 +463,37 @@ class DownloadViewModel : ViewModel() {
      */
     private suspend fun readOne(url: String): MediaInfo? {
         val app = HazelApp.instance
+        val access = CookieRepository.accessFor(app, url)
+        val fetchMode = SettingsRepository.getFetchMode(app).first()
+        val forceIpv4 = SettingsRepository.getForceIpv4(app).first()
+        val listingSource = SettingsRepository.getListingSource(app).first()
+
         return expand(
             url,
-            CookieRepository.accessFor(app, url),
-            SettingsRepository.getFetchMode(app).first(),
-            SettingsRepository.getForceIpv4(app).first(),
-            SettingsRepository.getListingSource(app).first(),
+            access,
+            fetchMode,
+            forceIpv4,
+            listingSource,
             "${MediaProbe.PROBE_PROCESS_ID}_direct"
         ).firstOrNull()?.let { first ->
             // A listing entry carries no formats, so it is read again on its own before a
             // quality can be picked from it.
             if (first.hasResolvedFormats) first
-            else runCatching {
-                probeWithRetry(
-                    first.url,
-                    CookieRepository.accessFor(app, first.url),
-                    SettingsRepository.getFetchMode(app).first(),
-                    SettingsRepository.getForceIpv4(app).first(),
-                    "${MediaProbe.PROBE_PROCESS_ID}_direct_formats"
-                )
-            }.getOrNull() ?: first
+            else {
+                val fastResolved = if (listingSource == ListingSource.NEWPIPE && !access.hasCookies && NewPipeLister.handlesStream(first.url)) {
+                    NewPipeLister.single(first.url)?.takeIf { it.hasResolvedFormats }
+                } else null
+
+                fastResolved ?: runCatching {
+                    probeWithRetry(
+                        first.url,
+                        access,
+                        fetchMode,
+                        forceIpv4,
+                        "${MediaProbe.PROBE_PROCESS_ID}_direct_formats"
+                    )
+                }.getOrNull() ?: first
+            }
         }
     }
 
@@ -706,11 +735,16 @@ class DownloadViewModel : ViewModel() {
         formatsInFlight += info.url
         viewModelScope.launch(Dispatchers.IO) {
             val app = HazelApp.instance
+            val source = SettingsRepository.getListingSource(app).first()
+            val access = CookieRepository.accessFor(app, info.url)
             val resolved = runCatching {
                 InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
+                    ?: (if (source == ListingSource.NEWPIPE && !access.hasCookies && NewPipeLister.handlesStream(info.url)) {
+                        NewPipeLister.single(info.url)?.takeIf { it.hasResolvedFormats }
+                    } else null)
                     ?: probeWithRetry(
                         info.url,
-                        CookieRepository.accessFor(app, info.url),
+                        access,
                         SettingsRepository.getFetchMode(app).first(),
                         SettingsRepository.getForceIpv4(app).first(),
                         "${MediaProbe.PROBE_PROCESS_ID}_formats"
@@ -799,12 +833,16 @@ class DownloadViewModel : ViewModel() {
         title: String,
         author: String,
         audioLanguage: String? = null,
-        treeUri: String = ""
+        treeUri: String = "",
+        info: MediaInfo? = null
     ) {
-        val info = _state.value.info ?: return
+        val targetInfo = info ?: _state.value.info ?: _state.value.results.firstOrNull() ?: return
+        if (_state.value.info == null) {
+            _state.value = _state.value.copy(info = targetInfo)
+        }
         startBatch(
             context = context,
-            plans = listOf(DownloadPlan(info, format, title, author, audioLanguage)),
+            plans = listOf(DownloadPlan(targetInfo, format, title, author, audioLanguage)),
             options = options,
             treeUri = treeUri
         )
@@ -857,6 +895,11 @@ class DownloadViewModel : ViewModel() {
             )
             return
         }
+
+        // Start foreground service synchronously immediately while calling activity is in foreground.
+        // This keeps the process alive when the share overlay finishes.
+        val firstTitle = plans.firstOrNull()?.title.orEmpty()
+        DownloadService.start(context.applicationContext, firstTitle)
 
         isBatchCancelled = false
         downloadContext = context.applicationContext
@@ -913,6 +956,7 @@ class DownloadViewModel : ViewModel() {
             if (caps?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) != true) {
                 // The queue is left where it is, on disk and in memory. There is nothing
                 // wrong with what was asked for, only with the connection, so it waits.
+                DownloadService.stop(app)
                 fail(app, "No internet connection")
                 return@launch
             }
@@ -927,6 +971,7 @@ class DownloadViewModel : ViewModel() {
             // whether it was cellular let all of those through a setting whose entire point
             // is that they should not be.
             if (SettingsRepository.getWifiOnly(app).first() && !onWifiOrEthernet(caps)) {
+                DownloadService.stop(app)
                 holdForWifi(app)
                 return@launch
             }
@@ -934,11 +979,6 @@ class DownloadViewModel : ViewModel() {
             // Asks the system to leave the process alone for the length of the run. Started
             // before the first link rather than per link, so a set of ten is one service for
             // the whole set instead of ten in a row.
-            //
-            // Started here, after the run is known to be going ahead, rather than before the
-            // checks. A service started and stopped in the same breath is the thing the
-            // system kills the process over, and a run refused for the connection never
-            // needed one in the first place.
             DownloadService.start(app, firstTitle)
 
             val speedLimit = SettingsRepository.getSpeedLimit(app).first()

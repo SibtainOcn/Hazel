@@ -62,8 +62,22 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
 
-            <!-- Share target — catches shared URLs from any app -->
+        <!--
+            Translucent share overlay activity.
+            Catches shared URLs from external applications and renders the format selection
+            bottom sheet directly over the host app without switching windows or screen stacks.
+        -->
+        <activity
+            android:name=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.Hazel.Overlay"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="locale|layoutDirection|orientation|screenSize|smallestScreenSize|screenLayout">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -72,14 +86,13 @@
         </activity>
 
         <!--
-            Second share target, so the share sheet offers a choice rather than one Hazel.
-            An alias rather than another activity: it is the same screen, entered with a
-            different intention, and the app should not hold two copies of itself to say so.
-            Sharing here downloads at the saved quality without asking anything.
+            Instant share target.
+            Appears in the Android system share sheet as "Instant". Catches shared URLs and
+            downloads at the user's saved quick settings via a minimal overlay confirmation.
         -->
         <activity-alias
             android:name=".DirectShareActivity"
-            android:targetActivity=".MainActivity"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
             android:exported="true"
             android:label="@string/direct_share_label"
             android:icon="@mipmap/ic_launcher">

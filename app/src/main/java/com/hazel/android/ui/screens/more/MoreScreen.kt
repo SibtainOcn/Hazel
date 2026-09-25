@@ -60,6 +60,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.Lifecycle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.runtime.collectAsState
+import com.hazel.android.data.SettingsRepository
+import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.update.YtDlpUpdater
 import com.hazel.android.util.AppLocale
@@ -79,6 +82,7 @@ fun MoreScreen(
     onNavigateToSponsor: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val listingSource by SettingsRepository.getListingSource(context).collectAsState(initial = ListingSource.DEFAULT)
 
     // Read when the screen appears so the row can show what clearing would free.
     var tempBytes by remember { mutableStateOf(0L) }
@@ -308,6 +312,13 @@ fun MoreScreen(
             // Link reading: network bounds used while resolving a pasted link
             ListItem(
                 headlineContent = { Text(stringResource(R.string.more_link_reading)) },
+                supportingContent = {
+                    Text(
+                        stringResource(listingSource.labelRes),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                    )
+                },
                 leadingContent = {
                     Icon(Icons.Filled.Speed, null, tint = MaterialTheme.colorScheme.primary)
                 },

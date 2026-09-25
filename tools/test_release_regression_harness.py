@@ -700,18 +700,18 @@ def run_tests():
     print("\n--- 8. UI Assets, Launcher Icon & Resource Parity ---")
     # -----------------------------------------------------------------------
 
-    # Test 8.1: Launcher Background Color is White (#FFFFFF)
+    # Test 8.1: Launcher Background Color is Black (#000000)
     colors_xml_path = REPO_ROOT / "app/src/main/res/values/colors.xml"
     if colors_xml_path.exists():
         colors_tree = ET.parse(colors_xml_path)
         bg_elem = colors_tree.getroot().find("./color[@name='ic_launcher_background']")
-        check("Launcher background color is #FFFFFF", bg_elem.text if bg_elem is not None else "", "#FFFFFF")
+        check("Launcher background color is #000000", bg_elem.text if bg_elem is not None else "", "#000000")
 
-    # Test 8.2: Launcher Foreground Stroke is Black (#000000)
+    # Test 8.2: Launcher Foreground Stroke is White (#FFFFFF)
     foreground_xml_path = REPO_ROOT / "app/src/main/res/drawable/ic_launcher_foreground.xml"
     if foreground_xml_path.exists():
         fg_content = foreground_xml_path.read_text(encoding="utf-8")
-        check_true("Launcher foreground strokeColor is #000000", 'android:strokeColor="#000000"' in fg_content)
+        check_true("Launcher foreground strokeColor is #FFFFFF", 'android:strokeColor="#FFFFFF"' in fg_content)
 
     # Test 8.3: SponsorScreen Constants
     sponsor_kt = REPO_ROOT / "app/src/main/java/com/hazel/android/ui/screens/more/SponsorScreen.kt"

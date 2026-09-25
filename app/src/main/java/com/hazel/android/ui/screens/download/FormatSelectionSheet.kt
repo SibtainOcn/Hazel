@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -454,15 +455,23 @@ private fun ContainerBadge(text: String) {
             .background(MaterialTheme.colorScheme.primary),
         contentAlignment = Alignment.Center
     ) {
+        val cleanText = text.trim().uppercase()
+        val fontSize = when {
+            cleanText.length > 5 -> 10.sp
+            cleanText.length >= 4 -> 11.5.sp
+            else -> 13.sp
+        }
         Text(
-            text.uppercase(),
+            text = cleanText,
             style = MaterialTheme.typography.labelLarge,
-            // A container name is three or four letters; "DEFAULT" is the one that is not,
-            // and it is shrunk to fit rather than allowed to widen the block.
-            fontSize = if (text.length > 5) 11.sp else 15.sp,
+            fontSize = fontSize,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
-            color = MaterialTheme.colorScheme.onPrimary
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 3.dp)
         )
     }
 }

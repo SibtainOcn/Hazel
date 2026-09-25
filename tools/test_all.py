@@ -207,6 +207,8 @@ def main():
         ("Home Search UX & Data Preservation Harness", [py, "tools/test_home_search_ux_and_preservation.py"]),
         ("Release Regression Harness", [py, "tools/test_release_regression_harness.py"]),
         ("Controls & Multi-Source Harness", [py, "tools/test_download_controls_and_sources.py"]),
+        ("Share Overlay Isolation & Safety Harness", [py, "tools/test_share_overlay_isolation.py"]),
+        ("NewPipe Latency & Multi-Source Harness", [py, "tools/test_newpipe_latency_and_fallback.py"]),
         ("Gradle JVM Unit Tests", GRADLE_CMD + [":app:testDebugUnitTest", "--console=plain"]),
     ]
 

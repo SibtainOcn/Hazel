@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Transparent share overlay activity (`ShareOverlayActivity`) with quick one-tap confirmation for Hazel Instant and in-place `FormatSheet` selection over host apps without app switching.
+- Pixel-perfect `InstantShareSheet` and `OverlayLoadingSheet` matching modern dark specifications (`sheet-instant.html` & `sheet-fetching.html`) with Hazel SVG logo, dynamic progress indicators, and independent emerald `#8FD6B8` & `#0A0A0A` theme tokens.
+- Built-in Java reader (NewPipe extractor) as the default listing source (`ListingSource.NEWPIPE`) with fast-path in-process stream and collection recognition (~200ms latency) and transparent silent fallback to the yt-dlp binary engine.
+- Configurable listing source preference in More > Fetch settings with live status badge indicators.
+- Media search provider interface (`MediaSearchProvider` & `UnifiedSearchCoordinator`) designed for future multi-engine direct search expansion.
+- Automated test harnesses for share overlay isolation, history recording, and NewPipe latency/fallback validation (`tools/test_share_overlay_isolation.py` and `tools/test_newpipe_latency_and_fallback.py`).
+
 ### Changed
 - Replaced the Ko-fi sponsor option (which was marked "Opening soon") with a live
   Buy Me a Coffee link (`buymeacoffee.com/sibtainocean`).
@@ -20,8 +28,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated batch download action bar quality button to display real-time chosen quality labels (e.g. HQ: AUTO, HQ: BEST, HQ: 1080p) instead of a static generic icon.
 - Aligned pause, resume, and cancel actions across the header controls, thumbnail center button, and 3-dots menu with full support for cancelling waiting queue items without clearing the batch.
 - Modernized home and download media cards with an edge-to-edge 16:9 full-artwork thumbnail design; title and author are now overlaid directly atop the artwork with a dual gradient scrim for high legibility, duration and active download progress chips are anchored to the bottom-left corner, and status tags remain on the bottom-right.
-- Reverted the app launcher icon to a white background with a black bolt foreground.
+- Updated app launcher icon to a sleek black background with a white bolt foreground.
+- CI test harnesses and Android backup rules: aligned release regression and share overlay test suites with the black icon and dynamic accent theme, and removed invalid backup domain to resolve fatal lintVitalRelease errors.
 - Modernized the Downloads screen title with an unread activity indicator mark beside the dropdown chevron and on the "Downloading queue" filter when active downloads or queued items exist.
+
+### Fixed
+- Background download execution: Fixed a critical issue where initiating downloads from `ShareOverlayActivity` (both Normal Share and Instant Share) caused downloads to remain suspended in pending state until `MainActivity` was manually launched; resolved by passing target `MediaInfo` explicitly to `startDownload` and starting `DownloadService` synchronously before closing the activity, preventing Android and OEM process freezers (e.g. `OplusHansManager`) from suspending background execution.
+- Foreground service start lifecycle: Started `DownloadService` synchronously and immediately on the UI thread when initiating downloads from both `ShareOverlayActivity` and `InstantShareSheet`, ensuring the process enters the foreground before `finishAndRemoveTask()` destroys the calling activity and preventing `ForegroundServiceStartNotAllowedException` or process freezing on Android 12+.
+- Notification permission & shade delivery: Registered `PermissionHelper` in `ShareOverlayActivity.onCreate()` and prompted for `POST_NOTIFICATIONS` permission on Android 13+, ensuring download progress notifications appear in the status bar and notification drawer immediately upon queuing.
+- Format badge alignment: Fixed a layout issue in `FormatSelectionSheet` where container badges for 4-letter streams (`WEBM`, `OPUS`) overflowed available width at 15sp bold and aligned to the far-left border; dynamically scaled font sizes based on character length (`>5` chars: 10sp, `≥4` chars: 11.5sp, `<4` chars: 13sp) and added `TextAlign.Center` with horizontal padding, ensuring all container tags (`WEBM`, `M4A`, `MPEG-4`, `DEFAULT`) align in the exact center of the badge.
+- Clean overlay dismissal: Replaced `finish()` with `finishAndRemoveTask()` in `ShareOverlayActivity.closeOverlay()`, preventing the Android window manager on certain OEM launchers from erroneously bringing `MainActivity` to the foreground when dismissing the share overlay.
+- Stream and format latency optimization: NewPipe in-process extractor now parses video and audio streams directly into concrete format choices in ~200ms rather than triggering a 20-30 second yt-dlp Python dump, enabling instant format sheet population with zero waiting.
+- Robust YouTube thumbnail resolution via `UrlExtractor.extractYouTubeId` ensuring instant, crisp artwork loading across single shares and collection listings.
+- Optimized yt-dlp metadata probe with `--compat-options manifest-filesize-approx` and `--skip-download` to eliminate redundant fragment probing latency on mobile connections during fallback.
+- Fixed button text truncation on the instant share sheet where "Download Now" clipped to "Download No" on standard screen widths by tightening padding and tuning typography bounds.
+- Fixed shared link isolation where sharing a single video unintentionally opened `BatchDownloadSheet` with previously searched items; shared URLs now resolve in clean isolation with dedicated routing (`fetchShare`).
+- Ensured both normal share and Hazel instant share immediately record captured URLs into history.
+- Removed artificial delay timers in share loading sheet, driving progress dynamically via smooth continuous transitions.
 
 ### Added
 - Synchronized 16:9 skeleton shimmer loading animation (`ShimmerHost` & `shimmerCard`) with rounded card placeholders and dark gradient scrim during metadata fetching.
