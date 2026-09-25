@@ -213,6 +213,22 @@ fun DownloadScreen(
         }
     }
 
+    // When the active download switches (e.g. current item finishes, next starts),
+    // scroll the list so the new active card is visible at the top. Without this the
+    // viewport stays anchored on the old completed card and the user has to scroll
+    // manually to find the one that is running now.
+    val activeUrl = state.info?.url
+    val isDownloading = state.isDownloading
+    LaunchedEffect(activeUrl, isDownloading) {
+        if (isDownloading && activeUrl != null && (state.isMultiple || state.batch.size > 1)) {
+            // Item 0 is "instant", item 1 is "fetching", then the results follow.
+            // orderedResults places the active URL first, so scrolling to index 0
+            // brings the currently-downloading card into view without jumping past
+            // the header or controls.
+            listState.animateScrollToItem(0)
+        }
+    }
+
     // Links already downloaded, so a repeat can be pointed out before it is started again.
     val history by DownloadHistoryRepository.getHistory(context)
         .collectAsState(initial = emptyList())
@@ -1569,8 +1585,8 @@ private fun MediaRow(
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
     ) {
         Column(
             modifier = if (inHand) Modifier else Modifier.clickable(onClick = onOpenSheet)
@@ -1578,13 +1594,13 @@ private fun MediaRow(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
-                        .size(width = 104.dp, height = 60.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .size(width = 128.dp, height = 78.dp)
+                        .clip(RoundedCornerShape(14.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
@@ -1657,7 +1673,7 @@ private fun MediaRow(
                     }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(14.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(

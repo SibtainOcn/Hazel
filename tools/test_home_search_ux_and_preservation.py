@@ -237,6 +237,35 @@ def test_search_and_history_screen_ux():
 
 
 # ---------------------------------------------------------------------------
+# Suite 6: Compact MediaRow Alignment & Batch Auto-Scroll UX
+# ---------------------------------------------------------------------------
+def test_compact_alignment_and_batch_scroll():
+    print("\n--- Suite 6: Compact MediaRow Alignment & Batch Auto-Scroll UX ---")
+
+    cards_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "components" / "MediaCards.kt"
+    download_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "DownloadScreen.kt"
+
+    cards_content = cards_file.read_text(encoding="utf-8")
+    download_content = download_file.read_text(encoding="utf-8")
+
+    # 1. MediaCards.kt MediaRow dimensions must match HistoryRow / QueuedRow (128x78dp, 14dp clip, 20dp surface)
+    check_true("MediaCards.kt MediaRow uses 128x78dp thumbnail", ".size(width = 128.dp, height = 78.dp)" in cards_content)
+    check_true("MediaCards.kt MediaRow uses 14dp thumbnail corner clip", ".clip(RoundedCornerShape(14.dp))" in cards_content)
+    check_true("MediaCards.kt MediaRow uses 20dp surface shape", "shape = RoundedCornerShape(20.dp)" in cards_content)
+    check_true("MediaCards.kt MediaRow uses 14dp spacer between thumbnail and text", "Spacer(modifier = Modifier.width(14.dp))" in cards_content)
+
+    # 2. DownloadScreen.kt private MediaRow dimensions
+    check_true("DownloadScreen.kt MediaRow uses 128x78dp thumbnail", ".size(width = 128.dp, height = 78.dp)" in download_content)
+    check_true("DownloadScreen.kt MediaRow uses 14dp thumbnail corner clip", ".clip(RoundedCornerShape(14.dp))" in download_content)
+    check_true("DownloadScreen.kt MediaRow uses 20dp surface shape", "shape = RoundedCornerShape(20.dp)" in download_content)
+    check_true("DownloadScreen.kt MediaRow uses 14dp spacer between thumbnail and text", "Spacer(modifier = Modifier.width(14.dp))" in download_content)
+
+    # 3. Batch / Playlist Auto-Scroll on Active Download Transition
+    check_true("DownloadScreen.kt has LaunchedEffect watching activeUrl and isDownloading", "LaunchedEffect(activeUrl, isDownloading)" in download_content)
+    check_true("DownloadScreen.kt animates scroll to top item on batch transition", "listState.animateScrollToItem(0)" in download_content)
+
+
+# ---------------------------------------------------------------------------
 # Main Runner
 # ---------------------------------------------------------------------------
 def main():
@@ -249,6 +278,7 @@ def main():
     test_locale_parity()
     test_home_screen_components()
     test_search_and_history_screen_ux()
+    test_compact_alignment_and_batch_scroll()
 
     print("\n" + "=" * 70)
     print(f"  Summary: {PASS_COUNT}/{PASS_COUNT + FAIL_COUNT} tests PASSED, {FAIL_COUNT} FAILED")

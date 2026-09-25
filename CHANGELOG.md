@@ -68,6 +68,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   failures, eliminating misleading error banners (such as "1 of 49 failed") when items are
   intentionally cancelled or skipped.
 - URL validation now accepts uppercase and mixed-case URI schemes (e.g. `HTTPS://`, `Http://`) and trims leading/trailing whitespace.
+- Fixed home screen search bar click target where tapping outer segments failed to open search; expanded clickable surface across the entire bar container while isolating the 3-dot overflow menu.
+- Fixed compact single-row visual misalignment across Downloads and History screens where active downloading items displayed a smaller thumbnail (`104×60dp`) and mismatched corner radius (`12dp`) compared to completed and queued rows; aligned `MediaRow` with `HistoryRow` and `QueuedRow` (`128×78dp` thumbnail, `20dp` surface shape, `14dp` corner clip, and `14dp` spacer).
+- Fixed home screen batch and playlist downloads where advancing from one completed item to the next active download left the viewport anchored on the previous completed item; added smooth automatic scroll to the top active item whenever the running download advances.
 
 ## [1.0.8] - 2026-09-03
 
