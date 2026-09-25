@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "💡 Discussions & Feedback"
+    url: https://github.com/SibtainOcn/Hazel/discussions
+    about: Share suggestions, ask questions, or connect with the community before opening an issue.
+  - name: "🌐 Website Extraction Failures"
+    url: https://github.com/yt-dlp/yt-dlp/issues
+    about: Report upstream extractor breakage directly to the yt-dlp project.
+  - name: "📋 Supported Extractor List"
+    url: https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md
+    about: Review platforms currently supported upstream by yt-dlp.

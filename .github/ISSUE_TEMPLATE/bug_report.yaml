@@ -1,0 +1,105 @@
+name: Bug report
+description: Report an issue or unexpected behavior in Hazel
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Before Submitting an Issue
+
+        * **Site & Extraction Failures** (HTTP 403, bot verification, unsupported links): Hazel uses `yt-dlp` for all network media extraction. Go to **Settings > Engine** and update to the newest yt-dlp release first. If the platform is still failing, check whether the issue is already tracked on the [yt-dlp issue tracker](https://github.com/yt-dlp/yt-dlp/issues).
+        * **App-Level Defects**: Crashes, frozen views, queue state corruption, storage access issues, UI/theme glitches, or preference persistence bugs belong directly here.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I am testing against the newest available Hazel build
+          required: true
+        - label: I verified whether updating yt-dlp in Settings > Engine resolves the problem
+          required: true
+        - label: I searched open and closed tickets to ensure this is not a duplicate
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Summary of the Issue
+      description: Explain what went wrong and how the app behaved unexpectedly.
+      placeholder: |
+        The download stalls at a specific percentage and fails to finish.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Outcome
+      description: Describe what should have happened under normal circumstances.
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Provide clear, step-by-step instructions to replicate the behavior.
+      placeholder: |
+        1. Launch Hazel
+        2. Paste the URL into the search field
+        3. Pick an audio format and start download
+        4. Observe the failure
+    validations:
+      required: true
+
+  - type: input
+    id: link
+    attributes:
+      label: Media URL
+      description: Provide the link tested if the issue involves a specific video or platform (omit private links).
+      placeholder: https://...
+    validations:
+      required: false
+
+  - type: textarea
+    id: settings
+    attributes:
+      label: Active Configuration
+      description: Any relevant non-default options (audio extraction format, SponsorBlock, custom cookies, incognito mode).
+      placeholder: |
+        Audio format: MP3
+        SponsorBlock: Enabled
+        Cookies: Disabled
+    validations:
+      required: false
+
+  - type: textarea
+    id: device
+    attributes:
+      label: System & Build Details
+      description: Include your device model, Android release, and installed Hazel build variant.
+      placeholder: |
+        Device: Pixel 8
+        Android version: 15
+        Hazel version: 1.0.8 (arm64-v8a)
+    validations:
+      required: true
+
+  - type: textarea
+    id: media
+    attributes:
+      label: Visual Demonstration
+      description: Attach screenshots or a brief screen recording highlighting the defect.
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Trace & Logs
+      description: Paste relevant diagnostic output from the download card or crash reports.
+      render: text
+    validations:
+      required: false

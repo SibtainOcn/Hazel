@@ -1,0 +1,53 @@
+name: Feature request
+description: Propose an enhancement or new capability for Hazel
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hazel provides a native mobile interface on top of `yt-dlp`. Because media downloads rely on this backend, Hazel cannot implement features that `yt-dlp` does not offer. Exposing existing `yt-dlp` capabilities through intuitive mobile controls or refining Hazel's UI/UX is always welcome.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I searched open and closed requests to confirm this idea is not already tracked
+          required: true
+        - label: This capability is supported by yt-dlp, or pertains directly to Hazel's interface
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Use Case & Motivation
+      description: What specific problem or workflow friction are you trying to address?
+      placeholder: |
+        When saving long podcasts, it would be useful to skip standard intro sequences automatically.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: How do you envision this working inside the app (navigation, UI controls, or settings)?
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Current Workarounds
+      description: How are you currently accomplishing this goal, or what other approaches have you tried?
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Notes & References
+      description: Include relevant screenshots, UI sketches, or yt-dlp command arguments.
+    validations:
+      required: false
