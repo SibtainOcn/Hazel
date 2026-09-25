@@ -59,6 +59,15 @@ object NewPipeLister {
     }
 
     /**
+     * Whether this address is recognized by an extractor service as an individual media stream,
+     * decided instantly by matching address patterns without network overhead.
+     */
+    fun handlesStream(url: String): Boolean {
+        val service = service(url) ?: return false
+        return runCatching { service.streamLHFactory.acceptUrl(url) }.getOrDefault(false)
+    }
+
+    /**
      * Lists a collection, paging until the source runs out.
      *
      * Returns null on any failure, which the caller reads as "ask yt-dlp instead". Nothing
