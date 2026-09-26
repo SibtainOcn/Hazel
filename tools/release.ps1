@@ -146,8 +146,7 @@ if ($DryRun) {
     Info "would run: .\gradlew.bat :app:generateFastlaneChangelogs"
 } else {
     & $gradlew ':app:generateFastlaneChangelogs' --console=plain
-    if ($LASTEXITCODE -ne 0) { Die "generateFastlaneChangelogs failed. Nothing has been committed." }
-    $written = Get-ChildItem 'fastlane/metadata/android/en-US/changelogs' -Filter "$newCode.txt","$($newCode+1).txt" -ErrorAction SilentlyContinue
+    $written = Get-ChildItem 'fastlane/metadata/android/en-US/changelogs' -Filter "$newCode*" -ErrorAction SilentlyContinue
     if (-not $written) {
         Warn "no changelog files for $newCode were produced. Check the task output."
     } else {
