@@ -26,9 +26,7 @@ permissions:
   contents: read
 
 env:
-  # The daemon is a liability on a machine that is discarded after one build, and it hides
-  # memory problems behind a restart.
-  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true
+  GRADLE_OPTS: -Dorg.gradle.parallel=true -Dorg.gradle.caching=true
 
 jobs:
   # Reads the string resources and nothing else, so it answers in seconds and answers first.
