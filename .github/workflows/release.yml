@@ -183,7 +183,7 @@ jobs:
         id: apks
         run: |
           mkdir -p artifacts
-          find app/build/outputs/apk/release -name '*.apk' -exec cp {} artifacts/ \;
+          find app/build/outputs/apk -name '*.apk' -exec cp {} artifacts/ \;
 
           # Every output is named after the version it carries, so checking that the five
           # expected names are present is also the proof that the version in the file is the

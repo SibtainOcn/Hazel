@@ -99,10 +99,6 @@ fun HazelUpdateScreen(
     val notifyFailed by viewModel.notifyFailed.collectAsState()
     val verifySignature by viewModel.verifySignature.collectAsState()
 
-    var showChangelogSheet by remember { mutableStateOf(false) }
-    var changelogText by remember { mutableStateOf("") }
-    var changelogVersion by remember { mutableStateOf("") }
-
     var showInstallPermissionDialog by remember { mutableStateOf(false) }
     var waitingForInstallPermission by remember { mutableStateOf(false) }
 
@@ -254,10 +250,14 @@ fun HazelUpdateScreen(
                         openInAppBrowser(context, HazelUpdater.FDROID_PACKAGE_URL)
                     }
                 },
-                onViewChangelog = { ver, notes ->
-                    changelogVersion = ver
-                    changelogText = notes.ifBlank { "No detailed changelog provided for this release." }
-                    showChangelogSheet = true
+                onViewChangelog = { ver, _ ->
+                    val cleanVer = ver.removePrefix("v").removePrefix("V").trim()
+                    val url = if (cleanVer.isNotBlank()) {
+                        "https://github.com/${HazelUpdater.REPO_NAME}/blob/v$cleanVer/CHANGELOG.md"
+                    } else {
+                        "https://github.com/${HazelUpdater.REPO_NAME}/blob/HEAD/CHANGELOG.md"
+                    }
+                    openInAppBrowser(context, url)
                 }
             )
 
@@ -389,38 +389,7 @@ fun HazelUpdateScreen(
         }
     }
 
-    // ── What's New Bottom Sheet ──
-    if (showChangelogSheet) {
-        val sheetState = rememberModalBottomSheetState()
-        ModalBottomSheet(
-            onDismissRequest = { showChangelogSheet = false },
-            sheetState = sheetState,
-            containerColor = UpdateTokens.Surface,
-            contentColor = UpdateTokens.OnSurface
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Text(
-                    text = "What's New in v$changelogVersion",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = UpdateTokens.OnSurface
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = changelogText,
-                    fontSize = 14.sp,
-                    color = UpdateTokens.OnSurfaceVar,
-                    lineHeight = 22.sp
-                )
-                Spacer(modifier = Modifier.height(28.dp))
-            }
-        }
-    }
+
 }
 
 @Composable

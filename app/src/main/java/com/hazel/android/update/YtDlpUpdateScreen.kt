@@ -78,10 +78,6 @@ fun YtDlpUpdateScreen(
     val notifyFailed by viewModel.notifyFailed.collectAsState()
     val verifySignature by viewModel.verifySignature.collectAsState()
 
-    var showChangelogSheet by remember { mutableStateOf(false) }
-    var changelogText by remember { mutableStateOf("") }
-    var changelogVersion by remember { mutableStateOf("") }
-
     val displayInstalled = installedVersion ?: YtDlpUpdater.cachedVersion(context) ?: "Bundled"
 
     Scaffold(
@@ -123,9 +119,14 @@ fun YtDlpUpdateScreen(
                 onCancel = { viewModel.cancelUpdate() },
                 onDismiss = { viewModel.dismissCompletely() },
                 onViewChangelog = { ver, repo ->
-                    changelogVersion = ver
-                    changelogText = "Latest binary release for channel ${channel.label} from $repo.\n\nIncludes recent site extractor patches and streaming protocol fixes."
-                    showChangelogSheet = true
+                    val cleanRepo = repo.ifBlank { channel.repo }
+                    val cleanVer = ver.trim()
+                    val url = if (cleanVer.isNotBlank()) {
+                        "https://github.com/$cleanRepo/releases/tag/$cleanVer"
+                    } else {
+                        channel.releasesUrl
+                    }
+                    openInAppBrowser(context, url)
                 }
             )
 
@@ -255,58 +256,7 @@ fun YtDlpUpdateScreen(
         }
     }
 
-    // ── What's New Bottom Sheet ──
-    if (showChangelogSheet) {
-        val sheetState = rememberModalBottomSheetState()
-        ModalBottomSheet(
-            onDismissRequest = { showChangelogSheet = false },
-            sheetState = sheetState,
-            containerColor = UpdateTokens.Surface,
-            contentColor = UpdateTokens.OnSurface
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Text(
-                    text = "yt-dlp Release $changelogVersion",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = UpdateTokens.OnSurface
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = changelogText,
-                    fontSize = 14.sp,
-                    color = UpdateTokens.OnSurfaceVar,
-                    lineHeight = 22.sp
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(44.dp)
-                        .clip(RoundedCornerShape(22.dp))
-                        .background(UpdateTokens.Accent)
-                        .clickable {
-                            openInAppBrowser(context, channel.releasesUrl)
-                            showChangelogSheet = false
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "View on GitHub",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = UpdateTokens.AccentOn
-                    )
-                }
-                Spacer(modifier = Modifier.height(28.dp))
-            }
-        }
-    }
+
 }
 
 /** Backward compatibility alias */
