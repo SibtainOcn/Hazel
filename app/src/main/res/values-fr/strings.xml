@@ -508,7 +508,6 @@
     <string name="fetch_mode_thorough_label">Minutieux</string>
     <string name="fetch_mode_thorough_description">Attend plus longtemps et réessaie davantage. Le plus lent, mais il survit à un réseau faible.</string>
     <string name="listing_source_ytdlp_description">Le moteur qui fait aussi le téléchargement. Il fonctionne sur tous les sites qu\'il prend en charge, et se met à jour tout seul, donc il continue de marcher à mesure que les sites changent.</string>
-    <string name="listing_source_newpipe_label">Préférer le lecteur intégré</string>
     <string name="listing_source_newpipe_description">Liste les playlists et les chaînes en une seule requête au lieu de lancer le moteur, ce qui est plus rapide sur les sites qu\'il connaît. Il revient à yt-dlp pour tout le reste, et dès qu\'il ne parvient pas à lire un lien.</string>
 
     <!-- ToolsScreen -->

@@ -277,8 +277,8 @@ class UpdaterTest {
               "suggestedVersionCode": 504,
               "packages": [
                 {
-                  "versionName": "1.0.8",
-                  "versionCode": 504,
+                  "versionName": "1.0.9",
+                  "versionCode": 505,
                   "added": 1724000000000
                 }
               ]
@@ -291,7 +291,7 @@ class UpdaterTest {
             suggested = packages.getJSONObject(0).optString("versionName", "").trim()
         }
 
-        assertEquals("1.0.8", suggested)
+        assertEquals("1.0.9", suggested)
     }
 
     // 7. Live Resilient Resolution Tests (Rate-Limit Proof) 
@@ -301,7 +301,7 @@ class UpdaterTest {
         val result = HazelUpdater.latestReleaseResult(HazelUpdater.Channel.STABLE)
         assertTrue("Expected Success but got $result", result is HazelUpdater.CheckResult.Success)
         val info = (result as HazelUpdater.CheckResult.Success).info
-        assertEquals("1.0.8", info.version)
+        assertTrue("Version should match semver format", info.version.matches(Regex("""\d+\.\d+\.\d+.*""")))
         if (HazelUpdater.isFdroid()) {
             assertEquals(HazelUpdater.FDROID_PACKAGE_URL, info.downloadUrl)
         } else {

@@ -30,11 +30,11 @@ enum class ListingSource(
 
     companion object {
         /**
-         * Built-in Java reader (NewPipe) by default. It executes in-process on Android's ART
-         * runtime without Python process startup overhead, returning metadata in ~200ms.
-         * Falls back silently to yt-dlp on any parsing or extraction failure.
+         * yt-dlp binary engine by default. It guarantees full extraction of all available
+         * stream qualities, audio language tracks, and subtitles across all supported sites.
+         * NewPipe remains available as an optional fast reader.
          */
-        val DEFAULT = NEWPIPE
+        val DEFAULT = YT_DLP
 
         fun fromName(name: String?): ListingSource =
             entries.firstOrNull { it.name == name } ?: DEFAULT

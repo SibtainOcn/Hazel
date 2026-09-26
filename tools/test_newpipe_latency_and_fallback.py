@@ -263,8 +263,8 @@ def test_source_code_structure():
     resolver_text = resolver_file.read_text(encoding="utf-8")
 
     check_true(
-        "ListingSource default is NEWPIPE",
-        "val DEFAULT = NEWPIPE" in resolver_text
+        "ListingSource default is YT_DLP",
+        "val DEFAULT = YT_DLP" in resolver_text
     )
     check_true(
         "handlesCollection checked first",

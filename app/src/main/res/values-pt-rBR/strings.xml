@@ -508,7 +508,6 @@
     <string name="fetch_mode_thorough_label">Minucioso</string>
     <string name="fetch_mode_thorough_description">Espera mais e tenta mais vezes. O mais lento, mas sobrevive a uma rede fraca.</string>
     <string name="listing_source_ytdlp_description">O mesmo motor que faz o download. Funciona em todos os sites que ele suporta, e se atualiza sozinho, então continua funcionando conforme os sites mudam.</string>
-    <string name="listing_source_newpipe_label">Preferir o leitor interno</string>
     <string name="listing_source_newpipe_description">Lista playlists e canais em um único pedido em vez de iniciar o motor, o que é mais rápido nos sites que ele conhece. Recorre ao yt-dlp para todo o resto, e sempre que não conseguir ler um link.</string>
 
     <!-- ToolsScreen -->

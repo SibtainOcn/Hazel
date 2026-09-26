@@ -500,7 +500,6 @@
     <string name="fetch_mode_thorough_label">Gründlich</string>
     <string name="fetch_mode_thorough_description">Wartet länger und versucht es öfter. Am langsamsten, übersteht aber ein schwaches Netz.</string>
     <string name="listing_source_ytdlp_description">Dieselbe Engine, die auch herunterlädt. Sie funktioniert auf jeder Seite, die sie unterstützt, und aktualisiert sich selbst, also läuft sie weiter, während sich Seiten ändern.</string>
-    <string name="listing_source_newpipe_label">Den eingebauten Leser bevorzugen</string>
     <string name="listing_source_newpipe_description">Listet Playlists und Kanäle in einer einzigen Anfrage, statt die Engine zu starten, was auf den ihm bekannten Seiten schneller ist. Für alles andere und immer dann, wenn er einen Link nicht lesen kann, greift er auf yt-dlp zurück.</string>
 
     <!-- ToolsScreen -->

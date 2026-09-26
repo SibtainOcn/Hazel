@@ -516,7 +516,6 @@
     <string name="fetch_mode_thorough_label">Тщательный</string>
     <string name="fetch_mode_thorough_description">Дольше ожидает и делает больше попыток. Самый медленный, но справляется со слабым сигналом.</string>
     <string name="listing_source_ytdlp_description">Тот же движок, что выполняет загрузку. Работает со всеми поддерживаемыми сайтами и обновляется сам, адаптируясь к изменениям сайтов.</string>
-    <string name="listing_source_newpipe_label">Предпочитать встроенный модуль</string>
     <string name="listing_source_newpipe_description">Получает плейлисты и каналы за один запрос без запуска движка, что быстрее на поддерживаемых сайтах. Для остального и при ошибках переключается на yt-dlp.</string>
 
     <!-- ToolsScreen -->

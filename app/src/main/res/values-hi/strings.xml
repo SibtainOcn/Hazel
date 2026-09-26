@@ -500,7 +500,6 @@
     <string name="fetch_mode_thorough_label">पूरी तरह</string>
     <string name="fetch_mode_thorough_description">ज़्यादा इंतज़ार और ज़्यादा कोशिशें। सबसे धीमा, पर कमज़ोर नेटवर्क पर टिक जाता है।</string>
     <string name="listing_source_ytdlp_description">वही इंजन जो डाउनलोड करता है। जिन साइटों को यह समझता है उन सब पर काम करता है, और खुद को अपडेट करता रहता है, इसलिए साइटें बदलने पर भी चलता रहता है।</string>
-    <string name="listing_source_newpipe_label">भीतर बने रीडर को प्राथमिकता दें</string>
     <string name="listing_source_newpipe_description">इंजन चलाने के बजाय एक ही अनुरोध में प्लेलिस्ट और चैनल की सूची बनाता है, जो जानी-पहचानी साइटों पर तेज़ है। बाकी सब के लिए, और जब भी कोई लिंक न पढ़ पाए, yt-dlp पर लौट आता है।</string>
 
     <!-- ToolsScreen -->

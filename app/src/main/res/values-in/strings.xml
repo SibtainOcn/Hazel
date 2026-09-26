@@ -492,7 +492,6 @@
     <string name="fetch_mode_thorough_label">Menyeluruh</string>
     <string name="fetch_mode_thorough_description">Menunggu lebih lama dan mencoba lebih banyak. Paling lambat, tetapi tahan di jaringan yang lemah.</string>
     <string name="listing_source_ytdlp_description">Mesin yang sama dengan yang melakukan pengunduhan. Bekerja di setiap situs yang didukungnya, dan memperbarui diri sendiri, sehingga tetap berfungsi saat situs berubah.</string>
-    <string name="listing_source_newpipe_label">Pilih pembaca bawaan</string>
     <string name="listing_source_newpipe_description">Mendaftar daftar putar dan saluran dalam satu permintaan tanpa memulai mesin, yang lebih cepat di situs yang dikenalnya. Beralih kembali ke yt-dlp untuk hal lain dan setiap kali tidak dapat membaca tautan.</string>
 
     <!-- ToolsScreen -->

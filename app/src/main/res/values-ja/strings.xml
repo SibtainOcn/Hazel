@@ -492,7 +492,6 @@
     <string name="fetch_mode_thorough_label">慎重</string>
     <string name="fetch_mode_thorough_description">長く待機し、再試行回数を増やします。時間はかかりますが、不安定な通信環境でも成功しやすくなります。</string>
     <string name="listing_source_ytdlp_description">ダウンロードを行うエンジンと同じものです。サポートされているすべてのサイトで動作し、自動更新されるため、サイトの変更にも継続して対応できます。</string>
-    <string name="listing_source_newpipe_label">内蔵リーダーを優先</string>
     <string name="listing_source_newpipe_description">エンジンを起動せずに1回のリクエストでプレイリストやチャンネルを取得するため、対応サイトでは高速です。その他のサイトや読み込めない場合は yt-dlp にフォールバックします。</string>
 
     <!-- ToolsScreen -->

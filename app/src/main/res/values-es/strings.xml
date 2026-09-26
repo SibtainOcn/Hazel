@@ -508,7 +508,6 @@
     <string name="fetch_mode_thorough_label">Minucioso</string>
     <string name="fetch_mode_thorough_description">Espera más y reintenta más. Lo más lento, pero sobrevive a una red débil.</string>
     <string name="listing_source_ytdlp_description">El mismo motor que hace la descarga. Funciona en todos los sitios que admite, y se actualiza solo, así que sigue funcionando a medida que los sitios cambian.</string>
-    <string name="listing_source_newpipe_label">Preferir el lector integrado</string>
     <string name="listing_source_newpipe_description">Lista las listas de reproducción y los canales en una sola petición en vez de arrancar el motor, lo que es más rápido en los sitios que conoce. Recurre a yt-dlp para todo lo demás, y siempre que no pueda leer un enlace.</string>
 
     <!-- ToolsScreen -->

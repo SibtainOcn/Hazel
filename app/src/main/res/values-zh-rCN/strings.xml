@@ -492,7 +492,6 @@
     <string name="fetch_mode_thorough_label">彻底</string>
     <string name="fetch_mode_thorough_description">等得更久，重试更多。最慢，但能撑过弱网络。</string>
     <string name="listing_source_ytdlp_description">和执行下载的是同一个引擎。它支持的每个站点都能用，而且会自我更新，所以站点变化时它也能继续工作。</string>
-    <string name="listing_source_newpipe_label">优先使用内置读取器</string>
     <string name="listing_source_newpipe_description">用一次请求就列出播放列表和频道，而不必启动引擎，在它认识的站点上更快。其余情况，以及任何读不出链接的时候，都会回退到 yt-dlp。</string>
 
     <!-- ToolsScreen -->
