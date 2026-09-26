@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.10] - 2026-09-27
 ### Changed
 - Reverted default link reading extractor to yt-dlp (`ListingSource.YT_DLP`) to guarantee complete extraction of all available audio languages, subtitle tracks, and video qualities across all media sources.
 - Streamlined Link Reading settings screen to display minimal "yt-dlp" and "NewPipe" options without verbose descriptions or badges.
