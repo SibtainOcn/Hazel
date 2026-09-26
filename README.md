@@ -68,10 +68,10 @@ English
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.jpg" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.jpg" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="30%" />
 </div>
 
