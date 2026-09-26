@@ -14,6 +14,7 @@ thing before writing anything, and read [`BLOCKED.md`](BLOCKED.md) as well.
 | Add Spanish, Hindi, anything | [Job 2: translation](#job-2-translation) |
 | Know what the checker is telling me | [The checker](#the-checker) |
 | Know why some literal is allowed to stay | [The allowlist](#the-allowlist) |
+| Validate Fastlane or F-Droid recipe YAML | [Fastlane & F-Droid YAML Checker](#fastlane--f-droid-yaml-checker) |
 
 ---
 
@@ -27,6 +28,7 @@ tools/
   test_artist_metadata.py              artist metadata and colon handling harness
   literal-allowlist.txt                literals deliberately left in the Kotlin, each with a reason
   BLOCKED.md                           text that needs a code change before it can be extracted
+  fastlane_yaml_checker/               Fastlane store metadata & F-Droid recipe strict validator & formatter
   README.md                            this file
 app/src/main/res/
   values/strings.xml                   the English source. Every key starts life here.
@@ -306,3 +308,25 @@ file has been read. Read the file.
 If you find a parameter name in this codebase that holds visible text and is not in the
 `LITERAL` pattern in `check.py`, add it. That has already happened three times, and each
 time the real count went up.
+
+---
+
+## Fastlane & F-Droid YAML Checker
+
+Before cutting a release or submitting a Merge Request to `fdroiddata`, validate all store metadata and recipe files with the strict checker:
+
+```bash
+python tools/fastlane_yaml_checker/checker.py
+```
+
+### What it guarantees:
+- **Fastlane store listings**: Checks title (<= 50 chars), short description (<= 80 chars), and full description (<= 4000 chars).
+- **Changelog length limit**: Validates that all changelogs in `fastlane/metadata/android/<locale>/changelogs/` are **<= 500 characters** (hard rejection limit on Google Play and F-Droid).
+- **Version alignment**: Confirms that changelogs and F-Droid recipe entries match the active `versionName` and `versionCode` in `app/build.gradle.kts`.
+- **F-Droid `rewritemeta` compliance**: Strict line-by-line formatting verification (`AllowedAPKSigningKeys`, `binary: ` trailing space, and `output:` path formatting) to guarantee clean, zero-diff CI pipeline runs.
+
+To auto-format or fix formatting discrepancies:
+```bash
+python tools/fastlane_yaml_checker/checker.py --yaml path/to/com.hazel.android.yml --fix
+```
+

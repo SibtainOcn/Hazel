@@ -60,6 +60,8 @@ English
 
 </div>
 
+*Only the links listed above ([GitHub Releases](https://github.com/SibtainOcn/Hazel/releases/latest) and [F-Droid](https://f-droid.org/packages/com.hazel.android/)) are the official, trusted sources of Hazel. Please be advised that any external websites or third-party vendors are unofficial and operate completely independently of me.*
+
 ## 📲 Screenshots
 
 <div>
@@ -115,7 +117,20 @@ For most devices, it is recommended to install the **arm64-v8a** version of the 
 
 - Stable releases are also available on [F-Droid](https://f-droid.org/packages/com.hazel.android/)
 
-Hazel will always be free and open source for everyone. If you like it, please consider [supporting the project](https://github.com/sponsors/SibtainOcn)!
+Hazel will always be free and open source for everyone. If you like it, consider supporting the project via [GitHub Sponsors](https://github.com/sponsors/SibtainOcn) or [Buy Me a Coffee](https://www.buymeacoffee.com/sibtainocean)!
+
+### 🔑 Connect with third-party apps
+The app's package name is `com.hazel.android`.
+
+### 🔍 Verify application signature
+Hazel release builds are reproducible. Official releases are signed with the developer certificate below. If the signature on your APK is different, a third party has modified the application. Always verify you are using the app with the original signature:
+
+```text
+Owner (DN): CN=sibtainocn
+SHA-256:    0377e9c8352c017e42583cea1715c40c400a51c4045c268825ffc9bae1305c86
+SHA-1:      d5c4a6a86d3cde1c1c722564f1efaf8893ea85a2
+MD5:        3bcce9e14c616a9087766563875978e6
+```
 
 ## 🤝 Contributing
 

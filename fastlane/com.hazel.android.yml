@@ -1,157 +1,111 @@
-# Draft F-Droid recipe for Hazel.
-#
-# This file does NOT belong in this repository. It is a working copy of what goes into
-# fdroiddata as metadata/com.hazel.android.yml, kept here so it can be reviewed before it
-# is submitted. Delete it once the merge request is open.
-#
-# To submit:
-#   1. Fork https://gitlab.com/fdroid/fdroiddata
-#   2. Put this file at metadata/com.hazel.android.yml
-#   3. Run:  fdroid readmeta && fdroid rewritemeta com.hazel.android && fdroid lint com.hazel.android
-#   4. Build it the way the server will:  fdroid build -v -l com.hazel.android
-#   5. Open the merge request
-#
-# Every versionName and commit below names v1.0.6. Earlier tags cannot be submitted:
-# v1.0.4 predates the removal of the foojay toolchain resolver, which F-Droid's scanner
-# refuses outright, and v1.0.5 computes its version rather than stating it, which leaves
-# their update check unable to find any version information.
-
-# Download is the one that matters, since it is where somebody looking for a downloader
-# actually browses. Multimedia and Internet are the broader shelves the app also belongs on.
-# Nothing further is listed: F-Droid gains nothing from categories an app only half fits,
-# and a reviewer will ask about any that do not obviously apply.
-Categories:
-  - Download
-  - Multimedia
-  - Internet
-
-License: GPL-3.0-or-later
-
-AuthorName: SibtainOcn
-SourceCode: https://github.com/SibtainOcn/Hazel
-IssueTracker: https://github.com/SibtainOcn/Hazel/issues
-# /HEAD rather than /main, which is what fdroid lint asks for: it follows the default branch
-# whatever that branch is later renamed to.
-Changelog: https://github.com/SibtainOcn/Hazel/blob/HEAD/CHANGELOG.md
-
-# The app fetches yt-dlp updates from the GitHub API, which F-Droid classes as depending on
-# a non-free network service. It is a label on the listing, not a reason for rejection.
 AntiFeatures:
   NonFreeNet:
     en-US: Uses the GitHub API to check for and download yt-dlp engine updates
+Categories:
+  - Download
+  - Internet
+  - Multimedia
+License: GPL-3.0-or-later
+AuthorName: SibtainOcn
+SourceCode: https://github.com/SibtainOcn/Hazel
+IssueTracker: https://github.com/SibtainOcn/Hazel/issues
+Changelog: https://github.com/SibtainOcn/Hazel/blob/HEAD/CHANGELOG.md
 
-# checkupdates works this out from the app name in AndroidManifest.xml and writes it into
-# the recipe itself. Their CI ends the job with git diff --exit-code, so a field it wants to
-# add and we left out fails the run even though nothing is wrong with it.
 AutoName: Hazel
 
 RepoType: git
 Repo: https://github.com/SibtainOcn/Hazel.git
 
 Builds:
-  # One entry per output, in ascending version code, which is also the order a device
-  # prefers them in. The universal APK is first and lowest, so it is what a device gets only
-  # when none of the architecture builds fit; anything matching a real architecture is
-  # offered that smaller file instead.
-  #
-  # output: is relative to subdir:, which is already app/. Writing app/build/... here
-  # resolves to app/app/build/... and fails with "No apks match" straight after a build
-  # that in fact succeeded, which reads as a build failure and is not one.
-  #
-  # $$VERSION$$ rather than the literal version, and no gradleprops. F-Droid's bot adds
-  # each new release by copying these entries and changing only versionName, versionCode
-  # and commit. It does not touch output: or gradleprops:, so a literal version in either
-  # would be carried forward and the next release would look for a file the build never
-  # produced. $$VERSION$$ is substituted at build time, and the version it stands for comes
-  # from the literals in app/build.gradle.kts, which the checkout already has.
-  #
-  # There is deliberately no build: running ./gradlew here. F-Droid deletes
-  # gradle-wrapper.jar before building, because a binary blob in the source tree is exactly
-  # what they will not run, and supplies its own Gradle instead. The gradle: field is what
-  # asks for that, and gradleprops is how -P arguments reach it. A recipe that calls
-  # ./gradlew itself fails with "No such file or directory" after compiling nothing.
-  - versionName: 1.0.6
-    versionCode: 300
-    commit: v1.0.6
-    subdir: app
-    gradle:
-      - yes
-    output: build/outputs/apk/release/Hazel-v$$VERSION$$-universal-stable.apk
-    binary: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-universal-stable.apk
-
-  - versionName: 1.0.6
-    versionCode: 301
-    commit: v1.0.6
+  - versionName: 1.0.8
+    versionCode: 501
+    commit: 351c15ffec92e0257e9e1557e933b160896ca491
     subdir: app
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-armeabi-v7a-stable.apk
-    binary: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-armeabi-v7a-stable.apk
+    binary: 
+      https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-armeabi-v7a-stable.apk
 
-  - versionName: 1.0.6
-    versionCode: 302
-    commit: v1.0.6
+  - versionName: 1.0.8
+    versionCode: 502
+    commit: 351c15ffec92e0257e9e1557e933b160896ca491
     subdir: app
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-x86-stable.apk
-    binary: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-x86-stable.apk
+    binary: 
+      https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-x86-stable.apk
 
-  - versionName: 1.0.6
-    versionCode: 303
-    commit: v1.0.6
+  - versionName: 1.0.8
+    versionCode: 503
+    commit: 351c15ffec92e0257e9e1557e933b160896ca491
     subdir: app
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-x86_64-stable.apk
-    binary: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-x86_64-stable.apk
+    binary: 
+      https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-x86_64-stable.apk
 
-  - versionName: 1.0.6
-    versionCode: 304
-    commit: v1.0.6
+  - versionName: 1.0.8
+    versionCode: 504
+    commit: 351c15ffec92e0257e9e1557e933b160896ca491
     subdir: app
     gradle:
       - yes
     output: build/outputs/apk/release/Hazel-v$$VERSION$$-arm64-v8a-stable.apk
-    binary: https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-arm64-v8a-stable.apk
+    binary: 
+      https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-arm64-v8a-stable.apk
 
-# Reproducible builds. F-Droid builds from source, compares the result against the APK
-# published on GitHub, and where they match it ships that signed file instead of one of its
-# own. An install from GitHub and an install from F-Droid are then the same APK, and a person
-# can move between the two without uninstalling first.
-#
-# This is set at inclusion rather than later. Without it F-Droid signs with its own key, and
-# switching afterwards would change the signature every existing F-Droid install trusts.
-#
-# The URL goes on each build entry rather than in one app level Binaries: field, because
-# there is no placeholder for the architecture. %v is substituted, %a does not exist, so a
-# single field cannot name five different files.
-#
-# The fingerprint is the SHA-256 of the signing certificate, from
-# apksigner verify --print-certs on a published APK.
+  - versionName: 1.0.9
+    versionCode: 601
+    commit: 1964ded690fde347f7c517849a071d04dd3190ae
+    subdir: app
+    gradle:
+      - fdroid
+    output: 
+      build/outputs/apk/fdroid/release/Hazel-v$$VERSION$$-fdroid-armeabi-v7a-stable.apk
+    binary: 
+      https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-fdroid-armeabi-v7a-stable.apk
+
+  - versionName: 1.0.9
+    versionCode: 602
+    commit: 1964ded690fde347f7c517849a071d04dd3190ae
+    subdir: app
+    gradle:
+      - fdroid
+    output: build/outputs/apk/fdroid/release/Hazel-v$$VERSION$$-fdroid-x86-stable.apk
+    binary: 
+      https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-fdroid-x86-stable.apk
+
+  - versionName: 1.0.9
+    versionCode: 603
+    commit: 1964ded690fde347f7c517849a071d04dd3190ae
+    subdir: app
+    gradle:
+      - fdroid
+    output: build/outputs/apk/fdroid/release/Hazel-v$$VERSION$$-fdroid-x86_64-stable.apk
+    binary: 
+      https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-fdroid-x86_64-stable.apk
+
+  - versionName: 1.0.9
+    versionCode: 604
+    commit: 1964ded690fde347f7c517849a071d04dd3190ae
+    subdir: app
+    gradle:
+      - fdroid
+    output: build/outputs/apk/fdroid/release/Hazel-v$$VERSION$$-fdroid-arm64-v8a-stable.apk
+    binary: 
+      https://github.com/SibtainOcn/Hazel/releases/download/v%v/Hazel-v%v-fdroid-arm64-v8a-stable.apk
+
 AllowedAPKSigningKeys: 0377e9c8352c017e42583cea1715c40c400a51c4045c268825ffc9bae1305c86
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
-
-# The five APKs of one release, expressed as arithmetic on the single versionCode their
-# update check reads out of app/build.gradle.kts.
-#
-# Without this it reads 300, compares it against CurrentVersionCode 304 and stops with
-# "current version is newer", because it has no way to know that 304 is the same release as
-# 300 rather than a later one. It takes the highest derived code as the release's own, so
-# these five have to end at 304.
-#
-# It is also what keeps a future release correct on its own. On the next tag it clones the
-# last five build entries, keeps each one's output: line, and assigns the derived codes in
-# ascending order. That only lands each ABI on the right file while the entries below stay
-# sorted by version code, so leave them in that order.
 VercodeOperation:
-  - '%c'
   - '%c + 1'
   - '%c + 2'
   - '%c + 3'
   - '%c + 4'
-
-CurrentVersion: 1.0.6
-CurrentVersionCode: 304
+CurrentVersion: 1.0.9
+CurrentVersionCode: 604
