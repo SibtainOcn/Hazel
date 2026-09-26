@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.9] - 2026-09-26
+
+### Store
+* In-app Software Update hub for Hazel and yt-dlp extractor engine updates.
+* Transparent share overlay with instant downloading and format selection over host apps.
+* Built-in NewPipe reader for ultra-fast link extraction with yt-dlp fallback.
+* Modern Getting Started onboarding walkthrough and improved permission flows.
+* Streamlined download queue, artist metadata tagging, and UI polish across all screens.
+
 ### Added
 - Software Update hub (`SoftwareUpdateScreen`) presenting two distinct component updaters: Hazel application updates and yt-dlp extractor engine updates.
 - Dedicated Hazel in-app updater (`HazelUpdateScreen` & `HazelUpdater`) with GitHub release parsing, semver comparison (`isNewer`), architecture-aware APK matching (`arm64-v8a`, `armeabi-v7a`, `x86_64`, `universal`), release channel selection (Stable, Beta, Nightly), and download speed/ETA reporting.

@@ -1,0 +1,5 @@
+* In-app Software Update hub for Hazel and yt-dlp extractor engine updates.
+* Transparent share overlay with instant downloading and format selection over host apps.
+* Built-in NewPipe reader for ultra-fast link extraction with yt-dlp fallback.
+* Modern Getting Started onboarding walkthrough and improved permission flows.
+* Streamlined download queue, artist metadata tagging, and UI polish across all screens.
