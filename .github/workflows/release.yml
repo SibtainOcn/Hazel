@@ -25,7 +25,7 @@ permissions:
   contents: write
 
 env:
-  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true
+  GRADLE_OPTS: -Dorg.gradle.parallel=true -Dorg.gradle.caching=true
 
 jobs:
   # A release is the one build nobody can take back, so the tests run before anything is
