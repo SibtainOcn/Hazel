@@ -119,10 +119,10 @@ For most devices, it is recommended to install the **arm64-v8a** version of the 
 
 Hazel will always be free and open source for everyone. If you like it, consider supporting the project via [GitHub Sponsors](https://github.com/sponsors/SibtainOcn) or [Buy Me a Coffee](https://www.buymeacoffee.com/sibtainocean)!
 
-### 🔑 Connect with third-party apps
+### 🔗  Connect with third-party apps
 The app's package name is `com.hazel.android`.
 
-### 🔍 Verify application signature
+### ✅ Verify application signature
 Hazel release builds are reproducible. Official releases are signed with the developer certificate below. If the signature on your APK is different, a third party has modified the application. Always verify you are using the app with the original signature:
 
 ```text
