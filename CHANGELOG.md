@@ -22,6 +22,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bitrate is its own setting for audio conversions, in the single and batch sheets, and the batch sheet's bottom buttons are drawn on a surface.
 - The format list has a filter sheet (All, Suggested, Smallest per resolution, Generic, and the sort order), an update button that reads the formats again, and a choice of reader (NewPipe or yt-dlp) for links both can read.
 - Loading skeletons rest at low opacity with a soft band sweeping across them, the same in both themes, and show only while a read is actually running.
+- A new Queue tab holds everything downloading, waiting or failed, with pause, resume, cancel and retry per item and for all; a red dot on the tab shows while anything is in hand. The home screen no longer carries these controls, and a running card opens the queue.
+- The Downloads tab lists finished files only, with a layout toggle, sort order and direction, Audio and Video filters, a deleted/not deleted filter, and removing all, deleted or duplicate entries.
+- The bottom bar is a compact row of icons.
+- Sharing a link opens its sheet at once while the link is read in the background; a download chosen before the read finishes starts as soon as it does. The separate Hazel Instant share target and its settings are removed.
+- Reading a new link replaces the previous results, and the loading skeleton fills the screen from the top.
+- The batch sheet offers an instant quality ladder for audio (best, ~192 to ~64 kbps, worst) and more video heights (down to 144p, and worst), without reading every link first.
+- List cards shrink slightly while a list scrolls. Chips and small buttons are drawn as flat surfaces.
+- A read failure offers adding cookies, and the share sheet's failure dialog copies its log.
+
+### Fixed (continued)
+- Two downloads could start at once when a link was shared while a saved queue was resuming, failing with "Process ID already exists".
+- Reading a new link during a download no longer changes that download's title, file name or history record.
+- An engine too old for the options the app passes is replaced with the bundled copy instead of failing every read.
 
 ## [1.0.10] - 2026-09-27
 ### Changed

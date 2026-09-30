@@ -513,7 +513,8 @@ def main():
     view_model_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "download" / "DownloadViewModel.kt").read_text(encoding="utf-8")
     check_true("DownloadViewModel imports SearchHistoryRepository", "import com.hazel.android.data.SearchHistoryRepository" in view_model_kt)
     check_true("DownloadViewModel fetchAll records searches into SearchHistoryRepository", "SearchHistoryRepository.record(app, it)" in view_model_kt)
-    check_true("DownloadViewModel startDirect records into SearchHistoryRepository", "SearchHistoryRepository.record(app, link)" in view_model_kt)
+    overlay_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "share" / "ShareOverlayActivity.kt").read_text(encoding="utf-8")
+    check_true("Shared links are recorded into SearchHistoryRepository", "SearchHistoryRepository.record(app, url)" in overlay_kt)
     check_true("DownloadViewModel checks incognito before recording search history", "SettingsRepository.getIncognito(app).first()" in view_model_kt)
     check_true("DownloadViewModel fetchAll normalizes URL prefix", "raw.startsWith(\"www.\"" in view_model_kt)
 

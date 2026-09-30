@@ -311,7 +311,8 @@ def test_source_code_structure():
     check_true("DownloadViewModel.kt exists", vm_file.is_file())
     vm_text = vm_file.read_text(encoding="utf-8")
     check_true("DownloadViewModel resolveFormats respects source setting and cookies", "reader == ListingSource.NEWPIPE && !access.hasCookies" in vm_text)
-    check_true("DownloadViewModel readOne respects listingSource and cookies", "listingSource == ListingSource.NEWPIPE && !access.hasCookies" in vm_text)
+    resolver_text = (REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/LinkResolver.kt").read_text(encoding="utf-8")
+    check_true("LinkResolver respects listingSource and cookies", "source == ListingSource.NEWPIPE && !access.hasCookies" in resolver_text)
 
     search_provider_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/MediaSearchProvider.kt"
     check_true("MediaSearchProvider.kt exists", search_provider_file.is_file())
