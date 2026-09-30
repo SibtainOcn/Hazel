@@ -1653,7 +1653,7 @@ class DownloadViewModel : ViewModel() {
         // reachable, under the identity they were collected with. The read that filled the
         // sheet used the same ones, so the format ids it showed are the ids this asks for.
         applySiteAccess(access, url)
-        applyAdvanced(url)
+        applyAdvanced(url, signedIn = access.cookieFile != null)
 
         // Whether the two streams have to be muxed back together after the download. The
         // container option decides the result when one was chosen, otherwise mp4 is used

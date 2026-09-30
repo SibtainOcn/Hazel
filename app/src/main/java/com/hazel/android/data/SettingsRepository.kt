@@ -173,6 +173,7 @@ object SettingsRepository {
     private val ADV_PLAYER_CLIENTS = stringPreferencesKey("adv_player_clients")
     private val ADV_PO_TOKENS = stringPreferencesKey("adv_po_tokens")
     private val ADV_VISITOR_DATA = stringPreferencesKey("adv_visitor_data")
+    private val ADV_AUTO_PO_TOKENS = booleanPreferencesKey("adv_auto_po_tokens")
     private val ADV_METADATA_LANGUAGE = booleanPreferencesKey("adv_metadata_app_language")
     private val ADV_YOUTUBE_ARGS = stringPreferencesKey("adv_youtube_extra_args")
     private val ADV_DOWNLOAD_ARGS = stringPreferencesKey("adv_download_extra_args")
@@ -187,6 +188,7 @@ object SettingsRepository {
                 playerClients = prefs[ADV_PLAYER_CLIENTS].orEmpty().split(',').map { it.trim() }.filter { it.isNotBlank() },
                 poTokens = prefs[ADV_PO_TOKENS].orEmpty(),
                 visitorData = prefs[ADV_VISITOR_DATA].orEmpty(),
+                autoPoTokens = prefs[ADV_AUTO_PO_TOKENS] ?: false,
                 metadataInAppLanguage = prefs[ADV_METADATA_LANGUAGE] ?: false,
                 youtubeExtraArgs = prefs[ADV_YOUTUBE_ARGS].orEmpty(),
                 downloadExtraArgs = prefs[ADV_DOWNLOAD_ARGS].orEmpty(),
@@ -203,6 +205,7 @@ object SettingsRepository {
             prefs[ADV_PLAYER_CLIENTS] = settings.playerClients.joinToString(",")
             prefs[ADV_PO_TOKENS] = settings.poTokens
             prefs[ADV_VISITOR_DATA] = settings.visitorData
+            prefs[ADV_AUTO_PO_TOKENS] = settings.autoPoTokens
             prefs[ADV_METADATA_LANGUAGE] = settings.metadataInAppLanguage
             prefs[ADV_YOUTUBE_ARGS] = settings.youtubeExtraArgs
             prefs[ADV_DOWNLOAD_ARGS] = settings.downloadExtraArgs

@@ -625,4 +625,11 @@
     <string name="advanced_impersonate_checking">正在询问引擎可以模拟哪些浏览器</string>
     <string name="advanced_impersonate_none">此设备上的引擎无法模拟浏览器，请求将按原样发送。</string>
     <string name="advanced_impersonate_check_failed">暂时无法询问引擎，请稍后再试。</string>
+    <string name="advanced_auto_po_tokens">在此设备上生成 PO 令牌</string>
+    <string name="advanced_auto_po_tokens_summary">未粘贴令牌时，为每个读取或下载的视频在隐藏浏览器中运行 YouTube 自己的校验。实验性功能。</string>
+    <string name="advanced_po_token_test">测试令牌生成</string>
+    <string name="advanced_po_token_testing">正在生成令牌…</string>
+    <string name="advanced_po_token_test_hint">点按立即生成令牌，看看是否可用</string>
+    <string name="advanced_po_token_test_ok">可用，用时 %1$s 秒</string>
+    <string name="advanced_po_token_test_failed">未成功：%1$s</string>
 </resources>

@@ -625,4 +625,11 @@
     <string name="advanced_impersonate_checking">エンジンに模倣できるブラウザを確認しています</string>
     <string name="advanced_impersonate_none">この端末のエンジンはブラウザを模倣できないため、リクエストはそのまま送信されます。</string>
     <string name="advanced_impersonate_check_failed">今はエンジンに確認できませんでした。少し後でもう一度お試しください。</string>
+    <string name="advanced_auto_po_tokens">この端末でPOトークンを作成</string>
+    <string name="advanced_auto_po_tokens_summary">トークンが貼り付けられていないとき、読み込み・ダウンロードする動画ごとにYouTube自身のチェックを非表示のブラウザで実行します。試験的。</string>
+    <string name="advanced_po_token_test">トークン作成をテスト</string>
+    <string name="advanced_po_token_testing">トークンを作成中…</string>
+    <string name="advanced_po_token_test_hint">タップして今すぐトークンを作成し、動作するか確認します</string>
+    <string name="advanced_po_token_test_ok">動作しています（%1$s 秒で作成）</string>
+    <string name="advanced_po_token_test_failed">動作しませんでした: %1$s</string>
 </resources>

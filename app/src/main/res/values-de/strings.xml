@@ -632,4 +632,11 @@
     <string name="advanced_impersonate_checking">Die Engine wird gefragt, welche Browser sie nachahmen kann</string>
     <string name="advanced_impersonate_none">Die Engine auf diesem Gerät kann keinen Browser nachahmen, Anfragen werden unverändert gesendet.</string>
     <string name="advanced_impersonate_check_failed">Die Engine konnte gerade nicht gefragt werden. Versuche es gleich noch einmal.</string>
+    <string name="advanced_auto_po_tokens">PO-Tokens auf dem Gerät erzeugen</string>
+    <string name="advanced_auto_po_tokens_summary">Führt YouTubes eigene Prüfung für jedes gelesene oder geladene Video in einem unsichtbaren Browser aus, wenn keine Tokens eingefügt sind. Experimentell.</string>
+    <string name="advanced_po_token_test">Token-Erzeugung testen</string>
+    <string name="advanced_po_token_testing">Token wird erzeugt…</string>
+    <string name="advanced_po_token_test_hint">Tippen, um jetzt ein Token zu erzeugen und zu prüfen, ob es klappt</string>
+    <string name="advanced_po_token_test_ok">Funktioniert, erzeugt in %1$s s</string>
+    <string name="advanced_po_token_test_failed">Hat nicht geklappt: %1$s</string>
 </resources>

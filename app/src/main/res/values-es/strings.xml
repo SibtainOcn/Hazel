@@ -639,4 +639,11 @@
     <string name="advanced_impersonate_checking">Preguntando al motor qué navegadores puede imitar</string>
     <string name="advanced_impersonate_none">El motor de este dispositivo no puede imitar un navegador, así que las solicitudes se envían tal cual.</string>
     <string name="advanced_impersonate_check_failed">No se pudo consultar al motor ahora. Inténtalo de nuevo en un momento.</string>
+    <string name="advanced_auto_po_tokens">Crear tokens PO en este dispositivo</string>
+    <string name="advanced_auto_po_tokens_summary">Ejecuta la comprobación de YouTube en un navegador oculto para cada vídeo leído o descargado, si no hay tokens pegados. Experimental.</string>
+    <string name="advanced_po_token_test">Probar la creación de tokens</string>
+    <string name="advanced_po_token_testing">Creando un token…</string>
+    <string name="advanced_po_token_test_hint">Toca para crear un token ahora y ver si funciona</string>
+    <string name="advanced_po_token_test_ok">Funciona, creado en %1$s s</string>
+    <string name="advanced_po_token_test_failed">No funcionó: %1$s</string>
 </resources>

@@ -682,4 +682,11 @@
     <string name="advanced_impersonate_checking">Asking the engine which browsers it can imitate</string>
     <string name="advanced_impersonate_none">The engine on this device cannot imitate a browser, so requests are sent as they are.</string>
     <string name="advanced_impersonate_check_failed">The engine could not be asked right now. Try again in a moment.</string>
+    <string name="advanced_auto_po_tokens">Make PO tokens on this device</string>
+    <string name="advanced_auto_po_tokens_summary">Runs YouTube\'s own check in a hidden browser for each video read or downloaded, when no tokens are pasted in. Experimental.</string>
+    <string name="advanced_po_token_test">Test token making</string>
+    <string name="advanced_po_token_testing">Making a token…</string>
+    <string name="advanced_po_token_test_hint">Tap to make a token now and see whether it works</string>
+    <string name="advanced_po_token_test_ok">Working, made in %1$s s</string>
+    <string name="advanced_po_token_test_failed">Did not work: %1$s</string>
 </resources>

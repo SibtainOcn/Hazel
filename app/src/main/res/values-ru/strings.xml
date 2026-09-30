@@ -645,4 +645,11 @@
     <string name="advanced_impersonate_checking">Спрашиваем движок, какие браузеры он может имитировать</string>
     <string name="advanced_impersonate_none">Движок на этом устройстве не умеет имитировать браузер, поэтому запросы отправляются как есть.</string>
     <string name="advanced_impersonate_check_failed">Сейчас не удалось спросить движок. Попробуйте чуть позже.</string>
+    <string name="advanced_auto_po_tokens">Создавать PO-токены на устройстве</string>
+    <string name="advanced_auto_po_tokens_summary">Запускает проверку YouTube в скрытом браузере для каждого читаемого или скачиваемого видео, если токены не вставлены. Экспериментально.</string>
+    <string name="advanced_po_token_test">Проверить создание токенов</string>
+    <string name="advanced_po_token_testing">Создаём токен…</string>
+    <string name="advanced_po_token_test_hint">Нажмите, чтобы создать токен сейчас и проверить, работает ли он</string>
+    <string name="advanced_po_token_test_ok">Работает, создан за %1$s с</string>
+    <string name="advanced_po_token_test_failed">Не сработало: %1$s</string>
 </resources>

@@ -639,4 +639,11 @@
     <string name="advanced_impersonate_checking">Demande au moteur quels navigateurs il peut imiter</string>
     <string name="advanced_impersonate_none">Le moteur de cet appareil ne peut imiter aucun navigateur, les requêtes sont donc envoyées telles quelles.</string>
     <string name="advanced_impersonate_check_failed">Le moteur n\'a pas pu être interrogé pour le moment. Réessayez dans un instant.</string>
+    <string name="advanced_auto_po_tokens">Créer les jetons PO sur cet appareil</string>
+    <string name="advanced_auto_po_tokens_summary">Exécute la vérification de YouTube dans un navigateur caché pour chaque vidéo lue ou téléchargée, quand aucun jeton n\'est collé. Expérimental.</string>
+    <string name="advanced_po_token_test">Tester la création de jetons</string>
+    <string name="advanced_po_token_testing">Création d\'un jeton…</string>
+    <string name="advanced_po_token_test_hint">Touchez pour créer un jeton maintenant et voir s\'il fonctionne</string>
+    <string name="advanced_po_token_test_ok">Fonctionne, créé en %1$s s</string>
+    <string name="advanced_po_token_test_failed">N\'a pas fonctionné : %1$s</string>
 </resources>

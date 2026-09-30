@@ -16,6 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hazel.android.download.ImpersonateTargets
+import com.hazel.android.download.PoTokenGenerator
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.PlayCircle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.Locale
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Key
@@ -63,6 +68,8 @@ fun AdvancedScreen(onBack: () -> Unit) {
     }
 
     val notSet = stringResource(R.string.advanced_not_set)
+    var testing by remember { mutableStateOf(false) }
+    var testResult by remember { mutableStateOf<PoTokenGenerator.Status?>(null) }
 
     SettingsScreen(
         title = stringResource(R.string.advanced_title),
@@ -79,6 +86,46 @@ fun AdvancedScreen(onBack: () -> Unit) {
                         value = settings.playerClients.joinToString(", ")
                             .ifBlank { stringResource(R.string.advanced_automatic) },
                         onClick = { dialog = AdvancedDialog.PLAYER_CLIENTS }
+                    )
+                },
+                {
+                    SwitchSettingRow(
+                        icon = Icons.Filled.AutoAwesome,
+                        title = stringResource(R.string.advanced_auto_po_tokens),
+                        summary = stringResource(R.string.advanced_auto_po_tokens_summary),
+                        checked = settings.autoPoTokens,
+                        onCheckedChange = { on -> save { it.copy(autoPoTokens = on) } }
+                    )
+                },
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.PlayCircle,
+                        title = stringResource(R.string.advanced_po_token_test),
+                        value = when {
+                            testing -> stringResource(R.string.advanced_po_token_testing)
+                            testResult == null -> stringResource(R.string.advanced_po_token_test_hint)
+                            testResult!!.ok -> stringResource(R.string.advanced_po_token_test_ok, testResult!!.message)
+                            else -> stringResource(R.string.advanced_po_token_test_failed, testResult!!.message)
+                        },
+                        enabled = !testing,
+                        onClick = {
+                            testing = true
+                            scope.launch {
+                                val started = System.currentTimeMillis()
+                                // A known public video, so the test makes a token of each kind.
+                                val minted = withContext(Dispatchers.IO) {
+                                    PoTokenGenerator.mintBlocking(listOf("jNQXAC9IVRw"))
+                                }
+                                val took = "%.1f".format(Locale.ROOT, (System.currentTimeMillis() - started) / 1000f)
+                                testResult = if (minted != null) {
+                                    PoTokenGenerator.Status(true, took, System.currentTimeMillis())
+                                } else {
+                                    PoTokenGenerator.lastStatus?.takeIf { !it.ok }
+                                        ?: PoTokenGenerator.Status(false, "-", System.currentTimeMillis())
+                                }
+                                testing = false
+                            }
+                        }
                     )
                 },
                 {

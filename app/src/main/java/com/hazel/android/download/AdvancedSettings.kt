@@ -1,5 +1,6 @@
 package com.hazel.android.download
 
+import com.hazel.android.util.UrlExtractor
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import java.util.Locale
 
@@ -19,6 +20,11 @@ data class AdvancedSettings(
     val poTokens: String = "",
     /** The visitor data the PO tokens were made for. */
     val visitorData: String = "",
+    /**
+     * Make PO tokens on the device for every YouTube video read or downloaded, when none
+     * were pasted in. See [PoTokenGenerator].
+     */
+    val autoPoTokens: Boolean = false,
     /** YouTube's titles and descriptions in the app's language, where YouTube has it. */
     val metadataInAppLanguage: Boolean = false,
     /** More YouTube extractor arguments, `key=value;key=value`, for anything not above. */
@@ -49,19 +55,51 @@ data class AdvancedSettings(
      * The `--extractor-args` value for YouTube, or null when nothing is set. Built as one
      * value because yt-dlp keeps only the last `youtube:` it is given.
      */
-    fun youtubeExtractorArgs(appLanguage: String = Locale.getDefault().toLanguageTag()): String? {
+    fun youtubeExtractorArgs(
+        appLanguage: String = Locale.getDefault().toLanguageTag(),
+        generated: PoTokenGenerator.Minted? = null,
+        signedIn: Boolean = false
+    ): String? {
+        val pasted = validPoTokens()
+        // Tokens made here are used only when none were pasted in, and mweb is added to
+        // yt-dlp's own clients for them: its streams are the ones they unlock, while the
+        // web client is served in a form yt-dlp cannot download (2026).
+        val made = generated?.takeIf { pasted.isEmpty() }
+        val madeTokens = made?.let(::generatedTokens).orEmpty()
         val parts = buildList {
             val clients = playerClients.filter { it in PLAYER_CLIENTS || it == "default" }
-            if (clients.isNotEmpty()) add("player_client=${clients.joinToString(",")}")
-            val tokens = validPoTokens()
+            when {
+                clients.isNotEmpty() -> add("player_client=${clients.joinToString(",")}")
+                madeTokens.isNotEmpty() -> add("player_client=default,mweb")
+            }
+            val tokens = pasted.ifEmpty { madeTokens }
             if (tokens.isNotEmpty()) add("po_token=${tokens.joinToString(",")}")
-            visitorData.trim().takeIf { it.isNotEmpty() && ';' !in it }?.let { add("visitor_data=$it") }
+            val visitor = visitorData.trim().takeIf { it.isNotEmpty() && ';' !in it }
+            when {
+                visitor != null -> add("visitor_data=$visitor")
+                // yt-dlp wants the visitor the tokens were made with when signed out, read
+                // from nowhere else; signed in, the account stands in for it.
+                made != null && madeTokens.isNotEmpty() && !signedIn -> {
+                    add("visitor_data=${made.visitorData}")
+                    if (!youtubeExtraArgs.contains("player_skip")) add("player_skip=webpage,configs")
+                }
+            }
             if (metadataInAppLanguage) youtubeLanguage(appLanguage)?.let { add("lang=$it") }
             youtubeExtraArgs.split(';').map { it.trim() }
                 .filter { '=' in it && !it.startsWith("=") }
                 .forEach { add(it) }
         }
         return parts.takeIf { it.isNotEmpty() }?.joinToString(";", prefix = "youtube:")
+    }
+
+    /**
+     * The made tokens as yt-dlp takes them. YouTube binds the streaming token to the video
+     * for most sessions now, and the player token always is, so the video's token serves
+     * both, for each web client that uses them.
+     */
+    private fun generatedTokens(made: PoTokenGenerator.Minted): List<String> {
+        val token = made.videoTokens.values.firstOrNull() ?: return emptyList()
+        return WEB_TOKEN_CLIENTS.flatMap { client -> listOf("$client.gvs+$token", "$client.player+$token") }
     }
 
     /**
@@ -85,6 +123,9 @@ data class AdvancedSettings(
             "web", "web_safari", "web_embedded", "web_music", "web_creator", "mweb",
             "android", "android_vr", "ios", "visionos", "tv", "tv_downgraded", "tv_simply"
         )
+
+        /** The clients whose tokens come from the web challenge the device can run. */
+        private val WEB_TOKEN_CLIENTS = listOf("mweb", "web", "web_safari", "web_music")
 
         /** `CLIENT.CONTEXT+TOKEN`, the context being gvs, player or subs. */
         private val PO_TOKEN_FORMAT = Regex("""^[a-z_]+\.(gvs|player|subs)\+[A-Za-z0-9_\-=%]+$""")
@@ -190,14 +231,24 @@ data class AdvancedSettings(
  * Applies the advanced settings to a request. Called beside [applySiteAccess] on every read
  * and every download, so the two always ask the site the same way.
  */
-fun YoutubeDLRequest.applyAdvanced(url: String, settings: AdvancedSettings = AdvancedSettingsStore.current) {
+fun YoutubeDLRequest.applyAdvanced(
+    url: String,
+    signedIn: Boolean = false,
+    settings: AdvancedSettings = AdvancedSettingsStore.current
+) {
     if (settings.noCheckCertificates) addOption("--no-check-certificates")
     if (settings.sleepRequestsSeconds > 0) {
         addOption("--sleep-requests", settings.sleepRequestsSeconds.toString())
     }
     settings.impersonateTarget()?.let { addOption("--impersonate", it) }
     if (isYouTube(url) || url.contains("music.youtube.com")) {
-        settings.youtubeExtractorArgs()?.let { addOption("--extractor-args", it) }
+        // Made only for a single video: a playlist's listing needs no token, and each of its
+        // videos gets its own when it is read.
+        val generated = if (settings.autoPoTokens && settings.validPoTokens().isEmpty()) {
+            UrlExtractor.extractYouTubeId(url)?.let { PoTokenGenerator.mintBlocking(listOf(it)) }
+        } else null
+        settings.youtubeExtractorArgs(generated = generated, signedIn = signedIn)
+            ?.let { addOption("--extractor-args", it) }
     }
 }
 

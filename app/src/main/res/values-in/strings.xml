@@ -625,4 +625,11 @@
     <string name="advanced_impersonate_checking">Menanyakan browser mana yang bisa ditiru mesin</string>
     <string name="advanced_impersonate_none">Mesin di perangkat ini tidak bisa meniru browser, jadi permintaan dikirim apa adanya.</string>
     <string name="advanced_impersonate_check_failed">Mesin tidak bisa ditanya sekarang. Coba lagi sebentar lagi.</string>
+    <string name="advanced_auto_po_tokens">Buat token PO di perangkat ini</string>
+    <string name="advanced_auto_po_tokens_summary">Menjalankan pemeriksaan YouTube di browser tersembunyi untuk setiap video yang dibaca atau diunduh, jika tidak ada token yang ditempel. Eksperimental.</string>
+    <string name="advanced_po_token_test">Uji pembuatan token</string>
+    <string name="advanced_po_token_testing">Membuat token…</string>
+    <string name="advanced_po_token_test_hint">Ketuk untuk membuat token sekarang dan melihat apakah berhasil</string>
+    <string name="advanced_po_token_test_ok">Berhasil, dibuat dalam %1$s dtk</string>
+    <string name="advanced_po_token_test_failed">Tidak berhasil: %1$s</string>
 </resources>
