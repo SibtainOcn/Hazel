@@ -22,6 +22,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -72,6 +73,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
@@ -87,6 +89,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -351,10 +354,10 @@ fun HistoryScreen() {
             }
         } else {
             val listState = rememberLazyListState()
-            val shrink = rememberScrollShrink(listState)
+            val shrink = rememberScrollShrink()
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().nestedScroll(shrink),
                 contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(if (listLayout) 10.dp else 12.dp)
             ) {
@@ -666,9 +669,12 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, actions: EntryAct
                 EntryMenu(menuOpen, present, actions) { menuOpen = false }
             }
 
+            // One row across the bottom, the date taking what the tags leave, so a long
+            // date on a narrow screen is cut short instead of drawn over the tags.
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
+                    .fillMaxWidth()
                     .padding(10.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -682,16 +688,18 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, actions: EntryAct
                 formatDuration(entry.durationSeconds).takeIf { it.isNotBlank() }?.let { CardTag(it) }
                 if (entry.sizeBytes > 0) CardTag(formatFileSize(entry.sizeBytes))
                 if (!present) DeletedTag()
+                Text(
+                    formatDateTime(entry.completedAt),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 2.dp)
+                )
             }
-
-            Text(
-                formatDateTime(entry.completedAt),
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.85f),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(12.dp)
-            )
         }
     }
 }
@@ -736,9 +744,12 @@ private fun HistoryRow(entry: HistoryEntry, present: Boolean, actions: EntryActi
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Row(
+                // The tags wrap rather than share one line: a long author in a Row took the
+                // whole width and squeezed the date to a single character per line, which
+                // stretched the row to many times its height.
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     val chipColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                     val chipText = MaterialTheme.colorScheme.primary
@@ -746,10 +757,7 @@ private fun HistoryRow(entry: HistoryEntry, present: Boolean, actions: EntryActi
                         CardTag(entry.author, background = chipColor, foreground = chipText)
                     }
                     CardTag(formatDateTime(entry.completedAt), background = chipColor, foreground = chipText)
-                }
-                if (!present) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    DeletedTag()
+                    if (!present) DeletedTag()
                 }
             }
             Spacer(modifier = Modifier.width(8.dp))
