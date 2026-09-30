@@ -232,6 +232,7 @@ object DownloadQueueRepository {
     private fun encodeOptions(options: DownloadOptions) = JSONObject().apply {
         put("videoContainer", options.videoContainer)
         put("audioContainer", options.audioContainer)
+        put("audioQuality", options.audioQuality)
         put("embedThumbnail", options.embedThumbnail)
         put("filenameTemplate", options.filenameTemplate)
         put("sponsorBlock", JSONArray(options.sponsorBlockFilters.toList()))
@@ -249,6 +250,7 @@ object DownloadQueueRepository {
         return DownloadOptions(
             videoContainer = json.optString("videoContainer"),
             audioContainer = json.optString("audioContainer"),
+            audioQuality = json.optString("audioQuality"),
             embedThumbnail = json.optBoolean("embedThumbnail"),
             filenameTemplate = json.optString("filenameTemplate")
                 .ifBlank { DownloadOptions.DEFAULT_FILENAME_TEMPLATE },

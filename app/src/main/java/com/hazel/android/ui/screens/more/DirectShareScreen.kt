@@ -55,6 +55,7 @@ import com.hazel.android.R
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.AUDIO_CONTAINERS
+import com.hazel.android.download.AUDIO_QUALITY_STEPS
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.VIDEO_CONTAINERS
 import com.hazel.android.download.languageLabel
@@ -171,6 +172,32 @@ fun DirectShareScreen(onBack: () -> Unit, onOpenCookies: () -> Unit = {}) {
                         selected = maxHeight == height,
                         onSelect = {
                             scope.launch { SettingsRepository.setQuickMaxHeight(context, height) }
+                        }
+                    )
+                }
+            }
+        } else {
+            Spacer(modifier = Modifier.height(24.dp))
+
+            SectionTitle(
+                title = stringResource(R.string.properties_bitrate),
+                description = stringResource(R.string.batch_audio_quality_subtitle)
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                AUDIO_QUALITY_STEPS.forEach { (quality, labelRes) ->
+                    ChoiceRow(
+                        label = stringResource(labelRes),
+                        description = null,
+                        selected = options.audioQuality == quality,
+                        onSelect = {
+                            update(options.copy(audioQuality = quality))
                         }
                     )
                 }

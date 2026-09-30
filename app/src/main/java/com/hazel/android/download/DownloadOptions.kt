@@ -13,6 +13,8 @@ data class DownloadOptions(
     /** Output container. Blank means "Default": whatever the source already provides. */
     val videoContainer: String = "",
     val audioContainer: String = "",
+    /** Bitrate of an audio conversion, such as "192k". Blank leaves it to the encoder. */
+    val audioQuality: String = "",
 
     val embedThumbnail: Boolean = false,
     val filenameTemplate: String = DEFAULT_FILENAME_TEMPLATE,
@@ -80,6 +82,20 @@ val VIDEO_CONTAINERS = listOf("Default", "mp4", "webm", "mkv", "mov", "avi", "fl
 /** Containers offered for an audio download. */
 val AUDIO_CONTAINERS =
     listOf("Default", "mp3", "m4a", "aac", "alac", "flac", "opus", "wav", "vorbis")
+
+/**
+ * Bitrates offered for yt-dlp's `--audio-quality`, which sets the bitrate of a conversion.
+ * Blank leaves it to the encoder. A download kept in the format it arrived in is not
+ * re-encoded, so the setting only matters alongside a different output format.
+ */
+val AUDIO_QUALITY_STEPS: List<Pair<String, Int>> = listOf(
+    "" to R.string.audio_quality_best,
+    "320k" to R.string.audio_quality_320kbps,
+    "256k" to R.string.audio_quality_256kbps,
+    "192k" to R.string.audio_quality_192kbps,
+    "128k" to R.string.audio_quality_128kbps,
+    "64k" to R.string.audio_quality_64kbps
+)
 
 /**
  * How hard yt-dlp tries when reading a link.

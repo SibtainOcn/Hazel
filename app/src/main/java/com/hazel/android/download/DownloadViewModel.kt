@@ -34,6 +34,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import com.hazel.android.util.LinkKey
+import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.flow.update
 import java.io.File
 
 /** Where one link has got to while a batch is running. */
@@ -186,6 +190,9 @@ class DownloadViewModel : ViewModel() {
 
     /** Entries whose formats are being read, so opening a sheet twice reads once. */
     private val formatsInFlight = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+
+    /** Caps how many links have their formats read at the same time. */
+    private val formatReads = Semaphore(FORMAT_READS_AT_ONCE)
 
     private var downloadContext: Context? = null
     private var downloadIsVideo: Boolean = true
@@ -726,46 +733,69 @@ class DownloadViewModel : ViewModel() {
     /**
      * Reads one entry's formats, for a card that came from a listing.
      *
-     * Called when the sheet opens on such a card. A card that already has formats, or one
-     * whose formats are still being read, is left alone.
+     * Called when the sheet opens on such a card, and for every link of a set when its
+     * audio formats are asked for. A card that already has formats, or one whose formats
+     * are still being read, is left alone.
+     *
+     * Reads beyond [FORMAT_READS_AT_ONCE] wait their turn: each is a Python process of its
+     * own, and a playlist of eighty started at once would starve the device rather than
+     * finish any sooner.
      */
     fun resolveFormats(info: MediaInfo) {
-        if (info.hasResolvedFormats || info.url in formatsInFlight) return
+        if (info.hasResolvedFormats || !formatsInFlight.add(info.url)) return
 
-        formatsInFlight += info.url
         viewModelScope.launch(Dispatchers.IO) {
-            val app = HazelApp.instance
-            val source = SettingsRepository.getListingSource(app).first()
-            val access = CookieRepository.accessFor(app, info.url)
-            val resolved = runCatching {
-                InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
-                    ?: (if (source == ListingSource.NEWPIPE && !access.hasCookies && NewPipeLister.handlesStream(info.url)) {
-                        NewPipeLister.single(info.url)?.takeIf { it.hasResolvedFormats }
-                    } else null)
-                    ?: probeWithRetry(
-                        info.url,
-                        access,
-                        SettingsRepository.getFetchMode(app).first(),
-                        SettingsRepository.getForceIpv4(app).first(),
-                        "${MediaProbe.PROBE_PROCESS_ID}_formats"
-                    )
-            }.getOrNull()
-
-            formatsInFlight -= info.url
+            val resolved = try {
+                formatReads.withPermit { readFormats(info.url) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                null
+            } finally {
+                formatsInFlight -= info.url
+            }
             if (resolved == null) return@launch
 
-            // The listing's title and artwork are kept: they are what the card already
-            // shows, and replacing them mid-read would make the card flicker.
+            // The artwork the full read found is preferred, since a listing often carries
+            // only a small preview; the listing's title is kept, as the card already shows it.
             val merged = resolved.copy(
                 title = info.title.ifBlank { resolved.title },
-                thumbnail = info.thumbnail ?: resolved.thumbnail
+                thumbnail = resolved.thumbnail ?: info.thumbnail
             )
 
-            _state.value = _state.value.copy(
-                results = _state.value.results.map { if (it.url == info.url) merged else it },
-                info = if (_state.value.info?.url == info.url) merged else _state.value.info
-            )
+            // Several reads finish at once when a set is being resolved, so the change is
+            // applied atomically rather than as a read and a separate write that could
+            // drop another link's answer landing in between.
+            _state.update { current ->
+                current.copy(
+                    results = current.results.map { if (it.url == info.url) merged else it },
+                    info = if (current.info?.url == info.url) merged else current.info
+                )
+            }
         }
+    }
+
+    /** One link's formats, from the cache when it holds them. */
+    private suspend fun readFormats(url: String): MediaInfo? {
+        val app = HazelApp.instance
+        val source = SettingsRepository.getListingSource(app).first()
+        val access = CookieRepository.accessFor(app, url)
+
+        InfoCache.metadataFor(url)?.takeIf { it.hasResolvedFormats }?.let { return it }
+
+        if (source == ListingSource.NEWPIPE && !access.hasCookies && NewPipeLister.handlesStream(url)) {
+            NewPipeLister.single(url)?.takeIf { it.hasResolvedFormats }?.let { return it }
+        }
+
+        return probeWithRetry(
+            url,
+            access,
+            SettingsRepository.getFetchMode(app).first(),
+            SettingsRepository.getForceIpv4(app).first(),
+            // Each read has an id of its own: the engine refuses a second process under an
+            // id already running, which failed every read after the first in a set.
+            "${MediaProbe.PROBE_PROCESS_ID}_formats_${LinkKey.digest(url)}"
+        )
     }
 
     /**
@@ -1586,22 +1616,50 @@ class DownloadViewModel : ViewModel() {
             } else if (needsMerge) {
                 addOption("--merge-output-format", "mp4")
             }
-        } else if (container.isNotBlank()) {
-            // Audio containers are produced by extracting and re-encoding, which is the
-            // only way to hand back a format the source did not offer in the first place.
+        } else {
+            // Always extracted, even with no conversion asked for: an audio stream usually
+            // arrives inside a video container (Opus in WebM), and extracting is what hands
+            // it back as the audio file it is (.opus) rather than as that container.
             addOption("-x")
-            addOption("--audio-format", container.lowercase())
+            val targetFormat = container.lowercase()
+            if (targetFormat.isNotBlank() && targetFormat !in setOf("default", "webm")) {
+                addOption("--audio-format", targetFormat)
+            }
+            if (options.audioQuality.isNotBlank()) {
+                addOption("--audio-quality", options.audioQuality)
+            }
         }
 
         // Cover art cannot be written into these containers, so asking for it there makes
         // the whole download fail in post-processing.
-        val artworkContainer = container.lowercase() !in NO_ARTWORK_CONTAINERS
-        if (options.embedThumbnail && artworkContainer) addOption("--embed-thumbnail")
+        val artworkSupported = if (isVideo) {
+            val effectiveContainer = when {
+                container.isNotBlank() -> container.lowercase()
+                needsMerge -> "mp4"
+                else -> format.ext.lowercase()
+            }
+            effectiveContainer !in NO_ARTWORK_CONTAINERS
+        } else {
+            val effectiveContainer = when {
+                container.isNotBlank() && container.lowercase() != "default" -> container.lowercase()
+                else -> format.ext.lowercase()
+            }
+            effectiveContainer != "wav"
+        }
+        if (options.embedThumbnail && artworkSupported) {
+            addOption("--embed-thumbnail")
+            addOption("--convert-thumbnails", "jpg")
+        }
 
         applyChapters(options, isVideo)
         applySponsorBlock(options)
         if (isVideo) applySubtitles(options)
         applyMetadata(title, author)
+        // Music players group cover art by album, and a file with no album tag is filed
+        // under its folder's name. Every song saved to the same folder then shows one
+        // cover. A source's own album is kept, so an album's tracks still group together;
+        // anything else is its own album, named after the track.
+        if (!isVideo) addOption("--parse-metadata", "%(album,title)s:%(meta_album)s")
     }
 
     /**
@@ -1719,7 +1777,7 @@ class DownloadViewModel : ViewModel() {
 
     private fun executeYtDlp(request: YoutubeDLRequest) {
         lastNotifiedAt = 0L
-        YoutubeDL.getInstance().execute(request, processId) { progress, _, line ->
+        YtDlpEngine.execute(request, processId) { progress, _, line ->
             refreshFloorFromDisk()
             val percent = progress.coerceIn(0f, 100f).coerceAtLeast(progressFloor * 100f)
             val status = cleanProgressLine(line) ?: _state.value.status
@@ -1795,6 +1853,7 @@ class DownloadViewModel : ViewModel() {
             false
         }
 
+        val isMusic = !plan.format.hasVideo
         val savedPath: String
         val finalDir: File
 
@@ -1804,13 +1863,14 @@ class DownloadViewModel : ViewModel() {
         } else {
             finalDir = try {
                 com.hazel.android.util.MediaStoreHelper.moveToPublicStorage(
-                    context, downloadDir, StoragePaths.DOWNLOAD_RELATIVE_PATH, isMusic = false
+                    context, downloadDir, StoragePaths.downloadRelativePath(isAudio = isMusic),
+                    isMusic = isMusic
                 ) { savedUri = it }
             } catch (_: Exception) {
                 // MediaStore move failed; the files stay in app storage and remain accessible.
                 downloadDir
             }
-            savedPath = StoragePaths.DOWNLOADS_DISPLAY
+            savedPath = StoragePaths.downloadsDisplay(isAudio = isMusic)
         }
 
         com.hazel.android.util.MediaStoreHelper.scanFiles(context, finalDir)
@@ -1828,7 +1888,7 @@ class DownloadViewModel : ViewModel() {
         DownloadNotificationHelper.showComplete(
             context,
             title = _state.value.info?.title.orEmpty().ifBlank { fileName },
-            isVideo = downloadIsVideo,
+            isVideo = plan.format.hasVideo,
             fileUri = savedUri
         )
 
@@ -2191,6 +2251,9 @@ class DownloadViewModel : ViewModel() {
         )
 
         val URL_PATTERN = Regex("^https?://.+", RegexOption.IGNORE_CASE)
+
+        /** Format reads allowed to run together; see [resolveFormats]. */
+        private const val FORMAT_READS_AT_ONCE = 3
 
         /** Containers with no tag atom that can hold cover art. */
         val NO_ARTWORK_CONTAINERS = setOf("webm", "avi", "flv")

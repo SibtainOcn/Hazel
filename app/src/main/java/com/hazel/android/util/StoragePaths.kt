@@ -59,18 +59,31 @@ object StoragePaths {
             "Hazel"
         )
 
-
-
     // ── Display paths (shown in UI) ──
 
     const val DOWNLOADS_DISPLAY = "Download/Hazel"
+    const val DOWNLOADS_VIDEO_DISPLAY = "Download/Hazel/Video"
+    const val DOWNLOADS_AUDIO_DISPLAY = "Download/Hazel/Audio"
     const val CONVERTED_DISPLAY = "Music/Hazel"
-
 
     // ── MediaStore relative paths (used for ContentValues) ──
 
     /** Relative path for MediaStore.Downloads: "Download/Hazel" */
     const val DOWNLOAD_RELATIVE_PATH = "Download/Hazel"
+    const val DOWNLOAD_VIDEO_RELATIVE_PATH = "Download/Hazel/Video"
+    const val DOWNLOAD_AUDIO_RELATIVE_PATH = "Download/Hazel/Audio"
+
+    /**
+     * Where a download lands when the user has not picked a folder: audio and video are kept
+     * apart under the app's download folder, so a music library and a video library can each
+     * be pointed at their own.
+     */
+    fun downloadRelativePath(isAudio: Boolean): String =
+        if (isAudio) DOWNLOAD_AUDIO_RELATIVE_PATH else DOWNLOAD_VIDEO_RELATIVE_PATH
+
+    /** [downloadRelativePath] as the UI shows it. */
+    fun downloadsDisplay(isAudio: Boolean): String =
+        if (isAudio) DOWNLOADS_AUDIO_DISPLAY else DOWNLOADS_VIDEO_DISPLAY
 
     /** Relative path for MediaStore.Audio: "Music/Hazel" */
     const val MUSIC_RELATIVE_PATH = "Music/Hazel"

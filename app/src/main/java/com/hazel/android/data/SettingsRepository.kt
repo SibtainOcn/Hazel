@@ -83,6 +83,7 @@ object SettingsRepository {
     private class OptionKeys(prefix: String) {
         val videoContainer = stringPreferencesKey("${prefix}video_container")
         val audioContainer = stringPreferencesKey("${prefix}audio_container")
+        val audioQuality = stringPreferencesKey("${prefix}audio_quality")
         val embedThumbnail = booleanPreferencesKey("${prefix}embed_thumbnail")
         val filenameTemplate = stringPreferencesKey("${prefix}filename_template")
         val sponsorBlock = stringSetPreferencesKey("${prefix}sponsorblock_filters")
@@ -102,6 +103,7 @@ object SettingsRepository {
         return DownloadOptions(
             videoContainer = this[keys.videoContainer] ?: defaults.videoContainer,
             audioContainer = this[keys.audioContainer] ?: defaults.audioContainer,
+            audioQuality = this[keys.audioQuality] ?: defaults.audioQuality,
             embedThumbnail = this[keys.embedThumbnail] ?: defaults.embedThumbnail,
             filenameTemplate = this[keys.filenameTemplate] ?: defaults.filenameTemplate,
             sponsorBlockFilters = this[keys.sponsorBlock] ?: defaults.sponsorBlockFilters,
@@ -117,6 +119,7 @@ object SettingsRepository {
     private fun MutablePreferences.writeOptions(keys: OptionKeys, options: DownloadOptions) {
         this[keys.videoContainer] = options.videoContainer
         this[keys.audioContainer] = options.audioContainer
+        this[keys.audioQuality] = options.audioQuality
         this[keys.embedThumbnail] = options.embedThumbnail
         this[keys.filenameTemplate] = options.filenameTemplate
         this[keys.sponsorBlock] = options.sponsorBlockFilters
