@@ -1,21 +1,19 @@
 package com.hazel.android.ui.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,55 +21,68 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.graphicsLayer
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.tan
 
 /**
- * Placeholder skeletons with a single highlight travelling across them.
+ * Placeholder skeletons with one highlight travelling across them.
  *
- * The sweep belongs to the whole skeleton, not to each block: one continuous diagonal band
- * crosses the host container at a 20° tilt, so all cards and elements read as one surface
- * catching the light simultaneously. Empty space between elements remains unaffected
- * via offscreen layer compositing.
+ * The skeleton is drawn as it is, then masked: everything sits at [RESTING_ALPHA], and a
+ * soft band as wide as the skeleton sweeps across it at full strength. Because the band
+ * changes opacity rather than adding light, it shows the same in either theme and on any
+ * colour of block, and the gaps between blocks stay empty since there is nothing there to
+ * reveal. The sweep belongs to the whole skeleton rather than to each block, so a list of
+ * placeholders reads as one surface catching the light instead of rows flickering apart.
+ *
+ * A skeleton is wrapped in [ShimmerHost], and its placeholders use [shimmerBlock].
  */
 private const val SWEEP_DURATION_MS = 1000
 
-/** Width of the moving highlight, as a fraction of the host's width. */
-private const val BAND_WIDTH = 0.50f
-
-/** The processing sweep is narrower than the skeleton one, so it reads as a glint. */
-private const val SHARP_BAND_WIDTH = 0.17f
-
-/** How long the band takes to cross, and how long the whole cycle runs including its rest. */
-private const val SWEEP_TRAVEL_MS = 1000
-private const val SWEEP_CYCLE_MS = 1800
+/** How visible the skeleton is between passes of the band. */
+private const val RESTING_ALPHA = 0.3f
 
 /** Lean of the band, in degrees off vertical. */
 private const val SWEEP_TILT_DEGREES = 20.0
 
-/** Placeholder fill on the media card skeleton, which is dark in either theme. */
-private val MEDIA_CARD_BLOCK = Color(0xFF3A3A44)
+/**
+ * Where the band's edges fall across the host's width: its full-strength core sits at the
+ * centre and it fades out over the quarter on either side.
+ */
+private const val BAND_FADE_START = 0.25f
+private const val BAND_FADE_END = 0.75f
 
 /**
- * Drives a unified diagonal shimmer sweep across all placeholder content inside it.
+ * The fill of a placeholder block. A mid grey rather than a theme colour: at rest it is
+ * faint on dark and light surfaces alike, and at full strength under the band it stands
+ * clear of both.
  */
+private val BLOCK_GREY = Color(0xFFA6A6A6)
+
+/** The processing sweep is narrower than the skeleton one, so it reads as a glint. */
+private const val SHARP_BAND_WIDTH = 0.17f
+
+/** How long the processing glint takes to cross, and its whole cycle including the rest. */
+private const val GLINT_TRAVEL_MS = 1150
+private const val GLINT_CYCLE_MS = 2050
+
+/** Drives one sweep for everything inside it. Place it around a whole skeleton. */
 @Composable
 fun ShimmerHost(
     modifier: Modifier = Modifier,
@@ -90,39 +101,39 @@ fun ShimmerHost(
 
     Box(
         modifier = modifier
+            // The mask needs a layer of its own: it keeps the skeleton's alpha, and only
+            // what this host drew, rather than punching through to whatever is behind it.
             .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
             .drawWithContent {
                 drawContent()
 
-                val cosTheta = 0.9396926f // cos(20°)
-                val sinTheta = 0.34202014f // sin(20°)
+                val radians = Math.toRadians(SWEEP_TILT_DEGREES)
+                val axisX = cos(radians).toFloat()
+                val axisY = sin(radians).toFloat()
 
-                val bandWidth = size.width * BAND_WIDTH
-                val reach = size.width * cosTheta + size.height * sinTheta
-                val travel = reach + bandWidth * 2f
-                val d = -bandWidth + travel * progress
+                // The band starts fully before the left edge and ends fully past the right,
+                // counting the extra ground the tilt adds over the host's height.
+                val span = size.width
+                val travel = span + tan(radians).toFloat() * size.height
+                val offset = -travel + 2f * travel * progress
 
-                val startDist = d - bandWidth / 2f
-                val endDist = d + bandWidth / 2f
+                val start = Offset(offset, 0f)
+                val end = Offset(offset + span * axisX, span * axisY)
 
-                val coreHighlight = Color.White.copy(alpha = 0.40f)
-                val warmShoulder = Color(0xFFE8DDD0).copy(alpha = 0.10f)
-
+                val resting = Color.Black.copy(alpha = RESTING_ALPHA)
                 drawRect(
                     brush = Brush.linearGradient(
                         colorStops = arrayOf(
-                            0f    to Color.Transparent,
-                            0.20f to warmShoulder,
-                            0.40f to coreHighlight.copy(alpha = coreHighlight.alpha * 0.35f),
-                            0.50f to coreHighlight,
-                            0.60f to coreHighlight.copy(alpha = coreHighlight.alpha * 0.35f),
-                            0.80f to warmShoulder,
-                            1f    to Color.Transparent
+                            0f to resting,
+                            BAND_FADE_START to resting,
+                            0.5f to Color.Black,
+                            BAND_FADE_END to resting,
+                            1f to resting
                         ),
-                        start = Offset(startDist * cosTheta, startDist * sinTheta),
-                        end = Offset(endDist * cosTheta, endDist * sinTheta)
+                        start = start,
+                        end = end
                     ),
-                    blendMode = BlendMode.SrcAtop
+                    blendMode = BlendMode.DstIn
                 )
             }
     ) {
@@ -130,25 +141,10 @@ fun ShimmerHost(
     }
 }
 
-/**
- * Paints the receiver as a placeholder block that a [ShimmerHost] sweep passes over.
- *
- * The fill follows the theme, so a skeleton reads as a faint shape on a light sheet as well
- * as on a dark one. [color] overrides it for a skeleton drawn on a fixed dark surface, such
- * as the media card, which stands in for artwork under a dark scrim in either theme.
- */
-fun Modifier.shimmerBlock(
-    shape: Shape = RoundedCornerShape(6.dp),
-    color: Color = Color.Unspecified
-): Modifier = composed {
-    val fill = color.takeOrElse { MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f) }
-    clip(shape).background(fill)
-}
-
-/** Card surface for skeleton cards, following the theme. */
-fun Modifier.shimmerCard(shape: Shape = RoundedCornerShape(20.dp)): Modifier = composed {
-    clip(shape).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-}
+/** Paints the receiver as a placeholder block that a [ShimmerHost] sweep passes over. */
+fun Modifier.shimmerBlock(shape: Shape = RoundedCornerShape(6.dp)): Modifier = this
+    .clip(shape)
+    .background(BLOCK_GREY)
 
 /**
  * A one-shot luminous shine sweep that passes across an element (such as the searchbar)
@@ -165,8 +161,8 @@ fun Modifier.refreshShine(progress: Float, shape: Shape = RoundedCornerShape(26.
         if (progress <= 0f || progress >= 1f) return@drawWithContent
 
         val radians = Math.toRadians(SWEEP_TILT_DEGREES).toFloat()
-        val axisX = kotlin.math.cos(radians)
-        val axisY = kotlin.math.sin(radians)
+        val axisX = cos(radians)
+        val axisY = sin(radians)
 
         val bandWidth = size.width * 0.35f
         val reach = size.width + kotlin.math.abs(axisY) * size.height + bandWidth * 2f
@@ -213,134 +209,64 @@ fun Modifier.refreshShine(progress: Float, shape: Shape = RoundedCornerShape(26.
     }
 
 /**
- * Skeleton placeholder matching [MediaCard]'s 16:9 layout: overlaid title, author,
- * duration badge at bottom-start, and state tag at bottom-end.
+ * Stands in for the media card while a link is being read, in the card's own 16:9 shape:
+ * title and author along the top, duration and state badges along the bottom, so nothing
+ * moves when the real card takes its place.
  */
 @Composable
 fun MediaCardShimmer(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = Color(0xFF1A1A1E)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f)
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Box(
+        Column(
             modifier = Modifier
+                .align(Alignment.TopStart)
                 .fillMaxWidth()
-                .aspectRatio(16f / 9f)
+                .padding(start = 14.dp, top = 14.dp, end = 14.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            0f to Color(0xFF262630),
-                            0.35f to Color(0xFF1E1E26),
-                            0.65f to Color(0xFF1A1A22),
-                            1f to Color(0xFF141418)
-                        )
-                    )
+                    .fillMaxWidth(0.8f)
+                    .height(10.dp)
+                    .shimmerBlock(RoundedCornerShape(5.dp))
             )
+            Spacer(modifier = Modifier.height(8.dp))
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.linearGradient(
-                            0f to Color(0x0AFFFFFF),
-                            0.5f to Color.Transparent,
-                            1f to Color(0x08FFFFFF),
-                            start = Offset.Zero,
-                            end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-                        )
-                    )
+                    .fillMaxWidth(0.55f)
+                    .height(10.dp)
+                    .shimmerBlock(RoundedCornerShape(5.dp))
             )
-
+            Spacer(modifier = Modifier.height(8.dp))
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            0f to Color.Black.copy(alpha = 0.52f),
-                            0.35f to Color.Transparent,
-                            0.70f to Color.Transparent,
-                            1f to Color.Black.copy(alpha = 0.58f)
-                        )
-                    )
+                    .width(50.dp)
+                    .height(10.dp)
+                    .shimmerBlock(RoundedCornerShape(5.dp))
             )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color.Transparent)
-                    .drawBehind {
-                        drawRoundRect(
-                            brush = Brush.linearGradient(
-                                0f to Color(0x18FFFFFF),
-                                0.5f to Color(0x08FFFFFF),
-                                1f to Color(0x14FFFFFF),
-                                start = Offset.Zero,
-                                end = Offset(size.width, size.height)
-                            ),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(20.dp.toPx()),
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx())
-                        )
-                    }
-            )
-
-            Column(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .fillMaxWidth()
-                    .padding(start = 14.dp, top = 12.dp, end = 14.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.75f)
-                        .height(13.dp)
-                        .shimmerBlock(RoundedCornerShape(4.dp), MEDIA_CARD_BLOCK)
-                )
-                Spacer(modifier = Modifier.height(7.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.52f)
-                        .height(13.dp)
-                        .shimmerBlock(RoundedCornerShape(4.dp), MEDIA_CARD_BLOCK)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.38f)
-                        .height(10.dp)
-                        .shimmerBlock(RoundedCornerShape(3.dp), MEDIA_CARD_BLOCK)
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(10.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .width(46.dp)
-                        .height(18.dp)
-                        .shimmerBlock(RoundedCornerShape(4.dp), MEDIA_CARD_BLOCK)
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(10.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .width(56.dp)
-                        .height(18.dp)
-                        .shimmerBlock(RoundedCornerShape(4.dp), MEDIA_CARD_BLOCK)
-                )
-            }
         }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(12.dp)
+                .width(46.dp)
+                .height(18.dp)
+                .shimmerBlock(RoundedCornerShape(5.dp))
+        )
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(12.dp)
+                .width(56.dp)
+                .height(18.dp)
+                .shimmerBlock(RoundedCornerShape(5.dp))
+        )
     }
 }
 
@@ -417,10 +343,10 @@ fun ProcessingShimmer(modifier: Modifier = Modifier) {
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = keyframes {
-                durationMillis = SWEEP_CYCLE_MS
+                durationMillis = GLINT_CYCLE_MS
                 0f at 0 using FastOutSlowInEasing
-                1f at SWEEP_TRAVEL_MS
-                1f at SWEEP_CYCLE_MS
+                1f at GLINT_TRAVEL_MS
+                1f at GLINT_CYCLE_MS
             },
             repeatMode = RepeatMode.Restart
         ),
@@ -435,8 +361,8 @@ fun ProcessingShimmer(modifier: Modifier = Modifier) {
             // progress bar lying on its side; a raked one reads as a reflection, which is
             // the difference between the surface looking busy and looking lit.
             val radians = Math.toRadians(SWEEP_TILT_DEGREES).toFloat()
-            val axisX = kotlin.math.cos(radians)
-            val axisY = kotlin.math.sin(radians)
+            val axisX = cos(radians)
+            val axisY = sin(radians)
 
             // Travel is measured along the tilt, and overshoots at both ends so the band is
             // fully clear of the artwork before the cycle restarts.
