@@ -336,6 +336,34 @@ object SettingsRepository {
         }
     }
 
+    // Audio and video each have their own destination. Unset, a kind takes the single
+    // folder older versions kept for both, so a folder picked before the split stays in use;
+    // set to blank, it is the built-in Download/Hazel/Audio or Download/Hazel/Video.
+    private fun treeUriKey(isVideo: Boolean) =
+        stringPreferencesKey(if (isVideo) "download_tree_uri_video" else "download_tree_uri_audio")
+
+    private fun treeLabelKey(isVideo: Boolean) =
+        stringPreferencesKey(if (isVideo) "download_tree_label_video" else "download_tree_label_audio")
+
+    private fun Preferences.saveDir(isVideo: Boolean): SaveDir {
+        val uri = this[treeUriKey(isVideo)]
+        return if (uri != null) SaveDir(uri, this[treeLabelKey(isVideo)].orEmpty())
+        else SaveDir(this[DOWNLOAD_TREE_URI_KEY].orEmpty(), this[DOWNLOAD_TREE_LABEL_KEY].orEmpty())
+    }
+
+    fun getSaveDirs(context: Context): Flow<SaveDirs> =
+        context.dataStore.data.map { prefs -> SaveDirs(audio = prefs.saveDir(false), video = prefs.saveDir(true)) }
+
+    suspend fun setSaveDir(context: Context, isVideo: Boolean, uri: String, label: String) {
+        context.dataStore.edit { prefs ->
+            prefs[treeUriKey(isVideo)] = uri
+            prefs[treeLabelKey(isVideo)] = label
+        }
+    }
+
+    /** Back to the built-in folder for that kind. */
+    suspend fun resetSaveDir(context: Context, isVideo: Boolean) = setSaveDir(context, isVideo, "", "")
+
     // yt-dlp update channel persistence ("Stable" / "Nightly" / "Master")
     private val YTDLP_CHANNEL_KEY = stringPreferencesKey("ytdlp_channel")
 

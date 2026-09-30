@@ -23,12 +23,15 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.hazel.android.HazelApp
 import com.hazel.android.R
 import com.hazel.android.data.SearchHistoryRepository
+import com.hazel.android.data.SaveDirs
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadViewModelHolder
@@ -132,9 +135,9 @@ class ShareOverlayActivity : ComponentActivity() {
 
             val options by SettingsRepository.getDownloadOptions(this)
                 .collectAsState(initial = DownloadOptions())
-            val treeUri by SettingsRepository.getDownloadTreeUri(this).collectAsState(initial = "")
-            val treeLabel by SettingsRepository.getDownloadTreeLabel(this).collectAsState(initial = "")
-            val saveDirLabel = treeLabel.ifBlank { StoragePaths.DOWNLOADS_DISPLAY }
+            val saveDirs by SettingsRepository.getSaveDirs(this).collectAsState(initial = SaveDirs())
+            // The kind whose folder the picker is choosing, set as it opens.
+            var pickingVideoDir by remember { mutableStateOf(true) }
             val accentName by SettingsRepository.getAccentColor(this).collectAsState(initial = "Cyan")
 
             LaunchedEffect(url) {
@@ -165,15 +168,27 @@ class ShareOverlayActivity : ComponentActivity() {
                             uri,
                             Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                         )
+                        val forVideo = pickingVideoDir
                         scope.launch {
-                            SettingsRepository.setDownloadTree(
-                                this@ShareOverlayActivity, uri.toString(), MediaStoreHelper.describeTree(uri)
+                            SettingsRepository.setSaveDir(
+                                this@ShareOverlayActivity, forVideo, uri.toString(), MediaStoreHelper.describeTree(uri)
                             )
                         }
                     } catch (_: SecurityException) {
                         // The persistable grant was refused; the default folder stays in use.
                     }
                 }
+            }
+
+            val openSaveDir: (Boolean) -> Unit = { isVideo ->
+                MediaOpener.openLocation(this@ShareOverlayActivity, saveDirs.of(isVideo).uri, isVideo)
+            }
+            val pickSaveDir: (Boolean) -> Unit = { isVideo ->
+                pickingVideoDir = isVideo
+                folderPicker.launch(saveDirs.of(isVideo).uri.takeIf { it.isNotBlank() }?.let(Uri::parse))
+            }
+            val resetSaveDir: (Boolean) -> Unit = { isVideo ->
+                scope.launch { SettingsRepository.resetSaveDir(this@ShareOverlayActivity, isVideo) }
             }
 
             // Signing in from the failure dialog reads the link again with the new cookies.
@@ -222,17 +237,16 @@ class ShareOverlayActivity : ComponentActivity() {
                             onOptionsChange = { changed ->
                                 scope.launch { SettingsRepository.setDownloadOptions(this@ShareOverlayActivity, changed) }
                             },
-                            saveDirLabel = saveDirLabel,
-                            isCustomSaveDir = treeUri.isNotBlank(),
-                            onOpenSaveDir = { MediaOpener.openLocation(this@ShareOverlayActivity, treeUri) },
-                            onPickSaveDir = { folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse)) },
-                            onResetSaveDir = { scope.launch { SettingsRepository.clearDownloadTree(this@ShareOverlayActivity) } },
+                            saveDirs = saveDirs,
+                            onOpenSaveDir = openSaveDir,
+                            onPickSaveDir = pickSaveDir,
+                            onResetSaveDir = resetSaveDir,
                             onResolveFormats = downloadViewModel::resolveFormats,
                             readingUrls = formatsReading,
                             onRefreshFormats = downloadViewModel::refreshFormats,
                             onRemove = downloadViewModel::removeResult,
                             onDownload = { plans ->
-                                downloadViewModel.startBatch(applicationContext, plans, options, treeUri)
+                                downloadViewModel.startBatch(applicationContext, plans, options, saveDirs = saveDirs)
                                 announceStarted()
                                 closeOverlay()
                             },
@@ -253,8 +267,7 @@ class ShareOverlayActivity : ComponentActivity() {
                                 onOptionsChange = { changed ->
                                     scope.launch { SettingsRepository.setDownloadOptions(this@ShareOverlayActivity, changed) }
                                 },
-                                saveDirLabel = saveDirLabel,
-                                isCustomSaveDir = treeUri.isNotBlank(),
+                                saveDirs = saveDirs,
                                 // The ladder is a full answer on its own, so no skeleton
                                 // stands under it; the header says the link is being read.
                                 isLoadingFormats = resolved != null && info.url in formatsReading,
@@ -262,9 +275,9 @@ class ShareOverlayActivity : ComponentActivity() {
                                 onRefreshFormats = resolved?.let { item ->
                                     { source -> downloadViewModel.refreshFormats(listOf(item), source) }
                                 },
-                                onOpenSaveDir = { MediaOpener.openLocation(this@ShareOverlayActivity, treeUri) },
-                                onPickSaveDir = { folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse)) },
-                                onResetSaveDir = { scope.launch { SettingsRepository.clearDownloadTree(this@ShareOverlayActivity) } },
+                                onOpenSaveDir = openSaveDir,
+                                onPickSaveDir = pickSaveDir,
+                                onResetSaveDir = resetSaveDir,
                                 onDownload = { format, audioLanguage, title, author ->
                                     if (resolved != null) {
                                         downloadViewModel.startDownload(
@@ -274,8 +287,8 @@ class ShareOverlayActivity : ComponentActivity() {
                                             title = title,
                                             author = author,
                                             audioLanguage = audioLanguage,
-                                            treeUri = treeUri,
-                                            info = resolved
+                                            info = resolved,
+                                            saveDirs = saveDirs
                                         )
                                     } else {
                                         // Not read yet: the choice waits for the read and
@@ -288,7 +301,7 @@ class ShareOverlayActivity : ComponentActivity() {
                                             title = title,
                                             author = author,
                                             audioLanguage = audioLanguage,
-                                            treeUri = treeUri
+                                            treeUri = saveDirs.of(format.hasVideo).uri
                                         )
                                     }
                                     announceStarted()

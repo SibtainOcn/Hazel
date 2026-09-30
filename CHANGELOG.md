@@ -29,8 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reading a new link replaces the previous results, and the loading skeleton fills the screen from the top.
 - The batch sheet offers an instant quality ladder for audio (best, ~192 to ~64 kbps, worst) and more video heights (down to 144p, and worst), without reading every link first.
 - Media cards shrink slightly while their list scrolls (not the format list), in step with how fast it moves: a slow drag barely touches them, a flick pulls them in, and they spring back as soon as the list slows or stops. Chips and small buttons are drawn as flat surfaces.
-- The Thumbnail option opens a dialog with Cover art (on by default) and Crop to square (off by default), in the single and batch sheets. A live harness (`tools/test_thumbnail_embed_live.py`) checks both against real links for every audio format and video container the sheet offers.
+- The Thumbnail option opens a dialog with Cover art (on by default) and Crop to square (off by default), in the single and batch sheets. A live harness (`tools/live/test_thumbnail_embed_live.py`) checks both against real links for every audio format and video container the sheet offers.
 - The share sheet shows a shimmering "Fetching…" heading while a link is read, in place of blank placeholder bars.
+- Audio and video each have their own save folder, shown and changed in More › Downloads and in the download sheet, kept until changed or reset. A folder chosen in an earlier version stays in use for both.
 - The download sheet's Audio and Video tabs sit at the start of the sheet, with a short bar under the chosen one.
 - A read failure offers adding cookies, and the share sheet's failure dialog copies its log.
 
@@ -38,6 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Two downloads could start at once when a link was shared while a saved queue was resuming, failing with "Process ID already exists".
 - Reading a new link during a download no longer changes that download's title, file name or history record.
 - An engine too old for the options the app passes is replaced with the bundled copy instead of failing every read.
+- Starting a download while another was paused silently resumed the paused one and dropped it from the list; a paused download now stays paused until resumed, and Resume works while something else downloads.
+- Every download shared one temporary folder: cancelling or failing one deleted a paused download's progress, and a finished download could publish another's half-made file into Downloads. Each download now works in a folder of its own, and a cancelled download is discarded instead of published.
+- Clear queue removed paused downloads and the running download's record along with the waiting links; it now clears only the waiting links.
+- Resume from the notification after the app was closed did nothing (and on Android 12+ could not open the app); it now resumes in the background. Cancel from it now really drops the paused download.
+- Cookie files exported from a browser lost their HttpOnly (sign-in) cookies, and sites under two-part domains such as .co.uk or .co.in shared one another's cookies.
+- A cover that could not be embedded in the file's container failed the whole download (archive.org, single-file FLV, AVI, TS and similar); such files are now remuxed to MKV, and WAV, AIFF and WMA sources extracted to FLAC or M4A.
+- Links whose source reports no length (Instagram reels, some DASH streams) showed no duration; the length is now added up from the stream's segments or read from the media file itself, and a length from a playlist listing is no longer lost when the full read has none.
+- A downloaded Hazel update APK stayed in the cache when the app was next opened offline.
 - A playlist or several links opening on the last card instead of the first: the list kept the scroll position of the previous results.
 - Cropping a cover to a square failed the whole download, and a cover that was already a JPEG was never cropped.
 - The Downloads tab's row layout stretching each row to many times its height when a long author left no room for the date; the tags now wrap to a second line and are cut short with an ellipsis rather than wrapped letter by letter. The card layout's date no longer overlaps its tags on narrow screens.

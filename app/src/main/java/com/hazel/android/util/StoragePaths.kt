@@ -52,6 +52,10 @@ object StoragePaths {
             "Hazel"
         )
 
+    /** Where one kind lands by default: Download/Hazel/Audio or Download/Hazel/Video. */
+    fun finalDownloads(isAudio: Boolean): File =
+        File(finalDownloads, if (isAudio) "Audio" else "Video")
+
     /** Final converter dir: /storage/emulated/0/Music/Hazel/ */
     val finalConverted: File
         get() = File(

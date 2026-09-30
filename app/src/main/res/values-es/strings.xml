@@ -536,7 +536,6 @@
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Atrás</string>
-    <string name="storage_locations_downloads">Descargas</string>
     <string name="storage_locations_title">Descargas</string>
     <string name="storage_locations_subtitle">Dónde se guardan las descargas, y los límites con los que funcionan</string>
     <string name="storage_locations_limits">Límites</string>

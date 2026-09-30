@@ -399,5 +399,54 @@ class MediaProbeParseTest {
         assertNotNull(fallback)
         assertEquals(1080, fallback.height)
     }
+
+    // Shaped on an Instagram reel read in September 2026: no duration anywhere, DASH streams
+    // with no segment list, and progressive files whose codecs are not reported at all.
+    private val reelWithoutDuration = """
+        {
+          "id": "Dd4-yVGTSUg",
+          "duration": null,
+          "formats": [
+            {"format_id": "dash-1a", "protocol": "https", "url": "https://cdn/a.mp4",
+             "vcodec": "none", "acodec": "mp4a.40.5"},
+            {"format_id": "1", "protocol": "https", "url": "https://cdn/1.mp4",
+             "vcodec": null, "acodec": null,
+             "http_headers": {"User-Agent": "UA", "Referer": "https://www.instagram.com/"}},
+            {"format_id": "dash-1v", "protocol": "https", "url": "https://cdn/v.mp4",
+             "vcodec": "vp09.00.31.08", "acodec": "none"}
+          ]
+        }
+    """.trimIndent()
+
+    @Test
+    fun `a stream with no reported length has none to add up`() {
+        assertEquals(0, MediaProbe.segmentedDuration(JSONObject(reelWithoutDuration)))
+        assertEquals(0, parse(reelWithoutDuration).durationSeconds)
+    }
+
+    @Test
+    fun `a segmented stream carries its length in its segments`() {
+        val json = """
+            {"formats": [
+              {"format_id": "v", "fragments": [{"url": "i"}, {"duration": 4.0}, {"duration": 4.0}, {"duration": 2.5}]},
+              {"format_id": "a", "fragments": [{"duration": 10.4}]}
+            ]}
+        """.trimIndent()
+        assertEquals(10, MediaProbe.segmentedDuration(JSONObject(json)))
+        assertEquals(10, parse(json).durationSeconds)
+    }
+
+    @Test
+    fun `the file asked for its length is the progressive one, with its headers`() {
+        val (address, headers) = assertNotNull(MediaProbe.directMediaUrl(JSONObject(reelWithoutDuration)))
+        assertEquals("https://cdn/1.mp4", address)
+        assertEquals("https://www.instagram.com/", headers["Referer"])
+    }
+
+    @Test
+    fun `a stream only reachable in segments is not asked`() {
+        val json = """{"formats": [{"format_id": "hls", "protocol": "m3u8_native", "url": "https://x/m.m3u8"}]}"""
+        assertNull(MediaProbe.directMediaUrl(JSONObject(json)))
+    }
 }
 

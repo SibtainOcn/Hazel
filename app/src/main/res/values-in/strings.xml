@@ -522,7 +522,6 @@
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Kembali</string>
-    <string name="storage_locations_downloads">Unduhan</string>
     <string name="storage_locations_title">Unduhan</string>
     <string name="storage_locations_subtitle">Tempat unduhan disimpan, dan batas operasionalnya</string>
     <string name="storage_locations_limits">Batas</string>

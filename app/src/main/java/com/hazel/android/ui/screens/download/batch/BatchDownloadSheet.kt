@@ -64,7 +64,7 @@ import com.hazel.android.ui.screens.download.SponsorBlockDialog
 import com.hazel.android.ui.screens.download.SubtitlesDialog
 import com.hazel.android.ui.screens.download.ThumbnailDialog
 import com.hazel.android.ui.screens.download.FormatSelectionSheet
-import com.hazel.android.util.StoragePaths
+import com.hazel.android.data.SaveDirs
 import kotlin.math.roundToInt
 
 /**
@@ -90,11 +90,12 @@ fun BatchDownloadSheet(
     results: List<MediaInfo>,
     options: DownloadOptions,
     onOptionsChange: (DownloadOptions) -> Unit,
-    saveDirLabel: String,
-    isCustomSaveDir: Boolean,
-    onOpenSaveDir: () -> Unit,
-    onPickSaveDir: () -> Unit,
-    onResetSaveDir: () -> Unit,
+    /** Where audio and video are saved; the set shows the one for its current kind. */
+    saveDirs: SaveDirs,
+    /** Each is given the kind in question: true for video. */
+    onOpenSaveDir: (isVideo: Boolean) -> Unit,
+    onPickSaveDir: (isVideo: Boolean) -> Unit,
+    onResetSaveDir: (isVideo: Boolean) -> Unit,
     onResolveFormats: (MediaInfo) -> Unit,
     /** Links whose formats are being read right now. */
     readingUrls: Set<String> = emptySet(),
@@ -407,8 +408,7 @@ fun BatchDownloadSheet(
             info = focused,
             options = options,
             onOptionsChange = onOptionsChange,
-            saveDirLabel = saveDirLabel,
-            isCustomSaveDir = isCustomSaveDir,
+            saveDirs = saveDirs,
             isLoadingFormats = focused.url in readingUrls,
             onRefreshFormats = { source -> onRefreshFormats(listOf(focused), source) },
             initialFormat = state.formatOf(focused),
@@ -528,15 +528,14 @@ fun BatchDownloadSheet(
         )
 
         BatchSheet.SAVE_DIR -> BatchSaveDirSheet(
-            saveDirLabel = if (isCustomSaveDir) saveDirLabel
-            else StoragePaths.downloadsDisplay(isAudio = !state.videoTab),
+            saveDirLabel = saveDirs.labelOf(state.videoTab),
             onOpen = {
                 openSheet = BatchSheet.NONE
-                onOpenSaveDir()
+                onOpenSaveDir(state.videoTab)
             },
             onPick = {
                 openSheet = BatchSheet.NONE
-                onPickSaveDir()
+                onPickSaveDir(state.videoTab)
             },
             onDismiss = { openSheet = BatchSheet.NONE }
         )

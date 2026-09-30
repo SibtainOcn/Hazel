@@ -579,7 +579,6 @@
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Back</string>
-    <string name="storage_locations_downloads">Downloads</string>
     <string name="storage_locations_title">Downloads</string>
     <string name="storage_locations_subtitle">Where downloads are saved, and the limits they run under</string>
     <string name="storage_locations_limits">Limits</string>

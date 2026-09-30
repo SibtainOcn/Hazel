@@ -89,7 +89,8 @@ object MediaProbe {
             val payload = response.out.trim().takeIf { it.isNotBlank() }
                 ?: throw IllegalStateException("No metadata returned")
 
-            val parsed = parse(url, JSONObject(payload)).copy(requiresSignIn = signedIn)
+            val json = JSONObject(payload)
+            val parsed = withStreamDuration(parse(url, json), json).copy(requiresSignIn = signedIn)
 
             // Kept so a repeat of this link needs no read, and so the download can replay
             // the payload instead of extracting the same thing over again.
@@ -202,7 +203,7 @@ object MediaProbe {
         val isCollection = root.optString("_type") == "playlist" && entries != null
 
         if (!isCollection) {
-            val info = parse(url, root).copy(requiresSignIn = signedIn)
+            val info = withStreamDuration(parse(url, root), root).copy(requiresSignIn = signedIn)
             InfoCache.put(url, info, payload)
             return LinkContents.Single(info)
         }
@@ -431,7 +432,9 @@ object MediaProbe {
 
         // Resolved before the formats, because a format with no reported size can only
         // be estimated from its bitrate and the running time.
-        val duration = resolveDuration(media).takeIf { it > 0 } ?: resolveDuration(root)
+        val duration = resolveDuration(media).takeIf { it > 0 }
+            ?: resolveDuration(root).takeIf { it > 0 }
+            ?: segmentedDuration(media)
 
         val parsed = readFormats(media, duration).distinctBy { it.formatId }
 
@@ -695,6 +698,89 @@ object MediaProbe {
             ?.fold(0) { acc, part -> acc * 60 + part }
             ?: 0
     }
+
+    /**
+     * The running time of a segmented stream, added up from its segments, for a source that
+     * reports no duration of its own. yt-dlp lists each DASH or HLS segment with its length,
+     * so a stream split into a list of segments carries its length even when the page did
+     * not say. The longest such stream is taken, since a video and its audio can differ by a
+     * frame or two. Zero when no stream is split that way.
+     */
+    internal fun segmentedDuration(media: JSONObject): Int {
+        val formats = media.optJSONArray("formats") ?: return 0
+        var longest = 0.0
+        for (i in 0 until formats.length()) {
+            val fragments = formats.optJSONObject(i)?.optJSONArray("fragments") ?: continue
+            var total = 0.0
+            for (j in 0 until fragments.length()) {
+                total += fragments.optJSONObject(j)?.optDouble("duration", 0.0)
+                    ?.takeIf { !it.isNaN() && it > 0.0 } ?: 0.0
+            }
+            if (total > longest) longest = total
+        }
+        return longest.toInt()
+    }
+
+    /**
+     * A direct address of the media itself, with the headers the site wants sent with it,
+     * for asking the file how long it is. Prefers a single progressive file (both streams,
+     * over plain HTTP), then any plain-HTTP stream; null when every stream is a manifest or
+     * segmented, which cannot be asked this way.
+     */
+    internal fun directMediaUrl(media: JSONObject): Pair<String, Map<String, String>>? {
+        val formats = media.optJSONArray("formats") ?: return null
+        val candidates = (0 until formats.length()).mapNotNull { formats.optJSONObject(it) }
+            .filter { f ->
+                val protocol = f.optString("protocol")
+                val address = f.optString("url")
+                address.startsWith("http") && (protocol.isBlank() || protocol == "https" || protocol == "http") &&
+                    !f.has("fragments")
+            }
+        // A codec reported as "none" means the stream is missing; one not reported at all
+        // (Instagram's progressive files) may well be there, so only "none" rules one out.
+        val best = candidates.firstOrNull { f ->
+            f.optString("vcodec") != "none" && f.optString("acodec") != "none"
+        } ?: candidates.firstOrNull() ?: return null
+        val headers = best.optJSONObject("http_headers")?.let { json ->
+            json.keys().asSequence().associateWith { json.optString(it) }
+        }.orEmpty()
+        return best.optString("url") to headers
+    }
+
+    /**
+     * Fills in the running time when the source reported none, by asking the media file
+     * itself. Only the file's header is read, and only for such a link, so an ordinary read
+     * costs nothing more. Instagram's reels are the usual case: the page sometimes leaves
+     * the length out, and yt-dlp has no other place to find it for a single-file stream.
+     */
+    private fun withStreamDuration(info: MediaInfo, root: JSONObject): MediaInfo {
+        if (info.durationSeconds > 0) return info
+        val media = root.optJSONArray("entries")?.let { entries ->
+            (0 until entries.length()).mapNotNull { entries.optJSONObject(it) }
+                .firstOrNull { it.has("formats") || it.has("url") }
+        } ?: root
+        val (address, headers) = directMediaUrl(media) ?: return info
+        val retriever = android.media.MediaMetadataRetriever()
+        var seconds = 0
+        // The reader has no timeout of its own, and a server that stalls would hold the
+        // whole read up; it gets a few seconds, and the card goes without a length after.
+        val reader = Thread {
+            try {
+                retriever.setDataSource(address, headers)
+                seconds = retriever
+                    .extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)
+                    ?.toLongOrNull()?.div(1000)?.toInt() ?: 0
+            } catch (_: Exception) {
+                // No length to be had from the file either.
+            }
+        }.apply { isDaemon = true }
+        reader.start()
+        reader.join(STREAM_DURATION_TIMEOUT_MS)
+        runCatching { retriever.release() }
+        return if (seconds > 0) info.copy(durationSeconds = seconds) else info
+    }
+
+    private const val STREAM_DURATION_TIMEOUT_MS = 8_000L
 
     private fun JSONObject.readCodec(key: String): String? =
         optString(key).takeIf { it.isNotBlank() && it != "none" && it != "null" }

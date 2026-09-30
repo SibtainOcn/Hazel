@@ -529,7 +529,6 @@
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">वापस</string>
-    <string name="storage_locations_downloads">डाउनलोड</string>
     <string name="storage_locations_title">डाउनलोड</string>
     <string name="storage_locations_subtitle">डाउनलोड कहाँ सहेजे जाते हैं, और किन सीमाओं में चलते हैं</string>
     <string name="storage_locations_limits">सीमाएँ</string>

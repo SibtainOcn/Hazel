@@ -302,7 +302,9 @@ class DownloadViewModel : ViewModel() {
             synchronized(queue) {
                 // Straight into the queue rather than back through the front door: they are
                 // already written down, and enqueuing them again would only rewrite them.
-                owed.forEach { queue.addLast(it) }
+                // A resume from the notification can reach the queue first, as this starts.
+                owed.filter { saved -> queue.none { it.url == saved.url } }
+                    .forEach { queue.addLast(it) }
             }
             runQueue(app, resumed = true)
         }
@@ -314,8 +316,22 @@ class DownloadViewModel : ViewModel() {
     /** Set while a batch runs, so a cancel stops the whole run rather than one item. */
     @Volatile private var isBatchCancelled = false
 
-    private val downloadDir: File
-        get() = StoragePaths.tempDownloads
+    /**
+     * The folder the download in hand works in: one per link, under the temporary downloads
+     * folder, so nothing done to one download touches another's files.
+     *
+     * They used to share one folder, and everything that tidies up after a download works
+     * on a whole folder: the partial files of a paused download were deleted when the next
+     * download failed or was cancelled, so it started again from nothing; and a finished
+     * download published every file in the folder, so a paused download's finished video
+     * stream, still waiting for its audio, landed in Downloads as a video without sound.
+     */
+    @Volatile private var downloadDir: File = StoragePaths.tempDownloads
+
+    /** Throws away everything a download had on disk: it was cancelled or it failed. */
+    private fun discardWorkDir() {
+        runCatching { downloadDir.deleteRecursively() }
+    }
 
     // Persistent yt-dlp cache, shared with MediaProbe so the player data resolved while
     // fetching metadata is reused by the download instead of being fetched twice.
@@ -693,7 +709,10 @@ class DownloadViewModel : ViewModel() {
             // only a small preview; the listing's title is kept, as the card already shows it.
             val merged = resolved.copy(
                 title = info.title.ifBlank { resolved.title },
-                thumbnail = resolved.thumbnail ?: info.thumbnail
+                thumbnail = resolved.thumbnail ?: info.thumbnail,
+                // A running time the listing gave is kept when the full read has none,
+                // rather than the card losing the length it was already showing.
+                durationSeconds = resolved.durationSeconds.takeIf { it > 0 } ?: info.durationSeconds
             )
 
             // Several reads finish at once when a set is being resolved, so the change is
@@ -813,7 +832,9 @@ class DownloadViewModel : ViewModel() {
         author: String,
         audioLanguage: String? = null,
         treeUri: String = "",
-        info: MediaInfo? = null
+        info: MediaInfo? = null,
+        /** Where each kind is saved; when given, it decides over [treeUri]. */
+        saveDirs: com.hazel.android.data.SaveDirs? = null
     ) {
         val targetInfo = info ?: _state.value.info ?: _state.value.results.firstOrNull() ?: return
         if (_state.value.info == null) {
@@ -823,7 +844,8 @@ class DownloadViewModel : ViewModel() {
             context = context,
             plans = listOf(DownloadPlan(targetInfo, format, title, author, audioLanguage)),
             options = options,
-            treeUri = treeUri
+            treeUri = treeUri,
+            saveDirs = saveDirs
         )
     }
 
@@ -843,7 +865,12 @@ class DownloadViewModel : ViewModel() {
         context: Context,
         plans: List<DownloadPlan>,
         options: DownloadOptions,
-        treeUri: String = ""
+        treeUri: String = "",
+        /**
+         * Where each kind is saved. When given, every link goes to the folder for its own
+         * kind, so a set mixing audio and video sends each to its place.
+         */
+        saveDirs: com.hazel.android.data.SaveDirs? = null
     ) {
         if (plans.isEmpty()) return
 
@@ -855,7 +882,9 @@ class DownloadViewModel : ViewModel() {
         // failed and the file stayed in the app's folder without anything saying so.
         com.hazel.android.util.PermissionHelper.ensureSharedStorageWrite(context)
 
-        val queued = plans.map { it.toQueued(options, treeUri) }
+        val queued = plans.map {
+            it.toQueued(options, saveDirs?.of(it.format.hasVideo)?.uri ?: treeUri)
+        }
         val alreadyRunning = synchronized(queue) {
             queue.addAll(queued)
             runOwner != null
@@ -894,7 +923,12 @@ class DownloadViewModel : ViewModel() {
             isProcessing = false,
             error = null,
             waitingForWifi = false,
-            batch = plans.map { BatchItem(url = it.info.url, title = it.title) }
+            // What is still owed from before (a paused download, links waiting behind it)
+            // stays on the list next to the new links rather than vanishing from it.
+            batch = _state.value.batch.filter {
+                (it.state == BatchState.PAUSED || it.state == BatchState.QUEUED) &&
+                    plans.none { plan -> plan.info.url == it.url }
+            } + plans.map { BatchItem(url = it.info.url, title = it.title) }
         )
 
         runQueue(context.applicationContext, resumed = false)
@@ -977,12 +1011,18 @@ class DownloadViewModel : ViewModel() {
                 if (isBatchCancelled) break
                 // Released in the same step that finds the queue empty, so a link added a
                 // moment later starts a run of its own instead of waiting on this one.
+                //
+                // A paused link stays where it is and is stepped over: the user stopped it,
+                // and starting something else is not a reason to start it again.
                 val next = synchronized(queue) {
-                    queue.removeFirstOrNull().also { if (it == null && runOwner === token) runOwner = null }
+                    val index = queue.indexOfFirst { !it.paused }
+                    (if (index >= 0) queue.removeAt(index) else null)
+                        .also { if (it == null && runOwner === token) runOwner = null }
                 } ?: break
                 val plan = next.toPlan()
                 val options = next.options
                 downloadTreeUri = next.treeUri
+                downloadDir = workDirFor(plan.info.url)
 
                 // The download uses the site credentials configured for this URL so that
                 // both the metadata probe and the download execute with matching access.
@@ -1060,13 +1100,15 @@ class DownloadViewModel : ViewModel() {
                     }
 
                     if (isBatchCancelled) {
-                        finishDownload(app, plan, options)
+                        // Cancelled, so nothing it left is kept. Publishing it put a half-made
+                        // file in Downloads and a history entry for a cancelled download.
+                        discardWorkDir()
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         break
                     }
 
                     if (isCancelled) {
-                        purgeFragments()
+                        discardWorkDir()
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         isCancelled = false
                         continue
@@ -1083,17 +1125,19 @@ class DownloadViewModel : ViewModel() {
                         break
                     }
                     if (isBatchCancelled) {
-                        finishDownload(app, plan, options)
+                        // Cancelled, so nothing it left is kept. Publishing it put a half-made
+                        // file in Downloads and a history entry for a cancelled download.
+                        discardWorkDir()
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         break
                     }
                     if (isCancelled) {
-                        purgeFragments()
+                        discardWorkDir()
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         isCancelled = false
                         continue
                     }
-                    finishDownload(app, plan, options)
+                    discardWorkDir()
                     markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                     break
                 } catch (e: Exception) {
@@ -1103,13 +1147,15 @@ class DownloadViewModel : ViewModel() {
                     }
 
                     if (isBatchCancelled) {
-                        finishDownload(app, plan, options)
+                        // Cancelled, so nothing it left is kept. Publishing it put a half-made
+                        // file in Downloads and a history entry for a cancelled download.
+                        discardWorkDir()
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         break
                     }
 
                     if (isCancelled) {
-                        purgeFragments()
+                        discardWorkDir()
                         markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                         isCancelled = false
                         continue
@@ -1136,8 +1182,8 @@ class DownloadViewModel : ViewModel() {
                         )
                     }
                     // One bad link does not stop the rest: the failure is recorded against
-                    // that item and the batch carries on.
-                    purgeFragments()
+                    // that item and the batch carries on. A retry starts clean.
+                    discardWorkDir()
                     markBatch(
                         plan.info.url,
                         BatchState.FAILED,
@@ -1156,6 +1202,10 @@ class DownloadViewModel : ViewModel() {
             DownloadQueueRepository.save(app, remaining)
             if (isBatchCancelled) {
                 synchronized(queue) { queue.clear() }
+                // Paused downloads are given up with the rest, their partial files and their
+                // notification with them. Nothing is running any more to be caught by this.
+                runCatching { StoragePaths.tempDownloads.listFiles()?.forEach { it.deleteRecursively() } }
+                DownloadNotificationHelper.cancelPaused(app)
                 _state.value = _state.value.copy(
                     batch = _state.value.batch.map {
                         if (it.state == BatchState.PAUSED || it.state == BatchState.QUEUED || it.state == BatchState.DOWNLOADING) {
@@ -1214,7 +1264,8 @@ class DownloadViewModel : ViewModel() {
      */
     private fun discardHeldDownload() {
         val app = HazelApp.instance
-        purgeFragments()
+        // Nothing is running, so every partial download on disk is one being given up.
+        runCatching { StoragePaths.tempDownloads.listFiles()?.forEach { it.deleteRecursively() } }
         DownloadNotificationHelper.cancelProgress(app)
         DownloadNotificationHelper.showCancelled(app)
 
@@ -1318,10 +1369,9 @@ class DownloadViewModel : ViewModel() {
         } else {
             // It is waiting in the queue or is paused
             val app = HazelApp.instance
-            val wasHeld = _state.value.batch.any { it.url == url && it.state == BatchState.PAUSED }
-            if (wasHeld) {
-                purgeFragments()
-            }
+            // Its own folder only: another download may be running beside it, and its
+            // partial files are in a folder of their own.
+            runCatching { workDirFor(url).deleteRecursively() }
             synchronized(queue) {
                 queue.removeAll { it.url == url }
             }
@@ -1404,26 +1454,47 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
-    /** Starts the queue again from whatever is at the head of it, paused item included. */
+    /**
+     * Starts every paused download again, and the queue with them.
+     *
+     * Works whether or not something is running: a paused link waits in the queue, stepped
+     * over, and resuming it only has to say it is no longer paused. A run in flight takes it
+     * up next; otherwise a run starts for it. A pause written down by an earlier session is
+     * only on disk, so it is brought back into the queue here.
+     */
     fun resumeDownload() {
-        if (_state.value.isDownloading) return
         val app = HazelApp.instance
         downloadScope.launch {
             val pending = runCatching { DownloadQueueRepository.load(app) }
                 .getOrDefault(emptyList())
-            if (pending.isEmpty()) return@launch
+
+            // Links already settled, or the one in hand, are not taken from the record
+            // again, even if it has not caught up with them yet.
+            val inHand = _state.value.batch
+                .filter { it.state != BatchState.PAUSED && it.state != BatchState.QUEUED }
+                .mapTo(mutableSetOf()) { it.url }
+            _state.value.active?.url?.takeIf { _state.value.isDownloading }?.let { inHand += it }
+
+            val anything = synchronized(queue) {
+                val held = queue.map { it.copy(paused = false) }
+                queue.clear()
+                queue.addAll(held)
+                pending
+                    .filter { saved -> saved.url !in inHand && queue.none { it.url == saved.url } }
+                    .forEach { queue.addLast(it.copy(paused = false)) }
+                queue.isNotEmpty()
+            }
+            if (!anything) return@launch
 
             DownloadNotificationHelper.cancelPaused(app)
             DownloadQueueRepository.clearPaused(app)
-            synchronized(queue) {
-                if (queue.isEmpty()) pending.forEach { queue.addLast(it.copy(paused = false)) }
-            }
             _state.value = _state.value.copy(
                 batch = _state.value.batch.map {
                     if (it.state == BatchState.PAUSED) it.copy(state = BatchState.QUEUED) else it
                 }
             )
-            runQueue(app, resumed = true)
+            // Joins the run in flight if there is one, and starts one if there is not.
+            runQueue(app, resumed = !_state.value.isDownloading)
         }
     }
 
@@ -1449,17 +1520,31 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
-    /** Clears all pending items from the waiting queue while preserving any active download. */
+    /**
+     * Clears the links waiting their turn. The download running and any paused download are
+     * not waiting, and stay: they are on the Running tab, and clearing the waiting list is
+     * not a way of cancelling them. Clearing the whole record used to take their entries with
+     * it, so a paused download could no longer be resumed and a running one was not picked
+     * up again after the app was closed.
+     */
     fun clearQueue(context: Context) {
-        val activeUrl = _state.value.active?.url
-        synchronized(queue) {
-            queue.clear()
-        }
+        val cleared = synchronized(queue) {
+            val waiting = queue.filter { !it.paused }
+            queue.removeAll { !it.paused }
+            waiting.map { it.url }
+        }.toMutableSet()
+        // A waiting link written down by an earlier session is only on disk.
+        val activeUrl = _state.value.active?.url?.takeIf { _state.value.isDownloading }
         _state.value = _state.value.copy(
-            batch = _state.value.batch.filter { it.url == activeUrl && it.state == BatchState.DOWNLOADING }
+            batch = _state.value.batch.filterNot {
+                it.state == BatchState.QUEUED || it.url in cleared
+            }
         )
         downloadScope.launch {
-            DownloadQueueRepository.clear(context)
+            DownloadQueueRepository.load(context)
+                .filter { !it.paused && it.url != activeUrl }
+                .forEach { cleared += it.url }
+            cleared.forEach { DownloadQueueRepository.remove(context, it) }
         }
     }
 
@@ -1602,23 +1687,30 @@ class DownloadViewModel : ViewModel() {
             }
         }
 
-        // Cover art cannot be written into these containers, so asking for it there makes
-        // the whole download fail in post-processing.
-        val artworkSupported = if (isVideo) {
-            val effectiveContainer = when {
-                container.isNotBlank() -> container.lowercase()
-                needsMerge -> "mp4"
-                else -> format.ext.lowercase()
-            }
-            effectiveContainer !in NO_ARTWORK_CONTAINERS
+        // Where the cover goes. Asking yt-dlp to embed one into a file that cannot hold it
+        // fails the whole download, and what the file ends up as is not always what was
+        // asked for: a site serving one ready-made file (archive.org's .ogv, a single .flv)
+        // is not merged, so the chosen container never applies to it. Rather than guess,
+        // the file is steered into a container that can hold the cover.
+        val chosen = container.lowercase().takeUnless { it == "default" }.orEmpty()
+        val wantsCover = options.embedThumbnail && if (isVideo) {
+            // A choice of WebM, AVI or FLV is kept, and goes without a cover.
+            chosen !in NO_ARTWORK_CONTAINERS
         } else {
-            val effectiveContainer = when {
-                container.isNotBlank() && container.lowercase() != "default" -> container.lowercase()
-                else -> format.ext.lowercase()
-            }
-            effectiveContainer != "wav"
+            chosen != "wav"
         }
-        if (options.embedThumbnail && artworkSupported) {
+        if (wantsCover) {
+            if (isVideo) {
+                // Files already in a container that holds a cover stay as they are; any
+                // other container is remuxed into MKV, which takes any codec, so this can
+                // never fail on the codecs a site happens to use. A merged download is
+                // already in its chosen container, so this changes nothing there.
+                addOption("--remux-video", if (chosen == "mkv") "mkv" else COVER_SAFE_VIDEO)
+            } else if (chosen.isBlank() || chosen == "webm") {
+                // Extraction as it would be without a cover, except for a source file the
+                // cover cannot go into (WAV, AIFF, WMA), which is converted instead.
+                addOption("--audio-format", COVER_SAFE_AUDIO)
+            }
             addOption("--embed-thumbnail")
             if (options.cropThumbnail) {
                 // The crop is a filter on the thumbnail's conversion, and yt-dlp skips the
@@ -1855,6 +1947,9 @@ class DownloadViewModel : ViewModel() {
         }
 
         com.hazel.android.util.MediaStoreHelper.scanFiles(context, finalDir)
+        // The download's own folder is empty once its file has moved, and goes. A file the
+        // move could not publish stays in it, and a folder with anything in it is not deleted.
+        runCatching { downloadDir.delete() }
 
         _state.value = _state.value.copy(
             progress = 1f,
@@ -2033,9 +2128,8 @@ class DownloadViewModel : ViewModel() {
     }
 
     private fun fail(context: Context, message: String) {
-        // A failed run leaves fragments behind; clear them so the next download does not
-        // publish them alongside its own output.
-        purgeFragments()
+        // Nothing on disk is touched: this is a run that could not start, and the folder
+        // last worked in may be a paused download's, whose partial files are its progress.
         _state.value = _state.value.copy(
             isDownloading = false,
             active = null,
@@ -2241,6 +2335,20 @@ class DownloadViewModel : ViewModel() {
         val NO_ARTWORK_CONTAINERS = setOf("webm", "avi", "flv")
 
         /**
+         * yt-dlp remux rules, matched on the file's extension: containers that hold a cover
+         * are left alone (a rule whose target is its source is a no-op), anything else is
+         * remuxed to MKV, which takes any codec.
+         */
+        const val COVER_SAFE_VIDEO = "mp4>mp4/mov>mov/mkv>mkv/mkv"
+
+        /**
+         * yt-dlp extraction rules, matched on the file's extension. Everything extracts as
+         * it would by default ("best"), except the three kinds of file a cover cannot go
+         * into: uncompressed WAV and AIFF become lossless FLAC, WMA becomes M4A.
+         */
+        const val COVER_SAFE_AUDIO = "aiff>flac/wav>flac/wma>m4a/best"
+
+        /**
          * Centre crop to the shorter side, whichever way round the artwork is. yt-dlp splits
          * post-processor arguments the way a shell would, so the double quotes are what keep
          * the single quotes for ffmpeg; without them the commas split the filter and the
@@ -2248,4 +2356,14 @@ class DownloadViewModel : ViewModel() {
          */
         const val CROP_TO_SQUARE = "crop=\"'if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\""
     }
+}
+
+/**
+ * The working folder of the download for [url], under the temporary downloads folder: the
+ * same one every time that link is resumed, and never shared with another link.
+ */
+internal fun workDirFor(url: String): File {
+    val digest = java.security.MessageDigest.getInstance("SHA-1").digest(url.toByteArray())
+    val key = digest.take(8).joinToString("") { "%02x".format(it) }
+    return File(StoragePaths.tempDownloads, "dl_$key")
 }

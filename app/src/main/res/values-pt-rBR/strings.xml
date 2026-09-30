@@ -536,7 +536,6 @@
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Voltar</string>
-    <string name="storage_locations_downloads">Downloads</string>
     <string name="storage_locations_title">Downloads</string>
     <string name="storage_locations_subtitle">Onde os downloads são salvos, e os limites sob os quais eles rodam</string>
     <string name="storage_locations_limits">Limites</string>

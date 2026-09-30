@@ -59,11 +59,15 @@ object MediaOpener {
      * the document picker, and those are opened in different ways. [treeUri] is the picked
      * folder if there is one; without it the app's own folder is what there is to show.
      */
-    fun openLocation(context: Context, treeUri: String) {
+    /** Opens a picked folder, or the built-in one: for [isVideo]'s kind when it is given. */
+    fun openLocation(context: Context, treeUri: String, isVideo: Boolean? = null) {
         if (treeUri.isNotBlank()) {
             FolderUtil.openTree(context, Uri.parse(treeUri))
         } else {
-            FolderUtil.open(context, StoragePaths.finalDownloads)
+            FolderUtil.open(
+                context,
+                isVideo?.let { StoragePaths.finalDownloads(isAudio = !it) } ?: StoragePaths.finalDownloads
+            )
         }
     }
 }

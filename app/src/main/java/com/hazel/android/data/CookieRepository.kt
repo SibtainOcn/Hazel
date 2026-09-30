@@ -222,7 +222,7 @@ object CookieRepository {
             enabled.forEach { entry ->
                 entry.content.lineSequence().forEach { line ->
                     // Per-entry headers and comments are dropped: one header for the file.
-                    if (line.isNotBlank() && !line.startsWith("#")) {
+                    if (isCookieLine(line)) {
                         append(line)
                         append('\n')
                     }
@@ -281,11 +281,28 @@ object CookieRepository {
 
         // An imported set names no site, so its own cookies are asked instead. The domain
         // is the first field of a Netscape line.
-        return entry.content.lineSequence().any { line ->
-            val domain = line.substringBefore('\t').trim().removePrefix(".")
+        return entry.content.lineSequence().filter { isCookieLine(it) }.any { line ->
+            val domain = domainOf(line)
             domain.isNotBlank() && siteKeyOf(domain) == site
         }
     }
+
+    /**
+     * Whether a line of a cookie file is a cookie. Lines starting with `#` are comments,
+     * except `#HttpOnly_`, which is how browser exports mark an HttpOnly cookie: those are
+     * the session and sign-in cookies, and treating them as comments dropped exactly the
+     * ones a signed-in download needs. yt-dlp reads the prefix itself.
+     */
+    private fun isCookieLine(line: String): Boolean {
+        val trimmed = line.trim()
+        return trimmed.isNotBlank() && (!trimmed.startsWith("#") || trimmed.startsWith(HTTP_ONLY_PREFIX))
+    }
+
+    /** The domain a cookie line is for, without the HttpOnly marker or the leading dot. */
+    private fun domainOf(line: String): String =
+        line.substringBefore('\t').trim().removePrefix(HTTP_ONLY_PREFIX).removePrefix(".")
+
+    private const val HTTP_ONLY_PREFIX = "#HttpOnly_"
 
     /** The cookie file for one site, written fresh so it always matches the saved list. */
     private suspend fun writeSiteFile(
@@ -298,7 +315,7 @@ object CookieRepository {
             append('\n')
             entries.forEach { entry ->
                 entry.content.lineSequence().forEach { line ->
-                    if (line.isNotBlank() && !line.startsWith("#")) {
+                    if (isCookieLine(line)) {
                         append(line)
                         append('\n')
                     }
@@ -306,8 +323,18 @@ object CookieRepository {
             }
         }
 
+        // Written beside the file and moved into place, so a read that starts while another
+        // is writing (format reads run several at once) never meets half a file.
         val file = File(context.cacheDir, "cookies-$site.txt")
-        runCatching { file.writeText(body) }.getOrNull() ?: return@withContext null
+        val staging = File.createTempFile("cookies-$site", ".tmp", context.cacheDir)
+        val written = runCatching {
+            staging.writeText(body)
+            staging.renameTo(file) || run { file.writeText(body); staging.delete(); true }
+        }.getOrDefault(false)
+        if (!written) {
+            staging.delete()
+            return@withContext null
+        }
         file.takeIf { it.length() > 0 }
     }
 
@@ -322,7 +349,13 @@ object CookieRepository {
         val host = url.takeIf { it.isNotBlank() } ?: return null
         SITE_ALIASES[host]?.let { return it }
 
-        val registrable = host.split('.').takeLast(2).joinToString(".")
+        // Two labels for most sites, three under a country's second level (bbc.co.uk,
+        // abc.net.au): taking two there made every .co.uk site one site, and handed each
+        // one's cookies to all the others.
+        val labels = host.split('.')
+        val underSecondLevel = labels.size >= 3 && labels.last().length == 2 &&
+            labels[labels.size - 2] in SECOND_LEVEL_LABELS
+        val registrable = labels.takeLast(if (underSecondLevel) 3 else 2).joinToString(".")
         return SITE_ALIASES[registrable] ?: registrable.takeIf { it.contains('.') }
     }
 
@@ -334,6 +367,11 @@ object CookieRepository {
             .lowercase()
             .removePrefix("www.")
     }
+
+    /** Second-level labels countries register sites under, as in co.uk or com.au. */
+    private val SECOND_LEVEL_LABELS = setOf(
+        "co", "com", "net", "org", "gov", "edu", "ac", "ne", "or", "go", "gob", "nic", "mil"
+    )
 
     /** Short forms and sister domains, mapped to the site they are part of. */
     private val SITE_ALIASES = mapOf(
@@ -361,7 +399,7 @@ object CookieRepository {
     suspend fun importText(context: Context, text: String, title: String): Boolean {
         val lines = text.lineSequence()
             .map { it.trim() }
-            .filter { it.isNotBlank() && !it.startsWith("#") }
+            .filter { isCookieLine(it) }
             .toList()
         if (lines.isEmpty()) return false
 
@@ -371,7 +409,7 @@ object CookieRepository {
 
         for (line in lines) {
             val parts = line.split('\t')
-            val rawDomain = parts.firstOrNull()?.trim()?.removePrefix(".")
+            val rawDomain = parts.firstOrNull()?.let { domainOf(it) }
             val site = rawDomain?.let { siteKeyOf(it) ?: it }
             if (!site.isNullOrBlank()) {
                 siteToLines.getOrPut(site) { mutableListOf() }.add(line)

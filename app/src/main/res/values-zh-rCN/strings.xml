@@ -522,7 +522,6 @@
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">返回</string>
-    <string name="storage_locations_downloads">下载</string>
     <string name="storage_locations_title">下载</string>
     <string name="storage_locations_subtitle">下载保存在哪里，以及它们受哪些限制</string>
     <string name="storage_locations_limits">限制</string>

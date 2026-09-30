@@ -73,6 +73,7 @@ import com.hazel.android.R
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SearchHistoryRepository
+import com.hazel.android.data.SaveDirs
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
@@ -122,7 +123,7 @@ fun SearchScreen(
     var showClearHistoryConfirm by remember { mutableStateOf(false) }
 
     // Needed only to open the folder a repeat warning refers to.
-    val saveTreeUri by SettingsRepository.getDownloadTreeUri(context).collectAsState(initial = "")
+    val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
 
     // Links already queued are hidden from the list, and what is being typed filters it.
     val suggestions = remember(history, text, queued) {
@@ -225,7 +226,9 @@ fun SearchScreen(
             AlreadyDownloadedDialog(
                 entry = existing,
                 onPlay = { MediaOpener.play(context, existing.fileUri, existing.isVideo) },
-                onOpenLocation = { MediaOpener.openLocation(context, saveTreeUri) },
+                onOpenLocation = {
+                    MediaOpener.openLocation(context, saveDirs.of(existing.isVideo).uri, existing.isVideo)
+                },
                 onDownloadAgain = {
                     pendingDuplicate = null
                     startSearch(links)

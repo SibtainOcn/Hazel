@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import com.hazel.android.data.SaveDirs
 import com.hazel.android.ui.components.FlatChip
 import com.hazel.android.ui.components.ShimmerLabel
 import androidx.compose.foundation.clickable
@@ -72,7 +73,6 @@ import com.hazel.android.download.VIDEO_CONTAINERS
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.NewPipeLister
 import com.hazel.android.download.languageLabel
-import com.hazel.android.util.StoragePaths
 
 /**
  * Everything you can adjust before a download starts.
@@ -96,8 +96,8 @@ fun FormatSheet(
     info: MediaInfo,
     options: DownloadOptions,
     onOptionsChange: (DownloadOptions) -> Unit,
-    saveDirLabel: String,
-    isCustomSaveDir: Boolean,
+    /** Where audio and video are saved; the sheet shows and changes the one for its tab. */
+    saveDirs: SaveDirs,
     isLoadingFormats: Boolean = false,
     /** The link itself is still being read, so its details are not in yet. */
     isReadingLink: Boolean = false,
@@ -112,9 +112,10 @@ fun FormatSheet(
      * header offers to play it beside the action that would fetch it again.
      */
     onPlay: (() -> Unit)? = null,
-    onOpenSaveDir: () -> Unit,
-    onPickSaveDir: () -> Unit,
-    onResetSaveDir: () -> Unit,
+    /** Each is given the kind the sheet is on: true for video. */
+    onOpenSaveDir: (isVideo: Boolean) -> Unit,
+    onPickSaveDir: (isVideo: Boolean) -> Unit,
+    onResetSaveDir: (isVideo: Boolean) -> Unit,
     onDownload: (
         format: MediaFormat,
         audioLanguage: String?,
@@ -390,9 +391,7 @@ fun FormatSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val effectiveSaveDirLabel = if (isCustomSaveDir) saveDirLabel
-            else StoragePaths.downloadsDisplay(isAudio = !videoTab)
-            SaveDirField(label = effectiveSaveDirLabel, onClick = { openDialog = SheetDialog.SAVE_DIR })
+            SaveDirField(label = saveDirs.labelOf(videoTab), onClick = { openDialog = SheetDialog.SAVE_DIR })
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -550,19 +549,19 @@ fun FormatSheet(
         )
 
         SheetDialog.SAVE_DIR -> SaveDirDialog(
-            label = saveDirLabel,
-            isCustom = isCustomSaveDir,
+            label = saveDirs.labelOf(videoTab),
+            isCustom = saveDirs.of(videoTab).isCustom,
             onOpen = {
                 openDialog = SheetDialog.NONE
-                onOpenSaveDir()
+                onOpenSaveDir(videoTab)
             },
             onPick = {
                 openDialog = SheetDialog.NONE
-                onPickSaveDir()
+                onPickSaveDir(videoTab)
             },
             onReset = {
                 openDialog = SheetDialog.NONE
-                onResetSaveDir()
+                onResetSaveDir(videoTab)
             },
             onDismiss = { openDialog = SheetDialog.NONE }
         )
@@ -774,8 +773,9 @@ private fun SaveDirField(label: String, onClick: () -> Unit) {
     }
 }
 
+/** Where one kind of download is saved, with opening, changing and resetting it. */
 @Composable
-private fun SaveDirDialog(
+internal fun SaveDirDialog(
     label: String,
     isCustom: Boolean,
     onOpen: () -> Unit,

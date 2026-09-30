@@ -86,6 +86,7 @@ import com.hazel.android.R
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SearchHistoryRepository
+import com.hazel.android.data.SaveDirs
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.BatchItem
 import com.hazel.android.download.BatchState
@@ -135,8 +136,10 @@ fun DownloadScreen(
 
     val options by SettingsRepository.getDownloadOptions(context)
         .collectAsState(initial = DownloadOptions())
-    val treeUri by SettingsRepository.getDownloadTreeUri(context).collectAsState(initial = "")
-    val treeLabel by SettingsRepository.getDownloadTreeLabel(context).collectAsState(initial = "")
+    val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
+
+    // The kind whose folder the picker is choosing, set as it opens.
+    var pickingVideoDir by remember { mutableStateOf(true) }
 
 
     // Collected as null until the stored value arrives, so the dialog cannot flash up for
@@ -195,9 +198,10 @@ fun DownloadScreen(
                     Intent.FLAG_GRANT_READ_URI_PERMISSION or
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
+                val forVideo = pickingVideoDir
                 scope.launch {
-                    SettingsRepository.setDownloadTree(
-                        context, uri.toString(), MediaStoreHelper.describeTree(uri)
+                    SettingsRepository.setSaveDir(
+                        context, forVideo, uri.toString(), MediaStoreHelper.describeTree(uri)
                     )
                 }
             } catch (_: SecurityException) {
@@ -680,7 +684,9 @@ fun DownloadScreen(
             AlreadyDownloadedDialog(
                 entry = existing,
                 onPlay = { MediaOpener.play(context, existing.fileUri, existing.isVideo) },
-                onOpenLocation = { MediaOpener.openLocation(context, treeUri) },
+                onOpenLocation = {
+                    MediaOpener.openLocation(context, saveDirs.of(existing.isVideo).uri, existing.isVideo)
+                },
                 onDownloadAgain = {
                     homePastePendingDupe = null
                     downloadViewModel.fetchAll(links)
@@ -779,7 +785,9 @@ fun DownloadScreen(
         AlreadyDownloadedDialog(
             entry = existing,
             onPlay = { MediaOpener.play(context, existing.fileUri, existing.isVideo) },
-            onOpenLocation = { MediaOpener.openLocation(context, treeUri) },
+            onOpenLocation = {
+                MediaOpener.openLocation(context, saveDirs.of(existing.isVideo).uri, existing.isVideo)
+            },
             onDownloadAgain = {
                 alreadyHave = null
                 sheetVisible = true
@@ -807,7 +815,16 @@ fun DownloadScreen(
         )
     }
 
-    val saveDirLabel = treeLabel.ifBlank { StoragePaths.DOWNLOADS_DISPLAY }
+    val pickSaveDir: (Boolean) -> Unit = { isVideo ->
+        pickingVideoDir = isVideo
+        folderPicker.launch(saveDirs.of(isVideo).uri.takeIf { it.isNotBlank() }?.let(Uri::parse))
+    }
+    val openSaveDirOf: (Boolean) -> Unit = { isVideo ->
+        MediaOpener.openLocation(context, saveDirs.of(isVideo).uri, isVideo)
+    }
+    val resetSaveDir: (Boolean) -> Unit = { isVideo ->
+        scope.launch { SettingsRepository.resetSaveDir(context, isVideo) }
+    }
 
     if (sheetVisible) {
         state.info?.let { info ->
@@ -830,17 +847,12 @@ fun DownloadScreen(
                 onOptionsChange = {
                     scope.launch { SettingsRepository.setDownloadOptions(context, it) }
                 },
-                saveDirLabel = saveDirLabel,
-                isCustomSaveDir = treeUri.isNotBlank(),
+                saveDirs = saveDirs,
                 isLoadingFormats = state.isFetching || info.url in formatsReading,
                 onRefreshFormats = { source -> downloadViewModel.refreshFormats(listOf(info), source) },
-                onOpenSaveDir = { openSaveDir(context, treeUri) },
-                onPickSaveDir = {
-                    folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse))
-                },
-                onResetSaveDir = {
-                    scope.launch { SettingsRepository.clearDownloadTree(context) }
-                },
+                onOpenSaveDir = openSaveDirOf,
+                onPickSaveDir = pickSaveDir,
+                onResetSaveDir = resetSaveDir,
                 onDownload = { format, audioLanguage, title, author ->
                     sheetVisible = false
                     downloadViewModel.startDownload(
@@ -850,7 +862,7 @@ fun DownloadScreen(
                         title = title,
                         author = author,
                         audioLanguage = audioLanguage,
-                        treeUri = treeUri
+                        saveDirs = saveDirs
                     )
                 },
                 onDismiss = { sheetVisible = false }
@@ -865,22 +877,17 @@ fun DownloadScreen(
             onOptionsChange = {
                 scope.launch { SettingsRepository.setDownloadOptions(context, it) }
             },
-            saveDirLabel = saveDirLabel,
-            isCustomSaveDir = treeUri.isNotBlank(),
-            onOpenSaveDir = { openSaveDir(context, treeUri) },
-            onPickSaveDir = {
-                folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse))
-            },
-            onResetSaveDir = {
-                scope.launch { SettingsRepository.clearDownloadTree(context) }
-            },
+            saveDirs = saveDirs,
+            onOpenSaveDir = openSaveDirOf,
+            onPickSaveDir = pickSaveDir,
+            onResetSaveDir = resetSaveDir,
             onResolveFormats = downloadViewModel::resolveFormats,
             readingUrls = formatsReading,
             onRefreshFormats = downloadViewModel::refreshFormats,
             onRemove = downloadViewModel::removeResult,
             onDownload = { plans ->
                 batchSheetVisible = false
-                downloadViewModel.startBatch(context, plans, options, treeUri)
+                downloadViewModel.startBatch(context, plans, options, saveDirs = saveDirs)
             },
             onDismiss = { batchSheetVisible = false }
         )
@@ -923,11 +930,6 @@ fun DownloadScreen(
             }
         )
     }
-}
-
-private fun openSaveDir(context: android.content.Context, treeUri: String) {
-    if (treeUri.isNotBlank()) FolderUtil.openTree(context, Uri.parse(treeUri))
-    else FolderUtil.open(context, StoragePaths.finalDownloads)
 }
 
 /**

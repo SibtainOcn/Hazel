@@ -522,7 +522,6 @@
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">戻る</string>
-    <string name="storage_locations_downloads">ダウンロード</string>
     <string name="storage_locations_title">ダウンロード</string>
     <string name="storage_locations_subtitle">ダウンロードの保存場所と動作制限</string>
     <string name="storage_locations_limits">制限</string>
