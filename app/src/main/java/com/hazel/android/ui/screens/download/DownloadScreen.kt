@@ -65,6 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -463,203 +464,230 @@ fun DownloadScreen(
                     )
             )
 
-            // A lazy list rather than a scrolling column: a column composes every card it
-            // holds, artwork and all, so a playlist of a hundred built a hundred full width
-            // images at once and ran the app out of memory on the way back from the compact
-            // layout. This builds only what is on screen, whatever the list is holding.
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                    start = 20.dp,
-                    end = 20.dp,
-                    // Room for the action that floats over the list, on the same terms as
-                    // the action itself.
-                    bottom = if (pendingResults.size > 1) 96.dp else 32.dp
-                )
-            ) {
-                // An instant share reads with nothing on screen to show for it, so the
-                // same skeleton stands in, named after where the link came from.
-                item(key = "instant") {
-                    AnimatedVisibility(
-                        visible = state.instantSource.isNotBlank(),
-                        enter = M3Motion.contentEnter(),
-                        exit = M3Motion.contentExit()
-                    ) {
-                        Column {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                stringResource(R.string.download_instant_source, state.instantSource),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+            if (orderedResults.isEmpty() && state.isFetching) {
+                // Fixed viewport skeleton placeholders during initial link fetch.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 20.dp)
+                        .clipToBounds()
+                ) {
+                    Column {
+                        if (state.fetchProgress.isNotBlank()) {
                             Spacer(modifier = Modifier.height(12.dp))
-                            ShimmerHost(modifier = Modifier.fillMaxWidth()) {
-                                MediaCardShimmer()
-                            }
+                            Text(
+                                state.fetchProgress,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
-                    }
-                }
-
-                // While links are being read, a skeleton of the card stands in for them.
-                item(key = "fetching") {
-                    AnimatedVisibility(
-                        visible = state.isFetching,
-                        enter = M3Motion.contentEnter(),
-                        exit = M3Motion.contentExit()
-                    ) {
-                        Column {
-                            if (state.fetchProgress.isNotBlank()) {
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    state.fetchProgress,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            ShimmerHost(modifier = Modifier.fillMaxWidth()) {
-                                Column {
-                                    repeat(state.fetchCount.coerceIn(1, SHIMMER_CARD_LIMIT)) {
-                                        Spacer(modifier = Modifier.height(20.dp))
-                                        MediaCardShimmer()
-                                    }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        ShimmerHost(modifier = Modifier.fillMaxWidth()) {
+                            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                                repeat(VIEWPORT_SKELETON_COUNT) {
+                                    MediaCardShimmer()
                                 }
                             }
                         }
                     }
                 }
-
-                items(orderedResults, key = { it.url }) { info ->
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Each card arrives rather than appearing: it fades up from slightly
-                    // below where it belongs, once, the first time it is composed. A long
-                    // playlist scrolls past as a series of cards settling into place
-                    // instead of a wall that redraws itself under the finger.
-                    var shown by remember(info.url) { mutableStateOf(false) }
-                    LaunchedEffect(info.url) { shown = true }
-                    val entrance by animateFloatAsState(
-                        targetValue = if (shown) 1f else 0f,
-                        animationSpec = M3Motion.emphasized(320),
-                        label = "cardEntrance"
+            } else {
+                // A lazy list rather than a scrolling column: a column composes every card it
+                // holds, artwork and all, so a playlist of a hundred built a hundred full width
+                // images at once and ran the app out of memory on the way back from the compact
+                // layout. This builds only what is on screen, whatever the list is holding.
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                        start = 20.dp,
+                        end = 20.dp,
+                        // Room for the action that floats over the list, on the same terms as
+                        // the action itself.
+                        bottom = if (pendingResults.size > 1) 96.dp else 32.dp
                     )
-
-                    val batchItem = state.batch.firstOrNull { it.url == info.url }
-                    val isActive = state.isDownloading && state.info?.url == info.url
-
-                    // A card that came from a listing carries no formats yet. Reading them
-                    // starts with the sheet, so the wait happens against an open sheet
-                    // rather than against a card that looks unresponsive.
-                    val openSheet = {
-                        downloadViewModel.selectResult(info)
-                        downloadViewModel.resolveFormats(info)
-                        sheetVisible = true
-                    }
-
-                    Box(
-                        modifier = Modifier.graphicsLayer {
-                            alpha = entrance
-                            translationY = (1f - entrance) * 28f
-                        }
-                    ) {
-                        MediaCard(
-                            info = info,
-                            isDownloading = isActive,
-                            isProcessing = isActive && state.isProcessing,
-                            progress = state.progress,
-                            totalBytes = state.totalBytes,
-                            isComplete = batchItem?.state == BatchState.DONE ||
-                                    (!state.isMultiple && state.isComplete),
-                            batchItem = batchItem,
-                            waitingForWifi = state.waitingForWifi,
-                            alreadyDownloaded = info.url in savedUrls,
-                            onOpenSheet = openSheet,
-                            onCancel = { downloadViewModel.cancelItem(info.url) },
-                            onPause = downloadViewModel::pauseDownload,
-                            onResume = downloadViewModel::resumeDownload
-                        )
-                    }
-                }
-
-                // How the run as a whole went, under the list rather than over it. It
-                // reports on what the cards above say one by one, so it belongs after them:
-                // above the list it was the first thing read, before there was anything for
-                // it to be about.
-                item(key = "error") {
-                    AnimatedVisibility(
-                        visible = state.error != null,
-                        enter = M3Motion.contentEnter(),
-                        exit = M3Motion.contentExit()
-                    ) {
-                        state.error?.let {
-                            Text(
-                                it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(top = 16.dp, start = 4.dp)
-                            )
+                ) {
+                    // An instant share reads with nothing on screen to show for it, so the
+                    // same skeleton stands in, named after where the link came from.
+                    item(key = "instant") {
+                        AnimatedVisibility(
+                            visible = state.instantSource.isNotBlank(),
+                            enter = M3Motion.contentEnter(),
+                            exit = M3Motion.contentExit()
+                        ) {
+                            Column {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    stringResource(R.string.download_instant_source, state.instantSource),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                ShimmerHost(modifier = Modifier.fillMaxWidth()) {
+                                    MediaCardShimmer()
+                                }
+                            }
                         }
                     }
-                }
 
-                // Says where the downloads that used to sit here have gone. Reading a new
-                // link takes what has finished off the list, so without this the cards a
-                // user watched arrive would simply be absent the next time they pasted
-                // something, which reads as the app having lost them.
-                if (state.savedAside && !state.isFetching) {
-                    item(key = "savedAside") {
+                    items(orderedResults, key = { it.url }) { info ->
                         Spacer(modifier = Modifier.height(20.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+
+                        // Each card arrives rather than appearing: it fades up from slightly
+                        // below where it belongs, once, the first time it is composed. A long
+                        // playlist scrolls past as a series of cards settling into place
+                        // instead of a wall that redraws itself under the finger.
+                        var shown by remember(info.url) { mutableStateOf(false) }
+                        LaunchedEffect(info.url) { shown = true }
+                        val entrance by animateFloatAsState(
+                            targetValue = if (shown) 1f else 0f,
+                            animationSpec = M3Motion.emphasized(320),
+                            label = "cardEntrance"
+                        )
+
+                        val batchItem = state.batch.firstOrNull { it.url == info.url }
+                        val isActive = state.isDownloading && state.info?.url == info.url
+
+                        // A card that came from a listing carries no formats yet. Reading them
+                        // starts with the sheet, so the wait happens against an open sheet
+                        // rather than against a card that looks unresponsive.
+                        val openSheet = {
+                            downloadViewModel.selectResult(info)
+                            downloadViewModel.resolveFormats(info)
+                            sheetVisible = true
+                        }
+
+                        Box(
+                            modifier = Modifier.graphicsLayer {
+                                alpha = entrance
+                                translationY = (1f - entrance) * 28f
+                            }
                         ) {
-                            Icon(
-                                Icons.Filled.CheckCircle,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                stringResource(R.string.download_saved_aside),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            MediaCard(
+                                info = info,
+                                isDownloading = isActive,
+                                isProcessing = isActive && state.isProcessing,
+                                progress = state.progress,
+                                totalBytes = state.totalBytes,
+                                isComplete = batchItem?.state == BatchState.DONE ||
+                                        (!state.isMultiple && state.isComplete),
+                                batchItem = batchItem,
+                                waitingForWifi = state.waitingForWifi,
+                                alreadyDownloaded = info.url in savedUrls,
+                                onOpenSheet = openSheet,
+                                onCancel = { downloadViewModel.cancelItem(info.url) },
+                                onPause = downloadViewModel::pauseDownload,
+                                onResume = downloadViewModel::resumeDownload
                             )
                         }
                     }
-                }
 
-                if (incognito && state.results.isEmpty() && !state.isFetching) {
-                    item(key = "incognito") {
-                        Spacer(modifier = Modifier.height(72.dp))
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                    // While playlist/multi links continue reading remaining items, 2 skeleton cards
+                    // stand in below the loaded results to smoothly indicate incoming entries.
+                    if (state.isFetching && orderedResults.isNotEmpty()) {
+                        item(key = "fetching") {
+                            Column {
+                                if (state.fetchProgress.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        state.fetchProgress,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                ShimmerHost(modifier = Modifier.fillMaxWidth()) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        repeat(INCREMENTAL_SKELETON_COUNT) {
+                                            MediaCardShimmer()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // How the run as a whole went, under the list rather than over it. It
+                    // reports on what the cards above say one by one, so it belongs after them:
+                    // above the list it was the first thing read, before there was anything for
+                    // it to be about.
+                    item(key = "error") {
+                        AnimatedVisibility(
+                            visible = state.error != null,
+                            enter = M3Motion.contentEnter(),
+                            exit = M3Motion.contentExit()
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.incognito),
-                                contentDescription = null,
-                                modifier = Modifier.size(44.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.height(14.dp))
-                            Text(
-                                stringResource(R.string.download_incognito_title),
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                stringResource(R.string.download_incognito_body),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(horizontal = 24.dp)
-                            )
+                            state.error?.let {
+                                Text(
+                                    it,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(top = 16.dp, start = 4.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    // Says where the downloads that used to sit here have gone. Reading a new
+                    // link takes what has finished off the list, so without this the cards a
+                    // user watched arrive would simply be absent the next time they pasted
+                    // something, which reads as the app having lost them.
+                    if (state.savedAside && !state.isFetching) {
+                        item(key = "savedAside") {
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Filled.CheckCircle,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    stringResource(R.string.download_saved_aside),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    if (incognito && state.results.isEmpty() && !state.isFetching) {
+                        item(key = "incognito") {
+                            Spacer(modifier = Modifier.height(72.dp))
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.incognito),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(44.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Text(
+                                    stringResource(R.string.download_incognito_title),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    stringResource(R.string.download_incognito_body),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(horizontal = 24.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -1399,11 +1427,14 @@ private fun MediaCard(
 }
 
 /**
- * How many stand-in cards a read shows at most. A long playlist reports its whole
- * length, and a placeholder for every entry of it is a screenful of the same shape
- * repeated, which says nothing the first few do not.
+ * Number of skeleton placeholders displayed during initial metadata fetch.
  */
-private const val SHIMMER_CARD_LIMIT = 6
+private const val VIEWPORT_SKELETON_COUNT = 3
+
+/**
+ * 2 cards stand in below already-loaded results while remaining playlist items continue loading.
+ */
+private const val INCREMENTAL_SKELETON_COUNT = 2
 
 /** Dark pill drawn over the thumbnail. */
 @Composable

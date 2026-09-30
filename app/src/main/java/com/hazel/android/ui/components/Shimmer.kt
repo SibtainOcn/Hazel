@@ -9,6 +9,7 @@ import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,12 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
@@ -40,53 +36,41 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * Placeholder skeletons with a single highlight travelling across them.
  *
- * The sweep belongs to the whole skeleton, not to each block: one band crosses the group
- * from left to right, so the blocks read as one surface catching the light. Animating each
- * block on its own timeline is what makes a shimmer look wrong, because every block starts
- * its own sweep and the group flickers instead of gleaming.
- *
- * A skeleton is therefore wrapped in [ShimmerHost], and every placeholder inside it uses
- * [shimmerBlock]. Blocks measure where they sit inside the host and draw the part of the
- * band that falls across them.
- *
- * This is for skeletons only. Waits with no shape to stand in for, such as an update check,
- * keep [HazelLoadingIndicator].
+ * The sweep belongs to the whole skeleton, not to each block: one continuous diagonal band
+ * crosses the host container at a 20° tilt, so all cards and elements read as one surface
+ * catching the light simultaneously. Empty space between elements remains unaffected
+ * via offscreen layer compositing.
  */
-private const val SWEEP_DURATION_MS = 1200
+private const val SWEEP_DURATION_MS = 1000
 
 /** Width of the moving highlight, as a fraction of the host's width. */
-private const val BAND_WIDTH = 0.45f
+private const val BAND_WIDTH = 0.50f
 
 /** The processing sweep is narrower than the skeleton one, so it reads as a glint. */
 private const val SHARP_BAND_WIDTH = 0.17f
 
 /** How long the band takes to cross, and how long the whole cycle runs including its rest. */
-private const val SWEEP_TRAVEL_MS = 1150
-private const val SWEEP_CYCLE_MS = 2050
+private const val SWEEP_TRAVEL_MS = 1000
+private const val SWEEP_CYCLE_MS = 1800
 
 /** Lean of the band, in degrees off vertical. */
 private const val SWEEP_TILT_DEGREES = 20.0
 
-/** Position of the band and the geometry it is measured against. */
-private data class ShimmerSweep(
-    val progress: Float,
-    val hostLeft: Float,
-    val hostWidth: Float
-)
-
-private val LocalShimmerSweep = staticCompositionLocalOf<ShimmerSweep?> { null }
+/** Placeholder fill on the media card skeleton, which is dark in either theme. */
+private val MEDIA_CARD_BLOCK = Color(0xFF3A3A44)
 
 /**
- * Drives one sweep for everything inside it. Place this around a whole skeleton rather than
- * around each placeholder.
+ * Drives a unified diagonal shimmer sweep across all placeholder content inside it.
  */
 @Composable
 fun ShimmerHost(
@@ -104,107 +88,66 @@ fun ShimmerHost(
         label = "shimmerSweep"
     )
 
-    var hostLeft by remember { mutableStateOf(0f) }
-    var hostWidth by remember { mutableStateOf(0f) }
-
     Box(
-        modifier = modifier.onGloballyPositioned { coordinates ->
-            hostLeft = coordinates.positionInRoot().x
-            hostWidth = coordinates.size.width.toFloat()
-        }
+        modifier = modifier
+            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+            .drawWithContent {
+                drawContent()
+
+                val cosTheta = 0.9396926f // cos(20°)
+                val sinTheta = 0.34202014f // sin(20°)
+
+                val bandWidth = size.width * BAND_WIDTH
+                val reach = size.width * cosTheta + size.height * sinTheta
+                val travel = reach + bandWidth * 2f
+                val d = -bandWidth + travel * progress
+
+                val startDist = d - bandWidth / 2f
+                val endDist = d + bandWidth / 2f
+
+                val coreHighlight = Color.White.copy(alpha = 0.40f)
+                val warmShoulder = Color(0xFFE8DDD0).copy(alpha = 0.10f)
+
+                drawRect(
+                    brush = Brush.linearGradient(
+                        colorStops = arrayOf(
+                            0f    to Color.Transparent,
+                            0.20f to warmShoulder,
+                            0.40f to coreHighlight.copy(alpha = coreHighlight.alpha * 0.35f),
+                            0.50f to coreHighlight,
+                            0.60f to coreHighlight.copy(alpha = coreHighlight.alpha * 0.35f),
+                            0.80f to warmShoulder,
+                            1f    to Color.Transparent
+                        ),
+                        start = Offset(startDist * cosTheta, startDist * sinTheta),
+                        end = Offset(endDist * cosTheta, endDist * sinTheta)
+                    ),
+                    blendMode = BlendMode.SrcAtop
+                )
+            }
     ) {
-        CompositionLocalProvider(
-            LocalShimmerSweep provides ShimmerSweep(progress, hostLeft, hostWidth)
-        ) {
-            content()
-        }
+        content()
     }
 }
 
 /**
- * Paints the receiver as a placeholder block that the host's sweep passes over.
+ * Paints the receiver as a placeholder block that a [ShimmerHost] sweep passes over.
  *
- * Outside a [ShimmerHost] the block still renders, as a plain resting fill, so a skeleton
- * used on its own never disappears.
+ * The fill follows the theme, so a skeleton reads as a faint shape on a light sheet as well
+ * as on a dark one. [color] overrides it for a skeleton drawn on a fixed dark surface, such
+ * as the media card, which stands in for artwork under a dark scrim in either theme.
  */
-fun Modifier.shimmerBlock(shape: Shape = RoundedCornerShape(6.dp)): Modifier = composed {
-    val base = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f)
-    val highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.26f)
-
-    val sweep = LocalShimmerSweep.current
-    var blockLeft by remember { mutableStateOf(0f) }
-
-    this
-        .clip(shape)
-        .background(base)
-        .onGloballyPositioned { blockLeft = it.positionInRoot().x }
-        .drawWithContent {
-            drawContent()
-
-            if (sweep == null || sweep.hostWidth <= 0f) return@drawWithContent
-
-            val bandWidth = sweep.hostWidth * BAND_WIDTH
-            // The band starts fully off the host's left edge and finishes fully off its
-            // right edge, which is what keeps the sweep continuous across the group.
-            val travel = sweep.hostWidth + bandWidth * 2f
-            val bandLeftInRoot = sweep.hostLeft - bandWidth + travel * sweep.progress
-
-            // Translate into this block's own coordinates so the band lines up across
-            // blocks that start at different offsets.
-            val start = bandLeftInRoot - blockLeft
-
-            drawRect(
-                brush = Brush.linearGradient(
-                    colorStops = arrayOf(
-                        0f to Color.Transparent,
-                        0.5f to highlight,
-                        1f to Color.Transparent
-                    ),
-                    start = Offset(start, 0f),
-                    end = Offset(start + bandWidth, size.height)
-                )
-            )
-        }
+fun Modifier.shimmerBlock(
+    shape: Shape = RoundedCornerShape(6.dp),
+    color: Color = Color.Unspecified
+): Modifier = composed {
+    val fill = color.takeOrElse { MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f) }
+    clip(shape).background(fill)
 }
 
-/**
- * Paints a card surface with a continuous sweep pass over the entire card.
- */
+/** Card surface for skeleton cards, following the theme. */
 fun Modifier.shimmerCard(shape: Shape = RoundedCornerShape(20.dp)): Modifier = composed {
-    val base = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
-    val highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f)
-
-    val sweep = LocalShimmerSweep.current
-    var cardLeft by remember { mutableStateOf(0f) }
-
-    this
-        .clip(shape)
-        .background(base)
-        .onGloballyPositioned { cardLeft = it.positionInRoot().x }
-        .drawWithContent {
-            drawContent()
-
-            if (sweep == null || sweep.hostWidth <= 0f) return@drawWithContent
-
-            val bandWidth = sweep.hostWidth * BAND_WIDTH
-            val travel = sweep.hostWidth + bandWidth * 2f
-            val bandLeftInRoot = sweep.hostLeft - bandWidth + travel * sweep.progress
-            val start = bandLeftInRoot - cardLeft
-
-            drawRect(
-                brush = Brush.linearGradient(
-                    colorStops = arrayOf(
-                        0f to Color.Transparent,
-                        0.4f to highlight.copy(alpha = highlight.alpha * 0.4f),
-                        0.5f to highlight,
-                        0.6f to highlight.copy(alpha = highlight.alpha * 0.4f),
-                        1f to Color.Transparent
-                    ),
-                    start = Offset(start, 0f),
-                    end = Offset(start + bandWidth, size.height)
-                )
-            )
-        }
+    clip(shape).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
 }
 
 /**
@@ -270,68 +213,133 @@ fun Modifier.refreshShine(progress: Float, shape: Shape = RoundedCornerShape(26.
     }
 
 /**
- * Stands in for the media card while a link is being read. It matches the real card's
- * 16:9 layout with overlaid title, author, duration badge and subtle vignette scrim,
- * exactly matching Hazel's MediaCard so nothing jumps when the metadata arrives.
+ * Skeleton placeholder matching [MediaCard]'s 16:9 layout: overlaid title, author,
+ * duration badge at bottom-start, and state tag at bottom-end.
  */
 @Composable
 fun MediaCardShimmer(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = Color(0xFF1A1A1E)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
-                .shimmerCard(RoundedCornerShape(20.dp))
         ) {
-            // Dark gradient overlay matching real MediaCard
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            0f to Color.Black.copy(alpha = 0.70f),
-                            0.4f to Color.Transparent,
-                            0.7f to Color.Transparent,
-                            1f to Color.Black.copy(alpha = 0.75f)
+                            0f to Color(0xFF262630),
+                            0.35f to Color(0xFF1E1E26),
+                            0.65f to Color(0xFF1A1A22),
+                            1f to Color(0xFF141418)
+                        )
+                    )
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.linearGradient(
+                            0f to Color(0x0AFFFFFF),
+                            0.5f to Color.Transparent,
+                            1f to Color(0x08FFFFFF),
+                            start = Offset.Zero,
+                            end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
                         )
                     )
             )
 
-            // Overlaid title and author placeholder lines at top-start
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Black.copy(alpha = 0.52f),
+                            0.35f to Color.Transparent,
+                            0.70f to Color.Transparent,
+                            1f to Color.Black.copy(alpha = 0.58f)
+                        )
+                    )
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.Transparent)
+                    .drawBehind {
+                        drawRoundRect(
+                            brush = Brush.linearGradient(
+                                0f to Color(0x18FFFFFF),
+                                0.5f to Color(0x08FFFFFF),
+                                1f to Color(0x14FFFFFF),
+                                start = Offset.Zero,
+                                end = Offset(size.width, size.height)
+                            ),
+                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(20.dp.toPx()),
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx())
+                        )
+                    }
+            )
+
             Column(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .fillMaxWidth()
-                    .padding(start = 14.dp, top = 14.dp, end = 20.dp)
+                    .padding(start = 14.dp, top = 12.dp, end = 14.dp)
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.82f)
-                        .height(15.dp)
-                        .shimmerBlock(RoundedCornerShape(4.dp))
+                        .fillMaxWidth(0.75f)
+                        .height(13.dp)
+                        .shimmerBlock(RoundedCornerShape(4.dp), MEDIA_CARD_BLOCK)
                 )
                 Spacer(modifier = Modifier.height(7.dp))
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.48f)
-                        .height(12.dp)
-                        .shimmerBlock(RoundedCornerShape(4.dp))
+                        .fillMaxWidth(0.52f)
+                        .height(13.dp)
+                        .shimmerBlock(RoundedCornerShape(4.dp), MEDIA_CARD_BLOCK)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.38f)
+                        .height(10.dp)
+                        .shimmerBlock(RoundedCornerShape(3.dp), MEDIA_CARD_BLOCK)
                 )
             }
 
-            // Bottom-start duration badge placeholder
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(12.dp)
-                    .width(48.dp)
-                    .height(18.dp)
-                    .shimmerBlock(RoundedCornerShape(4.dp))
-            )
+                    .padding(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(46.dp)
+                        .height(18.dp)
+                        .shimmerBlock(RoundedCornerShape(4.dp), MEDIA_CARD_BLOCK)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(56.dp)
+                        .height(18.dp)
+                        .shimmerBlock(RoundedCornerShape(4.dp), MEDIA_CARD_BLOCK)
+                )
+            }
         }
     }
 }
