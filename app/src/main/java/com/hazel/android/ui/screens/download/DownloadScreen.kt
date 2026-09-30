@@ -330,6 +330,10 @@ fun DownloadScreen(
         when {
             resolved == null -> downloadViewModel.clearAutoOpened()
 
+            // Read by the share overlay, which showed its own sheet for it. Opening the app
+            // later leaves the result on the list without asking about it a second time.
+            downloadViewModel.readShownElsewhere -> downloadViewModel.markAutoOpened(resolved)
+
             resolved != downloadViewModel.autoOpenedUrl && !state.isMultiple &&
                     !state.isDownloading && !state.isComplete -> {
                 downloadViewModel.markAutoOpened(resolved)

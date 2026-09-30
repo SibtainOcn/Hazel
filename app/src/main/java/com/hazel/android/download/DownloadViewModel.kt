@@ -155,7 +155,17 @@ class DownloadViewModel : ViewModel() {
 
     fun clearAutoOpened() {
         autoOpenedUrl = null
+        readShownElsewhere = false
     }
+
+    /**
+     * True while the results in hand came from a read the share overlay started. Its sheet
+     * opened over the app it was shared from, and the choice was made or declined there;
+     * opening the app afterwards is not a request to be asked again, so the app's own sheet
+     * does not open for these results. A read started in the app clears it.
+     */
+    var readShownElsewhere: Boolean = false
+        private set
 
     private var fetchJob: Job? = null
     private var downloadJob: Job? = null
@@ -371,6 +381,7 @@ class DownloadViewModel : ViewModel() {
         clearResults()
         onUrlChange(url)
         fetchAll(listOf(url))
+        readShownElsewhere = true
     }
 
     /** Points the sheet at one of several resolved links. */
