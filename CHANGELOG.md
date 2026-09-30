@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - yt-dlp updates itself in the background on launch, following the automatic download and Wi-Fi only settings of the update screen.
 - The batch sheet's quality button opens the format list for audio as well, showing the formats the links share with the size of the whole set; a codec such as Opus or AAC can be chosen for links from mixed sources.
 - Bitrate is its own setting for audio conversions, in the single and batch sheets, and the batch sheet's bottom buttons are drawn on a surface.
+- The format list has a filter sheet (All, Suggested, Smallest per resolution, Generic, and the sort order), an update button that reads the formats again, and a choice of reader (NewPipe or yt-dlp) for links both can read.
+- Loading skeletons rest at low opacity with a soft band sweeping across them, the same in both themes, and show only while a read is actually running.
 
 ## [1.0.10] - 2026-09-27
 ### Changed
