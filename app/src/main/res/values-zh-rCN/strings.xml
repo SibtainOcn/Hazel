@@ -440,7 +440,6 @@
     <string name="cookie_webview_done">"  确定"</string>
 
     <!-- FormatSelectionSheet -->
-    <string name="format_selection_sort">格式排序</string>
     <string name="format_selection_change">更改格式</string>
     <string name="format_selection_title">格式</string>
     <string name="format_selection_subtitle">选择格式</string>
@@ -449,6 +448,14 @@
     <string name="format_sort_quality">画质</string>
     <string name="format_sort_file_size">文件大小</string>
     <string name="format_sort_container">封装格式</string>
+    <string name="format_filter_title">格式筛选</string>
+    <string name="format_filter_all">全部</string>
+    <string name="format_filter_suggested">推荐</string>
+    <string name="format_filter_smallest">最小格式（按分辨率）</string>
+    <string name="format_filter_generic">通用</string>
+    <string name="format_source_title">格式来源</string>
+    <string name="format_sort_title">排序方式</string>
+    <string name="format_update">更新</string>
 
     <!-- AudioLanguageSheet -->
     <string name="audio_language_title">音轨语言</string>

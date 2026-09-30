@@ -1,6 +1,12 @@
 package com.hazel.android.ui.screens.download
 
 import androidx.annotation.StringRes
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.collectAsState
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -24,12 +30,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.UnfoldMore
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +59,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hazel.android.R
+import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.FormatFilter
+import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.ui.components.FormatListShimmer
@@ -90,6 +96,10 @@ enum class FormatSort(@StringRes val labelRes: Int) {
  * listing and has not been read yet. Only the generic entry is there to show at that point,
  * so the sheet says the rest is still coming rather than letting one row look like the
  * whole answer.
+ *
+ * The filter button narrows the list and orders it. Given [onRefresh], the sheet also offers
+ * to read the formats again, and when [canChooseSource] says the links can be read by either
+ * reader, to read them with the other one.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,23 +109,42 @@ fun FormatSelectionSheet(
     onConfirm: (MediaFormat) -> Unit,
     onDismiss: () -> Unit,
     audioFirst: Boolean = false,
-    isLoadingFormats: Boolean = false
+    isLoadingFormats: Boolean = false,
+    onRefresh: ((ListingSource?) -> Unit)? = null,
+    canChooseSource: Boolean = false
 ) {
     // Half height on open. The sheet is a list, and a list is readable from the top down,
     // so the whole screen is offered rather than demanded.
     val sheetState = rememberModalBottomSheetState()
 
     var sort by remember { mutableStateOf(FormatSort.QUALITY) }
-    var sortMenuOpen by remember { mutableStateOf(false) }
+    var filter by remember { mutableStateOf(FormatFilter.ALL) }
+    var filterSheetOpen by remember { mutableStateOf(false) }
     var draft by remember { mutableStateOf(selected) }
+
+    // The reader these formats came from: the setting, until the user picks another here.
+    val context = LocalContext.current
+    val settingSource by remember(context) { SettingsRepository.getListingSource(context) }
+        .collectAsState(initial = ListingSource.DEFAULT)
+    var chosenSource by remember { mutableStateOf<ListingSource?>(null) }
+    val source = chosenSource ?: settingSource
+
+    // Set while an update the user asked for is running. The list it replaces is hidden
+    // behind the skeleton until then, so old rows are never mistaken for the new answer.
+    var refreshing by remember { mutableStateOf(false) }
+    LaunchedEffect(isLoadingFormats) { if (!isLoadingFormats) refreshing = false }
+    val refresh: (ListingSource?) -> Unit = { picked ->
+        refreshing = true
+        onRefresh?.invoke(picked)
+    }
 
     // The rows are laid out once per ordering rather than per frame. Each carries the text
     // it draws, so scrolling does no formatting work and a fast fling has nothing to do
     // but draw.
     val videoTitle = stringResource(R.string.format_sheet_tab_video)
     val audioTitle = stringResource(R.string.format_sheet_tab_audio)
-    val rows = remember(info, sort, audioFirst, videoTitle, audioTitle) {
-        buildRows(info, sort, audioFirst, videoTitle, audioTitle)
+    val rows = remember(info, sort, filter, audioFirst, videoTitle, audioTitle) {
+        buildRows(info, sort, filter, audioFirst, videoTitle, audioTitle)
     }
 
     val listState = rememberLazyListState()
@@ -156,39 +185,20 @@ fun FormatSelectionSheet(
                     )
                 }
 
-                Box {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f))
-                            .clickable { sortMenuOpen = true },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.Sort,
-                            contentDescription = stringResource(R.string.format_selection_sort),
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = sortMenuOpen,
-                        onDismissRequest = { sortMenuOpen = false }
-                    ) {
-                        FormatSort.entries.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(stringResource(option.labelRes)) },
-                                onClick = {
-                                    sort = option
-                                    sortMenuOpen = false
-                                },
-                                trailingIcon = if (option == sort) {
-                                    { Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }
-                                } else null
-                            )
-                        }
-                    }
+                HeaderIconButton(
+                    icon = Icons.Filled.FilterList,
+                    description = stringResource(R.string.format_filter_title),
+                    onClick = { filterSheetOpen = true }
+                )
+
+                if (onRefresh != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    HeaderIconButton(
+                        icon = Icons.Filled.Refresh,
+                        description = stringResource(R.string.format_update),
+                        enabled = !isLoadingFormats,
+                        onClick = { refresh(chosenSource) }
+                    )
                 }
 
                 Spacer(modifier = Modifier.width(10.dp))
@@ -237,7 +247,7 @@ fun FormatSelectionSheet(
                     .let { PaddingValues(bottom = it.calculateBottomPadding() + 24.dp) }
             ) {
                 items(
-                    count = rows.size,
+                    count = if (refreshing) 0 else rows.size,
                     key = { rows[it].key },
                     contentType = { if (rows[it] is FormatListRow.Header) 0 else 1 }
                 ) { index ->
@@ -259,13 +269,147 @@ fun FormatSelectionSheet(
                 if (isLoadingFormats) {
                     item(key = "loading", contentType = 2) {
                         FormatListShimmer(
-                            rows = 4,
+                            rows = if (refreshing) 6 else 4,
                             modifier = Modifier.padding(horizontal = 14.dp)
                         )
                     }
                 }
             }
         }
+    }
+
+    if (filterSheetOpen) {
+        FormatFilterSheet(
+            filter = filter,
+            sort = sort,
+            source = source.takeIf { canChooseSource && onRefresh != null },
+            onFilter = {
+                filter = it
+                filterSheetOpen = false
+            },
+            onSort = {
+                sort = it
+                filterSheetOpen = false
+            },
+            onSource = { picked ->
+                filterSheetOpen = false
+                chosenSource = picked
+                filter = FormatFilter.ALL
+                refresh(picked)
+            },
+            onDismiss = { filterSheetOpen = false }
+        )
+    }
+}
+
+/** A round button in the sheet's header, drawn the way the sort button always was. */
+@Composable
+private fun HeaderIconButton(
+    icon: ImageVector,
+    description: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true
+) {
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = if (enabled) 0.18f else 0.08f))
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            icon,
+            contentDescription = description,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = if (enabled) 1f else 0.4f)
+        )
+    }
+}
+
+/**
+ * What the format list shows, how it is ordered, and which reader its formats come from.
+ *
+ * Each section is a short list with the current choice ticked, and a choice applies and
+ * closes the sheet at once. [source] is null where the links cannot be read both ways, and
+ * the section is then left out rather than offering a reader that would not work.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FormatFilterSheet(
+    filter: FormatFilter,
+    sort: FormatSort,
+    source: ListingSource?,
+    onFilter: (FormatFilter) -> Unit,
+    onSort: (FormatSort) -> Unit,
+    onSource: (ListingSource) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = null
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 20.dp, bottom = 24.dp)
+        ) {
+            FilterSection(stringResource(R.string.format_filter_title))
+            FormatFilter.entries.forEach { option ->
+                FilterOption(stringResource(option.labelRes), option == filter) { onFilter(option) }
+            }
+
+            FilterSection(stringResource(R.string.format_sort_title))
+            FormatSort.entries.forEach { option ->
+                FilterOption(stringResource(option.labelRes), option == sort) { onSort(option) }
+            }
+
+            if (source != null) {
+                FilterSection(stringResource(R.string.format_source_title))
+                // The reader that answers soonest first, as the reading settings list them.
+                listOf(ListingSource.NEWPIPE, ListingSource.YT_DLP).forEach { option ->
+                    FilterOption(stringResource(option.labelRes), option == source) { onSource(option) }
+                }
+            }
+
+            Spacer(modifier = Modifier.navigationBarsPadding())
+        }
+    }
+}
+
+@Composable
+private fun FilterSection(title: String) {
+    Text(
+        title,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 4.dp)
+    )
+}
+
+@Composable
+private fun FilterOption(label: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 24.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.size(24.dp), contentAlignment = Alignment.Center) {
+            if (selected) {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(24.dp))
+        Text(label, style = MaterialTheme.typography.bodyLarge)
     }
 }
 
@@ -292,12 +436,13 @@ private sealed interface FormatListRow {
 private fun buildRows(
     info: MediaInfo,
     sort: FormatSort,
+    filter: FormatFilter,
     audioFirst: Boolean,
     videoTitle: String,
     audioTitle: String
 ): List<FormatListRow> {
-    val video = info.videoFormats.sortedBy(sort)
-    val audio = info.audioFormats.sortedBy(sort)
+    val video = filter.apply(info.videoFormats, audio = false).sortedBy(sort)
+    val audio = filter.apply(info.audioFormats, audio = true).sortedBy(sort)
 
     fun section(title: String, formats: List<MediaFormat>): List<FormatListRow> =
         if (formats.isEmpty()) emptyList()

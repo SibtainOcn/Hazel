@@ -447,7 +447,6 @@
     <string name="cookie_webview_done">"  ठीक है"</string>
 
     <!-- FormatSelectionSheet -->
-    <string name="format_selection_sort">फ़ॉर्मैट क्रम में लगाएँ</string>
     <string name="format_selection_change">फ़ॉर्मैट बदलें</string>
     <string name="format_selection_title">फ़ॉर्मैट</string>
     <string name="format_selection_subtitle">फ़ॉर्मैट चुनें</string>
@@ -456,6 +455,14 @@
     <string name="format_sort_quality">क्वालिटी</string>
     <string name="format_sort_file_size">फ़ाइल का आकार</string>
     <string name="format_sort_container">कंटेनर</string>
+    <string name="format_filter_title">फ़ॉर्मैट फ़िल्टर</string>
+    <string name="format_filter_all">सभी</string>
+    <string name="format_filter_suggested">सुझाए गए</string>
+    <string name="format_filter_smallest">सबसे छोटा फ़ॉर्मैट (प्रति रेज़ोल्यूशन)</string>
+    <string name="format_filter_generic">सामान्य</string>
+    <string name="format_source_title">फ़ॉर्मैट स्रोत</string>
+    <string name="format_sort_title">क्रमबद्ध करें</string>
+    <string name="format_update">अपडेट करें</string>
 
     <!-- AudioLanguageSheet -->
     <string name="audio_language_title">ऑडियो की भाषा</string>

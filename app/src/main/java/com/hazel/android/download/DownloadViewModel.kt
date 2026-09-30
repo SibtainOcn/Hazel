@@ -189,7 +189,13 @@ class DownloadViewModel : ViewModel() {
     @Volatile private var lastNotifiedAt = 0L
 
     /** Entries whose formats are being read, so opening a sheet twice reads once. */
-    private val formatsInFlight = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+    /**
+     * Links whose formats are being read right now. The format list shows its skeleton
+     * for exactly these, so a link whose read failed stops showing one instead of
+     * waiting forever.
+     */
+    private val _formatsReading = MutableStateFlow<Set<String>>(emptySet())
+    val formatsReading: StateFlow<Set<String>> = _formatsReading.asStateFlow()
 
     /** Caps how many links have their formats read at the same time. */
     private val formatReads = Semaphore(FORMAT_READS_AT_ONCE)
@@ -736,23 +742,41 @@ class DownloadViewModel : ViewModel() {
      * Called when the sheet opens on such a card, and for every link of a set when its
      * audio formats are asked for. A card that already has formats, or one whose formats
      * are still being read, is left alone.
+     */
+    fun resolveFormats(info: MediaInfo) {
+        if (info.hasResolvedFormats) return
+        readFormatsOf(info, fresh = false, source = null)
+    }
+
+    /**
+     * Reads the formats of [infos] again, from the source rather than the cache, with
+     * [source] when one is given and the reader setting otherwise. This is the format
+     * list's update action, and what switching its formats source does.
+     */
+    fun refreshFormats(infos: List<MediaInfo>, source: ListingSource? = null) {
+        infos.forEach { readFormatsOf(it, fresh = true, source = source) }
+    }
+
+    /**
+     * Starts one link's read unless one is already running for it.
      *
      * Reads beyond [FORMAT_READS_AT_ONCE] wait their turn: each is a Python process of its
      * own, and a playlist of eighty started at once would starve the device rather than
      * finish any sooner.
      */
-    fun resolveFormats(info: MediaInfo) {
-        if (info.hasResolvedFormats || !formatsInFlight.add(info.url)) return
+    private fun readFormatsOf(info: MediaInfo, fresh: Boolean, source: ListingSource?) {
+        if (!claimFormatRead(info.url)) return
 
         viewModelScope.launch(Dispatchers.IO) {
             val resolved = try {
-                formatReads.withPermit { readFormats(info.url) }
+                formatReads.withPermit { readFormats(info.url, fresh, source) }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.w("Hazel", "Format read failed for ${info.url}: ${e.message}")
                 null
             } finally {
-                formatsInFlight -= info.url
+                _formatsReading.update { it - info.url }
             }
             if (resolved == null) return@launch
 
@@ -775,15 +799,31 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
-    /** One link's formats, from the cache when it holds them. */
-    private suspend fun readFormats(url: String): MediaInfo? {
+    /** Marks [url] as being read, or returns false when it already is. */
+    private fun claimFormatRead(url: String): Boolean {
+        while (true) {
+            val current = _formatsReading.value
+            if (url in current) return false
+            if (_formatsReading.compareAndSet(current, current + url)) return true
+        }
+    }
+
+    /**
+     * One link's formats. A [fresh] read skips the cache and replaces what it held; a
+     * [source] overrides the reader setting for this read.
+     */
+    private suspend fun readFormats(url: String, fresh: Boolean, source: ListingSource?): MediaInfo? {
         val app = HazelApp.instance
-        val source = SettingsRepository.getListingSource(app).first()
+        val reader = source ?: SettingsRepository.getListingSource(app).first()
         val access = CookieRepository.accessFor(app, url)
 
-        InfoCache.metadataFor(url)?.takeIf { it.hasResolvedFormats }?.let { return it }
+        if (fresh) {
+            InfoCache.invalidate(url)
+        } else {
+            InfoCache.metadataFor(url)?.takeIf { it.hasResolvedFormats }?.let { return it }
+        }
 
-        if (source == ListingSource.NEWPIPE && !access.hasCookies && NewPipeLister.handlesStream(url)) {
+        if (reader == ListingSource.NEWPIPE && !access.hasCookies && NewPipeLister.handlesStream(url)) {
             NewPipeLister.single(url)?.takeIf { it.hasResolvedFormats }?.let { return it }
         }
 

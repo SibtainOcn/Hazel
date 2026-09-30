@@ -487,7 +487,6 @@
     <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->
-    <string name="format_selection_sort">Sort formats</string>
     <string name="format_selection_change">Change format</string>
     <string name="format_selection_title">Format</string>
     <string name="format_selection_subtitle">Select format</string>
@@ -496,6 +495,14 @@
     <string name="format_sort_quality">Quality</string>
     <string name="format_sort_file_size">File size</string>
     <string name="format_sort_container">Container</string>
+    <string name="format_filter_title">Format filter</string>
+    <string name="format_filter_all">All</string>
+    <string name="format_filter_suggested">Suggested</string>
+    <string name="format_filter_smallest">Smallest format (per resolution)</string>
+    <string name="format_filter_generic">Generic</string>
+    <string name="format_source_title">Formats source</string>
+    <string name="format_sort_title">Sort by</string>
+    <string name="format_update">Update</string>
 
     <!-- AudioLanguageSheet -->
     <string name="audio_language_title">Audio language</string>

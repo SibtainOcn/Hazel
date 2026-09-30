@@ -461,7 +461,6 @@
     <string name="cookie_webview_done">"  ОК"</string>
 
     <!-- FormatSelectionSheet -->
-    <string name="format_selection_sort">Сортировка форматов</string>
     <string name="format_selection_change">Сменить формат</string>
     <string name="format_selection_title">Формат</string>
     <string name="format_selection_subtitle">Выберите формат</string>
@@ -470,6 +469,14 @@
     <string name="format_sort_quality">Качество</string>
     <string name="format_sort_file_size">Размер файла</string>
     <string name="format_sort_container">Контейнер</string>
+    <string name="format_filter_title">Фильтр форматов</string>
+    <string name="format_filter_all">Все</string>
+    <string name="format_filter_suggested">Рекомендуемые</string>
+    <string name="format_filter_smallest">Наименьший формат (для каждого разрешения)</string>
+    <string name="format_filter_generic">Общие</string>
+    <string name="format_source_title">Источник форматов</string>
+    <string name="format_sort_title">Сортировка</string>
+    <string name="format_update">Обновить</string>
 
     <!-- AudioLanguageSheet -->
     <string name="audio_language_title">Язык аудио</string>

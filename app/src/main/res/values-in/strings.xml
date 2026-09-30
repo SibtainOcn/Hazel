@@ -440,7 +440,6 @@
     <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->
-    <string name="format_selection_sort">Urutkan format</string>
     <string name="format_selection_change">Ubah format</string>
     <string name="format_selection_title">Format</string>
     <string name="format_selection_subtitle">Pilih format</string>
@@ -449,6 +448,14 @@
     <string name="format_sort_quality">Kualitas</string>
     <string name="format_sort_file_size">Ukuran file</string>
     <string name="format_sort_container">Wadah</string>
+    <string name="format_filter_title">Filter format</string>
+    <string name="format_filter_all">Semua</string>
+    <string name="format_filter_suggested">Disarankan</string>
+    <string name="format_filter_smallest">Format terkecil (per resolusi)</string>
+    <string name="format_filter_generic">Generik</string>
+    <string name="format_source_title">Sumber format</string>
+    <string name="format_sort_title">Urutkan menurut</string>
+    <string name="format_update">Perbarui</string>
 
     <!-- AudioLanguageSheet -->
     <string name="audio_language_title">Bahasa audio</string>

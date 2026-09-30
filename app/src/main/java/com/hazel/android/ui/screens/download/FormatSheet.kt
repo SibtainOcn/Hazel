@@ -64,6 +64,8 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.VIDEO_CONTAINERS
+import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.NewPipeLister
 import com.hazel.android.download.languageLabel
 import com.hazel.android.util.StoragePaths
 
@@ -92,6 +94,8 @@ fun FormatSheet(
     saveDirLabel: String,
     isCustomSaveDir: Boolean,
     isLoadingFormats: Boolean = false,
+    /** Reads this link's formats again, with the given reader or the setting's. */
+    onRefreshFormats: ((ListingSource?) -> Unit)? = null,
     initialFormat: MediaFormat? = null,
     /** The soundtrack this link is already set to, for a link being adjusted again. */
     initialAudioLanguage: String? = null,
@@ -438,6 +442,8 @@ fun FormatSheet(
             selected = selected,
             audioFirst = !videoTab,
             isLoadingFormats = isLoadingFormats,
+            onRefresh = onRefreshFormats,
+            canChooseSource = remember(info.url) { NewPipeLister.handlesStream(info.url) },
             onConfirm = { format ->
                 if (format.hasVideo) pickedVideo = format else pickedAudio = format
                 // Picking an audio stream from the video tab, or the other way round,

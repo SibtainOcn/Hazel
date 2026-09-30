@@ -44,6 +44,8 @@ import com.hazel.android.R
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadPlan
 import com.hazel.android.download.MediaFormat
+import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.NewPipeLister
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.BatchAudioFormats
 import com.hazel.android.download.formatFileSize
@@ -88,6 +90,10 @@ fun BatchDownloadSheet(
     onPickSaveDir: () -> Unit,
     onResetSaveDir: () -> Unit,
     onResolveFormats: (MediaInfo) -> Unit,
+    /** Links whose formats are being read right now. */
+    readingUrls: Set<String> = emptySet(),
+    /** Reads these links' formats again, with the given reader or the setting's. */
+    onRefreshFormats: (List<MediaInfo>, ListingSource?) -> Unit = { _, _ -> },
     onRemove: (MediaInfo) -> Unit,
     onDownload: (List<DownloadPlan>) -> Unit,
     onDismiss: () -> Unit
@@ -397,7 +403,8 @@ fun BatchDownloadSheet(
             onOptionsChange = onOptionsChange,
             saveDirLabel = saveDirLabel,
             isCustomSaveDir = isCustomSaveDir,
-            isLoadingFormats = !focused.hasResolvedFormats,
+            isLoadingFormats = focused.url in readingUrls,
+            onRefreshFormats = { source -> onRefreshFormats(listOf(focused), source) },
             initialFormat = state.formatOf(focused),
             initialAudioLanguage = state.languageOf(focused),
             confirmAsApply = true,
@@ -480,7 +487,11 @@ fun BatchDownloadSheet(
                 },
                 onDismiss = { openSheet = BatchSheet.NONE },
                 audioFirst = true,
-                isLoadingFormats = targets.any { !it.hasResolvedFormats }
+                isLoadingFormats = targets.any { it.url in readingUrls },
+                onRefresh = { source -> onRefreshFormats(targets, source) },
+                canChooseSource = remember(targets) {
+                    targets.isNotEmpty() && targets.all { NewPipeLister.handlesStream(it.url) }
+                }
             )
         }
 

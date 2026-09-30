@@ -440,7 +440,6 @@
     <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->
-    <string name="format_selection_sort">形式を並べ替え</string>
     <string name="format_selection_change">形式を変更</string>
     <string name="format_selection_title">形式</string>
     <string name="format_selection_subtitle">形式を選択</string>
@@ -449,6 +448,14 @@
     <string name="format_sort_quality">画質</string>
     <string name="format_sort_file_size">ファイルサイズ</string>
     <string name="format_sort_container">コンテナ</string>
+    <string name="format_filter_title">フォーマットフィルター</string>
+    <string name="format_filter_all">すべて</string>
+    <string name="format_filter_suggested">おすすめ</string>
+    <string name="format_filter_smallest">最小フォーマット（解像度ごと）</string>
+    <string name="format_filter_generic">汎用</string>
+    <string name="format_source_title">フォーマットの取得元</string>
+    <string name="format_sort_title">並べ替え</string>
+    <string name="format_update">更新</string>
 
     <!-- AudioLanguageSheet -->
     <string name="audio_language_title">音声の言語</string>

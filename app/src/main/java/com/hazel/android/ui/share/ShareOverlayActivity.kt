@@ -145,6 +145,7 @@ class ShareOverlayActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
             val downloadViewModel = remember { DownloadViewModelHolder.get() }
             val state by downloadViewModel.state.collectAsState()
+            val formatsReading by downloadViewModel.formatsReading.collectAsState()
 
             val options by SettingsRepository.getDownloadOptions(this)
                 .collectAsState(initial = DownloadOptions())
@@ -253,7 +254,10 @@ class ShareOverlayActivity : ComponentActivity() {
                                     },
                                     saveDirLabel = saveDirLabel,
                                     isCustomSaveDir = treeUri.isNotBlank(),
-                                    isLoadingFormats = state.isFetching || !currentInfo.hasResolvedFormats,
+                                    isLoadingFormats = state.isFetching || currentInfo.url in formatsReading,
+                                    onRefreshFormats = { source ->
+                                        downloadViewModel.refreshFormats(listOf(currentInfo), source)
+                                    },
                                     onOpenSaveDir = { MediaOpener.openLocation(this@ShareOverlayActivity, treeUri) },
                                     onPickSaveDir = {
                                         folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse))
@@ -301,6 +305,8 @@ class ShareOverlayActivity : ComponentActivity() {
                                         scope.launch { SettingsRepository.clearDownloadTree(this@ShareOverlayActivity) }
                                     },
                                     onResolveFormats = { item -> downloadViewModel.resolveFormats(item) },
+                                    readingUrls = formatsReading,
+                                    onRefreshFormats = downloadViewModel::refreshFormats,
                                     onRemove = { item -> downloadViewModel.removeResult(item) },
                                     onDownload = { plans ->
                                         downloadViewModel.startBatch(
@@ -336,7 +342,10 @@ class ShareOverlayActivity : ComponentActivity() {
                                     },
                                     saveDirLabel = saveDirLabel,
                                     isCustomSaveDir = treeUri.isNotBlank(),
-                                    isLoadingFormats = state.isFetching || !currentInfo.hasResolvedFormats,
+                                    isLoadingFormats = state.isFetching || currentInfo.url in formatsReading,
+                                    onRefreshFormats = { source ->
+                                        downloadViewModel.refreshFormats(listOf(currentInfo), source)
+                                    },
                                     onOpenSaveDir = { MediaOpener.openLocation(this@ShareOverlayActivity, treeUri) },
                                     onPickSaveDir = {
                                         folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse))

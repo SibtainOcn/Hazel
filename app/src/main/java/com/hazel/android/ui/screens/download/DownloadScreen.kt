@@ -129,6 +129,7 @@ fun DownloadScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val state by downloadViewModel.state.collectAsState()
+    val formatsReading by downloadViewModel.formatsReading.collectAsState()
 
     val options by SettingsRepository.getDownloadOptions(context)
         .collectAsState(initial = DownloadOptions())
@@ -856,7 +857,8 @@ fun DownloadScreen(
                 },
                 saveDirLabel = saveDirLabel,
                 isCustomSaveDir = treeUri.isNotBlank(),
-                isLoadingFormats = state.isFetching || !info.hasResolvedFormats,
+                isLoadingFormats = state.isFetching || info.url in formatsReading,
+                onRefreshFormats = { source -> downloadViewModel.refreshFormats(listOf(info), source) },
                 onOpenSaveDir = { openSaveDir(context, treeUri) },
                 onPickSaveDir = {
                     folderPicker.launch(treeUri.takeIf { it.isNotBlank() }?.let(Uri::parse))
@@ -898,6 +900,8 @@ fun DownloadScreen(
                 scope.launch { SettingsRepository.clearDownloadTree(context) }
             },
             onResolveFormats = downloadViewModel::resolveFormats,
+            readingUrls = formatsReading,
+            onRefreshFormats = downloadViewModel::refreshFormats,
             onRemove = downloadViewModel::removeResult,
             onDownload = { plans ->
                 batchSheetVisible = false
