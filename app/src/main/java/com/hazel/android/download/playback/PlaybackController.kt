@@ -151,7 +151,7 @@ class PlaybackController(
         positionMs = ms.coerceAtLeast(0L)
     }
 
-    fun setMuted(muted: Boolean) {
+    fun mute(muted: Boolean) {
         player.volume = if (muted) 0f else 1f
         isMuted = muted
     }

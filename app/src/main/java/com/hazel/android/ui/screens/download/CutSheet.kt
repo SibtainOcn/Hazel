@@ -367,7 +367,7 @@ private fun PreviewControls(
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
-        IconButton(onClick = { controller.setMuted(!controller.isMuted) }) {
+        IconButton(onClick = { controller.mute(!controller.isMuted) }) {
             Icon(
                 if (controller.isMuted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
                 contentDescription = stringResource(
