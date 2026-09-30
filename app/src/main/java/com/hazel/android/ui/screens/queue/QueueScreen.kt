@@ -229,6 +229,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             info = item.info,
                             isDownloading = item.isDownloading,
                             isProcessing = item.isDownloading && state.isProcessing,
+                            processingSteps = if (item.isDownloading) state.processingSteps else emptyList(),
+                            processingStep = state.processingStep,
                             progress = if (item.isDownloading) state.progress else 0f,
                             totalBytes = if (item.isDownloading) state.totalBytes else 0L,
                             batchItem = item.batchItem,

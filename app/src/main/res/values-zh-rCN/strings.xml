@@ -540,4 +540,14 @@
     <string name="options_thumbnail_embed">封面</string>
     <string name="options_thumbnail_crop">裁剪为正方形</string>
     <string name="options_thumbnail_crop_body">封面从图片中央裁剪，形状与音乐播放器显示的一致。</string>
+    <string name="processing_step_fetch">获取</string>
+    <string name="processing_step_merge">合并</string>
+    <string name="processing_step_extract">提取</string>
+    <string name="processing_step_remux">重封装</string>
+    <string name="processing_step_subtitles">字幕</string>
+    <string name="processing_step_cut">剪切</string>
+    <string name="processing_step_tags">标签</string>
+    <string name="processing_step_cover">封面</string>
+    <string name="processing_step_split">分割</string>
+    <string name="processing_step_save">保存</string>
 </resources>

@@ -554,4 +554,14 @@
     <string name="options_thumbnail_embed">Capa</string>
     <string name="options_thumbnail_crop">Cortar em quadrado</string>
     <string name="options_thumbnail_crop_body">A capa é cortada do centro da imagem, no formato que os players de música mostram.</string>
+    <string name="processing_step_fetch">Buscar</string>
+    <string name="processing_step_merge">Juntar</string>
+    <string name="processing_step_extract">Extrair</string>
+    <string name="processing_step_remux">Remux</string>
+    <string name="processing_step_subtitles">Legendas</string>
+    <string name="processing_step_cut">Cortar</string>
+    <string name="processing_step_tags">Tags</string>
+    <string name="processing_step_cover">Capa</string>
+    <string name="processing_step_split">Dividir</string>
+    <string name="processing_step_save">Salvar</string>
 </resources>

@@ -554,4 +554,14 @@
     <string name="options_thumbnail_embed">Pochette</string>
     <string name="options_thumbnail_crop">Recadrer en carré</string>
     <string name="options_thumbnail_crop_body">La pochette est découpée au centre de l\'image, au format affiché par les lecteurs de musique.</string>
+    <string name="processing_step_fetch">Récupérer</string>
+    <string name="processing_step_merge">Fusionner</string>
+    <string name="processing_step_extract">Extraire</string>
+    <string name="processing_step_remux">Remux</string>
+    <string name="processing_step_subtitles">Sous-titres</string>
+    <string name="processing_step_cut">Couper</string>
+    <string name="processing_step_tags">Tags</string>
+    <string name="processing_step_cover">Pochette</string>
+    <string name="processing_step_split">Diviser</string>
+    <string name="processing_step_save">Enregistrer</string>
 </resources>

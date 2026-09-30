@@ -560,4 +560,14 @@
     <string name="options_thumbnail_embed">Обложка</string>
     <string name="options_thumbnail_crop">Обрезать до квадрата</string>
     <string name="options_thumbnail_crop_body">Обложка вырезается из центра изображения — в форме, которую показывают музыкальные плееры.</string>
+    <string name="processing_step_fetch">Загрузка</string>
+    <string name="processing_step_merge">Слияние</string>
+    <string name="processing_step_extract">Извлечение</string>
+    <string name="processing_step_remux">Ремукс</string>
+    <string name="processing_step_subtitles">Субтитры</string>
+    <string name="processing_step_cut">Вырезка</string>
+    <string name="processing_step_tags">Теги</string>
+    <string name="processing_step_cover">Обложка</string>
+    <string name="processing_step_split">Разбивка</string>
+    <string name="processing_step_save">Сохранение</string>
 </resources>

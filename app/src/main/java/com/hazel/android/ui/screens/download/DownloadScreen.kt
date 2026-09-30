@@ -83,6 +83,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.ui.components.ProcessingTracker
+import com.hazel.android.download.ProcessingStep
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SearchHistoryRepository
@@ -553,6 +555,8 @@ fun DownloadScreen(
                                 info = info,
                                 isDownloading = isActive,
                                 isProcessing = isActive && state.isProcessing,
+                                processingSteps = if (isActive) state.processingSteps else emptyList(),
+                                processingStep = state.processingStep,
                                 progress = state.progress,
                                 totalBytes = state.totalBytes,
                                 isComplete = batchItem?.state == BatchState.DONE ||
@@ -1073,6 +1077,8 @@ private fun MediaCard(
     info: MediaInfo,
     isDownloading: Boolean,
     isProcessing: Boolean = false,
+    processingSteps: List<ProcessingStep> = emptyList(),
+    processingStep: Int = 0,
     progress: Float,
     totalBytes: Long,
     isComplete: Boolean,
@@ -1216,7 +1222,17 @@ private fun MediaCard(
                 }
 
                 if (isProcessing && !isPaused) {
-                    ProcessingShimmer(modifier = Modifier.fillMaxSize())
+                    // The stages this download goes through, as far as it has got; the
+                    // plain sweep only stands in when no stages are known.
+                    if (processingSteps.isNotEmpty()) {
+                        ProcessingTracker(
+                            steps = processingSteps,
+                            current = processingStep,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        ProcessingShimmer(modifier = Modifier.fillMaxSize())
+                    }
                 } else {
                     // The progress ring says how far along the download is. Stopping or
                     // pausing it is done from the queue, which a tap on the card opens.

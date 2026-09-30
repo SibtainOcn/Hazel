@@ -554,4 +554,14 @@
     <string name="options_thumbnail_embed">Portada</string>
     <string name="options_thumbnail_crop">Recortar en cuadrado</string>
     <string name="options_thumbnail_crop_body">La portada se recorta del centro de la imagen, con la forma que muestran los reproductores de música.</string>
+    <string name="processing_step_fetch">Obtener</string>
+    <string name="processing_step_merge">Unir</string>
+    <string name="processing_step_extract">Extraer</string>
+    <string name="processing_step_remux">Remux</string>
+    <string name="processing_step_subtitles">Subtítulos</string>
+    <string name="processing_step_cut">Cortar</string>
+    <string name="processing_step_tags">Etiquetas</string>
+    <string name="processing_step_cover">Portada</string>
+    <string name="processing_step_split">Dividir</string>
+    <string name="processing_step_save">Guardar</string>
 </resources>

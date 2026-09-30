@@ -540,4 +540,14 @@
     <string name="options_thumbnail_embed">カバーアート</string>
     <string name="options_thumbnail_crop">正方形に切り抜く</string>
     <string name="options_thumbnail_crop_body">カバーは画像の中央から、音楽プレーヤーが表示する形に切り抜かれます。</string>
+    <string name="processing_step_fetch">取得</string>
+    <string name="processing_step_merge">結合</string>
+    <string name="processing_step_extract">抽出</string>
+    <string name="processing_step_remux">リマックス</string>
+    <string name="processing_step_subtitles">字幕</string>
+    <string name="processing_step_cut">カット</string>
+    <string name="processing_step_tags">タグ</string>
+    <string name="processing_step_cover">カバー</string>
+    <string name="processing_step_split">分割</string>
+    <string name="processing_step_save">保存</string>
 </resources>

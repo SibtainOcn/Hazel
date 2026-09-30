@@ -547,4 +547,14 @@
     <string name="options_thumbnail_embed">Cover</string>
     <string name="options_thumbnail_crop">Quadratisch zuschneiden</string>
     <string name="options_thumbnail_crop_body">Das Cover wird aus der Bildmitte geschnitten, in der Form, die Musikplayer zeigen.</string>
+    <string name="processing_step_fetch">Laden</string>
+    <string name="processing_step_merge">Zusammenführen</string>
+    <string name="processing_step_extract">Extrahieren</string>
+    <string name="processing_step_remux">Umpacken</string>
+    <string name="processing_step_subtitles">Untertitel</string>
+    <string name="processing_step_cut">Schneiden</string>
+    <string name="processing_step_tags">Tags</string>
+    <string name="processing_step_cover">Cover</string>
+    <string name="processing_step_split">Teilen</string>
+    <string name="processing_step_save">Speichern</string>
 </resources>

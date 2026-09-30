@@ -96,6 +96,12 @@ data class DownloadState(
      * cancel control for a processing treatment.
      */
     val isProcessing: Boolean = false,
+    /**
+     * The stages the download in hand goes through, worked out from what its request asks
+     * for, and how far along them it is. The card shows them as it processes.
+     */
+    val processingSteps: List<ProcessingStep> = emptyList(),
+    val processingStep: Int = 0,
     val fileName: String = "",
     val savedPath: String = "",
     val error: String? = null,
@@ -337,6 +343,9 @@ class DownloadViewModel : ViewModel() {
      * stream, still waiting for its audio, landed in Downloads as a video without sound.
      */
     @Volatile private var downloadDir: File = StoragePaths.tempDownloads
+
+    /** The stages the request built last will go through, handed to the state as it runs. */
+    @Volatile private var plannedSteps: List<ProcessingStep> = emptyList()
 
     /** Throws away everything a download had on disk: it was cancelled or it failed. */
     private fun discardWorkDir() {
@@ -1744,6 +1753,22 @@ class DownloadViewModel : ViewModel() {
         // cover. A source's own album is kept, so an album's tracks still group together;
         // anything else is its own album, named after the track.
         if (!isVideo) addOption("--parse-metadata", "%(album,title)s:%(meta_album)s")
+
+        // The stages this request sets in motion, in the order yt-dlp runs them.
+        plannedSteps = buildList {
+            add(ProcessingStep.FETCH)
+            if (isVideo && needsMerge) add(ProcessingStep.MERGE)
+            if (!isVideo) add(ProcessingStep.EXTRACT)
+            if (isVideo && wantsCover) add(ProcessingStep.REMUX)
+            if (isVideo && options.embedSubs) add(ProcessingStep.SUBTITLES)
+            if (options.sponsorBlockFilters.isNotEmpty()) add(ProcessingStep.CUT)
+            if (title.isNotBlank() || author.isNotBlank() || (isVideo && options.addChapters)) {
+                add(ProcessingStep.TAGS)
+            }
+            if (wantsCover) add(ProcessingStep.COVER)
+            if (options.splitByChapters) add(ProcessingStep.SPLIT)
+            add(ProcessingStep.SAVE)
+        }
     }
 
     /**
@@ -1861,17 +1886,23 @@ class DownloadViewModel : ViewModel() {
 
     private fun executeYtDlp(request: YoutubeDLRequest) {
         lastNotifiedAt = 0L
+        val steps = plannedSteps
+        _state.value = _state.value.copy(processingSteps = steps, processingStep = 0)
         YtDlpEngine.execute(request, processId) { progress, _, line ->
             refreshFloorFromDisk()
             val percent = progress.coerceIn(0f, 100f).coerceAtLeast(progressFloor * 100f)
             val status = cleanProgressLine(line) ?: _state.value.status
             val processing = _state.value.isProcessing || isPostProcessing(line)
+            // Only ever forward: a stage the engine announces moves the card to it, and a
+            // line for one already passed (a second [Metadata], say) changes nothing.
+            val announced = ProcessingStep.announcedBy(line)?.let { steps.indexOf(it) } ?: -1
             _state.value = _state.value.copy(
                 progress = percent / 100f,
                 totalBytes = if (expectedTotalBytes > 0) expectedTotalBytes
                 else parseTotalBytes(line) ?: _state.value.totalBytes,
                 status = status,
-                isProcessing = processing
+                isProcessing = processing,
+                processingStep = maxOf(_state.value.processingStep, announced)
             )
 
             // Updates are paced by the clock rather than by the percentage. yt-dlp reports
@@ -1922,7 +1953,12 @@ class DownloadViewModel : ViewModel() {
         // file and its length is no longer a question with a cheap answer.
         val finalSizeBytes = latestFile?.length()?.takeIf { it > 0 } ?: _state.value.totalBytes
 
-        _state.value = _state.value.copy(status = "Saving", isProcessing = true)
+        _state.value = _state.value.copy(
+            status = "Saving",
+            isProcessing = true,
+            processingStep = _state.value.processingSteps.indexOf(ProcessingStep.SAVE)
+                .takeIf { it >= 0 } ?: _state.value.processingStep
+        )
 
         val tree = downloadTreeUri.takeIf { it.isNotBlank() }?.let(android.net.Uri::parse)
 

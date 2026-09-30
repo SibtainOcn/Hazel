@@ -540,4 +540,14 @@
     <string name="options_thumbnail_embed">Sampul</string>
     <string name="options_thumbnail_crop">Potong persegi</string>
     <string name="options_thumbnail_crop_body">Sampul dipotong dari tengah gambar, dengan bentuk yang ditampilkan pemutar musik.</string>
+    <string name="processing_step_fetch">Ambil</string>
+    <string name="processing_step_merge">Gabung</string>
+    <string name="processing_step_extract">Ekstrak</string>
+    <string name="processing_step_remux">Remux</string>
+    <string name="processing_step_subtitles">Subtitel</string>
+    <string name="processing_step_cut">Potong</string>
+    <string name="processing_step_tags">Tag</string>
+    <string name="processing_step_cover">Sampul</string>
+    <string name="processing_step_split">Pisah</string>
+    <string name="processing_step_save">Simpan</string>
 </resources>
