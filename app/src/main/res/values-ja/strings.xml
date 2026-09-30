@@ -541,8 +541,8 @@
     <string name="options_thumbnail_crop">正方形に切り抜く</string>
     <string name="options_thumbnail_crop_body">カバーは画像の中央から、音楽プレーヤーが表示する形に切り抜かれます。</string>
     <string name="settings_back">戻る</string>
-    <string name="more_processing">処理</string>
-    <string name="processing_title">処理</string>
+    <string name="more_processing">合成</string>
+    <string name="processing_title">合成</string>
     <string name="processing_description">すべてのダウンロードの初期設定です。ダウンロードシートでの変更もここに保存されます。</string>
     <string name="processing_section_general">全般</string>
     <string name="processing_default">デフォルト</string>
@@ -562,7 +562,7 @@
     <string name="processing_video_quality">動画の画質</string>
     <string name="processing_sub_original">元の言語（自動）</string>
     <string name="processing_reset">すべてデフォルトに戻す</string>
-    <string name="processing_reset_title">処理の設定をリセットしますか？</string>
+    <string name="processing_reset_title">合成の設定をリセットしますか？</string>
     <string name="processing_reset_body">この画面のすべての設定が初期状態に戻ります。</string>
     <string name="more_advanced">詳細設定</string>
     <string name="advanced_title">詳細設定</string>

@@ -555,8 +555,8 @@
     <string name="options_thumbnail_crop">Recortar en cuadrado</string>
     <string name="options_thumbnail_crop_body">La portada se recorta del centro de la imagen, con la forma que muestran los reproductores de música.</string>
     <string name="settings_back">Atrás</string>
-    <string name="more_processing">Procesamiento</string>
-    <string name="processing_title">Procesamiento</string>
+    <string name="more_processing">Síntesis</string>
+    <string name="processing_title">Síntesis</string>
     <string name="processing_description">Con lo que empieza cada descarga. Los cambios hechos en la hoja de descarga también se guardan aquí.</string>
     <string name="processing_section_general">General</string>
     <string name="processing_default">Predeterminado</string>
@@ -576,7 +576,7 @@
     <string name="processing_video_quality">Calidad de vídeo</string>
     <string name="processing_sub_original">Idioma original (automático)</string>
     <string name="processing_reset">Restablecer todo</string>
-    <string name="processing_reset_title">¿Restablecer los ajustes de procesamiento?</string>
+    <string name="processing_reset_title">¿Restablecer los ajustes de síntesis?</string>
     <string name="processing_reset_body">Cada ajuste de esta pantalla vuelve a su valor original.</string>
     <string name="more_advanced">Avanzado</string>
     <string name="advanced_title">Avanzado</string>

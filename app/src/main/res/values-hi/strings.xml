@@ -548,8 +548,8 @@
     <string name="options_thumbnail_crop">वर्गाकार काटें</string>
     <string name="options_thumbnail_crop_body">कवर को चित्र के बीच से काटा जाता है, उसी आकार में जो म्यूज़िक प्लेयर दिखाते हैं।</string>
     <string name="settings_back">वापस</string>
-    <string name="more_processing">प्रोसेसिंग</string>
-    <string name="processing_title">प्रोसेसिंग</string>
+    <string name="more_processing">सिंथेसाइज़िंग</string>
+    <string name="processing_title">सिंथेसाइज़िंग</string>
     <string name="processing_description">हर डाउनलोड इन्हीं सेटिंग्स से शुरू होता है। डाउनलोड शीट में किए बदलाव भी यहीं सहेजे जाते हैं।</string>
     <string name="processing_section_general">सामान्य</string>
     <string name="processing_default">डिफ़ॉल्ट</string>
@@ -569,7 +569,7 @@
     <string name="processing_video_quality">वीडियो क्वालिटी</string>
     <string name="processing_sub_original">मूल भाषा (स्वचालित)</string>
     <string name="processing_reset">सब डिफ़ॉल्ट पर रीसेट करें</string>
-    <string name="processing_reset_title">प्रोसेसिंग सेटिंग्स रीसेट करें?</string>
+    <string name="processing_reset_title">सिंथेसाइज़िंग सेटिंग्स रीसेट करें?</string>
     <string name="processing_reset_body">इस स्क्रीन की हर सेटिंग ऐप की मूल सेटिंग पर लौट जाएगी।</string>
     <string name="more_advanced">एडवांस्ड</string>
     <string name="advanced_title">एडवांस्ड</string>

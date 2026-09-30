@@ -555,8 +555,8 @@
     <string name="options_thumbnail_crop">Recadrer en carré</string>
     <string name="options_thumbnail_crop_body">La pochette est découpée au centre de l\'image, au format affiché par les lecteurs de musique.</string>
     <string name="settings_back">Retour</string>
-    <string name="more_processing">Traitement</string>
-    <string name="processing_title">Traitement</string>
+    <string name="more_processing">Synthèse</string>
+    <string name="processing_title">Synthèse</string>
     <string name="processing_description">Le point de départ de chaque téléchargement. Les changements faits dans la feuille de téléchargement sont aussi enregistrés ici.</string>
     <string name="processing_section_general">Général</string>
     <string name="processing_default">Par défaut</string>
@@ -576,7 +576,7 @@
     <string name="processing_video_quality">Qualité vidéo</string>
     <string name="processing_sub_original">Langue d\'origine (automatique)</string>
     <string name="processing_reset">Tout réinitialiser</string>
-    <string name="processing_reset_title">Réinitialiser les réglages de traitement ?</string>
+    <string name="processing_reset_title">Réinitialiser les réglages de synthèse ?</string>
     <string name="processing_reset_body">Chaque réglage de cet écran revient à sa valeur d\'origine.</string>
     <string name="more_advanced">Avancé</string>
     <string name="advanced_title">Avancé</string>

@@ -555,8 +555,8 @@
     <string name="options_thumbnail_crop">Cortar em quadrado</string>
     <string name="options_thumbnail_crop_body">A capa é cortada do centro da imagem, no formato que os players de música mostram.</string>
     <string name="settings_back">Voltar</string>
-    <string name="more_processing">Processamento</string>
-    <string name="processing_title">Processamento</string>
+    <string name="more_processing">Síntese</string>
+    <string name="processing_title">Síntese</string>
     <string name="processing_description">O ponto de partida de cada download. Mudanças feitas na folha de download também são salvas aqui.</string>
     <string name="processing_section_general">Geral</string>
     <string name="processing_default">Padrão</string>
@@ -576,7 +576,7 @@
     <string name="processing_video_quality">Qualidade de vídeo</string>
     <string name="processing_sub_original">Idioma original (automático)</string>
     <string name="processing_reset">Redefinir tudo</string>
-    <string name="processing_reset_title">Redefinir as configurações de processamento?</string>
+    <string name="processing_reset_title">Redefinir as configurações de síntese?</string>
     <string name="processing_reset_body">Cada configuração desta tela volta ao padrão do app.</string>
     <string name="more_advanced">Avançado</string>
     <string name="advanced_title">Avançado</string>

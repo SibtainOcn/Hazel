@@ -541,8 +541,8 @@
     <string name="options_thumbnail_crop">Potong persegi</string>
     <string name="options_thumbnail_crop_body">Sampul dipotong dari tengah gambar, dengan bentuk yang ditampilkan pemutar musik.</string>
     <string name="settings_back">Kembali</string>
-    <string name="more_processing">Pemrosesan</string>
-    <string name="processing_title">Pemrosesan</string>
+    <string name="more_processing">Sintesis</string>
+    <string name="processing_title">Sintesis</string>
     <string name="processing_description">Titik awal setiap unduhan. Perubahan di lembar unduhan juga disimpan di sini.</string>
     <string name="processing_section_general">Umum</string>
     <string name="processing_default">Bawaan</string>
@@ -562,7 +562,7 @@
     <string name="processing_video_quality">Kualitas video</string>
     <string name="processing_sub_original">Bahasa asli (otomatis)</string>
     <string name="processing_reset">Atur ulang semua ke bawaan</string>
-    <string name="processing_reset_title">Atur ulang pengaturan pemrosesan?</string>
+    <string name="processing_reset_title">Atur ulang pengaturan sintesis?</string>
     <string name="processing_reset_body">Setiap pengaturan di layar ini kembali seperti bawaan aplikasi.</string>
     <string name="more_advanced">Lanjutan</string>
     <string name="advanced_title">Lanjutan</string>

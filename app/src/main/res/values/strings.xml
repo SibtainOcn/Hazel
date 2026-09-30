@@ -598,8 +598,8 @@
     <string name="options_thumbnail_crop">Crop to square</string>
     <string name="options_thumbnail_crop_body">The cover is cut from the centre of the artwork, the shape music players show.</string>
     <string name="settings_back">Back</string>
-    <string name="more_processing">Processing</string>
-    <string name="processing_title">Processing</string>
+    <string name="more_processing">Synthesizing</string>
+    <string name="processing_title">Synthesizing</string>
     <string name="processing_description">What every download starts from. Changes made in the download sheet are saved here too.</string>
     <string name="processing_section_general">General</string>
     <string name="processing_default">Default</string>
@@ -619,7 +619,7 @@
     <string name="processing_video_quality">Video quality</string>
     <string name="processing_sub_original">Original language (automatic)</string>
     <string name="processing_reset">Reset all to defaults</string>
-    <string name="processing_reset_title">Reset processing settings?</string>
+    <string name="processing_reset_title">Reset synthesizing settings?</string>
     <string name="processing_reset_body">Every setting on this screen goes back to how the app ships.</string>
     <string name="more_advanced">Advanced</string>
     <string name="advanced_title">Advanced</string>

@@ -541,8 +541,8 @@
     <string name="options_thumbnail_crop">裁剪为正方形</string>
     <string name="options_thumbnail_crop_body">封面从图片中央裁剪，形状与音乐播放器显示的一致。</string>
     <string name="settings_back">返回</string>
-    <string name="more_processing">处理</string>
-    <string name="processing_title">处理</string>
+    <string name="more_processing">合成</string>
+    <string name="processing_title">合成</string>
     <string name="processing_description">每次下载的初始设置。在下载面板中所做的更改也会保存在这里。</string>
     <string name="processing_section_general">常规</string>
     <string name="processing_default">默认</string>
@@ -562,7 +562,7 @@
     <string name="processing_video_quality">视频画质</string>
     <string name="processing_sub_original">原始语言（自动）</string>
     <string name="processing_reset">全部恢复默认</string>
-    <string name="processing_reset_title">重置处理设置？</string>
+    <string name="processing_reset_title">重置合成设置？</string>
     <string name="processing_reset_body">此页面上的所有设置都将恢复为初始状态。</string>
     <string name="more_advanced">高级</string>
     <string name="advanced_title">高级</string>

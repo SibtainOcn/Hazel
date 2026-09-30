@@ -561,8 +561,8 @@
     <string name="options_thumbnail_crop">Обрезать до квадрата</string>
     <string name="options_thumbnail_crop_body">Обложка вырезается из центра изображения — в форме, которую показывают музыкальные плееры.</string>
     <string name="settings_back">Назад</string>
-    <string name="more_processing">Обработка</string>
-    <string name="processing_title">Обработка</string>
+    <string name="more_processing">Синтез</string>
+    <string name="processing_title">Синтез</string>
     <string name="processing_description">С этого начинается каждая загрузка. Изменения в окне загрузки тоже сохраняются здесь.</string>
     <string name="processing_section_general">Общие</string>
     <string name="processing_default">По умолчанию</string>
@@ -582,7 +582,7 @@
     <string name="processing_video_quality">Качество видео</string>
     <string name="processing_sub_original">Исходный язык (автоматические)</string>
     <string name="processing_reset">Сбросить всё</string>
-    <string name="processing_reset_title">Сбросить настройки обработки?</string>
+    <string name="processing_reset_title">Сбросить настройки синтеза?</string>
     <string name="processing_reset_body">Все настройки на этом экране вернутся к исходным.</string>
     <string name="more_advanced">Расширенные</string>
     <string name="advanced_title">Расширенные</string>

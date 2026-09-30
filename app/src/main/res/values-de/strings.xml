@@ -548,8 +548,8 @@
     <string name="options_thumbnail_crop">Quadratisch zuschneiden</string>
     <string name="options_thumbnail_crop_body">Das Cover wird aus der Bildmitte geschnitten, in der Form, die Musikplayer zeigen.</string>
     <string name="settings_back">Zurück</string>
-    <string name="more_processing">Verarbeitung</string>
-    <string name="processing_title">Verarbeitung</string>
+    <string name="more_processing">Synthese</string>
+    <string name="processing_title">Synthese</string>
     <string name="processing_description">Womit jeder Download beginnt. Änderungen im Download-Fenster werden auch hier gespeichert.</string>
     <string name="processing_section_general">Allgemein</string>
     <string name="processing_default">Standard</string>
@@ -569,7 +569,7 @@
     <string name="processing_video_quality">Videoqualität</string>
     <string name="processing_sub_original">Originalsprache (automatisch)</string>
     <string name="processing_reset">Alles auf Standard zurücksetzen</string>
-    <string name="processing_reset_title">Verarbeitungseinstellungen zurücksetzen?</string>
+    <string name="processing_reset_title">Syntheseeinstellungen zurücksetzen?</string>
     <string name="processing_reset_body">Jede Einstellung auf dieser Seite wird auf den Auslieferungszustand zurückgesetzt.</string>
     <string name="more_advanced">Erweitert</string>
     <string name="advanced_title">Erweitert</string>
