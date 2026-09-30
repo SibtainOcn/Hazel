@@ -418,13 +418,9 @@ fun MediaCard(
                     .fillMaxWidth()
                     .height(4.dp)
 
-                if (isProcessing) {
-                    LinearProgressIndicator(
-                        modifier = lineModifier,
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color.White.copy(alpha = 0.25f)
-                    )
-                } else {
+                // While processing, the stage track over the artwork is the progress; a
+                // second line along the bottom only repeated it.
+                if (!isProcessing) {
                     LinearProgressIndicator(
                         progress = { animatedProgress },
                         modifier = lineModifier,
