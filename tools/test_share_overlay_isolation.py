@@ -272,7 +272,9 @@ def test_sheet_opens_at_once():
     check_true("Signing in reads the link again", "signInLauncher" in overlay and "fetchShare(url)" in overlay)
 
     sheet = (REPO_ROOT / "app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt").read_text(encoding="utf-8")
-    check_true("Format sheet adopts a title that arrives late", "if (title.isBlank()) title = info.title" in sheet)
+    check_true("Format sheet adopts a title that arrives late",
+               "if (title.isBlank()) title = info.title" in sheet
+               or "if (title.isBlank()) title = readableTitle(info.title)" in sheet)
 
 
 # ===========================================================================

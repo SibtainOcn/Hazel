@@ -33,8 +33,59 @@ data class DownloadOptions(
     val embedSubs: Boolean = true,
     val writeSubs: Boolean = false,
     val writeAutoSubs: Boolean = false,
-    val subLanguages: String = DEFAULT_SUB_LANGUAGES
+    val subLanguages: String = DEFAULT_SUB_LANGUAGES,
+    /**
+     * With subtitles embedded, the subtitle files are removed once they are in the video.
+     * Off, they are kept beside it, which is yt-dlp's `--write-subs` next to `--embed-subs`.
+     */
+    val deleteSubsAfterEmbed: Boolean = true,
+
+    /** SponsorBlock at all. Off, nothing is cut or marked whatever the categories say. */
+    val useSponsorBlock: Boolean = true,
+    /** The SponsorBlock server to ask. Blank is the public one, [SponsorBlock.API_URL]. */
+    val sponsorBlockApiUrl: String = "",
+
+    // ── Preferences the sheets start from. None of them is passed to yt-dlp as such:
+    // they decide which format is picked before the download is asked for. ──
+
+    /** Soundtrack to prefer, as a language tag ("hi", "en"). Blank takes the source's own. */
+    val preferredAudioLanguage: String = "",
+    /** [AudioCodec] name to prefer. Blank prefers none. */
+    val preferredAudioCodec: String = "",
+    /** [VideoCodec] name to prefer. Blank prefers none. */
+    val preferredVideoCodec: String = "",
+    /** Video quality to start from: 0 is best, a height is a ceiling, [WORST_HEIGHT] worst. */
+    val videoQuality: Int = 0,
+
+    // ── For one download only. Set from the sheet as the download starts, carried with it
+    // in the queue, and never saved as a setting, so the next download does not inherit a
+    // cut or a live option meant for this one. ──
+
+    /** Start of the part to download, in seconds; below zero downloads all of it. */
+    val sectionStart: Double = -1.0,
+    /** End of the part to download, in seconds. */
+    val sectionEnd: Double = -1.0,
+    /** `--force-keyframes-at-cuts`: exact cut points, at the cost of re-encoding around them. */
+    val preciseCuts: Boolean = false,
+    /** `--live-from-start`: a stream already live is taken from its beginning, not from now. */
+    val liveFromStart: Boolean = false,
+    /** `--wait-for-video`: a stream not started yet is waited for, then downloaded. */
+    val waitForVideo: Boolean = false
 ) {
+    /** True when only part of the media is to be downloaded. */
+    val hasSection: Boolean
+        get() = sectionStart >= 0.0 && sectionEnd > sectionStart
+
+    val audioCodecPreference: AudioCodec?
+        get() = AudioCodec.entries.firstOrNull { it.name == preferredAudioCodec }
+
+    val videoCodecPreference: VideoCodec?
+        get() = VideoCodec.entries.firstOrNull { it.name == preferredVideoCodec }
+
+    /** The SponsorBlock server a request goes to. */
+    val sponsorBlockServer: String
+        get() = sponsorBlockApiUrl.trim().trimEnd('/').ifBlank { SponsorBlock.API_URL }
+
     /**
      * Count shown on the Chapters chip badge. Embedding only applies to a video download,
      * so it is left out of the count on the audio tab.
@@ -46,14 +97,81 @@ data class DownloadOptions(
     val thumbnailBadge: Int
         get() = listOf(embedThumbnail, embedThumbnail && cropThumbnail).count { it }
 
+    /** Count shown on the SponsorBlock chip badge: the categories cut, while it is on. */
+    val sponsorBlockBadge: Int
+        get() = if (useSponsorBlock) sponsorBlockFilters.size else 0
+
     /** Count shown on the Subtitles chip badge. */
     val subtitleBadge: Int
         get() = listOf(embedSubs, writeSubs, writeAutoSubs).count { it }
 
+    /** These options with a download's own choices laid over them. */
+    fun with(oneOff: OneOffOptions): DownloadOptions = copy(
+        sectionStart = if (oneOff.hasSection) oneOff.sectionStart else -1.0,
+        sectionEnd = if (oneOff.hasSection) oneOff.sectionEnd else -1.0,
+        preciseCuts = oneOff.hasSection && oneOff.preciseCuts,
+        liveFromStart = oneOff.liveFromStart,
+        waitForVideo = oneOff.waitForVideo
+    )
+
     companion object {
         const val DEFAULT_FILENAME_TEMPLATE = "%(title)s.%(ext)s"
-        const val DEFAULT_SUB_LANGUAGES = "en.*,.*-orig"
+        /**
+         * English as published, and the video's own language as captioned. Not "en.*": that
+         * also takes every machine translation into or out of English, each one a request,
+         * and a single one refused (YouTube answers a burst with 429) fails the whole
+         * download, since yt-dlp treats a subtitle it could not fetch as an error.
+         */
+        const val DEFAULT_SUB_LANGUAGES = "en,en-US,en-GB,en-IN,en-CA,en-AU,.*-orig"
+
+        /** The default before it was narrowed, still stored for anyone who never changed it. */
+        const val LEGACY_SUB_LANGUAGES = "en.*,.*-orig"
     }
+}
+
+/**
+ * What the sheet sets for one download and nothing after it: a part of the media to cut out
+ * and keep, and how to take a live stream.
+ */
+data class OneOffOptions(
+    val sectionStart: Double = -1.0,
+    val sectionEnd: Double = -1.0,
+    val preciseCuts: Boolean = false,
+    val liveFromStart: Boolean = false,
+    val waitForVideo: Boolean = false
+) {
+    val hasSection: Boolean
+        get() = sectionStart >= 0.0 && sectionEnd > sectionStart
+}
+
+/**
+ * A time as the cut fields show it: "1:02:03.250" or "2:03.250", the milliseconds only
+ * when there are any.
+ */
+fun formatTimestamp(seconds: Double): String {
+    val totalMillis = Math.round(seconds.coerceAtLeast(0.0) * 1000)
+    val h = totalMillis / 3_600_000
+    val m = (totalMillis % 3_600_000) / 60_000
+    val s = (totalMillis % 60_000) / 1000
+    val ms = totalMillis % 1000
+    val clock = if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%d:%02d".format(m, s)
+    return if (ms > 0) "%s.%03d".format(clock, ms) else clock
+}
+
+/**
+ * Reads a time typed into a cut field: seconds ("75.5"), or minutes and seconds ("1:15.5"),
+ * or hours as well ("1:02:03"). Null for anything else.
+ */
+fun parseTimestamp(text: String): Double? {
+    val parts = text.trim().split(':')
+    if (parts.isEmpty() || parts.size > 3 || parts.any { it.isBlank() }) return null
+    val seconds = parts.last().toDoubleOrNull()?.takeIf { it >= 0 } ?: return null
+    val whole = parts.dropLast(1).map { it.toIntOrNull()?.takeIf { v -> v >= 0 } ?: return null }
+    if (whole.isNotEmpty() && seconds >= 60) return null
+    if (whole.isEmpty()) return seconds
+    var total = 0.0
+    for (part in whole) total = total * 60 + part
+    return total * 60 + seconds
 }
 
 /**

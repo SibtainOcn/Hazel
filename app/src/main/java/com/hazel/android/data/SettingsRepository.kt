@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.hazel.android.download.DownloadOptions
@@ -96,6 +97,13 @@ object SettingsRepository {
         val writeSubs = booleanPreferencesKey("${prefix}write_subs")
         val writeAutoSubs = booleanPreferencesKey("${prefix}write_auto_subs")
         val subLanguages = stringPreferencesKey("${prefix}sub_languages")
+        val deleteSubsAfterEmbed = booleanPreferencesKey("${prefix}delete_subs_after_embed")
+        val useSponsorBlock = booleanPreferencesKey("${prefix}use_sponsorblock")
+        val sponsorBlockApiUrl = stringPreferencesKey("${prefix}sponsorblock_api_url")
+        val preferredAudioLanguage = stringPreferencesKey("${prefix}preferred_audio_language")
+        val preferredAudioCodec = stringPreferencesKey("${prefix}preferred_audio_codec")
+        val preferredVideoCodec = stringPreferencesKey("${prefix}preferred_video_codec")
+        val videoQuality = intPreferencesKey("${prefix}video_quality")
     }
 
     private val SHEET_OPTIONS = OptionKeys("")
@@ -115,7 +123,15 @@ object SettingsRepository {
             embedSubs = this[keys.embedSubs] ?: defaults.embedSubs,
             writeSubs = this[keys.writeSubs] ?: defaults.writeSubs,
             writeAutoSubs = this[keys.writeAutoSubs] ?: defaults.writeAutoSubs,
-            subLanguages = this[keys.subLanguages] ?: defaults.subLanguages
+            subLanguages = (this[keys.subLanguages] ?: defaults.subLanguages)
+                .takeUnless { it == DownloadOptions.LEGACY_SUB_LANGUAGES } ?: defaults.subLanguages,
+            deleteSubsAfterEmbed = this[keys.deleteSubsAfterEmbed] ?: defaults.deleteSubsAfterEmbed,
+            useSponsorBlock = this[keys.useSponsorBlock] ?: defaults.useSponsorBlock,
+            sponsorBlockApiUrl = this[keys.sponsorBlockApiUrl] ?: defaults.sponsorBlockApiUrl,
+            preferredAudioLanguage = this[keys.preferredAudioLanguage] ?: defaults.preferredAudioLanguage,
+            preferredAudioCodec = this[keys.preferredAudioCodec] ?: defaults.preferredAudioCodec,
+            preferredVideoCodec = this[keys.preferredVideoCodec] ?: defaults.preferredVideoCodec,
+            videoQuality = this[keys.videoQuality] ?: defaults.videoQuality
         )
     }
 
@@ -133,6 +149,13 @@ object SettingsRepository {
         this[keys.writeSubs] = options.writeSubs
         this[keys.writeAutoSubs] = options.writeAutoSubs
         this[keys.subLanguages] = options.subLanguages
+        this[keys.deleteSubsAfterEmbed] = options.deleteSubsAfterEmbed
+        this[keys.useSponsorBlock] = options.useSponsorBlock
+        this[keys.sponsorBlockApiUrl] = options.sponsorBlockApiUrl
+        this[keys.preferredAudioLanguage] = options.preferredAudioLanguage
+        this[keys.preferredAudioCodec] = options.preferredAudioCodec
+        this[keys.preferredVideoCodec] = options.preferredVideoCodec
+        this[keys.videoQuality] = options.videoQuality
     }
 
     fun getDownloadOptions(context: Context): Flow<DownloadOptions> =
@@ -140,6 +163,67 @@ object SettingsRepository {
 
     suspend fun setDownloadOptions(context: Context, options: DownloadOptions) {
         context.dataStore.edit { prefs -> prefs.writeOptions(SHEET_OPTIONS, options) }
+    }
+
+    // ── Advanced ──
+    //
+    // Engine options for difficult sources. Read by every request through
+    // AdvancedSettingsStore, which the app keeps in step with what is stored here.
+
+    private val ADV_PLAYER_CLIENTS = stringPreferencesKey("adv_player_clients")
+    private val ADV_PO_TOKENS = stringPreferencesKey("adv_po_tokens")
+    private val ADV_VISITOR_DATA = stringPreferencesKey("adv_visitor_data")
+    private val ADV_AUTO_PO_TOKENS = booleanPreferencesKey("adv_auto_po_tokens")
+    private val ADV_METADATA_LANGUAGE = booleanPreferencesKey("adv_metadata_app_language")
+    private val ADV_YOUTUBE_ARGS = stringPreferencesKey("adv_youtube_extra_args")
+    private val ADV_DOWNLOAD_ARGS = stringPreferencesKey("adv_download_extra_args")
+    private val ADV_NO_CHECK_CERTS = booleanPreferencesKey("adv_no_check_certificates")
+    private val ADV_SLEEP_REQUESTS = intPreferencesKey("adv_sleep_requests")
+    private val ADV_IMPERSONATE = stringPreferencesKey("adv_impersonate")
+    private val ADV_IMPERSONATE_AVAILABLE = stringPreferencesKey("adv_impersonate_available")
+
+    fun getAdvancedSettings(context: Context): Flow<com.hazel.android.download.AdvancedSettings> =
+        context.dataStore.data.map { prefs ->
+            com.hazel.android.download.AdvancedSettings(
+                playerClients = prefs[ADV_PLAYER_CLIENTS].orEmpty().split(',').map { it.trim() }.filter { it.isNotBlank() },
+                poTokens = prefs[ADV_PO_TOKENS].orEmpty(),
+                visitorData = prefs[ADV_VISITOR_DATA].orEmpty(),
+                autoPoTokens = prefs[ADV_AUTO_PO_TOKENS] ?: false,
+                metadataInAppLanguage = prefs[ADV_METADATA_LANGUAGE] ?: false,
+                youtubeExtraArgs = prefs[ADV_YOUTUBE_ARGS].orEmpty(),
+                downloadExtraArgs = prefs[ADV_DOWNLOAD_ARGS].orEmpty(),
+                noCheckCertificates = prefs[ADV_NO_CHECK_CERTS] ?: false,
+                sleepRequestsSeconds = prefs[ADV_SLEEP_REQUESTS] ?: 0,
+                impersonate = prefs[ADV_IMPERSONATE].orEmpty(),
+                impersonateAvailable = prefs[ADV_IMPERSONATE_AVAILABLE].orEmpty().split(',')
+                    .map { it.trim() }.filter { it.isNotBlank() }
+            )
+        }
+
+    suspend fun setAdvancedSettings(context: Context, settings: com.hazel.android.download.AdvancedSettings) {
+        context.dataStore.edit { prefs ->
+            prefs[ADV_PLAYER_CLIENTS] = settings.playerClients.joinToString(",")
+            prefs[ADV_PO_TOKENS] = settings.poTokens
+            prefs[ADV_VISITOR_DATA] = settings.visitorData
+            prefs[ADV_AUTO_PO_TOKENS] = settings.autoPoTokens
+            prefs[ADV_METADATA_LANGUAGE] = settings.metadataInAppLanguage
+            prefs[ADV_YOUTUBE_ARGS] = settings.youtubeExtraArgs
+            prefs[ADV_DOWNLOAD_ARGS] = settings.downloadExtraArgs
+            prefs[ADV_NO_CHECK_CERTS] = settings.noCheckCertificates
+            prefs[ADV_SLEEP_REQUESTS] = settings.sleepRequestsSeconds
+            prefs[ADV_IMPERSONATE] = settings.impersonate
+            prefs[ADV_IMPERSONATE_AVAILABLE] = settings.impersonateAvailable.joinToString(",")
+        }
+        // In force at once, rather than when the stored value next comes round.
+        com.hazel.android.download.AdvancedSettingsStore.current = settings
+    }
+
+    /** Every download option and preference back to how the app ships. */
+    suspend fun resetDownloadOptions(context: Context) = setDownloadOptions(context, DownloadOptions())
+
+    /** Applies [change] to the saved options in one step, so two quick changes cannot race. */
+    suspend fun updateDownloadOptions(context: Context, change: (DownloadOptions) -> DownloadOptions) {
+        context.dataStore.edit { prefs -> prefs.writeOptions(SHEET_OPTIONS, change(prefs.readOptions(SHEET_OPTIONS))) }
     }
 
     // ── Link reading ──
@@ -218,6 +302,7 @@ object SettingsRepository {
 
     suspend fun setIncognito(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[INCOGNITO_KEY] = enabled }
+        if (enabled) HomeResultsRepository.clear(context)
     }
 
     // ── Downloads list ──
@@ -256,6 +341,8 @@ object SettingsRepository {
 
     private val WIFI_ONLY_KEY = booleanPreferencesKey("wifi_only")
     private val SPEED_LIMIT_KEY = stringPreferencesKey("speed_limit")
+    private val CONCURRENT_FRAGMENTS_KEY = intPreferencesKey("concurrent_fragments")
+    private val THROTTLED_RATE_KEY = stringPreferencesKey("throttled_rate")
 
     /**
      * Refuses to start a download while the phone is on mobile data.
@@ -305,6 +392,49 @@ object SettingsRepository {
     fun speedLimitLabel(limit: String): String =
         SPEED_LIMITS.firstOrNull { it.first == limit }?.second
             ?: limit.ifBlank { "No limit" }
+
+    /**
+     * How many pieces of a stream split into fragments (DASH and HLS, which is most of
+     * YouTube, live streams and many other sites) are fetched at once. One is yt-dlp's own
+     * default; the app starts at the most it offers, so nothing holds a download back unless
+     * the user asks. More finishes sooner on a fast connection, and has no effect on a file
+     * that comes as one piece.
+     */
+    fun getConcurrentFragments(context: Context): Flow<Int> =
+        context.dataStore.data.map { prefs ->
+            (prefs[CONCURRENT_FRAGMENTS_KEY] ?: CONCURRENT_FRAGMENTS.last())
+                .coerceIn(1, CONCURRENT_FRAGMENTS.last())
+        }
+
+    suspend fun setConcurrentFragments(context: Context, count: Int) {
+        context.dataStore.edit { prefs ->
+            prefs[CONCURRENT_FRAGMENTS_KEY] = count.coerceIn(1, CONCURRENT_FRAGMENTS.last())
+        }
+    }
+
+    /** The counts offered. Past eight a site is more likely to refuse than to go faster. */
+    val CONCURRENT_FRAGMENTS: List<Int> = listOf(1, 2, 4, 8)
+
+    /**
+     * The speed below which a download is taken to be throttled by the site, as yt-dlp
+     * spells it ("100K"). When the transfer drops under it, yt-dlp fetches fresh links and
+     * carries on from where it was, which gets round the slow links some sites hand out.
+     * Blank leaves it off, which is the default.
+     */
+    fun getThrottledRate(context: Context): Flow<String> =
+        context.dataStore.data.map { prefs -> prefs[THROTTLED_RATE_KEY].orEmpty() }
+
+    suspend fun setThrottledRate(context: Context, rate: String) {
+        context.dataStore.edit { prefs -> prefs[THROTTLED_RATE_KEY] = rate.trim() }
+    }
+
+    /** The rates offered, paired with what each is called; blank is off. */
+    val THROTTLED_RATES: List<Pair<String, String>> = listOf(
+        "50K" to "50 KB/s",
+        "100K" to "100 KB/s",
+        "250K" to "250 KB/s",
+        "500K" to "500 KB/s"
+    )
 
 
     // ── Download destination ──
@@ -453,6 +583,7 @@ object SettingsRepository {
             val ytdlpAvail = prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false
             prefs[HAS_UPDATE_AVAILABLE_KEY] = available || ytdlpAvail
         }
+        if (available) BackupRepository.autoBackupBeforeUpdate(context)
     }
 
     fun getYtDlpUpdateAvailable(context: Context): Flow<Boolean> {

@@ -13,6 +13,7 @@ import com.hazel.android.data.QueuedDownload
 import com.hazel.android.data.toPlan
 import com.hazel.android.data.toQueued
 import com.hazel.android.data.HistoryEntry
+import com.hazel.android.data.HomeResultsRepository
 import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.LinkContents
@@ -34,6 +35,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import com.hazel.android.util.LinkKey
 import kotlinx.coroutines.sync.withPermit
@@ -275,6 +279,20 @@ class DownloadViewModel : ViewModel() {
         restoreQueue()
     }
 
+    /** Puts back the cards left on the home screen last time, then keeps the file current. */
+    private suspend fun restoreHomeResults(app: HazelApp) {
+        val incognito = SettingsRepository.getIncognito(app).first()
+        val saved = if (incognito) emptyList() else HomeResultsRepository.load(app)
+        // No sheet is selected, so none opens on its own.
+        _state.update { if (it.results.isEmpty() && !it.isFetching && saved.isNotEmpty()) it.copy(results = saved) else it }
+        viewModelScope.launch(Dispatchers.IO) {
+            _state.map { it.results }.distinctUntilChanged().drop(1).collect { results ->
+                if (SettingsRepository.getIncognito(app).first()) HomeResultsRepository.clear(app)
+                else HomeResultsRepository.save(app, results)
+            }
+        }
+    }
+
     override fun onCleared() {
         DownloadCommands.unregister(this)
         super.onCleared()
@@ -290,6 +308,7 @@ class DownloadViewModel : ViewModel() {
     private fun restoreQueue() {
         downloadScope.launch {
             val app = HazelApp.instance
+            restoreHomeResults(app)
             val pending = runCatching { DownloadQueueRepository.load(app) }
                 .getOrDefault(emptyList())
             if (pending.isEmpty()) return@launch
@@ -1025,7 +1044,11 @@ class DownloadViewModel : ViewModel() {
             // the whole set instead of ten in a row.
             DownloadService.start(app, firstTitle)
 
-            val speedLimit = SettingsRepository.getSpeedLimit(app).first()
+            val limits = TransferLimits(
+                speedLimit = SettingsRepository.getSpeedLimit(app).first(),
+                concurrentFragments = SettingsRepository.getConcurrentFragments(app).first(),
+                throttledRate = SettingsRepository.getThrottledRate(app).first()
+            )
 
             while (true) {
                 if (isBatchCancelled) break
@@ -1081,7 +1104,7 @@ class DownloadViewModel : ViewModel() {
                         executeYtDlp(
                             buildRequest(
                                 plan.info.url, plan.format, options, plan.title, plan.author,
-                                planAccess, speedLimit,
+                                planAccess, limits,
                                 plan.info.mergeAudioFor(plan.audioLanguage)?.selector,
                                 plan.audioLanguage
                             )
@@ -1107,7 +1130,7 @@ class DownloadViewModel : ViewModel() {
                         executeYtDlp(
                             buildRequest(
                                 plan.info.url, plan.format, options, plan.title, plan.author,
-                                planAccess, speedLimit,
+                                planAccess, limits,
                                 plan.info.mergeAudioFor(plan.audioLanguage)?.selector,
                                 plan.audioLanguage
                             )
@@ -1610,7 +1633,7 @@ class DownloadViewModel : ViewModel() {
         title: String,
         author: String,
         access: SiteAccess,
-        speedLimit: String,
+        limits: TransferLimits,
         /**
          * The audio stream to mux into a video-only format. Worked out by the caller from
          * the plan, so a download of a source with several soundtracks takes the one the
@@ -1634,7 +1657,14 @@ class DownloadViewModel : ViewModel() {
         // A ceiling on transfer speed, when one was asked for. Left off entirely otherwise,
         // rather than passed as some very large number, so nothing stands between yt-dlp
         // and the connection in the ordinary case.
-        if (speedLimit.isNotBlank()) addOption("--limit-rate", speedLimit)
+        if (limits.speedLimit.isNotBlank()) addOption("--limit-rate", limits.speedLimit)
+        // Fragments fetched side by side. Only streams that come in pieces are affected, so
+        // it is safe to pass for every source.
+        if (limits.concurrentFragments > 1) {
+            addOption("--concurrent-fragments", limits.concurrentFragments.toString())
+        }
+        // Below this speed the links are taken to be throttled and fetched again.
+        if (limits.throttledRate.isNotBlank()) addOption("--throttled-rate", limits.throttledRate)
         addOption("--no-check-certificates")
         addOption("--cache-dir", ytDlpCacheDir.absolutePath)
 
@@ -1642,6 +1672,7 @@ class DownloadViewModel : ViewModel() {
         // reachable, under the identity they were collected with. The read that filled the
         // sheet used the same ones, so the format ids it showed are the ids this asks for.
         applySiteAccess(access, url)
+        applyAdvanced(url, signedIn = access.cookieFile != null)
 
         // Whether the two streams have to be muxed back together after the download. The
         // container option decides the result when one was chosen, otherwise mp4 is used
@@ -1656,7 +1687,20 @@ class DownloadViewModel : ViewModel() {
             // Generic rows carry a complete yt-dlp expression already.
             format.isGeneric -> {
                 addOption("-f", format.selector)
-                format.sort?.let { addOption("-S", it) }
+                // A preferred codec is sorted after what the row itself asks for, so it
+                // decides between streams of that quality and never costs resolution or
+                // bitrate. yt-dlp reads "vcodec:h264" as h264 first, then anything plainer.
+                val codecSort = if (isVideo) {
+                    options.videoCodecPreference?.let { "vcodec:${it.sortKey}" }
+                } else {
+                    options.audioCodecPreference?.let { "acodec:${it.sortKey}" }
+                }
+                val sort = when {
+                    codecSort == null -> format.sort
+                    isVideo -> "${format.sort ?: "res"},$codecSort"
+                    else -> "${format.sort ?: "abr"},$codecSort"
+                }
+                sort?.let { addOption("-S", it) }
                 needsMerge = isVideo
             }
             // Video-only stream: pair it with the audio track the sheet named, so the
@@ -1745,7 +1789,8 @@ class DownloadViewModel : ViewModel() {
         }
 
         applyChapters(options, isVideo)
-        applySponsorBlock(options)
+        applySponsorBlock(options, isVideo)
+        applyOneOff(options)
         if (isVideo) applySubtitles(options)
         applyMetadata(title, author)
         // Music players group cover art by album, and a file with no album tag is filed
@@ -1761,7 +1806,7 @@ class DownloadViewModel : ViewModel() {
             if (!isVideo) add(ProcessingStep.EXTRACT)
             if (isVideo && wantsCover) add(ProcessingStep.REMUX)
             if (isVideo && options.embedSubs) add(ProcessingStep.SUBTITLES)
-            if (options.sponsorBlockFilters.isNotEmpty()) add(ProcessingStep.CUT)
+            if (options.useSponsorBlock && options.sponsorBlockFilters.isNotEmpty()) add(ProcessingStep.CUT)
             if (title.isNotBlank() || author.isNotBlank() || (isVideo && options.addChapters)) {
                 add(ProcessingStep.TAGS)
             }
@@ -1769,6 +1814,9 @@ class DownloadViewModel : ViewModel() {
             if (options.splitByChapters) add(ProcessingStep.SPLIT)
             add(ProcessingStep.SAVE)
         }
+
+        // Last, so an extra argument from the advanced settings can change what was set above.
+        applyExtraDownloadArguments()
     }
 
     /**
@@ -1777,12 +1825,23 @@ class DownloadViewModel : ViewModel() {
      */
     private fun YoutubeDLRequest.applyChapters(options: DownloadOptions, isVideo: Boolean) {
         if (isVideo && options.addChapters) {
-            addOption("--sponsorblock-mark", "all")
+            // The source's own chapters are embedded either way. SponsorBlock's segments
+            // are added as chapters of their own only while SponsorBlock is in use, since
+            // marking them means asking its server about every video.
+            if (options.useSponsorBlock) addOption("--sponsorblock-mark", "all")
             addOption("--embed-chapters")
         }
         if (options.splitByChapters) {
             addOption("--split-chapters")
-            addOption("-o", "chapter:%(section_number)d - %(section_title)s.%(ext)s")
+            // In the download's own folder, like the file itself. A bare template is taken
+            // relative to the process's working directory, which on Android is the root of
+            // the system and cannot be written, so splitting failed; and the title keeps two
+            // videos' "01 Intro" from overwriting each other.
+            addOption(
+                "-o",
+                "chapter:${downloadDir.absolutePath}/" +
+                    limitNameFields("%(title)s - %(section_number)02d %(section_title)s.%(ext)s")
+            )
         }
     }
 
@@ -1794,19 +1853,47 @@ class DownloadViewModel : ViewModel() {
      * The endpoint is passed explicitly so a change of default in yt-dlp cannot silently
      * redirect the lookups.
      */
-    private fun YoutubeDLRequest.applySponsorBlock(options: DownloadOptions) {
+    private fun YoutubeDLRequest.applySponsorBlock(options: DownloadOptions, isVideo: Boolean) {
+        if (!options.useSponsorBlock) return
         val filters = options.sponsorBlockFilters.filter { it.isNotBlank() }
         if (filters.isNotEmpty()) {
             addOption("--sponsorblock-remove", filters.joinToString(","))
         }
-        if (filters.isNotEmpty() || options.addChapters) {
-            addOption("--sponsorblock-api", SponsorBlock.API_URL)
+        if (filters.isNotEmpty() || (isVideo && options.addChapters)) {
+            addOption("--sponsorblock-api", options.sponsorBlockServer)
         }
+    }
+
+    /**
+     * What the sheet set for this download alone: a part of it to keep, and how to take a
+     * live stream.
+     *
+     * The part is passed as yt-dlp's `--download-sections "*START-END"`, in seconds. Without
+     * `--force-keyframes-at-cuts` the cut snaps to the nearest keyframe (a few tenths of a
+     * second out, checked: a 4.5 s cut came out 4.72 s); with it the cut is exact (4.52 s)
+     * and the parts around the cut points are encoded again, which takes longer.
+     */
+    private fun YoutubeDLRequest.applyOneOff(options: DownloadOptions) {
+        if (options.hasSection) {
+            addOption(
+                "--download-sections",
+                "*%.3f-%.3f".format(java.util.Locale.ROOT, options.sectionStart, options.sectionEnd)
+            )
+            if (options.preciseCuts) addOption("--force-keyframes-at-cuts")
+        }
+        if (options.liveFromStart) addOption("--live-from-start")
+        // Checked again every minute at first and then less often, up to every ten, so a
+        // premiere hours away is not asked about every few seconds.
+        if (options.waitForVideo) addOption("--wait-for-video", "60-600")
     }
 
     /** Subtitle downloading and embedding, both driven by the same language selector. */
     private fun YoutubeDLRequest.applySubtitles(options: DownloadOptions) {
-        if (options.writeSubs) addOption("--write-subs")
+        // yt-dlp keeps the subtitle files it embedded only when they were also asked for as
+        // files, so keeping them after embedding is asking for them as files as well.
+        if (options.writeSubs || (options.embedSubs && !options.deleteSubsAfterEmbed)) {
+            addOption("--write-subs")
+        }
         if (options.writeAutoSubs) addOption("--write-auto-subs")
         if (options.embedSubs) addOption("--embed-subs")
 
@@ -1866,23 +1953,52 @@ class DownloadViewModel : ViewModel() {
             template = template.replace("%(title)s", sanitizeForFilename(title))
         }
         if (author.isNotBlank() && author != info?.uploader) {
-            val safe = sanitizeForFilename(author)
+            val safe = sanitizeForFilename(author, NAME_FIELD_BYTES.getValue("uploader"))
             template = template
                 .replace("%(uploader)s", safe)
                 .replace("%(channel)s", safe)
         }
-        return template
+        // yt-dlp fills these with the text as the site gave it and does not shorten it, so a
+        // post whose caption is its title failed with "File name too long". Its byte limit
+        // on a field keeps the name inside the 255 bytes a file name may have, whatever the
+        // script.
+        return limitNameFields(template)
     }
 
     /**
-     * Strips path separators, characters Android's filesystems reject, and the percent sign
-     * that would otherwise be read back as another template field.
+     * Gives the free-text fields of an output template yt-dlp's byte limit (`%(title).120B`),
+     * leaving any field that already has a format of its own as it was written.
      */
-    private fun sanitizeForFilename(value: String): String =
-        value.replace(Regex("""[\\/:*?"<>|%]"""), "_")
-            .trim()
-            .take(120)
-            .ifBlank { "download" }
+    private fun limitNameFields(template: String): String =
+        NAME_FIELD_BYTES.entries.fold(template) { acc, (field, bytes) ->
+            acc.replace("%($field)s", "%($field).${bytes}B")
+        }
+
+    /**
+     * Strips path separators, characters Android's filesystems reject, and the percent sign
+     * that would otherwise be read back as another template field, and cuts the rest to
+     * [maxBytes].
+     *
+     * The cut is by bytes, not characters: a file name may be 255 bytes, and a character
+     * of Japanese or an emoji takes three or four, so 120 characters of either was already
+     * too long. What is left of the 255 is for the extension, the ".part" and format
+     * suffixes yt-dlp adds while it works, and a chapter's name when chapters are split.
+     */
+    private fun sanitizeForFilename(value: String, maxBytes: Int = MAX_NAME_BYTES): String {
+        val clean = value.replace(Regex("""[\\/:*?"<>|%]"""), "_").replace(Regex("\\s+"), " ").trim()
+        val out = StringBuilder()
+        var bytes = 0
+        var i = 0
+        while (i < clean.length) {
+            val cp = clean.codePointAt(i)
+            val size = String(Character.toChars(cp)).toByteArray().size
+            if (bytes + size > maxBytes) break
+            out.appendCodePoint(cp)
+            bytes += size
+            i += Character.charCount(cp)
+        }
+        return out.toString().trim().ifBlank { "download" }
+    }
 
     private fun executeYtDlp(request: YoutubeDLRequest) {
         lastNotifiedAt = 0L
@@ -2341,6 +2457,23 @@ class DownloadViewModel : ViewModel() {
     }
 
     private companion object {
+        /** The most a title may take of a file name, in UTF-8 bytes; 255 is the limit. */
+        const val MAX_NAME_BYTES = 120
+
+        /**
+         * Template fields that carry whatever text the site gave, with the bytes each may
+         * take. A title and a name together, plus the extension and the suffixes yt-dlp adds
+         * while it works, stay inside 255.
+         */
+        val NAME_FIELD_BYTES = mapOf(
+            "title" to MAX_NAME_BYTES,
+            "album" to MAX_NAME_BYTES,
+            "uploader" to 60,
+            "channel" to 60,
+            "artist" to 60,
+            "section_title" to 60
+        )
+
         val TOTAL_SIZE_PATTERN = Regex("""of\s*~?\s*([\d.]+)(KiB|MiB|GiB)""", RegexOption.IGNORE_CASE)
 
         /** Leading `[stage]` markers yt-dlp puts at the front of every output line. */
@@ -2414,3 +2547,13 @@ internal fun workDirFor(url: String): File {
     val key = digest.take(8).joinToString("") { "%02x".format(it) }
     return File(StoragePaths.tempDownloads, "dl_$key")
 }
+
+/**
+ * The transfer settings from More > Downloads, read once when a run starts so every link in
+ * it is fetched the same way, as yt-dlp spells each one. A blank rate is left off.
+ */
+internal data class TransferLimits(
+    val speedLimit: String = "",
+    val concurrentFragments: Int = 8,
+    val throttledRate: String = ""
+)

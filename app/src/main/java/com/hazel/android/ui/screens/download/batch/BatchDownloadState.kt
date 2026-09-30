@@ -8,9 +8,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.hazel.android.download.BatchAudioFormats
+import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadPlan
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
+import com.hazel.android.download.VideoCodec
 
 /**
  * Everything the batch sheet decides before the download starts.
@@ -93,6 +95,31 @@ class BatchDownloadState {
     var audioLanguage by mutableStateOf<String?>(null)
         private set
 
+    /**
+     * The soundtrack language the download settings prefer, as a tag. Each link reads it
+     * against the languages it actually has, so "hi" finds "hi-IN" on one source and "hi"
+     * on another, and a link without it keeps its own. [audioLanguage] set here overrides it.
+     */
+    var preferredLanguage by mutableStateOf("")
+        private set
+
+    /** The video codec the download settings prefer, taken at whatever height is picked. */
+    var videoCodec by mutableStateOf<VideoCodec?>(null)
+        private set
+
+    /**
+     * Starts the set from the download settings: quality ceiling, video codec, soundtrack
+     * language, and the audio codec as the audio default. Called as the saved settings
+     * arrive and whenever those preferences change; nothing in the sheet changes them, so
+     * a choice made in the sheet is not undone by it.
+     */
+    fun applyPreferences(options: DownloadOptions) {
+        maxHeight = options.videoQuality
+        videoCodec = options.videoCodecPreference
+        preferredLanguage = options.preferredAudioLanguage
+        options.audioCodecPreference?.let { audioChoice = it.genericFormat() }
+    }
+
     /** Titles and authors edited on one link, which name the file it is saved as. */
     var titleFor by mutableStateOf(emptyMap<String, String>())
         private set
@@ -126,12 +153,13 @@ class BatchDownloadState {
         isVideo: Boolean,
         language: String? = languageOf(info)
     ): MediaFormat? =
-        if (isVideo) info.autoPick(true, maxHeight, language)
+        if (isVideo) info.autoPick(true, maxHeight, language, videoCodec = videoCodec)
         else BatchAudioFormats.pick(info, audioChoice, language)
 
     /** The soundtrack a link will actually download with. */
     fun languageOf(info: MediaInfo): String? =
-        if (info.url in languageFor) languageFor[info.url] else audioLanguage
+        if (info.url in languageFor) languageFor[info.url]
+        else audioLanguage ?: info.languageMatching(preferredLanguage)
 
     /** Every soundtrack any link in the set offers, which is what there is to choose from. */
     val audioLanguages: List<String>
@@ -214,7 +242,7 @@ class BatchDownloadState {
         if (scope.size == results.size) {
             formatFor = emptyMap()
         } else {
-            applyToTargets { it.autoPick(videoTab, height, languageOf(it)) }
+            applyToTargets { it.autoPick(videoTab, height, languageOf(it), videoCodec = videoCodec) }
         }
     }
 

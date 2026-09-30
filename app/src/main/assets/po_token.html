@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+<script>
+/*
+ * Makes a proof-of-origin token the way YouTube's own web player does.
+ *
+ * YouTube hands out a challenge, runs it in the page's JavaScript engine (a small virtual
+ * machine it ships as the challenge's own script), and exchanges what the machine returns
+ * for an integrity token. A PO token is then minted from that for an identifier: the
+ * visitor ID here, which makes it a session token that the web clients' streams accept.
+ *
+ * YouTube now often binds the streaming token to the video instead (yt-dlp follows the
+ * player's html5_generate_content_po_token flag for this), so tokens are also minted for
+ * the video IDs asked for.
+ *
+ * The app loads this page with https://www.youtube.com as its address, so every request is
+ * same-origin, and calls hazelMint([videoIds]), whose promise resolves to the result as
+ * JSON; the app hands that back through its HazelPoToken bridge.
+ */
+var REQUEST_KEY = "O43z0dpjhgX20SCx4KAo";
+var API_KEY = "AIzaSyDyT5W0Jh49F30Pqqtyfdf7pDLFKLJoAnw";
+var WEB_CLIENT_VERSION = "2.20260925.01.00";
+
+function report(result) {
+  return JSON.stringify(result);
+}
+
+function base64ToBytes(text) {
+  var normal = text.replace(/-/g, "+").replace(/_/g, "/").replace(/\./g, "=");
+  while (normal.length % 4) normal += "=";
+  var binary = atob(normal);
+  var bytes = new Uint8Array(binary.length);
+  for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+function bytesToBase64Url(bytes) {
+  var binary = "";
+  for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_");
+}
+
+async function jnn(method, body) {
+  var response = await fetch("https://www.youtube.com/api/jnn/v1/" + method, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json+protobuf",
+      "x-goog-api-key": API_KEY,
+      "x-user-agent": "grpc-web-javascript/0.1"
+    },
+    body: JSON.stringify(body)
+  });
+  if (!response.ok) throw new Error(method + " answered " + response.status);
+  return response.json();
+}
+
+async function visitorData() {
+  var response = await fetch("https://www.youtube.com/youtubei/v1/visitor_id?prettyPrint=false", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ context: { client: { clientName: "WEB", clientVersion: WEB_CLIENT_VERSION, hl: "en" } } })
+  });
+  if (!response.ok) throw new Error("visitor_id answered " + response.status);
+  var json = await response.json();
+  var value = json && json.responseContext && json.responseContext.visitorData;
+  if (!value) throw new Error("no visitor data in the answer");
+  return value;
+}
+
+/* The challenge comes scrambled: base64 whose every byte was shifted down by 97. */
+function challengeData(raw) {
+  if (raw.length > 1 && typeof raw[1] === "string") {
+    var bytes = base64ToBytes(raw[1]);
+    for (var i = 0; i < bytes.length; i++) bytes[i] = (bytes[i] + 97) & 255;
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }
+  if (raw.length && typeof raw[0] === "object") return raw[0];
+  throw new Error("unexpected challenge");
+}
+
+async function runChallenge(data) {
+  var wrapped = data[1];
+  var script = Array.isArray(wrapped)
+    ? wrapped.find(function (v) { return v && typeof v === "string"; })
+    : null;
+  var program = data[4];
+  var globalName = data[5];
+  if (!script || !program || !globalName) throw new Error("challenge is missing its script");
+
+  new Function(script)();
+  var vm = window[globalName];
+  if (!vm || typeof vm.a !== "function") throw new Error("challenge script did not start");
+
+  var snapshot = null;
+  var started = vm.a(program, function (asyncSnapshot) { snapshot = asyncSnapshot; },
+    true, undefined, function () {}, [[], []]);
+  if (started && started[0] && typeof started[0].then === "function") await started[0];
+  if (typeof snapshot !== "function") throw new Error("challenge gave no snapshot");
+
+  var signals = [];
+  var answer = await new Promise(function (resolve, reject) {
+    var timer = setTimeout(function () { reject(new Error("challenge timed out")); }, 15000);
+    snapshot(function (value) { clearTimeout(timer); resolve(value); },
+      [undefined, undefined, signals, undefined]);
+  });
+  return { answer: answer, signals: signals };
+}
+
+/*
+ * The visitor and the minter, kept once made. The integrity token behind the minter lasts
+ * as long as YouTube said it would (twelve hours as of 2026), so every token asked for in
+ * that time is minted from it in a few milliseconds instead of a new challenge each time.
+ */
+var session = null;
+
+async function prepare() {
+  if (session && Date.now() < session.expiresAt) return session;
+  session = null;
+  var visitor = await visitorData();
+  var run = await runChallenge(challengeData(await jnn("Create", [REQUEST_KEY])));
+  var integrity = await jnn("GenerateIT", [REQUEST_KEY, run.answer]);
+  if (!integrity || typeof integrity[0] !== "string") throw new Error("no integrity token");
+  if (typeof run.signals[0] !== "function") throw new Error("challenge gave no minter");
+  var minter = await run.signals[0](base64ToBytes(integrity[0]));
+  var ttl = Number(integrity[1]) || 3600;
+  // Renewed well before YouTube's own limit, so a token handed out is never about to lapse.
+  session = { visitor: visitor, minter: minter, ttl: ttl, expiresAt: Date.now() + ttl * 500 };
+  return session;
+}
+
+async function mintFor(minter, identifier) {
+  var token = await minter(new TextEncoder().encode(identifier));
+  if (!(token instanceof Uint8Array) || token.length < 16) throw new Error("minted token is empty");
+  return bytesToBase64Url(token);
+}
+
+/*
+ * Mints a token for the visitor and one for each identifier given (video IDs), and
+ * reports {visitorData, poToken, tokens: {id: token}, ttlSeconds} or {error}.
+ */
+async function hazelMint(identifiers) {
+  try {
+    var current = await prepare();
+    var tokens = {};
+    var ids = Array.isArray(identifiers) ? identifiers : [];
+    for (var i = 0; i < ids.length; i++) tokens[ids[i]] = await mintFor(current.minter, ids[i]);
+    return report({
+      visitorData: current.visitor,
+      poToken: await mintFor(current.minter, current.visitor),
+      tokens: tokens,
+      ttlSeconds: current.ttl
+    });
+  } catch (e) {
+    session = null;
+    return report({ error: String(e && e.message || e) });
+  }
+}
+</script>
+</body>
+</html>

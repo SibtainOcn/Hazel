@@ -18,6 +18,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -103,7 +105,8 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
         }
     }
     val speedLimit by SettingsRepository.getSpeedLimit(context).collectAsState(initial = "")
-    var limitMenuOpen by remember { mutableStateOf(false) }
+    val concurrentFragments by SettingsRepository.getConcurrentFragments(context).collectAsState(initial = SettingsRepository.CONCURRENT_FRAGMENTS.last())
+    val throttledRate by SettingsRepository.getThrottledRate(context).collectAsState(initial = "")
 
     Column(
         modifier = Modifier
@@ -227,86 +230,48 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Held locally while it is being typed and written once it reads as something
-            // the engine will take, so a half-typed "1" is not saved as a one-byte ceiling.
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Filled.Speed,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        stringResource(R.string.storage_locations_speed_limit),
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        stringResource(R.string.storage_locations_speed_limit_description),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Box {
-                    Surface(
-                        onClick = { limitMenuOpen = true },
-                        shape = RoundedCornerShape(20.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(start = 16.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                SettingsRepository.speedLimitLabel(speedLimit),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                Icons.Filled.ArrowDropDown,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
+            LimitDropdownRow(
+                icon = Icons.Filled.Speed,
+                title = stringResource(R.string.storage_locations_speed_limit),
+                description = stringResource(R.string.storage_locations_speed_limit_description),
+                choices = SettingsRepository.SPEED_LIMITS,
+                selected = speedLimit,
+                selectedLabel = SettingsRepository.speedLimitLabel(speedLimit),
+                onSelect = { scope.launch { SettingsRepository.setSpeedLimit(context, it) } }
+            )
 
-                    DropdownMenu(
-                        expanded = limitMenuOpen,
-                        onDismissRequest = { limitMenuOpen = false }
-                    ) {
-                        SettingsRepository.SPEED_LIMITS.forEach { (value, label) ->
-                            DropdownMenuItem(
-                                text = { Text(label) },
-                                onClick = {
-                                    limitMenuOpen = false
-                                    scope.launch {
-                                        SettingsRepository.setSpeedLimit(context, value)
-                                    }
-                                },
-                                trailingIcon = if (value == speedLimit) {
-                                    {
-                                        Icon(
-                                            Icons.Filled.Check,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(18.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                } else null
-                            )
-                        }
-                    }
-                }
-            }
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            LimitDropdownRow(
+                icon = Icons.Filled.Layers,
+                title = stringResource(R.string.storage_locations_fragments),
+                description = stringResource(R.string.storage_locations_fragments_description),
+                choices = SettingsRepository.CONCURRENT_FRAGMENTS.map { it to it.toString() },
+                selected = concurrentFragments,
+                selectedLabel = concurrentFragments.toString(),
+                onSelect = { scope.launch { SettingsRepository.setConcurrentFragments(context, it) } }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            val rateOff = stringResource(R.string.advanced_sleep_off)
+            val rates = listOf("" to rateOff) + SettingsRepository.THROTTLED_RATES
+            LimitDropdownRow(
+                icon = Icons.Filled.Autorenew,
+                title = stringResource(R.string.storage_locations_throttled),
+                description = stringResource(R.string.storage_locations_throttled_description),
+                choices = rates,
+                selected = throttledRate,
+                selectedLabel = rates.firstOrNull { it.first == throttledRate }?.second
+                    ?: throttledRate.ifBlank { rateOff },
+                onSelect = { scope.launch { SettingsRepository.setThrottledRate(context, it) } }
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -387,4 +352,92 @@ private fun StorageLocationItem(
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.clickable(onClick = onClick)
     )
+}
+
+/**
+ * A limit picked from a short list: its name and what it does, and the current choice on a
+ * flat chip that opens the list. A list rather than a field to type in, because each value
+ * has a shape the engine expects and a typo would only show when a download misbehaves.
+ */
+@Composable
+private fun <T> LimitDropdownRow(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    choices: List<Pair<T, String>>,
+    selected: T,
+    selectedLabel: String,
+    onSelect: (T) -> Unit
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, fontWeight = FontWeight.Medium)
+            Text(
+                description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Box {
+            Surface(
+                onClick = { menuOpen = true },
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+            ) {
+                Row(
+                    modifier = Modifier.padding(start = 16.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        selectedLabel,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        Icons.Filled.ArrowDropDown,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                choices.forEach { (value, label) ->
+                    DropdownMenuItem(
+                        text = { Text(label) },
+                        onClick = {
+                            menuOpen = false
+                            onSelect(value)
+                        },
+                        trailingIcon = if (value == selected) {
+                            {
+                                Icon(
+                                    Icons.Filled.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        } else null
+                    )
+                }
+            }
+        }
+    }
 }

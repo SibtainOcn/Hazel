@@ -18,8 +18,19 @@ data class MediaInfo(
      * False is the ordinary case, and it is what keeps a public link away from a signed-in
      * request on the sites that answer those with less.
      */
-    val requiresSignIn: Boolean = false
+    val requiresSignIn: Boolean = false,
+    /**
+     * yt-dlp's `live_status`: "is_live", "is_upcoming", "post_live", "was_live", "not_live",
+     * or blank when the source does not say. Decides whether the live stream options apply.
+     */
+    val liveStatus: String = ""
 ) {
+    /** Streaming now. */
+    val isLive: Boolean get() = liveStatus == "is_live"
+
+    /** Scheduled and not started yet: a premiere, or a stream announced ahead. */
+    val isUpcoming: Boolean get() = liveStatus == "is_upcoming"
+
     /**
      * The entry the sheet opens on for each tab.
      *
@@ -50,6 +61,19 @@ data class MediaInfo(
      */
     val audioLanguages: List<String>
         get() = audioFormats.mapNotNull { it.language }.distinct()
+
+    /**
+     * The soundtrack of this media that answers to a preferred language, or null when it has
+     * none. Sources write the same language in more than one way ("hi", "hi-IN"), so an exact
+     * match is tried first and then one on the language alone.
+     */
+    fun languageMatching(preferred: String): String? {
+        val wanted = preferred.trim()
+        if (wanted.isBlank()) return null
+        val base = wanted.substringBefore('-').lowercase()
+        return audioLanguages.firstOrNull { it.equals(wanted, ignoreCase = true) }
+            ?: audioLanguages.firstOrNull { it.substringBefore('-').lowercase() == base }
+    }
 
     /**
      * The best audio in [language], falling back to the best of any when it has none.
@@ -95,12 +119,21 @@ data class MediaInfo(
         isVideo: Boolean,
         maxHeight: Int,
         audioLanguage: String? = null,
-        audioCodec: AudioCodec? = null
+        audioCodec: AudioCodec? = null,
+        videoCodec: VideoCodec? = null
     ): MediaFormat? {
         if (!isVideo) return bestAudioFor(audioLanguage, audioCodec)
         if (videoFormats.isEmpty()) return null
 
         val concrete = videoFormats.filter { !it.isGeneric }
+        // A preferred codec is taken at the height the ceiling lands on, never by giving
+        // up resolution for it: a sharper picture in another codec is the better answer.
+        val chosen = pickVideo(concrete, maxHeight) ?: return null
+        if (videoCodec == null || chosen.isGeneric) return chosen
+        return concrete.firstOrNull { it.height == chosen.height && videoCodec.matches(it) } ?: chosen
+    }
+
+    private fun pickVideo(concrete: List<MediaFormat>, maxHeight: Int): MediaFormat? {
         if (maxHeight == WORST_HEIGHT) {
             return concrete.minByOrNull { it.height } ?: WORST_VIDEO
         }
@@ -234,6 +267,25 @@ val WORST_VIDEO = MediaFormat(
  * of the same track sends whichever is asked for, and the file keeps it unless a different
  * output format is chosen as well.
  */
+/**
+ * A video codec a download can prefer.
+ *
+ * Matched on the `vcodec` a source reports, by the names it goes by there (H.264 is written
+ * "avc1" by YouTube and "h264" elsewhere). [sortKey] is the name yt-dlp's format sorting
+ * uses, for the generic rows that are resolved by yt-dlp rather than picked from a list.
+ */
+enum class VideoCodec(val label: String, private val prefixes: List<String>, val sortKey: String) {
+    H264("H.264 (AVC)", listOf("avc", "h264"), "h264"),
+    H265("H.265 (HEVC)", listOf("hvc", "hev", "h265"), "h265"),
+    VP9("VP9", listOf("vp9", "vp09"), "vp9"),
+    AV1("AV1", listOf("av01", "av1"), "av01");
+
+    fun matches(format: MediaFormat): Boolean {
+        val codec = format.vcodec?.lowercase()?.takeIf { it.isNotBlank() && it != "none" } ?: return false
+        return prefixes.any { codec.startsWith(it) }
+    }
+}
+
 enum class AudioCodec(
     /** Badge text, the way codecs are written everywhere else in the app. */
     val label: String,
@@ -247,6 +299,16 @@ enum class AudioCodec(
     VORBIS("VORBIS", "vorbis", setOf("ogg", "oga")),
     MP3("MP3", "mp3", setOf("mp3")),
     FLAC("FLAC", "flac", setOf("flac"));
+
+    /** The name yt-dlp's format sorting uses for this codec. */
+    val sortKey: String
+        get() = when (this) {
+            OPUS -> "opus"
+            AAC -> "aac"
+            VORBIS -> "vorbis"
+            MP3 -> "mp3"
+            FLAC -> "flac"
+        }
 
     /**
      * Whether [format] is in this codec. Many sites name the codec; the rest are read from
@@ -320,3 +382,28 @@ fun formatDuration(seconds: Int): String {
     val s = seconds % 60
     return if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%d:%02d".format(m, s)
 }
+
+/**
+ * A title fit to name a file and fill the sheet's title field.
+ *
+ * Sites without titles (TikTok, X, Facebook and the like) hand over the whole post as one,
+ * line breaks, hashtags and all. This keeps what reads as the title: the text on one line,
+ * without the run of hashtags and mentions at its end, and cut at a word near
+ * [MAX_TITLE_CHARS] when it is longer. A title that is nothing but tags keeps them, so there
+ * is always something left.
+ */
+fun readableTitle(raw: String): String {
+    val flat = raw.replace(Regex("\\s+"), " ").trim()
+    val untagged = flat.replace(TRAILING_TAGS, "").trim().ifBlank { flat }
+    if (untagged.length <= MAX_TITLE_CHARS) return untagged
+    // Never between the two halves of an emoji or other character outside the basic plane.
+    val cut = untagged.take(MAX_TITLE_CHARS).let { if (it.last().isHighSurrogate()) it.dropLast(1) else it }
+    val lastSpace = cut.lastIndexOf(' ')
+    return (if (lastSpace >= MAX_TITLE_CHARS * 2 / 3) cut.take(lastSpace) else cut)
+        .trimEnd(' ', ',', ';', ':', '-', '|')
+}
+
+private const val MAX_TITLE_CHARS = 100
+
+/** Hashtags and mentions at the very end of a caption, with anything between them. */
+private val TRAILING_TAGS = Regex("""(?:[\s,.|·]*[#@][\p{L}\p{N}_.]+)+[\s,.|·]*$""")

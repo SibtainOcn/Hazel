@@ -278,12 +278,12 @@ class ShareOverlayActivity : ComponentActivity() {
                                 onOpenSaveDir = openSaveDir,
                                 onPickSaveDir = pickSaveDir,
                                 onResetSaveDir = resetSaveDir,
-                                onDownload = { format, audioLanguage, title, author ->
+                                onDownload = { format, audioLanguage, title, author, oneOff ->
                                     if (resolved != null) {
                                         downloadViewModel.startDownload(
                                             context = applicationContext,
                                             format = format,
-                                            options = options,
+                                            options = options.with(oneOff),
                                             title = title,
                                             author = author,
                                             audioLanguage = audioLanguage,
@@ -297,7 +297,7 @@ class ShareOverlayActivity : ComponentActivity() {
                                             context = applicationContext,
                                             url = url,
                                             format = format,
-                                            options = options,
+                                            options = options.with(oneOff),
                                             title = title,
                                             author = author,
                                             audioLanguage = audioLanguage,

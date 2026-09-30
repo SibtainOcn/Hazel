@@ -247,6 +247,14 @@ object DownloadQueueRepository {
         put("writeSubs", options.writeSubs)
         put("writeAutoSubs", options.writeAutoSubs)
         put("subLanguages", options.subLanguages)
+        put("deleteSubsAfterEmbed", options.deleteSubsAfterEmbed)
+        put("useSponsorBlock", options.useSponsorBlock)
+        put("sponsorBlockApiUrl", options.sponsorBlockApiUrl)
+        put("sectionStart", options.sectionStart)
+        put("sectionEnd", options.sectionEnd)
+        put("preciseCuts", options.preciseCuts)
+        put("liveFromStart", options.liveFromStart)
+        put("waitForVideo", options.waitForVideo)
     }
 
     private fun decodeOptions(json: JSONObject?): DownloadOptions {
@@ -273,7 +281,15 @@ object DownloadQueueRepository {
             writeSubs = json.optBoolean("writeSubs"),
             writeAutoSubs = json.optBoolean("writeAutoSubs"),
             subLanguages = json.optString("subLanguages")
-                .ifBlank { DownloadOptions.DEFAULT_SUB_LANGUAGES }
+                .ifBlank { DownloadOptions.DEFAULT_SUB_LANGUAGES },
+            deleteSubsAfterEmbed = json.optBoolean("deleteSubsAfterEmbed", true),
+            useSponsorBlock = json.optBoolean("useSponsorBlock", true),
+            sponsorBlockApiUrl = json.optString("sponsorBlockApiUrl"),
+            sectionStart = json.optDouble("sectionStart", -1.0),
+            sectionEnd = json.optDouble("sectionEnd", -1.0),
+            preciseCuts = json.optBoolean("preciseCuts"),
+            liveFromStart = json.optBoolean("liveFromStart"),
+            waitForVideo = json.optBoolean("waitForVideo")
         )
     }
 }

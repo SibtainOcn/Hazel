@@ -13,6 +13,7 @@ Setup (Python 3):
 | Script | What it proves |
 |---|---|
 | `test_thumbnail_embed_live.py` | Cover art is embedded, and cropped square when asked, for every audio format and video container the sheet offers, on real sites and on awkward local formats (OGV, FLV, AVI, TS, WebM, WAV, AIFF, WMA, AC3, MKA). A cover never fails a download. |
+| `test_po_token_live.mjs` | The in-app PO token page (`app/src/main/assets/po_token.html`) mints real tokens when run in Chromium from the youtube.com address the app gives it, reuses its session for later mints, and with `--verify` yt-dlp lists a video's formats with those tokens. Needs Node and Playwright: `NODE_PATH=$(npm root -g) node tools/live/test_po_token_live.mjs --verify`. Set `JS_RUNTIME` to point yt-dlp at a Node it supports, and `HARNESS_ROUTE_REQUESTS=1` behind a proxy whose certificate Chromium does not trust. |
 | `test_sponsorblock_live.py` | SponsorBlock removal really cuts the segments from audio and video, marking writes them as chapters, other sites skip it cleanly, and a cookie file changes nothing. |
 
 Each script also has a `--static` mode, which needs no network: it checks that the flags
