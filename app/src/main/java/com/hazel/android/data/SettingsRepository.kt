@@ -13,6 +13,7 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.FetchMode
 import com.hazel.android.download.InfoCache
 import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.SearchSource
 import kotlinx.coroutines.flow.Flow
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.map
@@ -264,6 +265,70 @@ object SettingsRepository {
 
     suspend fun setForceIpv4(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[FORCE_IPV4_KEY] = enabled }
+    }
+
+    // ── Search and playback ──
+
+    private val SEARCH_SOURCE_KEY = stringPreferencesKey("search_source")
+    private val SEARCH_ENGINE_KEY = stringPreferencesKey("search_engine")
+    private val SEARCH_RESULTS_KEY = intPreferencesKey("search_results")
+    private val PLAY_ENGINE_KEY = stringPreferencesKey("play_engine")
+    private val PLAY_QUALITY_KEY = intPreferencesKey("play_quality")
+    private val SEARCH_SUGGESTIONS_KEY = booleanPreferencesKey("search_suggestions")
+
+    val SEARCH_RESULT_COUNTS = listOf(10, 25, 50)
+    const val DEFAULT_SEARCH_RESULTS = 25
+    val PLAY_QUALITIES = listOf(144, 240, 360, 480, 720, 1080)
+    const val DEFAULT_PLAY_QUALITY = 720
+
+    fun getSearchSource(context: Context): Flow<SearchSource> =
+        context.dataStore.data.map { prefs -> SearchSource.fromName(prefs[SEARCH_SOURCE_KEY]) }
+
+    suspend fun setSearchSource(context: Context, source: SearchSource) {
+        context.dataStore.edit { prefs -> prefs[SEARCH_SOURCE_KEY] = source.name }
+    }
+
+    /** Who answers a search on the sites NewPipe knows. NewPipe unless set otherwise. */
+    fun getSearchEngine(context: Context): Flow<ListingSource> =
+        context.dataStore.data.map { prefs ->
+            prefs[SEARCH_ENGINE_KEY]?.let(ListingSource::fromName) ?: ListingSource.NEWPIPE
+        }
+
+    suspend fun setSearchEngine(context: Context, engine: ListingSource) {
+        context.dataStore.edit { prefs -> prefs[SEARCH_ENGINE_KEY] = engine.name }
+    }
+
+    fun getSearchResults(context: Context): Flow<Int> =
+        context.dataStore.data.map { prefs -> prefs[SEARCH_RESULTS_KEY] ?: DEFAULT_SEARCH_RESULTS }
+
+    suspend fun setSearchResults(context: Context, count: Int) {
+        context.dataStore.edit { prefs -> prefs[SEARCH_RESULTS_KEY] = count }
+    }
+
+    /** Who finds the stream to play. NewPipe unless set otherwise, as it starts fastest. */
+    fun getPlayEngine(context: Context): Flow<ListingSource> =
+        context.dataStore.data.map { prefs ->
+            prefs[PLAY_ENGINE_KEY]?.let(ListingSource::fromName) ?: ListingSource.NEWPIPE
+        }
+
+    suspend fun setPlayEngine(context: Context, engine: ListingSource) {
+        context.dataStore.edit { prefs -> prefs[PLAY_ENGINE_KEY] = engine.name }
+    }
+
+    /** The tallest video the player asks for, in lines. */
+    fun getPlayQuality(context: Context): Flow<Int> =
+        context.dataStore.data.map { prefs -> prefs[PLAY_QUALITY_KEY] ?: DEFAULT_PLAY_QUALITY }
+
+    suspend fun setPlayQuality(context: Context, height: Int) {
+        context.dataStore.edit { prefs -> prefs[PLAY_QUALITY_KEY] = height }
+    }
+
+    /** Completions from Google while typing a search. Off unless turned on. */
+    fun getSearchSuggestions(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[SEARCH_SUGGESTIONS_KEY] ?: false }
+
+    suspend fun setSearchSuggestions(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[SEARCH_SUGGESTIONS_KEY] = enabled }
     }
 
     // ── First run ──
@@ -565,6 +630,7 @@ object SettingsRepository {
     // Dynamic update availability indicators for UI red dot badges
     private val HAS_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("has_update_available")
     private val HAZEL_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("hazel_update_available")
+    private val HAZEL_UPDATE_VERSION_KEY = stringPreferencesKey("hazel_update_version")
     private val YTDLP_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("ytdlp_update_available")
 
     fun getHasUpdateAvailable(context: Context): Flow<Boolean> {
@@ -577,9 +643,15 @@ object SettingsRepository {
     fun getHazelUpdateAvailable(context: Context): Flow<Boolean> {
         return context.dataStore.data.map { prefs -> prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false }
     }
-    suspend fun setHazelUpdateAvailable(context: Context, available: Boolean) {
+    /** The version the last check offered, so the flag can be dropped once it is installed. */
+    fun getHazelUpdateVersion(context: Context): Flow<String?> =
+        context.dataStore.data.map { prefs -> prefs[HAZEL_UPDATE_VERSION_KEY] }
+
+    suspend fun setHazelUpdateAvailable(context: Context, available: Boolean, version: String? = null) {
         context.dataStore.edit { prefs ->
             prefs[HAZEL_UPDATE_AVAILABLE_KEY] = available
+            if (available && version != null) prefs[HAZEL_UPDATE_VERSION_KEY] = version
+            else if (!available) prefs.remove(HAZEL_UPDATE_VERSION_KEY)
             val ytdlpAvail = prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false
             prefs[HAS_UPDATE_AVAILABLE_KEY] = available || ytdlpAvail
         }

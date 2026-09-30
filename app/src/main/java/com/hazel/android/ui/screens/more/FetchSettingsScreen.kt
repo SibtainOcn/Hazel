@@ -1,225 +1,227 @@
 package com.hazel.android.ui.screens.more
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.FormatListNumbered
+import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.Hub
+import androidx.compose.material.icons.filled.Lan
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.FetchMode
 import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.SearchSource
 import kotlinx.coroutines.launch
 
 /**
- * Controls how hard the downloader tries when reading a link.
+ * How links are read, how searches run, and how media plays.
  *
- * Reading a link is almost entirely network waiting, so how long a stalled connection is
- * given, and how many times a failed attempt is repeated, is what decides whether a paste
- * resolves in a second or in twenty. The settings are plain network bounds passed to
- * yt-dlp: they apply to every site the same way, so a change here cannot help one source
- * while breaking another.
+ * Each engine choice is between NewPipe, which answers fastest on the sites it knows, and
+ * yt-dlp, which works everywhere. Whichever is picked, yt-dlp takes over whenever NewPipe
+ * cannot answer, and downloads always use yt-dlp.
  */
 @Composable
 fun FetchSettingsScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val mode by SettingsRepository.getFetchMode(context)
-        .collectAsState(initial = FetchMode.DEFAULT)
-    val listingSource by SettingsRepository.getListingSource(context)
-        .collectAsState(initial = ListingSource.DEFAULT)
-    val forceIpv4 by SettingsRepository.getForceIpv4(context)
-        .collectAsState(initial = false)
+    val mode by SettingsRepository.getFetchMode(context).collectAsState(initial = FetchMode.DEFAULT)
+    val listingSource by SettingsRepository.getListingSource(context).collectAsState(initial = ListingSource.DEFAULT)
+    val forceIpv4 by SettingsRepository.getForceIpv4(context).collectAsState(initial = false)
+    val searchSource by SettingsRepository.getSearchSource(context).collectAsState(initial = SearchSource.DEFAULT)
+    val searchEngine by SettingsRepository.getSearchEngine(context).collectAsState(initial = ListingSource.NEWPIPE)
+    val searchResults by SettingsRepository.getSearchResults(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_SEARCH_RESULTS)
+    val suggestions by SettingsRepository.getSearchSuggestions(context).collectAsState(initial = false)
+    val playEngine by SettingsRepository.getPlayEngine(context).collectAsState(initial = ListingSource.NEWPIPE)
+    val playQuality by SettingsRepository.getPlayQuality(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_PLAY_QUALITY)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
+    var open by remember { mutableStateOf(Choice.NONE) }
+
+    val engineChoices = ListingSource.entries.map { it to stringResource(it.labelRes) }
+
+    SettingsScreen(
+        title = stringResource(R.string.fetch_settings_title),
+        onBack = onBack,
+        description = stringResource(R.string.fetch_settings_screen_description)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp, bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.fetch_settings_back)
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                stringResource(R.string.fetch_settings_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+        SettingsSection(
+            title = stringResource(R.string.fetch_settings_reading_links),
+            rows = listOf(
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.Link,
+                        title = stringResource(R.string.fetch_settings_read_with),
+                        value = stringResource(listingSource.labelRes),
+                        onClick = { open = Choice.READ_ENGINE }
+                    )
+                },
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.Timer,
+                        title = stringResource(R.string.fetch_settings_patience),
+                        value = stringResource(mode.labelRes) + " · " + pluralStringResource(
+                            R.plurals.fetch_settings_timing, mode.retries, mode.socketTimeoutSeconds, mode.retries
+                        ),
+                        onClick = { open = Choice.PATIENCE }
+                    )
+                },
+                {
+                    SwitchSettingRow(
+                        icon = Icons.Filled.Lan,
+                        title = stringResource(R.string.fetch_settings_force_ipv4),
+                        summary = stringResource(R.string.fetch_settings_force_ipv4_description),
+                        checked = forceIpv4,
+                        onCheckedChange = { scope.launch { SettingsRepository.setForceIpv4(context, it) } }
+                    )
+                }
             )
-        }
-
-        Text(
-            stringResource(R.string.fetch_settings_timeout_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-            modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            FetchMode.entries.forEach { option ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            scope.launch { SettingsRepository.setFetchMode(context, option) }
-                        }
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = option == mode,
-                        onClick = {
-                            scope.launch { SettingsRepository.setFetchMode(context, option) }
-                        }
+        SettingsSection(
+            title = stringResource(R.string.fetch_settings_search),
+            rows = listOf(
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.TravelExplore,
+                        title = stringResource(R.string.fetch_settings_search_on),
+                        value = stringResource(searchSource.labelRes),
+                        onClick = { open = Choice.SEARCH_SOURCE }
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(option.labelRes), fontWeight = FontWeight.Medium)
-                        Text(
-                            stringResource(option.descriptionRes),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
-                        )
-                        Text(
-                            pluralStringResource(
-                                R.plurals.fetch_settings_timing,
-                                option.retries,
-                                option.socketTimeoutSeconds,
-                                option.retries
-                            ),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-                        )
-                    }
+                },
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.Hub,
+                        title = stringResource(R.string.fetch_settings_search_with),
+                        value = stringResource(searchEngine.labelRes),
+                        onClick = { open = Choice.SEARCH_ENGINE }
+                    )
+                },
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.FormatListNumbered,
+                        title = stringResource(R.string.fetch_settings_search_results),
+                        value = searchResults.toString(),
+                        onClick = { open = Choice.SEARCH_RESULTS }
+                    )
+                },
+                {
+                    SwitchSettingRow(
+                        icon = Icons.Filled.Lightbulb,
+                        title = stringResource(R.string.fetch_settings_suggestions),
+                        summary = stringResource(R.string.fetch_settings_suggestions_summary),
+                        checked = suggestions,
+                        onCheckedChange = { scope.launch { SettingsRepository.setSearchSuggestions(context, it) } }
+                    )
                 }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            stringResource(R.string.fetch_settings_reading_links),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            stringResource(R.string.fetch_settings_reading_links_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-            modifier = Modifier.padding(bottom = 16.dp)
+            )
         )
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            ListingSource.entries.forEach { option ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            scope.launch { SettingsRepository.setListingSource(context, option) }
-                        }
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = option == listingSource,
-                        onClick = {
-                            scope.launch { SettingsRepository.setListingSource(context, option) }
-                        }
+        SettingsSection(
+            title = stringResource(R.string.fetch_settings_playback),
+            rows = listOf(
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.PlayCircle,
+                        title = stringResource(R.string.fetch_settings_play_with),
+                        value = stringResource(playEngine.labelRes),
+                        onClick = { open = Choice.PLAY_ENGINE }
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(option.labelRes),
-                        fontWeight = FontWeight.Medium
+                },
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.HighQuality,
+                        title = stringResource(R.string.fetch_settings_play_quality),
+                        value = stringResource(R.string.fetch_settings_play_quality_value, playQuality),
+                        onClick = { open = Choice.PLAY_QUALITY }
                     )
                 }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        scope.launch { SettingsRepository.setForceIpv4(context, !forceIpv4) }
-                    }
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        stringResource(R.string.fetch_settings_force_ipv4),
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        stringResource(R.string.fetch_settings_force_ipv4_description),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Switch(
-                    checked = forceIpv4,
-                    onCheckedChange = { enabled ->
-                        scope.launch { SettingsRepository.setForceIpv4(context, enabled) }
-                    }
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
+            )
+        )
     }
+
+    val close = { open = Choice.NONE }
+    when (open) {
+        Choice.NONE -> Unit
+        Choice.READ_ENGINE -> SingleChoiceDialog(
+            title = stringResource(R.string.fetch_settings_read_with),
+            choices = engineChoices,
+            selected = listingSource,
+            onSelect = { scope.launch { SettingsRepository.setListingSource(context, it) }; close() },
+            onDismiss = close,
+            describe = { stringResource(it.descriptionRes) }
+        )
+        Choice.PATIENCE -> SingleChoiceDialog(
+            title = stringResource(R.string.fetch_settings_patience),
+            choices = FetchMode.entries.map { it to stringResource(it.labelRes) },
+            selected = mode,
+            onSelect = { scope.launch { SettingsRepository.setFetchMode(context, it) }; close() },
+            onDismiss = close,
+            describe = { stringResource(it.descriptionRes) }
+        )
+        Choice.SEARCH_SOURCE -> SingleChoiceDialog(
+            title = stringResource(R.string.fetch_settings_search_on),
+            choices = SearchSource.entries.map { it to stringResource(it.labelRes) },
+            selected = searchSource,
+            onSelect = { scope.launch { SettingsRepository.setSearchSource(context, it) }; close() },
+            onDismiss = close
+        )
+        Choice.SEARCH_ENGINE -> SingleChoiceDialog(
+            title = stringResource(R.string.fetch_settings_search_with),
+            choices = engineChoices,
+            selected = searchEngine,
+            onSelect = { scope.launch { SettingsRepository.setSearchEngine(context, it) }; close() },
+            onDismiss = close,
+            describe = { engineSummary(it) }
+        )
+        Choice.SEARCH_RESULTS -> SingleChoiceDialog(
+            title = stringResource(R.string.fetch_settings_search_results),
+            choices = SettingsRepository.SEARCH_RESULT_COUNTS.map { it to it.toString() },
+            selected = searchResults,
+            onSelect = { scope.launch { SettingsRepository.setSearchResults(context, it) }; close() },
+            onDismiss = close
+        )
+        Choice.PLAY_ENGINE -> SingleChoiceDialog(
+            title = stringResource(R.string.fetch_settings_play_with),
+            choices = engineChoices,
+            selected = playEngine,
+            onSelect = { scope.launch { SettingsRepository.setPlayEngine(context, it) }; close() },
+            onDismiss = close,
+            describe = { engineSummary(it) }
+        )
+        Choice.PLAY_QUALITY -> SingleChoiceDialog(
+            title = stringResource(R.string.fetch_settings_play_quality),
+            choices = SettingsRepository.PLAY_QUALITIES.map {
+                it to stringResource(R.string.fetch_settings_play_quality_value, it)
+            },
+            selected = playQuality,
+            onSelect = { scope.launch { SettingsRepository.setPlayQuality(context, it) }; close() },
+            onDismiss = close
+        )
+    }
+}
+
+@Composable
+private fun engineSummary(engine: ListingSource): String = stringResource(
+    if (engine == ListingSource.NEWPIPE) R.string.fetch_settings_engine_newpipe_summary
+    else R.string.fetch_settings_engine_ytdlp_summary
+)
+
+private enum class Choice {
+    NONE, READ_ENGINE, PATIENCE, SEARCH_SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, PLAY_QUALITY
 }

@@ -33,8 +33,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 /** One destination on the bottom bar. */
 data class BottomBarItem(
     val route: String,
-    @DrawableRes val icon: Int,
-    @StringRes val label: Int,
+    @param:DrawableRes val icon: Int,
+    @param:StringRes val label: Int,
     /** Draws the red dot that says something is happening there. */
     val showDot: Boolean = false
 )

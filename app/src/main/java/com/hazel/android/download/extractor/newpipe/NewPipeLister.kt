@@ -1,8 +1,10 @@
-package com.hazel.android.download.extractor
+package com.hazel.android.download.extractor.newpipe
 
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.MediaProbe
+import com.hazel.android.download.extractor.LinkContents
+import com.hazel.android.download.extractor.LinkEntry
 import com.hazel.android.util.UrlExtractor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -27,15 +29,24 @@ import kotlin.coroutines.coroutineContext
  * startup overhead, returning metadata and formats in ~200ms. yt-dlp binary stays the
  * universal fallback for non-supported sites or any parsing errors.
  */
-object NewPipeLister {
+internal object NewPipeLister {
 
     private val started = AtomicBoolean(false)
 
-    private fun service(url: String): StreamingService? = runCatching {
+    internal fun ensureStarted() {
         if (started.compareAndSet(false, true)) {
             NewPipe.init(NewPipeDownloader())
         }
+    }
+
+    internal fun service(url: String): StreamingService? = runCatching {
+        ensureStarted()
         NewPipe.getServiceByUrl(url)
+    }.getOrNull()
+
+    internal fun serviceNamed(name: String): StreamingService? = runCatching {
+        ensureStarted()
+        NewPipe.getService(name)
     }.getOrNull()
 
     /**

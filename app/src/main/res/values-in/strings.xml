@@ -8,7 +8,7 @@
     <string name="nav_incognito_off">Mode samaran nonaktif</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">Masukkan URL</string>
+    <string name="download_search_hint">Cari atau masukkan URL</string>
     <string name="download_clear">Hapus</string>
     <string name="download_incognito_title">Anda dalam mode samaran</string>
     <string name="download_incognito_body">Unduhan tidak ditambahkan ke riwayat dan tautan tidak diingat. File tetap disimpan seperti biasa.</string>
@@ -38,15 +38,15 @@
     <string name="download_clear_confirm_body">Yakin ingin menghapus semua hasil dari layar?</string>
 
     <!-- SearchScreen -->
-    <string name="search_hint">Masukkan URL</string>
+    <string name="search_hint">Cari atau masukkan URL</string>
     <string name="search_back">Kembali</string>
     <string name="search_more">Lainnya</string>
     <string name="search_add_link">Tambah tautan lain</string>
     <string name="search_clear">Hapus</string>
     <string name="search_clear_results">Hapus hasil</string>
     <string name="search_clear_history">Hapus riwayat pencarian</string>
-    <string name="search_empty_history">Tautan yang Anda gunakan akan muncul di sini</string>
-    <string name="search_no_matches">Tidak ada tautan yang cocok</string>
+    <string name="search_empty_history">Pencarian dan tautan Anda akan muncul di sini</string>
+    <string name="search_no_matches">Tidak ada yang cocok</string>
     <string name="search_remove">Hapus</string>
     <string name="search_all">Cari semua</string>
     <string name="search_forget">Lupakan</string>
@@ -494,14 +494,11 @@
     <string name="accent_picker_close">Tutup</string>
 
     <!-- FetchSettingsScreen -->
-    <string name="fetch_settings_back">Kembali</string>
     <string name="fetch_settings_title">Pembacaan Tautan</string>
-    <string name="fetch_settings_timeout_description">Berapa lama menunggu sumber yang lambat sebelum menyerah dan mencoba lagi.</string>
     <plurals name="fetch_settings_timing">
         <item quantity="other">Batas waktu %1$d dtk, %2$d percobaan</item>
     </plurals>
     <string name="fetch_settings_reading_links">Membaca tautan</string>
-    <string name="fetch_settings_reading_links_description">Pembaca mana yang mengidentifikasi isi tautan. Unduhan selalu menggunakan yt-dlp, apa pun yang dipilih di sini.</string>
     <string name="fetch_settings_force_ipv4_description">Hanya aktifkan jika tautan terhenti di jaringan Anda. Ini mengatasi rute IPv6 yang bermasalah, dan lebih lambat di tempat lain.</string>
     <string name="fetch_settings_force_ipv4">Paksa IPv4</string>
     <string name="fetch_mode_fast_label">Cepat</string>
@@ -657,4 +654,38 @@
     <string name="backup_category_failed">Gagal</string>
     <string name="backup_category_cookies">Cookie</string>
     <string name="backup_category_search">Riwayat pencarian</string>
+    <string name="search_no_results">Tidak ada hasil untuk %1$s</string>
+    <string name="player_play">Putar</string>
+    <string name="player_pause">Jeda</string>
+    <string name="player_close">Tutup pemutar</string>
+    <string name="player_fullscreen">Layar penuh</string>
+    <string name="player_exit_fullscreen">Keluar dari layar penuh</string>
+    <string name="player_failed">Tidak dapat memutar ini</string>
+    <string name="player_retry">Coba lagi</string>
+    <string name="player_mute">Bisukan</string>
+    <string name="player_unmute">Bunyikan</string>
+    <string name="options_cut_start_here">Mulai di sini</string>
+    <string name="options_cut_end_here">Selesai di sini</string>
+    <string name="options_cut_jump_start">Ke awal</string>
+    <string name="options_cut_jump_end">Ke akhir</string>
+    <string name="fetch_settings_screen_description">Cara tautan dibaca, cara pencarian berjalan, dan cara media diputar. Unduhan selalu memakai yt-dlp.</string>
+    <string name="fetch_settings_read_with">Baca tautan dengan</string>
+    <string name="fetch_settings_patience">Koneksi lambat</string>
+    <string name="fetch_settings_search">Pencarian</string>
+    <string name="fetch_settings_search_on">Cari di</string>
+    <string name="fetch_settings_search_with">Cari dengan</string>
+    <string name="fetch_settings_search_results">Hasil per pencarian</string>
+    <string name="fetch_settings_suggestions">Saran pencarian</string>
+    <string name="fetch_settings_suggestions_summary">Menyarankan pencarian dari Google saat Anda mengetik. Yang Anda ketik dikirim ke Google.</string>
+    <string name="fetch_settings_playback">Pemutaran</string>
+    <string name="fetch_settings_play_with">Putar dengan</string>
+    <string name="fetch_settings_play_quality">Kualitas pemutaran</string>
+    <string name="fetch_settings_play_quality_value">Hingga %1$dp</string>
+    <string name="fetch_settings_engine_newpipe_summary">Tercepat di YouTube, SoundCloud, dan Bandcamp. yt-dlp mengambil alih di tempat lain dan setiap kali tidak bisa menjawab.</string>
+    <string name="fetch_settings_engine_ytdlp_summary">Lebih lambat untuk mulai, dan berfungsi di semua situs yang didukung yt-dlp.</string>
+    <plurals name="player_skip_seconds">
+        <item quantity="other">%d detik</item>
+    </plurals>
+    <string name="home_update">Perbarui</string>
+    <string name="home_update_available">Pembaruan tersedia</string>
 </resources>

@@ -18,8 +18,8 @@ import java.io.File
  */
 data class TempCategory(
     val id: String,
-    @StringRes val labelRes: Int,
-    @StringRes val descriptionRes: Int,
+    @param:StringRes val labelRes: Int,
+    @param:StringRes val descriptionRes: Int,
     val bytes: Long,
     /**
      * True when clearing this makes the app slower rather than losing anything, so the

@@ -47,6 +47,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
@@ -75,7 +76,7 @@ import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.VIDEO_CONTAINERS
 import com.hazel.android.download.extractor.ListingSource
-import com.hazel.android.download.extractor.NewPipeLister
+import com.hazel.android.download.extractor.newpipe.NewPipeEngine
 import com.hazel.android.download.languageLabel
 
 /**
@@ -402,6 +403,18 @@ fun FormatSheet(
                             ?.formatId
                             ?.takeIf { videoTab && current.hasVideo && !current.hasAudio }
                     )
+                    // The row stands in for the best until the real list arrives.
+                    if (isLoadingFormats && !info.hasResolvedFormats) {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 6.dp)
+                                .height(2.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                        )
+                    }
                 }
             }
 
@@ -519,7 +532,7 @@ fun FormatSheet(
             audioFirst = !videoTab,
             isLoadingFormats = isLoadingFormats,
             onRefresh = onRefreshFormats,
-            canChooseSource = remember(info.url) { NewPipeLister.handlesStream(info.url) },
+            canChooseSource = remember(info.url) { NewPipeEngine.handlesStream(info.url) },
             onConfirm = { format ->
                 if (format.hasVideo) pickedVideo = format else pickedAudio = format
                 // Picking an audio stream from the video tab, or the other way round,
@@ -558,7 +571,9 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
-        SheetDialog.CUT -> CutDialog(
+        SheetDialog.CUT -> CutSheet(
+            url = info.url,
+            thumbnail = info.thumbnail,
             durationSeconds = info.durationSeconds,
             current = oneOff,
             onApply = { start, end, precise ->

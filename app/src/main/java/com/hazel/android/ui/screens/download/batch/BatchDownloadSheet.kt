@@ -50,7 +50,7 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadPlan
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.extractor.ListingSource
-import com.hazel.android.download.extractor.NewPipeLister
+import com.hazel.android.download.extractor.newpipe.NewPipeEngine
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.WORST_HEIGHT
 import com.hazel.android.download.BatchAudioFormats
@@ -508,7 +508,7 @@ fun BatchDownloadSheet(
                 isLoadingFormats = targets.any { it.url in readingUrls },
                 onRefresh = { source -> onRefreshFormats(targets, source) },
                 canChooseSource = remember(targets) {
-                    targets.isNotEmpty() && targets.all { NewPipeLister.handlesStream(it.url) }
+                    targets.isNotEmpty() && targets.all { NewPipeEngine.handlesStream(it.url) }
                 }
             )
         }

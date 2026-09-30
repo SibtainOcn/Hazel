@@ -15,6 +15,7 @@ coil = "3.1.0"
 material3 = "1.5.0-alpha12"
 newpipeExtractor = "v0.26.5"
 json = "20250517"
+media3 = "1.11.1"
 
 
 [libraries]
@@ -43,6 +44,10 @@ coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref 
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
 json = { group = "org.json", name = "json", version.ref = "json" }
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+androidx-media3-exoplayer-hls = { group = "androidx.media3", name = "media3-exoplayer-hls", version.ref = "media3" }
+androidx-media3-exoplayer-dash = { group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "media3" }
+androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

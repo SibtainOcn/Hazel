@@ -8,7 +8,7 @@
     <string name="nav_incognito_off">无痕模式已关闭</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">粘贴链接</string>
+    <string name="download_search_hint">搜索或输入网址</string>
     <string name="download_clear">清空</string>
     <string name="download_incognito_title">你正在无痕模式中</string>
     <string name="download_incognito_body">下载不会加入历史记录，链接也不会被记住。文件仍会照常保存。</string>
@@ -38,15 +38,15 @@
     <string name="download_clear_confirm_body">确定要清除屏幕上的所有结果吗？</string>
 
     <!-- SearchScreen -->
-    <string name="search_hint">粘贴链接</string>
+    <string name="search_hint">搜索或输入网址</string>
     <string name="search_back">返回</string>
     <string name="search_more">更多</string>
     <string name="search_add_link">再添加一个链接</string>
     <string name="search_clear">清除</string>
     <string name="search_clear_results">清空结果</string>
     <string name="search_clear_history">清除搜索记录</string>
-    <string name="search_empty_history">你用过的链接会显示在这里</string>
-    <string name="search_no_matches">没有匹配的链接</string>
+    <string name="search_empty_history">你的搜索和链接会显示在这里</string>
+    <string name="search_no_matches">没有匹配项</string>
     <string name="search_remove">移除</string>
     <string name="search_all">全部搜索</string>
     <string name="search_forget">忘记</string>
@@ -494,14 +494,11 @@
     <string name="accent_picker_close">关闭</string>
 
     <!-- FetchSettingsScreen -->
-    <string name="fetch_settings_back">返回</string>
     <string name="fetch_settings_title">链接读取</string>
-    <string name="fetch_settings_timeout_description">在放弃并重试之前，要等一个慢来源多久。</string>
     <plurals name="fetch_settings_timing">
         <item quantity="other">超时 %1$d 秒，重试 %2$d 次</item>
     </plurals>
     <string name="fetch_settings_reading_links">链接读取</string>
-    <string name="fetch_settings_reading_links_description">由哪个读取器判断一个链接里有什么。无论这里选哪个，下载始终使用 yt-dlp。</string>
     <string name="fetch_settings_force_ipv4_description">只有当链接在你的网络上卡住时才打开它。它能绕开出问题的 IPv6 路由，在其他情况下都更慢。</string>
     <string name="fetch_settings_force_ipv4">强制使用 IPv4</string>
     <string name="fetch_mode_fast_label">快速</string>
@@ -657,4 +654,38 @@
     <string name="backup_category_failed">失败</string>
     <string name="backup_category_cookies">Cookie</string>
     <string name="backup_category_search">搜索记录</string>
+    <string name="search_no_results">没有找到 %1$s 的结果</string>
+    <string name="player_play">播放</string>
+    <string name="player_pause">暂停</string>
+    <string name="player_close">关闭播放器</string>
+    <string name="player_fullscreen">全屏</string>
+    <string name="player_exit_fullscreen">退出全屏</string>
+    <string name="player_failed">无法播放</string>
+    <string name="player_retry">重试</string>
+    <string name="player_mute">静音</string>
+    <string name="player_unmute">取消静音</string>
+    <string name="options_cut_start_here">从这里开始</string>
+    <string name="options_cut_end_here">到这里结束</string>
+    <string name="options_cut_jump_start">跳到开头</string>
+    <string name="options_cut_jump_end">跳到结尾</string>
+    <string name="fetch_settings_screen_description">设置链接的读取方式、搜索方式和媒体的播放方式。下载始终使用 yt-dlp。</string>
+    <string name="fetch_settings_read_with">读取链接使用</string>
+    <string name="fetch_settings_patience">慢速连接</string>
+    <string name="fetch_settings_search">搜索</string>
+    <string name="fetch_settings_search_on">搜索平台</string>
+    <string name="fetch_settings_search_with">搜索引擎</string>
+    <string name="fetch_settings_search_results">每次搜索结果数</string>
+    <string name="fetch_settings_suggestions">搜索建议</string>
+    <string name="fetch_settings_suggestions_summary">输入时显示 Google 搜索建议。你输入的内容会发送给 Google。</string>
+    <string name="fetch_settings_playback">播放</string>
+    <string name="fetch_settings_play_with">播放引擎</string>
+    <string name="fetch_settings_play_quality">播放画质</string>
+    <string name="fetch_settings_play_quality_value">最高 %1$dp</string>
+    <string name="fetch_settings_engine_newpipe_summary">在 YouTube、SoundCloud 和 Bandcamp 上最快。其他网站以及它无法处理时，由 yt-dlp 接手。</string>
+    <string name="fetch_settings_engine_ytdlp_summary">启动较慢，但适用于 yt-dlp 支持的所有网站。</string>
+    <plurals name="player_skip_seconds">
+        <item quantity="other">%d 秒</item>
+    </plurals>
+    <string name="home_update">更新</string>
+    <string name="home_update_available">有可用更新</string>
 </resources>

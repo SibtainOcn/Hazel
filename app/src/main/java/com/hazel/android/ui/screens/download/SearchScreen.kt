@@ -3,6 +3,8 @@ package com.hazel.android.ui.screens.download
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,7 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -75,34 +77,38 @@ import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.data.SettingsRepository
+import com.hazel.android.download.extractor.SearchSource
+import com.hazel.android.download.extractor.SearchSuggestions
+import com.hazel.android.ui.components.FlatChip
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * Full screen link entry.
+ * Full screen search and link entry.
  *
- * More than one link can be queued before anything is read: typing a link and confirming it
- * with the plus button parks it as a chip and clears the field for the next one, so a batch
- * is built up in one pass. Searching resolves everything that was queued, including whatever
- * is still in the field.
+ * Links are read as links; anything else is searched for on the site picked in the chips
+ * under the field. More than one link can be queued before anything is read: the plus
+ * button parks a typed link as a chip and clears the field for the next one.
  *
- * Previously used links sit underneath. Tapping one queues it; the arrow beside it puts it
- * back in the field instead, for when it needs editing first.
+ * Earlier searches and links sit underneath, with suggestions from Google when those are
+ * turned on. Tapping one uses it; the arrow beside it puts it in the field for editing.
  */
 @Composable
 fun SearchScreen(
     initialQuery: String = "",
     onSearch: (List<String>) -> Unit,
+    onSearchWords: (String, SearchSource) -> Unit,
     onClearResults: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val keyboard = LocalSoftwareKeyboardController.current
-    val clipboard = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
     val focusRequester = remember { FocusRequester() }
 
     val history by SearchHistoryRepository.getHistory(context).collectAsState(initial = emptyList())
@@ -125,9 +131,28 @@ fun SearchScreen(
     // Needed only to open the folder a repeat warning refers to.
     val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
 
+    val source by SettingsRepository.getSearchSource(context).collectAsState(initial = SearchSource.DEFAULT)
+    val suggestionsOn by SettingsRepository.getSearchSuggestions(context).collectAsState(initial = false)
+
     // Links already queued are hidden from the list, and what is being typed filters it.
     val suggestions = remember(history, text, queued) {
         history.filter { it !in queued && it.contains(text.trim(), ignoreCase = true) }
+    }
+
+    val typingWords = text.isNotBlank() && !isLinks(text)
+
+    // Google's completions for words being typed, asked for once typing pauses.
+    var remote by remember { mutableStateOf(listOf<String>()) }
+    LaunchedEffect(text, source, suggestionsOn) {
+        if (!suggestionsOn || !typingWords) {
+            remote = emptyList()
+            return@LaunchedEffect
+        }
+        delay(SUGGESTION_DELAY_MS)
+        remote = SearchSuggestions.forQuery(text, source)
+    }
+    val remoteShown = remember(remote, suggestions) {
+        remote.filter { hint -> suggestions.none { it.equals(hint, ignoreCase = true) } }
     }
 
     /**
@@ -158,7 +183,16 @@ fun SearchScreen(
         onSearch(links)
     }
 
+    fun searchWords(words: String) {
+        keyboard?.hide()
+        onSearchWords(words.trim(), source)
+    }
+
     fun submit() {
+        if (queued.isEmpty() && text.isNotBlank() && !isLinks(text)) {
+            searchWords(text)
+            return
+        }
         val all = (queued + typedLinks()).filter { it.isNotBlank() }.distinct()
         if (all.isEmpty()) return
 
@@ -189,15 +223,18 @@ fun SearchScreen(
      * goes through [submit], so a paste of several links is split the same way a typed one
      * is and a link already downloaded still raises the same warning.
      */
-    fun pasteAndSearch() {
-        val pasted = clipboard.getText()?.text.orEmpty().trim()
+    fun pasteAndSearch() = scope.launch {
+        val pasted = clipboard.getClipEntry()?.clipData
+            ?.takeIf { it.itemCount > 0 }
+            ?.getItemAt(0)?.coerceToText(context)?.toString()
+            .orEmpty().trim()
         if (pasted.isBlank()) {
             Toast.makeText(
                 context,
                 context.getString(R.string.search_nothing_to_paste),
                 Toast.LENGTH_SHORT
             ).show()
-            return
+            return@launch
         }
         text = pasted
         submit()
@@ -324,7 +361,7 @@ fun SearchScreen(
                 }
 
                 // Parks the typed link so another can be entered.
-                if (text.isNotBlank()) {
+                if (text.isNotBlank() && !typingWords) {
                     IconButton(onClick = { queueCurrent() }) {
                         Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.search_add_link))
                     }
@@ -338,6 +375,26 @@ fun SearchScreen(
                     ) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_clear))
                     }
+                }
+            }
+
+            // ── Where to search ──
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 12.dp)
+                    .padding(bottom = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SearchSource.entries.forEach { option ->
+                    FlatChip(
+                        label = stringResource(option.labelRes),
+                        selected = option == source,
+                        onClick = {
+                            scope.launch { SettingsRepository.setSearchSource(context, option) }
+                        }
+                    )
                 }
             }
 
@@ -389,8 +446,8 @@ fun SearchScreen(
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
             }
 
-            // ── History ──
-            if (suggestions.isEmpty()) {
+            // ── History and suggestions ──
+            if (suggestions.isEmpty() && remoteShown.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -419,6 +476,13 @@ fun SearchScreen(
                                     SearchHistoryRepository.remove(context.applicationContext, entry)
                                 }
                             }
+                        )
+                    }
+                    items(remoteShown, key = { "suggestion:$it" }) { hint ->
+                        SuggestionRow(
+                            query = hint,
+                            onUse = { searchWords(hint) },
+                            onFill = { text = hint }
                         )
                     }
                     }
@@ -533,6 +597,60 @@ private fun HistoryRow(
     }
     Spacer(modifier = Modifier.height(0.dp))
 }
+
+/** A completion offered while typing. The row searches it; the arrow puts it in the field. */
+@Composable
+private fun SuggestionRow(query: String, onUse: () -> Unit, onFill: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onUse)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            Icons.Filled.Search,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            query,
+            style = MaterialTheme.typography.bodyLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(onClick = onFill, modifier = Modifier.size(36.dp)) {
+            Icon(
+                Icons.AutoMirrored.Filled.CallMade,
+                contentDescription = stringResource(R.string.search_edit_before),
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+        }
+    }
+}
+
+/**
+ * Whether [text] is one or more links rather than words to search for: every part of it
+ * is an address, with or without its scheme.
+ */
+internal fun isLinks(text: String): Boolean {
+    val parts = text.trim().split(WHITESPACE).filter { it.isNotBlank() }
+    return parts.isNotEmpty() && parts.all { part ->
+        part.startsWith("http://", ignoreCase = true) ||
+            part.startsWith("https://", ignoreCase = true) ||
+            part.startsWith("www.", ignoreCase = true) ||
+            BARE_ADDRESS.matches(part)
+    }
+}
+
+/** A host with a dot in it and an optional path, such as youtu.be/abc. */
+private val BARE_ADDRESS = Regex("""^[\p{L}\p{N}-]+(\.[\p{L}\p{N}-]+)*\.[\p{L}]{2,}(:\d+)?([/?#]\S*)?$""")
+
+private const val SUGGESTION_DELAY_MS = 250L
 
 /** Any run of whitespace, which is what separates one pasted link from the next. */
 private val WHITESPACE = Regex("""\s+""")

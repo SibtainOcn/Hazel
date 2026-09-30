@@ -114,6 +114,12 @@ import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.hazel.android.ui.components.player.FullscreenPlayer
+import com.hazel.android.ui.components.player.InlinePlayer
+import com.hazel.android.ui.components.player.rememberPlaybackController
+import com.hazel.android.download.playback.PlaybackController
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.material.icons.filled.PlayArrow
 
 /**
  * Paste one link or several, read what the sources offer, pick formats, download.
@@ -184,6 +190,16 @@ fun DownloadScreen(
     }
 
     var searchOpen by remember { mutableStateOf(false) }
+    // The one card playing, if any. Starting another stops it. The player itself is held
+    // here rather than in the card, so full screen cannot drop it along with the card when
+    // the list lays itself out again.
+    var playingUrl by remember { mutableStateOf<String?>(null) }
+    var playerFullscreen by remember { mutableStateOf(false) }
+    val playback = playingUrl?.let { rememberPlaybackController(it) }
+    val stopPlaying = {
+        playingUrl = null
+        playerFullscreen = false
+    }
     var sheetVisible by remember { mutableStateOf(false) }
     var batchSheetVisible by remember { mutableStateOf(false) }
 
@@ -421,7 +437,8 @@ fun DownloadScreen(
             }
 
             UrlSearchBar(
-                url = state.url,
+                // Words searched for stay in the bar, as a link read does.
+                url = state.searchQuery.ifBlank { state.url },
                 shineProgress = searchBarShine.value,
                 onOpenSearch = {
                     cameFromShare = false
@@ -564,6 +581,14 @@ fun DownloadScreen(
                                 batchItem = batchItem,
                                 waitingForWifi = state.waitingForWifi,
                                 alreadyDownloaded = info.url in savedUrls,
+                                player = playback?.takeIf { playingUrl == info.url },
+                                playerFullscreen = playerFullscreen,
+                                onPlay = { playingUrl = info.url },
+                                onFullscreen = { playerFullscreen = true },
+                                onStopPlaying = {
+                                    // Full screen takes the card off screen; that is no reason to stop.
+                                    if (playingUrl == info.url && !playerFullscreen) stopPlaying()
+                                },
                                 onOpenSheet = openSheet,
                                 onOpenQueue = onOpenQueue
                             )
@@ -775,6 +800,28 @@ fun DownloadScreen(
         }
     }
 
+    // A card that has gone from the results takes its player with it.
+    LaunchedEffect(state.results, playingUrl) {
+        if (playingUrl != null && state.results.none { it.url == playingUrl }) stopPlaying()
+    }
+
+    if (playerFullscreen && playback != null) {
+        val playingInfo = state.results.firstOrNull { it.url == playingUrl }
+        FullscreenPlayer(
+            controller = playback,
+            thumbnail = playingInfo?.thumbnail,
+            onExit = { playerFullscreen = false },
+            onDownload = playingInfo?.let { info ->
+                {
+                    playerFullscreen = false
+                    downloadViewModel.selectResult(info)
+                    downloadViewModel.resolveFormats(info)
+                    sheetVisible = true
+                }
+            }
+        )
+    }
+
     if (searchOpen) {
         SearchScreen(
             // Opened empty rather than prefilled: a prefilled field would filter the
@@ -782,7 +829,13 @@ fun DownloadScreen(
             initialQuery = "",
             onSearch = { queries ->
                 searchOpen = false
+                stopPlaying()
                 downloadViewModel.fetchAll(queries)
+            },
+            onSearchWords = { query, source ->
+                searchOpen = false
+                stopPlaying()
+                downloadViewModel.search(query, source)
             },
             onClearResults = downloadViewModel::clearResults,
             onDismiss = { searchOpen = false }
@@ -857,21 +910,38 @@ fun DownloadScreen(
                 },
                 saveDirs = saveDirs,
                 isLoadingFormats = state.isFetching || info.url in formatsReading,
+                // A search or playlist card opens before its details are read.
+                isReadingLink = !info.hasResolvedFormats && info.url in formatsReading,
                 onRefreshFormats = { source -> downloadViewModel.refreshFormats(listOf(info), source) },
                 onOpenSaveDir = openSaveDirOf,
                 onPickSaveDir = pickSaveDir,
                 onResetSaveDir = resetSaveDir,
                 onDownload = { format, audioLanguage, title, author, oneOff ->
                     sheetVisible = false
-                    downloadViewModel.startDownload(
-                        context = context,
-                        format = format,
-                        options = options.with(oneOff),
-                        title = title,
-                        author = author,
-                        audioLanguage = audioLanguage,
-                        saveDirs = saveDirs
-                    )
+                    if (!info.hasResolvedFormats && info.url in formatsReading) {
+                        // Chosen before the read finished: it starts the moment the
+                        // formats land, applied to what the link turned out to hold.
+                        downloadViewModel.downloadOnceFormatsRead(
+                            context = context,
+                            info = info,
+                            format = format,
+                            options = options.with(oneOff),
+                            title = title,
+                            author = author,
+                            audioLanguage = audioLanguage,
+                            saveDirs = saveDirs
+                        )
+                    } else {
+                        downloadViewModel.startDownload(
+                            context = context,
+                            format = format,
+                            options = options.with(oneOff),
+                            title = title,
+                            author = author,
+                            audioLanguage = audioLanguage,
+                            saveDirs = saveDirs
+                        )
+                    }
                 },
                 onDismiss = { sheetVisible = false }
             )
@@ -1085,6 +1155,12 @@ private fun MediaCard(
     batchItem: BatchItem?,
     waitingForWifi: Boolean = false,
     alreadyDownloaded: Boolean = false,
+    /** The player, when this card is the one playing. */
+    player: PlaybackController? = null,
+    playerFullscreen: Boolean = false,
+    onPlay: () -> Unit = {},
+    onFullscreen: () -> Unit = {},
+    onStopPlaying: () -> Unit = {},
     onOpenSheet: () -> Unit,
     onOpenQueue: () -> Unit
 ) {
@@ -1332,6 +1408,26 @@ private fun MediaCard(
                         batchItem?.state == BatchState.QUEUED -> CornerTag(text = stringResource(R.string.download_queued))
                         alreadyDownloaded -> CornerTag(text = stringResource(R.string.download_downloaded))
                     }
+                    if (!inHand) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.55f))
+                                .clickable(
+                                    onClickLabel = stringResource(R.string.player_play),
+                                    onClick = onPlay
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Filled.PlayArrow,
+                                contentDescription = stringResource(R.string.player_play),
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
                 }
             }
 
@@ -1354,6 +1450,20 @@ private fun MediaCard(
                         drawStopIndicator = {}
                     )
                 }
+            }
+
+            // Playing covers the artwork with the player until it is closed or scrolled away.
+            if (player != null && !inHand) {
+                DisposableEffect(info.url) { onDispose { onStopPlaying() } }
+                InlinePlayer(
+                    controller = player,
+                    thumbnail = info.thumbnail,
+                    fullscreen = playerFullscreen,
+                    onFullscreen = onFullscreen,
+                    onClose = onStopPlaying,
+                    onDownload = onOpenSheet,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
     }

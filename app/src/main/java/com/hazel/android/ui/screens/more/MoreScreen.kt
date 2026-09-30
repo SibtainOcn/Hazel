@@ -229,11 +229,11 @@ fun MoreScreen(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            // Download location, read-only
+            // Appearance: theme and accent colour
             ListItem(
-                headlineContent = { Text(stringResource(R.string.more_downloads)) },
+                headlineContent = { Text(stringResource(R.string.more_appearance)) },
                 leadingContent = {
-                    Icon(Icons.Filled.Folder, null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.Filled.Palette, null, tint = MaterialTheme.colorScheme.primary)
                 },
                 trailingContent = {
                     Icon(
@@ -243,7 +243,7 @@ fun MoreScreen(
                     )
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToStorageLocations() }
+                modifier = Modifier.clickable { onNavigateToAppearance() }
             )
 
             HorizontalDivider(
@@ -316,11 +316,11 @@ fun MoreScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Appearance: theme and accent colour
+            // Download location, read-only
             ListItem(
-                headlineContent = { Text(stringResource(R.string.more_appearance)) },
+                headlineContent = { Text(stringResource(R.string.more_downloads)) },
                 leadingContent = {
-                    Icon(Icons.Filled.Palette, null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.Filled.Folder, null, tint = MaterialTheme.colorScheme.primary)
                 },
                 trailingContent = {
                     Icon(
@@ -330,7 +330,7 @@ fun MoreScreen(
                     )
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToAppearance() }
+                modifier = Modifier.clickable { onNavigateToStorageLocations() }
             )
 
             HorizontalDivider(
@@ -338,9 +338,8 @@ fun MoreScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Language. It sits beside Appearance because both are about how the app looks
-            // rather than what it does, and it says the current choice on the right the way
-            // the temporary files row says its size.
+            // Language. It says the current choice on the right the way the temporary files
+            // row says its size.
             ListItem(
                 headlineContent = { Text(stringResource(R.string.more_language)) },
                 leadingContent = {

@@ -34,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.ui.unit.sp
@@ -77,8 +76,8 @@ import com.hazel.android.update.UpdateScreen
 
 sealed class Screen(
     val route: String,
-    @StringRes val titleRes: Int,
-    @DrawableRes val icon: Int
+    @param:StringRes val titleRes: Int,
+    @param:DrawableRes val icon: Int
 ) {
     data object Download : Screen("download", R.string.nav_home, R.drawable.home)
     data object History : Screen("history", R.string.nav_history, R.drawable.downloads_tab)
@@ -162,7 +161,8 @@ fun AppNavigation(
                         // For GitHub release builds only (not yt-dlp): when Hazel app update is available,
                         // display a theme-adaptive, accent-independent "Update" pill next to incognito icon
                         if (!HazelUpdater.isFdroid() && hazelUpdateAvailable) {
-                            val isDark = isSystemInDarkTheme()
+                            // The app's own theme, which can differ from the system's.
+                            val isDark = isDarkTheme
                             val pillBg = if (isDark) UpdateTokens.UpdateContainer else Color(0xFFFFEECC)
                             val pillFg = if (isDark) UpdateTokens.Update else Color(0xFF8F4D00)
 
@@ -179,13 +179,13 @@ fun AppNavigation(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Download,
-                                    contentDescription = "Update Available",
+                                    contentDescription = stringResource(R.string.home_update_available),
                                     tint = pillFg,
                                     modifier = Modifier.size(15.dp)
                                 )
                                 Spacer(modifier = Modifier.width(5.dp))
                                 Text(
-                                    text = "Update",
+                                    text = stringResource(R.string.home_update),
                                     color = pillFg,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold

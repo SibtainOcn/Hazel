@@ -13,7 +13,7 @@ import com.hazel.android.R
  * where a download has got to. A stage the engine decides it has nothing to do for prints
  * nothing, and the card simply moves past it when a later one starts.
  */
-enum class ProcessingStep(@StringRes val label: Int, val marker: String?) {
+enum class ProcessingStep(@param:StringRes val label: Int, val marker: String?) {
     FETCH(R.string.processing_step_fetch, null),
     MERGE(R.string.processing_step_merge, "[merger]"),
     EXTRACT(R.string.processing_step_extract, "[extractaudio]"),

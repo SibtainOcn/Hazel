@@ -13,7 +13,7 @@ import com.hazel.android.R
  *
  * Every filter keeps the list's order, which is best first.
  */
-enum class FormatFilter(@StringRes val labelRes: Int) {
+enum class FormatFilter(@param:StringRes val labelRes: Int) {
 
     /** Everything the source reported. */
     ALL(R.string.format_filter_all),

@@ -128,7 +128,7 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
                 is HazelUpdater.CheckResult.Success -> {
                     val info = result.info
                     val isAvailable = HazelUpdater.isNewer(info.version)
-                    SettingsRepository.setHazelUpdateAvailable(getApplication(), isAvailable)
+                    SettingsRepository.setHazelUpdateAvailable(getApplication(), isAvailable, info.version)
                     _uiState.value = if (isAvailable) {
                         val cachedApk = HazelUpdater.getCachedApk(getApplication(), info)
                         if (cachedApk != null) {

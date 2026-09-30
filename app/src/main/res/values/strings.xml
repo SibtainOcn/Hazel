@@ -19,7 +19,7 @@
     <string name="nav_incognito_off">Incognito off</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">Enter URL</string>
+    <string name="download_search_hint">Search or insert URL</string>
     <string name="download_clear">Clear</string>
     <string name="download_incognito_title">You\'re incognito</string>
     <string name="download_incognito_body">Downloads are not added to your history and links are not remembered. The files themselves still save as usual.</string>
@@ -49,15 +49,15 @@
     <string name="download_clear_confirm_body">Are you sure you want to clear all results from the screen?</string>
 
     <!-- SearchScreen -->
-    <string name="search_hint">Enter URL</string>
+    <string name="search_hint">Search or insert URL</string>
     <string name="search_back">Back</string>
     <string name="search_more">More</string>
     <string name="search_add_link">Add another link</string>
     <string name="search_clear">Clear</string>
     <string name="search_clear_results">Clear results</string>
     <string name="search_clear_history">Clear search history</string>
-    <string name="search_empty_history">Links you use will appear here</string>
-    <string name="search_no_matches">No matching links</string>
+    <string name="search_empty_history">Your searches and links will appear here</string>
+    <string name="search_no_matches">No matches</string>
     <string name="search_remove">Remove</string>
     <string name="search_all">Search all</string>
     <string name="search_forget">Forget</string>
@@ -544,16 +544,13 @@
     <string name="accent_picker_close">Close</string>
 
     <!-- FetchSettingsScreen -->
-    <string name="fetch_settings_back">Back</string>
     <string name="fetch_settings_title">Link Reading</string>
-    <string name="fetch_settings_timeout_description">How long to wait on a slow source before giving up and retrying.</string>
     <!-- How patient one mode is. %1$d is the timeout in seconds, %2$d the retry count. -->
     <plurals name="fetch_settings_timing">
         <item quantity="one">%1$ds timeout, %2$d try</item>
         <item quantity="other">%1$ds timeout, %2$d tries</item>
     </plurals>
     <string name="fetch_settings_reading_links">Reading links</string>
-    <string name="fetch_settings_reading_links_description">Which reader works out what a link holds. Downloads always use yt-dlp, whichever is chosen here.</string>
     <string name="fetch_settings_force_ipv4_description">Only turn this on if links hang on your network. It works around a broken IPv6 route, and is slower everywhere else.</string>
     <string name="fetch_settings_force_ipv4">Force IPv4</string>
     <string name="fetch_mode_fast_label">Fast</string>
@@ -714,4 +711,48 @@
     <string name="backup_category_failed">Failed</string>
     <string name="backup_category_cookies">Cookies</string>
     <string name="backup_category_search">Search history</string>
+    <string name="search_no_results">No results for %1$s</string>
+    <string name="player_play">Play</string>
+    <string name="player_pause">Pause</string>
+    <string name="player_close">Close player</string>
+    <string name="player_fullscreen">Full screen</string>
+    <string name="player_exit_fullscreen">Exit full screen</string>
+    <string name="player_failed">Could not play this</string>
+    <string name="player_retry">Try again</string>
+    <string name="player_mute">Mute</string>
+    <string name="player_unmute">Unmute</string>
+    <string name="options_cut_start_here">Start here</string>
+    <string name="options_cut_end_here">End here</string>
+    <string name="options_cut_jump_start">Go to start</string>
+    <string name="options_cut_jump_end">Go to end</string>
+    <string name="fetch_settings_screen_description">How links are read, how searches run, and how media plays. Downloads always use yt-dlp.</string>
+    <string name="fetch_settings_read_with">Read links with</string>
+    <string name="fetch_settings_patience">Slow connections</string>
+    <string name="fetch_settings_search">Search</string>
+    <string name="fetch_settings_search_on">Search on</string>
+    <string name="fetch_settings_search_with">Search with</string>
+    <string name="fetch_settings_search_results">Results per search</string>
+    <string name="fetch_settings_suggestions">Search suggestions</string>
+    <string name="fetch_settings_suggestions_summary">Suggests searches from Google as you type. What you type is sent to Google.</string>
+    <string name="fetch_settings_playback">Playback</string>
+    <string name="fetch_settings_play_with">Play with</string>
+    <string name="fetch_settings_play_quality">Playback quality</string>
+    <string name="fetch_settings_play_quality_value">Up to %1$dp</string>
+    <string name="fetch_settings_engine_newpipe_summary">Fastest on YouTube, SoundCloud and Bandcamp. yt-dlp takes over everywhere else, and whenever it cannot answer.</string>
+    <string name="fetch_settings_engine_ytdlp_summary">Slower to start, and works on every site yt-dlp supports.</string>
+    <string name="search_source_youtube" translatable="false">YouTube</string>
+    <string name="search_source_youtube_music" translatable="false">YouTube Music</string>
+    <string name="search_source_soundcloud" translatable="false">SoundCloud</string>
+    <string name="search_source_bandcamp" translatable="false">Bandcamp</string>
+    <string name="search_source_bilibili" translatable="false">Bilibili</string>
+    <string name="search_source_niconico" translatable="false">Niconico</string>
+    <string name="search_source_prx" translatable="false">PRX</string>
+    <string name="search_source_rokfin" translatable="false">Rokfin</string>
+    <plurals name="player_skip_seconds">
+        <item quantity="one">%d second</item>
+        <item quantity="other">%d seconds</item>
+    </plurals>
+    <string name="player_quality_value" translatable="false">%1$dp</string>
+    <string name="home_update">Update</string>
+    <string name="home_update_available">Update available</string>
 </resources>

@@ -27,8 +27,8 @@ import java.io.File
  *    as last time instead of being walked a second time.
  *
  * All of it survives the app being closed, because the engine's payload is on disk and the
- * parsed form is rebuilt from it on the first miss. Only the last [MAX_ENTRIES] links are
- * kept: this is a convenience for links in current use, not a library.
+ * parsed form is rebuilt from it on the first miss. Only recent links are kept: this is a
+ * convenience for links in current use, not a library.
  *
  * The JSON holds signed stream addresses that stop working after a few hours, so replaying
  * it into a download has the shorter life of the two windows below. Every reader treats a
@@ -50,14 +50,23 @@ object InfoCache {
      */
     private const val INFO_JSON_TTL_MS = 60 * 60 * 1000L
 
-    /** How many links are remembered. The oldest goes when a new one arrives. */
-    private const val MAX_ENTRIES = 10
+    /**
+     * How many links keep their payload on disk. A payload can run to a megabyte, so this
+     * stays modest; the oldest goes when a new one arrives.
+     */
+    private const val MAX_ENTRIES = 40
+
+    /**
+     * How many parsed reads are held in memory. These are small, and a search or playlist
+     * opens many cards in a row, so far more are kept than payloads.
+     */
+    private const val MAX_MEMORY_ENTRIES = 200
 
     private data class Entry(val info: MediaInfo, val storedAt: Long)
 
     private val metadata = object : LinkedHashMap<String, Entry>(16, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Entry>) =
-            size > MAX_ENTRIES
+            size > MAX_MEMORY_ENTRIES
     }
 
     /**

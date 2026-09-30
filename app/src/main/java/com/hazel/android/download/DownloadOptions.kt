@@ -231,8 +231,8 @@ val AUDIO_QUALITY_STEPS: List<Pair<String, Int>> = listOf(
  * equally: nothing here is specific to one extractor.
  */
 enum class FetchMode(
-    @StringRes val labelRes: Int,
-    @StringRes val descriptionRes: Int,
+    @param:StringRes val labelRes: Int,
+    @param:StringRes val descriptionRes: Int,
     val socketTimeoutSeconds: Int,
     val retries: Int
 ) {

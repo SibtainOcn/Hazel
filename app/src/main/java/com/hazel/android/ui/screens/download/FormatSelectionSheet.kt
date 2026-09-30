@@ -75,7 +75,7 @@ import com.hazel.android.ui.theme.SizeBadgeContent
  * the listing source hold theirs: an enum has no Context, so a label written here is a
  * label nothing can translate.
  */
-enum class FormatSort(@StringRes val labelRes: Int) {
+enum class FormatSort(@param:StringRes val labelRes: Int) {
     QUALITY(R.string.format_sort_quality),
     FILE_SIZE(R.string.format_sort_file_size),
     CONTAINER(R.string.format_sort_container)
@@ -537,7 +537,7 @@ fun FormatRow(
                         // take two lines and shout over the rest of the row.
                         fontSize = if (headline.length > LONG_HEADLINE) 16.sp else 20.sp,
                         fontWeight = FontWeight.Normal,
-                        maxLines = 2,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         color = if (selected) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurface,
@@ -545,10 +545,11 @@ fun FormatRow(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "id: ${format.formatId}",
+                        "id: ${shortId(format.formatId)}",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
@@ -570,7 +571,7 @@ fun FormatRow(
                     ) {
                         if (mergeAudioId != null) {
                             MetaBadge(
-                                text = "id: $mergeAudioId",
+                                text = "id: ${shortId(mergeAudioId)}",
                                 icon = Icons.Filled.MusicNote,
                                 tone = BadgeTone.SOLID
                             )
@@ -594,6 +595,16 @@ fun FormatRow(
         }
     }
 }
+
+/**
+ * An id short enough to sit beside a headline. Sites such as Instagram number their DASH
+ * streams with twenty digits, which pushed the row to three lines; the start is enough to
+ * tell them apart at a glance.
+ */
+internal fun shortId(id: String): String =
+    if (id.length > MAX_ID_CHARS) id.take(MAX_ID_CHARS - 1) + "…" else id
+
+private const val MAX_ID_CHARS = 12
 
 /** Past this many characters a headline is a sentence rather than a label. */
 private const val LONG_HEADLINE = 22

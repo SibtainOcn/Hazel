@@ -8,7 +8,7 @@
     <string name="nav_incognito_off">Инкогнито выключено</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">Вставьте URL</string>
+    <string name="download_search_hint">Поиск или ссылка</string>
     <string name="download_clear">Очистить</string>
     <string name="download_incognito_title">Режим инкогнито</string>
     <string name="download_incognito_body">Загрузки не добавляются в историю, а ссылки не запоминаются. Сами файлы сохраняются как обычно.</string>
@@ -38,15 +38,15 @@
     <string name="download_clear_confirm_body">Вы действительно хотите удалить все результаты с экрана?</string>
 
     <!-- SearchScreen -->
-    <string name="search_hint">Вставьте URL</string>
+    <string name="search_hint">Поиск или ссылка</string>
     <string name="search_back">Назад</string>
     <string name="search_more">Ещё</string>
     <string name="search_add_link">Добавить ещё ссылку</string>
     <string name="search_clear">Очистить</string>
     <string name="search_clear_results">Очистить результаты</string>
     <string name="search_clear_history">Очистить историю поиска</string>
-    <string name="search_empty_history">Здесь появятся использованные ссылки</string>
-    <string name="search_no_matches">Нет подходящих ссылок</string>
+    <string name="search_empty_history">Здесь появятся ваши запросы и ссылки</string>
+    <string name="search_no_matches">Совпадений нет</string>
     <string name="search_remove">Удалить</string>
     <string name="search_all">Искать везде</string>
     <string name="search_forget">Забыть</string>
@@ -512,9 +512,7 @@
     <string name="accent_picker_close">Закрыть</string>
 
     <!-- FetchSettingsScreen -->
-    <string name="fetch_settings_back">Назад</string>
     <string name="fetch_settings_title">Чтение ссылок</string>
-    <string name="fetch_settings_timeout_description">Сколько ожидать медленный источник перед прекращением и повторной попыткой.</string>
     <plurals name="fetch_settings_timing">
         <item quantity="one">тайм-аут %1$d с, %2$d попытка</item>
         <item quantity="few">тайм-аут %1$d с, %2$d попытки</item>
@@ -522,7 +520,6 @@
         <item quantity="other">тайм-аут %1$d с, %2$d попыток</item>
     </plurals>
     <string name="fetch_settings_reading_links">Чтение ссылок</string>
-    <string name="fetch_settings_reading_links_description">Какой модуль определяет содержимое ссылки. Для загрузки всегда используется yt-dlp независимо от выбранного варианта.</string>
     <string name="fetch_settings_force_ipv4_description">Включайте только при зависании ссылок в вашей сети. Обходит некорректный маршрут IPv6 и замедляет работу во всех остальных сетях.</string>
     <string name="fetch_settings_force_ipv4">Принудительно IPv4</string>
     <string name="fetch_mode_fast_label">Быстрый</string>
@@ -677,4 +674,41 @@
     <string name="backup_category_failed">С ошибкой</string>
     <string name="backup_category_cookies">Cookies</string>
     <string name="backup_category_search">История поиска</string>
+    <string name="search_no_results">Нет результатов для %1$s</string>
+    <string name="player_play">Воспроизвести</string>
+    <string name="player_pause">Пауза</string>
+    <string name="player_close">Закрыть плеер</string>
+    <string name="player_fullscreen">Во весь экран</string>
+    <string name="player_exit_fullscreen">Выйти из полноэкранного режима</string>
+    <string name="player_failed">Не удалось воспроизвести</string>
+    <string name="player_retry">Повторить</string>
+    <string name="player_mute">Выключить звук</string>
+    <string name="player_unmute">Включить звук</string>
+    <string name="options_cut_start_here">Начать здесь</string>
+    <string name="options_cut_end_here">Закончить здесь</string>
+    <string name="options_cut_jump_start">К началу</string>
+    <string name="options_cut_jump_end">К концу</string>
+    <string name="fetch_settings_screen_description">Как читаются ссылки, как выполняется поиск и как воспроизводятся медиа. Загрузки всегда идут через yt-dlp.</string>
+    <string name="fetch_settings_read_with">Читать ссылки через</string>
+    <string name="fetch_settings_patience">Медленные соединения</string>
+    <string name="fetch_settings_search">Поиск</string>
+    <string name="fetch_settings_search_on">Искать на</string>
+    <string name="fetch_settings_search_with">Искать через</string>
+    <string name="fetch_settings_search_results">Результатов за поиск</string>
+    <string name="fetch_settings_suggestions">Подсказки поиска</string>
+    <string name="fetch_settings_suggestions_summary">Показывает подсказки Google при вводе. Введённый текст отправляется в Google.</string>
+    <string name="fetch_settings_playback">Воспроизведение</string>
+    <string name="fetch_settings_play_with">Воспроизводить через</string>
+    <string name="fetch_settings_play_quality">Качество воспроизведения</string>
+    <string name="fetch_settings_play_quality_value">До %1$dp</string>
+    <string name="fetch_settings_engine_newpipe_summary">Быстрее всего на YouTube, SoundCloud и Bandcamp. Везде ещё и когда он не справляется, работает yt-dlp.</string>
+    <string name="fetch_settings_engine_ytdlp_summary">Запускается медленнее и работает на всех сайтах, которые поддерживает yt-dlp.</string>
+    <plurals name="player_skip_seconds">
+        <item quantity="one">%d секунда</item>
+        <item quantity="few">%d секунды</item>
+        <item quantity="many">%d секунд</item>
+        <item quantity="other">%d секунды</item>
+    </plurals>
+    <string name="home_update">Обновить</string>
+    <string name="home_update_available">Доступно обновление</string>
 </resources>

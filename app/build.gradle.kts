@@ -444,11 +444,17 @@ dependencies {
     // Networking (URL validation + yt-dlp release metadata)
     implementation(libs.okhttp)
 
-    // Metadata-only extractor. Used to list what is behind a link on the sites it knows,
-    // where it answers in one request instead of a yt-dlp process. It never resolves
-    // formats and never downloads: yt-dlp owns both, and this falls back to it on any
-    // failure, so a stale extractor costs speed rather than function.
+    // Fast reader for listing, search and playback streams on the sites it knows. It never
+    // downloads, and every use falls back to yt-dlp, so a stale extractor costs speed rather
+    // than function. Only download/extractor/newpipe touches its API.
     implementation(libs.newpipe.extractor)
+
+    // Playback of search results and links, and the cut preview. Only download/playback
+    // builds players from it.
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.exoplayer.hls)
+    implementation(libs.androidx.media3.exoplayer.dash)
+    implementation(libs.androidx.media3.ui)
 
     // Unit tests, covering the two pure parts worth pinning: the link key and the metadata
     // parser fed saved engine payloads. kotlin-test brings the JUnit runner with it.
