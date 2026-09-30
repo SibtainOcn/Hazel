@@ -37,8 +37,8 @@ app/src/main/java/com/hazel/android/util/FolderUtil.kt:115: shows a folder descr
 app/src/main/java/com/hazel/android/util/MediaOpener.kt:27: message comes from getString, no literal on this line
 app/src/main/java/com/hazel/android/util/MediaOpener.kt:48: message comes from getString, no literal on this line
 app/src/main/java/com/hazel/android/ui/screens/cookies/CookieWebViewActivity.kt:267: message is the engine's own error text or getString, no literal here
-app/src/main/java/com/hazel/android/ui/screens/download/FormatSelectionSheet.kt:393: the source's own format id behind a fixed id: marker, an identifier the engine prints and no language changes
-app/src/main/java/com/hazel/android/ui/screens/download/FormatSelectionSheet.kt:419: the source's own format id behind a fixed id: marker, an identifier the engine prints and no language changes
+app/src/main/java/com/hazel/android/ui/screens/download/FormatSelectionSheet.kt:547: the source's own format id behind a fixed id: marker, an identifier the engine prints and no language changes
+app/src/main/java/com/hazel/android/ui/screens/download/FormatSelectionSheet.kt:574: the source's own format id behind a fixed id: marker, an identifier the engine prints and no language changes
 
 app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt:667: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt:672: Compose animation label, used by the tooling inspector only
