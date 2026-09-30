@@ -712,7 +712,6 @@
     <string name="backup_category_cookies">Cookies</string>
     <string name="backup_category_search">Search history</string>
     <string name="search_no_results">No results for %1$s</string>
-    <string name="search_results_for">Results for %1$s</string>
     <string name="player_play">Play</string>
     <string name="player_pause">Pause</string>
     <string name="player_close">Close player</string>
@@ -753,4 +752,7 @@
         <item quantity="one">%d second</item>
         <item quantity="other">%d seconds</item>
     </plurals>
+    <string name="player_quality_value" translatable="false">%1$dp</string>
+    <string name="home_update">Update</string>
+    <string name="home_update_available">Update available</string>
 </resources>

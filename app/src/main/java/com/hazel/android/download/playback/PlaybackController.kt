@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.OptIn
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -54,6 +55,9 @@ class PlaybackController(
     /** Width over height of the picture, or 0 before the first frame. */
     var aspectRatio by mutableFloatStateOf(0f)
         private set
+    /** Lines in the picture now playing, or 0 before the first frame. */
+    var videoHeight by mutableIntStateOf(0)
+        private set
     var isMuted by mutableStateOf(false)
         private set
 
@@ -81,6 +85,7 @@ class PlaybackController(
         override fun onVideoSizeChanged(size: VideoSize) {
             if (size.width > 0 && size.height > 0) {
                 aspectRatio = size.width * size.pixelWidthHeightRatio / size.height
+                videoHeight = minOf(size.width, size.height)
             }
         }
 
@@ -140,6 +145,9 @@ class PlaybackController(
     }
 
     fun retry() = start(positionMs, playWhenReady = true)
+
+    /** Finds the stream again, for a changed quality, and carries on from the same moment. */
+    fun reload() = start(player.currentPosition.coerceAtLeast(0L), playWhenReady = player.playWhenReady)
 
     fun play() {
         if (player.playbackState == Player.STATE_ENDED) player.seekTo(0L)

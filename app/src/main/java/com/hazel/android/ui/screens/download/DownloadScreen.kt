@@ -191,8 +191,8 @@ fun DownloadScreen(
 
     var searchOpen by remember { mutableStateOf(false) }
     // The one card playing, if any. Starting another stops it. The player itself is held
-    // here rather than in the card, so full screen and the turn of the screen it brings
-    // cannot drop it along with the card when the list lays itself out again.
+    // here rather than in the card, so full screen cannot drop it along with the card when
+    // the list lays itself out again.
     var playingUrl by remember { mutableStateOf<String?>(null) }
     var playerFullscreen by remember { mutableStateOf(false) }
     val playback = playingUrl?.let { rememberPlaybackController(it) }
@@ -533,18 +533,6 @@ fun DownloadScreen(
                         bottom = if (pendingResults.size > 1) 96.dp else 32.dp
                     )
                 ) {
-                    if (state.searchQuery.isNotBlank()) {
-                        item(key = "search-heading") {
-                            Text(
-                                stringResource(R.string.search_results_for, state.searchQuery),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(top = 12.dp)
-                            )
-                        }
-                    }
                     items(orderedResults, key = { it.url }) { info ->
                         Spacer(modifier = Modifier.height(20.dp))
 

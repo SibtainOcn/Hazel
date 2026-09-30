@@ -655,7 +655,6 @@
     <string name="backup_category_cookies">Cookie</string>
     <string name="backup_category_search">検索履歴</string>
     <string name="search_no_results">%1$s の結果はありません</string>
-    <string name="search_results_for">%1$s の検索結果</string>
     <string name="player_play">再生</string>
     <string name="player_pause">一時停止</string>
     <string name="player_close">プレーヤーを閉じる</string>
@@ -687,4 +686,6 @@
     <plurals name="player_skip_seconds">
         <item quantity="other">%d 秒</item>
     </plurals>
+    <string name="home_update">更新</string>
+    <string name="home_update_available">アップデートがあります</string>
 </resources>

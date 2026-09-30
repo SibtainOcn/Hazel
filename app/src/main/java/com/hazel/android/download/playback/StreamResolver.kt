@@ -86,7 +86,14 @@ object StreamResolver {
         val videoOrder = compareBy<JSONObject>({ it.height() }, { it.optString("ext") == "mp4" }, { it.optDouble("tbr", 0.0) })
 
         val both = usable.filter { it.hasVideo() && it.hasAudio() && fits(it) }.maxWithOrNull(videoOrder)
+        // Nothing within the cap means the smallest picture there is, not sound alone.
         val picture = usable.filter { it.hasVideo() && !it.hasAudio() && fits(it) }.maxWithOrNull(videoOrder)
+            ?: usable.filter { it.hasVideo() && !it.hasAudio() && it.height() > 0 }
+                .takeIf { both == null }
+                ?.minByOrNull { it.height() }
+        val smallestBoth = if (both == null) {
+            usable.filter { it.hasVideo() && it.hasAudio() && it.height() > 0 }.minByOrNull { it.height() }
+        } else null
         val sound = usable.filter { it.hasAudio() && !it.hasVideo() }
             .maxWithOrNull(compareBy({ it.optString("ext") == "m4a" }, { it.optDouble("abr", 0.0) }))
 
@@ -101,6 +108,7 @@ object StreamResolver {
                     engine = ListingSource.YT_DLP
                 )
             both != null -> single(both)
+            smallestBoth != null -> single(smallestBoth)
             sound != null -> single(sound).copy(hasVideo = false)
             // Nothing within the cap: the smallest picture is still better than none.
             else -> usable.filter { it.hasVideo() }.minByOrNull { it.height() }?.let { single(it) }

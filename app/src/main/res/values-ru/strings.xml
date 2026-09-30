@@ -675,7 +675,6 @@
     <string name="backup_category_cookies">Cookies</string>
     <string name="backup_category_search">История поиска</string>
     <string name="search_no_results">Нет результатов для %1$s</string>
-    <string name="search_results_for">Результаты для %1$s</string>
     <string name="player_play">Воспроизвести</string>
     <string name="player_pause">Пауза</string>
     <string name="player_close">Закрыть плеер</string>
@@ -710,4 +709,6 @@
         <item quantity="many">%d секунд</item>
         <item quantity="other">%d секунды</item>
     </plurals>
+    <string name="home_update">Обновить</string>
+    <string name="home_update_available">Доступно обновление</string>
 </resources>

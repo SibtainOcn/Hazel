@@ -510,12 +510,18 @@ object HazelUpdater {
      */
     suspend fun checkUpdatesSilently(context: Context) = withContext(Dispatchers.IO) {
         cleanInstalledApks(context)
+        // An update installed since the last check is no longer one, whether or not the
+        // network is there to say so.
+        val offered = com.hazel.android.data.SettingsRepository.getHazelUpdateVersion(context).first()
+        if (offered != null && !isNewer(offered)) {
+            com.hazel.android.data.SettingsRepository.setHazelUpdateAvailable(context, false)
+        }
         try {
             val channelLabel = com.hazel.android.data.SettingsRepository.getHazelChannel(context).first()
             val channel = Channel.fromLabel(channelLabel)
             val release = latestRelease(channel)
             val hasHazelUpdate = release != null && isNewer(release.version)
-            com.hazel.android.data.SettingsRepository.setHazelUpdateAvailable(context, hasHazelUpdate)
+            com.hazel.android.data.SettingsRepository.setHazelUpdateAvailable(context, hasHazelUpdate, release?.version)
             cleanStaleApks(context, preserveVersion = if (hasHazelUpdate) release.version else null)
         } catch (_: Exception) {
             // Ignore silent network check failure

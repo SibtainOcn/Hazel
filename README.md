@@ -86,6 +86,12 @@ English
 - Edit title, author, and file type / metadata before saving
 - Select different download formats and containers
 
+### Search & Play
+- **Search** - type words instead of a link to search YouTube, YouTube Music, SoundCloud, Bandcamp, Bilibili, Niconico, PRX or Rokfin, with optional search suggestions
+- **Play before you download** - play any result or link right on its card, with a seek bar, double tap to skip, full screen and a quality picker, on any site Hazel can read
+- **Cut** - download only part of a video or track, choosing the range on a live preview
+- **Live streams** - record from the start of a live stream, or wait for a premiere and then download it
+
 ### Processing
 - **Language selection** - Save in any language the source video offers (English, Hindi, Urdu, Arabic, Malayalam, Marathi, German, and more)
 - **SponsorBlock** - cut out sponsors, intros, and other segments
@@ -96,16 +102,20 @@ English
 - Long-horizon background downloads supported
 - Pause, resume, and cancel from the card or the notification
 - Wi-Fi only mode - checked at start, so a transfer already going is not cut off
+- No speed limit by default, with parallel fragments and an optional speed cap
+- Results you have not downloaded yet stay on the home screen until you clear them
 
 ### Privacy
 - **Incognito** - downloads are not added to your library and links are not remembered
-- No accounts, no analytics, nothing sent anywhere
+- No accounts, no analytics, nothing sent anywhere (search suggestions, off by default, send what you type to Google)
 
 ### Settings & Customisation
 - Dark and light themes with accent colour
 - App languages - English, Spanish, Hindi, Simplified Chinese, Brazilian Portuguese, French, German, Russian, Japanese, Indonesian, and system default
 - Independent yt-dlp engine updates - Stable, Nightly or Master channel
 - Offline video-to-audio converter
+- **Backup & restore** - settings, downloads list, queue, cookies and search history, with an automatic backup before each update
+- **Advanced** - YouTube player clients, PO tokens (pasted, or made on the device), browser imitation, extra yt-dlp arguments
 
 ---
 ## ⬇️ Download
@@ -162,7 +172,7 @@ You should have received a copy of the GNU General Public License along with Haz
 ## 🧱 Credits
 
 Hazel is a GUI for [yt-dlp](https://github.com/yt-dlp/yt-dlp), based on [youtubedl-android](https://github.com/yausername/youtubedl-android).
-[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor)
+[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) for fast listing, search and playback streams, and [Media3 ExoPlayer](https://github.com/androidx/media) for playback.
 
 > *Special thanks to the [yt-dlp](https://github.com/yt-dlp/yt-dlp) team - without their work, Hazel wouldn't exist.*
 > 

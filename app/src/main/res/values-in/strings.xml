@@ -655,7 +655,6 @@
     <string name="backup_category_cookies">Cookie</string>
     <string name="backup_category_search">Riwayat pencarian</string>
     <string name="search_no_results">Tidak ada hasil untuk %1$s</string>
-    <string name="search_results_for">Hasil untuk %1$s</string>
     <string name="player_play">Putar</string>
     <string name="player_pause">Jeda</string>
     <string name="player_close">Tutup pemutar</string>
@@ -687,4 +686,6 @@
     <plurals name="player_skip_seconds">
         <item quantity="other">%d detik</item>
     </plurals>
+    <string name="home_update">Perbarui</string>
+    <string name="home_update_available">Pembaruan tersedia</string>
 </resources>

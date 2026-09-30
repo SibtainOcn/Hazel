@@ -25,12 +25,8 @@ internal object NewPipeStreams {
         val hls = info.hlsUrl?.takeIf { it.isNotBlank() }
         if (live && hls != null) return hlsStream(hls)
 
-        val muxed = info.videoStreams.orEmpty()
-            .filter { it.isPlainHttp() && it.height in 1..maxHeight }
-            .maxWithOrNull(videoOrder)
-        val videoOnly = info.videoOnlyStreams.orEmpty()
-            .filter { it.isPlainHttp() && it.height in 1..maxHeight }
-            .maxWithOrNull(videoOrder)
+        val muxed = withinCap(info.videoStreams.orEmpty(), maxHeight)
+        val videoOnly = withinCap(info.videoOnlyStreams.orEmpty(), maxHeight)
         val audio = info.audioStreams.orEmpty()
             .filter { it.isPlainHttp() }
             .maxWithOrNull(audioOrder)
@@ -66,6 +62,13 @@ internal object NewPipeStreams {
         headers = headersFor(address),
         engine = ListingSource.NEWPIPE
     )
+
+    /** The tallest stream within [maxHeight], or the smallest there is when none fits. */
+    private fun withinCap(streams: List<VideoStream>, maxHeight: Int): VideoStream? {
+        val playable = streams.filter { it.isPlainHttp() && it.height > 0 }
+        return playable.filter { it.height <= maxHeight }.maxWithOrNull(videoOrder)
+            ?: playable.minByOrNull { it.height }
+    }
 
     private fun Stream.isPlainHttp() =
         deliveryMethod == DeliveryMethod.PROGRESSIVE_HTTP && isUrl && !content.isNullOrBlank()

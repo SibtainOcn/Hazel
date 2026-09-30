@@ -655,7 +655,6 @@
     <string name="backup_category_cookies">Cookie</string>
     <string name="backup_category_search">搜索记录</string>
     <string name="search_no_results">没有找到 %1$s 的结果</string>
-    <string name="search_results_for">%1$s 的搜索结果</string>
     <string name="player_play">播放</string>
     <string name="player_pause">暂停</string>
     <string name="player_close">关闭播放器</string>
@@ -687,4 +686,6 @@
     <plurals name="player_skip_seconds">
         <item quantity="other">%d 秒</item>
     </plurals>
+    <string name="home_update">更新</string>
+    <string name="home_update_available">有可用更新</string>
 </resources>

@@ -1,13 +1,21 @@
 package com.hazel.android.ui.components.player
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
-import android.content.pm.ActivityInfo
+import android.content.res.Configuration
+import android.view.OrientationEventListener
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.runtime.collectAsState
+import com.hazel.android.data.SettingsRepository
+import kotlinx.coroutines.launch
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -66,6 +74,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -146,9 +155,10 @@ fun InlinePlayer(
 /**
  * The same player over the whole screen, with the system bars hidden.
  *
- * A wide picture turns the screen to landscape whatever the rotation lock says, as video
- * players do, decided once on the way in; the screen goes back to how it was on the way
- * out. A tall picture keeps the screen as it is.
+ * The app itself never turns. A wide picture on an upright screen is drawn turned a
+ * quarter, following which way the phone is tilted, so it fills the screen held sideways
+ * whatever the rotation lock says. Turning the app instead restarted it and stopped
+ * playback. A tall picture, or a screen already sideways, is drawn as it is.
  */
 @Composable
 fun FullscreenPlayer(
@@ -157,14 +167,25 @@ fun FullscreenPlayer(
     onExit: () -> Unit,
     onDownload: (() -> Unit)? = null
 ) {
-    val activity = LocalContext.current.findActivity()
+    val context = LocalContext.current
     val wide = remember { controller.aspectRatio == 0f || controller.aspectRatio >= 1f }
-    DisposableEffect(activity) {
-        val previous = activity?.requestedOrientation
-        if (wide) activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        onDispose {
-            if (activity != null && previous != null) activity.requestedOrientation = previous
+    val upright = LocalConfiguration.current.orientation != Configuration.ORIENTATION_LANDSCAPE
+    val turn = wide && upright
+
+    // Which way to turn: towards whichever side the phone is tipped to. Read from the
+    // sensor directly, so it works with the rotation lock on.
+    var degrees by remember { mutableFloatStateOf(90f) }
+    DisposableEffect(turn) {
+        val listener = object : OrientationEventListener(context) {
+            override fun onOrientationChanged(orientation: Int) {
+                when (orientation) {
+                    in 60..120 -> degrees = -90f
+                    in 240..300 -> degrees = 90f
+                }
+            }
         }
+        if (turn && listener.canDetectOrientation()) listener.enable()
+        onDispose { listener.disable() }
     }
 
     Dialog(
@@ -179,11 +200,21 @@ fun FullscreenPlayer(
                 hide(WindowInsetsCompat.Type.systemBars())
             }
         }
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black)
+                .background(Color.Black),
+            contentAlignment = Alignment.Center
         ) {
+            val area = if (turn) {
+                Modifier
+                    .requiredSize(width = maxHeight, height = maxWidth)
+                    .graphicsLayer { rotationZ = degrees }
+            } else {
+                Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding()
+            }
             PlayerArea(
                 controller = controller,
                 thumbnail = thumbnail,
@@ -192,9 +223,7 @@ fun FullscreenPlayer(
                 onToggleFullscreen = onExit,
                 onClose = null,
                 onDownload = onDownload,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .systemBarsPadding()
+                modifier = area
             )
         }
     }
@@ -212,12 +241,13 @@ private fun PlayerArea(
     modifier: Modifier = Modifier
 ) {
     var controlsShown by remember { mutableStateOf(true) }
+    var menuOpen by remember { mutableStateOf(false) }
     val loading = controller.phase == PlaybackController.Phase.LOADING ||
         (controller.isBuffering && !controller.isPlaying)
 
     // Controls step aside while the picture plays, and come back on a tap.
-    LaunchedEffect(controlsShown, controller.isPlaying) {
-        if (controlsShown && controller.isPlaying) {
+    LaunchedEffect(controlsShown, controller.isPlaying, menuOpen) {
+        if (controlsShown && controller.isPlaying && !menuOpen) {
             delay(CONTROLS_TIMEOUT_MS)
             controlsShown = false
         }
@@ -373,6 +403,7 @@ private fun PlayerArea(
                     controller = controller,
                     fullscreen = fullscreen,
                     onToggleFullscreen = onToggleFullscreen,
+                    onMenuChange = { menuOpen = it },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
@@ -394,6 +425,7 @@ private fun SeekBar(
     controller: PlaybackController,
     fullscreen: Boolean,
     onToggleFullscreen: () -> Unit,
+    onMenuChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var scrubbing by remember { mutableStateOf(false) }
@@ -419,6 +451,9 @@ private fun SeekBar(
                 color = Color.White
             )
             Spacer(modifier = Modifier.weight(1f))
+            if (controller.hasVideo) {
+                QualityButton(controller = controller, onMenuChange = onMenuChange)
+            }
             GlassIcon(
                 icon = if (fullscreen) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen,
                 description = stringResource(
@@ -462,6 +497,70 @@ private fun SeekBar(
             drawSeekLine(y, stroke, buffered, Color.White.copy(alpha = 0.45f))
             drawSeekLine(y, stroke, played, accent)
             drawCircle(accent, radius = thumb.toPx(), center = Offset(size.width * played, y))
+        }
+    }
+}
+
+/**
+ * The height playing now, and a menu of the heights to ask for. The choice is saved as the
+ * playback quality, so every later video starts at it; a video without that height plays
+ * the tallest below it, or its smallest when it has nothing that small.
+ */
+@Composable
+private fun QualityButton(controller: PlaybackController, onMenuChange: (Boolean) -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val cap by SettingsRepository.getPlayQuality(context)
+        .collectAsState(initial = SettingsRepository.DEFAULT_PLAY_QUALITY)
+    var open by remember { mutableStateOf(false) }
+    val setOpen = { value: Boolean ->
+        open = value
+        onMenuChange(value)
+    }
+    val playing = controller.videoHeight.takeIf { it > 0 } ?: cap
+
+    Box {
+        Surface(
+            onClick = { setOpen(true) },
+            shape = RoundedCornerShape(8.dp),
+            color = Color.Transparent,
+            contentColor = Color.White
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Filled.HighQuality,
+                    contentDescription = stringResource(R.string.fetch_settings_play_quality),
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    stringResource(R.string.player_quality_value, playing),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { setOpen(false) }) {
+            SettingsRepository.PLAY_QUALITIES.reversed().forEach { height ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.player_quality_value, height)) },
+                    trailingIcon = if (height == cap) {
+                        { Icon(Icons.Filled.Check, contentDescription = null) }
+                    } else null,
+                    onClick = {
+                        setOpen(false)
+                        if (height != cap) {
+                            scope.launch {
+                                SettingsRepository.setPlayQuality(context, height)
+                                controller.reload()
+                            }
+                        }
+                    }
+                )
+            }
         }
     }
 }
@@ -572,12 +671,6 @@ internal fun formatClock(ms: Long): String {
     val m = (total % 3600) / 60
     val s = total % 60
     return if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%02d:%02d".format(m, s)
-}
-
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
 }
 
 private const val CONTROLS_TIMEOUT_MS = 3_000L

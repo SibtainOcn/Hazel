@@ -662,7 +662,6 @@
     <string name="backup_category_cookies">कुकीज़</string>
     <string name="backup_category_search">खोज इतिहास</string>
     <string name="search_no_results">%1$s के लिए कोई नतीजा नहीं</string>
-    <string name="search_results_for">%1$s के नतीजे</string>
     <string name="player_play">चलाएं</string>
     <string name="player_pause">रोकें</string>
     <string name="player_close">प्लेयर बंद करें</string>
@@ -695,4 +694,6 @@
         <item quantity="one">%d सेकंड</item>
         <item quantity="other">%d सेकंड</item>
     </plurals>
+    <string name="home_update">अपडेट</string>
+    <string name="home_update_available">अपडेट उपलब्ध है</string>
 </resources>

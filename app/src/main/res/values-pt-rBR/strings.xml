@@ -669,7 +669,6 @@
     <string name="backup_category_cookies">Cookies</string>
     <string name="backup_category_search">Histórico de pesquisa</string>
     <string name="search_no_results">Nenhum resultado para %1$s</string>
-    <string name="search_results_for">Resultados para %1$s</string>
     <string name="player_play">Reproduzir</string>
     <string name="player_pause">Pausar</string>
     <string name="player_close">Fechar player</string>
@@ -703,4 +702,6 @@
         <item quantity="many">%d segundos</item>
         <item quantity="other">%d segundos</item>
     </plurals>
+    <string name="home_update">Atualizar</string>
+    <string name="home_update_available">Atualização disponível</string>
 </resources>

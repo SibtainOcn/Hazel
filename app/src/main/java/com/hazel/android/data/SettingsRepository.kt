@@ -278,7 +278,7 @@ object SettingsRepository {
 
     val SEARCH_RESULT_COUNTS = listOf(10, 25, 50)
     const val DEFAULT_SEARCH_RESULTS = 25
-    val PLAY_QUALITIES = listOf(360, 480, 720, 1080)
+    val PLAY_QUALITIES = listOf(144, 240, 360, 480, 720, 1080)
     const val DEFAULT_PLAY_QUALITY = 720
 
     fun getSearchSource(context: Context): Flow<SearchSource> =
@@ -630,6 +630,7 @@ object SettingsRepository {
     // Dynamic update availability indicators for UI red dot badges
     private val HAS_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("has_update_available")
     private val HAZEL_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("hazel_update_available")
+    private val HAZEL_UPDATE_VERSION_KEY = stringPreferencesKey("hazel_update_version")
     private val YTDLP_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("ytdlp_update_available")
 
     fun getHasUpdateAvailable(context: Context): Flow<Boolean> {
@@ -642,9 +643,15 @@ object SettingsRepository {
     fun getHazelUpdateAvailable(context: Context): Flow<Boolean> {
         return context.dataStore.data.map { prefs -> prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false }
     }
-    suspend fun setHazelUpdateAvailable(context: Context, available: Boolean) {
+    /** The version the last check offered, so the flag can be dropped once it is installed. */
+    fun getHazelUpdateVersion(context: Context): Flow<String?> =
+        context.dataStore.data.map { prefs -> prefs[HAZEL_UPDATE_VERSION_KEY] }
+
+    suspend fun setHazelUpdateAvailable(context: Context, available: Boolean, version: String? = null) {
         context.dataStore.edit { prefs ->
             prefs[HAZEL_UPDATE_AVAILABLE_KEY] = available
+            if (available && version != null) prefs[HAZEL_UPDATE_VERSION_KEY] = version
+            else if (!available) prefs.remove(HAZEL_UPDATE_VERSION_KEY)
             val ytdlpAvail = prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false
             prefs[HAS_UPDATE_AVAILABLE_KEY] = available || ytdlpAvail
         }
