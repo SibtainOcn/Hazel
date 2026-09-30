@@ -453,6 +453,7 @@ dependencies {
     // builds players from it.
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.hls)
+    implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.ui)
 
     // Unit tests, covering the two pure parts worth pinning: the link key and the metadata

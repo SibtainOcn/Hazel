@@ -23,7 +23,9 @@ internal object NewPipeStreams {
         val live = info.streamType == StreamType.LIVE_STREAM ||
             info.streamType == StreamType.AUDIO_LIVE_STREAM
         val hls = info.hlsUrl?.takeIf { it.isNotBlank() }
-        if (live && hls != null) return hlsStream(hls)
+        val dash = info.dashMpdUrl?.takeIf { it.isNotBlank() }
+        if (live && hls != null) return hlsStream(hls, maxHeight)
+        if (live && dash != null) return dashStream(dash, maxHeight)
 
         val muxed = withinCap(info.videoStreams.orEmpty(), maxHeight)
         val videoOnly = withinCap(info.videoOnlyStreams.orEmpty(), maxHeight)
@@ -49,21 +51,23 @@ internal object NewPipeStreams {
                 headers = headersFor(muxed.content),
                 engine = ListingSource.NEWPIPE
             )
+            dash != null -> dashStream(dash, maxHeight)
             audio != null -> PlayableStream(
                 url = audio.content,
                 hasVideo = false,
                 headers = headersFor(audio.content),
                 engine = ListingSource.NEWPIPE
             )
-            hls != null -> hlsStream(hls)
+            hls != null -> hlsStream(hls, maxHeight)
             else -> null
         }
         return chosen?.copy(heights = heights)
     }
 
-    private fun hlsStream(address: String) = PlayableStream(
+    private fun hlsStream(address: String, maxHeight: Int) = PlayableStream(
         url = address,
         isHls = true,
+        adaptiveCap = maxHeight,
         headers = headersFor(address),
         engine = ListingSource.NEWPIPE
     )
@@ -74,6 +78,14 @@ internal object NewPipeStreams {
         return playable.filter { it.quality() <= maxHeight }.maxWithOrNull(videoOrder)
             ?: playable.minByOrNull { it.quality() }
     }
+
+    private fun dashStream(address: String, maxHeight: Int) = PlayableStream(
+        url = address,
+        isDash = true,
+        adaptiveCap = maxHeight,
+        headers = headersFor(address),
+        engine = ListingSource.NEWPIPE
+    )
 
     private fun Stream.isPlainHttp() =
         deliveryMethod == DeliveryMethod.PROGRESSIVE_HTTP && isUrl && !content.isNullOrBlank()

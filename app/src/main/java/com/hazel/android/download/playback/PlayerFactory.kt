@@ -9,6 +9,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
@@ -38,23 +39,37 @@ object PlayerFactory {
     }
 
     fun sourceFor(stream: PlayableStream): MediaSource {
-        val main = source(stream.url, stream.headers, stream.isHls)
-        val audio = stream.audioUrl?.let { source(it, stream.audioHeaders, isHls = false) }
+        val main = source(stream.url, stream.headers, stream.isHls, stream.isDash)
+        val audio = stream.audioUrl?.let { source(it, stream.audioHeaders, isHls = false, isDash = false) }
         return if (audio != null) MergingMediaSource(main, audio) else main
     }
 
-    private fun source(url: String, headers: Map<String, String>, isHls: Boolean): MediaSource {
+    private fun source(url: String, headers: Map<String, String>, isHls: Boolean, isDash: Boolean): MediaSource {
         val agent = headers.entries.firstOrNull { it.key.equals("User-Agent", ignoreCase = true) }?.value
         val http = DefaultHttpDataSource.Factory()
             .setAllowCrossProtocolRedirects(true)
             .setUserAgent(agent ?: BROWSER_USER_AGENT)
             .setDefaultRequestProperties(headers.filterKeys { !it.equals("User-Agent", ignoreCase = true) })
         val item = MediaItem.fromUri(url)
-        return if (isHls || url.substringBefore('?').endsWith(".m3u8")) {
+        val path = url.substringBefore('?')
+        return if (isDash || path.endsWith(".mpd")) {
+            DashMediaSource.Factory(http).createMediaSource(item)
+        } else if (isHls || path.endsWith(".m3u8")) {
             HlsMediaSource.Factory(http).createMediaSource(item)
         } else {
             ProgressiveMediaSource.Factory(http).createMediaSource(item)
         }
+    }
+
+    /** Keeps an adaptive stream within the chosen quality, measured on the shorter side. */
+    fun applyCap(player: ExoPlayer, stream: PlayableStream) {
+        val builder = player.trackSelectionParameters.buildUpon()
+        when {
+            stream.adaptiveCap <= 0 -> builder.clearVideoSizeConstraints()
+            stream.portrait -> builder.setMaxVideoSize(stream.adaptiveCap, Int.MAX_VALUE)
+            else -> builder.setMaxVideoSize(Int.MAX_VALUE, stream.adaptiveCap)
+        }
+        player.trackSelectionParameters = builder.build()
     }
 
     private const val BROWSER_USER_AGENT =

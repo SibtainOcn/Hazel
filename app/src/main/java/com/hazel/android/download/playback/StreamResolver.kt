@@ -22,6 +22,15 @@ data class PlayableStream(
     val audioUrl: String? = null,
     val hasVideo: Boolean = true,
     val isHls: Boolean = false,
+    /** A DASH manifest, which the player adapts across on its own. */
+    val isDash: Boolean = false,
+    /**
+     * For a stream the player adapts across (a DASH manifest, an HLS master), the tallest
+     * quality it may pick, on the picture's shorter side; 0 for no limit.
+     */
+    val adaptiveCap: Int = 0,
+    /** Whether the picture is taller than wide, which decides which side [adaptiveCap] limits. */
+    val portrait: Boolean = false,
     val headers: Map<String, String> = emptyMap(),
     val audioHeaders: Map<String, String> = emptyMap(),
     val engine: ListingSource,
@@ -99,7 +108,25 @@ object StreamResolver {
         val sound = usable.filter { it.hasAudio() && !it.hasVideo() }
             .maxWithOrNull(compareBy({ it.optString("ext") == "m4a" }, { it.optDouble("abr", 0.0) }))
 
-        val heights = usable.filter { it.hasVideo() && it.height() > 0 }
+        // DASH formats come as segments of one manifest, which the player reads itself.
+        val all = (0 until formats.length()).mapNotNull { formats.optJSONObject(it) }
+        val dashFormats = all.filter {
+            it.optString("protocol") == "http_dash_segments" && it.optString("manifest_url").startsWith("http")
+        }
+        val dashHasVideo = dashFormats.any { it.hasVideo() && it.optString("vcodec").isNotBlank() }
+        val dash = dashFormats.firstOrNull()?.let { f ->
+            PlayableStream(
+                url = f.optString("manifest_url"),
+                hasVideo = dashHasVideo,
+                isDash = true,
+                headers = f.headers(),
+                engine = ListingSource.YT_DLP,
+                adaptiveCap = maxHeight,
+                portrait = dashFormats.any { it.optInt("height", 0) > it.optInt("width", Int.MAX_VALUE) }
+            )
+        }
+
+        val heights = (usable + dashFormats).filter { it.hasVideo() && it.height() > 0 }
             .map { it.height() }.distinct().sortedDescending()
 
         val chosen = when {
@@ -119,7 +146,13 @@ object StreamResolver {
             else -> usable.filter { it.hasVideo() }.minByOrNull { it.height() }?.let { single(it) }
                 ?: media.takeIf { it.isPlayable() }?.let { single(it) }
         }
-        return chosen?.copy(heights = heights)
+        // DASH stands in when nothing else plays, or when only sound plays and it has the picture.
+        val result = when {
+            chosen == null -> dash
+            !chosen.hasVideo && dashHasVideo -> dash
+            else -> chosen
+        }
+        return result?.copy(heights = heights)
     }
 
     private fun single(format: JSONObject) = PlayableStream(

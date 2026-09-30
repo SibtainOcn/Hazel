@@ -133,6 +133,7 @@ class PlaybackController(
                 if (released) return@launch
                 hasVideo = stream.hasVideo
                 heights = stream.heights
+                PlayerFactory.applyCap(player, stream)
                 player.setMediaSource(PlayerFactory.sourceFor(stream), resumeAt)
                 player.prepare()
             } catch (e: CancellationException) {
