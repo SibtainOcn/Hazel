@@ -213,14 +213,18 @@ private fun SettingRow(
     }
 }
 
-/** Pick one of [choices], each a stored value and what it is called. */
+/**
+ * Pick one of [choices], each a stored value and what it is called, with a line under it
+ * from [describe] where one helps the choice.
+ */
 @Composable
 internal fun <T> SingleChoiceDialog(
     title: String,
     choices: List<Pair<T, String>>,
     selected: T,
     onSelect: (T) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    describe: @Composable (T) -> String? = { null }
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -237,7 +241,16 @@ internal fun <T> SingleChoiceDialog(
                     ) {
                         RadioButton(selected = value == selected, onClick = { onSelect(value) })
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(label)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(label)
+                            describe(value)?.let { line ->
+                                Text(
+                                    line,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                                )
+                            }
+                        }
                     }
                 }
             }

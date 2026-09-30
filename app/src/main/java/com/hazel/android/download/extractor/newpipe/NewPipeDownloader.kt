@@ -1,4 +1,4 @@
-package com.hazel.android.download.extractor
+package com.hazel.android.download.extractor.newpipe
 
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody

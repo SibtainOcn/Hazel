@@ -19,7 +19,9 @@ import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkResolver
 import com.hazel.android.download.extractor.ListingSource
-import com.hazel.android.download.extractor.NewPipeLister
+import com.hazel.android.download.extractor.MediaSearch
+import com.hazel.android.download.extractor.SearchSource
+import com.hazel.android.download.extractor.newpipe.NewPipeEngine
 import com.hazel.android.util.StoragePaths
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
@@ -79,6 +81,8 @@ data class DownloadState(
     val fetchProgress: String = "",
     /** How many links the current read covers, so the screen can stand in for each one. */
     val fetchCount: Int = 0,
+    /** The words the results on screen were searched for, or blank when they came from links. */
+    val searchQuery: String = "",
     /** Every link that resolved from the last search, in the order they were entered. */
     val results: List<MediaInfo> = emptyList(),
     /** The result the open sheet is editing, and the one the engine is working on. */
@@ -572,7 +576,8 @@ class DownloadViewModel : ViewModel() {
             batch = if (runInHand) _state.value.batch else emptyList(),
             isComplete = false,
             fetchProgress = "",
-            fetchCount = valid.size
+            fetchCount = valid.size,
+            searchQuery = ""
         )
 
         fetchJob = viewModelScope.launch {
@@ -661,6 +666,77 @@ class DownloadViewModel : ViewModel() {
                     info = resolved.singleOrNull(),
                     savedAside = false
                 )
+            }
+        }
+    }
+
+    /**
+     * Searches [source] for [query] and shows what it found as cards.
+     *
+     * The cards carry no formats yet, like a playlist's: each is read when its sheet opens,
+     * and a play or a download of it works the same as for a pasted link.
+     */
+    fun search(query: String, source: SearchSource) {
+        val text = query.trim()
+        if (text.isBlank() || _state.value.isFetching) return
+        val app = HazelApp.instance
+
+        viewModelScope.launch(Dispatchers.IO) {
+            if (!SettingsRepository.getIncognito(app).first()) SearchHistoryRepository.record(app, text)
+        }
+        clearAutoOpened()
+
+        val runInHand = _state.value.isDownloading || _state.value.batch.any {
+            it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED ||
+                it.state == BatchState.QUEUED
+        }
+        _state.value = _state.value.copy(
+            isFetching = true,
+            error = null,
+            errorLog = null,
+            results = emptyList(),
+            info = null,
+            batch = if (runInHand) _state.value.batch else emptyList(),
+            isComplete = false,
+            fetchProgress = "",
+            fetchCount = SEARCH_SKELETONS,
+            searchQuery = text
+        )
+
+        fetchJob = viewModelScope.launch {
+            val found = try {
+                MediaSearch.search(
+                    query = text,
+                    source = source,
+                    engine = SettingsRepository.getSearchEngine(app).first(),
+                    count = SettingsRepository.getSearchResults(app).first(),
+                    cacheDir = ytDlpCacheDir,
+                    fetchMode = SettingsRepository.getFetchMode(app).first(),
+                    forceIpv4 = SettingsRepository.getForceIpv4(app).first()
+                )
+            } catch (_: CancellationException) {
+                _state.update { it.copy(isFetching = false) }
+                return@launch
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isFetching = false,
+                        errorLog = e.message?.trim().orEmpty().ifBlank { app.getString(R.string.no_results_error_title) }
+                    )
+                }
+                return@launch
+            }
+
+            _state.update {
+                if (found.isEmpty()) {
+                    it.copy(isFetching = false, errorLog = app.getString(R.string.search_no_results, text))
+                } else {
+                    it.copy(
+                        isFetching = false,
+                        results = found.map { entry -> InfoCache.metadataFor(entry.url) ?: MediaProbe.pendingFor(entry) },
+                        savedAside = false
+                    )
+                }
             }
         }
     }
@@ -790,8 +866,11 @@ class DownloadViewModel : ViewModel() {
             InfoCache.metadataFor(url)?.takeIf { it.hasResolvedFormats }?.let { return it }
         }
 
-        if (reader == ListingSource.NEWPIPE && !access.hasCookies && NewPipeLister.handlesStream(url)) {
-            NewPipeLister.single(url)?.takeIf { it.hasResolvedFormats }?.let { return it }
+        if (reader == ListingSource.NEWPIPE && !access.hasCookies && NewPipeEngine.handlesStream(url)) {
+            NewPipeEngine.single(url)?.takeIf { it.hasResolvedFormats }?.let {
+                InfoCache.put(url, it, rawJson = null)
+                return it
+            }
         }
 
         return probeWithRetry(
@@ -2457,6 +2536,9 @@ class DownloadViewModel : ViewModel() {
     }
 
     private companion object {
+        /** Cards stood in while a search runs. */
+        const val SEARCH_SKELETONS = 4
+
         /** The most a title may take of a file name, in UTF-8 bytes; 255 is the limit. */
         const val MAX_NAME_BYTES = 120
 

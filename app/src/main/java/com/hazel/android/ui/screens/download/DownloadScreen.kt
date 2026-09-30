@@ -114,6 +114,9 @@ import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.hazel.android.ui.components.player.InlinePlayer
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.material.icons.filled.PlayArrow
 
 /**
  * Paste one link or several, read what the sources offer, pick formats, download.
@@ -184,6 +187,8 @@ fun DownloadScreen(
     }
 
     var searchOpen by remember { mutableStateOf(false) }
+    // The one card playing, if any. Starting another stops it.
+    var playingUrl by remember { mutableStateOf<String?>(null) }
     var sheetVisible by remember { mutableStateOf(false) }
     var batchSheetVisible by remember { mutableStateOf(false) }
 
@@ -516,6 +521,18 @@ fun DownloadScreen(
                         bottom = if (pendingResults.size > 1) 96.dp else 32.dp
                     )
                 ) {
+                    if (state.searchQuery.isNotBlank()) {
+                        item(key = "search-heading") {
+                            Text(
+                                stringResource(R.string.search_results_for, state.searchQuery),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(top = 12.dp)
+                            )
+                        }
+                    }
                     items(orderedResults, key = { it.url }) { info ->
                         Spacer(modifier = Modifier.height(20.dp))
 
@@ -564,6 +581,9 @@ fun DownloadScreen(
                                 batchItem = batchItem,
                                 waitingForWifi = state.waitingForWifi,
                                 alreadyDownloaded = info.url in savedUrls,
+                                playing = playingUrl == info.url,
+                                onPlay = { playingUrl = info.url },
+                                onStopPlaying = { if (playingUrl == info.url) playingUrl = null },
                                 onOpenSheet = openSheet,
                                 onOpenQueue = onOpenQueue
                             )
@@ -782,7 +802,13 @@ fun DownloadScreen(
             initialQuery = "",
             onSearch = { queries ->
                 searchOpen = false
+                playingUrl = null
                 downloadViewModel.fetchAll(queries)
+            },
+            onSearchWords = { query, source ->
+                searchOpen = false
+                playingUrl = null
+                downloadViewModel.search(query, source)
             },
             onClearResults = downloadViewModel::clearResults,
             onDismiss = { searchOpen = false }
@@ -1085,6 +1111,9 @@ private fun MediaCard(
     batchItem: BatchItem?,
     waitingForWifi: Boolean = false,
     alreadyDownloaded: Boolean = false,
+    playing: Boolean = false,
+    onPlay: () -> Unit = {},
+    onStopPlaying: () -> Unit = {},
     onOpenSheet: () -> Unit,
     onOpenQueue: () -> Unit
 ) {
@@ -1332,6 +1361,26 @@ private fun MediaCard(
                         batchItem?.state == BatchState.QUEUED -> CornerTag(text = stringResource(R.string.download_queued))
                         alreadyDownloaded -> CornerTag(text = stringResource(R.string.download_downloaded))
                     }
+                    if (!inHand) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.55f))
+                                .clickable(
+                                    onClickLabel = stringResource(R.string.player_play),
+                                    onClick = onPlay
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Filled.PlayArrow,
+                                contentDescription = stringResource(R.string.player_play),
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
                 }
             }
 
@@ -1354,6 +1403,18 @@ private fun MediaCard(
                         drawStopIndicator = {}
                     )
                 }
+            }
+
+            // Playing covers the artwork with the player until it is closed or scrolled away.
+            if (playing && !inHand) {
+                DisposableEffect(info.url) { onDispose { onStopPlaying() } }
+                InlinePlayer(
+                    url = info.url,
+                    thumbnail = info.thumbnail,
+                    onClose = onStopPlaying,
+                    onDownload = onOpenSheet,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
     }

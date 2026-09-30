@@ -268,11 +268,11 @@ def test_source_code_structure():
     )
     check_true(
         "handlesCollection checked first",
-        "NewPipeLister.handlesCollection(url)" in resolver_text
+        "NewPipeEngine.handlesCollection(url)" in resolver_text
     )
     check_true(
         "handlesStream checked for fast single item metadata",
-        "NewPipeLister.handlesStream(url)" in resolver_text
+        "NewPipeEngine.handlesStream(url)" in resolver_text
     )
     check_true(
         "LinkResolver checks !access.hasCookies before using NewPipe",
@@ -283,7 +283,7 @@ def test_source_code_structure():
         "MediaProbe.listContents(" in resolver_text
     )
 
-    newpipe_lister_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/NewPipeLister.kt"
+    newpipe_lister_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/newpipe/NewPipeLister.kt"
     check_true("NewPipeLister.kt exists", newpipe_lister_file.is_file())
     lister_text = newpipe_lister_file.read_text(encoding="utf-8")
 
@@ -304,7 +304,7 @@ def test_source_code_structure():
     fetch_settings_file = REPO_ROOT / "app/src/main/java/com/hazel/android/ui/screens/more/FetchSettingsScreen.kt"
     check_true("FetchSettingsScreen.kt exists", fetch_settings_file.is_file())
     fetch_text = fetch_settings_file.read_text(encoding="utf-8")
-    check_true("FetchSettingsScreen allows toggling ListingSource", "ListingSource.entries.forEach" in fetch_text)
+    check_true("FetchSettingsScreen allows choosing ListingSource", "ListingSource.entries" in fetch_text)
 
     # DownloadViewModel pipeline wiring
     vm_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/DownloadViewModel.kt"
@@ -314,11 +314,20 @@ def test_source_code_structure():
     resolver_text = (REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/LinkResolver.kt").read_text(encoding="utf-8")
     check_true("LinkResolver respects listingSource and cookies", "source == ListingSource.NEWPIPE && !access.hasCookies" in resolver_text)
 
-    search_provider_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/MediaSearchProvider.kt"
-    check_true("MediaSearchProvider.kt exists", search_provider_file.is_file())
-    search_text = search_provider_file.read_text(encoding="utf-8")
+    search_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/MediaSearch.kt"
+    check_true("MediaSearch.kt exists", search_file.is_file())
+    search_text = search_file.read_text(encoding="utf-8")
+    check_true("MediaSearch is defined", "object MediaSearch" in search_text)
+    check_true("MediaSearch falls back to yt-dlp", "MediaProbe.listContents(" in search_text)
 
-    check_true("UnifiedSearchCoordinator is defined", "object UnifiedSearchCoordinator" in search_text)
+    # The NewPipe library is used from one package only, so its API changes stay there.
+    source_root = REPO_ROOT / "app/src/main/java"
+    newpipe_dir = source_root / "com/hazel/android/download/extractor/newpipe"
+    outside = [
+        str(f.relative_to(REPO_ROOT)) for f in source_root.rglob("*.kt")
+        if newpipe_dir not in f.parents and "org.schabi.newpipe" in f.read_text(encoding="utf-8")
+    ]
+    check("NewPipe library imported only inside the newpipe package", outside, [])
 
 
 # ===========================================================================

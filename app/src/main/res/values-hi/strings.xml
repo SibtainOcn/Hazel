@@ -8,7 +8,7 @@
     <string name="nav_incognito_off">गुप्त मोड बंद है</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">लिंक चिपकाएँ</string>
+    <string name="download_search_hint">खोजें या URL डालें</string>
     <string name="download_clear">हटाएँ</string>
     <string name="download_incognito_title">आप गुप्त मोड में हैं</string>
     <string name="download_incognito_body">डाउनलोड आपके इतिहास में नहीं जुड़ते और लिंक याद नहीं रखे जाते। फ़ाइलें हमेशा की तरह सहेजी जाती हैं।</string>
@@ -38,15 +38,15 @@
     <string name="download_clear_confirm_body">क्या आप वाकई स्क्रीन से सभी परिणाम साफ़ करना चाहते हैं?</string>
 
     <!-- SearchScreen -->
-    <string name="search_hint">लिंक चिपकाएँ</string>
+    <string name="search_hint">खोजें या URL डालें</string>
     <string name="search_back">वापस</string>
     <string name="search_more">और</string>
     <string name="search_add_link">एक और लिंक जोड़ें</string>
     <string name="search_clear">मिटाएँ</string>
     <string name="search_clear_results">परिणाम हटाएँ</string>
     <string name="search_clear_history">खोज इतिहास मिटाएँ</string>
-    <string name="search_empty_history">आपके इस्तेमाल किए लिंक यहाँ दिखेंगे</string>
-    <string name="search_no_matches">कोई लिंक मेल नहीं खाता</string>
+    <string name="search_empty_history">आपकी खोजें और लिंक यहां दिखेंगे</string>
+    <string name="search_no_matches">कोई मेल नहीं</string>
     <string name="search_remove">हटाएँ</string>
     <string name="search_all">सब खोजें</string>
     <string name="search_forget">भूल जाएँ</string>
@@ -500,15 +500,12 @@
     <string name="accent_picker_close">बंद करें</string>
 
     <!-- FetchSettingsScreen -->
-    <string name="fetch_settings_back">वापस</string>
     <string name="fetch_settings_title">लिंक पढ़ना</string>
-    <string name="fetch_settings_timeout_description">धीमे स्रोत पर हार मानकर दोबारा कोशिश करने से पहले कितना इंतज़ार करना है।</string>
     <plurals name="fetch_settings_timing">
         <item quantity="one">%1$ds इंतज़ार, %2$d कोशिश</item>
         <item quantity="other">%1$ds इंतज़ार, %2$d कोशिशें</item>
     </plurals>
     <string name="fetch_settings_reading_links">लिंक पढ़ना</string>
-    <string name="fetch_settings_reading_links_description">कौन सा रीडर पता लगाए कि लिंक में क्या है। यहाँ जो भी चुना जाए, डाउनलोड हमेशा yt-dlp से ही होते हैं।</string>
     <string name="fetch_settings_force_ipv4_description">इसे तभी चालू करें जब आपके नेटवर्क पर लिंक अटक जाते हों। यह टूटे हुए IPv6 रास्ते से बचाता है, और बाकी हर जगह धीमा है।</string>
     <string name="fetch_settings_force_ipv4">IPv4 ज़रूरी करें</string>
     <string name="fetch_mode_fast_label">तेज़</string>
@@ -664,4 +661,34 @@
     <string name="backup_category_failed">विफल</string>
     <string name="backup_category_cookies">कुकीज़</string>
     <string name="backup_category_search">खोज इतिहास</string>
+    <string name="search_no_results">%1$s के लिए कोई नतीजा नहीं</string>
+    <string name="search_results_for">%1$s के नतीजे</string>
+    <string name="player_play">चलाएं</string>
+    <string name="player_pause">रोकें</string>
+    <string name="player_close">प्लेयर बंद करें</string>
+    <string name="player_fullscreen">पूरी स्क्रीन</string>
+    <string name="player_exit_fullscreen">पूरी स्क्रीन से बाहर</string>
+    <string name="player_failed">इसे चलाया नहीं जा सका</string>
+    <string name="player_retry">फिर कोशिश करें</string>
+    <string name="player_mute">आवाज़ बंद करें</string>
+    <string name="player_unmute">आवाज़ चालू करें</string>
+    <string name="options_cut_start_here">यहां से शुरू</string>
+    <string name="options_cut_end_here">यहां तक</string>
+    <string name="options_cut_jump_start">शुरुआत पर जाएं</string>
+    <string name="options_cut_jump_end">अंत पर जाएं</string>
+    <string name="fetch_settings_screen_description">लिंक कैसे पढ़े जाते हैं, खोज कैसे होती है और मीडिया कैसे चलता है। डाउनलोड हमेशा yt-dlp से होते हैं।</string>
+    <string name="fetch_settings_read_with">लिंक इससे पढ़ें</string>
+    <string name="fetch_settings_patience">धीमे कनेक्शन</string>
+    <string name="fetch_settings_search">खोज</string>
+    <string name="fetch_settings_search_on">यहां खोजें</string>
+    <string name="fetch_settings_search_with">इससे खोजें</string>
+    <string name="fetch_settings_search_results">हर खोज में नतीजे</string>
+    <string name="fetch_settings_suggestions">खोज सुझाव</string>
+    <string name="fetch_settings_suggestions_summary">टाइप करते समय Google से खोज सुझाता है। आप जो टाइप करते हैं वह Google को भेजा जाता है।</string>
+    <string name="fetch_settings_playback">प्लेबैक</string>
+    <string name="fetch_settings_play_with">इससे चलाएं</string>
+    <string name="fetch_settings_play_quality">प्लेबैक गुणवत्ता</string>
+    <string name="fetch_settings_play_quality_value">%1$dp तक</string>
+    <string name="fetch_settings_engine_newpipe_summary">YouTube, SoundCloud और Bandcamp पर सबसे तेज़। बाकी हर जगह और जब यह जवाब न दे पाए, yt-dlp संभालता है।</string>
+    <string name="fetch_settings_engine_ytdlp_summary">शुरू होने में धीमा, और yt-dlp की हर समर्थित साइट पर काम करता है।</string>
 </resources>

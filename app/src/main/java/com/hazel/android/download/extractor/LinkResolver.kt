@@ -3,8 +3,10 @@ package com.hazel.android.download.extractor
 import androidx.annotation.StringRes
 import com.hazel.android.R
 import com.hazel.android.download.FetchMode
+import com.hazel.android.download.InfoCache
 import com.hazel.android.download.MediaProbe
 import com.hazel.android.download.SiteAccess
+import com.hazel.android.download.extractor.newpipe.NewPipeEngine
 import java.io.File
 
 /**
@@ -63,11 +65,14 @@ object LinkResolver {
 
         if (source == ListingSource.NEWPIPE && !access.hasCookies) {
             // First check collections (playlists & channel tabs) for low-latency listing
-            if (NewPipeLister.handlesCollection(url)) {
-                NewPipeLister.list(url)?.let { return it }
-            } else if (NewPipeLister.handlesStream(url)) {
-                // Single media stream: Extract metadata and resolved formats instantly in ~200ms
-                NewPipeLister.single(url)?.let { info ->
+            if (NewPipeEngine.handlesCollection(url)) {
+                NewPipeEngine.list(url)?.let { many ->
+                    InfoCache.putListing(url, many)
+                    return many
+                }
+            } else if (NewPipeEngine.handlesStream(url)) {
+                NewPipeEngine.single(url)?.let { info ->
+                    InfoCache.put(url, info, rawJson = null)
                     return LinkContents.Single(info)
                 }
             }

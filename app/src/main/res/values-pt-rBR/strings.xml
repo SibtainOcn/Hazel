@@ -8,7 +8,7 @@
     <string name="nav_incognito_off">Anônimo desativado</string>
 
     <!-- DownloadScreen -->
-    <string name="download_search_hint">Cole um link</string>
+    <string name="download_search_hint">Pesquise ou insira uma URL</string>
     <string name="download_clear">Limpar</string>
     <string name="download_incognito_title">Você está anônimo</string>
     <string name="download_incognito_body">Os downloads não entram no seu histórico e os links não são lembrados. Os arquivos continuam sendo salvos normalmente.</string>
@@ -38,15 +38,15 @@
     <string name="download_clear_confirm_body">Tem certeza de que deseja limpar todos os resultados da tela?</string>
 
     <!-- SearchScreen -->
-    <string name="search_hint">Cole um link</string>
+    <string name="search_hint">Pesquise ou insira uma URL</string>
     <string name="search_back">Voltar</string>
     <string name="search_more">Mais</string>
     <string name="search_add_link">Adicionar outro link</string>
     <string name="search_clear">Apagar</string>
     <string name="search_clear_results">Limpar os resultados</string>
     <string name="search_clear_history">Apagar o histórico de pesquisa</string>
-    <string name="search_empty_history">Os links que você usar vão aparecer aqui</string>
-    <string name="search_no_matches">Nenhum link corresponde</string>
+    <string name="search_empty_history">Suas buscas e links aparecerão aqui</string>
+    <string name="search_no_matches">Nenhuma correspondência</string>
     <string name="search_remove">Remover</string>
     <string name="search_all">Pesquisar tudo</string>
     <string name="search_forget">Esquecer</string>
@@ -506,16 +506,13 @@
     <string name="accent_picker_close">Fechar</string>
 
     <!-- FetchSettingsScreen -->
-    <string name="fetch_settings_back">Voltar</string>
     <string name="fetch_settings_title">Leitura de links</string>
-    <string name="fetch_settings_timeout_description">Quanto esperar por uma fonte lenta antes de desistir e tentar de novo.</string>
     <plurals name="fetch_settings_timing">
         <item quantity="one">%1$ds de espera, %2$d tentativa</item>
         <item quantity="many">%1$ds de espera, %2$d de tentativas</item>
         <item quantity="other">%1$ds de espera, %2$d tentativas</item>
     </plurals>
     <string name="fetch_settings_reading_links">Leitura de links</string>
-    <string name="fetch_settings_reading_links_description">Qual leitor descobre o que um link contém. Os downloads sempre usam o yt-dlp, seja qual for a opção escolhida aqui.</string>
     <string name="fetch_settings_force_ipv4_description">Ative isto só se os links travarem na sua rede. Serve para contornar uma rota IPv6 quebrada, e é mais lento em todo o resto.</string>
     <string name="fetch_settings_force_ipv4">Forçar IPv4</string>
     <string name="fetch_mode_fast_label">Rápido</string>
@@ -671,4 +668,34 @@
     <string name="backup_category_failed">Com falha</string>
     <string name="backup_category_cookies">Cookies</string>
     <string name="backup_category_search">Histórico de pesquisa</string>
+    <string name="search_no_results">Nenhum resultado para %1$s</string>
+    <string name="search_results_for">Resultados para %1$s</string>
+    <string name="player_play">Reproduzir</string>
+    <string name="player_pause">Pausar</string>
+    <string name="player_close">Fechar player</string>
+    <string name="player_fullscreen">Tela cheia</string>
+    <string name="player_exit_fullscreen">Sair da tela cheia</string>
+    <string name="player_failed">Não foi possível reproduzir</string>
+    <string name="player_retry">Tentar de novo</string>
+    <string name="player_mute">Silenciar</string>
+    <string name="player_unmute">Ativar som</string>
+    <string name="options_cut_start_here">Começar aqui</string>
+    <string name="options_cut_end_here">Terminar aqui</string>
+    <string name="options_cut_jump_start">Ir para o início</string>
+    <string name="options_cut_jump_end">Ir para o fim</string>
+    <string name="fetch_settings_screen_description">Como os links são lidos, como as buscas são feitas e como a mídia é reproduzida. Os downloads sempre usam o yt-dlp.</string>
+    <string name="fetch_settings_read_with">Ler links com</string>
+    <string name="fetch_settings_patience">Conexões lentas</string>
+    <string name="fetch_settings_search">Busca</string>
+    <string name="fetch_settings_search_on">Buscar em</string>
+    <string name="fetch_settings_search_with">Buscar com</string>
+    <string name="fetch_settings_search_results">Resultados por busca</string>
+    <string name="fetch_settings_suggestions">Sugestões de busca</string>
+    <string name="fetch_settings_suggestions_summary">Sugere buscas do Google enquanto você digita. O que você digita é enviado ao Google.</string>
+    <string name="fetch_settings_playback">Reprodução</string>
+    <string name="fetch_settings_play_with">Reproduzir com</string>
+    <string name="fetch_settings_play_quality">Qualidade de reprodução</string>
+    <string name="fetch_settings_play_quality_value">Até %1$dp</string>
+    <string name="fetch_settings_engine_newpipe_summary">O mais rápido no YouTube, SoundCloud e Bandcamp. O yt-dlp assume em todos os outros sites e sempre que ele não conseguir responder.</string>
+    <string name="fetch_settings_engine_ytdlp_summary">Demora mais para começar e funciona em todos os sites compatíveis com o yt-dlp.</string>
 </resources>

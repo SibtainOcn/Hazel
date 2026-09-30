@@ -55,7 +55,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:configChanges="locale|layoutDirection"
+            android:configChanges="locale|layoutDirection|orientation|screenSize|smallestScreenSize|screenLayout"
             android:theme="@style/Theme.Hazel.Splash">
 
             <!-- Normal launcher -->
