@@ -34,8 +34,11 @@ object LinkKey {
         // youtube.com.
         mediaId(host, path, query)?.let { (service, id) -> return "$service/$id" }
 
+        val isPlaylist = path.contains("playlist") || (query.containsKey("list") && !query.containsKey("v"))
+        val noiseParams = if (isPlaylist) NOISE_PARAMS - "list" else NOISE_PARAMS
+
         val kept = query
-            .filterKeys { it.lowercase() !in NOISE_PARAMS }
+            .filterKeys { it.lowercase() !in noiseParams }
             .toSortedMap()
             .map { (key, value) -> "$key=$value" }
             .joinToString("&")
@@ -57,10 +60,28 @@ object LinkKey {
     fun sameMedia(first: String, second: String): Boolean =
         canonical(first) == canonical(second) && canonical(first).isNotBlank()
 
-    /** Filename-safe digest of the canonical form, for anything keyed on disk. */
+    /**
+     * The key a read of [url] is remembered under.
+     *
+     * Stricter than [canonical] in one way: a link that names a collection alongside an item,
+     * such as a video opened from inside a playlist, reads as that whole collection, while
+     * the item on its own reads as one card. Both reduce to the same media, so keyed on the
+     * media alone the item's read would be handed back for the collection and a playlist
+     * pasted a second time would open as a single song.
+     */
+    fun readKey(url: String): String {
+        val base = canonical(url)
+        val list = runCatching { java.net.URI(url.trim()).rawQuery }.getOrNull()
+            ?.let { parseQuery(it)["list"] }
+            ?.takeIf { it.isNotBlank() }
+            ?: return base
+        return if ("list=$list" in base || base.endsWith("/$list")) base else "$base#list=$list"
+    }
+
+    /** Filename-safe digest of [readKey], for reads kept on disk. */
     fun digest(url: String): String {
         val bytes = java.security.MessageDigest.getInstance("SHA-256")
-            .digest(canonical(url).toByteArray())
+            .digest(readKey(url).toByteArray())
         return bytes.take(16).joinToString("") { "%02x".format(it) }
     }
 
@@ -83,6 +104,7 @@ object LinkKey {
 
             host.endsWith("youtube.com") -> when {
                 path.startsWith("/watch") -> query["v"]
+                path.startsWith("/playlist") -> query["list"]?.let { "playlist/$it" }
                 segments.size >= 2 && segments[0] in YOUTUBE_ID_SEGMENTS -> segments[1]
                 else -> null
             }

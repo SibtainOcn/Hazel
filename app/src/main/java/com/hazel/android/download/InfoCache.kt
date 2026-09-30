@@ -60,8 +60,23 @@ object InfoCache {
             size > MAX_ENTRIES
     }
 
-    private val directory: File
-        get() = File(HazelApp.instance.cacheDir, "info").apply { if (!exists()) mkdirs() }
+    /**
+     * Where reads are kept. The name carries a layout version: a build that changes how links
+     * are keyed or what a read contains moves to a new name, so what an older build stored
+     * under the old rules is dropped once instead of being served back.
+     */
+    private val directory: File by lazy {
+        val cacheRoot = HazelApp.instance.cacheDir
+        LEGACY_DIRECTORIES.forEach { runCatching { File(cacheRoot, it).deleteRecursively() } }
+        File(cacheRoot, DIRECTORY_NAME)
+    }
+
+    private fun ensureDirectory(): File = directory.apply { if (!exists()) mkdirs() }
+
+    private const val DIRECTORY_NAME = "info-v2"
+
+    /** Layouts earlier builds wrote, removed on first use. */
+    private val LEGACY_DIRECTORIES = listOf("info")
 
     /**
      * Parsed metadata for [url], or null when nothing fresh is held.
@@ -73,7 +88,7 @@ object InfoCache {
      */
     @Synchronized
     fun metadataFor(url: String): MediaInfo? {
-        val key = LinkKey.canonical(url)
+        val key = LinkKey.readKey(url)
         metadata[key]?.let { entry ->
             if (System.currentTimeMillis() - entry.storedAt <= METADATA_TTL_MS) return entry.info
             metadata.remove(key)
@@ -98,7 +113,7 @@ object InfoCache {
     /** Records both halves of a completed read. */
     @Synchronized
     fun put(url: String, info: MediaInfo, rawJson: String?) {
-        metadata[LinkKey.canonical(url)] = Entry(info, System.currentTimeMillis())
+        metadata[LinkKey.readKey(url)] = Entry(info, System.currentTimeMillis())
 
         // A collection's payload describes the collection rather than a playable item, so
         // replaying it into a download would select nothing.
@@ -179,7 +194,7 @@ object InfoCache {
      */
     @Synchronized
     fun invalidate(url: String) {
-        metadata.remove(LinkKey.canonical(url))
+        metadata.remove(LinkKey.readKey(url))
         runCatching { fileFor(url).delete() }
         runCatching { signInMarkerFor(url).delete() }
         runCatching { listingFileFor(url).delete() }
@@ -188,7 +203,7 @@ object InfoCache {
     @Synchronized
     fun clear() {
         metadata.clear()
-        runCatching { directory.listFiles()?.forEach { it.delete() } }
+        runCatching { ensureDirectory().listFiles()?.forEach { it.delete() } }
     }
 
     /** Removes what is past using, so the directory cannot grow unbounded. */
@@ -196,7 +211,7 @@ object InfoCache {
     fun prune() {
         runCatching {
             val cutoff = System.currentTimeMillis() - METADATA_TTL_MS
-            directory.listFiles()?.forEach { if (it.lastModified() < cutoff) it.delete() }
+            ensureDirectory().listFiles()?.forEach { if (it.lastModified() < cutoff) it.delete() }
         }
         trimToLimit()
     }
@@ -225,7 +240,7 @@ object InfoCache {
      */
     private fun trimToLimit() {
         runCatching {
-            val files = directory.listFiles()?.toList().orEmpty()
+            val files = ensureDirectory().listFiles()?.toList().orEmpty()
             val newestFirst = files
                 .groupBy { it.name.substringBefore('.') }
                 .entries
@@ -237,9 +252,9 @@ object InfoCache {
         }
     }
 
-    private fun fileFor(url: String) = File(directory, "${LinkKey.digest(url)}.info.json")
+    private fun fileFor(url: String) = File(ensureDirectory(), "${LinkKey.digest(url)}.info.json")
 
-    private fun signInMarkerFor(url: String) = File(directory, "${LinkKey.digest(url)}.signin")
+    private fun signInMarkerFor(url: String) = File(ensureDirectory(), "${LinkKey.digest(url)}.signin")
 
-    private fun listingFileFor(url: String) = File(directory, "${LinkKey.digest(url)}.list.json")
+    private fun listingFileFor(url: String) = File(ensureDirectory(), "${LinkKey.digest(url)}.list.json")
 }

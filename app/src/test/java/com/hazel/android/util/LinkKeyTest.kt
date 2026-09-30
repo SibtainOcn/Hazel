@@ -43,6 +43,17 @@ class LinkKeyTest {
     }
 
     @Test
+    fun `two different playlists compare as different media`() {
+        assertFalse(
+            LinkKey.sameMedia(
+                "https://www.youtube.com/playlist?list=PL1111111111111111",
+                "https://www.youtube.com/playlist?list=PL2222222222222222"
+            )
+        )
+        assertEquals("youtube/playlist/PL111", LinkKey.canonical("https://www.youtube.com/playlist?list=PL111"))
+    }
+
+    @Test
     fun `a timestamp does not make it a different video`() {
         assertTrue(
             LinkKey.sameMedia(
@@ -123,5 +134,29 @@ class LinkKeyTest {
         assertEquals(share, LinkKey.digest("https://youtu.be/kUox2TPnpzo?si=abc"))
         assertEquals(32, share.length)
         assertTrue(share.all { it.isDigit() || it in 'a'..'f' })
+    }
+
+    @Test
+    fun `a video opened from a playlist is read apart from the video alone`() {
+        val inList = "https://music.youtube.com/watch?v=kUox2TPnpzo&list=OLAK5uy_abc"
+        val alone = "https://www.youtube.com/watch?v=kUox2TPnpzo"
+
+        // Still the same media for the repeat-download check...
+        assertTrue(LinkKey.sameMedia(inList, alone))
+        // ...but a different read, so the playlist is never answered with one song.
+        assertNotEquals(LinkKey.readKey(inList), LinkKey.readKey(alone))
+        assertNotEquals(LinkKey.digest(inList), LinkKey.digest(alone))
+    }
+
+    @Test
+    fun `a playlist link reads under its own id only once`() {
+        val key = LinkKey.readKey("https://www.youtube.com/playlist?list=PL111&si=x")
+        assertEquals("youtube/playlist/PL111", key)
+    }
+
+    @Test
+    fun `links without a collection read under their media key`() {
+        val url = "https://www.jiosaavn.com/song/leja-re/OQsEfQFVUXk"
+        assertEquals(LinkKey.canonical(url), LinkKey.readKey(url))
     }
 }
