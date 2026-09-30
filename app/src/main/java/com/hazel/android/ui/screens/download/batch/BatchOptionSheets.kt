@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.download.AUDIO_CONTAINERS
+import com.hazel.android.download.AUDIO_QUALITY_STEPS
 import com.hazel.android.download.VIDEO_CONTAINERS
 
 /**
@@ -126,6 +127,45 @@ fun BatchQualitySheet(
                         label = stringResource(labelRes),
                         selected = height == maxHeight,
                         onClick = { onSelect(height) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** The bitrate an audio conversion in the set is encoded at. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BatchBitrateSheet(
+    currentQuality: String,
+    onSelect: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = batchSheetColor
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            SheetHeader(
+                stringResource(R.string.properties_bitrate),
+                stringResource(R.string.batch_audio_quality_subtitle)
+            )
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    start = 20.dp, end = 20.dp, bottom = 32.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(AUDIO_QUALITY_STEPS, key = { it.first }) { (quality, labelRes) ->
+                    ChoiceRow(
+                        label = stringResource(labelRes),
+                        selected = quality == currentQuality,
+                        onClick = { onSelect(quality) }
                     )
                 }
             }

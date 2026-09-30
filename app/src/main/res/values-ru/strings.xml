@@ -386,6 +386,8 @@
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Наилучшее качество</string>
+    <string name="audio_quality_best">Лучшее качество</string>
+    <string name="batch_audio_quality_subtitle">Используется при конвертации в другой формат</string>
     <string name="batch_type_sheet_title">Предпочтительный тип загрузки</string>
     <string name="batch_type_sheet_subtitle">В каком виде сохранять эти ссылки</string>
     <string name="batch_type_audio">Аудио</string>

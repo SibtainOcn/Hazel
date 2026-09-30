@@ -521,9 +521,9 @@ def main():
     print("\n--- 7. Stream Format Ladder, Player Client & Cookie Access Optimization ---")
     # -----------------------------------------------------------------------
     site_access_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "download" / "SiteAccess.kt").read_text(encoding="utf-8")
-    check_true("SiteAccess.kt contains web_embedded player client", "web_embedded" in site_access_kt)
+    # yt-dlp picks its own YouTube clients per release; a fixed list goes stale and leaves 360p.
+    check_true("SiteAccess.kt forces no YouTube player client", "player_client" not in site_access_kt)
     check_true("SiteAccess.kt contains isYouTube helper function", "fun isYouTube(" in site_access_kt)
-    check_true("SiteAccess.kt passes player_client for YouTube URLs", "youtube:player_client" in site_access_kt)
     check_true("SiteAccess.kt suppresses custom User-Agent on YouTube", "!isYouTube(url)" in site_access_kt)
 
     media_probe_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "download" / "MediaProbe.kt").read_text(encoding="utf-8")
@@ -554,11 +554,11 @@ def main():
     check_true("BatchDownloadState.kt resets formatFor on batch ceiling change", "if (scope.size == results.size) {" in batch_state_kt and "formatFor = emptyMap()" in batch_state_kt)
 
     batch_action_bar_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "batch" / "BatchActionBar.kt").read_text(encoding="utf-8")
-    check_true("BatchActionBar.kt accepts hqLabel parameter", "hqLabel: String = \"\"" in batch_action_bar_kt)
+    check_true("BatchActionBar.kt accepts hqLabel parameter", "hqLabel: String," in batch_action_bar_kt)
     check_true("BatchActionBar.kt displays dynamic HQ text on quality button", "text = hqLabel" in batch_action_bar_kt)
 
     batch_sheet_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "batch" / "BatchDownloadSheet.kt").read_text(encoding="utf-8")
-    check_true("BatchDownloadSheet.kt passes dynamic hqLabel", "hqLabel = hqLabel" in batch_sheet_kt and "HQ: ${state.maxHeight}p" in batch_sheet_kt)
+    check_true("BatchDownloadSheet.kt passes dynamic hqLabel", "hqLabel = hqLabel" in batch_sheet_kt and "R.string.batch_bar_hq_value, \"${state.maxHeight}p\"" in batch_sheet_kt)
 
     format_sheet_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "FormatSheet.kt").read_text(encoding="utf-8")
     check_true("FormatSheet.kt resolves generic initialFormat on format load", "initialFormat?.takeIf { !it.isGeneric && it.hasVideo }" in format_sheet_kt)

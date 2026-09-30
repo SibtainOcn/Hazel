@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Translate
@@ -64,6 +65,7 @@ import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.VIDEO_CONTAINERS
 import com.hazel.android.download.languageLabel
+import com.hazel.android.util.StoragePaths
 
 /**
  * Everything you can adjust before a download starts.
@@ -352,7 +354,9 @@ fun FormatSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SaveDirField(label = saveDirLabel, onClick = { openDialog = SheetDialog.SAVE_DIR })
+            val effectiveSaveDirLabel = if (isCustomSaveDir) saveDirLabel
+            else StoragePaths.downloadsDisplay(isAudio = !videoTab)
+            SaveDirField(label = effectiveSaveDirLabel, onClick = { openDialog = SheetDialog.SAVE_DIR })
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -380,6 +384,16 @@ fun FormatSheet(
                             onOptionsChange(options.copy(embedThumbnail = !options.embedThumbnail))
                         }
                     )
+                    // Named rather than valued: the bitrate belongs to a conversion, not to
+                    // the stream picked above, and the chip is lit while one is set.
+                    if (!videoTab) {
+                        OptionChip(
+                            label = stringResource(R.string.properties_bitrate),
+                            icon = Icons.Filled.HighQuality,
+                            selected = options.audioQuality.isNotBlank(),
+                            onClick = { openDialog = SheetDialog.AUDIO_QUALITY }
+                        )
+                    }
                     OptionChip(
                         label = stringResource(R.string.format_sheet_chapters),
                         icon = Icons.Filled.Book,
@@ -484,6 +498,15 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
+        SheetDialog.AUDIO_QUALITY -> AudioQualityDialog(
+            options = options,
+            onConfirm = {
+                onOptionsChange(it)
+                openDialog = SheetDialog.NONE
+            },
+            onDismiss = { openDialog = SheetDialog.NONE }
+        )
+
         SheetDialog.SAVE_DIR -> SaveDirDialog(
             label = saveDirLabel,
             isCustom = isCustomSaveDir,
@@ -505,7 +528,7 @@ fun FormatSheet(
 }
 
 /** Which of the sheet's dialogs is open. Only one can be at a time. */
-private enum class SheetDialog { NONE, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR }
+private enum class SheetDialog { NONE, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY }
 
 /** Labelled box whose value the user can type into, matching the read-only fields' look. */
 @Composable

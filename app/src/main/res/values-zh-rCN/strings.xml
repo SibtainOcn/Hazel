@@ -371,6 +371,8 @@
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">最佳画质</string>
+    <string name="audio_quality_best">最佳音质</string>
+    <string name="batch_audio_quality_subtitle">转换为其他格式时使用</string>
     <string name="batch_type_sheet_title">首选下载类型</string>
     <string name="batch_type_sheet_subtitle">这些链接会以什么形式下载</string>
     <string name="batch_type_audio">音频</string>

@@ -371,6 +371,8 @@
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Kualitas terbaik</string>
+    <string name="audio_quality_best">Kualitas terbaik</string>
+    <string name="batch_audio_quality_subtitle">Dipakai saat mengonversi ke format lain</string>
     <string name="batch_type_sheet_title">Jenis unduhan yang diinginkan</string>
     <string name="batch_type_sheet_subtitle">Format unduhan tautan-tautan ini</string>
     <string name="batch_type_audio">Audio</string>

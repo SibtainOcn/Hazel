@@ -405,6 +405,16 @@
     <string name="batch_quality_720" translatable="false">~ 720p</string>
     <string name="batch_quality_480" translatable="false">~ 480p</string>
     <string name="batch_quality_360" translatable="false">~ 360p</string>
+    <string name="audio_quality_best">Best quality</string>
+    <string name="audio_quality_320kbps" translatable="false">320 kbps</string>
+    <string name="audio_quality_256kbps" translatable="false">256 kbps</string>
+    <string name="audio_quality_192kbps" translatable="false">192 kbps</string>
+    <string name="audio_quality_128kbps" translatable="false">128 kbps</string>
+    <string name="audio_quality_64kbps" translatable="false">64 kbps</string>
+    <string name="batch_audio_quality_subtitle">Used when converting to another format</string>
+    <string name="batch_bar_hq_auto" translatable="false">HQ: AUTO</string>
+    <string name="batch_bar_hq_best" translatable="false">HQ: BEST</string>
+    <string name="batch_bar_hq_value" translatable="false">HQ: %1$s</string>
     <string name="batch_type_sheet_title">Preferred download type</string>
     <string name="batch_type_sheet_subtitle">What these links download as</string>
     <string name="batch_type_audio">Audio</string>

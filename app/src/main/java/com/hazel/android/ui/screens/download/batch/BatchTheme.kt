@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.luminance
  */
 private val SHEET_BLACK = Color(0xFF000000)
 private val RAISED_BLACK = Color(0xFF0A0A0A)
+private val BUTTON_BLACK = Color(0xFF1C1C1E)
 
 private val isDarkScheme: Boolean
     @Composable @ReadOnlyComposable
@@ -27,6 +28,14 @@ private val isDarkScheme: Boolean
 val batchSheetColor: Color
     @Composable @ReadOnlyComposable
     get() = if (isDarkScheme) SHEET_BLACK else MaterialTheme.colorScheme.surface
+
+/**
+ * The action bar's own buttons, one step up from the bar so each reads as something to tap
+ * rather than as a label printed on it.
+ */
+val batchButtonColor: Color
+    @Composable @ReadOnlyComposable
+    get() = if (isDarkScheme) BUTTON_BLACK else MaterialTheme.colorScheme.surfaceContainerHighest
 
 /** The rows, the action bar, and the rows inside the sheets it opens. */
 val batchRaisedColor: Color

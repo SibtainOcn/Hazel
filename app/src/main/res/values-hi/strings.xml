@@ -376,6 +376,8 @@
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">सबसे अच्छी क्वालिटी</string>
+    <string name="audio_quality_best">सर्वोत्तम क्वालिटी</string>
+    <string name="batch_audio_quality_subtitle">दूसरे फ़ॉर्मैट में बदलते समय लागू</string>
     <string name="batch_type_sheet_title">पसंदीदा डाउनलोड प्रकार</string>
     <string name="batch_type_sheet_subtitle">ये लिंक किस रूप में डाउनलोड होंगे</string>
     <string name="batch_type_audio">ऑडियो</string>

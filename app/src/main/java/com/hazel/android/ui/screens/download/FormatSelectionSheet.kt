@@ -112,7 +112,11 @@ fun FormatSelectionSheet(
     // The rows are laid out once per ordering rather than per frame. Each carries the text
     // it draws, so scrolling does no formatting work and a fast fling has nothing to do
     // but draw.
-    val rows = remember(info, sort, audioFirst) { buildRows(info, sort, audioFirst) }
+    val videoTitle = stringResource(R.string.format_sheet_tab_video)
+    val audioTitle = stringResource(R.string.format_sheet_tab_audio)
+    val rows = remember(info, sort, audioFirst, videoTitle, audioTitle) {
+        buildRows(info, sort, audioFirst, videoTitle, audioTitle)
+    }
 
     val listState = rememberLazyListState()
 
@@ -120,7 +124,7 @@ fun FormatSelectionSheet(
     // the wrong section hides the one row the user came to confirm. The row above it comes
     // along, so the header saying which kind of stream this is stays in view.
     LaunchedEffect(rows) {
-        val index = rows.indexOfFirst { it is FormatListRow.Entry && it.format == draft }
+        val index = rows.indexOfFirst { it is FormatListRow.Entry && it.format.formatId == draft?.formatId }
         if (index > 0) listState.scrollToItem((index - 1).coerceAtLeast(0))
     }
 
@@ -241,7 +245,9 @@ fun FormatSelectionSheet(
                         is FormatListRow.Header -> SectionHeader(row.title)
                         is FormatListRow.Entry -> FormatRow(
                             format = row.format,
-                            selected = row.format == draft,
+                            // By id: a list rebuilt while formats arrive holds new objects
+                            // for the same entries.
+                            selected = row.format.formatId == draft?.formatId,
                             onClick = { draft = row.format }
                         )
                     }
@@ -286,7 +292,9 @@ private sealed interface FormatListRow {
 private fun buildRows(
     info: MediaInfo,
     sort: FormatSort,
-    audioFirst: Boolean
+    audioFirst: Boolean,
+    videoTitle: String,
+    audioTitle: String
 ): List<FormatListRow> {
     val video = info.videoFormats.sortedBy(sort)
     val audio = info.audioFormats.sortedBy(sort)
@@ -298,8 +306,8 @@ private fun buildRows(
             formats.forEach { add(FormatListRow.Entry(it, title)) }
         }
 
-    val videoRows = section("Video", video)
-    val audioRows = section("Audio", audio)
+    val videoRows = section(videoTitle, video)
+    val audioRows = section(audioTitle, audio)
     return if (audioFirst) audioRows + videoRows else videoRows + audioRows
 }
 
@@ -369,7 +377,7 @@ fun FormatRow(
                 .padding(horizontal = 14.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ContainerBadge(text = format.ext.ifBlank { "DEFAULT" })
+            ContainerBadge(text = format.displayContainer)
 
             Spacer(modifier = Modifier.width(12.dp))
 

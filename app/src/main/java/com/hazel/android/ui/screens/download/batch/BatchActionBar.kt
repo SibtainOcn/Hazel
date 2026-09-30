@@ -1,6 +1,5 @@
 package com.hazel.android.ui.screens.download.batch
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,6 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -35,9 +33,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
@@ -68,6 +67,8 @@ import com.hazel.android.download.DownloadOptions
 fun BatchActionBar(
     isVideo: Boolean,
     qualityLabel: String,
+    /** The quality button's own text, such as "HQ: 720p". */
+    hqLabel: String,
     containerLabel: String,
     options: DownloadOptions,
     onDownloadType: () -> Unit,
@@ -83,7 +84,9 @@ fun BatchActionBar(
     showAudioLanguage: Boolean = false,
     audioLanguageLabel: String = "",
     onAudioLanguage: () -> Unit = {},
-    hqLabel: String = ""
+    /** Conversion bitrate, which only an audio download has. */
+    bitrateSet: Boolean = false,
+    onBitrate: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -124,6 +127,16 @@ fun BatchActionBar(
                         onClick = onSubtitles
                     )
                 }
+                // Named, not valued, the same as the single sheet: the bitrate is a setting of
+                // the conversion rather than the stream, and it is lit while one is set.
+                if (!isVideo) {
+                    BarChip(
+                        label = stringResource(R.string.properties_bitrate),
+                        icon = Icons.Filled.HighQuality,
+                        selected = bitrateSet,
+                        onClick = onBitrate
+                    )
+                }
                 if (showAudioLanguage) {
                     BarChip(
                         label = audioLanguageLabel,
@@ -151,7 +164,7 @@ fun BatchActionBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 BarButton(
@@ -160,7 +173,7 @@ fun BatchActionBar(
                     onClick = onDownloadType
                 )
                 BarButton(
-                    text = hqLabel.ifBlank { if (isVideo) "HQ: AUTO" else "HQ: BEST" },
+                    text = hqLabel,
                     description = stringResource(R.string.batch_bar_quality, qualityLabel),
                     onClick = onQuality
                 )
@@ -181,7 +194,10 @@ fun BatchActionBar(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * One of the bar's own buttons. Each sits on a surface of its own, one step up from the bar,
+ * so the row reads as four controls rather than as an icon and some text printed on it.
+ */
 @Composable
 private fun BarButton(
     description: String,
@@ -191,28 +207,33 @@ private fun BarButton(
 ) {
     val tint = MaterialTheme.colorScheme.onSurfaceVariant
 
-    Box(
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(24.dp),
+        color = batchButtonColor,
         modifier = Modifier
-            .height(52.dp)
-            .clip(RoundedCornerShape(26.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp),
-        contentAlignment = Alignment.Center
+            .height(48.dp)
+            .semantics { contentDescription = description }
     ) {
-        if (icon != null) {
-            Icon(
-                icon,
-                contentDescription = description,
-                modifier = Modifier.size(24.dp),
-                tint = tint
-            )
-        } else if (text != null) {
-            Text(
-                text,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = tint
-            )
+        Box(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (icon != null) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = tint
+                )
+            } else if (text != null) {
+                Text(
+                    text,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = tint
+                )
+            }
         }
     }
 }
