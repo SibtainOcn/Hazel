@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.rememberScrollShrink
+import com.hazel.android.ui.components.scrollShrink
 import androidx.annotation.StringRes
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.collectAsState
@@ -148,6 +150,7 @@ fun FormatSelectionSheet(
     }
 
     val listState = rememberLazyListState()
+    val shrink = rememberScrollShrink(listState)
 
     // Opens on what is currently chosen. A list of forty entries that opens at the top of
     // the wrong section hides the one row the user came to confirm. The row above it comes
@@ -253,13 +256,15 @@ fun FormatSelectionSheet(
                 ) { index ->
                     when (val row = rows[index]) {
                         is FormatListRow.Header -> SectionHeader(row.title)
-                        is FormatListRow.Entry -> FormatRow(
+                        is FormatListRow.Entry -> Box(modifier = Modifier.scrollShrink(shrink)) {
+                            FormatRow(
                             format = row.format,
                             // By id: a list rebuilt while formats arrive holds new objects
                             // for the same entries.
                             selected = row.format.formatId == draft?.formatId,
                             onClick = { draft = row.format }
-                        )
+                            )
+                        }
                     }
                 }
 

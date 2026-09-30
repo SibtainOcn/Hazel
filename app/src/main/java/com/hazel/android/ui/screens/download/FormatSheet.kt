@@ -1,6 +1,8 @@
 package com.hazel.android.ui.screens.download
 
-import androidx.compose.foundation.background
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import com.hazel.android.ui.components.FlatChip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,13 +31,9 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -47,10 +45,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -161,6 +158,10 @@ fun FormatSheet(
     // unambiguous, the metadata written into it.
     var title by remember(info.url) { mutableStateOf(info.title) }
     var author by remember(info.url) { mutableStateOf(info.uploader) }
+    // A sheet opened on a shared link before it was read starts with nothing to show, and
+    // takes the title and author as they arrive. Anything typed in the meantime is kept.
+    LaunchedEffect(info.title) { if (title.isBlank()) title = info.title }
+    LaunchedEffect(info.uploader) { if (author.isBlank()) author = info.uploader }
 
     var openDialog by remember { mutableStateOf(SheetDialog.NONE) }
     var formatSheetVisible by remember { mutableStateOf(false) }
@@ -740,29 +741,5 @@ private fun OptionChip(
     badge: Int = 0,
     onClick: () -> Unit
 ) {
-    val chip = @Composable {
-        FilterChip(
-            selected = selected,
-            onClick = onClick,
-            label = { Text(label) },
-            leadingIcon = {
-                Icon(
-                    if (selected) Icons.Filled.Check else icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-            },
-            colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                selectedLabelColor = MaterialTheme.colorScheme.primary,
-                selectedLeadingIconColor = MaterialTheme.colorScheme.primary
-            )
-        )
-    }
-
-    if (badge > 0) {
-        BadgedBox(badge = { Badge { Text(badge.toString()) } }) { chip() }
-    } else {
-        chip()
-    }
+    FlatChip(label = label, onClick = onClick, icon = icon, selected = selected, badge = badge)
 }

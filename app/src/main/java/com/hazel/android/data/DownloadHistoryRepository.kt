@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaPresence
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -59,24 +60,17 @@ data class HistoryEntry(
 }
 
 /** How the history list is ordered. */
-enum class HistorySort(val label: String) {
-    NEWEST("Date added"),
-    TITLE("Title"),
-    SIZE("File size")
+enum class HistorySort(@androidx.annotation.StringRes val labelRes: Int) {
+    NEWEST(com.hazel.android.R.string.history_sort_date),
+    TITLE(com.hazel.android.R.string.history_sort_title),
+    SIZE(com.hazel.android.R.string.history_sort_size)
 }
 
-/** Which kinds of download the list shows. */
-enum class HistoryFilter(val label: String) {
-    ALL("All"),
-    DOWNLOADING("Downloading queue"),
-    FAILED("Failed"),
-    AUDIO("Audio"),
-    VIDEO("Video");
-
-    @Deprecated("Merged into DOWNLOADING", ReplaceWith("DOWNLOADING"))
-    companion object {
-        val QUEUED get() = DOWNLOADING
-    }
+/** Which of the downloads list's files it shows, by whether they are still on the device. */
+enum class HistoryStatus(@androidx.annotation.StringRes val labelRes: Int) {
+    ALL(com.hazel.android.R.string.history_status_all),
+    PRESENT(com.hazel.android.R.string.history_status_present),
+    DELETED(com.hazel.android.R.string.history_status_deleted)
 }
 
 /**
@@ -111,13 +105,28 @@ object DownloadHistoryRepository {
         }
     }
 
-    suspend fun remove(context: Context, id: Long) = withContext(Dispatchers.IO) {
+    suspend fun remove(context: Context, id: Long) = removeAll(context, setOf(id))
+
+    /** Drops several entries in one write, leaving their files where they are. */
+    suspend fun removeAll(context: Context, ids: Set<Long>) = withContext(Dispatchers.IO) {
+        if (ids.isEmpty()) return@withContext
         context.dataStore.edit { prefs ->
-            val remaining = decode(prefs[HISTORY_KEY]).filterNot { it.id == id }
+            val remaining = decode(prefs[HISTORY_KEY]).filterNot { it.id in ids }
             if (remaining.isEmpty()) prefs.remove(HISTORY_KEY)
             else prefs[HISTORY_KEY] = encode(remaining)
         }
     }
+
+    /**
+     * The entries that repeat an earlier download: the same media, saved as the same kind.
+     * The newest record of each is the one kept.
+     */
+    fun duplicatesIn(entries: List<HistoryEntry>): Set<Long> =
+        entries.sortedByDescending { it.completedAt }
+            .groupBy { LinkKey.canonical(it.url) to it.isVideo }
+            .values
+            .flatMap { group -> group.drop(1) }
+            .mapTo(mutableSetOf()) { it.id }
 
     suspend fun clear(context: Context) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs -> prefs.remove(HISTORY_KEY) }

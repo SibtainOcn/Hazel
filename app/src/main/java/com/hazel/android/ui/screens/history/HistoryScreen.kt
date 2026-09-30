@@ -1,75 +1,79 @@
 package com.hazel.android.ui.screens.history
 
-import android.content.Context
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import com.hazel.android.ui.components.FlatChip
+import com.hazel.android.ui.components.FlatIconButton
+import com.hazel.android.ui.components.rememberScrollShrink
+import com.hazel.android.ui.components.scrollShrink
+import androidx.compose.foundation.lazy.rememberLazyListState
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.HourglassEmpty
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.ViewAgenda
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
@@ -78,773 +82,376 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.data.DownloadHistoryRepository
-import com.hazel.android.data.DownloadQueueRepository
-import com.hazel.android.data.FailedDownload
-import com.hazel.android.data.FailedDownloadRepository
 import com.hazel.android.data.HistoryEntry
-import com.hazel.android.data.HistoryFilter
 import com.hazel.android.data.HistorySort
-import com.hazel.android.data.QueuedDownload
+import com.hazel.android.data.HistoryStatus
 import com.hazel.android.data.SettingsRepository
-import com.hazel.android.download.DownloadViewModel
-import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
-import com.hazel.android.ui.components.MediaCard
+import com.hazel.android.ui.components.CardTag
+import com.hazel.android.ui.components.formatDateTime
 import com.hazel.android.ui.components.rememberPresence
 import com.hazel.android.util.MediaOpener
 import com.hazel.android.util.MediaPresence
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
- * Finished downloads and active workflow queues.
+ * What has finished downloading.
  *
- * Shows running downloads, finished history, queued links, and failed tasks with full visual parity,
- * support for large thumbnail and compact single-row layouts across all categories, and an interactive
- * top title dropdown menu.
+ * Only finished files live here; what is running, waiting or failed has the queue screen.
+ * The row under the title holds the view settings a person changes while looking at the
+ * list rather than in a menu: the layout, the order and its direction, and whether audio or
+ * video is shown. Layout and order are remembered between visits.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(
-    downloadViewModel: DownloadViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-) {
+fun HistoryScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val clipboardManager = LocalClipboardManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
 
-    val history by DownloadHistoryRepository.getHistory(context)
-        .collectAsState(initial = emptyList())
-    val downloadState by downloadViewModel.state.collectAsState()
-    val queueList by DownloadQueueRepository.getQueue(context).collectAsState(initial = emptyList())
-    val failedList by FailedDownloadRepository.getFailed(context).collectAsState(initial = emptyList())
+    val history by DownloadHistoryRepository.getHistory(context).collectAsState(initial = emptyList())
+    val listLayout by remember(context) { SettingsRepository.getHistoryListLayout(context) }
+        .collectAsState(initial = false)
+    val sortSetting by remember(context) { SettingsRepository.getHistorySort(context) }
+        .collectAsState(initial = HistorySort.NEWEST to false)
+    val (sort, reversed) = sortSetting
 
-
-    var sort by remember { mutableStateOf(HistorySort.NEWEST) }
-    var filter by remember { mutableStateOf(HistoryFilter.ALL) }
     var query by remember { mutableStateOf("") }
     var searchOpen by remember { mutableStateOf(false) }
+    var showAudio by remember { mutableStateOf(false) }
+    var showVideo by remember { mutableStateOf(false) }
+    var status by remember { mutableStateOf(HistoryStatus.ALL) }
+
     var sortMenuOpen by remember { mutableStateOf(false) }
-    var filterDropdownOpen by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
-    var confirmClear by remember { mutableStateOf(false) }
-    var confirmCancelAll by remember { mutableStateOf(false) }
+    var statusSheetOpen by remember { mutableStateOf(false) }
+    var confirmRemoveAll by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<HistoryEntry?>(null) }
     var properties by remember { mutableStateOf<HistoryEntry?>(null) }
-    var viewFailedLog by remember { mutableStateOf<FailedDownload?>(null) }
 
     val presence = rememberPresence(history)
 
-    val isDownloadingActive by remember(downloadState.isDownloading, downloadState.isProcessing) {
-        derivedStateOf { downloadState.isDownloading || downloadState.isProcessing }
+    val dismissSearch = {
+        query = ""
+        keyboard?.hide()
+        searchOpen = false
     }
 
-    val visible = remember(history, sort, filter, query) {
+    val visible = remember(history, sort, reversed, query, showAudio, showVideo, status, presence.toMap()) {
         history
+            .asSequence()
+            // Neither chip on, or both, is everything; one on narrows to that kind.
+            .filter { showAudio == showVideo || it.isVideo == showVideo }
             .filter { entry ->
-                when (filter) {
-                    HistoryFilter.AUDIO -> !entry.isVideo
-                    HistoryFilter.VIDEO -> entry.isVideo
-                    else -> true
+                val present = presence[entry.id] ?: true
+                when (status) {
+                    HistoryStatus.ALL -> true
+                    HistoryStatus.PRESENT -> present
+                    HistoryStatus.DELETED -> !present
                 }
             }
             .filter { entry ->
-                query.isBlank() ||
-                        entry.title.contains(query, ignoreCase = true) ||
-                        entry.author.contains(query, ignoreCase = true)
+                query.isBlank() || entry.title.contains(query, ignoreCase = true) ||
+                    entry.author.contains(query, ignoreCase = true)
             }
+            .toList()
             .let { entries ->
-                when (sort) {
+                val ordered = when (sort) {
                     HistorySort.NEWEST -> entries.sortedByDescending { it.completedAt }
                     HistorySort.TITLE -> entries.sortedBy { it.title.lowercase() }
                     HistorySort.SIZE -> entries.sortedByDescending { it.sizeBytes }
                 }
+                if (reversed) ordered.reversed() else ordered
             }
-    }
-
-    val visibleQueue = remember(queueList, query, sort) {
-        queueList
-            .filter { item ->
-                query.isBlank() ||
-                        item.title.contains(query, ignoreCase = true) ||
-                        item.author.contains(query, ignoreCase = true) ||
-                        item.url.contains(query, ignoreCase = true)
-            }
-            .let { items ->
-                when (sort) {
-                    HistorySort.NEWEST -> items
-                    HistorySort.TITLE -> items.sortedBy { it.title.lowercase() }
-                    HistorySort.SIZE -> items.sortedByDescending { it.fileSizeBytes }
-                }
-            }
-    }
-
-    val visibleFailed = remember(failedList, query, sort) {
-        failedList
-            .filter { item ->
-                query.isBlank() ||
-                        item.title.contains(query, ignoreCase = true) ||
-                        item.author.contains(query, ignoreCase = true) ||
-                        item.url.contains(query, ignoreCase = true) ||
-                        item.errorLog.contains(query, ignoreCase = true)
-            }
-            .let { items ->
-                when (sort) {
-                    HistorySort.NEWEST -> items.sortedByDescending { it.failedAt }
-                    HistorySort.TITLE -> items.sortedBy { it.title.lowercase() }
-                    HistorySort.SIZE -> items.sortedBy { it.title.lowercase() }
-                }
-            }
-    }
-
-    val activeDownloadMatches = remember(query, downloadState.fileName, downloadState.url, downloadState.info) {
-        query.isBlank() ||
-                downloadState.fileName.contains(query, ignoreCase = true) ||
-                downloadState.url.contains(query, ignoreCase = true) ||
-                (downloadState.info?.title?.contains(query, ignoreCase = true) == true) ||
-                (downloadState.info?.uploader?.contains(query, ignoreCase = true) == true)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-
-        // ── Top Header with Title Dropdown & Actions ──
+        // ── Title and actions ──
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 4.dp, bottom = 4.dp),
+                .padding(start = 20.dp, end = 4.dp, top = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 4.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { filterDropdownOpen = true }
-                        .padding(vertical = 4.dp, horizontal = 4.dp)
-                ) {
-                    Text(
-                        text = when (filter) {
-                            HistoryFilter.ALL -> stringResource(R.string.history_title)
-                            HistoryFilter.DOWNLOADING -> stringResource(R.string.history_tab_downloading_queue)
-                            HistoryFilter.FAILED -> stringResource(R.string.history_tab_failed)
-                            HistoryFilter.AUDIO -> stringResource(R.string.properties_kind_audio)
-                            HistoryFilter.VIDEO -> stringResource(R.string.properties_kind_video)
-                        },
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Icon(
-                        imageVector = Icons.Filled.ArrowDropDown,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                    // Theme-adaptive unread indicator mark (vertically centered with title and chevron)
-                    if (filter != HistoryFilter.DOWNLOADING && (isDownloadingActive || queueList.isNotEmpty())) {
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.error)
-                        )
-                    }
-                }
-
-                DropdownMenu(
-                    expanded = filterDropdownOpen,
-                    onDismissRequest = { filterDropdownOpen = false }
-                ) {
-                    HistoryFilter.entries.forEach { option ->
-                        val label = when (option) {
-                            HistoryFilter.ALL -> stringResource(R.string.history_title)
-                            HistoryFilter.DOWNLOADING -> {
-                                val base = stringResource(R.string.history_tab_downloading_queue)
-                                val totalCount = (if (isDownloadingActive) 1 else 0) + queueList.size
-                                if (totalCount > 0) "$base ($totalCount)" else base
-                            }
-                            HistoryFilter.FAILED -> {
-                                val base = stringResource(R.string.history_tab_failed)
-                                if (failedList.isNotEmpty()) "$base (${failedList.size})" else base
-                            }
-                            HistoryFilter.AUDIO -> stringResource(R.string.properties_kind_audio)
-                            HistoryFilter.VIDEO -> stringResource(R.string.properties_kind_video)
-                        }
-
-                        val showDot = option == HistoryFilter.DOWNLOADING &&
-                            option != filter &&
-                            (isDownloadingActive || queueList.isNotEmpty())
-                        DropdownMenuItem(
-                            text = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        label,
-                                        fontWeight = if (option == filter) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                    if (showDot) {
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Box(
-                                            modifier = Modifier
-                                                .size(6.dp)
-                                                .clip(CircleShape)
-                                                .background(MaterialTheme.colorScheme.error)
-                                        )
-                                    }
-                                }
-                            },
-                            onClick = {
-                                filter = option
-                                filterDropdownOpen = false
-                            },
-                            trailingIcon = if (option == filter) {
-                                { Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }
-                            } else null
-                        )
-                    }
-                }
-            }
-
-            // ── 3 Action Buttons (Search, Sort, More) ──
-
-            // 2. Search
-            IconButton(
-                onClick = { searchOpen = !searchOpen },
-                modifier = Modifier.size(40.dp)
-            ) {
+            Text(
+                stringResource(R.string.history_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = { searchOpen = !searchOpen }) {
                 Icon(
                     Icons.Filled.Search,
                     contentDescription = stringResource(R.string.history_search_action),
-                    modifier = Modifier.size(22.dp),
                     tint = if (searchOpen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
-
-            // 3. Sort
-            Box {
-                IconButton(
-                    onClick = { sortMenuOpen = true },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.Sort,
-                        contentDescription = stringResource(R.string.history_sort_action),
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-                DropdownMenu(
-                    expanded = sortMenuOpen,
-                    onDismissRequest = { sortMenuOpen = false }
-                ) {
-                    HistorySort.entries.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(option.label) },
-                            onClick = {
-                                sort = option
-                                sortMenuOpen = false
-                            },
-                            trailingIcon = if (option == sort) {
-                                { Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }
-                            } else null
-                        )
-                    }
-                }
+            IconButton(onClick = { statusSheetOpen = true }) {
+                Icon(
+                    Icons.Filled.FilterList,
+                    contentDescription = stringResource(R.string.history_filter_action),
+                    tint = if (status != HistoryStatus.ALL) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurface
+                )
             }
-
-            // 4. More (3-dots)
             Box {
-                IconButton(
-                    onClick = { menuOpen = true },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.history_menu_action),
-                        modifier = Modifier.size(22.dp)
-                    )
+                IconButton(onClick = { menuOpen = true }) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.history_menu_action))
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    when (filter) {
-                        HistoryFilter.ALL, HistoryFilter.AUDIO, HistoryFilter.VIDEO -> {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.history_menu_clear)) },
-                                onClick = {
-                                    menuOpen = false
-                                    confirmClear = true
-                                },
-                                enabled = history.isNotEmpty()
-                            )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.history_menu_remove_all)) },
+                        enabled = history.isNotEmpty(),
+                        onClick = {
+                            menuOpen = false
+                            confirmRemoveAll = true
                         }
-                        HistoryFilter.DOWNLOADING -> {
-                            val hasActiveOrQueue = isDownloadingActive || queueList.isNotEmpty()
-                            if (hasActiveOrQueue) {
-                                val isMulti = queueList.isNotEmpty() || downloadState.batch.size > 1
-                                if (downloadState.isDownloading) {
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                stringResource(
-                                                    if (isMulti) R.string.download_pause_all
-                                                    else R.string.download_pause
-                                                )
-                                            )
-                                        },
-                                        onClick = {
-                                            menuOpen = false
-                                            downloadViewModel.pauseDownload()
-                                        }
-                                    )
-                                } else {
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                stringResource(
-                                                    if (isMulti) R.string.download_resume_all
-                                                    else R.string.download_resume
-                                                )
-                                            )
-                                        },
-                                        onClick = {
-                                            menuOpen = false
-                                            downloadViewModel.resumeDownload()
-                                        }
-                                    )
-                                }
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            stringResource(
-                                                if (isMulti) R.string.download_cancel_all
-                                                else R.string.download_cancel_action
-                                            )
-                                        )
-                                    },
-                                    onClick = {
-                                        menuOpen = false
-                                        confirmCancelAll = true
-                                    }
-                                )
-                                if (queueList.isNotEmpty()) {
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.history_queue_clear_all)) },
-                                        onClick = {
-                                            menuOpen = false
-                                            confirmClear = true
-                                        }
-                                    )
-                                }
-                            } else {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.history_empty_downloading_queue)) },
-                                    onClick = { menuOpen = false },
-                                    enabled = false
-                                )
-                            }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.history_menu_remove_deleted)) },
+                        enabled = history.any { presence[it.id] == false },
+                        onClick = {
+                            menuOpen = false
+                            val gone = history.filter { presence[it.id] == false }.mapTo(mutableSetOf()) { it.id }
+                            scope.launch { DownloadHistoryRepository.removeAll(context, gone) }
                         }
-                        HistoryFilter.FAILED -> {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.history_failed_clear_all)) },
-                                onClick = {
-                                    menuOpen = false
-                                    confirmClear = true
-                                },
-                                enabled = failedList.isNotEmpty()
-                            )
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.history_menu_remove_duplicates)) },
+                        enabled = history.size > 1,
+                        onClick = {
+                            menuOpen = false
+                            val repeats = DownloadHistoryRepository.duplicatesIn(history)
+                            scope.launch { DownloadHistoryRepository.removeAll(context, repeats) }
                         }
-                    }
-
+                    )
                 }
             }
         }
 
-        // Search bar — animates smoothly into its own row; tapping outside dismisses it.
-        val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
-
+        // ── Search ──
         AnimatedVisibility(
             visible = searchOpen,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            val focusRequester = remember { FocusRequester() }
-            LaunchedEffect(Unit) { focusRequester.requestFocus() }
-
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 6.dp)
-                    .height(52.dp),
-                shape = RoundedCornerShape(26.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHighest
-            ) {
-                Row(
-                    modifier = Modifier.padding(start = 16.dp, end = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Filled.Search,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Box(modifier = Modifier.weight(1f)) {
-                        if (query.isEmpty()) {
-                            Text(
-                                stringResource(R.string.history_search_placeholder),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        BasicTextField(
-                            value = query,
-                            onValueChange = { query = it },
-                            singleLine = true,
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .focusRequester(focusRequester)
-                        )
-                    }
-                    if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) {
-                            Icon(
-                                Icons.Filled.Close,
-                                contentDescription = stringResource(R.string.history_search_clear),
-                                modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    } else {
-                        // X button to close the bar entirely when nothing is typed
-                        IconButton(onClick = {
-                            keyboardController?.hide()
-                            searchOpen = false
-                        }) {
-                            Icon(
-                                Icons.Filled.Close,
-                                contentDescription = stringResource(R.string.history_search_clear),
-                                modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
+            SearchField(
+                query = query,
+                onQueryChange = { query = it },
+                onClose = { dismissSearch() }
+            )
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // ── Screen Content by Selected Filter ──
-        Box(
+        // ── View settings ──
+        Row(
             modifier = Modifier
-                .weight(1f)
                 .fillMaxWidth()
-                .then(
-                    if (searchOpen) {
-                        Modifier.clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            keyboardController?.hide()
-                            searchOpen = false
-                        }
-                    } else Modifier
-                )
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            when (filter) {
-            HistoryFilter.DOWNLOADING -> {
-                DownloadingQueueView(
-                    state = downloadState,
-                    queueItems = visibleQueue,
-                    isDownloadingActive = isDownloadingActive,
-                    activeDownloadMatches = activeDownloadMatches,
-                    query = query,
-                    isFiltered = query.isNotBlank() && (isDownloadingActive || queueList.isNotEmpty()) && !activeDownloadMatches && visibleQueue.isEmpty(),
-                    onCancelActive = { downloadViewModel.cancelAllDownloads() },
-                    onPauseActive = { downloadViewModel.pauseDownload() },
-                    onResumeActive = { downloadViewModel.resumeDownload() },
-                    onRemoveQueued = { item -> downloadViewModel.removeQueued(context, item.url) }
-                )
-            }
-            HistoryFilter.FAILED -> {
-                HistoryFailedView(
-                    items = visibleFailed,
-                    isFiltered = query.isNotBlank() && failedList.isNotEmpty() && visibleFailed.isEmpty(),
-                    onViewLog = { item -> viewFailedLog = item },
-                    onRetry = { item ->
-                        Toast.makeText(context, context.getString(R.string.history_retrying_toast), Toast.LENGTH_SHORT).show()
-                        downloadViewModel.retryFailed(context, item)
-                    },
-                    onDismiss = { item ->
-                        scope.launch { FailedDownloadRepository.remove(context, item.id) }
-                    },
-                    onClearAll = {
-                        scope.launch { FailedDownloadRepository.clear(context) }
-                    }
-                )
-            }
-            HistoryFilter.ALL, HistoryFilter.AUDIO, HistoryFilter.VIDEO -> {
-                val showActiveDownload = isDownloadingActive && activeDownloadMatches && when (filter) {
-                    HistoryFilter.ALL -> true
-                    HistoryFilter.AUDIO -> downloadState.info?.videoFormats.isNullOrEmpty()
-                    HistoryFilter.VIDEO -> downloadState.info?.videoFormats?.isNotEmpty() == true
-                    else -> false
-                }
-
-                if (visible.isEmpty() && !showActiveDownload) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
+            FlatIconButton(
+                icon = if (listLayout) Icons.Filled.ViewAgenda else Icons.AutoMirrored.Filled.ViewList,
+                contentDescription = stringResource(R.string.history_layout_toggle),
+                onClick = { scope.launch { SettingsRepository.setHistoryListLayout(context, !listLayout) } }
+            )
+            VerticalDivider(modifier = Modifier.height(24.dp))
+            Box {
+                FlatChip(
+                    label = stringResource(sort.labelRes),
+                    onClick = { sortMenuOpen = true },
+                    leading = {
                         Icon(
-                            Icons.Filled.Download,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            if (history.isEmpty()) stringResource(R.string.history_empty_initial)
-                            else stringResource(R.string.history_empty_filtered),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            Icons.Filled.ArrowUpward,
+                            contentDescription = stringResource(R.string.history_sort_reverse),
+                            modifier = Modifier
+                                .size(16.dp)
+                                .rotate(if (reversed) 180f else 0f)
                         )
                     }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                            start = 20.dp, end = 20.dp, bottom = 24.dp
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        if (showActiveDownload) {
-                            item(key = "active_download") {
-                                val info = downloadState.info ?: MediaInfo(
-                                    url = downloadState.url,
-                                    title = downloadState.fileName.ifBlank { stringResource(R.string.history_tab_downloading) },
-                                    uploader = "",
-                                    thumbnail = null,
-                                    durationSeconds = 0,
-                                    videoFormats = emptyList(),
-                                    audioFormats = emptyList()
-                                )
-                                MediaCard(
-                                    info = info,
-                                    isDownloading = true,
-                                    isProcessing = downloadState.isProcessing,
-                                    progress = downloadState.progress,
-                                    totalBytes = downloadState.totalBytes,
-                                    waitingForWifi = downloadState.waitingForWifi,
-                                    onCancel = { downloadViewModel.cancelDownload() },
-                                    onPause = { downloadViewModel.pauseDownload() },
-                                    onResume = { downloadViewModel.resumeDownload() }
-                                )
-                            }
-                        }
-
-                        items(visible, key = { it.id }) { entry ->
-                            val present = presence[entry.id] ?: true
-
-                            val open = {
-                                scope.launch {
-                                    if (MediaPresence.refresh(context, entry.fileUri)) {
-                                        openEntry(context, entry)
-                                    } else {
-                                        presence[entry.id] = false
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.history_toast_file_gone),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                )
+                DropdownMenu(expanded = sortMenuOpen, onDismissRequest = { sortMenuOpen = false }) {
+                    HistorySort.entries.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(stringResource(option.labelRes)) },
+                            trailingIcon = if (option == sort) {
+                                {
+                                    Icon(
+                                        Icons.Filled.ArrowUpward,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(18.dp)
+                                            .rotate(if (reversed) 180f else 0f)
+                                    )
                                 }
-                                Unit
+                            } else null,
+                            onClick = {
+                                sortMenuOpen = false
+                                // Picking the order already in use flips its direction.
+                                val flip = if (option == sort) !reversed else false
+                                scope.launch { SettingsRepository.setHistorySort(context, option, flip) }
                             }
-                            val remove = {
-                                scope.launch { DownloadHistoryRepository.remove(context, entry.id) }
-                                Unit
-                            }
+                        )
+                    }
+                }
+            }
+            VerticalDivider(modifier = Modifier.height(24.dp))
+            KindChip(
+                label = stringResource(R.string.properties_kind_audio),
+                icon = Icons.Filled.MusicNote,
+                selected = showAudio,
+                onClick = { showAudio = !showAudio }
+            )
+            KindChip(
+                label = stringResource(R.string.properties_kind_video),
+                icon = Icons.Filled.Videocam,
+                selected = showVideo,
+                onClick = { showVideo = !showVideo }
+            )
+        }
 
-                            HistoryCard(
-                                entry = entry,
-                                present = present,
-                                onOpen = open,
-                                onRemove = remove,
-                                onDeleteFile = { pendingDelete = entry },
-                                onProperties = { properties = entry }
-                            )
+        // ── The list ──
+        // While the search field is open, a tap anywhere on the list closes it again, the
+        // way a tap outside any field hands the screen back.
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+        if (visible.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    Icons.Filled.Download,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    stringResource(
+                        if (history.isEmpty()) R.string.history_empty_initial else R.string.history_empty_filtered
+                    ),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            val listState = rememberLazyListState()
+            val shrink = rememberScrollShrink(listState)
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(if (listLayout) 10.dp else 12.dp)
+            ) {
+                items(visible, key = { it.id }) { entry ->
+                    val present = presence[entry.id] ?: true
+                    val open: () -> Unit = {
+                        scope.launch {
+                            if (MediaPresence.refresh(context, entry.fileUri)) {
+                                MediaOpener.play(context, entry.fileUri, entry.isVideo)
+                            } else {
+                                presence[entry.id] = false
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.history_toast_file_gone),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
+                    }
+                    val actions = EntryActions(
+                        onOpen = open,
+                        onProperties = { properties = entry },
+                        onRemove = { scope.launch { DownloadHistoryRepository.remove(context, entry.id) } },
+                        onDeleteFile = { pendingDelete = entry }
+                    )
+                    Box(modifier = Modifier.scrollShrink(shrink)) {
+                        if (listLayout) HistoryRow(entry, present, actions)
+                        else HistoryCard(entry, present, actions)
                     }
                 }
             }
         }
-    }
+        if (searchOpen) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { dismissSearch() }
+            )
+        }
+        }
     }
 
-    viewFailedLog?.let { failed ->
-        AlertDialog(
-            onDismissRequest = { viewFailedLog = null },
-            title = {
+    if (statusSheetOpen) {
+        ModalBottomSheet(
+            onDismissRequest = { statusSheetOpen = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            dragHandle = null
+        ) {
+            Column(modifier = Modifier.padding(top = 20.dp).navigationBarsPadding()) {
                 Text(
-                    stringResource(R.string.history_failed_error_log),
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleLarge
+                    stringResource(R.string.history_filter_status),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                 )
-            },
-            text = {
-                Column {
-                    Text(
-                        failed.title.ifBlank { failed.url },
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Surface(
+                HistoryStatus.entries.forEach { option ->
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(280.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHighest
-                    ) {
-                        val scrollState = rememberScrollState()
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(scrollState)
-                                .padding(12.dp)
-                        ) {
-                            Text(
-                                text = failed.errorLog.ifBlank { stringResource(R.string.history_empty_failed) },
-                                fontFamily = FontFamily.Monospace,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface
+                            .selectable(
+                                selected = option == status,
+                                role = Role.RadioButton,
+                                onClick = {
+                                    status = option
+                                    statusSheetOpen = false
+                                }
                             )
-                        }
+                            .padding(horizontal = 16.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = option == status, onClick = null)
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(stringResource(option.labelRes), style = MaterialTheme.typography.bodyLarge)
                     }
                 }
-            },
-            confirmButton = {
-                FilledTonalButton(
-                    onClick = {
-                        clipboardManager.setText(AnnotatedString(failed.errorLog))
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.history_failed_log_copied),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                ) {
-                    Icon(
-                        Icons.Filled.ContentCopy,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(stringResource(R.string.history_failed_copy_log))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { viewFailedLog = null }) {
-                    Text(stringResource(R.string.history_clear_dialog_cancel))
-                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
-        )
+        }
     }
 
-    if (confirmClear) {
-        val title = when (filter) {
-            HistoryFilter.DOWNLOADING -> stringResource(R.string.history_queue_clear_all)
-            HistoryFilter.FAILED -> stringResource(R.string.history_failed_clear_all)
-            else -> stringResource(R.string.history_clear_dialog_title)
-        }
+    if (confirmRemoveAll) {
         AlertDialog(
-            onDismissRequest = { confirmClear = false },
-            title = { Text(title, fontWeight = FontWeight.Bold) },
+            onDismissRequest = { confirmRemoveAll = false },
+            title = { Text(stringResource(R.string.history_clear_dialog_title), fontWeight = FontWeight.Bold) },
             text = { Text(stringResource(R.string.history_clear_dialog_body)) },
             confirmButton = {
                 TextButton(onClick = {
-                    scope.launch {
-                        when (filter) {
-                            HistoryFilter.DOWNLOADING -> downloadViewModel.clearQueue(context)
-                            HistoryFilter.FAILED -> FailedDownloadRepository.clear(context)
-                            else -> DownloadHistoryRepository.clear(context)
-                        }
-                    }
-                    confirmClear = false
+                    confirmRemoveAll = false
+                    scope.launch { DownloadHistoryRepository.clear(context) }
                 }) { Text(stringResource(R.string.history_clear_dialog_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmClear = false }) { Text(stringResource(R.string.history_clear_dialog_cancel)) }
-            }
-        )
-    }
-
-    if (confirmCancelAll) {
-        val isMulti = queueList.isNotEmpty() || downloadState.batch.size > 1
-        AlertDialog(
-            onDismissRequest = { confirmCancelAll = false },
-            title = {
-                Text(
-                    stringResource(
-                        if (isMulti) R.string.download_cancel_all
-                        else R.string.download_cancel_action
-                    ),
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Text(
-                    stringResource(
-                        if (isMulti) R.string.download_cancel_dialog_body
-                        else R.string.download_cancel_single_dialog_body
-                    )
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        confirmCancelAll = false
-                        downloadViewModel.cancelAllDownloads()
-                    }
-                ) {
-                    Text(
-                        stringResource(R.string.download_cancel_action),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmCancelAll = false }) {
-                    Text(stringResource(R.string.download_cancel_dialog_dismiss))
+                TextButton(onClick = { confirmRemoveAll = false }) {
+                    Text(stringResource(R.string.history_clear_dialog_cancel))
                 }
             }
         )
@@ -865,291 +472,140 @@ fun HistoryScreen(
             text = { Text(stringResource(R.string.history_delete_dialog_body, entry.fileName)) },
             confirmButton = {
                 TextButton(onClick = {
+                    pendingDelete = null
                     scope.launch {
                         val deleted = DownloadHistoryRepository.deleteFile(context, entry)
                         Toast.makeText(
                             context,
-                            if (deleted) context.getString(R.string.history_toast_file_deleted) else context.getString(R.string.history_toast_file_delete_failed),
+                            context.getString(
+                                if (deleted) R.string.history_toast_file_deleted
+                                else R.string.history_toast_file_delete_failed
+                            ),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                    pendingDelete = null
                 }) { Text(stringResource(R.string.history_delete_dialog_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.history_delete_dialog_cancel)) }
+                TextButton(onClick = { pendingDelete = null }) {
+                    Text(stringResource(R.string.history_delete_dialog_cancel))
+                }
             }
         )
     }
 }
 
-
-
-
-
-
+/** What can be done with one finished download, whichever layout draws it. */
+private class EntryActions(
+    val onOpen: () -> Unit,
+    val onProperties: () -> Unit,
+    val onRemove: () -> Unit,
+    val onDeleteFile: () -> Unit
+)
 
 @Composable
-private fun HistoryFailedView(
-    items: List<FailedDownload>,
-    isFiltered: Boolean = false,
-    onViewLog: (FailedDownload) -> Unit,
-    onRetry: (FailedDownload) -> Unit,
-    onDismiss: (FailedDownload) -> Unit,
-    onClearAll: () -> Unit
+private fun KindChip(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    selected: Boolean,
+    onClick: () -> Unit
 ) {
-    if (items.isEmpty()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+    FlatChip(label = label, onClick = onClick, icon = icon, selected = selected)
+}
+
+@Composable
+private fun SearchField(query: String, onQueryChange: (String) -> Unit, onClose: () -> Unit) {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 6.dp)
+            .height(52.dp),
+        shape = RoundedCornerShape(26.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, end = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                if (isFiltered) Icons.Filled.Download else Icons.Filled.Warning,
+                Icons.Filled.Search,
                 contentDescription = null,
-                modifier = Modifier.size(if (isFiltered) 48.dp else 56.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(if (isFiltered) 12.dp else 16.dp))
-            Text(
-                if (isFiltered) stringResource(R.string.history_empty_filtered)
-                else stringResource(R.string.history_empty_failed),
-                style = if (isFiltered) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
-                fontWeight = if (isFiltered) FontWeight.Normal else FontWeight.SemiBold,
-                color = if (isFiltered) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
-            )
-            if (!isFiltered) {
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    stringResource(R.string.history_empty_failed_sub),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
+            Spacer(modifier = Modifier.width(12.dp))
+            Box(modifier = Modifier.weight(1f)) {
+                if (query.isEmpty()) {
+                    Text(
+                        stringResource(R.string.history_search_placeholder),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                BasicTextField(
+                    value = query,
+                    onValueChange = onQueryChange,
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
                 )
             }
-        }
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                start = 20.dp, end = 20.dp, bottom = 24.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item(key = "failed_header") {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = onClearAll) {
-                        Text(
-                            stringResource(R.string.history_failed_clear_all),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                }
-            }
-
-            items(items, key = { it.id }) { item ->
-                FailedCard(
-                    item = item,
-                    onViewLog = { onViewLog(item) },
-                    onRetry = { onRetry(item) },
-                    onDismiss = { onDismiss(item) }
+            IconButton(onClick = { if (query.isNotEmpty()) onQueryChange("") else onClose() }) {
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = stringResource(R.string.history_search_clear),
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
     }
 }
 
+/** The entry's options, anchored to whatever opened them. */
 @Composable
-private fun FailedCard(
-    item: FailedDownload,
-    onViewLog: () -> Unit,
-    onRetry: () -> Unit,
+private fun EntryMenu(
+    expanded: Boolean,
+    present: Boolean,
+    actions: EntryActions,
     onDismiss: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-    ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .clip(RoundedCornerShape(12.dp))
-            ) {
-                if (item.thumbnail != null) {
-                    AsyncImage(
-                        model = item.thumbnail,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Filled.Warning,
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp),
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                0f to Color.Black.copy(alpha = 0.65f),
-                                0.45f to Color.Transparent,
-                                1f to Color.Black.copy(alpha = 0.7f)
-                            )
-                        )
-                )
-
-                Tag(
-                    text = stringResource(R.string.history_tab_failed),
-                    background = MaterialTheme.colorScheme.error,
-                    foreground = MaterialTheme.colorScheme.onError,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(8.dp)
-                )
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .size(30.dp)
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.55f))
-                        .clickable(onClick = onDismiss),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.history_failed_dismiss),
-                        modifier = Modifier.size(16.dp),
-                        tint = Color.White
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(10.dp)
-                ) {
-                    Text(
-                        text = item.title.ifBlank { item.url },
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (item.author.isNotBlank()) {
-                        Text(
-                            text = item.author,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.75f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.history_card_properties)) },
+            onClick = {
+                onDismiss()
+                actions.onProperties()
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-            ) {
-                val snippet = item.errorLog.lines().firstOrNull { it.isNotBlank() }
-                    ?: stringResource(R.string.history_empty_failed)
-                Text(
-                    text = snippet,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(8.dp)
-                )
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.history_card_remove)) },
+            onClick = {
+                onDismiss()
+                actions.onRemove()
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = formatDate(item.failedAt),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    TextButton(onClick = onViewLog) {
-                        Icon(
-                            Icons.Filled.Info,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            stringResource(R.string.history_failed_error_log),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-
-                    FilledTonalButton(
-                        onClick = onRetry,
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    ) {
-                        Icon(
-                            Icons.Filled.Refresh,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            stringResource(R.string.history_failed_retry),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                }
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.history_card_delete)) },
+            enabled = present,
+            onClick = {
+                onDismiss()
+                actions.onDeleteFile()
             }
-        }
+        )
     }
 }
 
+/** A finished download at full width, its artwork behind its details. */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HistoryCard(
-    entry: HistoryEntry,
-    present: Boolean,
-    onOpen: () -> Unit,
-    onRemove: () -> Unit,
-    onDeleteFile: () -> Unit,
-    onProperties: () -> Unit
-) {
+private fun HistoryCard(entry: HistoryEntry, present: Boolean, actions: EntryActions) {
     var menuOpen by remember { mutableStateOf(false) }
 
     Surface(
@@ -1162,23 +618,11 @@ private fun HistoryCard(
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
                 .combinedClickable(
-                    onClick = { if (present) onOpen() },
-                    onLongClick = onProperties
+                    onClick = { if (present) actions.onOpen() },
+                    onLongClick = actions.onProperties
                 )
         ) {
-            if (entry.thumbnail != null) {
-                AsyncImage(
-                    model = entry.thumbnail,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alpha = if (present) 1f else 0.7f,
-                    colorFilter = if (present) null else ColorFilter.colorMatrix(
-                        ColorMatrix().apply { setToSaturation(0f) }
-                    ),
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
+            Artwork(entry, present, Modifier.fillMaxSize())
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -1191,7 +635,7 @@ private fun HistoryCard(
                     )
             )
 
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 48.dp)) {
                 Text(
                     entry.title,
                     style = MaterialTheme.typography.titleSmall,
@@ -1211,48 +655,15 @@ private fun HistoryCard(
                 }
             }
 
-            Row(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box {
-                    IconButton(onClick = { menuOpen = true }) {
-                        Icon(
-                            Icons.Filled.MoreVert,
-                            contentDescription = stringResource(R.string.history_card_options),
-                            tint = Color.White
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = menuOpen,
-                        onDismissRequest = { menuOpen = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.history_card_properties)) },
-                            onClick = {
-                                menuOpen = false
-                                onProperties()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.history_card_remove)) },
-                            onClick = {
-                                menuOpen = false
-                                onRemove()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.history_card_delete)) },
-                            enabled = present,
-                            onClick = {
-                                menuOpen = false
-                                onDeleteFile()
-                            }
-                        )
-                    }
+            Box(modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
+                IconButton(onClick = { menuOpen = true }) {
+                    Icon(
+                        Icons.Filled.MoreVert,
+                        contentDescription = stringResource(R.string.history_card_options),
+                        tint = Color.White
+                    )
                 }
+                EntryMenu(menuOpen, present, actions) { menuOpen = false }
             }
 
             Row(
@@ -1263,25 +674,18 @@ private fun HistoryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    if (entry.isVideo) Icons.Filled.PlayArrow else Icons.Filled.MusicNote,
+                    if (entry.isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
                     tint = Color.White
                 )
-                val duration = formatDuration(entry.durationSeconds)
-                if (duration.isNotBlank()) Tag(duration)
-                if (entry.sizeBytes > 0) Tag(formatFileSize(entry.sizeBytes))
-                if (!present) {
-                    Tag(
-                        stringResource(R.string.history_tag_deleted),
-                        background = MaterialTheme.colorScheme.error,
-                        foreground = MaterialTheme.colorScheme.onError
-                    )
-                }
+                formatDuration(entry.durationSeconds).takeIf { it.isNotBlank() }?.let { CardTag(it) }
+                if (entry.sizeBytes > 0) CardTag(formatFileSize(entry.sizeBytes))
+                if (!present) DeletedTag()
             }
 
             Text(
-                formatDate(entry.completedAt),
+                formatDateTime(entry.completedAt),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White.copy(alpha = 0.85f),
                 modifier = Modifier
@@ -1292,28 +696,97 @@ private fun HistoryCard(
     }
 }
 
+/** A finished download as one compact row: artwork at the side, details beside it. */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun Tag(
-    text: String,
-    background: Color = Color.Black.copy(alpha = 0.6f),
-    foreground: Color = Color.White,
-    modifier: Modifier = Modifier
-) {
-    Surface(shape = RoundedCornerShape(4.dp), color = background, modifier = modifier) {
-        Text(
-            text,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = foreground,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+private fun HistoryRow(entry: HistoryEntry, present: Boolean, actions: EntryActions) {
+    var menuOpen by remember { mutableStateOf(false) }
+
+    Box {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .combinedClickable(
+                    onClick = { if (present) actions.onOpen() },
+                    onLongClick = { menuOpen = true }
+                )
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(128.dp)
+                    .aspectRatio(16f / 9f)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Artwork(entry, present, Modifier.fillMaxSize())
+                formatDuration(entry.durationSeconds).takeIf { it.isNotBlank() }?.let {
+                    CardTag(it, modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp))
+                }
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    entry.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val chipColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    val chipText = MaterialTheme.colorScheme.primary
+                    if (entry.author.isNotBlank()) {
+                        CardTag(entry.author, background = chipColor, foreground = chipText)
+                    }
+                    CardTag(formatDateTime(entry.completedAt), background = chipColor, foreground = chipText)
+                }
+                if (!present) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    DeletedTag()
+                }
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(
+                if (entry.isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
+                contentDescription = stringResource(
+                    if (entry.isVideo) R.string.properties_kind_video else R.string.properties_kind_audio
+                ),
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        EntryMenu(menuOpen, present, actions) { menuOpen = false }
+    }
+}
+
+@Composable
+private fun Artwork(entry: HistoryEntry, present: Boolean, modifier: Modifier) {
+    if (entry.thumbnail != null) {
+        AsyncImage(
+            model = entry.thumbnail,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            alpha = if (present) 1f else 0.7f,
+            // A file that is gone keeps its row, drained of colour, so the record still says
+            // what was downloaded without looking like something that will open.
+            colorFilter = if (present) null else ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
+            modifier = modifier
         )
     }
 }
 
-private fun openEntry(context: Context, entry: HistoryEntry) =
-    MediaOpener.play(context, entry.fileUri, entry.isVideo)
-
-private fun formatDate(millis: Long): String =
-    runCatching {
-        SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault()).format(Date(millis))
-    }.getOrDefault("")
+@Composable
+private fun DeletedTag() {
+    CardTag(
+        stringResource(R.string.history_tag_deleted),
+        background = MaterialTheme.colorScheme.error,
+        foreground = MaterialTheme.colorScheme.onError
+    )
+}

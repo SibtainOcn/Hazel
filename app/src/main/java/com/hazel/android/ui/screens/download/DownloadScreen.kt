@@ -1,5 +1,9 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import com.hazel.android.ui.components.rememberScrollShrink
+import com.hazel.android.ui.components.scrollShrink
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -15,6 +19,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,21 +33,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentPaste
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -56,18 +58,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -81,7 +79,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.hazel.android.R
@@ -109,6 +106,8 @@ import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.StoragePaths
+import com.hazel.android.util.copyToClipboard
+import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -124,7 +123,9 @@ fun DownloadScreen(
     pendingFailure: String? = null,
     onPendingFailureConsumed: () -> Unit = {},
     onSharesConsumed: () -> Unit = {},
-    downloadViewModel: DownloadViewModel = viewModel()
+    downloadViewModel: DownloadViewModel = viewModel(),
+    /** Opens the queue screen, where a download in hand is paused, resumed or cancelled. */
+    onOpenQueue: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -234,7 +235,7 @@ fun DownloadScreen(
     val isDownloading = state.isDownloading
     LaunchedEffect(activeUrl, isDownloading) {
         if (isDownloading && activeUrl != null && (state.isMultiple || state.batch.size > 1)) {
-            // Item 0 is "instant", item 1 is "fetching", then the results follow.
+            // The results come first in the list, before the loading and footer items.
             // orderedResults places the active URL first, so scrolling to index 0
             // brings the currently-downloading card into view without jumping past
             // the header or controls.
@@ -301,10 +302,6 @@ fun DownloadScreen(
     // warning is still raised here rather than there.
     var cameFromShare by remember { mutableStateOf(false) }
 
-    // Set while a link shared to the direct target is being resolved. It suppresses the
-    // sheet and the repeat warning, both of which are questions, and the point of that
-    // target is that nothing is asked.
-    var directPending by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
 
     // A single link goes straight to its sheet. A set of links does not, because the list
@@ -326,18 +323,12 @@ fun DownloadScreen(
                 // A repeat is raised in the search screen, where the link is entered and
                 // the answer is still cheap. A link shared in from another app never goes
                 // through that screen, so it is the one case still checked here.
-                val existing = if (cameFromShare && !directPending) {
+                val existing = if (cameFromShare) {
                     history.firstOrNull { LinkKey.sameMedia(it.url, resolved) }
                         ?.takeIf { DownloadHistoryRepository.fileExists(context, it) }
                 } else null
 
-                when {
-                    existing != null -> alreadyHave = existing
-                    // The direct target downloads instead of opening the sheet. The effect
-                    // below does that once the formats are in.
-                    directPending -> Unit
-                    else -> sheetVisible = true
-                }
+                if (existing != null) alreadyHave = existing else sheetVisible = true
             }
         }
     }
@@ -356,21 +347,8 @@ fun DownloadScreen(
         // effect, and anything left waiting behind a suspension point at that moment would
         // be dropped: the links have already been taken off the pending list, so nothing
         // would bring them back.
-        //
-        // The view model takes the direct ones rather than this screen reading them here.
-        // Shares arrive faster than a link can be read, and a queue that lives on a screen
-        // is one the next share arrives too early to join.
-        val direct = shares.filter { it.direct }
-        val asked = shares.filterNot { it.direct }
-
-        direct.forEach { downloadViewModel.startDirect(context, it.url, it.source) }
-
-        // The ordinary target opens the sheet, so those go through the usual read, which
-        // already takes several links at once.
-        if (asked.isNotEmpty()) {
-            downloadViewModel.onUrlChange(asked.first().url)
-            downloadViewModel.fetchAll(asked.map { it.url })
-        }
+        downloadViewModel.onUrlChange(shares.first().url)
+        downloadViewModel.fetchAll(shares.map { it.url })
 
         // Remembered the same way a typed link is. A link shared in is a link used, and the
         // entry screen offering back only what was typed there made the history look like it
@@ -378,10 +356,6 @@ fun DownloadScreen(
         // is not recorded, which is its whole point.
         if (!incognito) shares.forEach { SearchHistoryRepository.record(context, it.url) }
     }
-
-    // A link shared to the instant target reads and downloads itself, at the quality saved
-    // in settings, without a sheet or a question. That runs in the view model rather than
-    // here, so it survives this screen and so several shares in a row can queue up.
 
     if (guideSeen == false) {
         GettingStartedDialog(
@@ -484,10 +458,20 @@ fun DownloadScreen(
                             )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-                        ShimmerHost(modifier = Modifier.fillMaxWidth()) {
-                            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                                repeat(VIEWPORT_SKELETON_COUNT) {
-                                    MediaCardShimmer()
+                        // As many cards as the screen has room for, each at its real size, so
+                        // the last one runs off the bottom rather than being squeezed. A tall
+                        // screen shows more of them and a short one fewer.
+                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                            val cardHeight = maxWidth * 9f / 16f + SKELETON_SPACING
+                            val count = (maxHeight / cardHeight).toInt().plus(1)
+                                .coerceIn(1, MAX_VIEWPORT_SKELETONS)
+                            ShimmerHost(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight(align = Alignment.Top, unbounded = true)
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(SKELETON_SPACING)) {
+                                    repeat(count) { MediaCardShimmer() }
                                 }
                             }
                         }
@@ -498,6 +482,7 @@ fun DownloadScreen(
                 // holds, artwork and all, so a playlist of a hundred built a hundred full width
                 // images at once and ran the app out of memory on the way back from the compact
                 // layout. This builds only what is on screen, whatever the list is holding.
+                val shrink = rememberScrollShrink(listState)
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
@@ -511,30 +496,6 @@ fun DownloadScreen(
                         bottom = if (pendingResults.size > 1) 96.dp else 32.dp
                     )
                 ) {
-                    // An instant share reads with nothing on screen to show for it, so the
-                    // same skeleton stands in, named after where the link came from.
-                    item(key = "instant") {
-                        AnimatedVisibility(
-                            visible = state.instantSource.isNotBlank(),
-                            enter = M3Motion.contentEnter(),
-                            exit = M3Motion.contentExit()
-                        ) {
-                            Column {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    stringResource(R.string.download_instant_source, state.instantSource),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                ShimmerHost(modifier = Modifier.fillMaxWidth()) {
-                                    MediaCardShimmer()
-                                }
-                            }
-                        }
-                    }
-
                     items(orderedResults, key = { it.url }) { info ->
                         Spacer(modifier = Modifier.height(20.dp))
 
@@ -551,7 +512,7 @@ fun DownloadScreen(
                         )
 
                         val batchItem = state.batch.firstOrNull { it.url == info.url }
-                        val isActive = state.isDownloading && state.info?.url == info.url
+                        val isActive = state.isDownloading && state.active?.url == info.url
 
                         // A card that came from a listing carries no formats yet. Reading them
                         // starts with the sheet, so the wait happens against an open sheet
@@ -563,10 +524,12 @@ fun DownloadScreen(
                         }
 
                         Box(
-                            modifier = Modifier.graphicsLayer {
-                                alpha = entrance
-                                translationY = (1f - entrance) * 28f
-                            }
+                            modifier = Modifier
+                                .scrollShrink(shrink)
+                                .graphicsLayer {
+                                    alpha = entrance
+                                    translationY = (1f - entrance) * 28f
+                                }
                         ) {
                             MediaCard(
                                 info = info,
@@ -580,9 +543,7 @@ fun DownloadScreen(
                                 waitingForWifi = state.waitingForWifi,
                                 alreadyDownloaded = info.url in savedUrls,
                                 onOpenSheet = openSheet,
-                                onCancel = { downloadViewModel.cancelItem(info.url) },
-                                onPause = downloadViewModel::pauseDownload,
-                                onResume = downloadViewModel::resumeDownload
+                                onOpenQueue = onOpenQueue
                             )
                         }
                     }
@@ -701,7 +662,7 @@ fun DownloadScreen(
         // (no results, not fetching). A link is nearly always copied elsewhere first,
         // so the first action on this screen is typically a paste. Having it one tap
         // away without opening the full search screen saves a step.
-        val homeIsEmpty = state.results.isEmpty() && !state.isFetching && state.instantSource.isBlank()
+        val homeIsEmpty = state.results.isEmpty() && !state.isFetching
         val homePasteClipboard = LocalClipboardManager.current
         var homePastePendingDupe by remember { mutableStateOf<Pair<List<String>, HistoryEntry>?>(null) }
 
@@ -819,6 +780,7 @@ fun DownloadScreen(
             message = log,
             canFetchCookies = isCookieRelated(log) && state.url.isNotBlank(),
             canContinue = state.url.isNotBlank(),
+            canAddCookies = state.url.isNotBlank(),
             onCopyLog = {
                 copyToClipboard(context, log)
                 downloadViewModel.clearErrorLog()
@@ -1099,9 +1061,7 @@ private fun MediaCard(
     waitingForWifi: Boolean = false,
     alreadyDownloaded: Boolean = false,
     onOpenSheet: () -> Unit,
-    onCancel: () -> Unit,
-    onPause: () -> Unit = {},
-    onResume: () -> Unit = {}
+    onOpenQueue: () -> Unit
 ) {
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -1109,9 +1069,11 @@ private fun MediaCard(
         label = "cardProgress"
     )
 
-    var menuOpen by remember { mutableStateOf(false) }
     val isPaused = batchItem?.state == BatchState.PAUSED
     val isQueued = batchItem?.state == BatchState.QUEUED
+    // A download in hand is managed from the queue, so the card leads there instead of back
+    // to the sheet that started it.
+    val inHand = isDownloading || isPaused || isQueued
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -1123,9 +1085,9 @@ private fun MediaCard(
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
-                .then(
-                    if (isDownloading) Modifier
-                    else Modifier.clickable(onClick = onOpenSheet)
+                .clickable(
+                    onClickLabel = if (inHand) stringResource(R.string.download_open_queue) else null,
+                    onClick = if (inHand) onOpenQueue else onOpenSheet
                 )
         ) {
             // Sources without artwork simply show the placeholder glyph.
@@ -1169,7 +1131,7 @@ private fun MediaCard(
                     .padding(
                         start = 14.dp,
                         top = 12.dp,
-                        end = if (isDownloading || isPaused || isQueued) 48.dp else 14.dp
+                        end = 14.dp
                     )
             ) {
                 Text(
@@ -1191,67 +1153,6 @@ private fun MediaCard(
                     )
                 }
             }
-
-            // Offered while the download is in hand, and while it is sitting paused or queued.
-            if (isDownloading || isPaused || isQueued) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(6.dp)
-                        .zIndex(1f)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.55f))
-                            .clickable { menuOpen = true },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Filled.MoreVert,
-                            contentDescription = stringResource(R.string.download_options),
-                            modifier = Modifier.size(18.dp),
-                            tint = Color.White
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = menuOpen,
-                        onDismissRequest = { menuOpen = false }
-                    ) {
-                        if (isPaused) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.download_resume)) },
-                                onClick = {
-                                    menuOpen = false
-                                    onResume()
-                                }
-                            )
-                        } else if (isDownloading) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.download_pause)) },
-                                // Nothing to pause once the transfer is done and the
-                                // engine has moved on to merging or tagging.
-                                enabled = !isProcessing,
-                                onClick = {
-                                    menuOpen = false
-                                    onPause()
-                                }
-                            )
-                        }
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.download_cancel)) },
-                            onClick = {
-                                menuOpen = false
-                                onCancel()
-                            }
-                        )
-                    }
-                }
-            }
-
-
 
             // A paused download is still a download in hand, so the artwork keeps the
             // treatment that says so. Only the control in the middle changes: there is
@@ -1298,16 +1199,14 @@ private fun MediaCard(
                 if (isProcessing && !isPaused) {
                     ProcessingShimmer(modifier = Modifier.fillMaxSize())
                 } else {
-                    // A progress ring wrapping the cancel control. It is the only
-                    // tappable area while a download runs, so a stray tap cannot
-                    // reopen the sheet.
+                    // The progress ring says how far along the download is. Stopping or
+                    // pausing it is done from the queue, which a tap on the card opens.
                     Box(
                         modifier = Modifier
                             .align(Alignment.Center)
                             .size(60.dp)
                             .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.55f))
-                            .clickable(onClick = if (isPaused) onResume else onCancel),
+                            .background(Color.Black.copy(alpha = 0.55f)),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
@@ -1318,9 +1217,8 @@ private fun MediaCard(
                             strokeWidth = 3.dp
                         )
                         Icon(
-                            if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Close,
-                            contentDescription =
-                                stringResource(if (isPaused) R.string.download_resume_action else R.string.download_cancel_action),
+                            if (isPaused) Icons.Filled.Pause else Icons.Filled.Download,
+                            contentDescription = null,
                             modifier = Modifier.size(22.dp),
                             tint = Color.White
                         )
@@ -1430,10 +1328,11 @@ private fun MediaCard(
     }
 }
 
-/**
- * Number of skeleton placeholders displayed during initial metadata fetch.
- */
-private const val VIEWPORT_SKELETON_COUNT = 3
+/** Gap between skeleton cards, the same as between the cards they stand in for. */
+private val SKELETON_SPACING = 20.dp
+
+/** An upper bound on skeleton cards, for a screen taller than any phone's. */
+private const val MAX_VIEWPORT_SKELETONS = 8
 
 /**
  * 2 cards stand in below already-loaded results while remaining playlist items continue loading.
@@ -1478,13 +1377,3 @@ private fun CornerTag(
  * The site's front page, which is where a sign-in starts. Cookies are stored per site, so
  * the individual media address is trimmed away.
  */
-private fun siteRootOf(url: String): String = runCatching {
-    val parsed = java.net.URL(url)
-    "${parsed.protocol}://${parsed.host}"
-}.getOrDefault(url)
-
-private fun copyToClipboard(context: android.content.Context, text: String) {
-    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
-            as? android.content.ClipboardManager
-    clipboard?.setPrimaryClip(android.content.ClipData.newPlainText("Hazel log", text))
-}
