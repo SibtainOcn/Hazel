@@ -115,7 +115,8 @@ object SettingsRepository {
             embedSubs = this[keys.embedSubs] ?: defaults.embedSubs,
             writeSubs = this[keys.writeSubs] ?: defaults.writeSubs,
             writeAutoSubs = this[keys.writeAutoSubs] ?: defaults.writeAutoSubs,
-            subLanguages = this[keys.subLanguages] ?: defaults.subLanguages
+            subLanguages = (this[keys.subLanguages] ?: defaults.subLanguages)
+                .takeUnless { it == DownloadOptions.LEGACY_SUB_LANGUAGES } ?: defaults.subLanguages
         )
     }
 

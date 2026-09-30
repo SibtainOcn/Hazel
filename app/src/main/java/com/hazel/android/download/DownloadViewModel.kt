@@ -1757,7 +1757,14 @@ class DownloadViewModel : ViewModel() {
         }
         if (options.splitByChapters) {
             addOption("--split-chapters")
-            addOption("-o", "chapter:%(section_number)d - %(section_title)s.%(ext)s")
+            // In the download's own folder, like the file itself. A bare template is taken
+            // relative to the process's working directory, which on Android is the root of
+            // the system and cannot be written, so splitting failed; and the title keeps two
+            // videos' "01 Intro" from overwriting each other.
+            addOption(
+                "-o",
+                "chapter:${downloadDir.absolutePath}/%(title)s - %(section_number)02d %(section_title)s.%(ext)s"
+            )
         }
     }
 

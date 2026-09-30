@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed (subtitles and chapters)
+- Split by chapters wrote the chapter files to the process's working directory, which on Android cannot be written, so splitting failed; they are now saved beside the video, named after it.
+- The default subtitle languages (`en.*`) also requested every machine translation into or out of English, and one refused request (YouTube rate limiting) failed the whole download; the default is now English and the original-language track.
+
 ### Fixed
 - Downloads failing or looping after a link was shared in (#45): yt-dlp updates were written over the live engine while a download was using it, breaking it with `bad local file header`. A new build is now downloaded beside the live one, verified, and swapped in atomically only while no download or read is running; a damaged engine is restored from the bundled copy.
 - Playlists opening as a single song (#44): a video opened from a playlist and the video alone shared one cache entry, so a playlist pasted again could come back as one card. Reads are now keyed by media and collection, and every YouTube playlist no longer shares one key.

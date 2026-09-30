@@ -52,7 +52,16 @@ data class DownloadOptions(
 
     companion object {
         const val DEFAULT_FILENAME_TEMPLATE = "%(title)s.%(ext)s"
-        const val DEFAULT_SUB_LANGUAGES = "en.*,.*-orig"
+        /**
+         * English as published, and the video's own language as captioned. Not "en.*": that
+         * also takes every machine translation into or out of English, each one a request,
+         * and a single one refused (YouTube answers a burst with 429) fails the whole
+         * download, since yt-dlp treats a subtitle it could not fetch as an error.
+         */
+        const val DEFAULT_SUB_LANGUAGES = "en,en-US,en-GB,.*-orig"
+
+        /** The default before it was narrowed, still stored for anyone who never changed it. */
+        const val LEGACY_SUB_LANGUAGES = "en.*,.*-orig"
     }
 }
 
