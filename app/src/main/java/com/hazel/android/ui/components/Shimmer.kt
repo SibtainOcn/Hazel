@@ -5,7 +5,6 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -30,6 +29,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -78,12 +81,7 @@ private const val BAND_FADE_END = 0.75f
  */
 private val BLOCK_GREY = Color(0xFFA6A6A6)
 
-/** The processing sweep is narrower than the skeleton one, so it reads as a glint. */
-private const val SHARP_BAND_WIDTH = 0.17f
 
-/** How long the processing glint takes to cross, and its whole cycle including the rest. */
-private const val GLINT_TRAVEL_MS = 1150
-private const val GLINT_CYCLE_MS = 2050
 
 /** Drives one sweep for everything inside it. Place it around a whole skeleton. */
 @Composable
@@ -320,103 +318,148 @@ fun FormatListShimmer(rows: Int = 5, modifier: Modifier = Modifier) {
 }
 
 /**
- * A single bright band sweeping across whatever this is laid over.
+ * What a card's artwork shows while the download is done and the app is working on the file
+ * (merging, converting, embedding the cover).
  *
- * Unlike the skeleton blocks this paints no resting fill, so the artwork underneath stays
- * visible and only the band moves over it. The band is narrow and its highlight rises and
- * falls sharply, which reads as a surface catching the light rather than as a placeholder
- * waiting to be filled — the download is finished at this point, and what is left is the
- * work the app is doing to the file.
+ * Three layers, all drawn rather than composed, so the animation redraws the artwork
+ * without rebuilding the card:
  *
- * The bright core is flanked by a darker shoulder on both sides. A single white band
- * disappears over pale artwork, and a single dark one disappears over dark artwork; the
- * pair always leaves one half of it standing out. That is also what makes this readable in
- * either theme, since what the band crosses is the artwork rather than any app surface.
+ *  - a train of thin light bands raking across the artwork one after another, quickly and
+ *    without a rest between passes, so the surface reads as busy rather than as waiting;
+ *  - a slow breath of shade and glow over the whole picture, so it never looks frozen
+ *    between bands;
+ *  - a spinning ring at the centre, where the pause and cancel control sits while the
+ *    download runs, with a bright head and a fading tail, so what is happening has a place
+ *    of its own on the card.
+ *
+ * The bands pair a light core with a dark edge, which keeps them visible on pale and dark
+ * artwork alike; what they cross is the artwork, not an app surface, so the same drawing
+ * works in either theme.
  */
 @Composable
 fun ProcessingShimmer(modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "processing")
-
-    // The sweep crosses, then waits. A band that runs on a loop with no gap reads as a
-    // spinner and stops being noticed; one that passes and leaves the artwork alone for a
-    // moment reads as light moving across a surface, and the pause is what gives the next
-    // pass something to arrive against.
-    val progress by transition.animateFloat(
+    val sweep by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = keyframes {
-                durationMillis = GLINT_CYCLE_MS
-                0f at 0 using FastOutSlowInEasing
-                1f at GLINT_TRAVEL_MS
-                1f at GLINT_CYCLE_MS
-            },
+            animation = tween(durationMillis = PROCESSING_SWEEP_MS, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "processingSweep"
     )
+    val spin by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = PROCESSING_SPIN_MS, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "processingSpin"
+    )
+    val breath by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = PROCESSING_BREATH_MS, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "processingBreath"
+    )
 
     Box(
         modifier = modifier.drawBehind {
-            val bandWidth = size.width * SHARP_BAND_WIDTH
+            // Breath: the picture dims and lifts a little, over and over.
+            drawRect(Color.Black.copy(alpha = 0.10f + 0.12f * breath))
+            drawRect(
+                brush = Brush.radialGradient(
+                    colors = listOf(Color.White.copy(alpha = 0.04f + 0.08f * breath), Color.Transparent),
+                    center = center,
+                    radius = size.maxDimension * 0.6f
+                )
+            )
 
-            // The band leans rather than standing upright. A vertical wipe reads as a
-            // progress bar lying on its side; a raked one reads as a reflection, which is
-            // the difference between the surface looking busy and looking lit.
+            // Bands: a train of thin raked highlights.
             val radians = Math.toRadians(SWEEP_TILT_DEGREES).toFloat()
             val axisX = cos(radians)
             val axisY = sin(radians)
-
-            // Travel is measured along the tilt, and overshoots at both ends so the band is
-            // fully clear of the artwork before the cycle restarts.
+            val bandWidth = size.width * PROCESSING_BAND_WIDTH
             val reach = size.width + kotlin.math.abs(axisY) * size.height + bandWidth * 2f
-            val centreX = -bandWidth + reach * progress
-            val centreY = size.height / 2f
-
-            fun axis(width: Float) = Offset(
-                centreX - axisX * width / 2f,
-                centreY - axisY * width / 2f
-            ) to Offset(
-                centreX + axisX * width / 2f,
-                centreY + axisY * width / 2f
-            )
-
-            // Two passes make the sheen. A broad halo lifts the whole area the band is
-            // crossing, and a narrow core sits inside it as the highlight proper. One band
-            // alone is either soft and muddy or hard and cheap; the pair reads as depth.
-            val (haloStart, haloEnd) = axis(bandWidth * 2.6f)
-            drawRect(
-                brush = Brush.linearGradient(
-                    colorStops = arrayOf(
-                        0f to Color.Transparent,
-                        0.35f to Color.Black.copy(alpha = 0.20f),
-                        0.5f to Color.White.copy(alpha = 0.14f),
-                        0.65f to Color.Black.copy(alpha = 0.20f),
-                        1f to Color.Transparent
-                    ),
-                    start = haloStart,
-                    end = haloEnd
+            for (i in 0 until PROCESSING_BANDS) {
+                // Each band trails the one before it by a fixed share of the pass, and the
+                // train wraps, so there is always a band somewhere on the artwork.
+                val phase = (sweep - i * PROCESSING_BAND_GAP + 1f) % 1f
+                val centreX = -bandWidth + reach * phase
+                val centreY = size.height / 2f
+                val strength = 1f - i * 0.28f
+                val start = Offset(centreX - axisX * bandWidth / 2f, centreY - axisY * bandWidth / 2f)
+                val end = Offset(centreX + axisX * bandWidth / 2f, centreY + axisY * bandWidth / 2f)
+                drawRect(
+                    brush = Brush.linearGradient(
+                        colorStops = arrayOf(
+                            0f to Color.Transparent,
+                            0.30f to Color.Black.copy(alpha = 0.16f * strength),
+                            0.46f to Color.White.copy(alpha = 0.10f * strength),
+                            0.50f to Color.White.copy(alpha = 0.55f * strength),
+                            0.54f to Color.White.copy(alpha = 0.10f * strength),
+                            0.70f to Color.Black.copy(alpha = 0.16f * strength),
+                            1f to Color.Transparent
+                        ),
+                        start = start,
+                        end = end
+                    )
                 )
-            )
+            }
 
-            val (coreStart, coreEnd) = axis(bandWidth)
-            drawRect(
-                brush = Brush.linearGradient(
-                    colorStops = arrayOf(
-                        0f to Color.Transparent,
-                        0.42f to Color.White.copy(alpha = 0.08f),
-                        0.48f to Color.White.copy(alpha = 0.72f),
-                        0.52f to Color.White.copy(alpha = 0.72f),
-                        0.58f to Color.White.copy(alpha = 0.08f),
-                        1f to Color.Transparent
-                    ),
-                    start = coreStart,
-                    end = coreEnd
-                )
+            // Ring: a spinning comet at the centre, on a disc that keeps it legible over
+            // any artwork.
+            val ringRadius = PROCESSING_RING_RADIUS.toPx()
+            val stroke = PROCESSING_RING_STROKE.toPx()
+            drawCircle(
+                color = Color.Black.copy(alpha = 0.45f),
+                radius = ringRadius + stroke * 2.2f,
+                center = center
             )
+            drawCircle(
+                color = Color.White.copy(alpha = 0.18f),
+                radius = ringRadius,
+                center = center,
+                style = Stroke(width = stroke)
+            )
+            rotate(degrees = spin, pivot = center) {
+                drawArc(
+                    brush = Brush.sweepGradient(
+                        0f to Color.Transparent,
+                        0.55f to Color.White.copy(alpha = 0.25f),
+                        0.78f to Color.White,
+                        0.78f to Color.Transparent,
+                        1f to Color.Transparent,
+                        center = center
+                    ),
+                    startAngle = 0f,
+                    sweepAngle = 280f,
+                    useCenter = false,
+                    topLeft = Offset(center.x - ringRadius, center.y - ringRadius),
+                    size = Size(ringRadius * 2f, ringRadius * 2f),
+                    style = Stroke(width = stroke, cap = StrokeCap.Round)
+                )
+            }
         }
     )
 }
+
+/** One pass of the band train, how many bands it has, and the gap between them. */
+private const val PROCESSING_SWEEP_MS = 1100
+private const val PROCESSING_BANDS = 3
+private const val PROCESSING_BAND_GAP = 0.14f
+private const val PROCESSING_BAND_WIDTH = 0.12f
+
+/** One turn of the centre ring, and one breath in or out. */
+private const val PROCESSING_SPIN_MS = 850
+private const val PROCESSING_BREATH_MS = 1300
+
+private val PROCESSING_RING_RADIUS = 20.dp
+private val PROCESSING_RING_STROKE = 3.5.dp
 
 /** How long the band takes to cross a [ShimmerLabel], and how wide it is. */
 private const val TEXT_SWEEP_MS = 2000

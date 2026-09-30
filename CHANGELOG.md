@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Thumbnail option opens a dialog with Cover art (on by default) and Crop to square (off by default), in the single and batch sheets. A live harness (`tools/live/test_thumbnail_embed_live.py`) checks both against real links for every audio format and video container the sheet offers.
 - The share sheet shows a shimmering "Fetching…" heading while a link is read, in place of blank placeholder bars.
 - Audio and video each have their own save folder, shown and changed in More › Downloads and in the download sheet, kept until changed or reset. A folder chosen in an earlier version stays in use for both.
+- While a download is processing, its artwork shows a train of quick light bands, a slow breathing glow and a spinning ring at the centre, in place of a single slow glint.
 - The download sheet's Audio and Video tabs sit at the start of the sheet, with a short bar under the chosen one.
 - A read failure offers adding cookies, and the share sheet's failure dialog copies its log.
 
@@ -47,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A cover that could not be embedded in the file's container failed the whole download (archive.org, single-file FLV, AVI, TS and similar); such files are now remuxed to MKV, and WAV, AIFF and WMA sources extracted to FLAC or M4A.
 - Links whose source reports no length (Instagram reels, some DASH streams) showed no duration; the length is now added up from the stream's segments or read from the media file itself, and a length from a playlist listing is no longer lost when the full read has none.
 - A downloaded Hazel update APK stayed in the cache when the app was next opened offline.
+- Opening the app after sharing a link from another app (downloaded, cancelled or dismissed) opened that link's sheet again; results read by the share overlay now stay on the list without reopening it.
 - A playlist or several links opening on the last card instead of the first: the list kept the scroll position of the previous results.
 - Cropping a cover to a square failed the whole download, and a cover that was already a JPEG was never cropped.
 - The Downloads tab's row layout stretching each row to many times its height when a long author left no room for the date; the tags now wrap to a second line and are cut short with an ellipsis rather than wrapped letter by letter. The card layout's date no longer overlaps its tags on narrow screens.

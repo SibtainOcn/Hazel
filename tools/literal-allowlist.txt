@@ -2,13 +2,13 @@
 # Format:  <file>:<line>: <reason>
 # A reason must say why the text never reaches a user's eyes. "Looks fine" is not a reason.
 
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:439: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:525: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1084: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:708: Toast.makeText uses a resource reference, no literal string
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1195: two formatted byte counts joined by a slash, no words to translate
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1208: two formatted byte counts joined by a slash, no words to translate
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1202: numeric percentage format, no words to translate
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:443: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:529: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1088: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:712: Toast.makeText uses a resource reference, no literal string
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1199: two formatted byte counts joined by a slash, no words to translate
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1212: two formatted byte counts joined by a slash, no words to translate
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1206: numeric percentage format, no words to translate
 
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:492: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:527: Compose animation label, used by the tooling inspector only
@@ -27,12 +27,14 @@ app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:542:
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:723: a file extension, which is the same in every language
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:859: a file extension, which is the same in every language
 
-app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:94: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:102: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:338: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:356: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:442: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:450: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:92: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:100: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:341: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:349: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:358: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:367: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:485: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:493: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/screens/SplashScreen.kt:96: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/screens/SplashScreen.kt:104: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/util/FolderUtil.kt:66: shows a filesystem path, a runtime value with no words in it
