@@ -451,7 +451,8 @@ private fun SeekBar(
                 color = Color.White
             )
             Spacer(modifier = Modifier.weight(1f))
-            if (controller.hasVideo) {
+            // Offered only when this video has more than one quality to choose from.
+            if (controller.hasVideo && controller.heights.count { it <= MAX_PLAY_HEIGHT } > 1) {
                 QualityButton(controller = controller, onMenuChange = onMenuChange)
             }
             GlassIcon(
@@ -502,9 +503,9 @@ private fun SeekBar(
 }
 
 /**
- * The height playing now, and a menu of the heights to ask for. The choice is saved as the
- * playback quality, so every later video starts at it; a video without that height plays
- * the tallest below it, or its smallest when it has nothing that small.
+ * The quality playing now, and a menu of the qualities this video has, from whichever
+ * engine found it. The choice is saved as the playback quality, so later videos start at
+ * it; a video without that quality plays the nearest one below, or its smallest.
  */
 @Composable
 private fun QualityButton(controller: PlaybackController, onMenuChange: (Boolean) -> Unit) {
@@ -544,19 +545,21 @@ private fun QualityButton(controller: PlaybackController, onMenuChange: (Boolean
             }
         }
         DropdownMenu(expanded = open, onDismissRequest = { setOpen(false) }) {
-            SettingsRepository.PLAY_QUALITIES.reversed().forEach { height ->
+            controller.heights.filter { it <= MAX_PLAY_HEIGHT }.forEach { height ->
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.player_quality_value, height)) },
-                    trailingIcon = if (height == cap) {
+                    trailingIcon = if (height == playing) {
                         { Icon(Icons.Filled.Check, contentDescription = null) }
                     } else null,
                     onClick = {
                         setOpen(false)
-                        if (height != cap) {
-                            scope.launch {
-                                SettingsRepository.setPlayQuality(context, height)
-                                controller.reload()
-                            }
+                        scope.launch {
+                            // Kept on the settings' own steps; the step at or above an odd
+                            // height still plays that height here.
+                            val step = SettingsRepository.PLAY_QUALITIES.firstOrNull { it >= height }
+                                ?: SettingsRepository.PLAY_QUALITIES.last()
+                            SettingsRepository.setPlayQuality(context, step)
+                            if (height != playing) controller.reload()
                         }
                     }
                 )
@@ -674,6 +677,8 @@ internal fun formatClock(ms: Long): String {
 }
 
 private const val CONTROLS_TIMEOUT_MS = 3_000L
+/** The tallest quality the player offers; downloads are where anything taller belongs. */
+private const val MAX_PLAY_HEIGHT = 1080
 private const val SKIP_SECONDS = 5
 private const val SKIP_MS = SKIP_SECONDS * 1000L
 private const val SKIP_FLASH_MS = 700L

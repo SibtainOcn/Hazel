@@ -24,7 +24,9 @@ data class PlayableStream(
     val isHls: Boolean = false,
     val headers: Map<String, String> = emptyMap(),
     val audioHeaders: Map<String, String> = emptyMap(),
-    val engine: ListingSource
+    val engine: ListingSource,
+    /** Every picture quality this media can be played at, tallest first. */
+    val heights: List<Int> = emptyList()
 )
 
 /**
@@ -97,7 +99,10 @@ object StreamResolver {
         val sound = usable.filter { it.hasAudio() && !it.hasVideo() }
             .maxWithOrNull(compareBy({ it.optString("ext") == "m4a" }, { it.optDouble("abr", 0.0) }))
 
-        return when {
+        val heights = usable.filter { it.hasVideo() && it.height() > 0 }
+            .map { it.height() }.distinct().sortedDescending()
+
+        val chosen = when {
             picture != null && sound != null && (both == null || picture.height() > both.height()) ->
                 PlayableStream(
                     url = picture.optString("url"),
@@ -114,6 +119,7 @@ object StreamResolver {
             else -> usable.filter { it.hasVideo() }.minByOrNull { it.height() }?.let { single(it) }
                 ?: media.takeIf { it.isPlayable() }?.let { single(it) }
         }
+        return chosen?.copy(heights = heights)
     }
 
     private fun single(format: JSONObject) = PlayableStream(
@@ -124,7 +130,15 @@ object StreamResolver {
         engine = ListingSource.YT_DLP
     )
 
-    private fun JSONObject.height() = optInt("height", 0)
+    /**
+     * The picture's quality in lines: its shorter side, so a 1080 by 1920 short counts as
+     * 1080p the way the sites label it.
+     */
+    private fun JSONObject.height(): Int {
+        val h = optInt("height", 0)
+        val w = optInt("width", 0)
+        return if (h > 0 && w > 0) minOf(h, w) else h
+    }
 
     /**
      * Many sites leave codecs out. A stream is taken to hold a picture unless it says it has

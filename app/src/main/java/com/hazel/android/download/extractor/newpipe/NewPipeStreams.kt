@@ -31,8 +31,12 @@ internal object NewPipeStreams {
             .filter { it.isPlainHttp() }
             .maxWithOrNull(audioOrder)
 
-        return when {
-            videoOnly != null && audio != null && (muxed == null || videoOnly.height > muxed.height) ->
+        val heights = (info.videoStreams.orEmpty() + info.videoOnlyStreams.orEmpty())
+            .filter { it.isPlainHttp() && it.quality() > 0 }
+            .map { it.quality() }.distinct().sortedDescending()
+
+        val chosen = when {
+            videoOnly != null && audio != null && (muxed == null || videoOnly.quality() > muxed.quality()) ->
                 PlayableStream(
                     url = videoOnly.content,
                     audioUrl = audio.content,
@@ -54,6 +58,7 @@ internal object NewPipeStreams {
             hls != null -> hlsStream(hls)
             else -> null
         }
+        return chosen?.copy(heights = heights)
     }
 
     private fun hlsStream(address: String) = PlayableStream(
@@ -65,16 +70,20 @@ internal object NewPipeStreams {
 
     /** The tallest stream within [maxHeight], or the smallest there is when none fits. */
     private fun withinCap(streams: List<VideoStream>, maxHeight: Int): VideoStream? {
-        val playable = streams.filter { it.isPlainHttp() && it.height > 0 }
-        return playable.filter { it.height <= maxHeight }.maxWithOrNull(videoOrder)
-            ?: playable.minByOrNull { it.height }
+        val playable = streams.filter { it.isPlainHttp() && it.quality() > 0 }
+        return playable.filter { it.quality() <= maxHeight }.maxWithOrNull(videoOrder)
+            ?: playable.minByOrNull { it.quality() }
     }
 
     private fun Stream.isPlainHttp() =
         deliveryMethod == DeliveryMethod.PROGRESSIVE_HTTP && isUrl && !content.isNullOrBlank()
 
     /** Taller first, then MP4, which every device decodes. */
-    private val videoOrder = compareBy<VideoStream>({ it.height }, { it.format == NewPipeFormat.MPEG_4 })
+    private val videoOrder = compareBy<VideoStream>({ it.quality() }, { it.format == NewPipeFormat.MPEG_4 })
+
+    /** Lines on the shorter side, so a tall short counts as the quality it is labelled. */
+    private fun VideoStream.quality(): Int =
+        if (height > 0 && width > 0) minOf(height, width) else height
 
     /** The original track over dubbed ones, then M4A, then the higher bitrate. */
     private val audioOrder = compareBy<AudioStream>(

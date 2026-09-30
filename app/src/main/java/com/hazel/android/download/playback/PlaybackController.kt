@@ -55,6 +55,9 @@ class PlaybackController(
     /** Width over height of the picture, or 0 before the first frame. */
     var aspectRatio by mutableFloatStateOf(0f)
         private set
+    /** The qualities this media can be played at, tallest first; empty until it is found. */
+    var heights by mutableStateOf(emptyList<Int>())
+        private set
     /** Lines in the picture now playing, or 0 before the first frame. */
     var videoHeight by mutableIntStateOf(0)
         private set
@@ -129,6 +132,7 @@ class PlaybackController(
                 val stream = StreamResolver.resolve(url, attempt)
                 if (released) return@launch
                 hasVideo = stream.hasVideo
+                heights = stream.heights
                 player.setMediaSource(PlayerFactory.sourceFor(stream), resumeAt)
                 player.prepare()
             } catch (e: CancellationException) {

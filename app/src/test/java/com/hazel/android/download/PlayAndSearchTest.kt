@@ -74,6 +74,20 @@ class PlayAndSearchTest {
     }
 
     @Test
+    fun tallVideoCountsItsShortSideAndListsItsQualities() {
+        val stream = StreamResolver.pick(
+            media(
+                """{"url":"https://a/1080","protocol":"https","vcodec":"avc1","acodec":"mp4a","width":1080,"height":1920,"ext":"mp4"}""",
+                """{"url":"https://a/720","protocol":"https","vcodec":"avc1","acodec":"mp4a","width":720,"height":1280,"ext":"mp4"}""",
+                """{"url":"https://a/dash","protocol":"http_dash_segments","fragments":[{}],"vcodec":"avc1","acodec":"none","width":1440,"height":2560}"""
+            ),
+            maxHeight = 1080
+        )
+        assertEquals("https://a/1080", stream?.url)
+        assertEquals(listOf(1080, 720), stream?.heights)
+    }
+
+    @Test
     fun streamWithoutCodecsCountsAsVideo() {
         // Instagram reels often report neither codec nor height.
         val stream = StreamResolver.pick(
