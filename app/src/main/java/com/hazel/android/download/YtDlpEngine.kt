@@ -29,7 +29,8 @@ object YtDlpEngine {
      *
      * A binary left damaged by an older build's interrupted update is restored from the copy
      * bundled with the app and the run is tried once more, rather than failing every link
-     * until the user thinks to reinstall.
+     * until the user thinks to reinstall. So is one too old to accept the options the engine
+     * library always passes, which would otherwise refuse every run until an update landed.
      */
     fun execute(
         request: YoutubeDLRequest,
@@ -40,9 +41,17 @@ object YtDlpEngine {
     } catch (e: YoutubeDL.CanceledException) {
         throw e
     } catch (e: Exception) {
-        if (!isDamagedBinary(e)) throw e
-        Log.w("Hazel", "yt-dlp binary is damaged, restoring the bundled copy: ${e.message}")
-        YtDlpUpdater.ensureValidBinary(HazelApp.instance)
+        when {
+            isDamagedBinary(e) -> {
+                Log.w("Hazel", "yt-dlp binary is damaged, restoring the bundled copy: ${e.message}")
+                YtDlpUpdater.ensureValidBinary(HazelApp.instance)
+            }
+            isOutdatedBinary(e) -> {
+                Log.w("Hazel", "yt-dlp binary is too old for this app, restoring the bundled copy")
+                if (!YtDlpUpdater.restoreBundledBinary(HazelApp.instance)) throw e
+            }
+            else -> throw e
+        }
         shared { YoutubeDL.getInstance().execute(request, processId, callback) }
     }
 
@@ -61,6 +70,7 @@ object YtDlpEngine {
 
     private fun <T> shared(block: () -> T): T {
         lock.readLock().lock()
+        Log.d("Hazel", "yt-dlp run started (${lock.readLockCount} running)")
         try {
             return block()
         } finally {
@@ -77,6 +87,10 @@ object YtDlpEngine {
         val text = e.message?.lowercase() ?: return false
         return DAMAGED_BINARY_SIGNS.any { it in text }
     }
+
+    /** yt-dlp's refusal of an option it predates, such as the JS runtime the library adds. */
+    private fun isOutdatedBinary(e: Exception): Boolean =
+        e.message?.contains("no such option", ignoreCase = true) == true
 
     private val DAMAGED_BINARY_SIGNS = listOf("bad local file header", "zipimporterror", "bad zipfile")
 }

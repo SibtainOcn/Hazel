@@ -126,6 +126,35 @@ object YtDlpUpdater {
     }
 
     /**
+     * Replaces the live binary with the copy bundled in the app, whatever is on disk.
+     *
+     * For a binary that is intact but too old to run with the options the engine library
+     * passes: every run fails on it, so there is nothing to wait for. The copy is written
+     * beside the live one and renamed over it, so the swap itself is atomic.
+     */
+    @Synchronized
+    fun restoreBundledBinary(context: Context): Boolean {
+        val partial = File(engineDir(context), "yt-dlp.bundled")
+        return try {
+            context.resources.openRawResource(com.yausername.youtubedl_android.R.raw.ytdlp).use { input ->
+                partial.outputStream().use { input.copyTo(it) }
+            }
+            if (!isValidBinary(partial) || !partial.renameTo(liveBinary(context))) return false
+            liveBinary(context).setExecutable(true, false)
+            context.getSharedPreferences(LIBRARY_PREFS, Context.MODE_PRIVATE).edit()
+                .remove(VERSION_KEY)
+                .remove(VERSION_NAME_KEY)
+                .apply()
+            true
+        } catch (e: Exception) {
+            Log.e("Hazel", "Restoring the bundled yt-dlp failed", e)
+            false
+        } finally {
+            partial.delete()
+        }
+    }
+
+    /**
      * Puts a downloaded build live if one is waiting and nothing is running.
      *
      * The rename is atomic on the same filesystem, so a run either sees the old file or the
@@ -157,7 +186,10 @@ object YtDlpUpdater {
                 Log.i("Hazel", "yt-dlp ${tag.ifBlank { "update" }} is now live")
                 true
             }
-        } ?: false
+        } ?: run {
+            Log.i("Hazel", "yt-dlp update staged; it goes live once the running jobs finish")
+            false
+        }
     }
 
     /**

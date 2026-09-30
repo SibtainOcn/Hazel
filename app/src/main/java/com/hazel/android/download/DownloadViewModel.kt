@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hazel.android.HazelApp
+import com.hazel.android.R
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.DownloadQueueRepository
@@ -79,6 +80,12 @@ data class DownloadState(
     /** The result the open sheet is editing, and the one the engine is working on. */
     val info: MediaInfo? = null,
     val isDownloading: Boolean = false,
+    /**
+     * The link being downloaded, or paused mid-download. Kept apart from [info], which is
+     * whatever result the sheet is open on: reading a new link or opening another result
+     * must not rename, retitle or re-file a download that is already running.
+     */
+    val active: MediaInfo? = null,
     val progress: Float = 0f,
     /** Total transfer size reported by yt-dlp, 0 until its first progress line. */
     val totalBytes: Long = 0L,
@@ -110,15 +117,6 @@ data class DownloadState(
     val isComplete: Boolean = false,
     /** Per-link state while several links download one after another. */
     val batch: List<BatchItem> = emptyList(),
-    /**
-     * Where an instant share is being read from, or blank when none is.
-     *
-     * The instant target asks nothing and opens nothing, so between the share and the first
-     * byte there was a stretch of seconds with an empty screen behind it. This is what the
-     * screen says during it, and it names the source because "reading a link" is less
-     * reassuring than naming the one the user just came from.
-     */
-    val instantSource: String = "",
     /**
      * True once a read has taken a finished download off the list.
      *
@@ -246,6 +244,14 @@ class DownloadViewModel : ViewModel() {
      */
     private val queue = ArrayDeque<QueuedDownload>()
 
+    /**
+     * The run working through [queue], or null when none is. Claimed and released only under
+     * the queue's lock, so a link added at any moment either joins the run in flight or
+     * starts one of its own, never both: two runs at once share the engine's one process id,
+     * and the second fails with "Process ID already exists".
+     */
+    private var runOwner: Any? = null
+
     init {
         // Offered to the notification's buttons, so a pause from the shade and a pause from
         // the card are the same call rather than two ideas of what a pause is.
@@ -366,146 +372,70 @@ class DownloadViewModel : ViewModel() {
         )
     }
 
-    // ── Instant share ──
-
-    /** One link shared to the instant target, with where it was shared from. */
-    private data class DirectShare(val url: String, val source: String)
-
-    /** Links shared to the instant target, waiting to be read. */
-    private val directQueue = ArrayDeque<DirectShare>()
-
-    @Volatile private var directRunning = false
-
     /**
-     * Reads a link shared to the instant target and downloads it without asking anything.
+     * Starts a download chosen on a sheet that opened before its link had been read.
      *
-     * Held as a queue of its own, ahead of the download queue, because the two stages fail
-     * differently. Sharing three links in a row used to leave one: the second arrived while
-     * the first was still being read, and a read already in flight turned it away. They are
-     * read one after another now, and each hands its download to the queue behind it, so
-     * three shares in three seconds become three downloads.
-     *
-     * The screen is shown whichever link is being read at the time, so a user who does open
-     * the app mid-run sees where it has got to rather than the first link frozen in place.
+     * A shared link opens its sheet at once, and the choice can be made while the read is
+     * still running. The choice waits for that read here, where it survives the sheet
+     * closing, and is then applied to what the link turned out to be: the chosen kind at its
+     * best for a single item, or for every item of a collection. A read that fails is
+     * reported the way any failed read is, with a notification that opens its log.
      */
-    fun startDirect(context: Context, url: String, source: String = "") {
-        val link = url.trim()
-        if (link.isBlank()) return
-
-        synchronized(directQueue) { directQueue.addLast(DirectShare(link, source)) }
-        if (directRunning) return
-        directRunning = true
-
+    fun downloadOnceRead(
+        context: Context,
+        url: String,
+        format: MediaFormat,
+        options: DownloadOptions,
+        title: String,
+        author: String,
+        audioLanguage: String?,
+        treeUri: String
+    ) {
         val app = context.applicationContext
-        val initialSource = source.ifBlank { "the link" }
-        DownloadService.start(app, "Preparing download from $initialSource...")
-
-        downloadScope.launch {
-            if (!SettingsRepository.getIncognito(app).first()) {
-                SearchHistoryRepository.record(app, link)
+        viewModelScope.launch {
+            fetchJob?.join()
+            val current = _state.value
+            if (current.url != url) {
+                Log.w("Hazel", "Share choice dropped: another link was read meanwhile")
+                return@launch
             }
-            while (true) {
-                val share = synchronized(directQueue) { directQueue.removeFirstOrNull() } ?: break
-                val next = share.url
+            val results = current.results
+            Log.i("Hazel", "Share choice starting after the read: ${results.size} item(s)")
+            val isVideo = format.hasVideo
 
-                // Said while the link is being read, which is the stretch this target used
-                // to spend showing nothing at all: it asks no questions and opens no sheet,
-                // so without this the seconds before the first byte look like a share that
-                // went nowhere.
-                _state.value = _state.value.copy(
-                    instantSource = share.source.ifBlank { "the link" }
-                )
-
-                val info = runCatching { readOne(next) }.getOrNull()
-                if (info == null) {
-                    _state.value = _state.value.copy(instantSource = "")
-                    DownloadNotificationHelper.showError(app, "Could not read this link")
-                    DownloadService.stop(app)
-                    continue
+            when {
+                results.size > 1 -> {
+                    val plans = results.mapNotNull { info ->
+                        info.autoPick(isVideo, 0, audioLanguage)?.let {
+                            DownloadPlan(info, it, info.title, info.uploader, audioLanguage)
+                        }
+                    }
+                    if (plans.isNotEmpty()) startBatch(app, plans, options, treeUri)
                 }
 
-                val isVideo = SettingsRepository.getQuickIsVideo(app).first()
-                val maxHeight = SettingsRepository.getQuickMaxHeight(app).first()
-                // A standing preference rather than a question. A source that does not
-                // publish this soundtrack is downloaded with the one it does have.
-                val audioLanguage = SettingsRepository.getInstantAudioLanguage(app).first()
-                    .takeIf { it.isNotBlank() }
-                val format = info.autoPick(isVideo, maxHeight, audioLanguage)
-                if (format == null) {
-                    _state.value = _state.value.copy(instantSource = "")
-                    DownloadNotificationHelper.showError(app, "Nothing to download from this link")
-                    DownloadService.stop(app)
-                    continue
-                }
-
-                // Added to the list rather than replacing it. Three links shared in a row
-                // are three downloads, and a screen showing only the one being worked on
-                // says nothing about the two behind it.
-                _state.value = _state.value.copy(
-                    url = next,
-                    info = info,
-                    results = listOf(info) + _state.value.results.filterNot { it.url == info.url },
-                    error = null,
-                    errorLog = null,
-                    // The card is there now, so it says what is happening from here on.
-                    instantSource = ""
-                )
-                markAutoOpened(info.url)
-
-                startBatch(
-                    context = app,
-                    plans = listOf(
-                        DownloadPlan(info, format, info.title, info.uploader, audioLanguage)
-                    ),
-                    // The instant target's own settings, not the sheet's. Nobody is
-                    // watching this download, so it answers to the screen that was set up
-                    // for exactly that.
-                    options = SettingsRepository.getInstantOptions(app).first(),
-                    treeUri = SettingsRepository.getDownloadTreeUri(app).first()
-                )
-            }
-            _state.value = _state.value.copy(instantSource = "")
-            directRunning = false
-        }
-    }
-
-    /**
-     * Reads one link's metadata, for the paths with no screen watching. A link that turns
-     * out to hold several items contributes its first, since an instant share is one ask
-     * and a playlist shared that way is not a request for two hundred files.
-     */
-    private suspend fun readOne(url: String): MediaInfo? {
-        val app = HazelApp.instance
-        val access = CookieRepository.accessFor(app, url)
-        val fetchMode = SettingsRepository.getFetchMode(app).first()
-        val forceIpv4 = SettingsRepository.getForceIpv4(app).first()
-        val listingSource = SettingsRepository.getListingSource(app).first()
-
-        return expand(
-            url,
-            access,
-            fetchMode,
-            forceIpv4,
-            listingSource,
-            "${MediaProbe.PROBE_PROCESS_ID}_direct"
-        ).firstOrNull()?.let { first ->
-            // A listing entry carries no formats, so it is read again on its own before a
-            // quality can be picked from it.
-            if (first.hasResolvedFormats) first
-            else {
-                val fastResolved = if (listingSource == ListingSource.NEWPIPE && !access.hasCookies && NewPipeLister.handlesStream(first.url)) {
-                    NewPipeLister.single(first.url)?.takeIf { it.hasResolvedFormats }
-                } else null
-
-                fastResolved ?: runCatching {
-                    probeWithRetry(
-                        first.url,
-                        access,
-                        fetchMode,
-                        forceIpv4,
-                        "${MediaProbe.PROBE_PROCESS_ID}_direct_formats"
+                results.size == 1 -> {
+                    val info = results.first()
+                    val chosen = if (format.isGeneric) {
+                        info.autoPick(isVideo, 0, audioLanguage) ?: format
+                    } else format
+                    startDownload(
+                        context = app,
+                        format = chosen,
+                        options = options,
+                        title = title.ifBlank { info.title },
+                        author = author.ifBlank { info.uploader },
+                        audioLanguage = audioLanguage,
+                        treeUri = treeUri,
+                        info = info
                     )
-                }.getOrNull() ?: first
+                }
+
+                else -> {
+                    val log = current.errorLog ?: app.getString(R.string.no_results_error_title)
+                    DownloadNotificationHelper.showError(
+                        app, sanitizeError(log), signInUrl = signInTargetFor(log, url)
+                    )
+                }
             }
         }
     }
@@ -555,7 +485,7 @@ class DownloadViewModel : ViewModel() {
         val valid = targets.filter { URL_PATTERN.matches(it) }
         if (valid.isEmpty()) {
             _state.value = _state.value.copy(
-                error = "Invalid URL, must start with http:// or https://"
+                error = HazelApp.instance.getString(R.string.fetch_invalid_url)
             )
             return
         }
@@ -571,24 +501,23 @@ class DownloadViewModel : ViewModel() {
         // A fresh read is a fresh answer, so the sheet is allowed to open on its own again.
         clearAutoOpened()
 
-        // Read before the batch is emptied below, since that is the record of what this
-        // session finished and the merge at the end of the read needs it.
-        val finished = _state.value.batch
-            .filter { it.state == BatchState.DONE }
-            .map { it.url }
-            .toSet()
-
+        // A running download keeps its record of the run: the queue screen and the
+        // notification read it, and reading a new link has nothing to do with either.
+        val runInHand = _state.value.isDownloading || _state.value.batch.any {
+            it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED ||
+                it.state == BatchState.QUEUED
+        }
         _state.value = _state.value.copy(
             url = valid.first(),
             isFetching = true,
             error = null,
             errorLog = null,
-            // What is already listed stays, apart from what has finished downloading:
-            // a run's queue and its failures are worth keeping in view, and a search is
-            // another thing asked for rather than a reason to forget the last one. The
-            // search screen's own clear action is what empties the list.
+            // A new read is a new question, so the last answer goes and the skeleton takes
+            // the whole screen, the way a search replaces its results. Downloads started
+            // from the old results carry on in the queue.
+            results = emptyList(),
             info = null,
-            batch = emptyList(),
+            batch = if (runInHand) _state.value.batch else emptyList(),
             isComplete = false,
             fetchProgress = "",
             fetchCount = valid.size
@@ -607,7 +536,7 @@ class DownloadViewModel : ViewModel() {
             try {
                 if (valid.size > 1) {
                     _state.value = _state.value.copy(
-                        fetchProgress = "Reading ${valid.size} links"
+                        fetchProgress = HazelApp.instance.getString(R.string.fetch_settings_reading_links)
                     )
                 }
 
@@ -637,18 +566,18 @@ class DownloadViewModel : ViewModel() {
                 // One link that resolved to nothing is a failure worth reporting, since
                 // there is no other card to look at.
                 if (resolved.isEmpty() && valid.size == 1 && lastFailure.isBlank()) {
-                    lastFailure = "Could not read this link"
+                    lastFailure = HazelApp.instance.getString(R.string.no_results_error_title)
                 }
             } catch (_: CancellationException) {
                 _state.value = _state.value.copy(isFetching = false, fetchProgress = "")
                 return@launch
             } catch (e: Exception) {
                 lastFailure = e.message?.trim().orEmpty()
-                val message = sanitizeError(lastFailure.ifBlank { "Could not read this link" })
+                val message = sanitizeError(lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) })
                 _state.value = _state.value.copy(
                     isFetching = false,
                     fetchProgress = "",
-                    errorLog = lastFailure.ifBlank { "Could not read this link" }
+                    errorLog = lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) }
                 )
                 if (notifyFailure) {
                     DownloadNotificationHelper.showError(
@@ -661,7 +590,7 @@ class DownloadViewModel : ViewModel() {
             if (resolved.isEmpty() && notifyFailure) {
                 DownloadNotificationHelper.showError(
                     app,
-                    sanitizeError(lastFailure.ifBlank { "Could not read this link" }),
+                    sanitizeError(lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) }),
                     signInUrl = signInTargetFor(lastFailure, valid.first())
                 )
             }
@@ -670,32 +599,15 @@ class DownloadViewModel : ViewModel() {
                 _state.value.copy(
                     isFetching = false,
                     fetchProgress = "",
-                    errorLog = lastFailure.ifBlank { "Could not read this link" }
+                    errorLog = lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) }
                 )
             } else {
-                // A link that finished downloading is not carried into the new answer. The
-                // list is what the set action acts on, so ten links pasted beside two
-                // already saved read as twelve waiting, and Download all offered to fetch
-                // the saved two a second time. Worse, it turned a single new link into a
-                // set, because the list was two long even though only one of them was
-                // anything to download.
-                //
-                // Nothing is thrown away: they are on the downloads list, and the line at
-                // the foot of the results says so.
-                val kept = _state.value.results.filterNot { existing ->
-                    resolved.any { it.url == existing.url } || existing.url in finished
-                }
-
-                // Newest first, and a link read again keeps its new reading rather than
-                // appearing twice.
                 _state.value.copy(
                     isFetching = false,
                     fetchProgress = "",
-                    results = resolved + kept,
+                    results = resolved,
                     info = resolved.singleOrNull(),
-                    savedAside = _state.value.savedAside || _state.value.results.any { existing ->
-                        existing.url in finished && resolved.none { it.url == existing.url }
-                    }
+                    savedAside = false
                 )
             }
         }
@@ -947,9 +859,10 @@ class DownloadViewModel : ViewModel() {
         com.hazel.android.util.PermissionHelper.ensureSharedStorageWrite(context)
 
         val queued = plans.map { it.toQueued(options, treeUri) }
-        val alreadyRunning = _state.value.isDownloading
-
-        synchronized(queue) { queue.addAll(queued) }
+        val alreadyRunning = synchronized(queue) {
+            queue.addAll(queued)
+            runOwner != null
+        }
 
         // Written down before anything starts, so a queue interrupted a second later is
         // still a queue that can be picked up.
@@ -1001,6 +914,16 @@ class DownloadViewModel : ViewModel() {
      * the only case where the run has to announce itself.
      */
     private fun runQueue(app: Context, resumed: Boolean) {
+        val token = Any()
+        val claimed = synchronized(queue) {
+            if (runOwner != null) false else {
+                runOwner = token
+                true
+            }
+        }
+        // A run is already working through the queue, and it takes what was just added.
+        if (!claimed) return
+
         if (resumed) {
             isBatchCancelled = false
             downloadContext = app
@@ -1020,7 +943,7 @@ class DownloadViewModel : ViewModel() {
 
         // Run on a scope tied to the process rather than to the screen. A download the user
         // has walked away from should not end because the screen that started it did.
-        downloadJob = downloadScope.launch {
+        val job = downloadScope.launch {
             val cm = app.getSystemService(android.net.ConnectivityManager::class.java)
             val caps = cm?.activeNetwork?.let { cm.getNetworkCapabilities(it) }
             if (caps?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) != true) {
@@ -1055,7 +978,11 @@ class DownloadViewModel : ViewModel() {
 
             while (true) {
                 if (isBatchCancelled) break
-                val next = synchronized(queue) { queue.removeFirstOrNull() } ?: break
+                // Released in the same step that finds the queue empty, so a link added a
+                // moment later starts a run of its own instead of waiting on this one.
+                val next = synchronized(queue) {
+                    queue.removeFirstOrNull().also { if (it == null && runOwner === token) runOwner = null }
+                } ?: break
                 val plan = next.toPlan()
                 val options = next.options
                 downloadTreeUri = next.treeUri
@@ -1080,6 +1007,7 @@ class DownloadViewModel : ViewModel() {
                 val opening = if (progressFloor > 0f) "Resuming" else "Starting download"
                 _state.value = _state.value.copy(
                     info = plan.info,
+                    active = plan.info,
                     progress = progressFloor,
                     totalBytes = expectedTotalBytes,
                     status = opening,
@@ -1243,6 +1171,10 @@ class DownloadViewModel : ViewModel() {
             DownloadService.stop(app)
             finishBatch(app)
         }
+        job.invokeOnCompletion {
+            synchronized(queue) { if (runOwner === token) runOwner = null }
+        }
+        downloadJob = job
     }
 
     /**
@@ -1266,7 +1198,7 @@ class DownloadViewModel : ViewModel() {
         DownloadNotificationHelper.showPaused(
             context = app,
             progress = (fraction * 100f).toInt(),
-            mediaTitle = _state.value.info?.title.orEmpty().ifBlank { item.title },
+            mediaTitle = _state.value.active?.title.orEmpty().ifBlank { item.title },
             doneBytes = (total * fraction).toLong(),
             totalBytes = total
         )
@@ -1297,6 +1229,7 @@ class DownloadViewModel : ViewModel() {
                 } else it
             },
             isDownloading = false,
+            active = null,
             isProcessing = false,
             progress = 0f,
             status = ""
@@ -1333,6 +1266,7 @@ class DownloadViewModel : ViewModel() {
 
         _state.value = current.copy(
             isDownloading = false,
+            active = null,
             isComplete = done > 0,
             status = "",
             isProcessing = false,
@@ -1375,7 +1309,7 @@ class DownloadViewModel : ViewModel() {
      * and disk queue record, without disturbing the active download.
      */
     fun cancelItem(url: String) {
-        val activeInfo = _state.value.info
+        val activeInfo = _state.value.active
         if (_state.value.isDownloading && activeInfo?.url == url) {
             // Cancel ONLY this active download item (do NOT set isBatchCancelled)
             isCancelled = true
@@ -1520,7 +1454,7 @@ class DownloadViewModel : ViewModel() {
 
     /** Clears all pending items from the waiting queue while preserving any active download. */
     fun clearQueue(context: Context) {
-        val activeUrl = _state.value.info?.url
+        val activeUrl = _state.value.active?.url
         synchronized(queue) {
             queue.clear()
         }
@@ -1791,7 +1725,7 @@ class DownloadViewModel : ViewModel() {
         var template = options.filenameTemplate.ifBlank {
             SettingsRepository.DEFAULT_FILENAME_TEMPLATE
         }
-        val info = _state.value.info
+        val info = _state.value.active ?: _state.value.info
 
         if (title.isNotBlank() && title != info?.title) {
             template = template.replace("%(title)s", sanitizeForFilename(title))
@@ -1843,7 +1777,7 @@ class DownloadViewModel : ViewModel() {
                         context = it,
                         progress = percent.toInt(),
                         statusLine = status,
-                        mediaTitle = _state.value.info?.title.orEmpty(),
+                        mediaTitle = (_state.value.active ?: _state.value.info)?.title.orEmpty(),
                         doneBytes = (total * percent / 100f).toLong(),
                         totalBytes = total
                     )
@@ -1927,7 +1861,7 @@ class DownloadViewModel : ViewModel() {
         // name, which carries the template's separators and the container extension.
         DownloadNotificationHelper.showComplete(
             context,
-            title = _state.value.info?.title.orEmpty().ifBlank { fileName },
+            title = (_state.value.active ?: _state.value.info)?.title.orEmpty().ifBlank { fileName },
             isVideo = plan.format.hasVideo,
             fileUri = savedUri
         )
@@ -1951,7 +1885,7 @@ class DownloadViewModel : ViewModel() {
         plan: DownloadPlan,
         options: DownloadOptions
     ) {
-        val info = _state.value.info ?: return
+        val info = _state.value.active ?: _state.value.info ?: return
 
         viewModelScope.launch {
             // Incognito is checked here rather than at the call site, so every path that
@@ -2097,6 +2031,7 @@ class DownloadViewModel : ViewModel() {
         purgeFragments()
         _state.value = _state.value.copy(
             isDownloading = false,
+            active = null,
             progress = 0f,
             status = "",
             isProcessing = false,
