@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import com.hazel.android.util.LinkKey
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.sync.Semaphore
@@ -493,6 +494,44 @@ class DownloadViewModel : ViewModel() {
                     )
                 }
             }
+        }
+    }
+
+    /**
+     * Starts a download chosen on a card's sheet before that card's formats were read.
+     *
+     * Waits for the read already running, then applies the choice to what it found: the
+     * chosen kind at its best, within the quality and language preferences. If the read
+     * fails the choice still goes ahead as it stands, which yt-dlp resolves itself.
+     */
+    fun downloadOnceFormatsRead(
+        context: Context,
+        info: MediaInfo,
+        format: MediaFormat,
+        options: DownloadOptions,
+        title: String,
+        author: String,
+        audioLanguage: String?,
+        saveDirs: com.hazel.android.data.SaveDirs
+    ) {
+        val app = context.applicationContext
+        viewModelScope.launch {
+            withTimeoutOrNull(FORMAT_WAIT_MS) { _formatsReading.first { info.url !in it } }
+            val read = _state.value.results.firstOrNull { it.url == info.url }
+                ?.takeIf { it.hasResolvedFormats }
+                ?: InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
+                ?: info
+            val chosen = GenericFormats.applyTo(read, format, audioLanguage) ?: format
+            startDownload(
+                context = app,
+                format = chosen,
+                options = options,
+                title = title.ifBlank { read.title },
+                author = author.ifBlank { read.uploader },
+                audioLanguage = audioLanguage,
+                info = read,
+                saveDirs = saveDirs
+            )
         }
     }
 
@@ -2538,6 +2577,9 @@ class DownloadViewModel : ViewModel() {
     private companion object {
         /** Cards stood in while a search runs. */
         const val SEARCH_SKELETONS = 4
+
+        /** The longest a choice waits for its card's formats before going ahead anyway. */
+        const val FORMAT_WAIT_MS = 60_000L
 
         /** The most a title may take of a file name, in UTF-8 bytes; 255 is the limit. */
         const val MAX_NAME_BYTES = 120

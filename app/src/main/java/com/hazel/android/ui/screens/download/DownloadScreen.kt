@@ -426,7 +426,8 @@ fun DownloadScreen(
             }
 
             UrlSearchBar(
-                url = state.url,
+                // Words searched for stay in the bar, as a link read does.
+                url = state.searchQuery.ifBlank { state.url },
                 shineProgress = searchBarShine.value,
                 onOpenSearch = {
                     cameFromShare = false
@@ -883,21 +884,38 @@ fun DownloadScreen(
                 },
                 saveDirs = saveDirs,
                 isLoadingFormats = state.isFetching || info.url in formatsReading,
+                // A search or playlist card opens before its details are read.
+                isReadingLink = !info.hasResolvedFormats && info.url in formatsReading,
                 onRefreshFormats = { source -> downloadViewModel.refreshFormats(listOf(info), source) },
                 onOpenSaveDir = openSaveDirOf,
                 onPickSaveDir = pickSaveDir,
                 onResetSaveDir = resetSaveDir,
                 onDownload = { format, audioLanguage, title, author, oneOff ->
                     sheetVisible = false
-                    downloadViewModel.startDownload(
-                        context = context,
-                        format = format,
-                        options = options.with(oneOff),
-                        title = title,
-                        author = author,
-                        audioLanguage = audioLanguage,
-                        saveDirs = saveDirs
-                    )
+                    if (!info.hasResolvedFormats && info.url in formatsReading) {
+                        // Chosen before the read finished: it starts the moment the
+                        // formats land, applied to what the link turned out to hold.
+                        downloadViewModel.downloadOnceFormatsRead(
+                            context = context,
+                            info = info,
+                            format = format,
+                            options = options.with(oneOff),
+                            title = title,
+                            author = author,
+                            audioLanguage = audioLanguage,
+                            saveDirs = saveDirs
+                        )
+                    } else {
+                        downloadViewModel.startDownload(
+                            context = context,
+                            format = format,
+                            options = options.with(oneOff),
+                            title = title,
+                            author = author,
+                            audioLanguage = audioLanguage,
+                            saveDirs = saveDirs
+                        )
+                    }
                 },
                 onDismiss = { sheetVisible = false }
             )
