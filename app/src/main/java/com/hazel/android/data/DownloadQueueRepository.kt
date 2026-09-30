@@ -34,6 +34,8 @@ data class QueuedDownload(
     val durationSeconds: Int,
     val formatId: String,
     val selector: String,
+    /** The format sort that goes with [selector], for a generic row that names a target. */
+    val sort: String? = null,
     val formatLabel: String,
     val ext: String,
     val hasVideo: Boolean,
@@ -157,6 +159,7 @@ object DownloadQueueRepository {
         put("duration", item.durationSeconds)
         put("formatId", item.formatId)
         put("selector", item.selector)
+        put("sort", item.sort ?: JSONObject.NULL)
         put("formatLabel", item.formatLabel)
         put("ext", item.ext)
         put("hasVideo", item.hasVideo)
@@ -191,6 +194,7 @@ object DownloadQueueRepository {
             durationSeconds = item.optInt("duration"),
             formatId = item.optString("formatId"),
             selector = item.optString("selector"),
+            sort = item.optString("sort").takeIf { it.isNotBlank() && it != "null" },
             formatLabel = item.optString("formatLabel"),
             ext = item.optString("ext"),
             hasVideo = item.optBoolean("hasVideo"),
@@ -277,6 +281,7 @@ fun QueuedDownload.toPlan(): DownloadPlan {
     val format = MediaFormat(
         formatId = formatId,
         selector = selector,
+        sort = sort,
         label = formatLabel,
         ext = ext,
         vcodec = null,
@@ -344,6 +349,7 @@ fun DownloadPlan.toQueued(options: DownloadOptions, treeUri: String): QueuedDown
         durationSeconds = info.durationSeconds,
         formatId = format.formatId,
         selector = format.selector,
+        sort = format.sort,
         formatLabel = format.label,
         ext = format.ext,
         hasVideo = format.hasVideo,

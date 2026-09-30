@@ -25,10 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A new Queue tab holds everything downloading, waiting or failed, with pause, resume, cancel and retry per item and for all; a red dot on the tab shows while anything is in hand. The home screen no longer carries these controls, and a running card opens the queue.
 - The Downloads tab lists finished files only, with a layout toggle, sort order and direction, Audio and Video filters, a deleted/not deleted filter, and removing all, deleted or duplicate entries.
 - The bottom bar is a compact row of icons.
-- Sharing a link opens its sheet at once while the link is read in the background; a download chosen before the read finishes starts as soon as it does. The separate Hazel Instant share target and its settings are removed.
+- Sharing a link opens its sheet at once with a ready quality ladder (best, ~2160p to ~240p and worst for video; best, ~192 to ~64 kbps and worst for audio) and a shimmering header while the link is read; the real formats replace it when the read lands, and a download chosen before then starts as soon as it does. Ladder choices use yt-dlp format sorting, so a source without that exact quality gives its nearest. The separate Hazel Instant share target and its settings are removed.
 - Reading a new link replaces the previous results, and the loading skeleton fills the screen from the top.
 - The batch sheet offers an instant quality ladder for audio (best, ~192 to ~64 kbps, worst) and more video heights (down to 144p, and worst), without reading every link first.
-- List cards shrink slightly while a list scrolls. Chips and small buttons are drawn as flat surfaces.
+- Media cards shrink slightly while their list scrolls (not the format list). Chips and small buttons are drawn as flat surfaces.
 - A read failure offers adding cookies, and the share sheet's failure dialog copies its log.
 
 ### Fixed (continued)

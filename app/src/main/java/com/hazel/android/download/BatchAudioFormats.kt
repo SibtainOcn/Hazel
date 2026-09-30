@@ -39,12 +39,14 @@ object BatchAudioFormats {
     )
 
     /**
-     * The best audio at or under [kbps]. A source that labels no bitrate, or has nothing that
-     * low, still downloads: the expression falls back to its best audio.
+     * The audio closest to [kbps] without going over, by format sort, so a source with
+     * nothing that low still gives its nearest stream. A source that labels no bitrate
+     * downloads its best audio.
      */
     fun bitrateCeiling(kbps: Int) = MediaFormat(
         formatId = "ba_${kbps}k",
-        selector = "ba[abr<=$kbps]/ba/b",
+        selector = "ba/b",
+        sort = "abr:$kbps",
         label = "~$kbps kbps",
         ext = "",
         vcodec = null,

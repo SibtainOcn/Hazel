@@ -1,5 +1,7 @@
 package com.hazel.android.ui.share
 
+import androidx.compose.ui.res.stringResource
+import com.hazel.android.download.GenericFormats
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -31,8 +33,6 @@ import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadViewModelHolder
 import com.hazel.android.download.MediaInfo
-import com.hazel.android.download.MediaProbe
-import com.hazel.android.download.extractor.LinkEntry
 import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 import com.hazel.android.ui.screens.download.FormatSheet
 import com.hazel.android.ui.screens.download.NoResultsDialog
@@ -149,8 +149,11 @@ class ShareOverlayActivity : ComponentActivity() {
 
             // What the sheet shows before the read comes back: the link, and the generic
             // "best" rows, which are enough to download with.
-            val placeholder = remember(url) {
-                MediaProbe.pendingFor(LinkEntry(url = url, title = "", uploader = "", thumbnail = null, durationSeconds = 0))
+            val bestVideo = stringResource(R.string.batch_quality_best)
+            val bestAudio = stringResource(R.string.audio_quality_best)
+            val worst = stringResource(R.string.batch_quality_worst)
+            val placeholder = remember(url, bestVideo, bestAudio, worst) {
+                GenericFormats.placeholder(url, bestVideo, bestAudio, worst)
             }
 
             val folderPicker = rememberLauncherForActivityResult(
@@ -252,7 +255,10 @@ class ShareOverlayActivity : ComponentActivity() {
                                 },
                                 saveDirLabel = saveDirLabel,
                                 isCustomSaveDir = treeUri.isNotBlank(),
-                                isLoadingFormats = state.isFetching || info.url in formatsReading,
+                                // The ladder is a full answer on its own, so no skeleton
+                                // stands under it; the header says the link is being read.
+                                isLoadingFormats = resolved != null && info.url in formatsReading,
+                                isReadingLink = resolved == null && state.isFetching,
                                 onRefreshFormats = resolved?.let { item ->
                                     { source -> downloadViewModel.refreshFormats(listOf(item), source) }
                                 },

@@ -159,7 +159,13 @@ data class MediaFormat(
     /** True for the synthesised "best available" rows, which have no real format id. */
     val isGeneric: Boolean = false,
     /** True when the size came from the bitrate rather than from the source itself. */
-    val isEstimatedSize: Boolean = false
+    val isEstimatedSize: Boolean = false,
+    /**
+     * A yt-dlp format sort (`-S`) that goes with [selector], for a generic row that names a
+     * target rather than a stream: "res:720" prefers the resolution closest to 720 without
+     * going over, and the closest above only where nothing is at or under it.
+     */
+    val sort: String? = null
 ) {
     /**
      * The headline without the measured resolution after it.

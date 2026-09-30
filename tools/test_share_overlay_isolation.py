@@ -261,7 +261,7 @@ def test_sheet_opens_at_once():
     overlay = (REPO_ROOT / "app/src/main/java/com/hazel/android/ui/share/ShareOverlayActivity.kt").read_text(encoding="utf-8")
     vm = (REPO_ROOT / "app/src/main/java/com/hazel/android/download/DownloadViewModel.kt").read_text(encoding="utf-8")
 
-    check_true("Sheet opens on a placeholder for the shared link", "MediaProbe.pendingFor(" in overlay and "resolved ?: placeholder" in overlay)
+    check_true("Sheet opens on the generic quality ladder for the shared link", "GenericFormats.placeholder(" in overlay and "resolved ?: placeholder" in overlay)
     check_true("A choice made before the read waits for it", "downloadViewModel.downloadOnceRead(" in overlay)
     check_true("The view model waits for the running read", "fun downloadOnceRead(" in vm and "fetchJob?.join()" in vm)
     check_true("A failed read is reported after the sheet has closed", "DownloadNotificationHelper.showError(" in vm)

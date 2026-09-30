@@ -401,12 +401,11 @@ class DownloadViewModel : ViewModel() {
             }
             val results = current.results
             Log.i("Hazel", "Share choice starting after the read: ${results.size} item(s)")
-            val isVideo = format.hasVideo
 
             when {
                 results.size > 1 -> {
                     val plans = results.mapNotNull { info ->
-                        info.autoPick(isVideo, 0, audioLanguage)?.let {
+                        GenericFormats.applyTo(info, format, audioLanguage)?.let {
                             DownloadPlan(info, it, info.title, info.uploader, audioLanguage)
                         }
                     }
@@ -415,9 +414,7 @@ class DownloadViewModel : ViewModel() {
 
                 results.size == 1 -> {
                     val info = results.first()
-                    val chosen = if (format.isGeneric) {
-                        info.autoPick(isVideo, 0, audioLanguage) ?: format
-                    } else format
+                    val chosen = GenericFormats.applyTo(info, format, audioLanguage) ?: format
                     startDownload(
                         context = app,
                         format = chosen,
@@ -1554,6 +1551,7 @@ class DownloadViewModel : ViewModel() {
             // Generic rows carry a complete yt-dlp expression already.
             format.isGeneric -> {
                 addOption("-f", format.selector)
+                format.sort?.let { addOption("-S", it) }
                 needsMerge = isVideo
             }
             // Video-only stream: pair it with the audio track the sheet named, so the

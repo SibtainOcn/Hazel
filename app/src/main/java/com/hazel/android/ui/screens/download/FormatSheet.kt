@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.LineShimmer
+import com.hazel.android.ui.components.ShimmerHost
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.hazel.android.ui.components.FlatChip
@@ -91,6 +93,8 @@ fun FormatSheet(
     saveDirLabel: String,
     isCustomSaveDir: Boolean,
     isLoadingFormats: Boolean = false,
+    /** The link itself is still being read, so its details are not in yet. */
+    isReadingLink: Boolean = false,
     /** Reads this link's formats again, with the given reader or the setting's. */
     onRefreshFormats: ((ListingSource?) -> Unit)? = null,
     initialFormat: MediaFormat? = null,
@@ -187,16 +191,28 @@ fun FormatSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        stringResource(R.string.format_sheet_title),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        stringResource(R.string.format_sheet_subtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
+                    if (isReadingLink) {
+                        // Still reading: the heading shimmers in place of the words, so the
+                        // sheet reads as filling in rather than as finished.
+                        ShimmerHost {
+                            Column {
+                                LineShimmer(width = 140.dp, height = 22.dp)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                LineShimmer(width = 96.dp, height = 12.dp)
+                            }
+                        }
+                    } else {
+                        Text(
+                            stringResource(R.string.format_sheet_title),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            stringResource(R.string.format_sheet_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    }
                 }
                 // Left of the download action, and quieter than it. Playing what is already
                 // there is the smaller of the two things to do here, and it should not be
