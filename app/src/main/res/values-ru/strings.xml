@@ -612,4 +612,14 @@
     <string name="advanced_reset">Сбросить расширенные настройки</string>
     <string name="advanced_reset_title">Сбросить расширенные настройки?</string>
     <string name="advanced_reset_body">Все параметры на этом экране снова станут выключенными или пустыми.</string>
+    <string name="processing_step_fetch">Загрузка</string>
+    <string name="processing_step_merge">Слияние</string>
+    <string name="processing_step_extract">Извлечение</string>
+    <string name="processing_step_remux">Ремукс</string>
+    <string name="processing_step_subtitles">Субтитры</string>
+    <string name="processing_step_cut">Вырезка</string>
+    <string name="processing_step_tags">Теги</string>
+    <string name="processing_step_cover">Обложка</string>
+    <string name="processing_step_split">Разбивка</string>
+    <string name="processing_step_save">Сохранение</string>
 </resources>

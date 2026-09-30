@@ -599,4 +599,14 @@
     <string name="advanced_reset">Erweiterte Einstellungen zurücksetzen</string>
     <string name="advanced_reset_title">Erweiterte Einstellungen zurücksetzen?</string>
     <string name="advanced_reset_body">Jede Option auf dieser Seite wird wieder aus oder leer.</string>
+    <string name="processing_step_fetch">Laden</string>
+    <string name="processing_step_merge">Zusammenführen</string>
+    <string name="processing_step_extract">Extrahieren</string>
+    <string name="processing_step_remux">Umpacken</string>
+    <string name="processing_step_subtitles">Untertitel</string>
+    <string name="processing_step_cut">Schneiden</string>
+    <string name="processing_step_tags">Tags</string>
+    <string name="processing_step_cover">Cover</string>
+    <string name="processing_step_split">Teilen</string>
+    <string name="processing_step_save">Speichern</string>
 </resources>

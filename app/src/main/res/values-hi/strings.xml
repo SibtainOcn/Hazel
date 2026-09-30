@@ -599,4 +599,14 @@
     <string name="advanced_reset">एडवांस्ड सेटिंग्स रीसेट करें</string>
     <string name="advanced_reset_title">एडवांस्ड सेटिंग्स रीसेट करें?</string>
     <string name="advanced_reset_body">इस स्क्रीन का हर विकल्प फिर से बंद या खाली हो जाएगा।</string>
+    <string name="processing_step_fetch">लाना</string>
+    <string name="processing_step_merge">जोड़ना</string>
+    <string name="processing_step_extract">निकालना</string>
+    <string name="processing_step_remux">रीमक्स</string>
+    <string name="processing_step_subtitles">सबटाइटल</string>
+    <string name="processing_step_cut">काटना</string>
+    <string name="processing_step_tags">टैग</string>
+    <string name="processing_step_cover">कवर</string>
+    <string name="processing_step_split">बाँटना</string>
+    <string name="processing_step_save">सहेजना</string>
 </resources>

@@ -592,4 +592,14 @@
     <string name="advanced_reset">Atur ulang pengaturan lanjutan</string>
     <string name="advanced_reset_title">Atur ulang pengaturan lanjutan?</string>
     <string name="advanced_reset_body">Setiap opsi di layar ini kembali mati atau kosong.</string>
+    <string name="processing_step_fetch">Ambil</string>
+    <string name="processing_step_merge">Gabung</string>
+    <string name="processing_step_extract">Ekstrak</string>
+    <string name="processing_step_remux">Remux</string>
+    <string name="processing_step_subtitles">Subtitel</string>
+    <string name="processing_step_cut">Potong</string>
+    <string name="processing_step_tags">Tag</string>
+    <string name="processing_step_cover">Sampul</string>
+    <string name="processing_step_split">Pisah</string>
+    <string name="processing_step_save">Simpan</string>
 </resources>

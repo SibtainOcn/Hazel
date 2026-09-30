@@ -606,4 +606,14 @@
     <string name="advanced_reset">Restablecer ajustes avanzados</string>
     <string name="advanced_reset_title">¿Restablecer los ajustes avanzados?</string>
     <string name="advanced_reset_body">Cada opción de esta pantalla vuelve a desactivada o vacía.</string>
+    <string name="processing_step_fetch">Obtener</string>
+    <string name="processing_step_merge">Unir</string>
+    <string name="processing_step_extract">Extraer</string>
+    <string name="processing_step_remux">Remux</string>
+    <string name="processing_step_subtitles">Subtítulos</string>
+    <string name="processing_step_cut">Cortar</string>
+    <string name="processing_step_tags">Etiquetas</string>
+    <string name="processing_step_cover">Portada</string>
+    <string name="processing_step_split">Dividir</string>
+    <string name="processing_step_save">Guardar</string>
 </resources>

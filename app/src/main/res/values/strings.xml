@@ -649,4 +649,14 @@
     <string name="advanced_reset">Reset advanced settings</string>
     <string name="advanced_reset_title">Reset advanced settings?</string>
     <string name="advanced_reset_body">Every option on this screen goes back to off or empty.</string>
+    <string name="processing_step_fetch">Fetch</string>
+    <string name="processing_step_merge">Merge</string>
+    <string name="processing_step_extract">Extract</string>
+    <string name="processing_step_remux">Remux</string>
+    <string name="processing_step_subtitles">Subtitles</string>
+    <string name="processing_step_cut">Cut</string>
+    <string name="processing_step_tags">Tags</string>
+    <string name="processing_step_cover">Cover</string>
+    <string name="processing_step_split">Split</string>
+    <string name="processing_step_save">Save</string>
 </resources>

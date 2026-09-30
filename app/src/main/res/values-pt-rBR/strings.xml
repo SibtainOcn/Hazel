@@ -606,4 +606,14 @@
     <string name="advanced_reset">Redefinir configurações avançadas</string>
     <string name="advanced_reset_title">Redefinir as configurações avançadas?</string>
     <string name="advanced_reset_body">Cada opção desta tela volta a ficar desligada ou vazia.</string>
+    <string name="processing_step_fetch">Buscar</string>
+    <string name="processing_step_merge">Juntar</string>
+    <string name="processing_step_extract">Extrair</string>
+    <string name="processing_step_remux">Remux</string>
+    <string name="processing_step_subtitles">Legendas</string>
+    <string name="processing_step_cut">Cortar</string>
+    <string name="processing_step_tags">Tags</string>
+    <string name="processing_step_cover">Capa</string>
+    <string name="processing_step_split">Dividir</string>
+    <string name="processing_step_save">Salvar</string>
 </resources>

@@ -592,4 +592,14 @@
     <string name="advanced_reset">重置高级设置</string>
     <string name="advanced_reset_title">重置高级设置？</string>
     <string name="advanced_reset_body">此页面上的每个选项都将恢复为关闭或空白。</string>
+    <string name="processing_step_fetch">获取</string>
+    <string name="processing_step_merge">合并</string>
+    <string name="processing_step_extract">提取</string>
+    <string name="processing_step_remux">重封装</string>
+    <string name="processing_step_subtitles">字幕</string>
+    <string name="processing_step_cut">剪切</string>
+    <string name="processing_step_tags">标签</string>
+    <string name="processing_step_cover">封面</string>
+    <string name="processing_step_split">分割</string>
+    <string name="processing_step_save">保存</string>
 </resources>

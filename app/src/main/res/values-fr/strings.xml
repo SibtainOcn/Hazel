@@ -606,4 +606,14 @@
     <string name="advanced_reset">Réinitialiser les réglages avancés</string>
     <string name="advanced_reset_title">Réinitialiser les réglages avancés ?</string>
     <string name="advanced_reset_body">Chaque option de cet écran redevient désactivée ou vide.</string>
+    <string name="processing_step_fetch">Récupérer</string>
+    <string name="processing_step_merge">Fusionner</string>
+    <string name="processing_step_extract">Extraire</string>
+    <string name="processing_step_remux">Remux</string>
+    <string name="processing_step_subtitles">Sous-titres</string>
+    <string name="processing_step_cut">Couper</string>
+    <string name="processing_step_tags">Tags</string>
+    <string name="processing_step_cover">Pochette</string>
+    <string name="processing_step_split">Diviser</string>
+    <string name="processing_step_save">Enregistrer</string>
 </resources>

@@ -592,4 +592,14 @@
     <string name="advanced_reset">詳細設定をリセット</string>
     <string name="advanced_reset_title">詳細設定をリセットしますか？</string>
     <string name="advanced_reset_body">この画面のすべての項目がオフまたは空に戻ります。</string>
+    <string name="processing_step_fetch">取得</string>
+    <string name="processing_step_merge">結合</string>
+    <string name="processing_step_extract">抽出</string>
+    <string name="processing_step_remux">リマックス</string>
+    <string name="processing_step_subtitles">字幕</string>
+    <string name="processing_step_cut">カット</string>
+    <string name="processing_step_tags">タグ</string>
+    <string name="processing_step_cover">カバー</string>
+    <string name="processing_step_split">分割</string>
+    <string name="processing_step_save">保存</string>
 </resources>
