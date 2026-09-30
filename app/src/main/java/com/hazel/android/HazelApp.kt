@@ -7,7 +7,6 @@ import coil3.SingletonImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
 import android.util.Log
-import com.hazel.android.data.SettingsRepository
 import com.hazel.android.update.YtDlpUpdater
 import com.hazel.android.utils.CrashLogger
 import com.yausername.ffmpeg.FFmpeg
@@ -16,7 +15,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -75,22 +73,21 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
             try {
                 YoutubeDL.getInstance().init(this@HazelApp)
                 FFmpeg.getInstance().init(this@HazelApp)
+                // A binary cut short by an older build's in-place update fails every run,
+                // so it is replaced with the bundled copy before anything uses it.
+                YtDlpUpdater.ensureValidBinary(this@HazelApp)
+                // A build fetched last session while something was downloading goes live
+                // now, before this session's first run.
+                YtDlpUpdater.applyStagedUpdate(this@HazelApp)
                 Log.i("Hazel", "yt-dlp + FFmpeg initialized")
             } catch (e: Exception) {
                 Log.e("Hazel", "Library init failed: ${e.message}")
+                return@launch
             }
 
-            // Update the yt-dlp binary on the channel selected in the update screen.
-            // The same path is triggered manually from the yt-dlp update screen.
-            try {
-                val channel = YtDlpUpdater.Channel.fromLabel(
-                    SettingsRepository.getYtDlpChannel(this@HazelApp).first()
-                )
-                val status = YtDlpUpdater.install(this@HazelApp, channel)
-                Log.i("Hazel", "yt-dlp update (${channel.label}): $status")
-            } catch (e: Exception) {
-                Log.w("Hazel", "yt-dlp update failed: ${e.message}")
-            }
+            // Fetched in the background and swapped in only while nothing is running, so
+            // a download started meanwhile keeps the binary it started with.
+            YtDlpUpdater.autoUpdateIfAvailable(this@HazelApp)
         }
     }
 

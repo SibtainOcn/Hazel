@@ -2,6 +2,7 @@ package com.hazel.android.download
 
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkEntry
+import com.hazel.android.util.UrlExtractor
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.CancellationException
@@ -84,7 +85,7 @@ object MediaProbe {
 
         activeProcessIds.add(processId)
         try {
-            val response = YoutubeDL.getInstance().execute(request, processId, null)
+            val response = YtDlpEngine.execute(request, processId)
             val payload = response.out.trim().takeIf { it.isNotBlank() }
                 ?: throw IllegalStateException("No metadata returned")
 
@@ -116,6 +117,8 @@ object MediaProbe {
         val text = message?.lowercase() ?: return false
         return SIGN_IN_REFUSALS.any { it in text }
     }
+
+    private val YOUTUBE_VIDEO_ID = Regex("[A-Za-z0-9_-]{11}")
 
     private val SIGN_IN_REFUSALS = listOf(
         "sign in", "log in", "login", "private video", "members-only", "members only",
@@ -187,7 +190,7 @@ object MediaProbe {
 
         activeProcessIds.add(processId)
         val payload = try {
-            YoutubeDL.getInstance().execute(request, processId, null).out.trim()
+            YtDlpEngine.execute(request, processId).out.trim()
                 .takeIf { it.isNotBlank() }
                 ?: throw IllegalStateException("No metadata returned")
         } finally {
@@ -205,9 +208,10 @@ object MediaProbe {
         }
 
         val listed = buildList {
-            for (index in 0 until entries!!.length()) {
+            val length = entries.length()
+            for (index in 0 until length) {
                 val entry = entries.optJSONObject(index) ?: continue
-                toEntry(entry)?.let { add(it) }
+                toEntry(entry, url)?.let { add(it) }
             }
         }
 
@@ -233,17 +237,39 @@ object MediaProbe {
     }
 
     /** Reads one entry of a flat listing, which carries no formats by design. */
-    private fun toEntry(json: JSONObject): LinkEntry? {
-        val address = firstNonBlank(
+    private fun toEntry(json: JSONObject, parentUrl: String = ""): LinkEntry? {
+        val rawAddress = firstNonBlank(
             json.optString("webpage_url"),
             json.optString("url"),
             json.optString("original_url")
-        ).takeIf { it.isNotBlank() && it.startsWith("http") } ?: return null
+        )
+        val isYouTube = isYouTube(parentUrl) ||
+                json.optString("ie_key").equals("Youtube", ignoreCase = true) ||
+                json.optString("extractor_key").equals("Youtube", ignoreCase = true) ||
+                json.optString("extractor").equals("youtube", ignoreCase = true)
+
+        val address = when {
+            rawAddress.startsWith("http") -> rawAddress
+            // A YouTube listing may give a bare video id where an address would be.
+            isYouTube && YOUTUBE_VIDEO_ID.matches(rawAddress) -> "https://www.youtube.com/watch?v=$rawAddress"
+            isYouTube && YOUTUBE_VIDEO_ID.matches(json.optString("id")) ->
+                "https://www.youtube.com/watch?v=${json.optString("id")}"
+            // Anything else without a full address cannot be read on its own later.
+            else -> return null
+        }
 
         val title = firstNonBlank(json.optString("title"), json.optString("alt_title"))
         // Entries a source has withdrawn still occupy a slot in the listing. They cannot be
         // downloaded, so they are left out rather than shown as cards that will fail.
         if (title in UNAVAILABLE_TITLES) return null
+
+        val ytId = if (isYouTube || isYouTube(address)) {
+            UrlExtractor.extractYouTubeId(address)
+                ?: json.optString("id").takeIf { YOUTUBE_VIDEO_ID.matches(it) }
+        } else null
+
+        val thumb = resolveThumbnail(json)
+            ?: ytId?.let { "https://i.ytimg.com/vi/$it/hqdefault.jpg" }
 
         return LinkEntry(
             url = address,
@@ -254,7 +280,7 @@ object MediaProbe {
                 json.optString("channel"),
                 json.optString("uploader_id")
             ),
-            thumbnail = resolveThumbnail(json),
+            thumbnail = thumb,
             durationSeconds = resolveDuration(json)
         )
     }
@@ -440,7 +466,15 @@ object MediaProbe {
                 root.optString("uploader"),
                 root.optString("channel")
             ),
-            thumbnail = resolveThumbnail(media) ?: resolveThumbnail(root),
+            thumbnail = resolveThumbnail(media)
+                ?: resolveThumbnail(root)
+                ?: (if (isYouTube(url) ||
+                        root.optString("extractor_key").equals("Youtube", ignoreCase = true) ||
+                        media.optString("extractor_key").equals("Youtube", ignoreCase = true)) {
+                    UrlExtractor.extractYouTubeId(url)
+                        ?: UrlExtractor.extractYouTubeId(media.optString("webpage_url"))
+                        ?: UrlExtractor.extractYouTubeId(root.optString("webpage_url"))
+                } else null)?.let { "https://i.ytimg.com/vi/$it/hqdefault.jpg" },
             durationSeconds = duration,
             // The generic row stands in only where the source named nothing concrete. A
             // list that already holds real formats does not need it: it says nothing the
@@ -641,11 +675,14 @@ object MediaProbe {
         json.optString("thumbnail").takeIf { it.isNotBlank() && it != "null" }?.let { return it }
 
         val thumbs = json.optJSONArray("thumbnails") ?: return null
+        if (thumbs.length() == 0) return null
+
         return (0 until thumbs.length())
             .mapNotNull { thumbs.optJSONObject(it) }
             .maxByOrNull { it.optInt("preference", 0) * 100_000 + it.optInt("width", 0) }
             ?.optString("url")
-            ?.takeIf { it.isNotBlank() }
+            ?.takeIf { it.isNotBlank() && it != "null" }
+            ?: (thumbs.optJSONObject(thumbs.length() - 1)?.optString("url")?.takeIf { it.isNotBlank() && it != "null" })
     }
 
     /** Duration arrives as a number, a string, or not at all. */

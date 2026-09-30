@@ -170,7 +170,13 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
 
         updateJob = viewModelScope.launch {
             try {
-                YtDlpUpdater.install(getApplication(), info.channel)
+                YtDlpUpdater.install(getApplication(), info.channel) { done, total ->
+                    _uiState.value = UiState.Updating(
+                        info,
+                        progressBytes = done,
+                        totalBytes = if (total > 0) total else info.binarySize
+                    )
+                }
                 refreshInstalledVersion()
                 SettingsRepository.setYtDlpUpdateAvailable(getApplication(), false)
                 _uiState.value = UiState.Installed(_installedVersion.value ?: info.version)
