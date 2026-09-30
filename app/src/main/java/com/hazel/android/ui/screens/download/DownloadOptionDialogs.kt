@@ -300,7 +300,7 @@ private fun ToggleRow(
 
 /** Single-line editor shared by the template and subtitle-language dialogs. */
 @Composable
-private fun TextInputDialog(
+internal fun TextInputDialog(
     title: String,
     hint: String,
     value: String,

@@ -35,6 +35,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -110,6 +111,13 @@ fun BatchDownloadSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val state = rememberBatchDownloadState(results)
+    // The set starts from the download settings, and follows them if they change.
+    LaunchedEffect(
+        options.videoQuality, options.preferredVideoCodec,
+        options.preferredAudioLanguage, options.preferredAudioCodec
+    ) {
+        state.applyPreferences(options)
+    }
     var openSheet by remember { mutableStateOf(BatchSheet.NONE) }
     var listMenuOpen by remember { mutableStateOf(false) }
 

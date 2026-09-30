@@ -66,6 +66,8 @@ import com.hazel.android.ui.screens.more.FetchSettingsScreen
 import com.hazel.android.ui.screens.more.MoreScreen
 import com.hazel.android.ui.screens.more.StorageCleanupScreen
 import com.hazel.android.ui.screens.more.StorageLocationsScreen
+import com.hazel.android.ui.screens.more.ProcessingScreen
+import com.hazel.android.ui.screens.more.AdvancedScreen
 import com.hazel.android.ui.screens.more.ToolsScreen
 import com.hazel.android.ui.screens.more.SoftwareUpdateScreen
 import com.hazel.android.ui.screens.more.HazelUpdateScreen
@@ -122,7 +124,8 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val isSubScreen = currentRoute in listOf(
-        "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "sponsor", "software_update", "hazel_update", "ytdlp_update"
+        "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "sponsor", "software_update", "hazel_update", "ytdlp_update",
+        "processing", "advanced"
     )
 
     val downloadViewModel: com.hazel.android.download.DownloadViewModel =
@@ -309,6 +312,8 @@ fun AppNavigation(
                     onNavigateToAppearance = { navController.navigate("appearance") },
                     onNavigateToConverter = { navController.navigate("converter") },
                     onNavigateToStorageLocations = { navController.navigate("storage_locations") },
+                    onNavigateToProcessing = { navController.navigate("processing") },
+                    onNavigateToAdvanced = { navController.navigate("advanced") },
                     onNavigateToCookies = { navController.navigate("cookies") },
                     onNavigateToFetchSettings = { navController.navigate("fetch_settings") },
                     onNavigateToSponsor = { navController.navigate("sponsor") },
@@ -330,6 +335,12 @@ fun AppNavigation(
                 SponsorScreen(onBack = { navController.popBackStack() })
             }
 
+            composable("processing") {
+                ProcessingScreen(onBack = { navController.popBackStack() })
+            }
+            composable("advanced") {
+                AdvancedScreen(onBack = { navController.popBackStack() })
+            }
             composable("storage_locations") {
                 StorageLocationsScreen(onBack = { navController.popBackStack() })
             }

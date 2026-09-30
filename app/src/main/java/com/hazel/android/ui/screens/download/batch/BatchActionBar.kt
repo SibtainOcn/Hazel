@@ -143,7 +143,7 @@ fun BatchActionBar(
                 BarChip(
                     label = stringResource(R.string.batch_bar_sponsorblock),
                     icon = Icons.Filled.Paid,
-                    badge = options.sponsorBlockFilters.size,
+                    badge = options.sponsorBlockBadge,
                     onClick = onSponsorBlock
                 )
                 BarChip(

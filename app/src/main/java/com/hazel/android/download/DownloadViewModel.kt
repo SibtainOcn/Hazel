@@ -1633,6 +1633,7 @@ class DownloadViewModel : ViewModel() {
         // reachable, under the identity they were collected with. The read that filled the
         // sheet used the same ones, so the format ids it showed are the ids this asks for.
         applySiteAccess(access, url)
+        applyAdvanced(url)
 
         // Whether the two streams have to be muxed back together after the download. The
         // container option decides the result when one was chosen, otherwise mp4 is used
@@ -1647,7 +1648,20 @@ class DownloadViewModel : ViewModel() {
             // Generic rows carry a complete yt-dlp expression already.
             format.isGeneric -> {
                 addOption("-f", format.selector)
-                format.sort?.let { addOption("-S", it) }
+                // A preferred codec is sorted after what the row itself asks for, so it
+                // decides between streams of that quality and never costs resolution or
+                // bitrate. yt-dlp reads "vcodec:h264" as h264 first, then anything plainer.
+                val codecSort = if (isVideo) {
+                    options.videoCodecPreference?.let { "vcodec:${it.sortKey}" }
+                } else {
+                    options.audioCodecPreference?.let { "acodec:${it.sortKey}" }
+                }
+                val sort = when {
+                    codecSort == null -> format.sort
+                    isVideo -> "${format.sort ?: "res"},$codecSort"
+                    else -> "${format.sort ?: "abr"},$codecSort"
+                }
+                sort?.let { addOption("-S", it) }
                 needsMerge = isVideo
             }
             // Video-only stream: pair it with the audio track the sheet named, so the
@@ -1736,7 +1750,7 @@ class DownloadViewModel : ViewModel() {
         }
 
         applyChapters(options, isVideo)
-        applySponsorBlock(options)
+        applySponsorBlock(options, isVideo)
         if (isVideo) applySubtitles(options)
         applyMetadata(title, author)
         // Music players group cover art by album, and a file with no album tag is filed
@@ -1744,6 +1758,8 @@ class DownloadViewModel : ViewModel() {
         // cover. A source's own album is kept, so an album's tracks still group together;
         // anything else is its own album, named after the track.
         if (!isVideo) addOption("--parse-metadata", "%(album,title)s:%(meta_album)s")
+        // Last, so an extra argument from the advanced settings can change what was set above.
+        applyExtraDownloadArguments()
     }
 
     /**
@@ -1752,7 +1768,10 @@ class DownloadViewModel : ViewModel() {
      */
     private fun YoutubeDLRequest.applyChapters(options: DownloadOptions, isVideo: Boolean) {
         if (isVideo && options.addChapters) {
-            addOption("--sponsorblock-mark", "all")
+            // The source's own chapters are embedded either way. SponsorBlock's segments
+            // are added as chapters of their own only while SponsorBlock is in use, since
+            // marking them means asking its server about every video.
+            if (options.useSponsorBlock) addOption("--sponsorblock-mark", "all")
             addOption("--embed-chapters")
         }
         if (options.splitByChapters) {
@@ -1776,19 +1795,24 @@ class DownloadViewModel : ViewModel() {
      * The endpoint is passed explicitly so a change of default in yt-dlp cannot silently
      * redirect the lookups.
      */
-    private fun YoutubeDLRequest.applySponsorBlock(options: DownloadOptions) {
+    private fun YoutubeDLRequest.applySponsorBlock(options: DownloadOptions, isVideo: Boolean) {
+        if (!options.useSponsorBlock) return
         val filters = options.sponsorBlockFilters.filter { it.isNotBlank() }
         if (filters.isNotEmpty()) {
             addOption("--sponsorblock-remove", filters.joinToString(","))
         }
-        if (filters.isNotEmpty() || options.addChapters) {
-            addOption("--sponsorblock-api", SponsorBlock.API_URL)
+        if (filters.isNotEmpty() || (isVideo && options.addChapters)) {
+            addOption("--sponsorblock-api", options.sponsorBlockServer)
         }
     }
 
     /** Subtitle downloading and embedding, both driven by the same language selector. */
     private fun YoutubeDLRequest.applySubtitles(options: DownloadOptions) {
-        if (options.writeSubs) addOption("--write-subs")
+        // yt-dlp keeps the subtitle files it embedded only when they were also asked for as
+        // files, so keeping them after embedding is asking for them as files as well.
+        if (options.writeSubs || (options.embedSubs && !options.deleteSubsAfterEmbed)) {
+            addOption("--write-subs")
+        }
         if (options.writeAutoSubs) addOption("--write-auto-subs")
         if (options.embedSubs) addOption("--embed-subs")
 

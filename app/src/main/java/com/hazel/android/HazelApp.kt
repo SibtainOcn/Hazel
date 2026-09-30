@@ -56,6 +56,14 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
             delay(LIBRARY_INIT_FALLBACK_MS)
             startLibraryInit()
         }
+
+        // The advanced engine settings are read by every request, so they are held in
+        // memory and kept in step with storage from here on.
+        applicationScope.launch {
+            com.hazel.android.data.SettingsRepository.getAdvancedSettings(this@HazelApp).collect {
+                com.hazel.android.download.AdvancedSettingsStore.current = it
+            }
+        }
     }
 
     /**

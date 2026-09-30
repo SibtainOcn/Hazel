@@ -52,6 +52,19 @@ data class MediaInfo(
         get() = audioFormats.mapNotNull { it.language }.distinct()
 
     /**
+     * The soundtrack of this media that answers to a preferred language, or null when it has
+     * none. Sources write the same language in more than one way ("hi", "hi-IN"), so an exact
+     * match is tried first and then one on the language alone.
+     */
+    fun languageMatching(preferred: String): String? {
+        val wanted = preferred.trim()
+        if (wanted.isBlank()) return null
+        val base = wanted.substringBefore('-').lowercase()
+        return audioLanguages.firstOrNull { it.equals(wanted, ignoreCase = true) }
+            ?: audioLanguages.firstOrNull { it.substringBefore('-').lowercase() == base }
+    }
+
+    /**
      * The best audio in [language], falling back to the best of any when it has none.
      *
      * With a [codec] asked for, the best stream of that codec is preferred. A source that
@@ -95,12 +108,21 @@ data class MediaInfo(
         isVideo: Boolean,
         maxHeight: Int,
         audioLanguage: String? = null,
-        audioCodec: AudioCodec? = null
+        audioCodec: AudioCodec? = null,
+        videoCodec: VideoCodec? = null
     ): MediaFormat? {
         if (!isVideo) return bestAudioFor(audioLanguage, audioCodec)
         if (videoFormats.isEmpty()) return null
 
         val concrete = videoFormats.filter { !it.isGeneric }
+        // A preferred codec is taken at the height the ceiling lands on, never by giving
+        // up resolution for it: a sharper picture in another codec is the better answer.
+        val chosen = pickVideo(concrete, maxHeight) ?: return null
+        if (videoCodec == null || chosen.isGeneric) return chosen
+        return concrete.firstOrNull { it.height == chosen.height && videoCodec.matches(it) } ?: chosen
+    }
+
+    private fun pickVideo(concrete: List<MediaFormat>, maxHeight: Int): MediaFormat? {
         if (maxHeight == WORST_HEIGHT) {
             return concrete.minByOrNull { it.height } ?: WORST_VIDEO
         }
@@ -234,6 +256,25 @@ val WORST_VIDEO = MediaFormat(
  * of the same track sends whichever is asked for, and the file keeps it unless a different
  * output format is chosen as well.
  */
+/**
+ * A video codec a download can prefer.
+ *
+ * Matched on the `vcodec` a source reports, by the names it goes by there (H.264 is written
+ * "avc1" by YouTube and "h264" elsewhere). [sortKey] is the name yt-dlp's format sorting
+ * uses, for the generic rows that are resolved by yt-dlp rather than picked from a list.
+ */
+enum class VideoCodec(val label: String, private val prefixes: List<String>, val sortKey: String) {
+    H264("H.264 (AVC)", listOf("avc", "h264"), "h264"),
+    H265("H.265 (HEVC)", listOf("hvc", "hev", "h265"), "h265"),
+    VP9("VP9", listOf("vp9", "vp09"), "vp9"),
+    AV1("AV1", listOf("av01", "av1"), "av01");
+
+    fun matches(format: MediaFormat): Boolean {
+        val codec = format.vcodec?.lowercase()?.takeIf { it.isNotBlank() && it != "none" } ?: return false
+        return prefixes.any { codec.startsWith(it) }
+    }
+}
+
 enum class AudioCodec(
     /** Badge text, the way codecs are written everywhere else in the app. */
     val label: String,
@@ -247,6 +288,16 @@ enum class AudioCodec(
     VORBIS("VORBIS", "vorbis", setOf("ogg", "oga")),
     MP3("MP3", "mp3", setOf("mp3")),
     FLAC("FLAC", "flac", setOf("flac"));
+
+    /** The name yt-dlp's format sorting uses for this codec. */
+    val sortKey: String
+        get() = when (this) {
+            OPUS -> "opus"
+            AAC -> "aac"
+            VORBIS -> "vorbis"
+            MP3 -> "mp3"
+            FLAC -> "flac"
+        }
 
     /**
      * Whether [format] is in this codec. Many sites name the codec; the rest are read from

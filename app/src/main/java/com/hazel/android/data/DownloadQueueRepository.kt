@@ -247,6 +247,9 @@ object DownloadQueueRepository {
         put("writeSubs", options.writeSubs)
         put("writeAutoSubs", options.writeAutoSubs)
         put("subLanguages", options.subLanguages)
+        put("deleteSubsAfterEmbed", options.deleteSubsAfterEmbed)
+        put("useSponsorBlock", options.useSponsorBlock)
+        put("sponsorBlockApiUrl", options.sponsorBlockApiUrl)
     }
 
     private fun decodeOptions(json: JSONObject?): DownloadOptions {
@@ -273,7 +276,10 @@ object DownloadQueueRepository {
             writeSubs = json.optBoolean("writeSubs"),
             writeAutoSubs = json.optBoolean("writeAutoSubs"),
             subLanguages = json.optString("subLanguages")
-                .ifBlank { DownloadOptions.DEFAULT_SUB_LANGUAGES }
+                .ifBlank { DownloadOptions.DEFAULT_SUB_LANGUAGES },
+            deleteSubsAfterEmbed = json.optBoolean("deleteSubsAfterEmbed", true),
+            useSponsorBlock = json.optBoolean("useSponsorBlock", true),
+            sponsorBlockApiUrl = json.optString("sponsorBlockApiUrl")
         )
     }
 }

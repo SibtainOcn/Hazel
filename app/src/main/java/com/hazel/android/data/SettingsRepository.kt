@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.hazel.android.download.DownloadOptions
@@ -96,6 +97,13 @@ object SettingsRepository {
         val writeSubs = booleanPreferencesKey("${prefix}write_subs")
         val writeAutoSubs = booleanPreferencesKey("${prefix}write_auto_subs")
         val subLanguages = stringPreferencesKey("${prefix}sub_languages")
+        val deleteSubsAfterEmbed = booleanPreferencesKey("${prefix}delete_subs_after_embed")
+        val useSponsorBlock = booleanPreferencesKey("${prefix}use_sponsorblock")
+        val sponsorBlockApiUrl = stringPreferencesKey("${prefix}sponsorblock_api_url")
+        val preferredAudioLanguage = stringPreferencesKey("${prefix}preferred_audio_language")
+        val preferredAudioCodec = stringPreferencesKey("${prefix}preferred_audio_codec")
+        val preferredVideoCodec = stringPreferencesKey("${prefix}preferred_video_codec")
+        val videoQuality = intPreferencesKey("${prefix}video_quality")
     }
 
     private val SHEET_OPTIONS = OptionKeys("")
@@ -116,7 +124,14 @@ object SettingsRepository {
             writeSubs = this[keys.writeSubs] ?: defaults.writeSubs,
             writeAutoSubs = this[keys.writeAutoSubs] ?: defaults.writeAutoSubs,
             subLanguages = (this[keys.subLanguages] ?: defaults.subLanguages)
-                .takeUnless { it == DownloadOptions.LEGACY_SUB_LANGUAGES } ?: defaults.subLanguages
+                .takeUnless { it == DownloadOptions.LEGACY_SUB_LANGUAGES } ?: defaults.subLanguages,
+            deleteSubsAfterEmbed = this[keys.deleteSubsAfterEmbed] ?: defaults.deleteSubsAfterEmbed,
+            useSponsorBlock = this[keys.useSponsorBlock] ?: defaults.useSponsorBlock,
+            sponsorBlockApiUrl = this[keys.sponsorBlockApiUrl] ?: defaults.sponsorBlockApiUrl,
+            preferredAudioLanguage = this[keys.preferredAudioLanguage] ?: defaults.preferredAudioLanguage,
+            preferredAudioCodec = this[keys.preferredAudioCodec] ?: defaults.preferredAudioCodec,
+            preferredVideoCodec = this[keys.preferredVideoCodec] ?: defaults.preferredVideoCodec,
+            videoQuality = this[keys.videoQuality] ?: defaults.videoQuality
         )
     }
 
@@ -134,6 +149,13 @@ object SettingsRepository {
         this[keys.writeSubs] = options.writeSubs
         this[keys.writeAutoSubs] = options.writeAutoSubs
         this[keys.subLanguages] = options.subLanguages
+        this[keys.deleteSubsAfterEmbed] = options.deleteSubsAfterEmbed
+        this[keys.useSponsorBlock] = options.useSponsorBlock
+        this[keys.sponsorBlockApiUrl] = options.sponsorBlockApiUrl
+        this[keys.preferredAudioLanguage] = options.preferredAudioLanguage
+        this[keys.preferredAudioCodec] = options.preferredAudioCodec
+        this[keys.preferredVideoCodec] = options.preferredVideoCodec
+        this[keys.videoQuality] = options.videoQuality
     }
 
     fun getDownloadOptions(context: Context): Flow<DownloadOptions> =
@@ -141,6 +163,57 @@ object SettingsRepository {
 
     suspend fun setDownloadOptions(context: Context, options: DownloadOptions) {
         context.dataStore.edit { prefs -> prefs.writeOptions(SHEET_OPTIONS, options) }
+    }
+
+    // ── Advanced ──
+    //
+    // Engine options for difficult sources. Read by every request through
+    // AdvancedSettingsStore, which the app keeps in step with what is stored here.
+
+    private val ADV_PLAYER_CLIENTS = stringPreferencesKey("adv_player_clients")
+    private val ADV_PO_TOKENS = stringPreferencesKey("adv_po_tokens")
+    private val ADV_VISITOR_DATA = stringPreferencesKey("adv_visitor_data")
+    private val ADV_METADATA_LANGUAGE = booleanPreferencesKey("adv_metadata_app_language")
+    private val ADV_YOUTUBE_ARGS = stringPreferencesKey("adv_youtube_extra_args")
+    private val ADV_DOWNLOAD_ARGS = stringPreferencesKey("adv_download_extra_args")
+    private val ADV_NO_CHECK_CERTS = booleanPreferencesKey("adv_no_check_certificates")
+    private val ADV_SLEEP_REQUESTS = intPreferencesKey("adv_sleep_requests")
+
+    fun getAdvancedSettings(context: Context): Flow<com.hazel.android.download.AdvancedSettings> =
+        context.dataStore.data.map { prefs ->
+            com.hazel.android.download.AdvancedSettings(
+                playerClients = prefs[ADV_PLAYER_CLIENTS].orEmpty().split(',').map { it.trim() }.filter { it.isNotBlank() },
+                poTokens = prefs[ADV_PO_TOKENS].orEmpty(),
+                visitorData = prefs[ADV_VISITOR_DATA].orEmpty(),
+                metadataInAppLanguage = prefs[ADV_METADATA_LANGUAGE] ?: false,
+                youtubeExtraArgs = prefs[ADV_YOUTUBE_ARGS].orEmpty(),
+                downloadExtraArgs = prefs[ADV_DOWNLOAD_ARGS].orEmpty(),
+                noCheckCertificates = prefs[ADV_NO_CHECK_CERTS] ?: false,
+                sleepRequestsSeconds = prefs[ADV_SLEEP_REQUESTS] ?: 0
+            )
+        }
+
+    suspend fun setAdvancedSettings(context: Context, settings: com.hazel.android.download.AdvancedSettings) {
+        context.dataStore.edit { prefs ->
+            prefs[ADV_PLAYER_CLIENTS] = settings.playerClients.joinToString(",")
+            prefs[ADV_PO_TOKENS] = settings.poTokens
+            prefs[ADV_VISITOR_DATA] = settings.visitorData
+            prefs[ADV_METADATA_LANGUAGE] = settings.metadataInAppLanguage
+            prefs[ADV_YOUTUBE_ARGS] = settings.youtubeExtraArgs
+            prefs[ADV_DOWNLOAD_ARGS] = settings.downloadExtraArgs
+            prefs[ADV_NO_CHECK_CERTS] = settings.noCheckCertificates
+            prefs[ADV_SLEEP_REQUESTS] = settings.sleepRequestsSeconds
+        }
+        // In force at once, rather than when the stored value next comes round.
+        com.hazel.android.download.AdvancedSettingsStore.current = settings
+    }
+
+    /** Every download option and preference back to how the app ships. */
+    suspend fun resetDownloadOptions(context: Context) = setDownloadOptions(context, DownloadOptions())
+
+    /** Applies [change] to the saved options in one step, so two quick changes cannot race. */
+    suspend fun updateDownloadOptions(context: Context, change: (DownloadOptions) -> DownloadOptions) {
+        context.dataStore.edit { prefs -> prefs.writeOptions(SHEET_OPTIONS, change(prefs.readOptions(SHEET_OPTIONS))) }
     }
 
     // ── Link reading ──

@@ -33,8 +33,40 @@ data class DownloadOptions(
     val embedSubs: Boolean = true,
     val writeSubs: Boolean = false,
     val writeAutoSubs: Boolean = false,
-    val subLanguages: String = DEFAULT_SUB_LANGUAGES
+    val subLanguages: String = DEFAULT_SUB_LANGUAGES,
+    /**
+     * With subtitles embedded, the subtitle files are removed once they are in the video.
+     * Off, they are kept beside it, which is yt-dlp's `--write-subs` next to `--embed-subs`.
+     */
+    val deleteSubsAfterEmbed: Boolean = true,
+
+    /** SponsorBlock at all. Off, nothing is cut or marked whatever the categories say. */
+    val useSponsorBlock: Boolean = true,
+    /** The SponsorBlock server to ask. Blank is the public one, [SponsorBlock.API_URL]. */
+    val sponsorBlockApiUrl: String = "",
+
+    // ── Preferences the sheets start from. None of them is passed to yt-dlp as such:
+    // they decide which format is picked before the download is asked for. ──
+
+    /** Soundtrack to prefer, as a language tag ("hi", "en"). Blank takes the source's own. */
+    val preferredAudioLanguage: String = "",
+    /** [AudioCodec] name to prefer. Blank prefers none. */
+    val preferredAudioCodec: String = "",
+    /** [VideoCodec] name to prefer. Blank prefers none. */
+    val preferredVideoCodec: String = "",
+    /** Video quality to start from: 0 is best, a height is a ceiling, [WORST_HEIGHT] worst. */
+    val videoQuality: Int = 0
 ) {
+    val audioCodecPreference: AudioCodec?
+        get() = AudioCodec.entries.firstOrNull { it.name == preferredAudioCodec }
+
+    val videoCodecPreference: VideoCodec?
+        get() = VideoCodec.entries.firstOrNull { it.name == preferredVideoCodec }
+
+    /** The SponsorBlock server a request goes to. */
+    val sponsorBlockServer: String
+        get() = sponsorBlockApiUrl.trim().trimEnd('/').ifBlank { SponsorBlock.API_URL }
+
     /**
      * Count shown on the Chapters chip badge. Embedding only applies to a video download,
      * so it is left out of the count on the audio tab.
@@ -45,6 +77,10 @@ data class DownloadOptions(
     /** Count shown on the Thumbnail chip badge: cover art on, and cropped. */
     val thumbnailBadge: Int
         get() = listOf(embedThumbnail, embedThumbnail && cropThumbnail).count { it }
+
+    /** Count shown on the SponsorBlock chip badge: the categories cut, while it is on. */
+    val sponsorBlockBadge: Int
+        get() = if (useSponsorBlock) sponsorBlockFilters.size else 0
 
     /** Count shown on the Subtitles chip badge. */
     val subtitleBadge: Int
@@ -58,7 +94,7 @@ data class DownloadOptions(
          * and a single one refused (YouTube answers a burst with 429) fails the whole
          * download, since yt-dlp treats a subtitle it could not fetch as an error.
          */
-        const val DEFAULT_SUB_LANGUAGES = "en,en-US,en-GB,.*-orig"
+        const val DEFAULT_SUB_LANGUAGES = "en,en-US,en-GB,en-IN,en-CA,en-AU,.*-orig"
 
         /** The default before it was narrowed, still stored for anyone who never changed it. */
         const val LEGACY_SUB_LANGUAGES = "en.*,.*-orig"

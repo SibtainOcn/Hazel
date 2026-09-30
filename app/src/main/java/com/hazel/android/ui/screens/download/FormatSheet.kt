@@ -141,16 +141,32 @@ fun FormatSheet(
     // Both are keyed on whether the formats have arrived, because a card that came from a
     // listing opens this sheet before they have. Without that the sheet would keep the
     // stand-in it was opened with and never move to the real best.
-    var pickedVideo by remember(info.url, info.hasResolvedFormats) {
+    //
+    // With nothing chosen yet, each starts from the preferences in the download settings:
+    // the quality ceiling and codec for video, the language and codec for audio. They are
+    // keyed on as well, because the saved settings arrive a moment after the sheet opens.
+    val preferredLanguage = remember(info.url, info.hasResolvedFormats, options.preferredAudioLanguage) {
+        info.languageMatching(options.preferredAudioLanguage)
+    }
+    var pickedVideo by remember(
+        info.url, info.hasResolvedFormats, options.videoQuality, options.preferredVideoCodec
+    ) {
         mutableStateOf(
             initialFormat?.takeIf { !it.isGeneric && it.hasVideo }
-                ?: info.autoPick(true, initialFormat?.height ?: 0)
+                ?: info.autoPick(
+                    true,
+                    initialFormat?.height ?: options.videoQuality,
+                    videoCodec = options.videoCodecPreference
+                )
                 ?: info.bestVideo
         )
     }
-    var pickedAudio by remember(info.url, info.hasResolvedFormats) {
+    var pickedAudio by remember(
+        info.url, info.hasResolvedFormats, preferredLanguage, options.preferredAudioCodec
+    ) {
         mutableStateOf(
             initialFormat?.takeIf { !it.isGeneric && !it.hasVideo }
+                ?: info.bestAudioFor(preferredLanguage, options.audioCodecPreference)
                 ?: info.bestAudio
         )
     }
@@ -161,8 +177,8 @@ fun FormatSheet(
 
     // Which soundtrack the download takes, for the few sources that publish several. Null
     // means the one the source itself leads with, which is what almost every link gets.
-    var audioLanguage by remember(info.url, info.hasResolvedFormats) {
-        mutableStateOf(initialAudioLanguage)
+    var audioLanguage by remember(info.url, info.hasResolvedFormats, preferredLanguage) {
+        mutableStateOf(initialAudioLanguage ?: preferredLanguage)
     }
 
     // Title and author are editable: they name the saved file and, where the value is
@@ -446,7 +462,7 @@ fun FormatSheet(
                     OptionChip(
                         label = stringResource(R.string.format_sheet_sponsorblock),
                         icon = Icons.Filled.Paid,
-                        badge = options.sponsorBlockFilters.size,
+                        badge = options.sponsorBlockBadge,
                         onClick = { openDialog = SheetDialog.SPONSORBLOCK }
                     )
                     OptionChip(

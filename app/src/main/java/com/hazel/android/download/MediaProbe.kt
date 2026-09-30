@@ -348,6 +348,7 @@ object MediaProbe {
 
         // The sign-in, and everything that has to travel with it for the site to honour it.
         applySiteAccess(access, url)
+        applyAdvanced(url)
     }
 
     const val PROBE_PROCESS_ID = "hazel_probe"
