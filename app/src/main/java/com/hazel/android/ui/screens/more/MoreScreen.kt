@@ -27,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Cookie
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.Speed
@@ -80,7 +79,6 @@ fun MoreScreen(
     onNavigateToStorageLocations: () -> Unit = {},
     onNavigateToCookies: () -> Unit = {},
     onNavigateToFetchSettings: () -> Unit = {},
-    onNavigateToDirectShare: () -> Unit = {},
     onOpenBatterySettings: () -> Unit = {},
     onNavigateToStorageCleanup: () -> Unit = {},
     onNavigateToUpdate: () -> Unit = {},
@@ -330,29 +328,6 @@ fun MoreScreen(
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToFetchSettings() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // What the second share target does, which is the only place those choices can
-            // be made: sharing to it never opens the sheet.
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.more_hazel_instant)) },
-                leadingContent = {
-                    Icon(Icons.Filled.Bolt, null, tint = MaterialTheme.colorScheme.primary)
-                },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onNavigateToDirectShare() }
             )
 
             HorizontalDivider(

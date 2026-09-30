@@ -232,7 +232,7 @@ def test_search_and_history_screen_ux():
     check_true("HistoryScreen uses AnimatedVisibility for search bar", "AnimatedVisibility(\n            visible = searchOpen" in history_content or "AnimatedVisibility(visible = searchOpen" in history_content)
     check_true("HistoryScreen uses expandVertically + fadeIn", "expandVertically() + fadeIn()" in history_content)
     check_true("HistoryScreen uses shrinkVertically + fadeOut", "shrinkVertically() + fadeOut()" in history_content)
-    check_true("HistoryScreen dismisses search bar when tapping empty space outside", "keyboardController?.hide()\n                            searchOpen = false" in history_content)
+    check_true("HistoryScreen dismisses search bar when tapping empty space outside", "dismissSearch()" in history_content)
 
 
 # ---------------------------------------------------------------------------
@@ -317,32 +317,38 @@ def test_streamlined_home_and_downloading_queue():
     check_true("download_show_large_artwork string removed from UrlSearchBar", "R.string.download_show_large_artwork" not in dl_content)
     check_true("download_show_list string removed from UrlSearchBar", "R.string.download_show_list" not in dl_content)
 
-    # 3. Dedicated DownloadingQueueView component
-    check_true("DownloadingQueueView.kt exists", queue_view_file.is_file())
-    if queue_view_file.is_file():
-        q_content = queue_view_file.read_text(encoding="utf-8")
-        check_true("DownloadingQueueView composable defined", "fun DownloadingQueueView(" in q_content)
-        check_true("QueuedCard composable defined in DownloadingQueueView.kt", "fun QueuedCard(" in q_content)
-        check_true("QueuedRow removed from DownloadingQueueView.kt (compact purge)", "fun QueuedRow(" not in q_content)
+    # 3. Downloads in hand live on their own screen, reached from the bottom bar
+    queue_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "queue" / "QueueScreen.kt"
+    queue_cards_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "queue" / "QueueCards.kt"
+    nav_file = REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "navigation" / "AppNavigation.kt"
+    check_true("QueueScreen.kt exists", queue_file.is_file())
+    check_true("QueueCards.kt exists", queue_cards_file.is_file())
+    check_true("Old DownloadingQueueView.kt removed", not queue_view_file.is_file())
+    q_content = queue_file.read_text(encoding="utf-8") if queue_file.is_file() else ""
+    cards_content = queue_cards_file.read_text(encoding="utf-8") if queue_cards_file.is_file() else ""
+    nav_content = nav_file.read_text(encoding="utf-8")
+    check_true("QueuedCard and FailedCard defined for the queue", "fun QueuedCard(" in cards_content and "fun FailedCard(" in cards_content)
+    check_true("Queue has Running, In queue and Failed tabs", all(t in q_content for t in ["queue_tab_running", "queue_tab_queued", "history_tab_failed"]))
+    check_true("Queue tab is on the bottom bar", "Screen.Queue" in nav_content and "QueueScreen(" in nav_content)
+    check_true("Queue tab shows a dot while anything is in hand", "showDot = screen == Screen.Queue" in nav_content)
 
-    # 4. HistoryFilter combines Downloading & Queued
-    check_true("HistoryFilter DOWNLOADING is labeled Downloading queue", 'DOWNLOADING("Downloading queue")' in repo_content)
-    check_true("HistoryFilter has QUEUED compatibility alias", "val QUEUED get() = DOWNLOADING" in repo_content)
+    # 4. The queue menu offers the run controls
+    check_true("Queue menu offers pause all", "R.string.download_pause_all" in q_content)
+    check_true("Queue menu offers resume all", "R.string.download_resume_all" in q_content)
+    check_true("Queue menu offers cancel all", "R.string.download_cancel_all" in q_content)
+    check_true("Queue menu offers clear queue", "R.string.history_queue_clear_all" in q_content)
+    check_true("Queue running cards pause, resume and cancel per item",
+               "onCancel = { downloadViewModel.cancelItem(item.info.url) }" in q_content and
+               "onPause = downloadViewModel::pauseDownload" in q_content and
+               "onResume = downloadViewModel::resumeDownload" in q_content)
 
-    # 5. HistoryScreen uses DownloadingQueueView
-    check_true("HistoryScreen integrates DownloadingQueueView", "DownloadingQueueView(" in hist_content)
-    check_true("HistoryScreen header shows downloading queue string", "history_tab_downloading_queue" in hist_content)
+    # 5. The downloads list holds finished files only
+    check_true("HistoryFilter enum removed", "enum class HistoryFilter" not in repo_content)
+    check_true("Downloads list has no queue view", "DownloadingQueueView(" not in hist_content)
 
-    # 6. HistoryScreen 3-dots overflow menu offers batch controls
-    check_true("HistoryScreen 3-dots menu offers pause all", "R.string.download_pause_all" in hist_content)
-    check_true("HistoryScreen 3-dots menu offers resume all", "R.string.download_resume_all" in hist_content)
-    check_true("HistoryScreen 3-dots menu offers cancel all", "R.string.download_cancel_all" in hist_content)
-    check_true("HistoryScreen 3-dots menu offers clear queue", "R.string.history_queue_clear_all" in hist_content)
-
-    # 7. Per-video controls on Home screen intact (via MediaCard, not MediaRow)
-    check_true("Home screen retains onCancel action", "onCancel = { downloadViewModel.cancelItem(info.url) }" in dl_content)
-    check_true("Home screen retains onPause action", "onPause = downloadViewModel::pauseDownload" in dl_content)
-    check_true("Home screen retains onResume action", "onResume = downloadViewModel::resumeDownload" in dl_content)
+    # 6. The home screen hands a download in hand to the queue rather than controlling it
+    check_true("Home card opens the queue while a download is in hand", "onClick = if (inHand) onOpenQueue else onOpenSheet" in dl_content)
+    check_true("Home card has no cancel control", "onCancel = { downloadViewModel.cancelItem(info.url) }" not in dl_content)
 
 
 # ---------------------------------------------------------------------------

@@ -15,12 +15,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ClosedCaption
+import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
+import com.hazel.android.download.AUDIO_QUALITY_STEPS
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.SponsorBlock
 
@@ -141,6 +145,46 @@ fun ChaptersDialog(
 }
 
 /**
+ * The artwork written into the file: whether there is a cover at all, and whether it is
+ * cropped to a square. Cropping only means something with a cover, so it rests greyed out
+ * while the cover is off.
+ */
+@Composable
+fun ThumbnailDialog(
+    options: DownloadOptions,
+    onChange: (DownloadOptions) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Filled.Image, null) },
+        title = { Text(stringResource(R.string.options_thumbnail_title), fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                ToggleRow(
+                    label = stringResource(R.string.options_thumbnail_embed),
+                    checked = options.embedThumbnail,
+                    onCheckedChange = { onChange(options.copy(embedThumbnail = it)) }
+                )
+                ToggleRow(
+                    label = stringResource(R.string.options_thumbnail_crop),
+                    checked = options.embedThumbnail && options.cropThumbnail,
+                    enabled = options.embedThumbnail,
+                    onCheckedChange = { onChange(options.copy(cropThumbnail = it)) }
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.options_thumbnail_crop_body),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                )
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.options_chapters_dismiss)) } }
+    )
+}
+
+/**
  * Subtitle handling: embedded into the file, saved alongside it, or both, plus the language
  * selector yt-dlp is given as `--sub-langs`.
  */
@@ -232,12 +276,13 @@ fun FilenameTemplateDialog(
 private fun ToggleRow(
     label: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onCheckedChange(!checked) }
+            .clickable(enabled = enabled) { onCheckedChange(!checked) }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -245,10 +290,11 @@ private fun ToggleRow(
         Text(
             label,
             style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else 0.38f),
             modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.width(12.dp))
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
     }
 }
 
@@ -288,3 +334,57 @@ private fun TextInputDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.options_text_input_cancel)) } }
     )
 }
+
+/**
+ * Picks audio quality preset / bitrate ceiling.
+ */
+@Composable
+fun AudioQualityDialog(
+    options: DownloadOptions,
+    onConfirm: (DownloadOptions) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var selected by remember { mutableStateOf(options.audioQuality) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Filled.HighQuality, null) },
+        title = { Text(stringResource(R.string.properties_bitrate), fontWeight = FontWeight.Bold) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                AUDIO_QUALITY_STEPS.forEach { (quality, labelRes) ->
+                    val isChecked = selected == quality
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selected = quality }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = isChecked,
+                            onClick = { selected = quality }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            stringResource(labelRes),
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = if (isChecked) FontWeight.SemiBold else FontWeight.Normal
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(options.copy(audioQuality = selected)) }) {
+                Text(stringResource(R.string.options_text_input_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.options_text_input_cancel))
+            }
+        }
+    )
+}
+

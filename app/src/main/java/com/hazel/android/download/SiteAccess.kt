@@ -32,19 +32,16 @@ data class SiteAccess(
 }
 
 /**
- * Applies the sign-in to a request, along with client configurations needed to retrieve
- * full stream formats across different sites.
+ * Applies the sign-in to a request.
  *
- * Called on the metadata read and on the download alike.
+ * Called on the metadata read and on the download alike. Nothing is added when there are no
+ * cookies, so an ordinary fetch carries no extra options.
+ *
+ * No YouTube player client is forced. Which clients still answer with the full format ladder
+ * changes with YouTube, and yt-dlp's own default set follows those changes release by
+ * release; a fixed list goes stale and leaves only the single 360p stream every client serves.
  */
 fun YoutubeDLRequest.applySiteAccess(access: SiteAccess, url: String) {
-    if (isYouTube(url)) {
-        // Specify player clients that yield the complete format ladder (up to 1080p+ and full audio)
-        // rather than being throttled to legacy 360p or stripped by YouTube's SABR streaming experiment.
-        // The web_embedded client answers with adaptive video streams without requiring complex PO tokens.
-        addOption("--extractor-args", "youtube:player_client=$YOUTUBE_PLAYER_CLIENTS")
-    }
-
     val cookies = access.cookieFile ?: return
 
     addOption("--cookies", cookies.absolutePath)
@@ -56,16 +53,6 @@ fun YoutubeDLRequest.applySiteAccess(access: SiteAccess, url: String) {
         addOption("--add-header", "User-Agent:${access.userAgent}")
     }
 }
-
-/**
- * Player clients to query for YouTube media.
- *
- * YouTube serves each client type a different stream manifest. Restricting only to legacy clients
- * like web_safari limits results to 360p (format 18), while tv clients increasingly require PO tokens.
- * By prioritizing web_embedded with tv_downgraded, tv, and web_safari fallbacks, yt-dlp receives
- * the full adaptive video ladder (1080p, 720p, 480p) and all audio streams.
- */
-private const val YOUTUBE_PLAYER_CLIENTS = "web_embedded,tv_downgraded,tv,web_safari"
 
 /**
  * Whether the URL targets YouTube.
@@ -80,9 +67,3 @@ fun isYouTube(url: String): Boolean {
             host.endsWith("youtu.be") ||
             host.endsWith("youtube-nocookie.com")
 }
-
-/**
- * Legacy check retained for backwards compatibility.
- * With web_embedded included in player clients, cookies no longer restrict format availability.
- */
-fun cookiesNarrowTheFormats(url: String): Boolean = false

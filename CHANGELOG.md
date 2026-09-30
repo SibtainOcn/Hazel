@@ -6,6 +6,52 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Downloads failing or looping after a link was shared in (#45): yt-dlp updates were written over the live engine while a download was using it, breaking it with `bad local file header`. A new build is now downloaded beside the live one, verified, and swapped in atomically only while no download or read is running; a damaged engine is restored from the bundled copy.
+- Playlists opening as a single song (#44): a video opened from a playlist and the video alone shared one cache entry, so a playlist pasted again could come back as one card. Reads are now keyed by media and collection, and every YouTube playlist no longer shares one key.
+- YouTube offering only a single 360p format: Hazel no longer forces a fixed list of YouTube player clients and lets yt-dlp choose the ones that still serve the full ladder. Reads cached by older builds are dropped once.
+- Audio downloads saved as `.webm`: audio is now extracted to the file it really is (for example `.opus` or `.m4a`), or converted to the chosen format, with cover art embedded where the format allows it.
+- Every song showing the same cover in music players: audio files now carry an album tag, the source's own album where it has one and the track title otherwise.
+- Format reads for several links at once failing after the first, and concurrent results overwriting each other.
+- Skeleton placeholders drawing dark blocks on the light theme.
+
+### Changed
+- Downloads without a chosen folder are saved to `Download/Hazel/Audio` or `Download/Hazel/Video`.
+- yt-dlp updates itself in the background on launch, following the automatic download and Wi-Fi only settings of the update screen.
+- The batch sheet's quality button opens the format list for audio as well, showing the formats the links share with the size of the whole set; a codec such as Opus or AAC can be chosen for links from mixed sources.
+- Bitrate is its own setting for audio conversions, in the single and batch sheets, and the batch sheet's bottom buttons are drawn on a surface.
+- The format list has a filter sheet (All, Suggested, Smallest per resolution, Generic, and the sort order), an update button that reads the formats again, and a choice of reader (NewPipe or yt-dlp) for links both can read.
+- Loading skeletons rest at low opacity with a soft band sweeping across them, the same in both themes, and show only while a read is actually running.
+- A new Queue tab holds everything downloading, waiting or failed, with pause, resume, cancel and retry per item and for all; a red dot on the tab shows while anything is in hand. The home screen no longer carries these controls, and a running card opens the queue.
+- The Downloads tab lists finished files only, with a layout toggle, sort order and direction, Audio and Video filters, a deleted/not deleted filter, and removing all, deleted or duplicate entries.
+- The bottom bar is a compact row of icons.
+- Sharing a link opens its sheet at once with a ready quality ladder (best, ~2160p to ~240p and worst for video; best, ~192 to ~64 kbps and worst for audio) and a shimmering header while the link is read; the real formats replace it when the read lands, and a download chosen before then starts as soon as it does. Ladder choices use yt-dlp format sorting, so a source without that exact quality gives its nearest. The separate Hazel Instant share target and its settings are removed.
+- Reading a new link replaces the previous results, and the loading skeleton fills the screen from the top.
+- The batch sheet offers an instant quality ladder for audio (best, ~192 to ~64 kbps, worst) and more video heights (down to 144p, and worst), without reading every link first.
+- Media cards shrink slightly while their list scrolls (not the format list), in step with how fast it moves: a slow drag barely touches them, a flick pulls them in, and they spring back as soon as the list slows or stops. Chips and small buttons are drawn as flat surfaces.
+- The Thumbnail option opens a dialog with Cover art (on by default) and Crop to square (off by default), in the single and batch sheets. A live harness (`tools/live/test_thumbnail_embed_live.py`) checks both against real links for every audio format and video container the sheet offers.
+- The share sheet shows a shimmering "Fetching…" heading while a link is read, in place of blank placeholder bars.
+- Audio and video each have their own save folder, shown and changed in More › Downloads and in the download sheet, kept until changed or reset. A folder chosen in an earlier version stays in use for both.
+- While a download is processing, its artwork shows the stages yt-dlp goes through for it (Fetch, Merge, Extract, Remux, Subtitles, Cut, Tags, Cover, Split, Save, as the download asks for them), three at a time, in the theme's colours, with a shimmer running along the line to the next stage, and sliding along to the next three until the last are in view. The line along the card's bottom edge is no longer drawn while processing, since the track shows the progress. Downloads with no known stages keep a sweep of light bands and a spinning ring.
+- The download sheet's Audio and Video tabs sit at the start of the sheet, with a short bar under the chosen one.
+- A read failure offers adding cookies, and the share sheet's failure dialog copies its log.
+
+### Fixed (continued)
+- Two downloads could start at once when a link was shared while a saved queue was resuming, failing with "Process ID already exists".
+- Reading a new link during a download no longer changes that download's title, file name or history record.
+- An engine too old for the options the app passes is replaced with the bundled copy instead of failing every read.
+- Starting a download while another was paused silently resumed the paused one and dropped it from the list; a paused download now stays paused until resumed, and Resume works while something else downloads.
+- Every download shared one temporary folder: cancelling or failing one deleted a paused download's progress, and a finished download could publish another's half-made file into Downloads. Each download now works in a folder of its own, and a cancelled download is discarded instead of published.
+- Clear queue removed paused downloads and the running download's record along with the waiting links; it now clears only the waiting links.
+- Resume from the notification after the app was closed did nothing (and on Android 12+ could not open the app); it now resumes in the background. Cancel from it now really drops the paused download.
+- Cookie files exported from a browser lost their HttpOnly (sign-in) cookies, and sites under two-part domains such as .co.uk or .co.in shared one another's cookies.
+- A cover that could not be embedded in the file's container failed the whole download (archive.org, single-file FLV, AVI, TS and similar); such files are now remuxed to MKV, and WAV, AIFF and WMA sources extracted to FLAC or M4A.
+- Links whose source reports no length (Instagram reels, some DASH streams) showed no duration; the length is now added up from the stream's segments or read from the media file itself, and a length from a playlist listing is no longer lost when the full read has none.
+- A downloaded Hazel update APK stayed in the cache when the app was next opened offline.
+- Opening the app after sharing a link from another app (downloaded, cancelled or dismissed) opened that link's sheet again; results read by the share overlay now stay on the list without reopening it.
+- A playlist or several links opening on the last card instead of the first: the list kept the scroll position of the previous results.
+- Cropping a cover to a square failed the whole download, and a cover that was already a JPEG was never cropped.
+- The Downloads tab's row layout stretching each row to many times its height when a long author left no room for the date; the tags now wrap to a second line and are cut short with an ellipsis rather than wrapped letter by letter. The card layout's date no longer overlaps its tags on narrow screens.
 
 ## [1.0.10] - 2026-09-27
 ### Changed

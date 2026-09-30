@@ -1,5 +1,15 @@
 package com.hazel.android.ui.screens.more
 
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Videocam
+import com.hazel.android.data.SaveDirs
+import com.hazel.android.ui.screens.download.SaveDirDialog
+import com.hazel.android.util.MediaOpener
+import com.hazel.android.util.MediaStoreHelper
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Surface
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -33,7 +43,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -55,8 +64,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hazel.android.R
-import com.hazel.android.util.FolderUtil
-import com.hazel.android.util.StoragePaths
 
 /**
  * Shows all Hazel storage locations with an option to open each in the system file manager.
@@ -67,6 +74,34 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
 
     val wifiOnly by SettingsRepository.getWifiOnly(context).collectAsState(initial = false)
+    val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
+    // The kind whose folder is being looked at or chosen, or null when neither is.
+    var dirDialogFor by remember { mutableStateOf<Boolean?>(null) }
+    var pickingVideoDir by remember { mutableStateOf(true) }
+
+    // The same picker the download sheet uses, with the grant kept so the folder stays
+    // writable on later launches. The choice is saved for the kind it was made for, and
+    // every download of that kind goes there until it is changed or reset.
+    val folderPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+                val forVideo = pickingVideoDir
+                scope.launch {
+                    SettingsRepository.setSaveDir(
+                        context, forVideo, uri.toString(), MediaStoreHelper.describeTree(uri)
+                    )
+                }
+            } catch (_: SecurityException) {
+                // The provider refused a lasting grant, so the folder in use stays as it was.
+            }
+        }
+    }
     val speedLimit by SettingsRepository.getSpeedLimit(context).collectAsState(initial = "")
     var limitMenuOpen by remember { mutableStateOf(false) }
 
@@ -116,12 +151,23 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            // Downloads
+            // One row per kind: each is saved on its own, the built-in folder until a
+            // folder is picked for it.
             StorageLocationItem(
-                icon = Icons.Filled.Download,
-                title = stringResource(R.string.storage_locations_downloads),
-                path = StoragePaths.DOWNLOADS_DISPLAY,
-                onClick = { FolderUtil.open(context, StoragePaths.finalDownloads) }
+                icon = Icons.Filled.MusicNote,
+                title = stringResource(R.string.format_sheet_tab_audio),
+                path = saveDirs.labelOf(isVideo = false),
+                onClick = { dirDialogFor = false }
+            )
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+            StorageLocationItem(
+                icon = Icons.Filled.Videocam,
+                title = stringResource(R.string.format_sheet_tab_video),
+                path = saveDirs.labelOf(isVideo = true),
+                onClick = { dirDialogFor = true }
             )
 
         }
@@ -292,6 +338,27 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                 )
             }
         }
+    }
+
+    dirDialogFor?.let { isVideo ->
+        SaveDirDialog(
+            label = saveDirs.labelOf(isVideo),
+            isCustom = saveDirs.of(isVideo).isCustom,
+            onOpen = {
+                dirDialogFor = null
+                MediaOpener.openLocation(context, saveDirs.of(isVideo).uri, isVideo)
+            },
+            onPick = {
+                dirDialogFor = null
+                pickingVideoDir = isVideo
+                folderPicker.launch(saveDirs.of(isVideo).uri.takeIf { it.isNotBlank() }?.let(Uri::parse))
+            },
+            onReset = {
+                dirDialogFor = null
+                scope.launch { SettingsRepository.resetSaveDir(context, isVideo) }
+            },
+            onDismiss = { dirDialogFor = null }
+        )
     }
 }
 

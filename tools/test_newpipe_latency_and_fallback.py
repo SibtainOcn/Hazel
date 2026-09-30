@@ -19,7 +19,7 @@ Verifies:
 5. Simulated Device Form-Factors:
    - Phone portrait, tablet landscape, foldables, low-RAM constraints
 6. Strict Ban Rule:
-   - Strictly 0 occurrences of banned term "ytdlnis" across the entire repository.
+   - Strictly 0 occurrences of banned reference project terms across the entire repository.
 
 Run:
     python tools/test_newpipe_latency_and_fallback.py
@@ -310,8 +310,9 @@ def test_source_code_structure():
     vm_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/DownloadViewModel.kt"
     check_true("DownloadViewModel.kt exists", vm_file.is_file())
     vm_text = vm_file.read_text(encoding="utf-8")
-    check_true("DownloadViewModel resolveFormats respects source setting and cookies", "source == ListingSource.NEWPIPE && !access.hasCookies" in vm_text)
-    check_true("DownloadViewModel readOne respects listingSource and cookies", "listingSource == ListingSource.NEWPIPE && !access.hasCookies" in vm_text)
+    check_true("DownloadViewModel resolveFormats respects source setting and cookies", "reader == ListingSource.NEWPIPE && !access.hasCookies" in vm_text)
+    resolver_text = (REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/LinkResolver.kt").read_text(encoding="utf-8")
+    check_true("LinkResolver respects listingSource and cookies", "source == ListingSource.NEWPIPE && !access.hasCookies" in resolver_text)
 
     search_provider_file = REPO_ROOT / "app/src/main/java/com/hazel/android/download/extractor/MediaSearchProvider.kt"
     check_true("MediaSearchProvider.kt exists", search_provider_file.is_file())
@@ -339,8 +340,8 @@ def test_banned_names():
             if file.endswith((".kt", ".xml", ".java", ".md", ".html", ".gradle.kts")):
                 fpath = Path(root) / file
                 try:
-                    content = fpath.read_text(encoding="utf-8", errors="ignore")
-                    if banned_word.lower() in content.lower() or banned_word_no_hyphen.lower() in content.lower():
+                    content = fpath.read_text(encoding="utf-8", errors="ignore").lower()
+                    if banned_word.lower() in content or banned_word_no_hyphen.lower() in content:
                         violations.append(str(fpath.relative_to(REPO_ROOT)))
                 except Exception:
                     pass

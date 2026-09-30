@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.hazel.android.download.BatchAudioFormats
 import com.hazel.android.download.DownloadPlan
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
@@ -68,6 +69,14 @@ class BatchDownloadState {
     var maxHeight by mutableStateOf(0)
         private set
 
+    /**
+     * The audio format for the batch default, as picked from [BatchAudioFormats.choices].
+     * Null means best audio. Each link reads it against its own formats, so a link whose
+     * formats arrive later still lands on the matching stream.
+     */
+    var audioChoice by mutableStateOf<MediaFormat?>(null)
+        private set
+
     /** Links the user has adjusted on their own, keyed by url. */
     var formatFor by mutableStateOf(emptyMap<String, MediaFormat>())
         private set
@@ -109,7 +118,16 @@ class BatchDownloadState {
 
     /** The format a link will actually download with. */
     fun formatOf(info: MediaInfo): MediaFormat? =
-        formatFor[info.url] ?: info.autoPick(videoTab, maxHeight, languageOf(info))
+        formatFor[info.url] ?: defaultFor(info, videoTab)
+
+    /** What [info] takes when it follows the batch default as a video or an audio download. */
+    fun defaultFor(
+        info: MediaInfo,
+        isVideo: Boolean,
+        language: String? = languageOf(info)
+    ): MediaFormat? =
+        if (isVideo) info.autoPick(true, maxHeight, language)
+        else BatchAudioFormats.pick(info, audioChoice, language)
 
     /** The soundtrack a link will actually download with. */
     fun languageOf(info: MediaInfo): String? =
@@ -167,7 +185,7 @@ class BatchDownloadState {
         if (scope.size == results.size) {
             formatFor = emptyMap()
         } else {
-            applyToTargets { it.autoPick(isVideo, maxHeight, languageOf(it)) }
+            applyToTargets { defaultFor(it, isVideo) }
         }
     }
 
@@ -187,7 +205,7 @@ class BatchDownloadState {
         } else {
             languageFor = languageFor + scope.associate { it.url to language }
         }
-        applyToTargets { it.autoPick(videoTab, maxHeight, language) }
+        applyToTargets { defaultFor(it, videoTab, language) }
     }
 
     fun setQualityCeiling(height: Int) {
@@ -197,6 +215,17 @@ class BatchDownloadState {
             formatFor = emptyMap()
         } else {
             applyToTargets { it.autoPick(videoTab, height, languageOf(it)) }
+        }
+    }
+
+    /** Applies one audio format to every target. Null goes back to best audio. */
+    fun chooseAudio(choice: MediaFormat?) {
+        val scope = targets
+        if (scope.size == results.size) {
+            audioChoice = choice
+            formatFor = emptyMap()
+        } else {
+            applyToTargets { BatchAudioFormats.pick(it, choice, languageOf(it)) }
         }
     }
 

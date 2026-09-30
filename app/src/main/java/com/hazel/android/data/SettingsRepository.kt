@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.hazel.android.download.DownloadOptions
@@ -83,7 +82,12 @@ object SettingsRepository {
     private class OptionKeys(prefix: String) {
         val videoContainer = stringPreferencesKey("${prefix}video_container")
         val audioContainer = stringPreferencesKey("${prefix}audio_container")
-        val embedThumbnail = booleanPreferencesKey("${prefix}embed_thumbnail")
+        val audioQuality = stringPreferencesKey("${prefix}audio_quality")
+        // A new name for the cover setting: every save wrote the old one, so it holds the
+        // old default of off for nearly everyone rather than a choice, and cover art is now
+        // on unless turned off.
+        val embedThumbnail = booleanPreferencesKey("${prefix}cover_art")
+        val cropThumbnail = booleanPreferencesKey("${prefix}crop_thumbnail")
         val filenameTemplate = stringPreferencesKey("${prefix}filename_template")
         val sponsorBlock = stringSetPreferencesKey("${prefix}sponsorblock_filters")
         val addChapters = booleanPreferencesKey("${prefix}add_chapters")
@@ -95,14 +99,15 @@ object SettingsRepository {
     }
 
     private val SHEET_OPTIONS = OptionKeys("")
-    private val INSTANT_OPTIONS = OptionKeys("instant_")
 
     private fun Preferences.readOptions(keys: OptionKeys): DownloadOptions {
         val defaults = DownloadOptions()
         return DownloadOptions(
             videoContainer = this[keys.videoContainer] ?: defaults.videoContainer,
             audioContainer = this[keys.audioContainer] ?: defaults.audioContainer,
+            audioQuality = this[keys.audioQuality] ?: defaults.audioQuality,
             embedThumbnail = this[keys.embedThumbnail] ?: defaults.embedThumbnail,
+            cropThumbnail = this[keys.cropThumbnail] ?: defaults.cropThumbnail,
             filenameTemplate = this[keys.filenameTemplate] ?: defaults.filenameTemplate,
             sponsorBlockFilters = this[keys.sponsorBlock] ?: defaults.sponsorBlockFilters,
             addChapters = this[keys.addChapters] ?: defaults.addChapters,
@@ -117,7 +122,9 @@ object SettingsRepository {
     private fun MutablePreferences.writeOptions(keys: OptionKeys, options: DownloadOptions) {
         this[keys.videoContainer] = options.videoContainer
         this[keys.audioContainer] = options.audioContainer
+        this[keys.audioQuality] = options.audioQuality
         this[keys.embedThumbnail] = options.embedThumbnail
+        this[keys.cropThumbnail] = options.cropThumbnail
         this[keys.filenameTemplate] = options.filenameTemplate
         this[keys.sponsorBlock] = options.sponsorBlockFilters
         this[keys.addChapters] = options.addChapters
@@ -133,31 +140,6 @@ object SettingsRepository {
 
     suspend fun setDownloadOptions(context: Context, options: DownloadOptions) {
         context.dataStore.edit { prefs -> prefs.writeOptions(SHEET_OPTIONS, options) }
-    }
-
-    private val INSTANT_AUDIO_LANGUAGE_KEY = stringPreferencesKey("instant_audio_language")
-
-    /**
-     * The soundtrack an instant share prefers, as a language tag, or blank for whichever
-     * the source leads with.
-     *
-     * Nothing is asked at share time, so this is a standing preference rather than a
-     * choice: a source that has the language gets it, and one that does not is downloaded
-     * with what it has.
-     */
-    fun getInstantAudioLanguage(context: Context): Flow<String> =
-        context.dataStore.data.map { prefs -> prefs[INSTANT_AUDIO_LANGUAGE_KEY].orEmpty() }
-
-    suspend fun setInstantAudioLanguage(context: Context, language: String) {
-        context.dataStore.edit { prefs -> prefs[INSTANT_AUDIO_LANGUAGE_KEY] = language }
-    }
-
-    /** The same knobs, kept separately for the share target that asks nothing. */
-    fun getInstantOptions(context: Context): Flow<DownloadOptions> =
-        context.dataStore.data.map { prefs -> prefs.readOptions(INSTANT_OPTIONS) }
-
-    suspend fun setInstantOptions(context: Context, options: DownloadOptions) {
-        context.dataStore.edit { prefs -> prefs.writeOptions(INSTANT_OPTIONS, options) }
     }
 
     // ── Link reading ──
@@ -238,6 +220,38 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[INCOGNITO_KEY] = enabled }
     }
 
+    // ── Downloads list ──
+
+    private val HISTORY_LIST_LAYOUT_KEY = booleanPreferencesKey("history_list_layout")
+    private val HISTORY_SORT_KEY = stringPreferencesKey("history_sort")
+    private val HISTORY_SORT_REVERSED_KEY = booleanPreferencesKey("history_sort_reversed")
+
+    /** True for compact rows on the downloads list, false for full artwork cards. */
+    fun getHistoryListLayout(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[HISTORY_LIST_LAYOUT_KEY] ?: false }
+
+    suspend fun setHistoryListLayout(context: Context, list: Boolean) {
+        context.dataStore.edit { prefs -> prefs[HISTORY_LIST_LAYOUT_KEY] = list }
+    }
+
+    /**
+     * How the downloads list is ordered, and whether that order is reversed. Each order has
+     * a natural direction: newest, A to Z, largest first.
+     */
+    fun getHistorySort(context: Context): Flow<Pair<HistorySort, Boolean>> =
+        context.dataStore.data.map { prefs ->
+            val sort = HistorySort.entries.firstOrNull { it.name == prefs[HISTORY_SORT_KEY] }
+                ?: HistorySort.NEWEST
+            sort to (prefs[HISTORY_SORT_REVERSED_KEY] ?: false)
+        }
+
+    suspend fun setHistorySort(context: Context, sort: HistorySort, reversed: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[HISTORY_SORT_KEY] = sort.name
+            prefs[HISTORY_SORT_REVERSED_KEY] = reversed
+        }
+    }
+
     // ── Network ──
 
     private val WIFI_ONLY_KEY = booleanPreferencesKey("wifi_only")
@@ -293,35 +307,6 @@ object SettingsRepository {
             ?: limit.ifBlank { "No limit" }
 
 
-    // ── Direct share ──
-    //
-    // Sharing to the direct target skips the sheet entirely, so the choices the sheet would
-    // have asked for have to be answered in advance. These are those answers.
-
-    private val QUICK_IS_VIDEO_KEY = booleanPreferencesKey("quick_is_video")
-    private val QUICK_MAX_HEIGHT_KEY = intPreferencesKey("quick_max_height")
-
-    /** Whether a direct share saves video or audio. */
-    fun getQuickIsVideo(context: Context): Flow<Boolean> =
-        context.dataStore.data.map { prefs -> prefs[QUICK_IS_VIDEO_KEY] ?: true }
-
-    suspend fun setQuickIsVideo(context: Context, isVideo: Boolean) {
-        context.dataStore.edit { prefs -> prefs[QUICK_IS_VIDEO_KEY] = isVideo }
-    }
-
-    /**
-     * Tallest video a direct share will take, or 0 for whatever the source calls best.
-     *
-     * A cap rather than an exact height: sources do not all offer the same ladder, and a
-     * request for a height that is missing would have nothing to fall back to.
-     */
-    fun getQuickMaxHeight(context: Context): Flow<Int> =
-        context.dataStore.data.map { prefs -> prefs[QUICK_MAX_HEIGHT_KEY] ?: 0 }
-
-    suspend fun setQuickMaxHeight(context: Context, height: Int) {
-        context.dataStore.edit { prefs -> prefs[QUICK_MAX_HEIGHT_KEY] = height }
-    }
-
     // ── Download destination ──
     //
     // Blank means the built-in Download/Hazel folder. Otherwise this is a persisted SAF
@@ -350,6 +335,34 @@ object SettingsRepository {
             prefs.remove(DOWNLOAD_TREE_LABEL_KEY)
         }
     }
+
+    // Audio and video each have their own destination. Unset, a kind takes the single
+    // folder older versions kept for both, so a folder picked before the split stays in use;
+    // set to blank, it is the built-in Download/Hazel/Audio or Download/Hazel/Video.
+    private fun treeUriKey(isVideo: Boolean) =
+        stringPreferencesKey(if (isVideo) "download_tree_uri_video" else "download_tree_uri_audio")
+
+    private fun treeLabelKey(isVideo: Boolean) =
+        stringPreferencesKey(if (isVideo) "download_tree_label_video" else "download_tree_label_audio")
+
+    private fun Preferences.saveDir(isVideo: Boolean): SaveDir {
+        val uri = this[treeUriKey(isVideo)]
+        return if (uri != null) SaveDir(uri, this[treeLabelKey(isVideo)].orEmpty())
+        else SaveDir(this[DOWNLOAD_TREE_URI_KEY].orEmpty(), this[DOWNLOAD_TREE_LABEL_KEY].orEmpty())
+    }
+
+    fun getSaveDirs(context: Context): Flow<SaveDirs> =
+        context.dataStore.data.map { prefs -> SaveDirs(audio = prefs.saveDir(false), video = prefs.saveDir(true)) }
+
+    suspend fun setSaveDir(context: Context, isVideo: Boolean, uri: String, label: String) {
+        context.dataStore.edit { prefs ->
+            prefs[treeUriKey(isVideo)] = uri
+            prefs[treeLabelKey(isVideo)] = label
+        }
+    }
+
+    /** Back to the built-in folder for that kind. */
+    suspend fun resetSaveDir(context: Context, isVideo: Boolean) = setSaveDir(context, isVideo, "", "")
 
     // yt-dlp update channel persistence ("Stable" / "Nightly" / "Master")
     private val YTDLP_CHANNEL_KEY = stringPreferencesKey("ytdlp_channel")

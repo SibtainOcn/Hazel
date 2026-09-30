@@ -1,11 +1,10 @@
 package com.hazel.android.ui.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,72 +20,70 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.tan
 
 /**
- * Placeholder skeletons with a single highlight travelling across them.
+ * Placeholder skeletons with one highlight travelling across them.
  *
- * The sweep belongs to the whole skeleton, not to each block: one band crosses the group
- * from left to right, so the blocks read as one surface catching the light. Animating each
- * block on its own timeline is what makes a shimmer look wrong, because every block starts
- * its own sweep and the group flickers instead of gleaming.
+ * The skeleton is drawn as it is, then masked: everything sits at [RESTING_ALPHA], and a
+ * soft band as wide as the skeleton sweeps across it at full strength. Because the band
+ * changes opacity rather than adding light, it shows the same in either theme and on any
+ * colour of block, and the gaps between blocks stay empty since there is nothing there to
+ * reveal. The sweep belongs to the whole skeleton rather than to each block, so a list of
+ * placeholders reads as one surface catching the light instead of rows flickering apart.
  *
- * A skeleton is therefore wrapped in [ShimmerHost], and every placeholder inside it uses
- * [shimmerBlock]. Blocks measure where they sit inside the host and draw the part of the
- * band that falls across them.
- *
- * This is for skeletons only. Waits with no shape to stand in for, such as an update check,
- * keep [HazelLoadingIndicator].
+ * A skeleton is wrapped in [ShimmerHost], and its placeholders use [shimmerBlock].
  */
-private const val SWEEP_DURATION_MS = 1200
+private const val SWEEP_DURATION_MS = 1000
 
-/** Width of the moving highlight, as a fraction of the host's width. */
-private const val BAND_WIDTH = 0.45f
-
-/** The processing sweep is narrower than the skeleton one, so it reads as a glint. */
-private const val SHARP_BAND_WIDTH = 0.17f
-
-/** How long the band takes to cross, and how long the whole cycle runs including its rest. */
-private const val SWEEP_TRAVEL_MS = 1150
-private const val SWEEP_CYCLE_MS = 2050
+/** How visible the skeleton is between passes of the band. */
+private const val RESTING_ALPHA = 0.3f
 
 /** Lean of the band, in degrees off vertical. */
 private const val SWEEP_TILT_DEGREES = 20.0
 
-/** Position of the band and the geometry it is measured against. */
-private data class ShimmerSweep(
-    val progress: Float,
-    val hostLeft: Float,
-    val hostWidth: Float
-)
-
-private val LocalShimmerSweep = staticCompositionLocalOf<ShimmerSweep?> { null }
+/**
+ * Where the band's edges fall across the host's width: its full-strength core sits at the
+ * centre and it fades out over the quarter on either side.
+ */
+private const val BAND_FADE_START = 0.25f
+private const val BAND_FADE_END = 0.75f
 
 /**
- * Drives one sweep for everything inside it. Place this around a whole skeleton rather than
- * around each placeholder.
+ * The fill of a placeholder block. A mid grey rather than a theme colour: at rest it is
+ * faint on dark and light surfaces alike, and at full strength under the band it stands
+ * clear of both.
  */
+private val BLOCK_GREY = Color(0xFFA6A6A6)
+
+
+
+/** Drives one sweep for everything inside it. Place it around a whole skeleton. */
 @Composable
 fun ShimmerHost(
     modifier: Modifier = Modifier,
@@ -104,108 +100,52 @@ fun ShimmerHost(
         label = "shimmerSweep"
     )
 
-    var hostLeft by remember { mutableStateOf(0f) }
-    var hostWidth by remember { mutableStateOf(0f) }
-
     Box(
-        modifier = modifier.onGloballyPositioned { coordinates ->
-            hostLeft = coordinates.positionInRoot().x
-            hostWidth = coordinates.size.width.toFloat()
-        }
+        modifier = modifier
+            // The mask needs a layer of its own: it keeps the skeleton's alpha, and only
+            // what this host drew, rather than punching through to whatever is behind it.
+            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+            .drawWithContent {
+                drawContent()
+
+                val radians = Math.toRadians(SWEEP_TILT_DEGREES)
+                val axisX = cos(radians).toFloat()
+                val axisY = sin(radians).toFloat()
+
+                // The band starts fully before the left edge and ends fully past the right,
+                // counting the extra ground the tilt adds over the host's height.
+                val span = size.width
+                val travel = span + tan(radians).toFloat() * size.height
+                val offset = -travel + 2f * travel * progress
+
+                val start = Offset(offset, 0f)
+                val end = Offset(offset + span * axisX, span * axisY)
+
+                val resting = Color.Black.copy(alpha = RESTING_ALPHA)
+                drawRect(
+                    brush = Brush.linearGradient(
+                        colorStops = arrayOf(
+                            0f to resting,
+                            BAND_FADE_START to resting,
+                            0.5f to Color.Black,
+                            BAND_FADE_END to resting,
+                            1f to resting
+                        ),
+                        start = start,
+                        end = end
+                    ),
+                    blendMode = BlendMode.DstIn
+                )
+            }
     ) {
-        CompositionLocalProvider(
-            LocalShimmerSweep provides ShimmerSweep(progress, hostLeft, hostWidth)
-        ) {
-            content()
-        }
+        content()
     }
 }
 
-/**
- * Paints the receiver as a placeholder block that the host's sweep passes over.
- *
- * Outside a [ShimmerHost] the block still renders, as a plain resting fill, so a skeleton
- * used on its own never disappears.
- */
-fun Modifier.shimmerBlock(shape: Shape = RoundedCornerShape(6.dp)): Modifier = composed {
-    val base = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f)
-    val highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.26f)
-
-    val sweep = LocalShimmerSweep.current
-    var blockLeft by remember { mutableStateOf(0f) }
-
-    this
-        .clip(shape)
-        .background(base)
-        .onGloballyPositioned { blockLeft = it.positionInRoot().x }
-        .drawWithContent {
-            drawContent()
-
-            if (sweep == null || sweep.hostWidth <= 0f) return@drawWithContent
-
-            val bandWidth = sweep.hostWidth * BAND_WIDTH
-            // The band starts fully off the host's left edge and finishes fully off its
-            // right edge, which is what keeps the sweep continuous across the group.
-            val travel = sweep.hostWidth + bandWidth * 2f
-            val bandLeftInRoot = sweep.hostLeft - bandWidth + travel * sweep.progress
-
-            // Translate into this block's own coordinates so the band lines up across
-            // blocks that start at different offsets.
-            val start = bandLeftInRoot - blockLeft
-
-            drawRect(
-                brush = Brush.linearGradient(
-                    colorStops = arrayOf(
-                        0f to Color.Transparent,
-                        0.5f to highlight,
-                        1f to Color.Transparent
-                    ),
-                    start = Offset(start, 0f),
-                    end = Offset(start + bandWidth, size.height)
-                )
-            )
-        }
-}
-
-/**
- * Paints a card surface with a continuous sweep pass over the entire card.
- */
-fun Modifier.shimmerCard(shape: Shape = RoundedCornerShape(20.dp)): Modifier = composed {
-    val base = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
-    val highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f)
-
-    val sweep = LocalShimmerSweep.current
-    var cardLeft by remember { mutableStateOf(0f) }
-
-    this
-        .clip(shape)
-        .background(base)
-        .onGloballyPositioned { cardLeft = it.positionInRoot().x }
-        .drawWithContent {
-            drawContent()
-
-            if (sweep == null || sweep.hostWidth <= 0f) return@drawWithContent
-
-            val bandWidth = sweep.hostWidth * BAND_WIDTH
-            val travel = sweep.hostWidth + bandWidth * 2f
-            val bandLeftInRoot = sweep.hostLeft - bandWidth + travel * sweep.progress
-            val start = bandLeftInRoot - cardLeft
-
-            drawRect(
-                brush = Brush.linearGradient(
-                    colorStops = arrayOf(
-                        0f to Color.Transparent,
-                        0.4f to highlight.copy(alpha = highlight.alpha * 0.4f),
-                        0.5f to highlight,
-                        0.6f to highlight.copy(alpha = highlight.alpha * 0.4f),
-                        1f to Color.Transparent
-                    ),
-                    start = Offset(start, 0f),
-                    end = Offset(start + bandWidth, size.height)
-                )
-            )
-        }
-}
+/** Paints the receiver as a placeholder block that a [ShimmerHost] sweep passes over. */
+fun Modifier.shimmerBlock(shape: Shape = RoundedCornerShape(6.dp)): Modifier = this
+    .clip(shape)
+    .background(BLOCK_GREY)
 
 /**
  * A one-shot luminous shine sweep that passes across an element (such as the searchbar)
@@ -222,8 +162,8 @@ fun Modifier.refreshShine(progress: Float, shape: Shape = RoundedCornerShape(26.
         if (progress <= 0f || progress >= 1f) return@drawWithContent
 
         val radians = Math.toRadians(SWEEP_TILT_DEGREES).toFloat()
-        val axisX = kotlin.math.cos(radians)
-        val axisY = kotlin.math.sin(radians)
+        val axisX = cos(radians)
+        val axisY = sin(radians)
 
         val bandWidth = size.width * 0.35f
         val reach = size.width + kotlin.math.abs(axisY) * size.height + bandWidth * 2f
@@ -270,69 +210,64 @@ fun Modifier.refreshShine(progress: Float, shape: Shape = RoundedCornerShape(26.
     }
 
 /**
- * Stands in for the media card while a link is being read. It matches the real card's
- * 16:9 layout with overlaid title, author, duration badge and subtle vignette scrim,
- * exactly matching Hazel's MediaCard so nothing jumps when the metadata arrives.
+ * Stands in for the media card while a link is being read, in the card's own 16:9 shape:
+ * title and author along the top, duration and state badges along the bottom, so nothing
+ * moves when the real card takes its place.
  */
 @Composable
 fun MediaCardShimmer(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f)
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Box(
+        Column(
             modifier = Modifier
+                .align(Alignment.TopStart)
                 .fillMaxWidth()
-                .aspectRatio(16f / 9f)
-                .shimmerCard(RoundedCornerShape(20.dp))
+                .padding(start = 14.dp, top = 14.dp, end = 14.dp)
         ) {
-            // Dark gradient overlay matching real MediaCard
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            0f to Color.Black.copy(alpha = 0.70f),
-                            0.4f to Color.Transparent,
-                            0.7f to Color.Transparent,
-                            1f to Color.Black.copy(alpha = 0.75f)
-                        )
-                    )
+                    .fillMaxWidth(0.8f)
+                    .height(10.dp)
+                    .shimmerBlock(RoundedCornerShape(5.dp))
             )
-
-            // Overlaid title and author placeholder lines at top-start
-            Column(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .fillMaxWidth()
-                    .padding(start = 14.dp, top = 14.dp, end = 20.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.82f)
-                        .height(15.dp)
-                        .shimmerBlock(RoundedCornerShape(4.dp))
-                )
-                Spacer(modifier = Modifier.height(7.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.48f)
-                        .height(12.dp)
-                        .shimmerBlock(RoundedCornerShape(4.dp))
-                )
-            }
-
-            // Bottom-start duration badge placeholder
+            Spacer(modifier = Modifier.height(8.dp))
             Box(
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(12.dp)
-                    .width(48.dp)
-                    .height(18.dp)
-                    .shimmerBlock(RoundedCornerShape(4.dp))
+                    .fillMaxWidth(0.55f)
+                    .height(10.dp)
+                    .shimmerBlock(RoundedCornerShape(5.dp))
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .width(50.dp)
+                    .height(10.dp)
+                    .shimmerBlock(RoundedCornerShape(5.dp))
             )
         }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(12.dp)
+                .width(46.dp)
+                .height(18.dp)
+                .shimmerBlock(RoundedCornerShape(5.dp))
+        )
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(12.dp)
+                .width(56.dp)
+                .height(18.dp)
+                .shimmerBlock(RoundedCornerShape(5.dp))
+        )
     }
 }
 
@@ -383,101 +318,207 @@ fun FormatListShimmer(rows: Int = 5, modifier: Modifier = Modifier) {
 }
 
 /**
- * A single bright band sweeping across whatever this is laid over.
+ * What a card's artwork shows while the download is done and the app is working on the file
+ * (merging, converting, embedding the cover).
  *
- * Unlike the skeleton blocks this paints no resting fill, so the artwork underneath stays
- * visible and only the band moves over it. The band is narrow and its highlight rises and
- * falls sharply, which reads as a surface catching the light rather than as a placeholder
- * waiting to be filled — the download is finished at this point, and what is left is the
- * work the app is doing to the file.
+ * Three layers, all drawn rather than composed, so the animation redraws the artwork
+ * without rebuilding the card:
  *
- * The bright core is flanked by a darker shoulder on both sides. A single white band
- * disappears over pale artwork, and a single dark one disappears over dark artwork; the
- * pair always leaves one half of it standing out. That is also what makes this readable in
- * either theme, since what the band crosses is the artwork rather than any app surface.
+ *  - a train of thin light bands raking across the artwork one after another, quickly and
+ *    without a rest between passes, so the surface reads as busy rather than as waiting;
+ *  - a slow breath of shade and glow over the whole picture, so it never looks frozen
+ *    between bands;
+ *  - a spinning ring at the centre, where the pause and cancel control sits while the
+ *    download runs, with a bright head and a fading tail, so what is happening has a place
+ *    of its own on the card.
+ *
+ * The bands pair a light core with a dark edge, which keeps them visible on pale and dark
+ * artwork alike; what they cross is the artwork, not an app surface, so the same drawing
+ * works in either theme.
  */
 @Composable
 fun ProcessingShimmer(modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "processing")
-
-    // The sweep crosses, then waits. A band that runs on a loop with no gap reads as a
-    // spinner and stops being noticed; one that passes and leaves the artwork alone for a
-    // moment reads as light moving across a surface, and the pause is what gives the next
-    // pass something to arrive against.
-    val progress by transition.animateFloat(
+    val sweep by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = keyframes {
-                durationMillis = SWEEP_CYCLE_MS
-                0f at 0 using FastOutSlowInEasing
-                1f at SWEEP_TRAVEL_MS
-                1f at SWEEP_CYCLE_MS
-            },
+            animation = tween(durationMillis = PROCESSING_SWEEP_MS, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "processingSweep"
     )
+    val spin by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = PROCESSING_SPIN_MS, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "processingSpin"
+    )
+    val breath by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = PROCESSING_BREATH_MS, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "processingBreath"
+    )
 
     Box(
         modifier = modifier.drawBehind {
-            val bandWidth = size.width * SHARP_BAND_WIDTH
+            // Breath: the picture dims and lifts a little, over and over.
+            drawRect(Color.Black.copy(alpha = 0.10f + 0.12f * breath))
+            drawRect(
+                brush = Brush.radialGradient(
+                    colors = listOf(Color.White.copy(alpha = 0.04f + 0.08f * breath), Color.Transparent),
+                    center = center,
+                    radius = size.maxDimension * 0.6f
+                )
+            )
 
-            // The band leans rather than standing upright. A vertical wipe reads as a
-            // progress bar lying on its side; a raked one reads as a reflection, which is
-            // the difference between the surface looking busy and looking lit.
+            // Bands: a train of thin raked highlights.
             val radians = Math.toRadians(SWEEP_TILT_DEGREES).toFloat()
-            val axisX = kotlin.math.cos(radians)
-            val axisY = kotlin.math.sin(radians)
-
-            // Travel is measured along the tilt, and overshoots at both ends so the band is
-            // fully clear of the artwork before the cycle restarts.
+            val axisX = cos(radians)
+            val axisY = sin(radians)
+            val bandWidth = size.width * PROCESSING_BAND_WIDTH
             val reach = size.width + kotlin.math.abs(axisY) * size.height + bandWidth * 2f
-            val centreX = -bandWidth + reach * progress
-            val centreY = size.height / 2f
-
-            fun axis(width: Float) = Offset(
-                centreX - axisX * width / 2f,
-                centreY - axisY * width / 2f
-            ) to Offset(
-                centreX + axisX * width / 2f,
-                centreY + axisY * width / 2f
-            )
-
-            // Two passes make the sheen. A broad halo lifts the whole area the band is
-            // crossing, and a narrow core sits inside it as the highlight proper. One band
-            // alone is either soft and muddy or hard and cheap; the pair reads as depth.
-            val (haloStart, haloEnd) = axis(bandWidth * 2.6f)
-            drawRect(
-                brush = Brush.linearGradient(
-                    colorStops = arrayOf(
-                        0f to Color.Transparent,
-                        0.35f to Color.Black.copy(alpha = 0.20f),
-                        0.5f to Color.White.copy(alpha = 0.14f),
-                        0.65f to Color.Black.copy(alpha = 0.20f),
-                        1f to Color.Transparent
-                    ),
-                    start = haloStart,
-                    end = haloEnd
+            for (i in 0 until PROCESSING_BANDS) {
+                // Each band trails the one before it by a fixed share of the pass, and the
+                // train wraps, so there is always a band somewhere on the artwork.
+                val phase = (sweep - i * PROCESSING_BAND_GAP + 1f) % 1f
+                val centreX = -bandWidth + reach * phase
+                val centreY = size.height / 2f
+                val strength = 1f - i * 0.28f
+                val start = Offset(centreX - axisX * bandWidth / 2f, centreY - axisY * bandWidth / 2f)
+                val end = Offset(centreX + axisX * bandWidth / 2f, centreY + axisY * bandWidth / 2f)
+                drawRect(
+                    brush = Brush.linearGradient(
+                        colorStops = arrayOf(
+                            0f to Color.Transparent,
+                            0.30f to Color.Black.copy(alpha = 0.16f * strength),
+                            0.46f to Color.White.copy(alpha = 0.10f * strength),
+                            0.50f to Color.White.copy(alpha = 0.55f * strength),
+                            0.54f to Color.White.copy(alpha = 0.10f * strength),
+                            0.70f to Color.Black.copy(alpha = 0.16f * strength),
+                            1f to Color.Transparent
+                        ),
+                        start = start,
+                        end = end
+                    )
                 )
-            )
+            }
 
-            val (coreStart, coreEnd) = axis(bandWidth)
-            drawRect(
-                brush = Brush.linearGradient(
-                    colorStops = arrayOf(
-                        0f to Color.Transparent,
-                        0.42f to Color.White.copy(alpha = 0.08f),
-                        0.48f to Color.White.copy(alpha = 0.72f),
-                        0.52f to Color.White.copy(alpha = 0.72f),
-                        0.58f to Color.White.copy(alpha = 0.08f),
-                        1f to Color.Transparent
-                    ),
-                    start = coreStart,
-                    end = coreEnd
-                )
+            // Ring: a spinning comet at the centre, on a disc that keeps it legible over
+            // any artwork.
+            val ringRadius = PROCESSING_RING_RADIUS.toPx()
+            val stroke = PROCESSING_RING_STROKE.toPx()
+            drawCircle(
+                color = Color.Black.copy(alpha = 0.45f),
+                radius = ringRadius + stroke * 2.2f,
+                center = center
             )
+            drawCircle(
+                color = Color.White.copy(alpha = 0.18f),
+                radius = ringRadius,
+                center = center,
+                style = Stroke(width = stroke)
+            )
+            rotate(degrees = spin, pivot = center) {
+                drawArc(
+                    brush = Brush.sweepGradient(
+                        0f to Color.Transparent,
+                        0.55f to Color.White.copy(alpha = 0.25f),
+                        0.78f to Color.White,
+                        0.78f to Color.Transparent,
+                        1f to Color.Transparent,
+                        center = center
+                    ),
+                    startAngle = 0f,
+                    sweepAngle = 280f,
+                    useCenter = false,
+                    topLeft = Offset(center.x - ringRadius, center.y - ringRadius),
+                    size = Size(ringRadius * 2f, ringRadius * 2f),
+                    style = Stroke(width = stroke, cap = StrokeCap.Round)
+                )
+            }
         }
+    )
+}
+
+/** One pass of the band train, how many bands it has, and the gap between them. */
+private const val PROCESSING_SWEEP_MS = 1100
+private const val PROCESSING_BANDS = 3
+private const val PROCESSING_BAND_GAP = 0.14f
+private const val PROCESSING_BAND_WIDTH = 0.12f
+
+/** One turn of the centre ring, and one breath in or out. */
+private const val PROCESSING_SPIN_MS = 850
+private const val PROCESSING_BREATH_MS = 1300
+
+private val PROCESSING_RING_RADIUS = 20.dp
+private val PROCESSING_RING_STROKE = 3.5.dp
+
+/** How long the band takes to cross a [ShimmerLabel], and how wide it is. */
+private const val TEXT_SWEEP_MS = 2000
+private val TEXT_BAND_WIDTH = 125.dp
+
+/**
+ * Words with light running across them: the letters rest dim and a bright band sweeps
+ * through them from left to right, over and over. For a heading that is waiting on
+ * something, so it says what is happening ("Fetching") instead of standing in as a blank
+ * block.
+ *
+ * The band is painted into the letters only (the text is drawn, then the gradient is kept
+ * where the text is), so nothing shows between or around them, and it is read while
+ * drawing, so the sweep never recomposes the text.
+ */
+@Composable
+fun ShimmerLabel(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    fontWeight: FontWeight? = null
+) {
+    val transition = rememberInfiniteTransition(label = "shimmerText")
+    val progress by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = TEXT_SWEEP_MS, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmerTextSweep"
+    )
+    val resting = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+    val lit = MaterialTheme.colorScheme.onSurface
+
+    Text(
+        text,
+        style = style,
+        fontWeight = fontWeight,
+        maxLines = 1,
+        modifier = modifier
+            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+            .drawWithContent {
+                drawContent()
+                val band = TEXT_BAND_WIDTH.toPx()
+                // Starts wholly before the first letter and ends wholly past the last, so
+                // each pass leaves the word resting for a moment before the next.
+                val centre = -band + (size.width + 2f * band) * progress
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        0f to resting,
+                        0.5f to lit,
+                        1f to resting,
+                        startX = centre - band / 2f,
+                        endX = centre + band / 2f
+                    ),
+                    blendMode = BlendMode.SrcIn
+                )
+            }
     )
 }
 

@@ -51,8 +51,23 @@ data class MediaInfo(
     val audioLanguages: List<String>
         get() = audioFormats.mapNotNull { it.language }.distinct()
 
-    /** The best audio in [language], falling back to the best of any when it has none. */
-    fun bestAudioFor(language: String?): MediaFormat? {
+    /**
+     * The best audio in [language], falling back to the best of any when it has none.
+     *
+     * With a [codec] asked for, the best stream of that codec is preferred. A source that
+     * does not offer it gives its best of any codec instead, since a link that downloads in
+     * another codec is a better answer than one that does not download. Before the formats
+     * are known, the preference is handed to yt-dlp as a format filter with the same
+     * fallback built in.
+     */
+    fun bestAudioFor(language: String?, codec: AudioCodec? = null): MediaFormat? {
+        if (codec != null) {
+            val concrete = audioFormats.filter { !it.isGeneric }
+            if (concrete.isEmpty()) return codec.genericFormat()
+            val inLanguage = if (language.isNullOrBlank()) concrete
+            else concrete.filter { it.language == language }
+            inLanguage.firstOrNull { codec.matches(it) }?.let { return it }
+        }
         if (language.isNullOrBlank()) return bestAudio
         return audioFormats.firstOrNull { !it.isGeneric && it.language == language } ?: bestAudio
     }
@@ -76,11 +91,19 @@ data class MediaInfo(
      * clears the ceiling the smallest available is taken, since a download slightly over
      * budget is a better answer than no download at all.
      */
-    fun autoPick(isVideo: Boolean, maxHeight: Int, audioLanguage: String? = null): MediaFormat? {
-        if (!isVideo) return bestAudioFor(audioLanguage)
+    fun autoPick(
+        isVideo: Boolean,
+        maxHeight: Int,
+        audioLanguage: String? = null,
+        audioCodec: AudioCodec? = null
+    ): MediaFormat? {
+        if (!isVideo) return bestAudioFor(audioLanguage, audioCodec)
         if (videoFormats.isEmpty()) return null
 
         val concrete = videoFormats.filter { !it.isGeneric }
+        if (maxHeight == WORST_HEIGHT) {
+            return concrete.minByOrNull { it.height } ?: WORST_VIDEO
+        }
         if (maxHeight <= 0) return bestVideo
         if (concrete.isEmpty()) {
             return MediaFormat(
@@ -136,7 +159,13 @@ data class MediaFormat(
     /** True for the synthesised "best available" rows, which have no real format id. */
     val isGeneric: Boolean = false,
     /** True when the size came from the bitrate rather than from the source itself. */
-    val isEstimatedSize: Boolean = false
+    val isEstimatedSize: Boolean = false,
+    /**
+     * A yt-dlp format sort (`-S`) that goes with [selector], for a generic row that names a
+     * target rather than a stream: "res:720" prefers the resolution closest to 720 without
+     * going over, and the closest above only where nothing is at or under it.
+     */
+    val sort: String? = null
 ) {
     /**
      * The headline without the measured resolution after it.
@@ -158,6 +187,14 @@ data class MediaFormat(
         }
 
     /**
+     * Container / extension label shown in the UI.
+     * Audio streams are often encapsulated in WebM (with Opus codec) or M4A (with AAC codec).
+     * For audio, showing raw "WEBM" confuses users who expect audio formats (like OPUS).
+     */
+    val displayContainer: String
+        get() = ext.ifBlank { codecLabel.ifBlank { "DEFAULT" } }.uppercase()
+
+    /**
      * Size badge. Sources report either an exact size or an estimate derived from the
      * bitrate; an estimate is marked so a figure that turns out larger than the file is
      * not read as the app getting it wrong.
@@ -168,6 +205,81 @@ data class MediaFormat(
         }
 
     val bitrateLabel: String get() = formatBitrate(bitrateKbps)
+}
+
+/** The quality ceiling that asks for the smallest video a source has rather than a height. */
+const val WORST_HEIGHT = -1
+
+/** The engine's own smallest video with sound, for a link whose formats are not known yet. */
+val WORST_VIDEO = MediaFormat(
+    formatId = "worst",
+    selector = "wv*+wa/w",
+    label = "Worst quality",
+    ext = "",
+    vcodec = null,
+    acodec = null,
+    height = 0,
+    fps = 0,
+    bitrateKbps = 0.0,
+    fileSizeBytes = 0L,
+    hasVideo = true,
+    hasAudio = true,
+    isGeneric = true
+)
+
+/**
+ * An audio codec a download can prefer to receive the stream in.
+ *
+ * This is what the stream arrives as, before any conversion: a source offering Opus and AAC
+ * of the same track sends whichever is asked for, and the file keeps it unless a different
+ * output format is chosen as well.
+ */
+enum class AudioCodec(
+    /** Badge text, the way codecs are written everywhere else in the app. */
+    val label: String,
+    /** Leading part of the `acodec` a source reports for this codec. */
+    private val codecPrefix: String,
+    /** Extensions that carry only this codec, for sources that name no codec. */
+    private val extensions: Set<String>
+) {
+    OPUS("OPUS", "opus", setOf("opus")),
+    AAC("AAC", "mp4a", setOf("m4a", "aac")),
+    VORBIS("VORBIS", "vorbis", setOf("ogg", "oga")),
+    MP3("MP3", "mp3", setOf("mp3")),
+    FLAC("FLAC", "flac", setOf("flac"));
+
+    /**
+     * Whether [format] is in this codec. Many sites name the codec; the rest are read from
+     * an extension that only ever holds this one, and anything else is left unmatched
+     * rather than guessed at.
+     */
+    fun matches(format: MediaFormat): Boolean {
+        val codec = format.acodec?.lowercase()?.takeIf { it.isNotBlank() && it != "none" }
+        return if (codec != null) codec.startsWith(codecPrefix)
+        else format.ext.lowercase() in extensions
+    }
+
+    /** The yt-dlp expression for the best stream in this codec, or the best of any. */
+    fun genericFormat() = MediaFormat(
+        formatId = "ba[acodec^=$codecPrefix]",
+        selector = "ba[acodec^=$codecPrefix]/ba/b",
+        label = label,
+        ext = "",
+        vcodec = null,
+        acodec = codecPrefix,
+        height = 0,
+        fps = 0,
+        bitrateKbps = 0.0,
+        fileSizeBytes = 0L,
+        hasVideo = false,
+        hasAudio = true,
+        isGeneric = true
+    )
+
+    companion object {
+        /** The codec [format] carries, or null when it is not one of these. */
+        fun of(format: MediaFormat): AudioCodec? = entries.firstOrNull { it.matches(format) }
+    }
 }
 
 /**

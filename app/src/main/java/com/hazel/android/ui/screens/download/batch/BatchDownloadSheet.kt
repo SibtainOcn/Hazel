@@ -1,5 +1,8 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.ui.components.rememberScrollShrink
+import com.hazel.android.ui.components.scrollShrink
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +47,12 @@ import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadPlan
+import com.hazel.android.download.MediaFormat
+import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.NewPipeLister
 import com.hazel.android.download.MediaInfo
+import com.hazel.android.download.WORST_HEIGHT
+import com.hazel.android.download.BatchAudioFormats
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.download.languageLabel
 import com.hazel.android.ui.screens.download.AudioLanguageSheet
@@ -53,6 +62,10 @@ import com.hazel.android.ui.screens.download.FilenameTemplateDialog
 import com.hazel.android.ui.screens.download.FormatSheet
 import com.hazel.android.ui.screens.download.SponsorBlockDialog
 import com.hazel.android.ui.screens.download.SubtitlesDialog
+import com.hazel.android.ui.screens.download.ThumbnailDialog
+import com.hazel.android.ui.screens.download.FormatSelectionSheet
+import com.hazel.android.data.SaveDirs
+import kotlin.math.roundToInt
 
 /**
  * Settings for a whole set of links, whether they came from several pasted urls or from
@@ -77,12 +90,17 @@ fun BatchDownloadSheet(
     results: List<MediaInfo>,
     options: DownloadOptions,
     onOptionsChange: (DownloadOptions) -> Unit,
-    saveDirLabel: String,
-    isCustomSaveDir: Boolean,
-    onOpenSaveDir: () -> Unit,
-    onPickSaveDir: () -> Unit,
-    onResetSaveDir: () -> Unit,
+    /** Where audio and video are saved; the set shows the one for its current kind. */
+    saveDirs: SaveDirs,
+    /** Each is given the kind in question: true for video. */
+    onOpenSaveDir: (isVideo: Boolean) -> Unit,
+    onPickSaveDir: (isVideo: Boolean) -> Unit,
+    onResetSaveDir: (isVideo: Boolean) -> Unit,
     onResolveFormats: (MediaInfo) -> Unit,
+    /** Links whose formats are being read right now. */
+    readingUrls: Set<String> = emptySet(),
+    /** Reads these links' formats again, with the given reader or the setting's. */
+    onRefreshFormats: (List<MediaInfo>, ListingSource?) -> Unit = { _, _ -> },
     onRemove: (MediaInfo) -> Unit,
     onDownload: (List<DownloadPlan>) -> Unit,
     onDismiss: () -> Unit
@@ -269,11 +287,15 @@ fun BatchDownloadSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            val linkListState = rememberLazyListState()
+            val shrink = rememberScrollShrink()
             LazyColumn(
+                state = linkListState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f, fill = false)
-                    .heightIn(max = 280.dp),
+                    .heightIn(max = 280.dp)
+                    .nestedScroll(shrink),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     horizontal = 20.dp
                 ),
@@ -281,6 +303,7 @@ fun BatchDownloadSheet(
             ) {
                 items(results, key = { info -> info.url }) { info ->
                     val format = state.formatOf(info)
+                    Box(modifier = Modifier.scrollShrink(shrink)) {
                     BatchDownloadCard(
                         info = info,
                         formatLabel = format?.shortLabel.orEmpty(),
@@ -310,35 +333,52 @@ fun BatchDownloadSheet(
                         },
                         onRemove = { onRemove(info) }
                     )
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            val hqLabel = if (!state.videoTab) "HQ: BEST"
-            else if (state.maxHeight <= 0) "HQ: AUTO"
-            else "HQ: ${state.maxHeight}p"
+            val audioChoice = state.audioChoice
+            val hqLabel = when {
+                state.videoTab && state.maxHeight == WORST_HEIGHT -> stringResource(R.string.batch_bar_hq_value, "MIN")
+                state.videoTab && state.maxHeight <= 0 -> stringResource(R.string.batch_bar_hq_auto)
+                state.videoTab -> stringResource(R.string.batch_bar_hq_value, "${state.maxHeight}p")
+                audioChoice == null -> stringResource(R.string.batch_bar_hq_best)
+                else -> stringResource(R.string.batch_bar_hq_value, audioChoice.badgeText)
+            }
+
+            val qualityLabel = when {
+                state.videoTab -> stringResource(qualityLabelFor(state.maxHeight))
+                audioChoice == null -> stringResource(R.string.audio_quality_best)
+                else -> audioChoice.label
+            }
 
             BatchActionBar(
                 isVideo = state.videoTab,
-                qualityLabel = stringResource(qualityLabelFor(state.maxHeight)),
+                qualityLabel = qualityLabel,
                 hqLabel = hqLabel,
                 containerLabel = containerLabelFor(options, state.videoTab),
                 options = options,
                 onDownloadType = { openSheet = BatchSheet.TYPE },
-                onQuality = { openSheet = BatchSheet.QUALITY },
+                onQuality = {
+                    // The ladder answers at once; reading every link first is left to the
+                    // sheet's update button, for the user who wants their exact formats.
+                    openSheet = if (state.videoTab) BatchSheet.QUALITY else BatchSheet.AUDIO_FORMAT
+                },
                 onSaveDir = { openSheet = BatchSheet.SAVE_DIR },
                 onContainer = { openSheet = BatchSheet.CONTAINER },
-                onThumbnail = {
-                    onOptionsChange(options.copy(embedThumbnail = !options.embedThumbnail))
-                },
+                onThumbnail = { openSheet = BatchSheet.THUMBNAIL },
                 onChapters = { openSheet = BatchSheet.CHAPTERS },
                 onSubtitles = { openSheet = BatchSheet.SUBTITLES },
                 onSponsorBlock = { openSheet = BatchSheet.SPONSORBLOCK },
                 onFilename = { openSheet = BatchSheet.FILENAME },
                 showAudioLanguage = state.audioLanguages.size > 1,
-                audioLanguageLabel = state.audioLanguage?.let(::languageLabel) ?: "Default",
-                onAudioLanguage = { openSheet = BatchSheet.AUDIO_LANGUAGE }
+                audioLanguageLabel = state.audioLanguage?.let(::languageLabel)
+                    ?: stringResource(R.string.direct_share_audio_language_default),
+                onAudioLanguage = { openSheet = BatchSheet.AUDIO_LANGUAGE },
+                bitrateSet = options.audioQuality.isNotBlank(),
+                onBitrate = { openSheet = BatchSheet.BITRATE }
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -346,7 +386,8 @@ fun BatchDownloadSheet(
             // A set has no single address, so the one link it holds is named and a larger
             // set is counted. Incognito applies to the whole run either way.
             DownloadSheetFooter(
-                label = results.singleOrNull()?.url ?: "${results.size} links",
+                label = results.singleOrNull()?.url
+                    ?: pluralStringResource(R.plurals.batch_links, results.size, results.size),
                 copyText = results.singleOrNull()?.url.orEmpty(),
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
@@ -367,9 +408,9 @@ fun BatchDownloadSheet(
             info = focused,
             options = options,
             onOptionsChange = onOptionsChange,
-            saveDirLabel = saveDirLabel,
-            isCustomSaveDir = isCustomSaveDir,
-            isLoadingFormats = !focused.hasResolvedFormats,
+            saveDirs = saveDirs,
+            isLoadingFormats = focused.url in readingUrls,
+            onRefreshFormats = { source -> onRefreshFormats(listOf(focused), source) },
             initialFormat = state.formatOf(focused),
             initialAudioLanguage = state.languageOf(focused),
             confirmAsApply = true,
@@ -405,9 +446,7 @@ fun BatchDownloadSheet(
                 BatchDownloadTypeSheet(
                     isVideo = state.isVideo(info),
                     onSelect = { isVideo ->
-                        info.autoPick(isVideo, state.maxHeight)?.let {
-                            state.setFormat(info, it)
-                        }
+                        state.defaultFor(info, isVideo)?.let { state.setFormat(info, it) }
                         openSheet = BatchSheet.NONE
                         focusedUrl = null
                     },
@@ -439,6 +478,42 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
+        // The same format list a single link opens, holding what the targeted links share.
+        BatchSheet.AUDIO_FORMAT -> {
+            val targets = state.targets
+            val bestLabel = stringResource(R.string.audio_quality_best)
+            val worstLabel = stringResource(R.string.batch_quality_worst)
+            val choices = remember(targets, bestLabel, worstLabel) {
+                BatchAudioFormats.choices(targets, bestLabel, worstLabel)
+            }
+            FormatSelectionSheet(
+                info = remember(choices) { choicesAsInfo(choices) },
+                selected = currentAudioChoice(state, choices),
+                onConfirm = { choice ->
+                    state.chooseAudio(
+                        choice.takeUnless { it.formatId == BatchAudioFormats.BEST.formatId }
+                    )
+                    openSheet = BatchSheet.NONE
+                },
+                onDismiss = { openSheet = BatchSheet.NONE },
+                audioFirst = true,
+                isLoadingFormats = targets.any { it.url in readingUrls },
+                onRefresh = { source -> onRefreshFormats(targets, source) },
+                canChooseSource = remember(targets) {
+                    targets.isNotEmpty() && targets.all { NewPipeLister.handlesStream(it.url) }
+                }
+            )
+        }
+
+        BatchSheet.BITRATE -> BatchBitrateSheet(
+            currentQuality = options.audioQuality,
+            onSelect = { choice ->
+                onOptionsChange(options.copy(audioQuality = choice))
+                openSheet = BatchSheet.NONE
+            },
+            onDismiss = { openSheet = BatchSheet.NONE }
+        )
+
         BatchSheet.CONTAINER -> BatchContainerSheet(
             isVideo = state.videoTab,
             current = if (state.videoTab) options.videoContainer else options.audioContainer,
@@ -453,20 +528,26 @@ fun BatchDownloadSheet(
         )
 
         BatchSheet.SAVE_DIR -> BatchSaveDirSheet(
-            saveDirLabel = saveDirLabel,
+            saveDirLabel = saveDirs.labelOf(state.videoTab),
             onOpen = {
                 openSheet = BatchSheet.NONE
-                onOpenSaveDir()
+                onOpenSaveDir(state.videoTab)
             },
             onPick = {
                 openSheet = BatchSheet.NONE
-                onPickSaveDir()
+                onPickSaveDir(state.videoTab)
             },
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
         // The remaining settings each open the dialog the single download sheet uses, so
         // there is one place where each of them is explained.
+        BatchSheet.THUMBNAIL -> ThumbnailDialog(
+            options = options,
+            onChange = onOptionsChange,
+            onDismiss = { openSheet = BatchSheet.NONE }
+        )
+
         BatchSheet.CHAPTERS -> ChaptersDialog(
             options = options,
             isVideo = state.videoTab,
@@ -502,9 +583,38 @@ fun BatchDownloadSheet(
 
 /** Which sheet the action bar or a row's type button has opened, if any. */
 private enum class BatchSheet {
-    NONE, TYPE, ITEM_TYPE, QUALITY, CONTAINER, SAVE_DIR, AUDIO_LANGUAGE,
-    CHAPTERS, SUBTITLES, SPONSORBLOCK, FILENAME
+    NONE, TYPE, ITEM_TYPE, QUALITY, AUDIO_FORMAT, BITRATE, CONTAINER, SAVE_DIR, AUDIO_LANGUAGE,
+    THUMBNAIL, CHAPTERS, SUBTITLES, SPONSORBLOCK, FILENAME
 }
+
+/** The row among [choices] that stands for the set's current audio choice. */
+private fun currentAudioChoice(
+    state: BatchDownloadState,
+    choices: List<MediaFormat>
+): MediaFormat? {
+    val id = state.audioChoice?.formatId ?: BatchAudioFormats.BEST.formatId
+    return choices.firstOrNull { it.formatId == id }
+}
+
+/** The shared formats in the shape the format list reads. */
+private fun choicesAsInfo(choices: List<MediaFormat>) = MediaInfo(
+    url = "",
+    title = "",
+    uploader = "",
+    thumbnail = null,
+    durationSeconds = 0,
+    videoFormats = emptyList(),
+    audioFormats = choices
+)
+
+/** Short text for a format on the quality button, such as "OPUS 128K". */
+private val MediaFormat.badgeText: String
+    get() {
+        if (isGeneric) return label.uppercase()
+        val codec = codecLabel.ifBlank { displayContainer }
+        val kbps = bitrateKbps.roundToInt()
+        return if (kbps > 0) "$codec ${kbps}K" else codec
+    }
 
 /** The action bar's container label, which is the extension it will write. */
 private fun containerLabelFor(options: DownloadOptions, isVideo: Boolean): String {

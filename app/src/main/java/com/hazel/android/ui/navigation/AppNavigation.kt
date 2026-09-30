@@ -13,9 +13,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -48,6 +45,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hazel.android.R
+import com.hazel.android.download.BatchState
+import com.hazel.android.data.DownloadQueueRepository
+import com.hazel.android.ui.screens.queue.QueueScreen
+import com.hazel.android.ui.components.HazelBottomBar
+import com.hazel.android.ui.components.BottomBarItem
 import com.hazel.android.update.HazelUpdater
 import com.hazel.android.update.UpdateTokens
 import com.hazel.android.data.SettingsRepository
@@ -59,7 +61,6 @@ import com.hazel.android.ui.screens.download.DownloadScreen
 import com.hazel.android.ui.screens.download.openBatterySettings
 import com.hazel.android.ui.screens.history.HistoryScreen
 import com.hazel.android.ui.screens.more.AppearanceScreen
-import com.hazel.android.ui.screens.more.DirectShareScreen
 import com.hazel.android.ui.screens.more.SponsorScreen
 import com.hazel.android.ui.screens.more.FetchSettingsScreen
 import com.hazel.android.ui.screens.more.MoreScreen
@@ -78,12 +79,14 @@ sealed class Screen(
 ) {
     data object Download : Screen("download", R.string.nav_home, R.drawable.home)
     data object History : Screen("history", R.string.nav_history, R.drawable.downloads_tab)
+    data object Queue : Screen("queue", R.string.nav_queue, R.drawable.queue_tab)
     data object More : Screen("more", R.string.nav_more, R.drawable.more_tab)
 }
 
 private val bottomNavItems = listOf(
     Screen.Download,
     Screen.History,
+    Screen.Queue,
     Screen.More,
 )
 
@@ -119,7 +122,7 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val isSubScreen = currentRoute in listOf(
-        "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "direct_share", "sponsor", "software_update", "hazel_update", "ytdlp_update"
+        "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "sponsor", "software_update", "hazel_update", "ytdlp_update"
     )
 
     val downloadViewModel: com.hazel.android.download.DownloadViewModel =
@@ -230,48 +233,42 @@ fun AppNavigation(
         },
         bottomBar = {
             if (!isSubScreen) {
-                NavigationBar(
-                    containerColor = if (isDarkTheme) Color(0xFF000000)
-                                     else MaterialTheme.colorScheme.surfaceContainerHigh,
-                    tonalElevation = 0.dp,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    val currentDestination = navBackStackEntry?.destination
-
-                    // Red dot: visible when there are active downloads or queued items
-                    bottomNavItems.forEach { screen ->
-                        val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    painter = painterResource(id = screen.icon),
-                                    contentDescription = stringResource(screen.titleRes),
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            },
-                            label = { Text(stringResource(screen.titleRes), style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                unselectedIconColor = if (isDarkTheme) Color.White.copy(alpha = 0.5f)
-                                                      else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
-                                unselectedTextColor = if (isDarkTheme) Color.White.copy(alpha = 0.5f)
-                                                      else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
-                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                            )
-                        )
+                val downloadState by downloadViewModel.state.collectAsState()
+                val savedQueue by remember(context) { DownloadQueueRepository.getQueue(context) }
+                    .collectAsState(initial = emptyList())
+                // Lit while anything is downloading, paused part way or waiting its turn,
+                // so the queue is found without having to go and look.
+                val queueBusy = downloadState.isDownloading || savedQueue.isNotEmpty() ||
+                    downloadState.batch.any {
+                        it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED ||
+                            it.state == BatchState.QUEUED
                     }
-                }
+                val currentDestination = navBackStackEntry?.destination
+                HazelBottomBar(
+                    items = bottomNavItems.map { screen ->
+                        BottomBarItem(
+                            route = screen.route,
+                            icon = screen.icon,
+                            label = screen.titleRes,
+                            showDot = screen == Screen.Queue && queueBusy &&
+                                currentDestination?.route != Screen.Queue.route
+                        )
+                    },
+                    selectedRoute = bottomNavItems.firstOrNull { screen ->
+                        currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                    }?.route,
+                    containerColor = if (isDarkTheme) Color(0xFF000000)
+                    else MaterialTheme.colorScheme.surfaceContainerHigh,
+                    onSelect = { item ->
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
         }
     ) { innerPadding ->
@@ -291,11 +288,21 @@ fun AppNavigation(
                     pendingFailure = pendingFailure,
                     onPendingFailureConsumed = onPendingFailureConsumed,
                     onSharesConsumed = onSharesConsumed,
-                    downloadViewModel = downloadViewModel
+                    downloadViewModel = downloadViewModel,
+                    onOpenQueue = {
+                        navController.navigate(Screen.Queue.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
             composable(Screen.History.route) {
-                HistoryScreen(downloadViewModel = downloadViewModel)
+                HistoryScreen()
+            }
+            composable(Screen.Queue.route) {
+                QueueScreen(downloadViewModel = downloadViewModel)
             }
             composable(Screen.More.route) {
                 MoreScreen(
@@ -304,7 +311,6 @@ fun AppNavigation(
                     onNavigateToStorageLocations = { navController.navigate("storage_locations") },
                     onNavigateToCookies = { navController.navigate("cookies") },
                     onNavigateToFetchSettings = { navController.navigate("fetch_settings") },
-                    onNavigateToDirectShare = { navController.navigate("direct_share") },
                     onNavigateToSponsor = { navController.navigate("sponsor") },
                     onOpenBatterySettings = { openBatterySettings(context) },
                     onNavigateToStorageCleanup = { navController.navigate("storage_cleanup") },
@@ -324,12 +330,6 @@ fun AppNavigation(
                 SponsorScreen(onBack = { navController.popBackStack() })
             }
 
-            composable("direct_share") {
-                DirectShareScreen(
-                    onBack = { navController.popBackStack() },
-                    onOpenCookies = { navController.navigate("cookies") }
-                )
-            }
             composable("storage_locations") {
                 StorageLocationsScreen(onBack = { navController.popBackStack() })
             }

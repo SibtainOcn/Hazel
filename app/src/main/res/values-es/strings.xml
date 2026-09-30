@@ -1,5 +1,4 @@
 <resources>
-    <string name="direct_share_label">Instantáneo</string>
 
     <!-- Navigation -->
     <string name="nav_home">Inicio</string>
@@ -11,7 +10,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Pega un enlace</string>
     <string name="download_clear">Vaciar</string>
-    <string name="download_instant_source">Instantáneo · leyendo desde %1$s</string>
     <string name="download_incognito_title">Estás en incógnito</string>
     <string name="download_incognito_body">Las descargas no se añaden a tu historial y los enlaces no se recuerdan. Los archivos se guardan igual que siempre.</string>
     <string name="download_download_all">Descargar todo</string>
@@ -38,11 +36,6 @@
     <string name="download_cancel_dialog_dismiss">Seguir descargando</string>
     <string name="download_clear_confirm_title">¿Borrar resultados?</string>
     <string name="download_clear_confirm_body">¿Seguro que quieres borrar todos los resultados de la pantalla?</string>
-    <plurals name="download_links">
-        <item quantity="one">%d enlace</item>
-        <item quantity="many">%d de enlaces</item>
-        <item quantity="other">%d enlaces</item>
-    </plurals>
 
     <!-- SearchScreen -->
     <string name="search_hint">Pega un enlace</string>
@@ -195,7 +188,6 @@
     <string name="more_language">Idioma</string>
     <string name="more_cookies">Cookies</string>
     <string name="more_link_reading">Lectura de enlaces</string>
-    <string name="more_hazel_instant">Hazel Instantáneo</string>
     <string name="more_temporary_files">Archivos temporales</string>
     <string name="more_converter">Convertir vídeo a audio sin conexión</string>
     <string name="more_software_update">Actualización de software</string>
@@ -275,9 +267,7 @@
     <!-- HistoryScreen -->
     <string name="history_title">Todas las descargas</string>
     <string name="history_search_action">Buscar en las descargas</string>
-    <string name="history_sort_action">Ordenar</string>
     <string name="history_menu_action">Más</string>
-    <string name="history_menu_clear">Borrar el historial</string>
     <string name="history_search_placeholder">Buscar en las descargas</string>
     <string name="history_search_clear">Borrar la búsqueda</string>
     <string name="history_empty_initial">Aún no has descargado nada</string>
@@ -298,13 +288,30 @@
     <string name="history_card_delete">Eliminar el archivo</string>
     <string name="history_tag_deleted">Eliminado</string>
     <string name="history_toast_file_gone">Este archivo ya no está en tu dispositivo</string>
-    <string name="history_tab_downloading">Descargando</string>
-    <string name="history_tab_downloading_queue">Cola de descargas</string>
     <string name="history_tab_failed">Fallidos</string>
-    <string name="history_empty_downloading_queue">No hay descargas en progreso ni en cola</string>
-    <string name="history_empty_downloading_queue_sub">Las descargas activas y los elementos en cola aparecerán aquí.</string>
+    <string name="nav_queue">Cola</string>
+    <string name="queue_title">Cola de descargas</string>
+    <string name="queue_tab_running">En curso</string>
+    <string name="queue_tab_queued">En cola</string>
+    <string name="queue_empty_running">No se está descargando nada</string>
+    <string name="queue_empty_queued">No hay nada en espera</string>
+    <string name="history_sort_date">Fecha de adición</string>
+    <string name="history_sort_title">Título</string>
+    <string name="history_sort_size">Tamaño</string>
+    <string name="history_sort_reverse">Invertir orden</string>
+    <string name="history_layout_toggle">Cambiar diseño</string>
+    <string name="history_filter_action">Filtrar</string>
+    <string name="history_filter_status">Estado</string>
+    <string name="history_status_all">Todos</string>
+    <string name="history_status_present">No eliminados</string>
+    <string name="history_status_deleted">Eliminados</string>
+    <string name="history_menu_remove_all">Quitar todo</string>
+    <string name="history_menu_remove_deleted">Quitar eliminados</string>
+    <string name="history_menu_remove_duplicates">Quitar duplicados</string>
+    <string name="no_results_add_cookies">Añadir cookies</string>
+    <string name="download_open_queue">Abrir la cola de descargas</string>
+    <string name="fetch_invalid_url">Enlace no válido: debe empezar por http:// o https://</string>
     <string name="history_empty_failed">No hay descargas fallidas</string>
-    <string name="history_empty_failed_sub">Las descargas que encuentren errores aparecerán aquí con su registro de errores.</string>
     <string name="history_failed_error_log">Registro de errores</string>
     <string name="history_failed_copy_log">Copiar registro</string>
     <string name="history_failed_log_copied">Registro de errores copiado al portapapeles</string>
@@ -381,6 +388,9 @@
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">La mejor calidad</string>
+    <string name="batch_quality_worst">Peor calidad</string>
+    <string name="audio_quality_best">Mejor calidad</string>
+    <string name="batch_audio_quality_subtitle">Se usa al convertir a otro formato</string>
     <string name="batch_type_sheet_title">Tipo de descarga preferido</string>
     <string name="batch_type_sheet_subtitle">Cómo se descargan estos enlaces</string>
     <string name="batch_type_audio">Audio</string>
@@ -452,7 +462,6 @@
     <string name="cookie_webview_done">"  Aceptar"</string>
 
     <!-- FormatSelectionSheet -->
-    <string name="format_selection_sort">Ordenar los formatos</string>
     <string name="format_selection_change">Cambiar de formato</string>
     <string name="format_selection_title">Formato</string>
     <string name="format_selection_subtitle">Elige el formato</string>
@@ -461,6 +470,14 @@
     <string name="format_sort_quality">Calidad</string>
     <string name="format_sort_file_size">Tamaño del archivo</string>
     <string name="format_sort_container">Contenedor</string>
+    <string name="format_filter_title">Filtro de formato</string>
+    <string name="format_filter_all">Todos</string>
+    <string name="format_filter_suggested">Sugeridos</string>
+    <string name="format_filter_smallest">Formato más pequeño (por resolución)</string>
+    <string name="format_filter_generic">Genérico</string>
+    <string name="format_source_title">Origen de los formatos</string>
+    <string name="format_sort_title">Ordenar por</string>
+    <string name="format_update">Actualizar</string>
 
     <!-- AudioLanguageSheet -->
     <string name="audio_language_title">Idioma del audio</string>
@@ -515,45 +532,10 @@
     <string name="tools_title">Herramientas</string>
     <string name="tools_empty">Aquí todavía no hay nada.</string>
 
-    <!-- DirectShareScreen -->
-    <string name="direct_share_back">Atrás</string>
-    <string name="direct_share_save_as">Guardar como</string>
-    <string name="direct_share_video">Vídeo</string>
-    <string name="direct_share_audio_only">Solo audio</string>
-    <string name="direct_share_title">Hazel Instantáneo</string>
-    <string name="direct_share_intro">Compartir un enlace con Hazel Instantáneo empieza la descarga de inmediato, sin hoja y sin preguntas. Estas son las respuestas que usa.</string>
-    <string name="direct_share_video_description">Imagen y sonido, unidos en un solo archivo.</string>
-    <string name="direct_share_audio_description">Solo el sonido, con lo mejor que ofrezca la fuente.</string>
-    <string name="direct_share_quality_title">Límite de calidad</string>
-    <string name="direct_share_quality_description">Un techo, no un tamaño exacto. No todas las fuentes ofrecen las mismas alturas, así que se coge la mayor que quepa por debajo de esto, y la menor disponible cuando ninguna cabe.</string>
-    <string name="direct_share_output_title">Salida</string>
-    <string name="direct_share_output_description">El archivo que acaba en el dispositivo. Predeterminado conserva lo que ya da la fuente, que es la opción más rápida porque no se recodifica nada.</string>
-    <string name="direct_share_filename_template">Plantilla del nombre de archivo</string>
-    <string name="direct_share_audio_language">Idioma del audio</string>
     <string name="direct_share_audio_language_default">El de la fuente</string>
-    <string name="direct_share_extras_title">Extras</string>
-    <string name="direct_share_extras_description">Se aplican cuando la fuente los tiene. Lo que no tenga se omite en esa descarga en vez de hacerla fallar.</string>
-    <string name="direct_share_cover_art">Carátula</string>
-    <string name="direct_share_cover_art_description">Escribe la miniatura dentro del archivo, cuando el contenedor puede llevar una.</string>
-    <string name="direct_share_chapters">Capítulos</string>
-    <string name="direct_share_subtitles">Subtítulos</string>
-    <string name="direct_share_sponsorblock">SponsorBlock</string>
-    <string name="direct_share_sponsorblock_off">Desactivado</string>
-    <plurals name="direct_share_sponsorblock_cut">
-        <item quantity="one">%1$d categoría cortada</item>
-        <item quantity="many">%1$d de categorías cortadas</item>
-        <item quantity="other">%1$d categorías cortadas</item>
-    </plurals>
-    <string name="direct_share_signins_title">Sesiones</string>
-    <string name="direct_share_signins_description">Una compartición instantánea usa las cookies guardadas del sitio al que pertenezca el enlace, igual que una descarga empezada desde la hoja. No se pregunta nada al compartir, así que un enlace tras un inicio de sesión solo funciona si la sesión ya está guardada y activada.</string>
-    <string name="direct_share_cookies">Cookies</string>
-    <string name="direct_share_cookies_on">Activado, se usan en cada compartición instantánea</string>
-    <string name="direct_share_cookies_off">Desactivado</string>
-    <string name="direct_share_change">Cambiar %1$s</string>
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Atrás</string>
-    <string name="storage_locations_downloads">Descargas</string>
     <string name="storage_locations_title">Descargas</string>
     <string name="storage_locations_subtitle">Dónde se guardan las descargas, y los límites con los que funcionan</string>
     <string name="storage_locations_limits">Límites</string>
@@ -564,16 +546,22 @@
     <string name="storage_locations_speed_limit">Límite de velocidad</string>
 
     <!-- Share Overlay & Instant Share -->
-    <string name="share_overlay_instant_title">Hazel Instant</string>
-    <string name="share_overlay_instant_subtitle">Descargar con tus ajustes rápidos guardados</string>
-    <string name="share_overlay_instant_download">Descargar ahora</string>
-    <string name="share_overlay_instant_cancel">Cancelar</string>
     <string name="share_overlay_download_started">Descarga añadida a la cola</string>
     <string name="share_overlay_invalid_link">No se encontró ningún enlace web válido en el contenido compartido</string>
-    <string name="share_overlay_cancel_fetch">Cancelar</string>
-    <string name="share_overlay_stage_connecting">Conectando con %s…</string>
-    <string name="share_overlay_stage_reading">Leyendo detalles del contenido…</string>
-    <string name="share_overlay_stage_qualities">Buscando calidades del medio…</string>
-    <string name="share_overlay_stage_ready">Casi listo…</string>
 
+    <string name="format_sheet_fetching">Obteniendo…</string>
+    <string name="options_thumbnail_title">Miniatura</string>
+    <string name="options_thumbnail_embed">Portada</string>
+    <string name="options_thumbnail_crop">Recortar en cuadrado</string>
+    <string name="options_thumbnail_crop_body">La portada se recorta del centro de la imagen, con la forma que muestran los reproductores de música.</string>
+    <string name="processing_step_fetch">Obtener</string>
+    <string name="processing_step_merge">Unir</string>
+    <string name="processing_step_extract">Extraer</string>
+    <string name="processing_step_remux">Remux</string>
+    <string name="processing_step_subtitles">Subtítulos</string>
+    <string name="processing_step_cut">Cortar</string>
+    <string name="processing_step_tags">Etiquetas</string>
+    <string name="processing_step_cover">Portada</string>
+    <string name="processing_step_split">Dividir</string>
+    <string name="processing_step_save">Guardar</string>
 </resources>

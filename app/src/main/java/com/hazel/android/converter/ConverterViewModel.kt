@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.PermissionHelper
 import com.hazel.android.util.StoragePaths
-import com.yausername.youtubedl_android.YoutubeDL
+import com.hazel.android.download.YtDlpEngine
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -165,7 +165,7 @@ class ConverterViewModel : ViewModel() {
                     metadataArgs(title)?.let { addOption("--postprocessor-args", it) }
                 }
 
-                YoutubeDL.getInstance().execute(request, null) { progress, _, line ->
+                YtDlpEngine.execute(request) { progress, _, line ->
                     if (progress > 0f) {
                         _state.value = _state.value.copy(
                             progress = (progress.coerceIn(0f, 100f) / 100f) * 0.9f

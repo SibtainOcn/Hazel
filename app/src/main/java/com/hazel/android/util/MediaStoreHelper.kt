@@ -69,14 +69,14 @@ object MediaStoreHelper {
 
         // Return the final public directory
         return if (Build.VERSION.SDK_INT >= 30) {
-            val basePath = if (isMusic) {
+            val basePath = if (relativePath.startsWith("Music/")) {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
             } else {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             }
-            // Extract subdirectory from relativePath (e.g., "Download/Hazel/Playlist" → "Hazel/Playlist")
-            val subPath = relativePath.substringAfter("/")
-            File(basePath, subPath.substringAfter("/").ifEmpty { subPath })
+            // Extract subdirectory from relativePath (e.g., "Download/Hazel/Video" → "Hazel/Video")
+            val subPath = relativePath.removePrefix("Download/").removePrefix("Music/")
+            File(basePath, subPath)
         } else {
             File(Environment.getExternalStorageDirectory(), relativePath)
         }
@@ -135,7 +135,7 @@ object MediaStoreHelper {
     ): Uri? {
         val resolver = context.contentResolver
 
-        val collection = if (isMusic && Build.VERSION.SDK_INT >= 30) {
+        val collection = if (relativePath.startsWith("Music/") && Build.VERSION.SDK_INT >= 30) {
             MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
         } else if (Build.VERSION.SDK_INT >= 29) {
             MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)

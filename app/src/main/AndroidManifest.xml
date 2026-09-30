@@ -66,9 +66,8 @@
         </activity>
 
         <!--
-            Translucent share overlay activity.
-            Catches shared URLs from external applications and renders the format selection
-            bottom sheet directly over the host app without switching windows or screen stacks.
+            The share target. A link shared from another app opens its download sheet over
+            that app at once, and the sheet fills in while the link is read.
         -->
         <activity
             android:name=".ui.share.ShareOverlayActivity"
@@ -85,24 +84,6 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-
-        <!--
-            Instant share target.
-            Appears in the Android system share sheet as "Instant". Catches shared URLs and
-            downloads at the user's saved quick settings via a minimal overlay confirmation.
-        -->
-        <activity-alias
-            android:name=".DirectShareActivity"
-            android:targetActivity=".ui.share.ShareOverlayActivity"
-            android:exported="true"
-            android:label="@string/direct_share_label"
-            android:icon="@mipmap/ic_launcher">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-        </activity-alias>
 
         <!--
              Holds the process open while a download runs. It does no work of its own: the

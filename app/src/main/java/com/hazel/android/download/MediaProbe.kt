@@ -2,6 +2,7 @@ package com.hazel.android.download
 
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkEntry
+import com.hazel.android.util.UrlExtractor
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.CancellationException
@@ -84,11 +85,12 @@ object MediaProbe {
 
         activeProcessIds.add(processId)
         try {
-            val response = YoutubeDL.getInstance().execute(request, processId, null)
+            val response = YtDlpEngine.execute(request, processId)
             val payload = response.out.trim().takeIf { it.isNotBlank() }
                 ?: throw IllegalStateException("No metadata returned")
 
-            val parsed = parse(url, JSONObject(payload)).copy(requiresSignIn = signedIn)
+            val json = JSONObject(payload)
+            val parsed = withStreamDuration(parse(url, json), json).copy(requiresSignIn = signedIn)
 
             // Kept so a repeat of this link needs no read, and so the download can replay
             // the payload instead of extracting the same thing over again.
@@ -116,6 +118,8 @@ object MediaProbe {
         val text = message?.lowercase() ?: return false
         return SIGN_IN_REFUSALS.any { it in text }
     }
+
+    private val YOUTUBE_VIDEO_ID = Regex("[A-Za-z0-9_-]{11}")
 
     private val SIGN_IN_REFUSALS = listOf(
         "sign in", "log in", "login", "private video", "members-only", "members only",
@@ -187,7 +191,7 @@ object MediaProbe {
 
         activeProcessIds.add(processId)
         val payload = try {
-            YoutubeDL.getInstance().execute(request, processId, null).out.trim()
+            YtDlpEngine.execute(request, processId).out.trim()
                 .takeIf { it.isNotBlank() }
                 ?: throw IllegalStateException("No metadata returned")
         } finally {
@@ -199,15 +203,16 @@ object MediaProbe {
         val isCollection = root.optString("_type") == "playlist" && entries != null
 
         if (!isCollection) {
-            val info = parse(url, root).copy(requiresSignIn = signedIn)
+            val info = withStreamDuration(parse(url, root), root).copy(requiresSignIn = signedIn)
             InfoCache.put(url, info, payload)
             return LinkContents.Single(info)
         }
 
         val listed = buildList {
-            for (index in 0 until entries!!.length()) {
+            val length = entries.length()
+            for (index in 0 until length) {
                 val entry = entries.optJSONObject(index) ?: continue
-                toEntry(entry)?.let { add(it) }
+                toEntry(entry, url)?.let { add(it) }
             }
         }
 
@@ -233,17 +238,39 @@ object MediaProbe {
     }
 
     /** Reads one entry of a flat listing, which carries no formats by design. */
-    private fun toEntry(json: JSONObject): LinkEntry? {
-        val address = firstNonBlank(
+    private fun toEntry(json: JSONObject, parentUrl: String = ""): LinkEntry? {
+        val rawAddress = firstNonBlank(
             json.optString("webpage_url"),
             json.optString("url"),
             json.optString("original_url")
-        ).takeIf { it.isNotBlank() && it.startsWith("http") } ?: return null
+        )
+        val isYouTube = isYouTube(parentUrl) ||
+                json.optString("ie_key").equals("Youtube", ignoreCase = true) ||
+                json.optString("extractor_key").equals("Youtube", ignoreCase = true) ||
+                json.optString("extractor").equals("youtube", ignoreCase = true)
+
+        val address = when {
+            rawAddress.startsWith("http") -> rawAddress
+            // A YouTube listing may give a bare video id where an address would be.
+            isYouTube && YOUTUBE_VIDEO_ID.matches(rawAddress) -> "https://www.youtube.com/watch?v=$rawAddress"
+            isYouTube && YOUTUBE_VIDEO_ID.matches(json.optString("id")) ->
+                "https://www.youtube.com/watch?v=${json.optString("id")}"
+            // Anything else without a full address cannot be read on its own later.
+            else -> return null
+        }
 
         val title = firstNonBlank(json.optString("title"), json.optString("alt_title"))
         // Entries a source has withdrawn still occupy a slot in the listing. They cannot be
         // downloaded, so they are left out rather than shown as cards that will fail.
         if (title in UNAVAILABLE_TITLES) return null
+
+        val ytId = if (isYouTube || isYouTube(address)) {
+            UrlExtractor.extractYouTubeId(address)
+                ?: json.optString("id").takeIf { YOUTUBE_VIDEO_ID.matches(it) }
+        } else null
+
+        val thumb = resolveThumbnail(json)
+            ?: ytId?.let { "https://i.ytimg.com/vi/$it/hqdefault.jpg" }
 
         return LinkEntry(
             url = address,
@@ -254,7 +281,7 @@ object MediaProbe {
                 json.optString("channel"),
                 json.optString("uploader_id")
             ),
-            thumbnail = resolveThumbnail(json),
+            thumbnail = thumb,
             durationSeconds = resolveDuration(json)
         )
     }
@@ -405,7 +432,9 @@ object MediaProbe {
 
         // Resolved before the formats, because a format with no reported size can only
         // be estimated from its bitrate and the running time.
-        val duration = resolveDuration(media).takeIf { it > 0 } ?: resolveDuration(root)
+        val duration = resolveDuration(media).takeIf { it > 0 }
+            ?: resolveDuration(root).takeIf { it > 0 }
+            ?: segmentedDuration(media)
 
         val parsed = readFormats(media, duration).distinctBy { it.formatId }
 
@@ -440,7 +469,15 @@ object MediaProbe {
                 root.optString("uploader"),
                 root.optString("channel")
             ),
-            thumbnail = resolveThumbnail(media) ?: resolveThumbnail(root),
+            thumbnail = resolveThumbnail(media)
+                ?: resolveThumbnail(root)
+                ?: (if (isYouTube(url) ||
+                        root.optString("extractor_key").equals("Youtube", ignoreCase = true) ||
+                        media.optString("extractor_key").equals("Youtube", ignoreCase = true)) {
+                    UrlExtractor.extractYouTubeId(url)
+                        ?: UrlExtractor.extractYouTubeId(media.optString("webpage_url"))
+                        ?: UrlExtractor.extractYouTubeId(root.optString("webpage_url"))
+                } else null)?.let { "https://i.ytimg.com/vi/$it/hqdefault.jpg" },
             durationSeconds = duration,
             // The generic row stands in only where the source named nothing concrete. A
             // list that already holds real formats does not need it: it says nothing the
@@ -641,11 +678,14 @@ object MediaProbe {
         json.optString("thumbnail").takeIf { it.isNotBlank() && it != "null" }?.let { return it }
 
         val thumbs = json.optJSONArray("thumbnails") ?: return null
+        if (thumbs.length() == 0) return null
+
         return (0 until thumbs.length())
             .mapNotNull { thumbs.optJSONObject(it) }
             .maxByOrNull { it.optInt("preference", 0) * 100_000 + it.optInt("width", 0) }
             ?.optString("url")
-            ?.takeIf { it.isNotBlank() }
+            ?.takeIf { it.isNotBlank() && it != "null" }
+            ?: (thumbs.optJSONObject(thumbs.length() - 1)?.optString("url")?.takeIf { it.isNotBlank() && it != "null" })
     }
 
     /** Duration arrives as a number, a string, or not at all. */
@@ -658,6 +698,89 @@ object MediaProbe {
             ?.fold(0) { acc, part -> acc * 60 + part }
             ?: 0
     }
+
+    /**
+     * The running time of a segmented stream, added up from its segments, for a source that
+     * reports no duration of its own. yt-dlp lists each DASH or HLS segment with its length,
+     * so a stream split into a list of segments carries its length even when the page did
+     * not say. The longest such stream is taken, since a video and its audio can differ by a
+     * frame or two. Zero when no stream is split that way.
+     */
+    internal fun segmentedDuration(media: JSONObject): Int {
+        val formats = media.optJSONArray("formats") ?: return 0
+        var longest = 0.0
+        for (i in 0 until formats.length()) {
+            val fragments = formats.optJSONObject(i)?.optJSONArray("fragments") ?: continue
+            var total = 0.0
+            for (j in 0 until fragments.length()) {
+                total += fragments.optJSONObject(j)?.optDouble("duration", 0.0)
+                    ?.takeIf { !it.isNaN() && it > 0.0 } ?: 0.0
+            }
+            if (total > longest) longest = total
+        }
+        return longest.toInt()
+    }
+
+    /**
+     * A direct address of the media itself, with the headers the site wants sent with it,
+     * for asking the file how long it is. Prefers a single progressive file (both streams,
+     * over plain HTTP), then any plain-HTTP stream; null when every stream is a manifest or
+     * segmented, which cannot be asked this way.
+     */
+    internal fun directMediaUrl(media: JSONObject): Pair<String, Map<String, String>>? {
+        val formats = media.optJSONArray("formats") ?: return null
+        val candidates = (0 until formats.length()).mapNotNull { formats.optJSONObject(it) }
+            .filter { f ->
+                val protocol = f.optString("protocol")
+                val address = f.optString("url")
+                address.startsWith("http") && (protocol.isBlank() || protocol == "https" || protocol == "http") &&
+                    !f.has("fragments")
+            }
+        // A codec reported as "none" means the stream is missing; one not reported at all
+        // (Instagram's progressive files) may well be there, so only "none" rules one out.
+        val best = candidates.firstOrNull { f ->
+            f.optString("vcodec") != "none" && f.optString("acodec") != "none"
+        } ?: candidates.firstOrNull() ?: return null
+        val headers = best.optJSONObject("http_headers")?.let { json ->
+            json.keys().asSequence().associateWith { json.optString(it) }
+        }.orEmpty()
+        return best.optString("url") to headers
+    }
+
+    /**
+     * Fills in the running time when the source reported none, by asking the media file
+     * itself. Only the file's header is read, and only for such a link, so an ordinary read
+     * costs nothing more. Instagram's reels are the usual case: the page sometimes leaves
+     * the length out, and yt-dlp has no other place to find it for a single-file stream.
+     */
+    private fun withStreamDuration(info: MediaInfo, root: JSONObject): MediaInfo {
+        if (info.durationSeconds > 0) return info
+        val media = root.optJSONArray("entries")?.let { entries ->
+            (0 until entries.length()).mapNotNull { entries.optJSONObject(it) }
+                .firstOrNull { it.has("formats") || it.has("url") }
+        } ?: root
+        val (address, headers) = directMediaUrl(media) ?: return info
+        val retriever = android.media.MediaMetadataRetriever()
+        var seconds = 0
+        // The reader has no timeout of its own, and a server that stalls would hold the
+        // whole read up; it gets a few seconds, and the card goes without a length after.
+        val reader = Thread {
+            try {
+                retriever.setDataSource(address, headers)
+                seconds = retriever
+                    .extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)
+                    ?.toLongOrNull()?.div(1000)?.toInt() ?: 0
+            } catch (_: Exception) {
+                // No length to be had from the file either.
+            }
+        }.apply { isDaemon = true }
+        reader.start()
+        reader.join(STREAM_DURATION_TIMEOUT_MS)
+        runCatching { retriever.release() }
+        return if (seconds > 0) info.copy(durationSeconds = seconds) else info
+    }
+
+    private const val STREAM_DURATION_TIMEOUT_MS = 8_000L
 
     private fun JSONObject.readCodec(key: String): String? =
         optString(key).takeIf { it.isNotBlank() && it != "none" && it != "null" }

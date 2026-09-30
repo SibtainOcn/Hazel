@@ -1,6 +1,19 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import com.hazel.android.data.SaveDirs
+import com.hazel.android.ui.components.FlatChip
+import com.hazel.android.ui.components.ShimmerLabel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,32 +37,26 @@ import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -63,6 +70,8 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.VIDEO_CONTAINERS
+import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.NewPipeLister
 import com.hazel.android.download.languageLabel
 
 /**
@@ -87,9 +96,13 @@ fun FormatSheet(
     info: MediaInfo,
     options: DownloadOptions,
     onOptionsChange: (DownloadOptions) -> Unit,
-    saveDirLabel: String,
-    isCustomSaveDir: Boolean,
+    /** Where audio and video are saved; the sheet shows and changes the one for its tab. */
+    saveDirs: SaveDirs,
     isLoadingFormats: Boolean = false,
+    /** The link itself is still being read, so its details are not in yet. */
+    isReadingLink: Boolean = false,
+    /** Reads this link's formats again, with the given reader or the setting's. */
+    onRefreshFormats: ((ListingSource?) -> Unit)? = null,
     initialFormat: MediaFormat? = null,
     /** The soundtrack this link is already set to, for a link being adjusted again. */
     initialAudioLanguage: String? = null,
@@ -99,9 +112,10 @@ fun FormatSheet(
      * header offers to play it beside the action that would fetch it again.
      */
     onPlay: (() -> Unit)? = null,
-    onOpenSaveDir: () -> Unit,
-    onPickSaveDir: () -> Unit,
-    onResetSaveDir: () -> Unit,
+    /** Each is given the kind the sheet is on: true for video. */
+    onOpenSaveDir: (isVideo: Boolean) -> Unit,
+    onPickSaveDir: (isVideo: Boolean) -> Unit,
+    onResetSaveDir: (isVideo: Boolean) -> Unit,
     onDownload: (
         format: MediaFormat,
         audioLanguage: String?,
@@ -155,6 +169,10 @@ fun FormatSheet(
     // unambiguous, the metadata written into it.
     var title by remember(info.url) { mutableStateOf(info.title) }
     var author by remember(info.url) { mutableStateOf(info.uploader) }
+    // A sheet opened on a shared link before it was read starts with nothing to show, and
+    // takes the title and author as they arrive. Anything typed in the meantime is kept.
+    LaunchedEffect(info.title) { if (title.isBlank()) title = info.title }
+    LaunchedEffect(info.uploader) { if (author.isBlank()) author = info.uploader }
 
     var openDialog by remember { mutableStateOf(SheetDialog.NONE) }
     var formatSheetVisible by remember { mutableStateOf(false) }
@@ -180,16 +198,32 @@ fun FormatSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        stringResource(R.string.format_sheet_title),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        stringResource(R.string.format_sheet_subtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
+                    if (isReadingLink) {
+                        // Still reading: the heading says so, with light running through
+                        // the word, and the line under it stays so nothing moves when the
+                        // read lands.
+                        ShimmerLabel(
+                            stringResource(R.string.format_sheet_fetching),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            stringResource(R.string.format_sheet_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    } else {
+                        Text(
+                            stringResource(R.string.format_sheet_title),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            stringResource(R.string.format_sheet_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    }
                 }
                 // Left of the download action, and quieter than it. Playing what is already
                 // there is the smaller of the two things to do here, and it should not be
@@ -253,22 +287,27 @@ fun FormatSheet(
             Spacer(modifier = Modifier.height(12.dp))
 
             // ── Audio / Video tabs ──
-            val tabIndex = if (videoTab) 1 else 0
-            SecondaryTabRow(
-                selectedTabIndex = tabIndex,
-                containerColor = MaterialTheme.colorScheme.surface
+            //
+            // Two words at the start of the sheet rather than two halves of its width: the
+            // tabs are a choice of what to download, read along with the heading above
+            // them, and a short bar under the chosen word says which without ruling a line
+            // across the sheet.
+            Row(
+                // The words, not their touch targets, line up with the heading.
+                modifier = Modifier.offset(x = -SHEET_TAB_PADDING),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Tab(
+                SheetTab(
+                    label = stringResource(R.string.format_sheet_tab_audio),
                     selected = !videoTab,
-                    onClick = { videoTab = false },
                     enabled = info.audioFormats.isNotEmpty(),
-                    text = { Text(stringResource(R.string.format_sheet_tab_audio), fontWeight = FontWeight.SemiBold) }
+                    onClick = { videoTab = false }
                 )
-                Tab(
+                SheetTab(
+                    label = stringResource(R.string.format_sheet_tab_video),
                     selected = videoTab,
-                    onClick = { videoTab = true },
                     enabled = info.videoFormats.isNotEmpty(),
-                    text = { Text(stringResource(R.string.format_sheet_tab_video), fontWeight = FontWeight.SemiBold) }
+                    onClick = { videoTab = true }
                 )
             }
 
@@ -352,7 +391,7 @@ fun FormatSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SaveDirField(label = saveDirLabel, onClick = { openDialog = SheetDialog.SAVE_DIR })
+            SaveDirField(label = saveDirs.labelOf(videoTab), onClick = { openDialog = SheetDialog.SAVE_DIR })
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -375,11 +414,19 @@ fun FormatSheet(
                     OptionChip(
                         label = stringResource(R.string.format_sheet_thumbnail),
                         icon = Icons.Filled.Image,
-                        selected = options.embedThumbnail,
-                        onClick = {
-                            onOptionsChange(options.copy(embedThumbnail = !options.embedThumbnail))
-                        }
+                        badge = options.thumbnailBadge,
+                        onClick = { openDialog = SheetDialog.THUMBNAIL }
                     )
+                    // Named rather than valued: the bitrate belongs to a conversion, not to
+                    // the stream picked above, and the chip is lit while one is set.
+                    if (!videoTab) {
+                        OptionChip(
+                            label = stringResource(R.string.properties_bitrate),
+                            icon = Icons.Filled.HighQuality,
+                            selected = options.audioQuality.isNotBlank(),
+                            onClick = { openDialog = SheetDialog.AUDIO_QUALITY }
+                        )
+                    }
                     OptionChip(
                         label = stringResource(R.string.format_sheet_chapters),
                         icon = Icons.Filled.Book,
@@ -424,6 +471,8 @@ fun FormatSheet(
             selected = selected,
             audioFirst = !videoTab,
             isLoadingFormats = isLoadingFormats,
+            onRefresh = onRefreshFormats,
+            canChooseSource = remember(info.url) { NewPipeLister.handlesStream(info.url) },
             onConfirm = { format ->
                 if (format.hasVideo) pickedVideo = format else pickedAudio = format
                 // Picking an audio stream from the video tab, or the other way round,
@@ -462,6 +511,12 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
+        SheetDialog.THUMBNAIL -> ThumbnailDialog(
+            options = options,
+            onChange = onOptionsChange,
+            onDismiss = { openDialog = SheetDialog.NONE }
+        )
+
         SheetDialog.CHAPTERS -> ChaptersDialog(
             options = options,
             isVideo = videoTab,
@@ -484,20 +539,29 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
+        SheetDialog.AUDIO_QUALITY -> AudioQualityDialog(
+            options = options,
+            onConfirm = {
+                onOptionsChange(it)
+                openDialog = SheetDialog.NONE
+            },
+            onDismiss = { openDialog = SheetDialog.NONE }
+        )
+
         SheetDialog.SAVE_DIR -> SaveDirDialog(
-            label = saveDirLabel,
-            isCustom = isCustomSaveDir,
+            label = saveDirs.labelOf(videoTab),
+            isCustom = saveDirs.of(videoTab).isCustom,
             onOpen = {
                 openDialog = SheetDialog.NONE
-                onOpenSaveDir()
+                onOpenSaveDir(videoTab)
             },
             onPick = {
                 openDialog = SheetDialog.NONE
-                onPickSaveDir()
+                onPickSaveDir(videoTab)
             },
             onReset = {
                 openDialog = SheetDialog.NONE
-                onResetSaveDir()
+                onResetSaveDir(videoTab)
             },
             onDismiss = { openDialog = SheetDialog.NONE }
         )
@@ -505,7 +569,50 @@ fun FormatSheet(
 }
 
 /** Which of the sheet's dialogs is open. Only one can be at a time. */
-private enum class SheetDialog { NONE, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR }
+private val SHEET_TAB_PADDING = 12.dp
+
+/** One of the sheet's Audio / Video tabs: its word, and a short bar under it when chosen. */
+@Composable
+private fun SheetTab(label: String, selected: Boolean, enabled: Boolean, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val textColor by animateColorAsState(
+        targetValue = when {
+            selected -> colors.primary
+            enabled -> colors.onSurface
+            else -> colors.onSurface.copy(alpha = 0.38f)
+        },
+        label = "sheetTabText"
+    )
+    val barWidth by animateDpAsState(
+        targetValue = if (selected) 32.dp else 0.dp,
+        animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium),
+        label = "sheetTabBar"
+    )
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .selectable(selected = selected, enabled = enabled, role = Role.Tab, onClick = onClick)
+            .padding(horizontal = SHEET_TAB_PADDING, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = textColor
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Box(
+            modifier = Modifier
+                .width(barWidth)
+                .height(3.dp)
+                .clip(RoundedCornerShape(50))
+                .background(colors.primary)
+        )
+    }
+}
+
+private enum class SheetDialog { NONE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY }
 
 /** Labelled box whose value the user can type into, matching the read-only fields' look. */
 @Composable
@@ -666,8 +773,9 @@ private fun SaveDirField(label: String, onClick: () -> Unit) {
     }
 }
 
+/** Where one kind of download is saved, with opening, changing and resetting it. */
 @Composable
-private fun SaveDirDialog(
+internal fun SaveDirDialog(
     label: String,
     isCustom: Boolean,
     onOpen: () -> Unit,
@@ -711,29 +819,5 @@ private fun OptionChip(
     badge: Int = 0,
     onClick: () -> Unit
 ) {
-    val chip = @Composable {
-        FilterChip(
-            selected = selected,
-            onClick = onClick,
-            label = { Text(label) },
-            leadingIcon = {
-                Icon(
-                    if (selected) Icons.Filled.Check else icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-            },
-            colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                selectedLabelColor = MaterialTheme.colorScheme.primary,
-                selectedLeadingIconColor = MaterialTheme.colorScheme.primary
-            )
-        )
-    }
-
-    if (badge > 0) {
-        BadgedBox(badge = { Badge { Text(badge.toString()) } }) { chip() }
-    } else {
-        chip()
-    }
+    FlatChip(label = label, onClick = onClick, icon = icon, selected = selected, badge = badge)
 }

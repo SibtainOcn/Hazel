@@ -2,38 +2,34 @@
 # Format:  <file>:<line>: <reason>
 # A reason must say why the text never reaches a user's eyes. "Looks fine" is not a reason.
 
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:489: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:584: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1063: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1412: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1188: two formatted byte counts joined by a slash, no words to translate
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1201: two formatted byte counts joined by a slash, no words to translate
-app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1195: numeric percentage format, no words to translate
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:445: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:531: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1094: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:716: Toast.makeText uses a resource reference, no literal string
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1205: two formatted byte counts joined by a slash, no words to translate
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1212: numeric percentage format, no words to translate
+app/src/main/java/com/hazel/android/ui/screens/download/DownloadScreen.kt:1218: two formatted byte counts joined by a slash, no words to translate
 
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:492: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:527: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/history/HistoryScreen.kt:538: Toast.makeText uses a resource reference, no literal string
-app/src/main/java/com/hazel/android/ui/screens/history/HistoryScreen.kt:635: Toast.makeText uses a resource reference, no literal string
-app/src/main/java/com/hazel/android/ui/screens/history/HistoryScreen.kt:723: Toast.makeText uses resource references, no literal string
-app/src/main/java/com/hazel/android/ui/screens/history/HistoryScreen.kt:792: Toast.makeText uses resource references, no literal string
-app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:118: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:233: two formatted byte counts joined by a slash, no words to translate
-app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:240: numeric percentage format, no words to translate
-app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:246: two formatted byte counts joined by a slash, no words to translate
-app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:436: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/SearchScreen.kt:193: Toast.makeText uses a resource reference, no literal string
+app/src/main/java/com/hazel/android/ui/screens/history/HistoryScreen.kt:372: Toast.makeText uses a resource reference, no literal string
+app/src/main/java/com/hazel/android/ui/screens/history/HistoryScreen.kt:481: Toast.makeText uses resource references, no literal string
+app/src/main/java/com/hazel/android/ui/screens/download/SearchScreen.kt:195: Toast.makeText uses a resource reference, no literal string
 app/src/main/java/com/hazel/android/ui/screens/cookies/CookiesScreen.kt:577: ClipData label, not surfaced in the clipboard UI on any supported version
 app/src/main/java/com/hazel/android/ui/screens/cookies/CookiesScreen.kt:581: helper takes an already resolved string, every caller passes getString
-app/src/main/java/com/hazel/android/ui/screens/download/batch/BatchActionBar.kt:252: a count rendered into a badge, digits only, no words to translate
-app/src/main/java/com/hazel/android/ui/screens/download/batch/BatchDownloadSheet.kt:189: a formatted byte total behind a tilde, with a plus when some sizes are unknown, no words to translate
+app/src/main/java/com/hazel/android/ui/screens/download/batch/BatchDownloadSheet.kt:207: a formatted byte total behind a tilde, with a plus when some sizes are unknown, no words to translate
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:542: a numeric percentage, no words to translate
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:723: a file extension, which is the same in every language
 app/src/main/java/com/hazel/android/ui/screens/converter/ConverterScreen.kt:859: a file extension, which is the same in every language
 
-app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:93: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:101: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:262: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:280: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:92: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:100: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:341: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:349: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:358: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:367: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:485: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/Shimmer.kt:493: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/screens/SplashScreen.kt:96: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/screens/SplashScreen.kt:104: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/util/FolderUtil.kt:66: shows a filesystem path, a runtime value with no words in it
@@ -43,3 +39,15 @@ app/src/main/java/com/hazel/android/util/MediaOpener.kt:48: message comes from g
 app/src/main/java/com/hazel/android/ui/screens/cookies/CookieWebViewActivity.kt:267: message is the engine's own error text or getString, no literal here
 app/src/main/java/com/hazel/android/ui/screens/download/FormatSelectionSheet.kt:393: the source's own format id behind a fixed id: marker, an identifier the engine prints and no language changes
 app/src/main/java/com/hazel/android/ui/screens/download/FormatSelectionSheet.kt:419: the source's own format id behind a fixed id: marker, an identifier the engine prints and no language changes
+
+app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt:584: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt:589: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:121: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:284: two formatted byte counts joined by a slash, no words to translate
+app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:291: numeric percentage format, no words to translate
+app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:297: two formatted byte counts joined by a slash, no words to translate
+app/src/main/java/com/hazel/android/ui/components/ProcessingTracker.kt:63: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/ProcessingTracker.kt:68: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/ProcessingTracker.kt:71: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/ProcessingTracker.kt:76: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/components/ProcessingTracker.kt:85: Compose animation label, used by the tooling inspector only

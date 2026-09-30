@@ -3,7 +3,7 @@
 # Hazel - link-reading latency: findings and fixes
 
 
-Measured on the connected device (Realme RMX3151, Helio G85), yt-dlp **2026.08.19**,
+Measured on a mid-range Android device, yt-dlp **2026.08.19**,
 over the session's live network. Instrumentation was temporary and has been removed.
 
 ---
@@ -36,7 +36,7 @@ Each of these was measured, not reasoned about, and none of them was the cause:
 | Our yt-dlp cache is not working | `--no-cache-dir` → **19298 ms** vs 6079 ms | rejected - cache already saves ~13 s |
 | The new listing options are slower | A/B same URL: OLD `--no-playlist` 9880 ms vs NEW `--flat-playlist --lazy-playlist` 7884 ms | **rejected** - new is not slower |
 
-Note on the A/B: the identical call measured 7.9 s and 26 s minutes apart, so this device's
+Note on the A/B: the identical call measured 7.9 s and 26 s minutes apart, so the test
 network varies by ~3x. Single measurements here are not trustworthy; only paired ones are.
 
 ## 3. The regression reported mid-session
@@ -86,7 +86,7 @@ duplicate detection that depends on the same comparison.
   yt-dlp names multi-audio streams differently (`251-drc`, `251-0`). A format picked from
   them can fail at download time, after the user has chosen it. It is used for listing only.
 - **`player_client` overrides.** They fail outright on this yt-dlp version.
-- The remaining ~6 s first read is the floor for yt-dlp on this hardware.
+- The remaining ~6 s first read is the floor for yt-dlp on this class of hardware.
 
 ---
 

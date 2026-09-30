@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.download.ProcessingStep
 import com.hazel.android.download.BatchItem
 import com.hazel.android.download.BatchState
 import com.hazel.android.download.MediaInfo
@@ -101,6 +102,8 @@ fun MediaCard(
     info: MediaInfo,
     isDownloading: Boolean,
     isProcessing: Boolean = false,
+    processingSteps: List<ProcessingStep> = emptyList(),
+    processingStep: Int = 0,
     progress: Float = 0f,
     totalBytes: Long = 0L,
     isComplete: Boolean = false,
@@ -298,7 +301,17 @@ fun MediaCard(
                 }
 
                 if (isProcessing && !isPaused) {
-                    ProcessingShimmer(modifier = Modifier.fillMaxSize())
+                    // The stages this download goes through, as far as it has got; the
+                    // plain sweep only stands in when no stages are known.
+                    if (processingSteps.isNotEmpty()) {
+                        ProcessingTracker(
+                            steps = processingSteps,
+                            current = processingStep,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        ProcessingShimmer(modifier = Modifier.fillMaxSize())
+                    }
                 } else {
                     Box(
                         modifier = Modifier
@@ -405,13 +418,9 @@ fun MediaCard(
                     .fillMaxWidth()
                     .height(4.dp)
 
-                if (isProcessing) {
-                    LinearProgressIndicator(
-                        modifier = lineModifier,
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color.White.copy(alpha = 0.25f)
-                    )
-                } else {
+                // While processing, the stage track over the artwork is the progress; a
+                // second line along the bottom only repeated it.
+                if (!isProcessing) {
                     LinearProgressIndicator(
                         progress = { animatedProgress },
                         modifier = lineModifier,

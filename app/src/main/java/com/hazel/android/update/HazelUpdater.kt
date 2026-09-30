@@ -467,6 +467,27 @@ object HazelUpdater {
     }
 
     /**
+     * Removes downloaded APKs that are no longer ahead of the app: the one just installed,
+     * and anything older. Needs no network, unlike the check in [checkUpdatesSilently],
+     * which only tidied up once it had reached the release feed; an app updated and then
+     * opened offline kept its installer, tens of megabytes, in the cache. An APK for a
+     * version still newer than the app is kept, so an update downloaded but not yet
+     * installed is not fetched again.
+     */
+    fun cleanInstalledApks(context: Context) {
+        runCatching {
+            File(context.cacheDir, "updates").listFiles()?.forEach { file ->
+                if (!file.isFile || !file.name.endsWith(".apk", ignoreCase = true)) return@forEach
+                val version = APK_VERSION.find(file.name)?.groupValues?.get(1)
+                if (version == null || !isNewer(version)) file.delete()
+            }
+        }
+    }
+
+    /** The version in an update's file name, as in Hazel-v1.0.11-arm64-v8a-stable.apk. */
+    private val APK_VERSION = Regex("""^Hazel-v(\d+(?:\.\d+)*)""", RegexOption.IGNORE_CASE)
+
+    /**
      * Retrieves an already downloaded and verified APK from cache, if available.
      */
     fun getCachedApk(context: Context, info: ReleaseInfo): File? {
@@ -488,6 +509,7 @@ object HazelUpdater {
      * appear immediately in real-time without requiring manual user navigation.
      */
     suspend fun checkUpdatesSilently(context: Context) = withContext(Dispatchers.IO) {
+        cleanInstalledApks(context)
         try {
             val channelLabel = com.hazel.android.data.SettingsRepository.getHazelChannel(context).first()
             val channel = Channel.fromLabel(channelLabel)

@@ -3,7 +3,10 @@ package com.hazel.android.download
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.hazel.android.MainActivity
+import com.hazel.android.data.DownloadQueueRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Where the notification's buttons find the download they are meant to act on.
@@ -47,15 +50,12 @@ class DownloadActionReceiver : BroadcastReceiver() {
         when (intent.action) {
             ACTION_PAUSE -> viewModel?.pauseDownload()
 
-            ACTION_RESUME ->
-                if (viewModel != null) {
-                    viewModel.resumeDownload()
-                } else {
-                    // The process was rebuilt since the download was paused, so there is
-                    // nothing here to resume with. The queue is on disk and the app picks
-                    // it up as it starts, so opening the app is the resume.
-                    openApp(context)
-                }
+            // With the app closed since the pause there is no view model yet, and one is made
+            // for the resume: it reads the queue from disk and runs it in the background.
+            // Opening the app instead did not resume anything (a paused download is kept
+            // paused when the app starts), and Android 12 and later do not let a notification
+            // button open an activity from here at all.
+            ACTION_RESUME -> (viewModel ?: DownloadViewModelHolder.get()).resumeDownload()
 
             ACTION_CANCEL ->
                 if (viewModel != null) {
@@ -63,15 +63,22 @@ class DownloadActionReceiver : BroadcastReceiver() {
                 } else {
                     DownloadNotificationHelper.cancelPaused(context)
                     DownloadNotificationHelper.cancelProgress(context)
+                    // Given up for good: without this the paused download was still on the
+                    // record, and came back paused the next time the app opened.
+                    val app = context.applicationContext
+                    val pending = goAsync()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            DownloadQueueRepository.load(app).filter { it.paused }.forEach {
+                                DownloadQueueRepository.remove(app, it.url)
+                                runCatching { workDirFor(it.url).deleteRecursively() }
+                            }
+                        } finally {
+                            pending.finish()
+                        }
+                    }
                 }
         }
-    }
-
-    private fun openApp(context: Context) {
-        val launch = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-        runCatching { context.startActivity(launch) }
     }
 
     companion object {

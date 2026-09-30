@@ -10,13 +10,12 @@ Verifies:
    - Playlist / Collection URL -> BatchDownloadSheet
 3. Duplicate Independence: Whether a media item was downloaded previously or not,
    the share sheet resolves cleanly and allows format selection.
-4. History Recording: Both Normal Share and Hazel Instant Share immediately
-   record URLs into SearchHistoryRepository and complete downloads into DownloadHistoryRepository.
-5. Layout & Text Safety: Buttons in InstantShareSheet are symmetrically sized (52dp, weight=1),
-   use safe padding (8dp), and text scale (14sp) so "Download Now" never truncates to "Download No".
-6. Independent Black & Green Theme: Share overlay uses dedicated dark tokens (#0A0A0A & #8FD6B8)
-   completely independent of user-selected app theme or accent color.
-7. Zero Artificial Delays: OverlayLoadingSheet contains no blocking delay() calls.
+4. History Recording: a shared URL is recorded into SearchHistoryRepository at once.
+5. One share target: the sheet opens immediately on the shared link and fills in as it is
+   read; there is no separate instant target, loading screen or settings for one.
+6. Choosing before the read finishes: the download waits for the read and then starts.
+7. Failure dialog: the log copies and a sign-in can be added from it.
+8. Dark overlay theme using the user's accent colour.
 
 Run:
     python tools/test_share_overlay_isolation.py
@@ -122,7 +121,8 @@ def determine_sheet_new(state: MockDownloadState) -> str:
         return "BatchDownloadSheet"
     if len(state.results) == 1:
         return "FormatSheet"
-    return "OverlayLoadingSheet"
+    # The sheet opens on the shared link itself before anything is read.
+    return "FormatSheet"
 
 
 def test_share_intent_isolation():
@@ -203,14 +203,14 @@ def test_source_code_integrity():
         "accent.dark" in overlay_content and "accent.containerDark" in overlay_content
     )
 
-    # 4. Sheet display ordering: state.info != null checked for single item
+    # 4. One item opens the format sheet, a collection the batch sheet
     check_true(
-        "FormatSheet is rendered for single item info",
-        "state.info != null" in overlay_content and "FormatSheet(" in overlay_content
+        "FormatSheet is rendered for a single item",
+        "results.singleOrNull()" in overlay_content and "FormatSheet(" in overlay_content
     )
     check_true(
         "BatchDownloadSheet is only rendered for multiple results",
-        "state.results.size > 1" in overlay_content and "BatchDownloadSheet(" in overlay_content
+        "results.size > 1 -> BatchDownloadSheet(" in overlay_content
     )
 
     # 5. DownloadViewModel fetchShare definition
@@ -228,106 +228,51 @@ def test_source_code_integrity():
 
 
 # ===========================================================================
-# 3. InstantShareSheet Layout & Text Truncation Safety
+# 3. One share target
 # ===========================================================================
 
-def test_button_layout_safety():
-    print(f"\n{'='*70}\n  TEST 3: Button Layout Safety & Clipping Prevention\n{'='*70}")
+def test_single_share_target():
+    print(f"\n{'='*70}\n  TEST 3: One Share Target, No Instant Path\n{'='*70}")
 
-    instant_sheet_path = REPO_ROOT / "app/src/main/java/com/hazel/android/ui/share/InstantShareSheet.kt"
-    check_true("InstantShareSheet.kt exists", instant_sheet_path.is_file())
-    sheet_content = instant_sheet_path.read_text(encoding="utf-8")
+    manifest = (REPO_ROOT / "app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
+    check_true("No instant share alias in the manifest", "DirectShareActivity" not in manifest)
+    check_true("Share overlay still receives SEND", ".ui.share.ShareOverlayActivity" in manifest and "android.intent.action.SEND" in manifest)
 
-    # Verify content padding is explicitly tightened to 8.dp to prevent clipping
+    share_dir = REPO_ROOT / "app/src/main/java/com/hazel/android/ui/share"
+    check_true("InstantShareSheet.kt removed", not (share_dir / "InstantShareSheet.kt").exists())
+    check_true("OverlayLoadingSheet.kt removed", not (share_dir / "OverlayLoadingSheet.kt").exists())
     check_true(
-        "Buttons use tight 8.dp horizontal padding",
-        "contentPadding = PaddingValues(horizontal = 8.dp" in sheet_content
+        "DirectShareScreen.kt removed",
+        not (REPO_ROOT / "app/src/main/java/com/hazel/android/ui/screens/more/DirectShareScreen.kt").exists()
     )
 
-    # Verify font size is scaled safely (14.sp)
-    check_true(
-        "Button font size is 14.sp to fit Download Now safely",
-        "fontSize = 14.sp" in sheet_content
-    )
-
-    # Verify icon size is 16.dp with 6.dp spacer
-    check_true(
-        "Download icon size is 16.dp",
-        "modifier = Modifier.size(16.dp)" in sheet_content
-    )
-    check_true(
-        "Spacer between icon and text is 6.dp",
-        "Spacer(modifier = Modifier.width(6.dp))" in sheet_content
-    )
-
-    # Verify text overflow safety
-    check_true(
-        "Text overflow is TextOverflow.Ellipsis",
-        "overflow = TextOverflow.Ellipsis" in sheet_content
-    )
-
-    # Mathematical safety calculation for narrowest screens (320dp width)
-    screen_width_dp = 320.0
-    sheet_padding_dp = 40.0 # 20dp left + 20dp right
-    gap_dp = 10.0
-    available_width_for_buttons = screen_width_dp - sheet_padding_dp - gap_dp
-    single_button_width_dp = available_width_for_buttons / 2.0 # 135.0 dp
-
-    button_padding_dp = 16.0 # 8dp * 2
-    icon_width_dp = 16.0
-    spacer_width_dp = 6.0
-    available_text_width_dp = single_button_width_dp - button_padding_dp - icon_width_dp - spacer_width_dp # 97.0 dp
-
-    # "Download Now" is 12 characters. At 14sp, typical Roboto/GoogleSans average char width is ~6.2dp
-    estimated_text_width_dp = 12 * 6.2 # ~74.4 dp
-    check_true(
-        f"Text width ({estimated_text_width_dp:.1f}dp) comfortably fits within available button width ({available_text_width_dp:.1f}dp)",
-        estimated_text_width_dp < available_text_width_dp
-    )
+    vm_content = (REPO_ROOT / "app/src/main/java/com/hazel/android/download/DownloadViewModel.kt").read_text(encoding="utf-8")
+    check_true("startDirect removed from the view model", "fun startDirect(" not in vm_content)
+    check_true("instantSource removed from the state", "instantSource" not in vm_content)
 
 
 # ===========================================================================
-# 4. Zero Artificial Delays in Loading Sheet
+# 4. The sheet opens at once and a choice waits for the read
 # ===========================================================================
 
-def test_loading_sheet_performance():
-    print(f"\n{'='*70}\n  TEST 4: Loading Sheet Optimization & Zero Artificial Delays\n{'='*70}")
+def test_sheet_opens_at_once():
+    print(f"\n{'='*70}\n  TEST 4: Immediate Sheet & Download Once Read\n{'='*70}")
 
-    loading_sheet_path = REPO_ROOT / "app/src/main/java/com/hazel/android/ui/share/OverlayLoadingSheet.kt"
-    check_true("OverlayLoadingSheet.kt exists", loading_sheet_path.is_file())
-    loading_content = loading_sheet_path.read_text(encoding="utf-8")
+    overlay = (REPO_ROOT / "app/src/main/java/com/hazel/android/ui/share/ShareOverlayActivity.kt").read_text(encoding="utf-8")
+    vm = (REPO_ROOT / "app/src/main/java/com/hazel/android/download/DownloadViewModel.kt").read_text(encoding="utf-8")
 
-    # Check for hardcoded sequential artificial delays
-    check_true(
-        "No delay(850) artificial delay",
-        "delay(850)" not in loading_content
-    )
-    check_true(
-        "No delay(1350) artificial delay",
-        "delay(1350)" not in loading_content
-    )
-    check_true(
-        "No delay(2200) artificial delay",
-        "delay(2200)" not in loading_content
-    )
+    check_true("Sheet opens on the generic quality ladder for the shared link", "GenericFormats.placeholder(" in overlay and "resolved ?: placeholder" in overlay)
+    check_true("A choice made before the read waits for it", "downloadViewModel.downloadOnceRead(" in overlay)
+    check_true("The view model waits for the running read", "fun downloadOnceRead(" in vm and "fetchJob?.join()" in vm)
+    check_true("A failed read is reported after the sheet has closed", "DownloadNotificationHelper.showError(" in vm)
+    check_true("No artificial delays in the overlay", "delay(" not in overlay)
 
-    # Check that progressive animation drives rail progress smoothly
-    check_true(
-        "Progressive animation drives railProgress smoothly",
-        "animateFloatAsState" in loading_content and "railProgress" in loading_content
-    )
-    check_true(
-        "Concentric bolt icon used in loader",
-        "R.drawable.ic_hazel_bolt" in loading_content
-    )
-    check_true(
-        "Concentric circle badge used for loader",
-        "CircleShape" in loading_content
-    )
-    check_true(
-        "progressMessage is supported dynamically",
-        "progressMessage: String" in loading_content
-    )
+    check_true("Failure dialog copies the log", "copyToClipboard(this@ShareOverlayActivity, failure)" in overlay)
+    check_true("Failure dialog offers adding cookies", "canAddCookies = true" in overlay)
+    check_true("Signing in reads the link again", "signInLauncher" in overlay and "fetchShare(url)" in overlay)
+
+    sheet = (REPO_ROOT / "app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt").read_text(encoding="utf-8")
+    check_true("Format sheet adopts a title that arrives late", "if (title.isBlank()) title = info.title" in sheet)
 
 
 # ===========================================================================
@@ -341,8 +286,8 @@ def main():
 
     test_share_intent_isolation()
     test_source_code_integrity()
-    test_button_layout_safety()
-    test_loading_sheet_performance()
+    test_single_share_target()
+    test_sheet_opens_at_once()
 
     print("\n" + "=" * 70)
     print(f"  TOTAL CHECKS: {PASS_COUNT + FAIL_COUNT}")

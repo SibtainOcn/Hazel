@@ -39,16 +39,11 @@ class MainActivity : ComponentActivity() {
      * arrive as several intents on the same instance, and a single slot meant each one
      * overwrote the last before the screen had read it: sharing three links in a row
      * downloaded whichever of them happened to be looked at.
-     *
-     * [SharedLink.direct] says which of the two share targets it came through. They resolve
-     * to the same class, so the component name is the only place the difference shows, and
-     * it is the whole difference: the direct one means "do not ask, just download".
      */
     val pendingShares = mutableStateListOf<SharedLink>()
 
     data class SharedLink(
         val url: String,
-        val direct: Boolean,
         /** Where it came from, for the line shown while it is being read. */
         val source: String = ""
     )
@@ -170,14 +165,7 @@ class MainActivity : ComponentActivity() {
     private fun handleShareIntent(intent: Intent?) {
         if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()?.takeIf { it.isNotBlank() }
-                ?.let { link ->
-                    // The alias and the activity resolve to the same class, so which of the
-                    // two the user picked in the share sheet is only visible in the
-                    // component name.
-                    val direct =
-                        intent.component?.className?.endsWith("DirectShareActivity") == true
-                    pendingShares.add(SharedLink(link, direct, sourceLabelFor(link)))
-                }
+                ?.let { link -> pendingShares.add(SharedLink(link, sourceLabelFor(link))) }
         }
 
         intent?.getStringExtra(DownloadNotificationHelper.EXTRA_FAILURE_MESSAGE)

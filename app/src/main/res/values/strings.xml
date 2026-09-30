@@ -10,7 +10,6 @@
          Shown in the system share sheet. Android puts the app name in front of this,
          so naming the app here again would render as "Hazel Hazel direct".
     -->
-    <string name="direct_share_label">Instant</string>
 
     <!-- Navigation -->
     <string name="nav_home">Home</string>
@@ -22,7 +21,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Enter URL</string>
     <string name="download_clear">Clear</string>
-    <string name="download_instant_source">Instant \u00b7 reading from %1$s</string>
     <string name="download_incognito_title">You\'re incognito</string>
     <string name="download_incognito_body">Downloads are not added to your history and links are not remembered. The files themselves still save as usual.</string>
     <string name="download_download_all">Download all</string>
@@ -49,10 +47,6 @@
     <string name="download_cancel_dialog_dismiss">Keep downloading</string>
     <string name="download_clear_confirm_title">Clear results?</string>
     <string name="download_clear_confirm_body">Are you sure you want to clear all results from the screen?</string>
-    <plurals name="download_links">
-        <item quantity="one">%d link</item>
-        <item quantity="other">%d links</item>
-    </plurals>
 
     <!-- SearchScreen -->
     <string name="search_hint">Enter URL</string>
@@ -201,7 +195,6 @@
     <string name="more_language">Language</string>
     <string name="more_cookies">Cookies</string>
     <string name="more_link_reading">Link Reading</string>
-    <string name="more_hazel_instant">Hazel Instant</string>
     <string name="more_temporary_files">Temporary Files</string>
     <string name="more_converter">Offline convert video to audio</string>
     <string name="more_software_update">Software update</string>
@@ -286,9 +279,7 @@
     <!-- HistoryScreen -->
     <string name="history_title">All Downloads</string>
     <string name="history_search_action">Search downloads</string>
-    <string name="history_sort_action">Sort</string>
     <string name="history_menu_action">More</string>
-    <string name="history_menu_clear">Clear history</string>
     <string name="history_search_placeholder">Search downloads</string>
     <string name="history_search_clear">Clear search</string>
     <string name="history_empty_initial">Nothing downloaded yet</string>
@@ -309,13 +300,30 @@
     <string name="history_card_delete">Delete file</string>
     <string name="history_tag_deleted">Deleted</string>
     <string name="history_toast_file_gone">This file is no longer on your device</string>
-    <string name="history_tab_downloading">Downloading</string>
-    <string name="history_tab_downloading_queue">Downloading queue</string>
     <string name="history_tab_failed">Failed</string>
-    <string name="history_empty_downloading_queue">No downloads in progress or queued</string>
-    <string name="history_empty_downloading_queue_sub">Active downloads and queued items will appear here.</string>
+    <string name="nav_queue">Queue</string>
+    <string name="queue_title">Download queue</string>
+    <string name="queue_tab_running">Running</string>
+    <string name="queue_tab_queued">In queue</string>
+    <string name="queue_empty_running">Nothing is downloading</string>
+    <string name="queue_empty_queued">Nothing is waiting</string>
+    <string name="history_sort_date">Date added</string>
+    <string name="history_sort_title">Title</string>
+    <string name="history_sort_size">File size</string>
+    <string name="history_sort_reverse">Reverse order</string>
+    <string name="history_layout_toggle">Change layout</string>
+    <string name="history_filter_action">Filter</string>
+    <string name="history_filter_status">Status</string>
+    <string name="history_status_all">All</string>
+    <string name="history_status_present">Not deleted</string>
+    <string name="history_status_deleted">Deleted</string>
+    <string name="history_menu_remove_all">Remove all</string>
+    <string name="history_menu_remove_deleted">Remove deleted</string>
+    <string name="history_menu_remove_duplicates">Remove duplicates</string>
+    <string name="no_results_add_cookies">Add cookies</string>
+    <string name="download_open_queue">Open the download queue</string>
+    <string name="fetch_invalid_url">Invalid link: it must start with http:// or https://</string>
     <string name="history_empty_failed">No failed downloads</string>
-    <string name="history_empty_failed_sub">Downloads that encounter errors will appear here with error logs.</string>
     <string name="history_failed_error_log">Error Log</string>
     <string name="history_failed_copy_log">Copy Log</string>
     <string name="history_failed_log_copied">Error log copied to clipboard</string>
@@ -395,6 +403,7 @@
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Best quality</string>
+    <string name="batch_quality_worst">Worst quality</string>
     <!--
          Resolution ceilings. Digits and a unit suffix, with no word in them, so they read
          the same in every language and translating them would only introduce errors.
@@ -405,6 +414,18 @@
     <string name="batch_quality_720" translatable="false">~ 720p</string>
     <string name="batch_quality_480" translatable="false">~ 480p</string>
     <string name="batch_quality_360" translatable="false">~ 360p</string>
+    <string name="batch_quality_240" translatable="false">~ 240p</string>
+    <string name="batch_quality_144" translatable="false">~ 144p</string>
+    <string name="audio_quality_best">Best quality</string>
+    <string name="audio_quality_320kbps" translatable="false">320 kbps</string>
+    <string name="audio_quality_256kbps" translatable="false">256 kbps</string>
+    <string name="audio_quality_192kbps" translatable="false">192 kbps</string>
+    <string name="audio_quality_128kbps" translatable="false">128 kbps</string>
+    <string name="audio_quality_64kbps" translatable="false">64 kbps</string>
+    <string name="batch_audio_quality_subtitle">Used when converting to another format</string>
+    <string name="batch_bar_hq_auto" translatable="false">HQ: AUTO</string>
+    <string name="batch_bar_hq_best" translatable="false">HQ: BEST</string>
+    <string name="batch_bar_hq_value" translatable="false">HQ: %1$s</string>
     <string name="batch_type_sheet_title">Preferred download type</string>
     <string name="batch_type_sheet_subtitle">What these links download as</string>
     <string name="batch_type_audio">Audio</string>
@@ -477,7 +498,6 @@
     <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->
-    <string name="format_selection_sort">Sort formats</string>
     <string name="format_selection_change">Change format</string>
     <string name="format_selection_title">Format</string>
     <string name="format_selection_subtitle">Select format</string>
@@ -486,6 +506,14 @@
     <string name="format_sort_quality">Quality</string>
     <string name="format_sort_file_size">File size</string>
     <string name="format_sort_container">Container</string>
+    <string name="format_filter_title">Format filter</string>
+    <string name="format_filter_all">All</string>
+    <string name="format_filter_suggested">Suggested</string>
+    <string name="format_filter_smallest">Smallest format (per resolution)</string>
+    <string name="format_filter_generic">Generic</string>
+    <string name="format_source_title">Formats source</string>
+    <string name="format_sort_title">Sort by</string>
+    <string name="format_update">Update</string>
 
     <!-- AudioLanguageSheet -->
     <string name="audio_language_title">Audio language</string>
@@ -545,46 +573,12 @@
     <string name="tools_title">Tools</string>
     <string name="tools_empty">Nothing here yet.</string>
 
-    <!-- DirectShareScreen -->
-    <string name="direct_share_back">Back</string>
-    <string name="direct_share_save_as">Save as</string>
-    <string name="direct_share_video">Video</string>
-    <string name="direct_share_audio_only">Audio only</string>
-    <string name="direct_share_title">Hazel Instant</string>
-    <string name="direct_share_intro">Sharing a link to Hazel Instant starts the download straight away, with no sheet and no questions. These are the answers it uses.</string>
-    <string name="direct_share_video_description">Picture and sound, muxed into one file.</string>
-    <string name="direct_share_audio_description">Sound alone, at the best the source offers.</string>
-    <string name="direct_share_quality_title">Quality limit</string>
-    <string name="direct_share_quality_description">A ceiling, not an exact size. Sources do not all offer the same heights, so the tallest that fits under this is taken, and the smallest available when nothing does.</string>
-    <string name="direct_share_output_title">Output</string>
-    <string name="direct_share_output_description">The file that lands on the device. Default keeps whatever the source already provides, which is the fastest of the options because nothing is re-encoded.</string>
-    <string name="direct_share_filename_template">Filename template</string>
-    <string name="direct_share_audio_language">Audio language</string>
     <string name="direct_share_audio_language_default">Source default</string>
-    <string name="direct_share_extras_title">Extras</string>
-    <string name="direct_share_extras_description">Applied when the source has them. Anything it does not have is skipped for that download rather than failing it.</string>
-    <string name="direct_share_cover_art">Cover art</string>
-    <string name="direct_share_cover_art_description">Writes the thumbnail into the file, where the container can carry one.</string>
-    <string name="direct_share_chapters">Chapters</string>
-    <string name="direct_share_subtitles">Subtitles</string>
-    <string name="direct_share_sponsorblock">SponsorBlock</string>
-    <string name="direct_share_sponsorblock_off">Off</string>
     <!-- How many SponsorBlock categories are being cut. %1$d is the number of them. -->
-    <plurals name="direct_share_sponsorblock_cut">
-        <item quantity="one">%1$d category cut</item>
-        <item quantity="other">%1$d categories cut</item>
-    </plurals>
-    <string name="direct_share_signins_title">Sign-ins</string>
-    <string name="direct_share_signins_description">An instant share uses the saved cookies for whatever site the link belongs to, the same as a download started from the sheet. Nothing is asked at share time, so a link behind a login only works if the sign-in is already saved and switched on.</string>
-    <string name="direct_share_cookies">Cookies</string>
-    <string name="direct_share_cookies_on">On, used for every instant share</string>
-    <string name="direct_share_cookies_off">Off</string>
     <!-- Spoken by the screen reader on a row that opens a picker. %1$s is the row's label. -->
-    <string name="direct_share_change">Change %1$s</string>
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Back</string>
-    <string name="storage_locations_downloads">Downloads</string>
     <string name="storage_locations_title">Downloads</string>
     <string name="storage_locations_subtitle">Where downloads are saved, and the limits they run under</string>
     <string name="storage_locations_limits">Limits</string>
@@ -595,16 +589,22 @@
     <string name="storage_locations_speed_limit">Speed limit</string>
 
     <!-- Share Overlay & Instant Share -->
-    <string name="share_overlay_instant_title">Hazel Instant</string>
-    <string name="share_overlay_instant_subtitle">Download at your saved quick settings</string>
-    <string name="share_overlay_instant_download">Download Now</string>
-    <string name="share_overlay_instant_cancel">Cancel</string>
     <string name="share_overlay_download_started">Download added to queue</string>
     <string name="share_overlay_invalid_link">No valid web link found in shared content</string>
-    <string name="share_overlay_cancel_fetch">Cancel</string>
-    <string name="share_overlay_stage_connecting">Connecting to %s…</string>
-    <string name="share_overlay_stage_reading">Reading media details…</string>
-    <string name="share_overlay_stage_qualities">Finding source qualities…</string>
-    <string name="share_overlay_stage_ready">Almost ready…</string>
 
+    <string name="format_sheet_fetching">Fetching…</string>
+    <string name="options_thumbnail_title">Thumbnail</string>
+    <string name="options_thumbnail_embed">Cover art</string>
+    <string name="options_thumbnail_crop">Crop to square</string>
+    <string name="options_thumbnail_crop_body">The cover is cut from the centre of the artwork, the shape music players show.</string>
+    <string name="processing_step_fetch">Fetch</string>
+    <string name="processing_step_merge">Merge</string>
+    <string name="processing_step_extract">Extract</string>
+    <string name="processing_step_remux">Remux</string>
+    <string name="processing_step_subtitles">Subtitles</string>
+    <string name="processing_step_cut">Cut</string>
+    <string name="processing_step_tags">Tags</string>
+    <string name="processing_step_cover">Cover</string>
+    <string name="processing_step_split">Split</string>
+    <string name="processing_step_save">Save</string>
 </resources>

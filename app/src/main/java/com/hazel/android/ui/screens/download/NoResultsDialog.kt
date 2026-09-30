@@ -49,6 +49,12 @@ fun NoResultsDialog(
     message: String,
     canFetchCookies: Boolean,
     canContinue: Boolean,
+    /**
+     * Whether there is a site to sign in to. Offered on any failure, as a second action
+     * where the failure does not already read as a missing sign-in: a source that refuses
+     * an anonymous request often gives no hint that a sign-in would answer it.
+     */
+    canAddCookies: Boolean = false,
     onCopyLog: () -> Unit,
     onGetCookies: () -> Unit,
     onContinueAnyway: () -> Unit,
@@ -136,6 +142,11 @@ fun NoResultsDialog(
                     Text(stringResource(R.string.no_results_copy_log), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Spacer(modifier = Modifier.width(4.dp))
+                if (canAddCookies && !canFetchCookies) {
+                    TextButton(onClick = onGetCookies) {
+                        Text(stringResource(R.string.no_results_add_cookies))
+                    }
+                }
                 when {
                     canFetchCookies -> TextButton(onClick = onGetCookies) {
                         Text(stringResource(R.string.no_results_sign_in), fontWeight = FontWeight.SemiBold)
