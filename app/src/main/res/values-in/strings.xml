@@ -1,5 +1,4 @@
 <resources>
-    <string name="direct_share_label">Instan</string>
 
     <!-- Navigation -->
     <string name="nav_home">Beranda</string>
@@ -11,7 +10,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Masukkan URL</string>
     <string name="download_clear">Hapus</string>
-    <string name="download_instant_source">Instan · membaca dari %1$s</string>
     <string name="download_incognito_title">Anda dalam mode samaran</string>
     <string name="download_incognito_body">Unduhan tidak ditambahkan ke riwayat dan tautan tidak diingat. File tetap disimpan seperti biasa.</string>
     <string name="download_download_all">Unduh semua</string>
@@ -38,9 +36,6 @@
     <string name="download_cancel_dialog_dismiss">Lanjutkan mengunduh</string>
     <string name="download_clear_confirm_title">Hapus hasil?</string>
     <string name="download_clear_confirm_body">Yakin ingin menghapus semua hasil dari layar?</string>
-    <plurals name="download_links">
-        <item quantity="other">%d tautan</item>
-    </plurals>
 
     <!-- SearchScreen -->
     <string name="search_hint">Masukkan URL</string>
@@ -185,7 +180,6 @@
     <string name="more_language">Bahasa</string>
     <string name="more_cookies">Cookie</string>
     <string name="more_link_reading">Pembacaan Tautan</string>
-    <string name="more_hazel_instant">Hazel Instan</string>
     <string name="more_temporary_files">File Sementara</string>
     <string name="more_converter">Konversi offline video ke audio</string>
     <string name="more_software_update">Pembaruan perangkat lunak</string>
@@ -265,9 +259,7 @@
     <!-- HistoryScreen -->
     <string name="history_title">Semua Unduhan</string>
     <string name="history_search_action">Cari unduhan</string>
-    <string name="history_sort_action">Urutkan</string>
     <string name="history_menu_action">Lainnya</string>
-    <string name="history_menu_clear">Hapus riwayat</string>
     <string name="history_search_placeholder">Cari unduhan</string>
     <string name="history_search_clear">Hapus pencarian</string>
     <string name="history_empty_initial">Belum ada yang diunduh</string>
@@ -288,13 +280,30 @@
     <string name="history_card_delete">Hapus file</string>
     <string name="history_tag_deleted">Dihapus</string>
     <string name="history_toast_file_gone">File ini sudah tidak ada di perangkat Anda</string>
-    <string name="history_tab_downloading">Mengunduh</string>
-    <string name="history_tab_downloading_queue">Antrean unduhan</string>
     <string name="history_tab_failed">Gagal</string>
-    <string name="history_empty_downloading_queue">Tidak ada unduhan sedang berlangsung atau dalam antrean</string>
-    <string name="history_empty_downloading_queue_sub">Unduhan aktif dan item dalam antrean akan muncul di sini.</string>
+    <string name="nav_queue">Antrean</string>
+    <string name="queue_title">Antrean unduhan</string>
+    <string name="queue_tab_running">Berjalan</string>
+    <string name="queue_tab_queued">Dalam antrean</string>
+    <string name="queue_empty_running">Tidak ada yang diunduh</string>
+    <string name="queue_empty_queued">Tidak ada yang menunggu</string>
+    <string name="history_sort_date">Tanggal ditambahkan</string>
+    <string name="history_sort_title">Judul</string>
+    <string name="history_sort_size">Ukuran file</string>
+    <string name="history_sort_reverse">Balik urutan</string>
+    <string name="history_layout_toggle">Ubah tata letak</string>
+    <string name="history_filter_action">Filter</string>
+    <string name="history_filter_status">Status</string>
+    <string name="history_status_all">Semua</string>
+    <string name="history_status_present">Tidak dihapus</string>
+    <string name="history_status_deleted">Dihapus</string>
+    <string name="history_menu_remove_all">Hapus semua</string>
+    <string name="history_menu_remove_deleted">Hapus yang terhapus</string>
+    <string name="history_menu_remove_duplicates">Hapus duplikat</string>
+    <string name="no_results_add_cookies">Tambahkan cookie</string>
+    <string name="download_open_queue">Buka antrean unduhan</string>
+    <string name="fetch_invalid_url">Tautan tidak valid: harus diawali http:// atau https://</string>
     <string name="history_empty_failed">Tidak ada unduhan yang gagal</string>
-    <string name="history_empty_failed_sub">Unduhan yang mengalami kesalahan akan muncul di sini dengan catatan kesalahan.</string>
     <string name="history_failed_error_log">Catatan Kesalahan</string>
     <string name="history_failed_copy_log">Salin Catatan</string>
     <string name="history_failed_log_copied">Catatan kesalahan disalin ke papan klip</string>
@@ -371,6 +380,7 @@
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Kualitas terbaik</string>
+    <string name="batch_quality_worst">Kualitas terendah</string>
     <string name="audio_quality_best">Kualitas terbaik</string>
     <string name="batch_audio_quality_subtitle">Dipakai saat mengonversi ke format lain</string>
     <string name="batch_type_sheet_title">Jenis unduhan yang diinginkan</string>
@@ -508,39 +518,7 @@
     <string name="tools_title">Alat</string>
     <string name="tools_empty">Belum ada apa-apa di sini.</string>
 
-    <!-- DirectShareScreen -->
-    <string name="direct_share_back">Kembali</string>
-    <string name="direct_share_save_as">Simpan sebagai</string>
-    <string name="direct_share_video">Video</string>
-    <string name="direct_share_audio_only">Hanya audio</string>
-    <string name="direct_share_title">Hazel Instan</string>
-    <string name="direct_share_intro">Membagikan tautan ke Hazel Instan langsung memulai pengunduhan tanpa lembar dialog dan pertanyaan. Pengaturan berikut yang akan digunakan.</string>
-    <string name="direct_share_video_description">Gambar dan suara, digabungkan menjadi satu file.</string>
-    <string name="direct_share_audio_description">Hanya suara, dengan kualitas terbaik yang ditawarkan sumber.</string>
-    <string name="direct_share_quality_title">Batas kualitas</string>
-    <string name="direct_share_quality_description">Batas maksimum, bukan ukuran pasti. Tidak semua sumber menawarkan resolusi yang sama, jadi resolusi tertinggi yang sesuai batas ini akan diambil, atau yang terkecil jika tidak ada yang cocok.</string>
-    <string name="direct_share_output_title">Keluaran</string>
-    <string name="direct_share_output_description">File yang disimpan di perangkat. Standar mempertahankan format yang disediakan sumber, yang merupakan opsi tercepat karena tidak perlu pengkodean ulang.</string>
-    <string name="direct_share_filename_template">Templat nama file</string>
-    <string name="direct_share_audio_language">Bahasa audio</string>
     <string name="direct_share_audio_language_default">Default sumber</string>
-    <string name="direct_share_extras_title">Tambahan</string>
-    <string name="direct_share_extras_description">Diterapkan jika sumber memilikinya. Apa pun yang tidak tersedia akan dilewati alih-alih menggagalkan unduhan.</string>
-    <string name="direct_share_cover_art">Gambar sampul</string>
-    <string name="direct_share_cover_art_description">Menyematkan gambar mini ke dalam file, jika format wadah mendukungnya.</string>
-    <string name="direct_share_chapters">Bab</string>
-    <string name="direct_share_subtitles">Subtitel</string>
-    <string name="direct_share_sponsorblock">SponsorBlock</string>
-    <string name="direct_share_sponsorblock_off">Mati</string>
-    <plurals name="direct_share_sponsorblock_cut">
-        <item quantity="other">%1$d kategori dipotong</item>
-    </plurals>
-    <string name="direct_share_signins_title">Sesi masuk</string>
-    <string name="direct_share_signins_description">Berbagi instan menggunakan cookie tersimpan untuk situs tautan tersebut, sama seperti unduhan yang dimulai dari menu. Tidak ada pertanyaan saat berbagi, jadi tautan di balik login hanya berfungsi jika sesi masuk sudah disimpan dan diaktifkan.</string>
-    <string name="direct_share_cookies">Cookie</string>
-    <string name="direct_share_cookies_on">Aktif, digunakan untuk setiap berbagi instan</string>
-    <string name="direct_share_cookies_off">Mati</string>
-    <string name="direct_share_change">Ubah %1$s</string>
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Kembali</string>
@@ -555,16 +533,7 @@
     <string name="storage_locations_speed_limit">Batas kecepatan</string>
 
     <!-- Share Overlay & Instant Share -->
-    <string name="share_overlay_instant_title">Hazel Instant</string>
-    <string name="share_overlay_instant_subtitle">Unduh dengan pengaturan cepat tersimpan</string>
-    <string name="share_overlay_instant_download">Unduh Sekarang</string>
-    <string name="share_overlay_instant_cancel">Batal</string>
     <string name="share_overlay_download_started">Unduhan ditambahkan ke antrean</string>
     <string name="share_overlay_invalid_link">Tidak ada tautan web valid yang ditemukan dalam konten bersama</string>
-    <string name="share_overlay_cancel_fetch">Batal</string>
-    <string name="share_overlay_stage_connecting">Menghubungkan ke %s…</string>
-    <string name="share_overlay_stage_reading">Membaca detail media…</string>
-    <string name="share_overlay_stage_qualities">Mencari kualitas sumber…</string>
-    <string name="share_overlay_stage_ready">Hampir selesai…</string>
 
 </resources>

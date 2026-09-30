@@ -1,5 +1,4 @@
 <resources>
-    <string name="direct_share_label">Sofort</string>
 
     <!-- Navigation -->
     <string name="nav_home">Start</string>
@@ -11,7 +10,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Link einfügen</string>
     <string name="download_clear">Leeren</string>
-    <string name="download_instant_source">Sofort · liest von %1$s</string>
     <string name="download_incognito_title">Du bist inkognito</string>
     <string name="download_incognito_body">Downloads landen nicht in deinem Verlauf und Links werden nicht gemerkt. Die Dateien werden wie gewohnt gespeichert.</string>
     <string name="download_download_all">Alle herunterladen</string>
@@ -38,10 +36,6 @@
     <string name="download_cancel_dialog_dismiss">Weiter herunterladen</string>
     <string name="download_clear_confirm_title">Ergebnisse löschen?</string>
     <string name="download_clear_confirm_body">Möchten Sie wirklich alle Ergebnisse vom Bildschirm löschen?</string>
-    <plurals name="download_links">
-        <item quantity="one">%d Link</item>
-        <item quantity="other">%d Links</item>
-    </plurals>
 
     <!-- SearchScreen -->
     <string name="search_hint">Link einfügen</string>
@@ -190,7 +184,6 @@
     <string name="more_language">Sprache</string>
     <string name="more_cookies">Cookies</string>
     <string name="more_link_reading">Links lesen</string>
-    <string name="more_hazel_instant">Hazel Sofort</string>
     <string name="more_temporary_files">Temporäre Dateien</string>
     <string name="more_converter">Video offline in Audio umwandeln</string>
     <string name="more_software_update">Software-Update</string>
@@ -270,9 +263,7 @@
     <!-- HistoryScreen -->
     <string name="history_title">Alle Downloads</string>
     <string name="history_search_action">Downloads durchsuchen</string>
-    <string name="history_sort_action">Sortieren</string>
     <string name="history_menu_action">Mehr</string>
-    <string name="history_menu_clear">Verlauf löschen</string>
     <string name="history_search_placeholder">Downloads durchsuchen</string>
     <string name="history_search_clear">Suche löschen</string>
     <string name="history_empty_initial">Noch nichts heruntergeladen</string>
@@ -293,13 +284,30 @@
     <string name="history_card_delete">Datei löschen</string>
     <string name="history_tag_deleted">Gelöscht</string>
     <string name="history_toast_file_gone">Diese Datei ist nicht mehr auf deinem Gerät</string>
-    <string name="history_tab_downloading">Wird heruntergeladen</string>
-    <string name="history_tab_downloading_queue">Download-Warteschlange</string>
     <string name="history_tab_failed">Fehlgeschlagen</string>
-    <string name="history_empty_downloading_queue">Keine Downloads in Bearbeitung oder Warteschlange</string>
-    <string name="history_empty_downloading_queue_sub">Aktive Downloads und Einträge in der Warteschlange werden hier angezeigt.</string>
+    <string name="nav_queue">Warteschlange</string>
+    <string name="queue_title">Download-Warteschlange</string>
+    <string name="queue_tab_running">Läuft</string>
+    <string name="queue_tab_queued">Wartend</string>
+    <string name="queue_empty_running">Es wird nichts heruntergeladen</string>
+    <string name="queue_empty_queued">Nichts wartet</string>
+    <string name="history_sort_date">Hinzugefügt am</string>
+    <string name="history_sort_title">Titel</string>
+    <string name="history_sort_size">Dateigröße</string>
+    <string name="history_sort_reverse">Reihenfolge umkehren</string>
+    <string name="history_layout_toggle">Layout ändern</string>
+    <string name="history_filter_action">Filter</string>
+    <string name="history_filter_status">Status</string>
+    <string name="history_status_all">Alle</string>
+    <string name="history_status_present">Nicht gelöscht</string>
+    <string name="history_status_deleted">Gelöscht</string>
+    <string name="history_menu_remove_all">Alle entfernen</string>
+    <string name="history_menu_remove_deleted">Gelöschte entfernen</string>
+    <string name="history_menu_remove_duplicates">Duplikate entfernen</string>
+    <string name="no_results_add_cookies">Cookies hinzufügen</string>
+    <string name="download_open_queue">Download-Warteschlange öffnen</string>
+    <string name="fetch_invalid_url">Ungültiger Link: Er muss mit http:// oder https:// beginnen</string>
     <string name="history_empty_failed">Keine fehlgeschlagenen Downloads</string>
-    <string name="history_empty_failed_sub">Downloads mit Fehlern erscheinen hier samt Fehlerprotokoll.</string>
     <string name="history_failed_error_log">Fehlerprotokoll</string>
     <string name="history_failed_copy_log">Protokoll kopieren</string>
     <string name="history_failed_log_copied">Fehlerprotokoll in Zwischenablage kopiert</string>
@@ -376,6 +384,7 @@
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Beste Qualität</string>
+    <string name="batch_quality_worst">Schlechteste Qualität</string>
     <string name="audio_quality_best">Beste Qualität</string>
     <string name="batch_audio_quality_subtitle">Wird beim Umwandeln in ein anderes Format verwendet</string>
     <string name="batch_type_sheet_title">Bevorzugte Download-Art</string>
@@ -516,40 +525,7 @@
     <string name="tools_title">Werkzeuge</string>
     <string name="tools_empty">Hier ist noch nichts.</string>
 
-    <!-- DirectShareScreen -->
-    <string name="direct_share_back">Zurück</string>
-    <string name="direct_share_save_as">Speichern als</string>
-    <string name="direct_share_video">Video</string>
-    <string name="direct_share_audio_only">Nur Audio</string>
-    <string name="direct_share_title">Hazel Sofort</string>
-    <string name="direct_share_intro">Einen Link mit Hazel Sofort zu teilen startet den Download sofort, ohne Fenster und ohne Rückfragen. Das sind die Antworten, die es dabei verwendet.</string>
-    <string name="direct_share_video_description">Bild und Ton, zu einer Datei zusammengefügt.</string>
-    <string name="direct_share_audio_description">Nur der Ton, im Besten, was die Quelle hergibt.</string>
-    <string name="direct_share_quality_title">Qualitätsgrenze</string>
-    <string name="direct_share_quality_description">Eine Obergrenze, keine feste Größe. Nicht alle Quellen bieten dieselben Höhen an, also wird die größte genommen, die darunter passt, und die kleinste verfügbare, wenn keine passt.</string>
-    <string name="direct_share_output_title">Ausgabe</string>
-    <string name="direct_share_output_description">Die Datei, die auf dem Gerät landet. Standard behält, was die Quelle ohnehin liefert, und das ist die schnellste Wahl, weil nichts neu kodiert wird.</string>
-    <string name="direct_share_filename_template">Dateinamen-Vorlage</string>
-    <string name="direct_share_audio_language">Audiosprache</string>
     <string name="direct_share_audio_language_default">Die der Quelle</string>
-    <string name="direct_share_extras_title">Extras</string>
-    <string name="direct_share_extras_description">Werden angewandt, wenn die Quelle sie hat. Was sie nicht hat, wird bei dem Download übersprungen, statt ihn scheitern zu lassen.</string>
-    <string name="direct_share_cover_art">Coverbild</string>
-    <string name="direct_share_cover_art_description">Schreibt das Vorschaubild in die Datei, sofern der Container eines aufnehmen kann.</string>
-    <string name="direct_share_chapters">Kapitel</string>
-    <string name="direct_share_subtitles">Untertitel</string>
-    <string name="direct_share_sponsorblock">SponsorBlock</string>
-    <string name="direct_share_sponsorblock_off">Aus</string>
-    <plurals name="direct_share_sponsorblock_cut">
-        <item quantity="one">%1$d Kategorie herausgeschnitten</item>
-        <item quantity="other">%1$d Kategorien herausgeschnitten</item>
-    </plurals>
-    <string name="direct_share_signins_title">Anmeldungen</string>
-    <string name="direct_share_signins_description">Ein Sofort-Teilen nutzt die gespeicherten Cookies der Seite, zu der der Link gehört, genau wie ein Download aus dem Fenster. Beim Teilen wird nichts gefragt, ein Link hinter einer Anmeldung funktioniert also nur, wenn diese schon gespeichert und eingeschaltet ist.</string>
-    <string name="direct_share_cookies">Cookies</string>
-    <string name="direct_share_cookies_on">An, wird bei jedem Sofort-Teilen genutzt</string>
-    <string name="direct_share_cookies_off">Aus</string>
-    <string name="direct_share_change">%1$s ändern</string>
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Zurück</string>
@@ -564,16 +540,7 @@
     <string name="storage_locations_speed_limit">Geschwindigkeitsgrenze</string>
 
     <!-- Share Overlay & Instant Share -->
-    <string name="share_overlay_instant_title">Hazel Instant</string>
-    <string name="share_overlay_instant_subtitle">Mit gespeicherten Schnelleinstellungen herunterladen</string>
-    <string name="share_overlay_instant_download">Jetzt herunterladen</string>
-    <string name="share_overlay_instant_cancel">Abbrechen</string>
     <string name="share_overlay_download_started">Download zur Warteschlange hinzugefügt</string>
     <string name="share_overlay_invalid_link">Kein gültiger Weblink im geteilten Inhalt gefunden</string>
-    <string name="share_overlay_cancel_fetch">Abbrechen</string>
-    <string name="share_overlay_stage_connecting">Verbindung zu %s wird hergestellt…</string>
-    <string name="share_overlay_stage_reading">Mediendetails werden gelesen…</string>
-    <string name="share_overlay_stage_qualities">Medienqualitäten werden gesucht…</string>
-    <string name="share_overlay_stage_ready">Fast fertig…</string>
 
 </resources>

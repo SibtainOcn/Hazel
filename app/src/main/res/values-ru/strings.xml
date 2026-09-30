@@ -1,5 +1,4 @@
 <resources>
-    <string name="direct_share_label">Мгновенно</string>
 
     <!-- Navigation -->
     <string name="nav_home">Главная</string>
@@ -11,7 +10,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Вставьте URL</string>
     <string name="download_clear">Очистить</string>
-    <string name="download_instant_source">Мгновенно · чтение из %1$s</string>
     <string name="download_incognito_title">Режим инкогнито</string>
     <string name="download_incognito_body">Загрузки не добавляются в историю, а ссылки не запоминаются. Сами файлы сохраняются как обычно.</string>
     <string name="download_download_all">Скачать всё</string>
@@ -38,12 +36,6 @@
     <string name="download_cancel_dialog_dismiss">Продолжить загрузку</string>
     <string name="download_clear_confirm_title">Очистить результаты?</string>
     <string name="download_clear_confirm_body">Вы действительно хотите удалить все результаты с экрана?</string>
-    <plurals name="download_links">
-        <item quantity="one">%d ссылка</item>
-        <item quantity="few">%d ссылки</item>
-        <item quantity="many">%d ссылок</item>
-        <item quantity="other">%d ссылок</item>
-    </plurals>
 
     <!-- SearchScreen -->
     <string name="search_hint">Вставьте URL</string>
@@ -200,7 +192,6 @@
     <string name="more_language">Язык</string>
     <string name="more_cookies">Файлы cookie</string>
     <string name="more_link_reading">Чтение ссылок</string>
-    <string name="more_hazel_instant">Hazel Мгновенно</string>
     <string name="more_temporary_files">Временные файлы</string>
     <string name="more_converter">Офлайн-конвертер видео в аудио</string>
     <string name="more_software_update">Обновление ПО</string>
@@ -280,9 +271,7 @@
     <!-- HistoryScreen -->
     <string name="history_title">Все загрузки</string>
     <string name="history_search_action">Поиск загрузок</string>
-    <string name="history_sort_action">Сортировка</string>
     <string name="history_menu_action">Ещё</string>
-    <string name="history_menu_clear">Очистить историю</string>
     <string name="history_search_placeholder">Поиск загрузок</string>
     <string name="history_search_clear">Очистить поиск</string>
     <string name="history_empty_initial">Пока ничего не загружено</string>
@@ -303,13 +292,30 @@
     <string name="history_card_delete">Удалить файл</string>
     <string name="history_tag_deleted">Удалено</string>
     <string name="history_toast_file_gone">Этот файл больше не найден на устройстве</string>
-    <string name="history_tab_downloading">Загрузка</string>
-    <string name="history_tab_downloading_queue">Очередь загрузок</string>
     <string name="history_tab_failed">С ошибкой</string>
-    <string name="history_empty_downloading_queue">Нет загрузок в процессе или очереди</string>
-    <string name="history_empty_downloading_queue_sub">Здесь будут отображаться активные загрузки и элементы очереди.</string>
+    <string name="nav_queue">Очередь</string>
+    <string name="queue_title">Очередь загрузок</string>
+    <string name="queue_tab_running">Выполняются</string>
+    <string name="queue_tab_queued">В очереди</string>
+    <string name="queue_empty_running">Ничего не загружается</string>
+    <string name="queue_empty_queued">Ничего не ожидает</string>
+    <string name="history_sort_date">Дата добавления</string>
+    <string name="history_sort_title">Название</string>
+    <string name="history_sort_size">Размер файла</string>
+    <string name="history_sort_reverse">Обратный порядок</string>
+    <string name="history_layout_toggle">Сменить вид</string>
+    <string name="history_filter_action">Фильтр</string>
+    <string name="history_filter_status">Состояние</string>
+    <string name="history_status_all">Все</string>
+    <string name="history_status_present">Не удалённые</string>
+    <string name="history_status_deleted">Удалённые</string>
+    <string name="history_menu_remove_all">Удалить все</string>
+    <string name="history_menu_remove_deleted">Удалить удалённые</string>
+    <string name="history_menu_remove_duplicates">Удалить дубликаты</string>
+    <string name="no_results_add_cookies">Добавить cookie</string>
+    <string name="download_open_queue">Открыть очередь загрузок</string>
+    <string name="fetch_invalid_url">Недопустимая ссылка: она должна начинаться с http:// или https://</string>
     <string name="history_empty_failed">Нет загрузок с ошибками</string>
-    <string name="history_empty_failed_sub">Загрузки с ошибками отображаются здесь с журналом ошибок.</string>
     <string name="history_failed_error_log">Журнал ошибок</string>
     <string name="history_failed_copy_log">Копировать журнал</string>
     <string name="history_failed_log_copied">Журнал ошибок скопирован в буфер обмена</string>
@@ -386,6 +392,7 @@
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Наилучшее качество</string>
+    <string name="batch_quality_worst">Худшее качество</string>
     <string name="audio_quality_best">Лучшее качество</string>
     <string name="batch_audio_quality_subtitle">Используется при конвертации в другой формат</string>
     <string name="batch_type_sheet_title">Предпочтительный тип загрузки</string>
@@ -532,42 +539,7 @@
     <string name="tools_title">Инструменты</string>
     <string name="tools_empty">Здесь пока ничего нет.</string>
 
-    <!-- DirectShareScreen -->
-    <string name="direct_share_back">Назад</string>
-    <string name="direct_share_save_as">Сохранить как</string>
-    <string name="direct_share_video">Видео</string>
-    <string name="direct_share_audio_only">Только аудио</string>
-    <string name="direct_share_title">Hazel Мгновенно</string>
-    <string name="direct_share_intro">Отправка ссылки в Hazel Мгновенно сразу запускает загрузку без диалоговых окон и вопросов. Вот используемые параметры.</string>
-    <string name="direct_share_video_description">Изображение и звук, объединённые в один файл.</string>
-    <string name="direct_share_audio_description">Только аудио наилучшего качества из доступных в источнике.</string>
-    <string name="direct_share_quality_title">Ограничение качества</string>
-    <string name="direct_share_quality_description">Верхний предел, а не точный размер. Не все источники имеют одинаковое разрешение: выбирается максимальное в пределах лимита, либо минимальное из доступных, если ни одно не подошло.</string>
-    <string name="direct_share_output_title">Выходной файл</string>
-    <string name="direct_share_output_description">Файл, который сохраняется на устройстве. По умолчанию сохраняется исходный формат источника — это быстрее всего, так как перекодирование не требуется.</string>
-    <string name="direct_share_filename_template">Шаблон имени файла</string>
-    <string name="direct_share_audio_language">Язык аудио</string>
     <string name="direct_share_audio_language_default">Как в источнике</string>
-    <string name="direct_share_extras_title">Дополнительно</string>
-    <string name="direct_share_extras_description">Применяются, если они есть у источника. Недоступные элементы просто пропускаются, не вызывая ошибки загрузки.</string>
-    <string name="direct_share_cover_art">Обложка</string>
-    <string name="direct_share_cover_art_description">Записывает обложку в файл, если формат контейнера это поддерживает.</string>
-    <string name="direct_share_chapters">Разделы</string>
-    <string name="direct_share_subtitles">Субтитры</string>
-    <string name="direct_share_sponsorblock">SponsorBlock</string>
-    <string name="direct_share_sponsorblock_off">Выкл.</string>
-    <plurals name="direct_share_sponsorblock_cut">
-        <item quantity="one">вырезана %1$d категория</item>
-        <item quantity="few">вырезано %1$d категории</item>
-        <item quantity="many">вырезано %1$d категорий</item>
-        <item quantity="other">вырезано %1$d категорий</item>
-    </plurals>
-    <string name="direct_share_signins_title">Вход в аккаунт</string>
-    <string name="direct_share_signins_description">Мгновенная отправка использует сохранённые cookie для соответствующего сайта так же, как и загрузка из меню. Запросы при этом не показываются, поэтому загрузка с авторизацией работает, только если вход уже выполнен и включён.</string>
-    <string name="direct_share_cookies">Файлы cookie</string>
-    <string name="direct_share_cookies_on">Вкл., используются для каждой мгновенной загрузки</string>
-    <string name="direct_share_cookies_off">Выкл.</string>
-    <string name="direct_share_change">Изменить %1$s</string>
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Назад</string>
@@ -581,16 +553,7 @@
     <string name="storage_locations_wifi_only">Только по Wi-Fi</string>
     <string name="storage_locations_speed_limit">Ограничение скорости</string>
 
-    <string name="share_overlay_instant_title">Hazel Instant</string>
-    <string name="share_overlay_instant_subtitle">Скачать с сохраненными быстрыми настройками</string>
-    <string name="share_overlay_instant_download">Скачать сейчас</string>
-    <string name="share_overlay_instant_cancel">Отмена</string>
     <string name="share_overlay_download_started">Загрузка добавлена в очередь</string>
     <string name="share_overlay_invalid_link">В общем содержимом не найдено допустимой веб-ссылки</string>
-    <string name="share_overlay_cancel_fetch">Отмена</string>
-    <string name="share_overlay_stage_connecting">Подключение к %s…</string>
-    <string name="share_overlay_stage_reading">Чтение сведений о медиа…</string>
-    <string name="share_overlay_stage_qualities">Поиск качества источника…</string>
-    <string name="share_overlay_stage_ready">Почти готово…</string>
 
 </resources>

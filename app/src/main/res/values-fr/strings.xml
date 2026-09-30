@@ -1,5 +1,4 @@
 <resources>
-    <string name="direct_share_label">Instantané</string>
 
     <!-- Navigation -->
     <string name="nav_home">Accueil</string>
@@ -11,7 +10,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">Collez un lien</string>
     <string name="download_clear">Vider</string>
-    <string name="download_instant_source">Instantané · lecture depuis %1$s</string>
     <string name="download_incognito_title">Vous êtes en navigation privée</string>
     <string name="download_incognito_body">Les téléchargements ne sont pas ajoutés à votre historique et les liens ne sont pas retenus. Les fichiers sont enregistrés comme d\'habitude.</string>
     <string name="download_download_all">Tout télécharger</string>
@@ -38,11 +36,6 @@
     <string name="download_cancel_dialog_dismiss">Poursuivre le téléchargement</string>
     <string name="download_clear_confirm_title">Effacer les résultats ?</string>
     <string name="download_clear_confirm_body">Voulez-vous vraiment effacer tous les résultats de l\'écran ?</string>
-    <plurals name="download_links">
-        <item quantity="one">%d lien</item>
-        <item quantity="many">%d de liens</item>
-        <item quantity="other">%d liens</item>
-    </plurals>
 
     <!-- SearchScreen -->
     <string name="search_hint">Collez un lien</string>
@@ -195,7 +188,6 @@
     <string name="more_language">Langue</string>
     <string name="more_cookies">Cookies</string>
     <string name="more_link_reading">Lecture des liens</string>
-    <string name="more_hazel_instant">Hazel Instantané</string>
     <string name="more_temporary_files">Fichiers temporaires</string>
     <string name="more_converter">Convertir une vidéo en audio hors ligne</string>
     <string name="more_software_update">Mise à jour logicielle</string>
@@ -275,9 +267,7 @@
     <!-- HistoryScreen -->
     <string name="history_title">Tous les téléchargements</string>
     <string name="history_search_action">Chercher dans les téléchargements</string>
-    <string name="history_sort_action">Trier</string>
     <string name="history_menu_action">Plus</string>
-    <string name="history_menu_clear">Effacer l\'historique</string>
     <string name="history_search_placeholder">Chercher dans les téléchargements</string>
     <string name="history_search_clear">Effacer la recherche</string>
     <string name="history_empty_initial">Rien n\'a encore été téléchargé</string>
@@ -298,13 +288,30 @@
     <string name="history_card_delete">Supprimer le fichier</string>
     <string name="history_tag_deleted">Supprimé</string>
     <string name="history_toast_file_gone">Ce fichier n\'est plus sur votre appareil</string>
-    <string name="history_tab_downloading">Téléchargement</string>
-    <string name="history_tab_downloading_queue">File de téléchargement</string>
     <string name="history_tab_failed">Échecs</string>
-    <string name="history_empty_downloading_queue">Aucun téléchargement en cours ou en attente</string>
-    <string name="history_empty_downloading_queue_sub">Les téléchargements actifs et les éléments en attente apparaîtront ici.</string>
+    <string name="nav_queue">File</string>
+    <string name="queue_title">File de téléchargement</string>
+    <string name="queue_tab_running">En cours</string>
+    <string name="queue_tab_queued">En attente</string>
+    <string name="queue_empty_running">Aucun téléchargement en cours</string>
+    <string name="queue_empty_queued">Rien en attente</string>
+    <string name="history_sort_date">Date d’ajout</string>
+    <string name="history_sort_title">Titre</string>
+    <string name="history_sort_size">Taille</string>
+    <string name="history_sort_reverse">Inverser l’ordre</string>
+    <string name="history_layout_toggle">Changer la disposition</string>
+    <string name="history_filter_action">Filtrer</string>
+    <string name="history_filter_status">État</string>
+    <string name="history_status_all">Tous</string>
+    <string name="history_status_present">Non supprimés</string>
+    <string name="history_status_deleted">Supprimés</string>
+    <string name="history_menu_remove_all">Tout retirer</string>
+    <string name="history_menu_remove_deleted">Retirer les supprimés</string>
+    <string name="history_menu_remove_duplicates">Retirer les doublons</string>
+    <string name="no_results_add_cookies">Ajouter des cookies</string>
+    <string name="download_open_queue">Ouvrir la file de téléchargement</string>
+    <string name="fetch_invalid_url">Lien non valide : il doit commencer par http:// ou https://</string>
     <string name="history_empty_failed">Aucun téléchargement échoué</string>
-    <string name="history_empty_failed_sub">Les téléchargements ayant rencontré des erreurs apparaîtront ici avec leur journal d\'erreurs.</string>
     <string name="history_failed_error_log">Journal d\'erreurs</string>
     <string name="history_failed_copy_log">Copier le journal</string>
     <string name="history_failed_log_copied">Journal d\'erreurs copié dans le presse-papiers</string>
@@ -381,6 +388,7 @@
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Meilleure qualité</string>
+    <string name="batch_quality_worst">Pire qualité</string>
     <string name="audio_quality_best">Meilleure qualité</string>
     <string name="batch_audio_quality_subtitle">Utilisé lors de la conversion vers un autre format</string>
     <string name="batch_type_sheet_title">Type de téléchargement préféré</string>
@@ -524,41 +532,7 @@
     <string name="tools_title">Outils</string>
     <string name="tools_empty">Il n\'y a encore rien ici.</string>
 
-    <!-- DirectShareScreen -->
-    <string name="direct_share_back">Retour</string>
-    <string name="direct_share_save_as">Enregistrer comme</string>
-    <string name="direct_share_video">Vidéo</string>
-    <string name="direct_share_audio_only">Audio seul</string>
-    <string name="direct_share_title">Hazel Instantané</string>
-    <string name="direct_share_intro">Partager un lien vers Hazel Instantané lance le téléchargement aussitôt, sans panneau et sans question. Voici les réponses qu\'il utilise.</string>
-    <string name="direct_share_video_description">Image et son, réunis dans un seul fichier.</string>
-    <string name="direct_share_audio_description">Le son seul, dans ce que la source propose de mieux.</string>
-    <string name="direct_share_quality_title">Limite de qualité</string>
-    <string name="direct_share_quality_description">Un plafond, pas une taille exacte. Les sources ne proposent pas toutes les mêmes hauteurs, donc la plus grande qui tient en dessous est retenue, et la plus petite disponible quand aucune ne tient.</string>
-    <string name="direct_share_output_title">Sortie</string>
-    <string name="direct_share_output_description">Le fichier qui arrive sur l\'appareil. Par défaut garde ce que la source fournit déjà, ce qui est l\'option la plus rapide puisque rien n\'est réencodé.</string>
-    <string name="direct_share_filename_template">Modèle de nom de fichier</string>
-    <string name="direct_share_audio_language">Langue de l\'audio</string>
     <string name="direct_share_audio_language_default">Celle de la source</string>
-    <string name="direct_share_extras_title">Suppléments</string>
-    <string name="direct_share_extras_description">Appliqués quand la source les possède. Ce qu\'elle n\'a pas est ignoré pour ce téléchargement plutôt que de le faire échouer.</string>
-    <string name="direct_share_cover_art">Pochette</string>
-    <string name="direct_share_cover_art_description">Écrit la miniature dans le fichier, lorsque le conteneur peut en accueillir une.</string>
-    <string name="direct_share_chapters">Chapitres</string>
-    <string name="direct_share_subtitles">Sous-titres</string>
-    <string name="direct_share_sponsorblock">SponsorBlock</string>
-    <string name="direct_share_sponsorblock_off">Désactivé</string>
-    <plurals name="direct_share_sponsorblock_cut">
-        <item quantity="one">%1$d catégorie coupée</item>
-        <item quantity="many">%1$d de catégories coupées</item>
-        <item quantity="other">%1$d catégories coupées</item>
-    </plurals>
-    <string name="direct_share_signins_title">Connexions</string>
-    <string name="direct_share_signins_description">Un partage instantané utilise les cookies enregistrés du site auquel appartient le lien, comme un téléchargement lancé depuis le panneau. Rien n\'est demandé au moment du partage, donc un lien derrière une connexion ne fonctionne que si celle-ci est déjà enregistrée et activée.</string>
-    <string name="direct_share_cookies">Cookies</string>
-    <string name="direct_share_cookies_on">Activé, utilisés à chaque partage instantané</string>
-    <string name="direct_share_cookies_off">Désactivé</string>
-    <string name="direct_share_change">Modifier %1$s</string>
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">Retour</string>
@@ -573,16 +547,7 @@
     <string name="storage_locations_speed_limit">Limite de vitesse</string>
 
     <!-- Share Overlay & Instant Share -->
-    <string name="share_overlay_instant_title">Hazel Instant</string>
-    <string name="share_overlay_instant_subtitle">Télécharger selon vos paramètres rapides enregistrés</string>
-    <string name="share_overlay_instant_download">Télécharger maintenant</string>
-    <string name="share_overlay_instant_cancel">Annuler</string>
     <string name="share_overlay_download_started">Téléchargement ajouté à la file d\'attente</string>
     <string name="share_overlay_invalid_link">Aucun lien web valide trouvé dans le contenu partagé</string>
-    <string name="share_overlay_cancel_fetch">Annuler</string>
-    <string name="share_overlay_stage_connecting">Connexion à %s…</string>
-    <string name="share_overlay_stage_reading">Lecture des détails du média…</string>
-    <string name="share_overlay_stage_qualities">Recherche des qualités du média…</string>
-    <string name="share_overlay_stage_ready">Presque prêt…</string>
 
 </resources>

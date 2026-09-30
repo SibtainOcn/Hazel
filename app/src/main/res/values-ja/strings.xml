@@ -1,5 +1,4 @@
 <resources>
-    <string name="direct_share_label">即時</string>
 
     <!-- Navigation -->
     <string name="nav_home">ホーム</string>
@@ -11,7 +10,6 @@
     <!-- DownloadScreen -->
     <string name="download_search_hint">URLを入力</string>
     <string name="download_clear">消去</string>
-    <string name="download_instant_source">即時 · %1$s から読み込み中</string>
     <string name="download_incognito_title">シークレットモード</string>
     <string name="download_incognito_body">ダウンロードは履歴に追加されず、リンクも保存されません。ファイル自体は通常どおり保存されます。</string>
     <string name="download_download_all">すべてダウンロード</string>
@@ -38,9 +36,6 @@
     <string name="download_cancel_dialog_dismiss">ダウンロードを続ける</string>
     <string name="download_clear_confirm_title">結果を消去しますか？</string>
     <string name="download_clear_confirm_body">画面からすべての結果を消去してもよろしいですか？</string>
-    <plurals name="download_links">
-        <item quantity="other">%d 件のリンク</item>
-    </plurals>
 
     <!-- SearchScreen -->
     <string name="search_hint">URLを入力</string>
@@ -185,7 +180,6 @@
     <string name="more_language">言語</string>
     <string name="more_cookies">Cookie</string>
     <string name="more_link_reading">リンクの読み込み</string>
-    <string name="more_hazel_instant">Hazel 即時</string>
     <string name="more_temporary_files">一時ファイル</string>
     <string name="more_converter">動画から音声へのオフライン変換</string>
     <string name="more_software_update">ソフトウェアの更新</string>
@@ -265,9 +259,7 @@
     <!-- HistoryScreen -->
     <string name="history_title">すべてのダウンロード</string>
     <string name="history_search_action">ダウンロードを検索</string>
-    <string name="history_sort_action">並べ替え</string>
     <string name="history_menu_action">その他</string>
-    <string name="history_menu_clear">履歴を削除</string>
     <string name="history_search_placeholder">ダウンロードを検索</string>
     <string name="history_search_clear">検索をクリア</string>
     <string name="history_empty_initial">まだダウンロードはありません</string>
@@ -288,13 +280,30 @@
     <string name="history_card_delete">ファイルを削除</string>
     <string name="history_tag_deleted">削除済み</string>
     <string name="history_toast_file_gone">このファイルは端末上に見つかりません</string>
-    <string name="history_tab_downloading">ダウンロード中</string>
-    <string name="history_tab_downloading_queue">ダウンロード待機列</string>
     <string name="history_tab_failed">失敗</string>
-    <string name="history_empty_downloading_queue">進行中または待機中のダウンロードはありません</string>
-    <string name="history_empty_downloading_queue_sub">進行中のダウンロードと待機中のアイテムがここに表示されます。</string>
+    <string name="nav_queue">キュー</string>
+    <string name="queue_title">ダウンロードキュー</string>
+    <string name="queue_tab_running">実行中</string>
+    <string name="queue_tab_queued">待機中</string>
+    <string name="queue_empty_running">ダウンロード中の項目はありません</string>
+    <string name="queue_empty_queued">待機中の項目はありません</string>
+    <string name="history_sort_date">追加日</string>
+    <string name="history_sort_title">タイトル</string>
+    <string name="history_sort_size">ファイルサイズ</string>
+    <string name="history_sort_reverse">逆順にする</string>
+    <string name="history_layout_toggle">レイアウトを変更</string>
+    <string name="history_filter_action">フィルター</string>
+    <string name="history_filter_status">状態</string>
+    <string name="history_status_all">すべて</string>
+    <string name="history_status_present">削除されていない</string>
+    <string name="history_status_deleted">削除済み</string>
+    <string name="history_menu_remove_all">すべて削除</string>
+    <string name="history_menu_remove_deleted">削除済みを除去</string>
+    <string name="history_menu_remove_duplicates">重複を除去</string>
+    <string name="no_results_add_cookies">Cookie を追加</string>
+    <string name="download_open_queue">ダウンロードキューを開く</string>
+    <string name="fetch_invalid_url">無効なリンクです。http:// または https:// で始まる必要があります</string>
     <string name="history_empty_failed">失敗したダウンロードはありません</string>
-    <string name="history_empty_failed_sub">エラーが発生したダウンロードはエラーログとともにここに表示されます。</string>
     <string name="history_failed_error_log">エラーログ</string>
     <string name="history_failed_copy_log">ログをコピー</string>
     <string name="history_failed_log_copied">エラーログをクリップボードにコピーしました</string>
@@ -371,6 +380,7 @@
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">最高画質</string>
+    <string name="batch_quality_worst">最低画質</string>
     <string name="audio_quality_best">最高音質</string>
     <string name="batch_audio_quality_subtitle">別の形式に変換するときに使用</string>
     <string name="batch_type_sheet_title">優先ダウンロード形式</string>
@@ -508,39 +518,7 @@
     <string name="tools_title">ツール</string>
     <string name="tools_empty">ここにはまだ何もありません。</string>
 
-    <!-- DirectShareScreen -->
-    <string name="direct_share_back">戻る</string>
-    <string name="direct_share_save_as">保存形式</string>
-    <string name="direct_share_video">動画</string>
-    <string name="direct_share_audio_only">音声のみ</string>
-    <string name="direct_share_title">Hazel 即時</string>
-    <string name="direct_share_intro">Hazel 即時にリンクを共有すると、確認画面やダイアログなしですぐにダウンロードが開始されます。以下の設定が使用されます。</string>
-    <string name="direct_share_video_description">映像と音声を1つのファイルに結合します。</string>
-    <string name="direct_share_audio_description">音声のみを、ソースが提供する最高音質で保存します。</string>
-    <string name="direct_share_quality_title">画質の上限</string>
-    <string name="direct_share_quality_description">固定サイズではなく上限です。すべてのソースが同じ解像度を提供するわけではないため、これ以下の最大のものが選択され、該当するものがない場合は利用可能な最小のものが選択されます。</string>
-    <string name="direct_share_output_title">出力</string>
-    <string name="direct_share_output_description">端末に保存されるファイルです。デフォルトはソースが提供する形式をそのまま保持するため、再エンコード不要で最も高速です。</string>
-    <string name="direct_share_filename_template">ファイル名テンプレート</string>
-    <string name="direct_share_audio_language">音声の言語</string>
     <string name="direct_share_audio_language_default">ソースのデフォルト</string>
-    <string name="direct_share_extras_title">追加要素</string>
-    <string name="direct_share_extras_description">ソースに存在する場合に適用されます。存在しない要素はエラーにせずスキップされます。</string>
-    <string name="direct_share_cover_art">カバーアート</string>
-    <string name="direct_share_cover_art_description">コンテナが対応している場合、サムネイルをファイル内に埋め込みます。</string>
-    <string name="direct_share_chapters">チャプター</string>
-    <string name="direct_share_subtitles">字幕</string>
-    <string name="direct_share_sponsorblock">SponsorBlock</string>
-    <string name="direct_share_sponsorblock_off">オフ</string>
-    <plurals name="direct_share_sponsorblock_cut">
-        <item quantity="other">%1$d 個のカテゴリをカット</item>
-    </plurals>
-    <string name="direct_share_signins_title">ログイン情報</string>
-    <string name="direct_share_signins_description">即時共有では、通常ダウンロードと同様に保存済みCookieが使用されます。共有時に確認は表示されないため、ログインが必要なリンクは事前にログイン情報が保存され有効化されている必要があります。</string>
-    <string name="direct_share_cookies">Cookie</string>
-    <string name="direct_share_cookies_on">オン、すべての即時共有で使用</string>
-    <string name="direct_share_cookies_off">オフ</string>
-    <string name="direct_share_change">%1$s を変更</string>
 
     <!-- StorageLocationsScreen -->
     <string name="storage_locations_back">戻る</string>
@@ -555,16 +533,7 @@
     <string name="storage_locations_speed_limit">速度制限</string>
 
     <!-- Share Overlay & Instant Share -->
-    <string name="share_overlay_instant_title">Hazel Instant</string>
-    <string name="share_overlay_instant_subtitle">保存されたクイック設定でダウンロード</string>
-    <string name="share_overlay_instant_download">今すぐダウンロード</string>
-    <string name="share_overlay_instant_cancel">キャンセル</string>
     <string name="share_overlay_download_started">ダウンロードをキューに追加しました</string>
     <string name="share_overlay_invalid_link">共有されたコンテンツに有効なウェブリンクが見つかりません</string>
-    <string name="share_overlay_cancel_fetch">キャンセル</string>
-    <string name="share_overlay_stage_connecting">%s に接続中…</string>
-    <string name="share_overlay_stage_reading">メディア情報を取得中…</string>
-    <string name="share_overlay_stage_qualities">ソース品質を検索中…</string>
-    <string name="share_overlay_stage_ready">まもなく完了…</string>
 
 </resources>
