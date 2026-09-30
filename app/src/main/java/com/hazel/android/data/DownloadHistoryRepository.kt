@@ -60,14 +60,14 @@ data class HistoryEntry(
 }
 
 /** How the history list is ordered. */
-enum class HistorySort(@androidx.annotation.StringRes val labelRes: Int) {
+enum class HistorySort(@param:androidx.annotation.StringRes val labelRes: Int) {
     NEWEST(com.hazel.android.R.string.history_sort_date),
     TITLE(com.hazel.android.R.string.history_sort_title),
     SIZE(com.hazel.android.R.string.history_sort_size)
 }
 
 /** Which of the downloads list's files it shows, by whether they are still on the device. */
-enum class HistoryStatus(@androidx.annotation.StringRes val labelRes: Int) {
+enum class HistoryStatus(@param:androidx.annotation.StringRes val labelRes: Int) {
     ALL(com.hazel.android.R.string.history_status_all),
     PRESENT(com.hazel.android.R.string.history_status_present),
     DELETED(com.hazel.android.R.string.history_status_deleted)

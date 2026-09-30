@@ -77,8 +77,8 @@ import com.hazel.android.update.UpdateScreen
 
 sealed class Screen(
     val route: String,
-    @StringRes val titleRes: Int,
-    @DrawableRes val icon: Int
+    @param:StringRes val titleRes: Int,
+    @param:DrawableRes val icon: Int
 ) {
     data object Download : Screen("download", R.string.nav_home, R.drawable.home)
     data object History : Screen("history", R.string.nav_history, R.drawable.downloads_tab)

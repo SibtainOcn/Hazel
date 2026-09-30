@@ -749,4 +749,8 @@
     <string name="search_source_niconico" translatable="false">Niconico</string>
     <string name="search_source_prx" translatable="false">PRX</string>
     <string name="search_source_rokfin" translatable="false">Rokfin</string>
+    <plurals name="player_skip_seconds">
+        <item quantity="one">%d second</item>
+        <item quantity="other">%d seconds</item>
+    </plurals>
 </resources>

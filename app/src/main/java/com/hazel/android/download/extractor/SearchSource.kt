@@ -11,7 +11,7 @@ import com.hazel.android.R
  * the same site. A source may have either or both.
  */
 enum class SearchSource(
-    @StringRes val labelRes: Int,
+    @param:StringRes val labelRes: Int,
     val newPipeService: String? = null,
     val newPipeFilter: String? = null,
     val ytDlpPrefix: String? = null,

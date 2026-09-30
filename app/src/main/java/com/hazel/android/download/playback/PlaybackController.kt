@@ -46,6 +46,9 @@ class PlaybackController(
         private set
     var durationMs by mutableLongStateOf(0L)
         private set
+    /** How far ahead of the start the player has loaded. */
+    var bufferedMs by mutableLongStateOf(0L)
+        private set
     var hasVideo by mutableStateOf(true)
         private set
     /** Width over height of the picture, or 0 before the first frame. */
@@ -97,6 +100,7 @@ class PlaybackController(
             while (isActive) {
                 if (!released) {
                     positionMs = player.currentPosition.coerceAtLeast(0L)
+                    bufferedMs = player.bufferedPosition.coerceAtLeast(0L)
                     if (player.duration > 0) durationMs = player.duration
                     onProgress?.invoke(positionMs)
                 }
@@ -149,6 +153,12 @@ class PlaybackController(
     fun seekTo(ms: Long) {
         player.seekTo(ms.coerceAtLeast(0L))
         positionMs = ms.coerceAtLeast(0L)
+    }
+
+    /** Moves by [deltaMs], forwards or back, without leaving the media. */
+    fun seekBy(deltaMs: Long) {
+        val end = durationMs.takeIf { it > 0 } ?: Long.MAX_VALUE
+        seekTo((player.currentPosition + deltaMs).coerceIn(0L, end))
     }
 
     fun mute(muted: Boolean) {

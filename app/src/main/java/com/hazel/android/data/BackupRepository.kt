@@ -29,7 +29,7 @@ import java.util.Date
 import java.util.Locale
 
 /** What a backup can hold, each a set of stored keys. */
-enum class BackupCategory(val id: String, @StringRes val label: Int, val keys: Set<String>) {
+enum class BackupCategory(val id: String, @param:StringRes val label: Int, val keys: Set<String>) {
     SETTINGS("settings", R.string.backup_category_settings, emptySet()),
     HISTORY("history", R.string.backup_category_history, setOf("download_history")),
     QUEUE("queue", R.string.backup_category_queue, setOf("download_queue")),
@@ -248,7 +248,7 @@ object BackupRepository {
         val mine = runCatching { JSONArray(current ?: "[]") }.getOrElse { JSONArray() }
         val theirs = runCatching { JSONArray(incoming) }.getOrElse { return current ?: incoming }
         fun idOf(item: Any?): String = when {
-            identity != null && item is JSONObject -> item.opt(identity).toString()
+            identity != null && item is JSONObject -> "${item.opt(identity)}"
             else -> item.toString()
         }
         val seen = (0 until mine.length()).map { idOf(mine.opt(it)) }.toMutableSet()

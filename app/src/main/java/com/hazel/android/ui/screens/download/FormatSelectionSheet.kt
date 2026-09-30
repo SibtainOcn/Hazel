@@ -75,7 +75,7 @@ import com.hazel.android.ui.theme.SizeBadgeContent
  * the listing source hold theirs: an enum has no Context, so a label written here is a
  * label nothing can translate.
  */
-enum class FormatSort(@StringRes val labelRes: Int) {
+enum class FormatSort(@param:StringRes val labelRes: Int) {
     QUALITY(R.string.format_sort_quality),
     FILE_SIZE(R.string.format_sort_file_size),
     CONTAINER(R.string.format_sort_container)

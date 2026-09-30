@@ -698,4 +698,9 @@
     <string name="fetch_settings_play_quality_value">Hasta %1$dp</string>
     <string name="fetch_settings_engine_newpipe_summary">El más rápido en YouTube, SoundCloud y Bandcamp. yt-dlp se encarga del resto y de todo lo que no pueda responder.</string>
     <string name="fetch_settings_engine_ytdlp_summary">Tarda más en empezar y funciona en todos los sitios que admite yt-dlp.</string>
+    <plurals name="player_skip_seconds">
+        <item quantity="one">%d segundo</item>
+        <item quantity="many">%d segundos</item>
+        <item quantity="other">%d segundos</item>
+    </plurals>
 </resources>

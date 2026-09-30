@@ -16,8 +16,8 @@ import java.io.File
  * whichever of these is chosen, because its format ids are what a download is expressed in.
  */
 enum class ListingSource(
-    @StringRes val labelRes: Int,
-    @StringRes val descriptionRes: Int
+    @param:StringRes val labelRes: Int,
+    @param:StringRes val descriptionRes: Int
 ) {
 
     YT_DLP(

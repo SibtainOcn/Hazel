@@ -684,4 +684,7 @@
     <string name="fetch_settings_play_quality_value">最大 %1$dp</string>
     <string name="fetch_settings_engine_newpipe_summary">YouTube、SoundCloud、Bandcamp で最速です。それ以外のサイトや、答えられないときは yt-dlp が引き継ぎます。</string>
     <string name="fetch_settings_engine_ytdlp_summary">起動は遅めですが、yt-dlp が対応するすべてのサイトで使えます。</string>
+    <plurals name="player_skip_seconds">
+        <item quantity="other">%d 秒</item>
+    </plurals>
 </resources>

@@ -47,7 +47,7 @@ object MediaSearch {
             (engine == ListingSource.NEWPIPE || !source.readableByYtDlp)
 
         if (canUseNewPipe) {
-            val found = NewPipeEngine.search(source.newPipeService!!, source.newPipeFilter, text, count)
+            val found = NewPipeEngine.search(source.newPipeService, source.newPipeFilter, text, count)
             if (found.isNotEmpty()) return found
         }
 

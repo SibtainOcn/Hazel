@@ -59,7 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -108,7 +108,7 @@ fun SearchScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val keyboard = LocalSoftwareKeyboardController.current
-    val clipboard = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
     val focusRequester = remember { FocusRequester() }
 
     val history by SearchHistoryRepository.getHistory(context).collectAsState(initial = emptyList())
@@ -223,15 +223,18 @@ fun SearchScreen(
      * goes through [submit], so a paste of several links is split the same way a typed one
      * is and a link already downloaded still raises the same warning.
      */
-    fun pasteAndSearch() {
-        val pasted = clipboard.getText()?.text.orEmpty().trim()
+    fun pasteAndSearch() = scope.launch {
+        val pasted = clipboard.getClipEntry()?.clipData
+            ?.takeIf { it.itemCount > 0 }
+            ?.getItemAt(0)?.coerceToText(context)?.toString()
+            .orEmpty().trim()
         if (pasted.isBlank()) {
             Toast.makeText(
                 context,
                 context.getString(R.string.search_nothing_to_paste),
                 Toast.LENGTH_SHORT
             ).show()
-            return
+            return@launch
         }
         text = pasted
         submit()

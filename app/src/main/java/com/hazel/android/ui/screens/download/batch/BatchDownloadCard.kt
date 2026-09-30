@@ -72,19 +72,11 @@ fun BatchDownloadCard(
     onTypeClick: () -> Unit,
     onRemove: () -> Unit
 ) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value != SwipeToDismissBoxValue.Settled) {
-                onRemove()
-                true
-            } else {
-                false
-            }
-        }
-    )
+    val dismissState = rememberSwipeToDismissBoxState()
 
     SwipeToDismissBox(
         state = dismissState,
+        onDismiss = { value -> if (value != SwipeToDismissBoxValue.Settled) onRemove() },
         backgroundContent = {
             // Fills the row exactly, so nothing of it shows until the row is actually
             // dragged aside.

@@ -691,4 +691,8 @@
     <string name="fetch_settings_play_quality_value">%1$dp तक</string>
     <string name="fetch_settings_engine_newpipe_summary">YouTube, SoundCloud और Bandcamp पर सबसे तेज़। बाकी हर जगह और जब यह जवाब न दे पाए, yt-dlp संभालता है।</string>
     <string name="fetch_settings_engine_ytdlp_summary">शुरू होने में धीमा, और yt-dlp की हर समर्थित साइट पर काम करता है।</string>
+    <plurals name="player_skip_seconds">
+        <item quantity="one">%d सेकंड</item>
+        <item quantity="other">%d सेकंड</item>
+    </plurals>
 </resources>

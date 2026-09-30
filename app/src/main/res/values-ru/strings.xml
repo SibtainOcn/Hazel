@@ -704,4 +704,10 @@
     <string name="fetch_settings_play_quality_value">До %1$dp</string>
     <string name="fetch_settings_engine_newpipe_summary">Быстрее всего на YouTube, SoundCloud и Bandcamp. Везде ещё и когда он не справляется, работает yt-dlp.</string>
     <string name="fetch_settings_engine_ytdlp_summary">Запускается медленнее и работает на всех сайтах, которые поддерживает yt-dlp.</string>
+    <plurals name="player_skip_seconds">
+        <item quantity="one">%d секунда</item>
+        <item quantity="few">%d секунды</item>
+        <item quantity="many">%d секунд</item>
+        <item quantity="other">%d секунды</item>
+    </plurals>
 </resources>

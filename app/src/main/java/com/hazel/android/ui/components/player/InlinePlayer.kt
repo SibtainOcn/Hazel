@@ -8,8 +8,21 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.FastRewind
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,8 +48,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -214,11 +225,30 @@ private fun PlayerArea(
         }
     }
 
+    // A double tap on either half skips back or ahead, and repeated ones add up.
+    var skipSide by remember { mutableIntStateOf(0) }
+    var skipSeconds by remember { mutableIntStateOf(0) }
+    var skipTap by remember { mutableIntStateOf(0) }
+    LaunchedEffect(skipTap) {
+        if (skipTap == 0) return@LaunchedEffect
+        delay(SKIP_FLASH_MS)
+        skipSide = 0
+        skipSeconds = 0
+    }
+
     Box(
-        modifier = modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null
-        ) { controlsShown = !controlsShown }
+        modifier = modifier.pointerInput(controller) {
+            detectTapGestures(
+                onTap = { controlsShown = !controlsShown },
+                onDoubleTap = { offset ->
+                    val side = if (offset.x < size.width / 2f) -1 else 1
+                    controller.seekBy(side * SKIP_MS)
+                    skipSeconds = if (skipSide == side) skipSeconds + SKIP_SECONDS else SKIP_SECONDS
+                    skipSide = side
+                    skipTap++
+                }
+            )
+        }
     ) {
         // Artwork stands in until the first frame, and for sound without a picture.
         if (thumbnail != null && (!controller.hasVideo || controller.phase != PlaybackController.Phase.READY)) {
@@ -236,8 +266,32 @@ private fun PlayerArea(
             )
         }
 
+        if (skipSide != 0) {
+            SkipFlash(
+                forward = skipSide > 0,
+                seconds = skipSeconds,
+                modifier = Modifier
+                    .align(if (skipSide > 0) Alignment.CenterEnd else Alignment.CenterStart)
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.38f)
+            )
+        }
+
+        val controlsVisible = controlsShown || !controller.isPlaying
+        if (!controlsVisible && controller.durationMs > 0) {
+            // A hairline of progress stays along the foot while the controls are away.
+            ProgressLine(
+                played = controller.positionMs.toFloat() / controller.durationMs,
+                buffered = controller.bufferedMs.toFloat() / controller.durationMs,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(2.dp)
+            )
+        }
+
         AnimatedVisibility(
-            visible = controlsShown || !controller.isPlaying,
+            visible = controlsVisible,
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier.fillMaxSize()
@@ -324,13 +378,19 @@ private fun PlayerArea(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 2.dp)
                 )
             }
         }
     }
 }
 
+/**
+ * Time on the left, full screen on the right, and a thin bar under them: played in the
+ * accent, loaded in white, the rest faint. The dot on the bar grows while it is dragged,
+ * and a tap anywhere on the bar jumps there.
+ */
 @Composable
 private fun SeekBar(
     controller: PlaybackController,
@@ -338,16 +398,26 @@ private fun SeekBar(
     onToggleFullscreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var dragging by remember { mutableStateOf(false) }
-    var dragValue by remember { mutableFloatStateOf(0f) }
-    val duration = controller.durationMs.coerceAtLeast(1L).toFloat()
-    val shown = if (dragging) dragValue else controller.positionMs.toFloat().coerceIn(0f, duration)
+    var scrubbing by remember { mutableStateOf(false) }
+    var scrubFraction by remember { mutableFloatStateOf(0f) }
+    val duration = controller.durationMs
+    val enabled = duration > 0
+    val length by rememberUpdatedState(duration)
+    val played = when {
+        scrubbing -> scrubFraction
+        enabled -> (controller.positionMs.toFloat() / duration).coerceIn(0f, 1f)
+        else -> 0f
+    }
+    val buffered = if (enabled) (controller.bufferedMs.toFloat() / duration).coerceIn(0f, 1f) else 0f
+    val thumb by animateDpAsState(if (scrubbing) 8.dp else 6.dp, label = "seekThumb")
+    val accent = MaterialTheme.colorScheme.primary
 
     Column(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "${formatClock(shown.toLong())} · ${formatClock(controller.durationMs)}",
+                "${formatClock((played * duration).toLong())} / ${formatClock(duration)}",
                 style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
                 color = Color.White
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -360,27 +430,94 @@ private fun SeekBar(
                 background = Color.Transparent
             )
         }
-        Slider(
-            value = shown,
-            onValueChange = {
-                dragging = true
-                dragValue = it
-            },
-            onValueChangeFinished = {
-                controller.seekTo(dragValue.toLong())
-                dragging = false
-            },
-            valueRange = 0f..duration,
-            enabled = controller.durationMs > 0,
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = Color.White.copy(alpha = 0.3f)
-            ),
+        Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(24.dp)
-        )
+                .height(20.dp)
+                .pointerInput(enabled) {
+                    if (!enabled) return@pointerInput
+                    detectTapGestures { offset ->
+                        controller.seekTo((offset.x / size.width * length).toLong())
+                    }
+                }
+                .pointerInput(enabled) {
+                    if (!enabled) return@pointerInput
+                    detectHorizontalDragGestures(
+                        onDragStart = { offset ->
+                            scrubbing = true
+                            scrubFraction = (offset.x / size.width).coerceIn(0f, 1f)
+                        },
+                        onDragEnd = {
+                            controller.seekTo((scrubFraction * length).toLong())
+                            scrubbing = false
+                        },
+                        onDragCancel = { scrubbing = false }
+                    ) { change, _ ->
+                        change.consume()
+                        scrubFraction = (change.position.x / size.width).coerceIn(0f, 1f)
+                    }
+                }
+        ) {
+            val y = size.height / 2f
+            val stroke = if (scrubbing) 4.dp.toPx() else 3.dp.toPx()
+            drawSeekLine(y, stroke, 1f, Color.White.copy(alpha = 0.25f))
+            drawSeekLine(y, stroke, buffered, Color.White.copy(alpha = 0.45f))
+            drawSeekLine(y, stroke, played, accent)
+            drawCircle(accent, radius = thumb.toPx(), center = Offset(size.width * played, y))
+        }
+    }
+}
+
+/** The bar alone, for while the controls are hidden. */
+@Composable
+private fun ProgressLine(played: Float, buffered: Float, modifier: Modifier = Modifier) {
+    val accent = MaterialTheme.colorScheme.primary
+    Canvas(modifier = modifier) {
+        val y = size.height / 2f
+        drawSeekLine(y, size.height, buffered.coerceIn(0f, 1f), Color.White.copy(alpha = 0.35f))
+        drawSeekLine(y, size.height, played.coerceIn(0f, 1f), accent)
+    }
+}
+
+private fun DrawScope.drawSeekLine(y: Float, stroke: Float, fraction: Float, color: Color) {
+    if (fraction <= 0f) return
+    drawLine(
+        color = color,
+        start = Offset(0f, y),
+        end = Offset(size.width * fraction, y),
+        strokeWidth = stroke,
+        cap = StrokeCap.Round
+    )
+}
+
+/** The rewind or forward mark shown on the side a double tap skipped on. */
+@Composable
+private fun SkipFlash(forward: Boolean, seconds: Int, modifier: Modifier = Modifier) {
+    val shape = if (forward) {
+        RoundedCornerShape(topStartPercent = 50, bottomStartPercent = 50)
+    } else {
+        RoundedCornerShape(topEndPercent = 50, bottomEndPercent = 50)
+    }
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .background(Color.White.copy(alpha = 0.14f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                if (forward) Icons.Filled.FastForward else Icons.Filled.FastRewind,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(28.dp)
+            )
+            Text(
+                pluralStringResource(R.plurals.player_skip_seconds, seconds, seconds),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White
+            )
+        }
     }
 }
 
@@ -446,3 +583,6 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 }
 
 private const val CONTROLS_TIMEOUT_MS = 3_000L
+private const val SKIP_SECONDS = 5
+private const val SKIP_MS = SKIP_SECONDS * 1000L
+private const val SKIP_FLASH_MS = 700L
