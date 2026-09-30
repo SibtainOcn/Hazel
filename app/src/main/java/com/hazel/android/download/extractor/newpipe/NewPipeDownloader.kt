@@ -62,7 +62,7 @@ class NewPipeDownloader(builder: OkHttpClient.Builder = OkHttpClient.Builder()) 
         }
     }
 
-    private companion object {
+    internal companion object {
         const val CONNECT_TIMEOUT_SECONDS = 10L
         const val READ_TIMEOUT_SECONDS = 20L
         const val HTTP_TOO_MANY_REQUESTS = 429
