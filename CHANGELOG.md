@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Downloads failing or looping after a link was shared in (#45): yt-dlp updates were written over the live engine while a download was using it, breaking it with `bad local file header`. A new build is now downloaded beside the live one, verified, and swapped in atomically only while no download or read is running; a damaged engine is restored from the bundled copy.
+- Playlists opening as a single song (#44): a video opened from a playlist and the video alone shared one cache entry, so a playlist pasted again could come back as one card. Reads are now keyed by media and collection, and every YouTube playlist no longer shares one key.
+- YouTube offering only a single 360p format: Hazel no longer forces a fixed list of YouTube player clients and lets yt-dlp choose the ones that still serve the full ladder. Reads cached by older builds are dropped once.
+- Audio downloads saved as `.webm`: audio is now extracted to the file it really is (for example `.opus` or `.m4a`), or converted to the chosen format, with cover art embedded where the format allows it.
+- Every song showing the same cover in music players: audio files now carry an album tag, the source's own album where it has one and the track title otherwise.
+- Format reads for several links at once failing after the first, and concurrent results overwriting each other.
+- Skeleton placeholders drawing dark blocks on the light theme.
+
+### Changed
+- Downloads without a chosen folder are saved to `Download/Hazel/Audio` or `Download/Hazel/Video`.
+- yt-dlp updates itself in the background on launch, following the automatic download and Wi-Fi only settings of the update screen.
+- The batch sheet's quality button opens the format list for audio as well, showing the formats the links share with the size of the whole set; a codec such as Opus or AAC can be chosen for links from mixed sources.
+- Bitrate is its own setting for audio conversions, in the single and batch sheets, and the batch sheet's bottom buttons are drawn on a surface.
 
 ## [1.0.10] - 2026-09-27
 ### Changed
