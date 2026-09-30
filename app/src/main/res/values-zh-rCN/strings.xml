@@ -602,4 +602,27 @@
     <string name="processing_step_cover">封面</string>
     <string name="processing_step_split">分割</string>
     <string name="processing_step_save">保存</string>
+    <string name="options_cut_title">剪切</string>
+    <string name="options_cut_start">开始</string>
+    <string name="options_cut_end">结束</string>
+    <string name="options_cut_precise">精确剪切</string>
+    <string name="options_cut_precise_summary">通过重新编码两端，在你设定的位置精确剪切。速度较慢。关闭时，每个剪切点会移到最近的关键帧。</string>
+    <string name="options_cut_invalid">结束时间必须晚于开始时间，且在时长之内</string>
+    <string name="options_cut_apply">剪切</string>
+    <string name="options_cut_clear">清除</string>
+    <string name="options_cut_hint">时间格式为 1:02:03、2:03 或秒数。</string>
+    <string name="options_live_title">直播</string>
+    <string name="options_live_from_start">从头录制</string>
+    <string name="options_live_from_start_summary">从直播开始处下载，而不是从现在开始</string>
+    <string name="options_live_wait">等待开始</string>
+    <string name="options_live_wait_summary">等直播或首映开始后再下载</string>
+    <string name="storage_locations_fragments">并行分片</string>
+    <string name="storage_locations_fragments_description">同时下载的流分片数</string>
+    <string name="storage_locations_throttled">刷新慢速链接</string>
+    <string name="storage_locations_throttled_description">下载速度低于此值时获取新链接</string>
+    <string name="advanced_impersonate">模拟浏览器</string>
+    <string name="advanced_impersonate_unavailable_value">%1$s，此设备不可用</string>
+    <string name="advanced_impersonate_checking">正在询问引擎可以模拟哪些浏览器</string>
+    <string name="advanced_impersonate_none">此设备上的引擎无法模拟浏览器，请求将按原样发送。</string>
+    <string name="advanced_impersonate_check_failed">暂时无法询问引擎，请稍后再试。</string>
 </resources>

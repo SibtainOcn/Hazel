@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- More › Synthesizing sets the saved download options the sheets start from: SponsorBlock (on or off, categories and server), bitrate, cover art and crop, preferred audio language and codec, audio format, subtitles (embed, keep the files, languages), video format, chapters, preferred video codec and quality, with a reset.
+- More › Advanced sets YouTube player clients, PO tokens and visitor data, YouTube metadata in the app's language (only languages YouTube accepts), other YouTube arguments, a pause between requests, skipping certificate checks and extra download arguments, applied to every read and download.
+- Imitate a browser (More › Advanced) makes every request look like a real browser's, for sites that turn away anything else. The engine is asked which browsers it can imitate on the device and only those are offered, since yt-dlp stops a download asked for one it cannot do.
+- Cut in the download sheet downloads only part of a video or track: a range slider with editable start and end times, and an optional precise cut that re-encodes the ends instead of moving to the nearest keyframe.
+- Live in the download sheet, for live streams and upcoming premieres: record from the start of the stream, or wait for it to begin and then download it.
+- More › Downloads has Parallel fragments (1, 2, 4 or 8 pieces of a stream fetched at once, 8 by default) and Refresh slow links (fetch fresh links when a download drops under a chosen speed, off by default), beside the speed limit (no limit by default).
+
+### Fixed (file names)
+- A post whose caption is its title (TikTok, X, Facebook and similar) failed to download with "File name too long", since yt-dlp does not shorten titles. Names are now kept inside the 255 bytes Android allows, measured in bytes so Japanese, Chinese and emoji titles fit too, and the sheet's title field starts from the caption on one line without its trailing hashtags, cut at a word.
+
 ### Fixed (subtitles and chapters)
 - Split by chapters wrote the chapter files to the process's working directory, which on Android cannot be written, so splitting failed; they are now saved beside the video, named after it.
 - The default subtitle languages (`en.*`) also requested every machine translation into or out of English, and one refused request (YouTube rate limiting) failed the whole download; the default is now English and the original-language track.

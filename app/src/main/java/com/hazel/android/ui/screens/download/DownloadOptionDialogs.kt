@@ -38,6 +38,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
+import com.hazel.android.download.parseTimestamp
+import com.hazel.android.download.formatTimestamp
+import com.hazel.android.download.OneOffOptions
+import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.LiveTv
+import androidx.compose.material.icons.filled.ContentCut
 import com.hazel.android.download.AUDIO_QUALITY_STEPS
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.SponsorBlock
@@ -181,6 +188,187 @@ fun ThumbnailDialog(
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.options_chapters_dismiss)) } }
+    )
+}
+
+/**
+ * Keeps only part of the media: a range picked on a slider over its length, or typed
+ * exactly, with the choice of exact cut points (slower, as the ends are encoded again) or
+ * cut points at the nearest keyframe.
+ *
+ * The whole length picked is no cut at all, so it clears rather than asking yt-dlp to cut
+ * out everything.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CutDialog(
+    durationSeconds: Int,
+    current: OneOffOptions,
+    onApply: (start: Double, end: Double, precise: Boolean) -> Unit,
+    onClear: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val duration = durationSeconds.toDouble()
+    var startText by remember {
+        mutableStateOf(formatTimestamp(if (current.hasSection) current.sectionStart else 0.0))
+    }
+    var endText by remember {
+        mutableStateOf(
+            when {
+                current.hasSection -> formatTimestamp(current.sectionEnd)
+                duration > 0 -> formatTimestamp(duration)
+                else -> ""
+            }
+        )
+    }
+    var precise by remember { mutableStateOf(current.preciseCuts) }
+
+    val start = parseTimestamp(startText)
+    val end = parseTimestamp(endText)
+    val valid = start != null && end != null && end > start && (duration <= 0 || end <= duration + 0.5)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Filled.ContentCut, null) },
+        title = { Text(stringResource(R.string.options_cut_title), fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                if (duration > 0) {
+                    val from = (start ?: 0.0).coerceIn(0.0, duration).toFloat()
+                    val to = (end ?: duration).coerceIn(0.0, duration).toFloat()
+                    RangeSlider(
+                        value = minOf(from, to)..maxOf(from, to),
+                        onValueChange = { range ->
+                            startText = formatTimestamp(range.start.toDouble())
+                            endText = formatTimestamp(range.endInclusive.toDouble())
+                        },
+                        valueRange = 0f..duration.toFloat()
+                    )
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            formatTimestamp(0.0),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            formatTimestamp(duration),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                } else {
+                    Text(
+                        stringResource(R.string.options_cut_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    EditableField(
+                        label = stringResource(R.string.options_cut_start),
+                        value = startText,
+                        onValueChange = { startText = it },
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    EditableField(
+                        label = stringResource(R.string.options_cut_end),
+                        value = endText,
+                        onValueChange = { endText = it },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                if (!valid && startText.isNotBlank() && endText.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        stringResource(R.string.options_cut_invalid),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                ToggleRow(
+                    label = stringResource(R.string.options_cut_precise),
+                    checked = precise,
+                    onCheckedChange = { precise = it }
+                )
+                Text(
+                    stringResource(R.string.options_cut_precise_summary),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = valid,
+                onClick = {
+                    val from = start ?: return@TextButton
+                    val to = end ?: return@TextButton
+                    val whole = duration > 0 && from <= 0.05 && to >= duration - 0.05
+                    if (whole) onClear() else onApply(from, to, precise)
+                }
+            ) { Text(stringResource(R.string.options_cut_apply)) }
+        },
+        dismissButton = {
+            Row {
+                if (current.hasSection) {
+                    TextButton(onClick = onClear) { Text(stringResource(R.string.options_cut_clear)) }
+                }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.download_cancel)) }
+            }
+        }
+    )
+}
+
+/**
+ * How to take a live stream: from its beginning rather than from now, for one that is live;
+ * waited for and then downloaded, for one that has not started.
+ */
+@Composable
+fun LiveStreamDialog(
+    isUpcoming: Boolean,
+    current: OneOffOptions,
+    onChange: (OneOffOptions) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Filled.LiveTv, null) },
+        title = { Text(stringResource(R.string.options_live_title), fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                if (isUpcoming) {
+                    ToggleRow(
+                        label = stringResource(R.string.options_live_wait),
+                        checked = current.waitForVideo,
+                        onCheckedChange = { onChange(current.copy(waitForVideo = it)) }
+                    )
+                    Text(
+                        stringResource(R.string.options_live_wait_summary),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                    )
+                } else {
+                    ToggleRow(
+                        label = stringResource(R.string.options_live_from_start),
+                        checked = current.liveFromStart,
+                        onCheckedChange = { onChange(current.copy(liveFromStart = it)) }
+                    )
+                    Text(
+                        stringResource(R.string.options_live_from_start_summary),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.options_chapters_dismiss)) }
+        }
     )
 }
 

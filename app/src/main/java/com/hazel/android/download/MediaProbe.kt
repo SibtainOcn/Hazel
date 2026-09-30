@@ -480,6 +480,8 @@ object MediaProbe {
                         ?: UrlExtractor.extractYouTubeId(root.optString("webpage_url"))
                 } else null)?.let { "https://i.ytimg.com/vi/$it/hqdefault.jpg" },
             durationSeconds = duration,
+            liveStatus = media.optString("live_status").takeIf { it.isNotBlank() && it != "null" }
+                ?: if (media.optBoolean("is_live")) "is_live" else "",
             // The generic row stands in only where the source named nothing concrete. A
             // list that already holds real formats does not need it: it says nothing the
             // first real entry does not, and it cannot show the size, codec and

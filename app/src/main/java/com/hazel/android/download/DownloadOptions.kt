@@ -55,8 +55,27 @@ data class DownloadOptions(
     /** [VideoCodec] name to prefer. Blank prefers none. */
     val preferredVideoCodec: String = "",
     /** Video quality to start from: 0 is best, a height is a ceiling, [WORST_HEIGHT] worst. */
-    val videoQuality: Int = 0
+    val videoQuality: Int = 0,
+
+    // ── For one download only. Set from the sheet as the download starts, carried with it
+    // in the queue, and never saved as a setting, so the next download does not inherit a
+    // cut or a live option meant for this one. ──
+
+    /** Start of the part to download, in seconds; below zero downloads all of it. */
+    val sectionStart: Double = -1.0,
+    /** End of the part to download, in seconds. */
+    val sectionEnd: Double = -1.0,
+    /** `--force-keyframes-at-cuts`: exact cut points, at the cost of re-encoding around them. */
+    val preciseCuts: Boolean = false,
+    /** `--live-from-start`: a stream already live is taken from its beginning, not from now. */
+    val liveFromStart: Boolean = false,
+    /** `--wait-for-video`: a stream not started yet is waited for, then downloaded. */
+    val waitForVideo: Boolean = false
 ) {
+    /** True when only part of the media is to be downloaded. */
+    val hasSection: Boolean
+        get() = sectionStart >= 0.0 && sectionEnd > sectionStart
+
     val audioCodecPreference: AudioCodec?
         get() = AudioCodec.entries.firstOrNull { it.name == preferredAudioCodec }
 
@@ -86,6 +105,15 @@ data class DownloadOptions(
     val subtitleBadge: Int
         get() = listOf(embedSubs, writeSubs, writeAutoSubs).count { it }
 
+    /** These options with a download's own choices laid over them. */
+    fun with(oneOff: OneOffOptions): DownloadOptions = copy(
+        sectionStart = if (oneOff.hasSection) oneOff.sectionStart else -1.0,
+        sectionEnd = if (oneOff.hasSection) oneOff.sectionEnd else -1.0,
+        preciseCuts = oneOff.hasSection && oneOff.preciseCuts,
+        liveFromStart = oneOff.liveFromStart,
+        waitForVideo = oneOff.waitForVideo
+    )
+
     companion object {
         const val DEFAULT_FILENAME_TEMPLATE = "%(title)s.%(ext)s"
         /**
@@ -99,6 +127,51 @@ data class DownloadOptions(
         /** The default before it was narrowed, still stored for anyone who never changed it. */
         const val LEGACY_SUB_LANGUAGES = "en.*,.*-orig"
     }
+}
+
+/**
+ * What the sheet sets for one download and nothing after it: a part of the media to cut out
+ * and keep, and how to take a live stream.
+ */
+data class OneOffOptions(
+    val sectionStart: Double = -1.0,
+    val sectionEnd: Double = -1.0,
+    val preciseCuts: Boolean = false,
+    val liveFromStart: Boolean = false,
+    val waitForVideo: Boolean = false
+) {
+    val hasSection: Boolean
+        get() = sectionStart >= 0.0 && sectionEnd > sectionStart
+}
+
+/**
+ * A time as the cut fields show it: "1:02:03.250" or "2:03.250", the milliseconds only
+ * when there are any.
+ */
+fun formatTimestamp(seconds: Double): String {
+    val totalMillis = Math.round(seconds.coerceAtLeast(0.0) * 1000)
+    val h = totalMillis / 3_600_000
+    val m = (totalMillis % 3_600_000) / 60_000
+    val s = (totalMillis % 60_000) / 1000
+    val ms = totalMillis % 1000
+    val clock = if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%d:%02d".format(m, s)
+    return if (ms > 0) "%s.%03d".format(clock, ms) else clock
+}
+
+/**
+ * Reads a time typed into a cut field: seconds ("75.5"), or minutes and seconds ("1:15.5"),
+ * or hours as well ("1:02:03"). Null for anything else.
+ */
+fun parseTimestamp(text: String): Double? {
+    val parts = text.trim().split(':')
+    if (parts.isEmpty() || parts.size > 3 || parts.any { it.isBlank() }) return null
+    val seconds = parts.last().toDoubleOrNull()?.takeIf { it >= 0 } ?: return null
+    val whole = parts.dropLast(1).map { it.toIntOrNull()?.takeIf { v -> v >= 0 } ?: return null }
+    if (whole.isNotEmpty() && seconds >= 60) return null
+    if (whole.isEmpty()) return seconds
+    var total = 0.0
+    for (part in whole) total = total * 60 + part
+    return total * 60 + seconds
 }
 
 /**

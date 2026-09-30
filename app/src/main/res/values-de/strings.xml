@@ -609,4 +609,27 @@
     <string name="processing_step_cover">Cover</string>
     <string name="processing_step_split">Teilen</string>
     <string name="processing_step_save">Speichern</string>
+    <string name="options_cut_title">Schneiden</string>
+    <string name="options_cut_start">Start</string>
+    <string name="options_cut_end">Ende</string>
+    <string name="options_cut_precise">Genaue Schnitte</string>
+    <string name="options_cut_precise_summary">Schneidet genau an den gewählten Stellen, indem die Enden neu kodiert werden. Langsamer. Aus: Jeder Schnitt rückt zum nächsten Keyframe, einen Moment weiter.</string>
+    <string name="options_cut_invalid">Das Ende muss nach dem Start liegen, innerhalb der Länge</string>
+    <string name="options_cut_apply">Schneiden</string>
+    <string name="options_cut_clear">Löschen</string>
+    <string name="options_cut_hint">Zeiten als 1:02:03, 2:03 oder in Sekunden eingeben.</string>
+    <string name="options_live_title">Live</string>
+    <string name="options_live_from_start">Von Anfang an aufnehmen</string>
+    <string name="options_live_from_start_summary">Den Stream von seinem Beginn statt ab jetzt herunterladen</string>
+    <string name="options_live_wait">Auf den Start warten</string>
+    <string name="options_live_wait_summary">Warten, bis der Stream oder die Premiere beginnt, dann herunterladen</string>
+    <string name="storage_locations_fragments">Parallele Fragmente</string>
+    <string name="storage_locations_fragments_description">Teile eines Streams, die gleichzeitig geladen werden</string>
+    <string name="storage_locations_throttled">Langsame Links erneuern</string>
+    <string name="storage_locations_throttled_description">Neue Links holen, wenn ein Download unter diese Geschwindigkeit fällt</string>
+    <string name="advanced_impersonate">Browser nachahmen</string>
+    <string name="advanced_impersonate_unavailable_value">%1$s, hier nicht verfügbar</string>
+    <string name="advanced_impersonate_checking">Die Engine wird gefragt, welche Browser sie nachahmen kann</string>
+    <string name="advanced_impersonate_none">Die Engine auf diesem Gerät kann keinen Browser nachahmen, Anfragen werden unverändert gesendet.</string>
+    <string name="advanced_impersonate_check_failed">Die Engine konnte gerade nicht gefragt werden. Versuche es gleich noch einmal.</string>
 </resources>

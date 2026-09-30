@@ -861,12 +861,12 @@ fun DownloadScreen(
                 onOpenSaveDir = openSaveDirOf,
                 onPickSaveDir = pickSaveDir,
                 onResetSaveDir = resetSaveDir,
-                onDownload = { format, audioLanguage, title, author ->
+                onDownload = { format, audioLanguage, title, author, oneOff ->
                     sheetVisible = false
                     downloadViewModel.startDownload(
                         context = context,
                         format = format,
-                        options = options,
+                        options = options.with(oneOff),
                         title = title,
                         author = author,
                         audioLanguage = audioLanguage,

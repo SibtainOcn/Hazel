@@ -602,4 +602,27 @@
     <string name="processing_step_cover">カバー</string>
     <string name="processing_step_split">分割</string>
     <string name="processing_step_save">保存</string>
+    <string name="options_cut_title">カット</string>
+    <string name="options_cut_start">開始</string>
+    <string name="options_cut_end">終了</string>
+    <string name="options_cut_precise">正確なカット</string>
+    <string name="options_cut_precise_summary">端を再エンコードして、指定した位置で正確にカットします。時間がかかります。オフにすると、各カット位置は最寄りのキーフレームにずれます。</string>
+    <string name="options_cut_invalid">終了は開始より後で、長さの範囲内にしてください</string>
+    <string name="options_cut_apply">カット</string>
+    <string name="options_cut_clear">クリア</string>
+    <string name="options_cut_hint">時間は 1:02:03、2:03、または秒で入力します。</string>
+    <string name="options_live_title">ライブ</string>
+    <string name="options_live_from_start">最初から録画</string>
+    <string name="options_live_from_start_summary">今からではなく、配信の最初からダウンロードします</string>
+    <string name="options_live_wait">開始を待つ</string>
+    <string name="options_live_wait_summary">配信やプレミア公開が始まるまで待ってからダウンロードします</string>
+    <string name="storage_locations_fragments">並列フラグメント</string>
+    <string name="storage_locations_fragments_description">ストリームを同時に取得する数</string>
+    <string name="storage_locations_throttled">遅いリンクを更新</string>
+    <string name="storage_locations_throttled_description">ダウンロードがこの速度を下回ったら新しいリンクを取得します</string>
+    <string name="advanced_impersonate">ブラウザを模倣</string>
+    <string name="advanced_impersonate_unavailable_value">%1$s、この端末では利用不可</string>
+    <string name="advanced_impersonate_checking">エンジンに模倣できるブラウザを確認しています</string>
+    <string name="advanced_impersonate_none">この端末のエンジンはブラウザを模倣できないため、リクエストはそのまま送信されます。</string>
+    <string name="advanced_impersonate_check_failed">今はエンジンに確認できませんでした。少し後でもう一度お試しください。</string>
 </resources>

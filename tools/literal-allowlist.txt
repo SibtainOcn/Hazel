@@ -40,8 +40,8 @@ app/src/main/java/com/hazel/android/ui/screens/cookies/CookieWebViewActivity.kt:
 app/src/main/java/com/hazel/android/ui/screens/download/FormatSelectionSheet.kt:393: the source's own format id behind a fixed id: marker, an identifier the engine prints and no language changes
 app/src/main/java/com/hazel/android/ui/screens/download/FormatSelectionSheet.kt:419: the source's own format id behind a fixed id: marker, an identifier the engine prints and no language changes
 
-app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt:600: Compose animation label, used by the tooling inspector only
-app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt:605: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt:650: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt:655: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:121: Compose animation label, used by the tooling inspector only
 app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:284: two formatted byte counts joined by a slash, no words to translate
 app/src/main/java/com/hazel/android/ui/components/MediaCards.kt:291: numeric percentage format, no words to translate

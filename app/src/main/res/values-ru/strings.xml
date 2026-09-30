@@ -622,4 +622,27 @@
     <string name="processing_step_cover">Обложка</string>
     <string name="processing_step_split">Разбивка</string>
     <string name="processing_step_save">Сохранение</string>
+    <string name="options_cut_title">Обрезать</string>
+    <string name="options_cut_start">Начало</string>
+    <string name="options_cut_end">Конец</string>
+    <string name="options_cut_precise">Точная обрезка</string>
+    <string name="options_cut_precise_summary">Режет ровно в выбранных местах, перекодируя края. Медленнее. Если выключено, каждый срез сдвигается к ближайшему ключевому кадру.</string>
+    <string name="options_cut_invalid">Конец должен быть после начала и в пределах длительности</string>
+    <string name="options_cut_apply">Обрезать</string>
+    <string name="options_cut_clear">Очистить</string>
+    <string name="options_cut_hint">Вводите время как 1:02:03, 2:03 или в секундах.</string>
+    <string name="options_live_title">Трансляция</string>
+    <string name="options_live_from_start">Записывать с начала</string>
+    <string name="options_live_from_start_summary">Скачивать трансляцию с её начала, а не с текущего момента</string>
+    <string name="options_live_wait">Ждать начала</string>
+    <string name="options_live_wait_summary">Ждать начала трансляции или премьеры, затем скачать</string>
+    <string name="storage_locations_fragments">Параллельные фрагменты</string>
+    <string name="storage_locations_fragments_description">Сколько частей потока загружать одновременно</string>
+    <string name="storage_locations_throttled">Обновлять медленные ссылки</string>
+    <string name="storage_locations_throttled_description">Получать новые ссылки, когда скорость загрузки падает ниже этой</string>
+    <string name="advanced_impersonate">Имитировать браузер</string>
+    <string name="advanced_impersonate_unavailable_value">%1$s, здесь недоступно</string>
+    <string name="advanced_impersonate_checking">Спрашиваем движок, какие браузеры он может имитировать</string>
+    <string name="advanced_impersonate_none">Движок на этом устройстве не умеет имитировать браузер, поэтому запросы отправляются как есть.</string>
+    <string name="advanced_impersonate_check_failed">Сейчас не удалось спросить движок. Попробуйте чуть позже.</string>
 </resources>

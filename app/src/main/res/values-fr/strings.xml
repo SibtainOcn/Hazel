@@ -616,4 +616,27 @@
     <string name="processing_step_cover">Pochette</string>
     <string name="processing_step_split">Diviser</string>
     <string name="processing_step_save">Enregistrer</string>
+    <string name="options_cut_title">Découper</string>
+    <string name="options_cut_start">Début</string>
+    <string name="options_cut_end">Fin</string>
+    <string name="options_cut_precise">Coupes précises</string>
+    <string name="options_cut_precise_summary">Coupe exactement aux points choisis en réencodant les extrémités. Plus lent. Désactivé, chaque coupe passe à l\'image clé la plus proche.</string>
+    <string name="options_cut_invalid">La fin doit venir après le début, dans la durée</string>
+    <string name="options_cut_apply">Découper</string>
+    <string name="options_cut_clear">Effacer</string>
+    <string name="options_cut_hint">Saisissez les temps sous la forme 1:02:03, 2:03 ou en secondes.</string>
+    <string name="options_live_title">En direct</string>
+    <string name="options_live_from_start">Enregistrer depuis le début</string>
+    <string name="options_live_from_start_summary">Télécharger le direct depuis son début plutôt qu\'à partir de maintenant</string>
+    <string name="options_live_wait">Attendre le début</string>
+    <string name="options_live_wait_summary">Attendre que le direct ou la première commence, puis le télécharger</string>
+    <string name="storage_locations_fragments">Fragments en parallèle</string>
+    <string name="storage_locations_fragments_description">Morceaux d\'un flux téléchargés en même temps</string>
+    <string name="storage_locations_throttled">Renouveler les liens lents</string>
+    <string name="storage_locations_throttled_description">Obtenir de nouveaux liens quand un téléchargement passe sous cette vitesse</string>
+    <string name="advanced_impersonate">Imiter un navigateur</string>
+    <string name="advanced_impersonate_unavailable_value">%1$s, indisponible ici</string>
+    <string name="advanced_impersonate_checking">Demande au moteur quels navigateurs il peut imiter</string>
+    <string name="advanced_impersonate_none">Le moteur de cet appareil ne peut imiter aucun navigateur, les requêtes sont donc envoyées telles quelles.</string>
+    <string name="advanced_impersonate_check_failed">Le moteur n\'a pas pu être interrogé pour le moment. Réessayez dans un instant.</string>
 </resources>

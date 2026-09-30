@@ -659,4 +659,27 @@
     <string name="processing_step_cover">Cover</string>
     <string name="processing_step_split">Split</string>
     <string name="processing_step_save">Save</string>
+    <string name="options_cut_title">Cut</string>
+    <string name="options_cut_start">Start</string>
+    <string name="options_cut_end">End</string>
+    <string name="options_cut_precise">Precise cuts</string>
+    <string name="options_cut_precise_summary">Cuts exactly where you set them by encoding the ends again. Slower. Off, each cut moves to the nearest keyframe, a moment away.</string>
+    <string name="options_cut_invalid">The end must come after the start, within the length</string>
+    <string name="options_cut_apply">Cut</string>
+    <string name="options_cut_clear">Clear</string>
+    <string name="options_cut_hint">Type the times as 1:02:03, 2:03 or in seconds.</string>
+    <string name="options_live_title">Live</string>
+    <string name="options_live_from_start">Record from the start</string>
+    <string name="options_live_from_start_summary">Download the stream from its beginning instead of from now</string>
+    <string name="options_live_wait">Wait for it to start</string>
+    <string name="options_live_wait_summary">Wait until the stream or premiere begins, then download it</string>
+    <string name="storage_locations_fragments">Parallel fragments</string>
+    <string name="storage_locations_fragments_description">Pieces of a stream fetched at once</string>
+    <string name="storage_locations_throttled">Refresh slow links</string>
+    <string name="storage_locations_throttled_description">Fetch fresh links when a download drops under this speed</string>
+    <string name="advanced_impersonate">Imitate a browser</string>
+    <string name="advanced_impersonate_unavailable_value">%1$s, not available here</string>
+    <string name="advanced_impersonate_checking">Asking the engine which browsers it can imitate</string>
+    <string name="advanced_impersonate_none">The engine on this device cannot imitate a browser, so requests are sent as they are.</string>
+    <string name="advanced_impersonate_check_failed">The engine could not be asked right now. Try again in a moment.</string>
 </resources>

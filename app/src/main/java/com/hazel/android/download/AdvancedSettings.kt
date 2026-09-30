@@ -28,8 +28,23 @@ data class AdvancedSettings(
     /** `--no-check-certificates`, for a site whose certificate the device does not trust. */
     val noCheckCertificates: Boolean = false,
     /** `--sleep-requests`: seconds between requests while reading, for rate limited sites. */
-    val sleepRequestsSeconds: Int = 0
+    val sleepRequestsSeconds: Int = 0,
+    /**
+     * `--impersonate`: the browser whose connection every request is made to look like, as
+     * yt-dlp names its families ("chrome", "safari"). Blank leaves requests as they are.
+     */
+    val impersonate: String = "",
+    /**
+     * The browser families the engine on this device said it can imitate, the last time it
+     * was asked. yt-dlp stops with an error when asked for one it cannot, so [impersonate]
+     * is only passed when it is in this list.
+     */
+    val impersonateAvailable: List<String> = emptyList()
 ) {
+    /** The `--impersonate` value to pass, or null when none is set or it cannot be used. */
+    fun impersonateTarget(): String? =
+        impersonate.trim().lowercase().takeIf { it.isNotEmpty() && it in impersonateAvailable }
+
     /**
      * The `--extractor-args` value for YouTube, or null when nothing is set. Built as one
      * value because yt-dlp keeps only the last `youtube:` it is given.
@@ -180,6 +195,7 @@ fun YoutubeDLRequest.applyAdvanced(url: String, settings: AdvancedSettings = Adv
     if (settings.sleepRequestsSeconds > 0) {
         addOption("--sleep-requests", settings.sleepRequestsSeconds.toString())
     }
+    settings.impersonateTarget()?.let { addOption("--impersonate", it) }
     if (isYouTube(url) || url.contains("music.youtube.com")) {
         settings.youtubeExtractorArgs()?.let { addOption("--extractor-args", it) }
     }

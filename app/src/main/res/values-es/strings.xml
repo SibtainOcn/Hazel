@@ -616,4 +616,27 @@
     <string name="processing_step_cover">Portada</string>
     <string name="processing_step_split">Dividir</string>
     <string name="processing_step_save">Guardar</string>
+    <string name="options_cut_title">Recortar</string>
+    <string name="options_cut_start">Inicio</string>
+    <string name="options_cut_end">Fin</string>
+    <string name="options_cut_precise">Cortes precisos</string>
+    <string name="options_cut_precise_summary">Corta justo donde los marcas volviendo a codificar los extremos. Más lento. Desactivado, cada corte se mueve al fotograma clave más cercano.</string>
+    <string name="options_cut_invalid">El fin debe ir después del inicio, dentro de la duración</string>
+    <string name="options_cut_apply">Recortar</string>
+    <string name="options_cut_clear">Borrar</string>
+    <string name="options_cut_hint">Escribe los tiempos como 1:02:03, 2:03 o en segundos.</string>
+    <string name="options_live_title">En directo</string>
+    <string name="options_live_from_start">Grabar desde el principio</string>
+    <string name="options_live_from_start_summary">Descargar la emisión desde su inicio en lugar de desde ahora</string>
+    <string name="options_live_wait">Esperar a que empiece</string>
+    <string name="options_live_wait_summary">Esperar a que empiece la emisión o el estreno y luego descargarla</string>
+    <string name="storage_locations_fragments">Fragmentos en paralelo</string>
+    <string name="storage_locations_fragments_description">Partes de una emisión que se descargan a la vez</string>
+    <string name="storage_locations_throttled">Renovar enlaces lentos</string>
+    <string name="storage_locations_throttled_description">Obtener enlaces nuevos cuando una descarga baja de esta velocidad</string>
+    <string name="advanced_impersonate">Imitar un navegador</string>
+    <string name="advanced_impersonate_unavailable_value">%1$s, no disponible aquí</string>
+    <string name="advanced_impersonate_checking">Preguntando al motor qué navegadores puede imitar</string>
+    <string name="advanced_impersonate_none">El motor de este dispositivo no puede imitar un navegador, así que las solicitudes se envían tal cual.</string>
+    <string name="advanced_impersonate_check_failed">No se pudo consultar al motor ahora. Inténtalo de nuevo en un momento.</string>
 </resources>

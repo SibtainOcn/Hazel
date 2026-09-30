@@ -18,8 +18,19 @@ data class MediaInfo(
      * False is the ordinary case, and it is what keeps a public link away from a signed-in
      * request on the sites that answer those with less.
      */
-    val requiresSignIn: Boolean = false
+    val requiresSignIn: Boolean = false,
+    /**
+     * yt-dlp's `live_status`: "is_live", "is_upcoming", "post_live", "was_live", "not_live",
+     * or blank when the source does not say. Decides whether the live stream options apply.
+     */
+    val liveStatus: String = ""
 ) {
+    /** Streaming now. */
+    val isLive: Boolean get() = liveStatus == "is_live"
+
+    /** Scheduled and not started yet: a premiere, or a stream announced ahead. */
+    val isUpcoming: Boolean get() = liveStatus == "is_upcoming"
+
     /**
      * The entry the sheet opens on for each tab.
      *
@@ -371,3 +382,28 @@ fun formatDuration(seconds: Int): String {
     val s = seconds % 60
     return if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%d:%02d".format(m, s)
 }
+
+/**
+ * A title fit to name a file and fill the sheet's title field.
+ *
+ * Sites without titles (TikTok, X, Facebook and the like) hand over the whole post as one,
+ * line breaks, hashtags and all. This keeps what reads as the title: the text on one line,
+ * without the run of hashtags and mentions at its end, and cut at a word near
+ * [MAX_TITLE_CHARS] when it is longer. A title that is nothing but tags keeps them, so there
+ * is always something left.
+ */
+fun readableTitle(raw: String): String {
+    val flat = raw.replace(Regex("\\s+"), " ").trim()
+    val untagged = flat.replace(TRAILING_TAGS, "").trim().ifBlank { flat }
+    if (untagged.length <= MAX_TITLE_CHARS) return untagged
+    // Never between the two halves of an emoji or other character outside the basic plane.
+    val cut = untagged.take(MAX_TITLE_CHARS).let { if (it.last().isHighSurrogate()) it.dropLast(1) else it }
+    val lastSpace = cut.lastIndexOf(' ')
+    return (if (lastSpace >= MAX_TITLE_CHARS * 2 / 3) cut.take(lastSpace) else cut)
+        .trimEnd(' ', ',', ';', ':', '-', '|')
+}
+
+private const val MAX_TITLE_CHARS = 100
+
+/** Hashtags and mentions at the very end of a caption, with anything between them. */
+private val TRAILING_TAGS = Regex("""(?:[\s,.|·]*[#@][\p{L}\p{N}_.]+)+[\s,.|·]*$""")

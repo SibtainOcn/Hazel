@@ -65,6 +65,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
+import com.hazel.android.download.OneOffOptions
+import com.hazel.android.download.readableTitle
+import androidx.compose.material.icons.filled.LiveTv
+import androidx.compose.material.icons.filled.ContentCut
 import com.hazel.android.download.AUDIO_CONTAINERS
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.MediaFormat
@@ -120,7 +124,9 @@ fun FormatSheet(
         format: MediaFormat,
         audioLanguage: String?,
         title: String,
-        author: String
+        author: String,
+        /** Set for this download alone: a part to keep, how to take a live stream. */
+        oneOff: OneOffOptions
     ) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -183,14 +189,18 @@ fun FormatSheet(
 
     // Title and author are editable: they name the saved file and, where the value is
     // unambiguous, the metadata written into it.
-    var title by remember(info.url) { mutableStateOf(info.title) }
+    // A whole post handed over as the title is trimmed to what reads as one first.
+    var title by remember(info.url) { mutableStateOf(readableTitle(info.title)) }
     var author by remember(info.url) { mutableStateOf(info.uploader) }
     // A sheet opened on a shared link before it was read starts with nothing to show, and
     // takes the title and author as they arrive. Anything typed in the meantime is kept.
-    LaunchedEffect(info.title) { if (title.isBlank()) title = info.title }
+    LaunchedEffect(info.title) { if (title.isBlank()) title = readableTitle(info.title) }
     LaunchedEffect(info.uploader) { if (author.isBlank()) author = info.uploader }
 
     var openDialog by remember { mutableStateOf(SheetDialog.NONE) }
+    // A cut and the live options belong to this download, so they start empty for every
+    // link and are never written to the saved settings.
+    var oneOff by remember(info.url) { mutableStateOf(OneOffOptions()) }
     var formatSheetVisible by remember { mutableStateOf(false) }
     var languageSheetVisible by remember { mutableStateOf(false) }
 
@@ -269,7 +279,7 @@ fun FormatSheet(
                 Surface(
                     onClick = {
                         selected?.let {
-                            onDownload(it, audioLanguage, title.trim(), author.trim())
+                            onDownload(it, audioLanguage, title.trim(), author.trim(), oneOff)
                         }
                     },
                     enabled = selected != null,
@@ -471,6 +481,27 @@ fun FormatSheet(
                         onClick = { openDialog = SheetDialog.FILENAME }
                     )
                 }
+                // For this download alone, so not offered where the sheet only adjusts a link
+                // in a set. Live options show only on a stream that is live or scheduled,
+                // the only links yt-dlp can use them on.
+                if (!confirmAsApply) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OptionChip(
+                            label = stringResource(R.string.options_cut_title),
+                            icon = Icons.Filled.ContentCut,
+                            badge = if (oneOff.hasSection) 1 else 0,
+                            onClick = { openDialog = SheetDialog.CUT }
+                        )
+                        if (info.isLive || info.isUpcoming) {
+                            OptionChip(
+                                label = stringResource(R.string.options_live_title),
+                                icon = Icons.Filled.LiveTv,
+                                badge = listOf(oneOff.liveFromStart, oneOff.waitForVideo).count { it },
+                                onClick = { openDialog = SheetDialog.LIVE }
+                            )
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -524,6 +555,27 @@ fun FormatSheet(
                 onOptionsChange(it)
                 openDialog = SheetDialog.NONE
             },
+            onDismiss = { openDialog = SheetDialog.NONE }
+        )
+
+        SheetDialog.CUT -> CutDialog(
+            durationSeconds = info.durationSeconds,
+            current = oneOff,
+            onApply = { start, end, precise ->
+                oneOff = oneOff.copy(sectionStart = start, sectionEnd = end, preciseCuts = precise)
+                openDialog = SheetDialog.NONE
+            },
+            onClear = {
+                oneOff = oneOff.copy(sectionStart = -1.0, sectionEnd = -1.0, preciseCuts = false)
+                openDialog = SheetDialog.NONE
+            },
+            onDismiss = { openDialog = SheetDialog.NONE }
+        )
+
+        SheetDialog.LIVE -> LiveStreamDialog(
+            isUpcoming = info.isUpcoming,
+            current = oneOff,
+            onChange = { oneOff = it },
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
@@ -628,11 +680,11 @@ private fun SheetTab(label: String, selected: Boolean, enabled: Boolean, onClick
     }
 }
 
-private enum class SheetDialog { NONE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY }
+private enum class SheetDialog { NONE, CUT, LIVE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY }
 
 /** Labelled box whose value the user can type into, matching the read-only fields' look. */
 @Composable
-private fun EditableField(
+internal fun EditableField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,

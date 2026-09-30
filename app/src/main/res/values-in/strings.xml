@@ -602,4 +602,27 @@
     <string name="processing_step_cover">Sampul</string>
     <string name="processing_step_split">Pisah</string>
     <string name="processing_step_save">Simpan</string>
+    <string name="options_cut_title">Potong</string>
+    <string name="options_cut_start">Mulai</string>
+    <string name="options_cut_end">Selesai</string>
+    <string name="options_cut_precise">Potongan presisi</string>
+    <string name="options_cut_precise_summary">Memotong tepat di titik yang Anda pilih dengan mengode ulang ujungnya. Lebih lambat. Jika mati, setiap potongan bergeser ke keyframe terdekat.</string>
+    <string name="options_cut_invalid">Akhir harus setelah awal, dalam durasi</string>
+    <string name="options_cut_apply">Potong</string>
+    <string name="options_cut_clear">Hapus</string>
+    <string name="options_cut_hint">Tulis waktu sebagai 1:02:03, 2:03 atau dalam detik.</string>
+    <string name="options_live_title">Live</string>
+    <string name="options_live_from_start">Rekam dari awal</string>
+    <string name="options_live_from_start_summary">Unduh siaran dari awal, bukan dari sekarang</string>
+    <string name="options_live_wait">Tunggu hingga dimulai</string>
+    <string name="options_live_wait_summary">Tunggu hingga siaran atau premiere dimulai, lalu unduh</string>
+    <string name="storage_locations_fragments">Fragmen paralel</string>
+    <string name="storage_locations_fragments_description">Bagian stream yang diambil sekaligus</string>
+    <string name="storage_locations_throttled">Segarkan tautan lambat</string>
+    <string name="storage_locations_throttled_description">Ambil tautan baru saat unduhan turun di bawah kecepatan ini</string>
+    <string name="advanced_impersonate">Tiru browser</string>
+    <string name="advanced_impersonate_unavailable_value">%1$s, tidak tersedia di sini</string>
+    <string name="advanced_impersonate_checking">Menanyakan browser mana yang bisa ditiru mesin</string>
+    <string name="advanced_impersonate_none">Mesin di perangkat ini tidak bisa meniru browser, jadi permintaan dikirim apa adanya.</string>
+    <string name="advanced_impersonate_check_failed">Mesin tidak bisa ditanya sekarang. Coba lagi sebentar lagi.</string>
 </resources>

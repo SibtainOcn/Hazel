@@ -425,7 +425,7 @@ fun BatchDownloadSheet(
             onOpenSaveDir = onOpenSaveDir,
             onPickSaveDir = onPickSaveDir,
             onResetSaveDir = onResetSaveDir,
-            onDownload = { format, audioLanguage, title, author ->
+            onDownload = { format, audioLanguage, title, author, _ ->
                 state.setChoice(focused, format, title, author, audioLanguage)
                 focusedUrl = null
             },

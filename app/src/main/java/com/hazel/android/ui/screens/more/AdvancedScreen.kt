@@ -1,6 +1,22 @@
 package com.hazel.android.ui.screens.more
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.hazel.android.download.ImpersonateTargets
+import java.util.Locale
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Person
@@ -123,6 +139,19 @@ fun AdvancedScreen(onBack: () -> Unit) {
                     )
                 },
                 {
+                    ValueSettingRow(
+                        icon = Icons.Filled.Language,
+                        title = stringResource(R.string.advanced_impersonate),
+                        value = when {
+                            settings.impersonate.isBlank() -> stringResource(R.string.advanced_sleep_off)
+                            settings.impersonateTarget() == null ->
+                                stringResource(R.string.advanced_impersonate_unavailable_value, settings.impersonate)
+                            else -> browserName(settings.impersonate)
+                        },
+                        onClick = { dialog = AdvancedDialog.IMPERSONATE }
+                    )
+                },
+                {
                     SwitchSettingRow(
                         icon = Icons.Filled.Security,
                         title = stringResource(R.string.advanced_no_check_certificates),
@@ -212,6 +241,16 @@ fun AdvancedScreen(onBack: () -> Unit) {
             onDismiss = close
         )
 
+        AdvancedDialog.IMPERSONATE -> ImpersonateDialog(
+            selected = settings.impersonate,
+            onChecked = { available -> save { it.copy(impersonateAvailable = available) } },
+            onSelect = { target ->
+                save { it.copy(impersonate = target) }
+                close()
+            },
+            onDismiss = close
+        )
+
         AdvancedDialog.EXTRA_ARGS -> TextInputDialog(
             title = stringResource(R.string.advanced_extra_args),
             hint = stringResource(R.string.advanced_extra_args_hint),
@@ -228,7 +267,14 @@ fun AdvancedScreen(onBack: () -> Unit) {
             body = stringResource(R.string.advanced_reset_body),
             confirm = stringResource(R.string.format_sheet_reset),
             onConfirm = {
-                scope.launch { SettingsRepository.setAdvancedSettings(context, AdvancedSettings()) }
+                // What the engine said it can do is a fact about the device, not a setting,
+                // so it survives the reset.
+                scope.launch {
+                    SettingsRepository.setAdvancedSettings(
+                        context,
+                        AdvancedSettings(impersonateAvailable = settings.impersonateAvailable)
+                    )
+                }
                 close()
             },
             onDismiss = close
@@ -237,8 +283,75 @@ fun AdvancedScreen(onBack: () -> Unit) {
 }
 
 private enum class AdvancedDialog {
-    NONE, PLAYER_CLIENTS, PO_TOKENS, VISITOR_DATA, YOUTUBE_ARGS, SLEEP, EXTRA_ARGS, RESET
+    NONE, PLAYER_CLIENTS, PO_TOKENS, VISITOR_DATA, YOUTUBE_ARGS, SLEEP, IMPERSONATE, EXTRA_ARGS, RESET
 }
 
 /** The pauses offered between requests, in seconds. */
 private val SLEEP_STEPS = listOf(0, 1, 2, 5, 10)
+
+/** A browser family as yt-dlp names it ("chrome"), written the way people do ("Chrome"). */
+private fun browserName(family: String): String =
+    family.replaceFirstChar { it.titlecase(Locale.ROOT) }
+
+/**
+ * Picks the browser to imitate. The engine is asked which it can do each time the dialog
+ * opens, so a list that changed with an engine update is never stale, and only those are
+ * offered: yt-dlp stops a download outright when asked for one it cannot do.
+ */
+@Composable
+private fun ImpersonateDialog(
+    selected: String,
+    onChecked: (List<String>) -> Unit,
+    onSelect: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    // Null while the engine is being asked.
+    var available by remember { mutableStateOf<List<String>?>(null) }
+    var failed by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        val found = ImpersonateTargets.check()
+        if (found == null) failed = true else onChecked(found)
+        available = found.orEmpty()
+    }
+
+    val list = available
+    if (list != null && list.isNotEmpty()) {
+        SingleChoiceDialog(
+            title = stringResource(R.string.advanced_impersonate),
+            choices = listOf("" to stringResource(R.string.advanced_sleep_off)) +
+                list.map { it to browserName(it) },
+            selected = selected.takeIf { it in list }.orEmpty(),
+            onSelect = onSelect,
+            onDismiss = onDismiss
+        )
+        return
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.advanced_impersonate), fontWeight = FontWeight.Bold) },
+        text = {
+            if (list == null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(stringResource(R.string.advanced_impersonate_checking))
+                }
+            } else {
+                Text(
+                    stringResource(
+                        if (failed) R.string.advanced_impersonate_check_failed
+                        else R.string.advanced_impersonate_none
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                // Nothing to imitate, so a choice left from before is cleared rather than
+                // kept waiting on a browser the engine cannot offer.
+                if (list != null && !failed && selected.isNotBlank()) onSelect("") else onDismiss()
+            }) { Text(stringResource(R.string.format_sheet_ok)) }
+        }
+    )
+}

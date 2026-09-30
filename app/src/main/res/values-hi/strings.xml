@@ -609,4 +609,27 @@
     <string name="processing_step_cover">कवर</string>
     <string name="processing_step_split">बाँटना</string>
     <string name="processing_step_save">सहेजना</string>
+    <string name="options_cut_title">काटें</string>
+    <string name="options_cut_start">शुरुआत</string>
+    <string name="options_cut_end">अंत</string>
+    <string name="options_cut_precise">सटीक कट</string>
+    <string name="options_cut_precise_summary">सिरों को दोबारा एन्कोड करके ठीक वहीं काटता है जहाँ आप तय करते हैं। धीमा। बंद होने पर हर कट पास के कीफ़्रेम पर खिसक जाता है।</string>
+    <string name="options_cut_invalid">अंत शुरुआत के बाद और लंबाई के भीतर होना चाहिए</string>
+    <string name="options_cut_apply">काटें</string>
+    <string name="options_cut_clear">साफ़ करें</string>
+    <string name="options_cut_hint">समय 1:02:03, 2:03 या सेकंड में लिखें।</string>
+    <string name="options_live_title">लाइव</string>
+    <string name="options_live_from_start">शुरुआत से रिकॉर्ड करें</string>
+    <string name="options_live_from_start_summary">स्ट्रीम को अभी से नहीं, उसकी शुरुआत से डाउनलोड करें</string>
+    <string name="options_live_wait">शुरू होने का इंतज़ार करें</string>
+    <string name="options_live_wait_summary">स्ट्रीम या प्रीमियर शुरू होने तक रुकें, फिर डाउनलोड करें</string>
+    <string name="storage_locations_fragments">समानांतर फ़्रैगमेंट</string>
+    <string name="storage_locations_fragments_description">स्ट्रीम के कितने हिस्से एक साथ लाए जाएँ</string>
+    <string name="storage_locations_throttled">धीमे लिंक ताज़ा करें</string>
+    <string name="storage_locations_throttled_description">डाउनलोड इस गति से नीचे जाने पर नए लिंक लाएँ</string>
+    <string name="advanced_impersonate">ब्राउज़र की नकल करें</string>
+    <string name="advanced_impersonate_unavailable_value">%1$s, यहाँ उपलब्ध नहीं</string>
+    <string name="advanced_impersonate_checking">इंजन से पूछा जा रहा है कि वह किन ब्राउज़रों की नकल कर सकता है</string>
+    <string name="advanced_impersonate_none">इस डिवाइस का इंजन किसी ब्राउज़र की नकल नहीं कर सकता, इसलिए अनुरोध वैसे ही भेजे जाते हैं।</string>
+    <string name="advanced_impersonate_check_failed">अभी इंजन से पूछा नहीं जा सका। थोड़ी देर में फिर कोशिश करें।</string>
 </resources>

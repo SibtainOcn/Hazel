@@ -616,4 +616,27 @@
     <string name="processing_step_cover">Capa</string>
     <string name="processing_step_split">Dividir</string>
     <string name="processing_step_save">Salvar</string>
+    <string name="options_cut_title">Cortar</string>
+    <string name="options_cut_start">Início</string>
+    <string name="options_cut_end">Fim</string>
+    <string name="options_cut_precise">Cortes precisos</string>
+    <string name="options_cut_precise_summary">Corta exatamente onde você marcar, codificando as pontas de novo. Mais lento. Desligado, cada corte vai para o quadro-chave mais próximo.</string>
+    <string name="options_cut_invalid">O fim deve vir depois do início, dentro da duração</string>
+    <string name="options_cut_apply">Cortar</string>
+    <string name="options_cut_clear">Limpar</string>
+    <string name="options_cut_hint">Digite os tempos como 1:02:03, 2:03 ou em segundos.</string>
+    <string name="options_live_title">Ao vivo</string>
+    <string name="options_live_from_start">Gravar desde o início</string>
+    <string name="options_live_from_start_summary">Baixar a transmissão desde o começo em vez de a partir de agora</string>
+    <string name="options_live_wait">Esperar começar</string>
+    <string name="options_live_wait_summary">Esperar a transmissão ou estreia começar e então baixar</string>
+    <string name="storage_locations_fragments">Fragmentos em paralelo</string>
+    <string name="storage_locations_fragments_description">Partes de uma transmissão baixadas ao mesmo tempo</string>
+    <string name="storage_locations_throttled">Renovar links lentos</string>
+    <string name="storage_locations_throttled_description">Buscar links novos quando um download cair abaixo desta velocidade</string>
+    <string name="advanced_impersonate">Imitar um navegador</string>
+    <string name="advanced_impersonate_unavailable_value">%1$s, indisponível aqui</string>
+    <string name="advanced_impersonate_checking">Perguntando ao mecanismo quais navegadores ele pode imitar</string>
+    <string name="advanced_impersonate_none">O mecanismo deste aparelho não consegue imitar um navegador, então as solicitações são enviadas como estão.</string>
+    <string name="advanced_impersonate_check_failed">Não foi possível consultar o mecanismo agora. Tente de novo em instantes.</string>
 </resources>

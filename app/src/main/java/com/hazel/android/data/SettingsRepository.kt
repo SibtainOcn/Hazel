@@ -178,6 +178,8 @@ object SettingsRepository {
     private val ADV_DOWNLOAD_ARGS = stringPreferencesKey("adv_download_extra_args")
     private val ADV_NO_CHECK_CERTS = booleanPreferencesKey("adv_no_check_certificates")
     private val ADV_SLEEP_REQUESTS = intPreferencesKey("adv_sleep_requests")
+    private val ADV_IMPERSONATE = stringPreferencesKey("adv_impersonate")
+    private val ADV_IMPERSONATE_AVAILABLE = stringPreferencesKey("adv_impersonate_available")
 
     fun getAdvancedSettings(context: Context): Flow<com.hazel.android.download.AdvancedSettings> =
         context.dataStore.data.map { prefs ->
@@ -189,7 +191,10 @@ object SettingsRepository {
                 youtubeExtraArgs = prefs[ADV_YOUTUBE_ARGS].orEmpty(),
                 downloadExtraArgs = prefs[ADV_DOWNLOAD_ARGS].orEmpty(),
                 noCheckCertificates = prefs[ADV_NO_CHECK_CERTS] ?: false,
-                sleepRequestsSeconds = prefs[ADV_SLEEP_REQUESTS] ?: 0
+                sleepRequestsSeconds = prefs[ADV_SLEEP_REQUESTS] ?: 0,
+                impersonate = prefs[ADV_IMPERSONATE].orEmpty(),
+                impersonateAvailable = prefs[ADV_IMPERSONATE_AVAILABLE].orEmpty().split(',')
+                    .map { it.trim() }.filter { it.isNotBlank() }
             )
         }
 
@@ -203,6 +208,8 @@ object SettingsRepository {
             prefs[ADV_DOWNLOAD_ARGS] = settings.downloadExtraArgs
             prefs[ADV_NO_CHECK_CERTS] = settings.noCheckCertificates
             prefs[ADV_SLEEP_REQUESTS] = settings.sleepRequestsSeconds
+            prefs[ADV_IMPERSONATE] = settings.impersonate
+            prefs[ADV_IMPERSONATE_AVAILABLE] = settings.impersonateAvailable.joinToString(",")
         }
         // In force at once, rather than when the stored value next comes round.
         com.hazel.android.download.AdvancedSettingsStore.current = settings
@@ -330,6 +337,8 @@ object SettingsRepository {
 
     private val WIFI_ONLY_KEY = booleanPreferencesKey("wifi_only")
     private val SPEED_LIMIT_KEY = stringPreferencesKey("speed_limit")
+    private val CONCURRENT_FRAGMENTS_KEY = intPreferencesKey("concurrent_fragments")
+    private val THROTTLED_RATE_KEY = stringPreferencesKey("throttled_rate")
 
     /**
      * Refuses to start a download while the phone is on mobile data.
@@ -379,6 +388,49 @@ object SettingsRepository {
     fun speedLimitLabel(limit: String): String =
         SPEED_LIMITS.firstOrNull { it.first == limit }?.second
             ?: limit.ifBlank { "No limit" }
+
+    /**
+     * How many pieces of a stream split into fragments (DASH and HLS, which is most of
+     * YouTube, live streams and many other sites) are fetched at once. One is yt-dlp's own
+     * default; the app starts at the most it offers, so nothing holds a download back unless
+     * the user asks. More finishes sooner on a fast connection, and has no effect on a file
+     * that comes as one piece.
+     */
+    fun getConcurrentFragments(context: Context): Flow<Int> =
+        context.dataStore.data.map { prefs ->
+            (prefs[CONCURRENT_FRAGMENTS_KEY] ?: CONCURRENT_FRAGMENTS.last())
+                .coerceIn(1, CONCURRENT_FRAGMENTS.last())
+        }
+
+    suspend fun setConcurrentFragments(context: Context, count: Int) {
+        context.dataStore.edit { prefs ->
+            prefs[CONCURRENT_FRAGMENTS_KEY] = count.coerceIn(1, CONCURRENT_FRAGMENTS.last())
+        }
+    }
+
+    /** The counts offered. Past eight a site is more likely to refuse than to go faster. */
+    val CONCURRENT_FRAGMENTS: List<Int> = listOf(1, 2, 4, 8)
+
+    /**
+     * The speed below which a download is taken to be throttled by the site, as yt-dlp
+     * spells it ("100K"). When the transfer drops under it, yt-dlp fetches fresh links and
+     * carries on from where it was, which gets round the slow links some sites hand out.
+     * Blank leaves it off, which is the default.
+     */
+    fun getThrottledRate(context: Context): Flow<String> =
+        context.dataStore.data.map { prefs -> prefs[THROTTLED_RATE_KEY].orEmpty() }
+
+    suspend fun setThrottledRate(context: Context, rate: String) {
+        context.dataStore.edit { prefs -> prefs[THROTTLED_RATE_KEY] = rate.trim() }
+    }
+
+    /** The rates offered, paired with what each is called; blank is off. */
+    val THROTTLED_RATES: List<Pair<String, String>> = listOf(
+        "50K" to "50 KB/s",
+        "100K" to "100 KB/s",
+        "250K" to "250 KB/s",
+        "500K" to "500 KB/s"
+    )
 
 
     // ── Download destination ──
