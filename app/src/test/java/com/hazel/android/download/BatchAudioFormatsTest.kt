@@ -2,6 +2,7 @@ package com.hazel.android.download
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.assertTrue
  */
 class BatchAudioFormatsTest {
 
-    private fun audio(id: String, codec: String, kbps: Double, size: Long, ext: String = "webm") =
+    private fun audio(id: String, codec: String?, kbps: Double, size: Long, ext: String = "webm") =
         MediaFormat(
             formatId = id,
             selector = id,
@@ -51,61 +52,55 @@ class BatchAudioFormatsTest {
     private val saavn = link("c", audio("320", "mp4a.40.2", 320.0, 9_000_000, "m4a"))
 
     @Test
-    fun `with nothing read yet only best audio is offered`() {
-        val choices = BatchAudioFormats.choices(listOf(unread("a"), unread("b")))
-        assertEquals(listOf(BatchAudioFormats.BEST), choices)
+    fun `the ladder is offered at once, with nothing read`() {
+        val ids = BatchAudioFormats.choices(listOf(unread("a"), unread("b")), "Best", "Worst")
+            .map { it.formatId }
+        assertEquals(
+            listOf("bestaudio", "ba_192k", "ba_160k", "ba_128k", "ba_96k", "ba_64k", "worstaudio"),
+            ids
+        )
     }
 
     @Test
-    fun `formats every link carries are offered with the whole set's size`() {
-        val choices = BatchAudioFormats.choices(listOf(youtubeA, youtubeB))
-        val opus = choices.first { it.formatId == "251" }
-        assertEquals(7_000_000, opus.fileSizeBytes)
-        assertTrue(choices.any { it.formatId == "140" })
+    fun `a bitrate step stays under its bitrate and falls back to the best`() {
+        assertEquals("ba[abr<=128]/ba/b", BatchAudioFormats.bitrateCeiling(128).selector)
     }
 
     @Test
-    fun `a format only some links carry is not offered, but its codec is`() {
-        val choices = BatchAudioFormats.choices(listOf(youtubeA, saavn))
-        assertTrue(choices.none { it.formatId == "251" || it.formatId == "320" })
-        assertTrue(choices.any { it.formatId == AudioCodec.OPUS.genericFormat().formatId })
-        assertTrue(choices.any { it.formatId == AudioCodec.AAC.genericFormat().formatId })
+    fun `formats every link carries are offered once all are read, sized for the set`() {
+        val shared = BatchAudioFormats.sharedFormats(listOf(youtubeA, youtubeB))
+        assertEquals(7_000_000, shared.first { it.formatId == "251" }.fileSizeBytes)
+        assertTrue(shared.any { it.formatId == "140" })
     }
 
     @Test
-    fun `a size covering only the links read so far is marked as a floor`() {
-        val choices = BatchAudioFormats.choices(listOf(youtubeA, youtubeB, unread("c")))
-        assertTrue(choices.first { it.formatId == "251" }.isEstimatedSize)
+    fun `nothing is shared while a link is unread or when sources differ`() {
+        assertTrue(BatchAudioFormats.sharedFormats(listOf(youtubeA, unread("x"))).isEmpty())
+        assertTrue(BatchAudioFormats.sharedFormats(listOf(youtubeA, saavn)).isEmpty())
     }
 
     @Test
-    fun `a codec a link does not offer falls back to its best audio`() {
-        val picked = BatchAudioFormats.pick(saavn, AudioCodec.OPUS.genericFormat(), null)
-        assertEquals("320", picked?.formatId)
+    fun `a ladder row reaches every link unchanged`() {
+        val step = BatchAudioFormats.bitrateCeiling(96)
+        assertSame(step, BatchAudioFormats.pick(saavn, step, null))
+        assertSame(step, BatchAudioFormats.pick(unread("x"), step, null))
     }
 
     @Test
-    fun `a codec choice takes that codec where the link offers it`() {
-        val picked = BatchAudioFormats.pick(youtubeA, AudioCodec.AAC.genericFormat(), null)
-        assertEquals("140", picked?.formatId)
-    }
-
-    @Test
-    fun `a concrete format lands on the same id, or its codec where the id is missing`() {
+    fun `a concrete format lands on the same id, or the link's best where it is missing`() {
         val choice = youtubeA.audioFormats.first { it.formatId == "140" }
         assertEquals("140", BatchAudioFormats.pick(youtubeB, choice, null)?.formatId)
         assertEquals("320", BatchAudioFormats.pick(saavn, choice, null)?.formatId)
     }
 
     @Test
-    fun `an unread link is handed a codec filter the engine can resolve`() {
-        val picked = BatchAudioFormats.pick(unread("x"), AudioCodec.OPUS.genericFormat(), null)
-        assertEquals("ba[acodec^=opus]/ba/b", picked?.selector)
+    fun `best audio is the link's own best stream`() {
+        assertEquals("251", BatchAudioFormats.pick(youtubeA, null, null)?.formatId)
     }
 
     @Test
     fun `a source that names no codec is matched by an extension only that codec uses`() {
-        val unnamed = audio("hq", "", 320.0, 9_000_000, "m4a").copy(acodec = null)
+        val unnamed = audio("hq", null, 320.0, 9_000_000, "m4a")
         assertEquals(AudioCodec.AAC, AudioCodec.of(unnamed))
         assertEquals(null, AudioCodec.of(unnamed.copy(ext = "mp4")))
     }

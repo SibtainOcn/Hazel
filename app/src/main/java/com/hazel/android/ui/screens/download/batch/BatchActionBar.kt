@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.ui.components.FlatChip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
@@ -22,10 +22,6 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Videocam
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -250,29 +246,5 @@ private fun BarChip(
     selected: Boolean = false,
     badge: Int = 0
 ) {
-    val chip = @Composable {
-        FilterChip(
-            selected = selected,
-            onClick = onClick,
-            label = { Text(label) },
-            leadingIcon = {
-                Icon(
-                    if (selected) Icons.Filled.Check else icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-            },
-            colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                selectedLabelColor = MaterialTheme.colorScheme.primary,
-                selectedLeadingIconColor = MaterialTheme.colorScheme.primary
-            )
-        )
-    }
-
-    if (badge > 0) {
-        BadgedBox(badge = { Badge { Text("$badge") } }) { chip() }
-    } else {
-        chip()
-    }
+    FlatChip(label = label, onClick = onClick, icon = icon, selected = selected, badge = badge)
 }

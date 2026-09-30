@@ -1,5 +1,8 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.ui.components.rememberScrollShrink
+import com.hazel.android.ui.components.scrollShrink
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,6 +50,7 @@ import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.NewPipeLister
 import com.hazel.android.download.MediaInfo
+import com.hazel.android.download.WORST_HEIGHT
 import com.hazel.android.download.BatchAudioFormats
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.download.languageLabel
@@ -280,7 +284,10 @@ fun BatchDownloadSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            val linkListState = rememberLazyListState()
+            val shrink = rememberScrollShrink(linkListState)
             LazyColumn(
+                state = linkListState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f, fill = false)
@@ -292,6 +299,7 @@ fun BatchDownloadSheet(
             ) {
                 items(results, key = { info -> info.url }) { info ->
                     val format = state.formatOf(info)
+                    Box(modifier = Modifier.scrollShrink(shrink)) {
                     BatchDownloadCard(
                         info = info,
                         formatLabel = format?.shortLabel.orEmpty(),
@@ -321,6 +329,7 @@ fun BatchDownloadSheet(
                         },
                         onRemove = { onRemove(info) }
                     )
+                    }
                 }
             }
 
@@ -328,6 +337,7 @@ fun BatchDownloadSheet(
 
             val audioChoice = state.audioChoice
             val hqLabel = when {
+                state.videoTab && state.maxHeight == WORST_HEIGHT -> stringResource(R.string.batch_bar_hq_value, "MIN")
                 state.videoTab && state.maxHeight <= 0 -> stringResource(R.string.batch_bar_hq_auto)
                 state.videoTab -> stringResource(R.string.batch_bar_hq_value, "${state.maxHeight}p")
                 audioChoice == null -> stringResource(R.string.batch_bar_hq_best)
@@ -337,7 +347,7 @@ fun BatchDownloadSheet(
             val qualityLabel = when {
                 state.videoTab -> stringResource(qualityLabelFor(state.maxHeight))
                 audioChoice == null -> stringResource(R.string.audio_quality_best)
-                else -> audioChoice.shortLabel
+                else -> audioChoice.label
             }
 
             BatchActionBar(
@@ -348,14 +358,9 @@ fun BatchDownloadSheet(
                 options = options,
                 onDownloadType = { openSheet = BatchSheet.TYPE },
                 onQuality = {
-                    if (state.videoTab) {
-                        openSheet = BatchSheet.QUALITY
-                    } else {
-                        // The formats the set shares can only be known once each link has
-                        // been read, so reading starts as the sheet opens and it fills in.
-                        state.targets.filterNot { it.hasResolvedFormats }.forEach(onResolveFormats)
-                        openSheet = BatchSheet.AUDIO_FORMAT
-                    }
+                    // The ladder answers at once; reading every link first is left to the
+                    // sheet's update button, for the user who wants their exact formats.
+                    openSheet = if (state.videoTab) BatchSheet.QUALITY else BatchSheet.AUDIO_FORMAT
                 },
                 onSaveDir = { openSheet = BatchSheet.SAVE_DIR },
                 onContainer = { openSheet = BatchSheet.CONTAINER },
@@ -475,7 +480,11 @@ fun BatchDownloadSheet(
         // The same format list a single link opens, holding what the targeted links share.
         BatchSheet.AUDIO_FORMAT -> {
             val targets = state.targets
-            val choices = remember(targets) { BatchAudioFormats.choices(targets) }
+            val bestLabel = stringResource(R.string.audio_quality_best)
+            val worstLabel = stringResource(R.string.batch_quality_worst)
+            val choices = remember(targets, bestLabel, worstLabel) {
+                BatchAudioFormats.choices(targets, bestLabel, worstLabel)
+            }
             FormatSelectionSheet(
                 info = remember(choices) { choicesAsInfo(choices) },
                 selected = currentAudioChoice(state, choices),
@@ -595,6 +604,7 @@ private fun choicesAsInfo(choices: List<MediaFormat>) = MediaInfo(
 /** Short text for a format on the quality button, such as "OPUS 128K". */
 private val MediaFormat.badgeText: String
     get() {
+        if (isGeneric) return label.uppercase()
         val codec = codecLabel.ifBlank { displayContainer }
         val kbps = bitrateKbps.roundToInt()
         return if (kbps > 0) "$codec ${kbps}K" else codec

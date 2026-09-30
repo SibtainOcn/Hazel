@@ -39,6 +39,7 @@ import com.hazel.android.R
 import com.hazel.android.download.AUDIO_CONTAINERS
 import com.hazel.android.download.AUDIO_QUALITY_STEPS
 import com.hazel.android.download.VIDEO_CONTAINERS
+import com.hazel.android.download.WORST_HEIGHT
 
 /**
  * The heights the action bar offers, paired with what each is called.
@@ -55,7 +56,10 @@ val BATCH_QUALITY_STEPS: List<Pair<Int, Int>> = listOf(
     1080 to R.string.batch_quality_1080,
     720 to R.string.batch_quality_720,
     480 to R.string.batch_quality_480,
-    360 to R.string.batch_quality_360
+    360 to R.string.batch_quality_360,
+    240 to R.string.batch_quality_240,
+    144 to R.string.batch_quality_144,
+    WORST_HEIGHT to R.string.batch_quality_worst
 )
 
 /**

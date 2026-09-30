@@ -101,6 +101,9 @@ data class MediaInfo(
         if (videoFormats.isEmpty()) return null
 
         val concrete = videoFormats.filter { !it.isGeneric }
+        if (maxHeight == WORST_HEIGHT) {
+            return concrete.minByOrNull { it.height } ?: WORST_VIDEO
+        }
         if (maxHeight <= 0) return bestVideo
         if (concrete.isEmpty()) {
             return MediaFormat(
@@ -197,6 +200,26 @@ data class MediaFormat(
 
     val bitrateLabel: String get() = formatBitrate(bitrateKbps)
 }
+
+/** The quality ceiling that asks for the smallest video a source has rather than a height. */
+const val WORST_HEIGHT = -1
+
+/** The engine's own smallest video with sound, for a link whose formats are not known yet. */
+val WORST_VIDEO = MediaFormat(
+    formatId = "worst",
+    selector = "wv*+wa/w",
+    label = "Worst quality",
+    ext = "",
+    vcodec = null,
+    acodec = null,
+    height = 0,
+    fps = 0,
+    bitrateKbps = 0.0,
+    fileSizeBytes = 0L,
+    hasVideo = true,
+    hasAudio = true,
+    isGeneric = true
+)
 
 /**
  * An audio codec a download can prefer to receive the stream in.
