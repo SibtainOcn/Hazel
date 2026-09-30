@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -285,13 +286,14 @@ fun BatchDownloadSheet(
             Spacer(modifier = Modifier.height(8.dp))
 
             val linkListState = rememberLazyListState()
-            val shrink = rememberScrollShrink(linkListState)
+            val shrink = rememberScrollShrink()
             LazyColumn(
                 state = linkListState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f, fill = false)
-                    .heightIn(max = 280.dp),
+                    .heightIn(max = 280.dp)
+                    .nestedScroll(shrink),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     horizontal = 20.dp
                 ),

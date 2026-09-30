@@ -63,6 +63,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.res.painterResource
@@ -482,12 +483,13 @@ fun DownloadScreen(
                 // holds, artwork and all, so a playlist of a hundred built a hundred full width
                 // images at once and ran the app out of memory on the way back from the compact
                 // layout. This builds only what is on screen, whatever the list is holding.
-                val shrink = rememberScrollShrink(listState)
+                val shrink = rememberScrollShrink()
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
+                        .weight(1f)
+                        .nestedScroll(shrink),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(
                         start = 20.dp,
                         end = 20.dp,

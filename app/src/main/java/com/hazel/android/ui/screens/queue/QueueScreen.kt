@@ -2,10 +2,10 @@ package com.hazel.android.ui.screens.queue
 
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import com.hazel.android.ui.components.ScrollShrink
 import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.State
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -379,7 +380,7 @@ private fun QueueList(
     isEmpty: Boolean,
     emptyIcon: ImageVector,
     emptyText: String,
-    content: androidx.compose.foundation.lazy.LazyListScope.(shrink: State<Float>) -> Unit
+    content: androidx.compose.foundation.lazy.LazyListScope.(shrink: ScrollShrink) -> Unit
 ) {
     if (isEmpty) {
         Column(
@@ -404,10 +405,10 @@ private fun QueueList(
         }
     } else {
         val listState = rememberLazyListState()
-        val shrink = rememberScrollShrink(listState)
+        val shrink = rememberScrollShrink()
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().nestedScroll(shrink),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) { content(shrink) }

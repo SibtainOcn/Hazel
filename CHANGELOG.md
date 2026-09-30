@@ -28,13 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sharing a link opens its sheet at once with a ready quality ladder (best, ~2160p to ~240p and worst for video; best, ~192 to ~64 kbps and worst for audio) and a shimmering header while the link is read; the real formats replace it when the read lands, and a download chosen before then starts as soon as it does. Ladder choices use yt-dlp format sorting, so a source without that exact quality gives its nearest. The separate Hazel Instant share target and its settings are removed.
 - Reading a new link replaces the previous results, and the loading skeleton fills the screen from the top.
 - The batch sheet offers an instant quality ladder for audio (best, ~192 to ~64 kbps, worst) and more video heights (down to 144p, and worst), without reading every link first.
-- Media cards shrink slightly while their list scrolls (not the format list). Chips and small buttons are drawn as flat surfaces.
+- Media cards shrink slightly while their list scrolls (not the format list), in step with how fast it moves: a slow drag barely touches them, a flick pulls them in, and they spring back as soon as the list slows or stops. Chips and small buttons are drawn as flat surfaces.
 - A read failure offers adding cookies, and the share sheet's failure dialog copies its log.
 
 ### Fixed (continued)
 - Two downloads could start at once when a link was shared while a saved queue was resuming, failing with "Process ID already exists".
 - Reading a new link during a download no longer changes that download's title, file name or history record.
 - An engine too old for the options the app passes is replaced with the bundled copy instead of failing every read.
+- The Downloads tab's row layout stretching each row to many times its height when a long author left no room for the date; the tags now wrap to a second line and are cut short with an ellipsis rather than wrapped letter by letter. The card layout's date no longer overlaps its tags on narrow screens.
 
 ## [1.0.10] - 2026-09-27
 ### Changed
