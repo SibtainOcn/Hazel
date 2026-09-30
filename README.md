@@ -93,10 +93,10 @@ English
 - **Live streams** - record from the start of a live stream, or wait for a premiere and then download it
 
 ### Processing
-- **Language selection** - Save in any language the source video offers (English, Hindi, Urdu, Arabic, Malayalam, Marathi, German, and more)
+- **Language selection** - Save in any language the source video offers
 - **SponsorBlock** - cut out sponsors, intros, and other segments
 - **Chapters** - embed in the file, or split into one file per chapter
-- **Subtitles** - burn in, save alongside, or both, in the languages you pick
+- **Subtitles** - In the languages you pick
 
 ### Downloads
 - Long-horizon background downloads supported
@@ -114,8 +114,8 @@ English
 - App languages - English, Spanish, Hindi, Simplified Chinese, Brazilian Portuguese, French, German, Russian, Japanese, Indonesian, and system default
 - Independent yt-dlp engine updates - Stable, Nightly or Master channel
 - Offline video-to-audio converter
-- **Backup & restore** - settings, downloads list, queue, cookies and search history, with an automatic backup before each update
-- **Advanced** - YouTube player clients, PO tokens (pasted, or made on the device), browser imitation, extra yt-dlp arguments
+- **Backup & restore** - settings, downloads list, queue, cookies and search history
+
 
 ---
 ## ⬇️ Download
