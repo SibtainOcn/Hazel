@@ -114,7 +114,10 @@ import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.hazel.android.ui.components.player.FullscreenPlayer
 import com.hazel.android.ui.components.player.InlinePlayer
+import com.hazel.android.ui.components.player.rememberPlaybackController
+import com.hazel.android.download.playback.PlaybackController
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.material.icons.filled.PlayArrow
 
@@ -187,8 +190,16 @@ fun DownloadScreen(
     }
 
     var searchOpen by remember { mutableStateOf(false) }
-    // The one card playing, if any. Starting another stops it.
+    // The one card playing, if any. Starting another stops it. The player itself is held
+    // here rather than in the card, so full screen and the turn of the screen it brings
+    // cannot drop it along with the card when the list lays itself out again.
     var playingUrl by remember { mutableStateOf<String?>(null) }
+    var playerFullscreen by remember { mutableStateOf(false) }
+    val playback = playingUrl?.let { rememberPlaybackController(it) }
+    val stopPlaying = {
+        playingUrl = null
+        playerFullscreen = false
+    }
     var sheetVisible by remember { mutableStateOf(false) }
     var batchSheetVisible by remember { mutableStateOf(false) }
 
@@ -582,9 +593,14 @@ fun DownloadScreen(
                                 batchItem = batchItem,
                                 waitingForWifi = state.waitingForWifi,
                                 alreadyDownloaded = info.url in savedUrls,
-                                playing = playingUrl == info.url,
+                                player = playback?.takeIf { playingUrl == info.url },
+                                playerFullscreen = playerFullscreen,
                                 onPlay = { playingUrl = info.url },
-                                onStopPlaying = { if (playingUrl == info.url) playingUrl = null },
+                                onFullscreen = { playerFullscreen = true },
+                                onStopPlaying = {
+                                    // Full screen takes the card off screen; that is no reason to stop.
+                                    if (playingUrl == info.url && !playerFullscreen) stopPlaying()
+                                },
                                 onOpenSheet = openSheet,
                                 onOpenQueue = onOpenQueue
                             )
@@ -796,6 +812,28 @@ fun DownloadScreen(
         }
     }
 
+    // A card that has gone from the results takes its player with it.
+    LaunchedEffect(state.results, playingUrl) {
+        if (playingUrl != null && state.results.none { it.url == playingUrl }) stopPlaying()
+    }
+
+    if (playerFullscreen && playback != null) {
+        val playingInfo = state.results.firstOrNull { it.url == playingUrl }
+        FullscreenPlayer(
+            controller = playback,
+            thumbnail = playingInfo?.thumbnail,
+            onExit = { playerFullscreen = false },
+            onDownload = playingInfo?.let { info ->
+                {
+                    playerFullscreen = false
+                    downloadViewModel.selectResult(info)
+                    downloadViewModel.resolveFormats(info)
+                    sheetVisible = true
+                }
+            }
+        )
+    }
+
     if (searchOpen) {
         SearchScreen(
             // Opened empty rather than prefilled: a prefilled field would filter the
@@ -803,12 +841,12 @@ fun DownloadScreen(
             initialQuery = "",
             onSearch = { queries ->
                 searchOpen = false
-                playingUrl = null
+                stopPlaying()
                 downloadViewModel.fetchAll(queries)
             },
             onSearchWords = { query, source ->
                 searchOpen = false
-                playingUrl = null
+                stopPlaying()
                 downloadViewModel.search(query, source)
             },
             onClearResults = downloadViewModel::clearResults,
@@ -1129,8 +1167,11 @@ private fun MediaCard(
     batchItem: BatchItem?,
     waitingForWifi: Boolean = false,
     alreadyDownloaded: Boolean = false,
-    playing: Boolean = false,
+    /** The player, when this card is the one playing. */
+    player: PlaybackController? = null,
+    playerFullscreen: Boolean = false,
     onPlay: () -> Unit = {},
+    onFullscreen: () -> Unit = {},
     onStopPlaying: () -> Unit = {},
     onOpenSheet: () -> Unit,
     onOpenQueue: () -> Unit
@@ -1424,11 +1465,13 @@ private fun MediaCard(
             }
 
             // Playing covers the artwork with the player until it is closed or scrolled away.
-            if (playing && !inHand) {
+            if (player != null && !inHand) {
                 DisposableEffect(info.url) { onDispose { onStopPlaying() } }
                 InlinePlayer(
-                    url = info.url,
+                    controller = player,
                     thumbnail = info.thumbnail,
+                    fullscreen = playerFullscreen,
+                    onFullscreen = onFullscreen,
                     onClose = onStopPlaying,
                     onDownload = onOpenSheet,
                     modifier = Modifier.fillMaxSize()

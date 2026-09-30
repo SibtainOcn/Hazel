@@ -114,56 +114,54 @@ fun rememberPlaybackController(url: String, startAtMs: Long = 0L): PlaybackContr
  * The player shown in place of a card's artwork: the picture, and a few controls over it
  * that fade away while it plays.
  *
+ * The [controller] and the full screen state belong to the caller, above any list, so
+ * turning the screen for full screen cannot take the player down with the card.
+ *
  * @param onDownload shows a Download action over the picture when given.
  */
 @Composable
 fun InlinePlayer(
-    url: String,
+    controller: PlaybackController,
     thumbnail: String?,
+    fullscreen: Boolean,
+    onFullscreen: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
     onDownload: (() -> Unit)? = null
 ) {
-    val controller = rememberPlaybackController(url)
-    var fullscreen by remember { mutableStateOf(false) }
-
     Box(modifier = modifier.background(Color.Black)) {
         PlayerArea(
             controller = controller,
             thumbnail = thumbnail,
             attached = !fullscreen,
             fullscreen = false,
-            onToggleFullscreen = { fullscreen = true },
+            onToggleFullscreen = onFullscreen,
             onClose = onClose,
             onDownload = onDownload,
             modifier = Modifier.fillMaxSize()
         )
     }
-
-    if (fullscreen) {
-        FullscreenPlayer(
-            controller = controller,
-            thumbnail = thumbnail,
-            onExit = { fullscreen = false },
-            onDownload = onDownload
-        )
-    }
 }
 
+/**
+ * The same player over the whole screen, with the system bars hidden.
+ *
+ * A wide picture turns the screen to landscape whatever the rotation lock says, as video
+ * players do, decided once on the way in; the screen goes back to how it was on the way
+ * out. A tall picture keeps the screen as it is.
+ */
 @Composable
-private fun FullscreenPlayer(
+fun FullscreenPlayer(
     controller: PlaybackController,
     thumbnail: String?,
     onExit: () -> Unit,
-    onDownload: (() -> Unit)?
+    onDownload: (() -> Unit)? = null
 ) {
     val activity = LocalContext.current.findActivity()
-    DisposableEffect(controller.aspectRatio) {
+    val wide = remember { controller.aspectRatio == 0f || controller.aspectRatio >= 1f }
+    DisposableEffect(activity) {
         val previous = activity?.requestedOrientation
-        // Wide pictures turn the screen; tall ones are already the right way up.
-        if (controller.aspectRatio >= 1f) {
-            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        }
+        if (wide) activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         onDispose {
             if (activity != null && previous != null) activity.requestedOrientation = previous
         }
