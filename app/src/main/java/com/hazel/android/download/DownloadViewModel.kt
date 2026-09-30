@@ -13,6 +13,7 @@ import com.hazel.android.data.QueuedDownload
 import com.hazel.android.data.toPlan
 import com.hazel.android.data.toQueued
 import com.hazel.android.data.HistoryEntry
+import com.hazel.android.data.HomeResultsRepository
 import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.LinkContents
@@ -34,6 +35,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import com.hazel.android.util.LinkKey
 import kotlinx.coroutines.sync.withPermit
@@ -275,6 +279,20 @@ class DownloadViewModel : ViewModel() {
         restoreQueue()
     }
 
+    /** Puts back the cards left on the home screen last time, then keeps the file current. */
+    private suspend fun restoreHomeResults(app: HazelApp) {
+        val incognito = SettingsRepository.getIncognito(app).first()
+        val saved = if (incognito) emptyList() else HomeResultsRepository.load(app)
+        // No sheet is selected, so none opens on its own.
+        _state.update { if (it.results.isEmpty() && !it.isFetching && saved.isNotEmpty()) it.copy(results = saved) else it }
+        viewModelScope.launch(Dispatchers.IO) {
+            _state.map { it.results }.distinctUntilChanged().drop(1).collect { results ->
+                if (SettingsRepository.getIncognito(app).first()) HomeResultsRepository.clear(app)
+                else HomeResultsRepository.save(app, results)
+            }
+        }
+    }
+
     override fun onCleared() {
         DownloadCommands.unregister(this)
         super.onCleared()
@@ -290,6 +308,7 @@ class DownloadViewModel : ViewModel() {
     private fun restoreQueue() {
         downloadScope.launch {
             val app = HazelApp.instance
+            restoreHomeResults(app)
             val pending = runCatching { DownloadQueueRepository.load(app) }
                 .getOrDefault(emptyList())
             if (pending.isEmpty()) return@launch

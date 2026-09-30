@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Imitate a browser (More › Advanced) makes every request look like a real browser's, for sites that turn away anything else. The engine is asked which browsers it can imitate on the device and only those are offered, since yt-dlp stops a download asked for one it cannot do.
 - Cut in the download sheet downloads only part of a video or track: a range slider with editable start and end times, and an optional precise cut that re-encodes the ends instead of moving to the nearest keyframe.
 - Live in the download sheet, for live streams and upcoming premieres: record from the start of the stream, or wait for it to begin and then download it.
+- More › Backup saves settings, the downloads list, the queue, failed downloads, cookies and search history to a file (all, or the categories picked), in `Download/Hazel/Backups` or a chosen folder, and restores any of them from a backup file. Restoring merges lists into what the phone already has, leaves out anything tied to the old device (picked folders, update flags), and brings queued downloads back paused. Automatic backup (on by default) backs everything up once when an update to Hazel is found.
+- Links read but not downloaded (one, several or a playlist) stay on the home screen when the app is closed and opened again, until a new read replaces them or they are cleared. Nothing is kept in incognito.
 - More › Downloads has Parallel fragments (1, 2, 4 or 8 pieces of a stream fetched at once, 8 by default) and Refresh slow links (fetch fresh links when a download drops under a chosen speed, off by default), beside the speed limit (no limit by default).
 
 ### Fixed (file names)

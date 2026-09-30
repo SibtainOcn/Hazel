@@ -68,6 +68,7 @@ import com.hazel.android.ui.screens.more.StorageCleanupScreen
 import com.hazel.android.ui.screens.more.StorageLocationsScreen
 import com.hazel.android.ui.screens.more.ProcessingScreen
 import com.hazel.android.ui.screens.more.AdvancedScreen
+import com.hazel.android.ui.screens.more.BackupScreen
 import com.hazel.android.ui.screens.more.ToolsScreen
 import com.hazel.android.ui.screens.more.SoftwareUpdateScreen
 import com.hazel.android.ui.screens.more.HazelUpdateScreen
@@ -314,6 +315,7 @@ fun AppNavigation(
                     onNavigateToStorageLocations = { navController.navigate("storage_locations") },
                     onNavigateToProcessing = { navController.navigate("processing") },
                     onNavigateToAdvanced = { navController.navigate("advanced") },
+                    onNavigateToBackup = { navController.navigate("backup") },
                     onNavigateToCookies = { navController.navigate("cookies") },
                     onNavigateToFetchSettings = { navController.navigate("fetch_settings") },
                     onNavigateToSponsor = { navController.navigate("sponsor") },
@@ -340,6 +342,9 @@ fun AppNavigation(
             }
             composable("advanced") {
                 AdvancedScreen(onBack = { navController.popBackStack() })
+            }
+            composable("backup") {
+                BackupScreen(onBack = { navController.popBackStack() })
             }
             composable("storage_locations") {
                 StorageLocationsScreen(onBack = { navController.popBackStack() })

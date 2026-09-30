@@ -302,6 +302,7 @@ object SettingsRepository {
 
     suspend fun setIncognito(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[INCOGNITO_KEY] = enabled }
+        if (enabled) HomeResultsRepository.clear(context)
     }
 
     // ── Downloads list ──
@@ -582,6 +583,7 @@ object SettingsRepository {
             val ytdlpAvail = prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false
             prefs[HAS_UPDATE_AVAILABLE_KEY] = available || ytdlpAvail
         }
+        if (available) BackupRepository.autoBackupBeforeUpdate(context)
     }
 
     fun getYtDlpUpdateAvailable(context: Context): Flow<Boolean> {

@@ -322,6 +322,7 @@ object MediaStoreHelper {
             "mkv" -> "video/x-matroska"
             "webm" -> "video/webm"
             "3gp" -> "video/3gpp"
+            "json" -> "application/json"
             else -> "application/octet-stream"
         }
     }

@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Build
@@ -86,7 +87,8 @@ fun MoreScreen(
     onNavigateToUpdate: () -> Unit = {},
     onNavigateToSponsor: () -> Unit = {},
     onNavigateToProcessing: () -> Unit = {},
-    onNavigateToAdvanced: () -> Unit = {}
+    onNavigateToAdvanced: () -> Unit = {},
+    onNavigateToBackup: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val listingSource by SettingsRepository.getListingSource(context).collectAsState(initial = ListingSource.DEFAULT)
@@ -286,6 +288,27 @@ fun MoreScreen(
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToAdvanced() }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.more_backup)) },
+                leadingContent = {
+                    Icon(Icons.Filled.SettingsBackupRestore, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onNavigateToBackup() }
             )
 
             HorizontalDivider(
