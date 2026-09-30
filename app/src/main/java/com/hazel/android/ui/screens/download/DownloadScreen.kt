@@ -74,7 +74,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -158,6 +158,15 @@ fun DownloadScreen(
     }
 
     val listState = rememberLazyListState()
+
+    // A new read empties the list and the skeleton takes its place, but the list's scroll
+    // position outlives it: the next results opened where the last ones were left, which
+    // after scrolling a playlist meant landing on its final card. Whenever the list is
+    // emptied it goes back to the top, so what arrives next is read from the start.
+    val hasResults = state.results.isNotEmpty()
+    LaunchedEffect(hasResults) {
+        if (!hasResults) listState.requestScrollToItem(0)
+    }
 
     // True once anything has moved under the pinned header. The header does not slide away
     // on scroll, which is the usual trick, because the field and the layout switch are what
@@ -379,7 +388,6 @@ fun DownloadScreen(
             var homeMenuOpen by remember { mutableStateOf(false) }
             var showClearHistoryConfirm by remember { mutableStateOf(false) }
             val homeScope = rememberCoroutineScope()
-            val homeClipboard = LocalClipboardManager.current
 
             if (showClearHistoryConfirm) {
                 AlertDialog(
@@ -665,7 +673,7 @@ fun DownloadScreen(
         // so the first action on this screen is typically a paste. Having it one tap
         // away without opening the full search screen saves a step.
         val homeIsEmpty = state.results.isEmpty() && !state.isFetching
-        val homePasteClipboard = LocalClipboardManager.current
+        val homePasteClipboard = LocalClipboard.current
         var homePastePendingDupe by remember { mutableStateOf<Pair<List<String>, HistoryEntry>?>(null) }
 
         homePastePendingDupe?.let { (links, existing) ->
@@ -685,14 +693,17 @@ fun DownloadScreen(
         if (homeIsEmpty) {
             Surface(
                 onClick = {
-                    val pasted = homePasteClipboard.getText()?.text.orEmpty().trim()
-                    if (pasted.isBlank()) {
-                        Toast.makeText(context, context.getString(R.string.search_nothing_to_paste), Toast.LENGTH_SHORT).show()
-                        return@Surface
-                    }
-                    val links = pasted.split(Regex("""\s+""")).map { it.trim() }.filter { it.isNotBlank() }.distinct()
-                    if (links.isEmpty()) return@Surface
                     scope.launch {
+                        val pasted = homePasteClipboard.getClipEntry()?.clipData
+                            ?.takeIf { it.itemCount > 0 }
+                            ?.getItemAt(0)?.coerceToText(context)?.toString()
+                            .orEmpty().trim()
+                        if (pasted.isBlank()) {
+                            Toast.makeText(context, context.getString(R.string.search_nothing_to_paste), Toast.LENGTH_SHORT).show()
+                            return@launch
+                        }
+                        val links = pasted.split(Regex("""\s+""")).map { it.trim() }.filter { it.isNotBlank() }.distinct()
+                        if (links.isEmpty()) return@launch
                         val existing = links.firstNotNullOfOrNull { link ->
                             history
                                 .firstOrNull { LinkKey.sameMedia(it.url, link) }

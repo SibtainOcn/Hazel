@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,6 +36,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.cos
@@ -412,6 +415,67 @@ fun ProcessingShimmer(modifier: Modifier = Modifier) {
                 )
             )
         }
+    )
+}
+
+/** How long the band takes to cross a [ShimmerLabel], and how wide it is. */
+private const val TEXT_SWEEP_MS = 2000
+private val TEXT_BAND_WIDTH = 125.dp
+
+/**
+ * Words with light running across them: the letters rest dim and a bright band sweeps
+ * through them from left to right, over and over. For a heading that is waiting on
+ * something, so it says what is happening ("Fetching") instead of standing in as a blank
+ * block.
+ *
+ * The band is painted into the letters only (the text is drawn, then the gradient is kept
+ * where the text is), so nothing shows between or around them, and it is read while
+ * drawing, so the sweep never recomposes the text.
+ */
+@Composable
+fun ShimmerLabel(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    fontWeight: FontWeight? = null
+) {
+    val transition = rememberInfiniteTransition(label = "shimmerText")
+    val progress by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = TEXT_SWEEP_MS, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmerTextSweep"
+    )
+    val resting = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+    val lit = MaterialTheme.colorScheme.onSurface
+
+    Text(
+        text,
+        style = style,
+        fontWeight = fontWeight,
+        maxLines = 1,
+        modifier = modifier
+            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+            .drawWithContent {
+                drawContent()
+                val band = TEXT_BAND_WIDTH.toPx()
+                // Starts wholly before the first letter and ends wholly past the last, so
+                // each pass leaves the word resting for a moment before the next.
+                val centre = -band + (size.width + 2f * band) * progress
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        0f to resting,
+                        0.5f to lit,
+                        1f to resting,
+                        startX = centre - band / 2f,
+                        endX = centre + band / 2f
+                    ),
+                    blendMode = BlendMode.SrcIn
+                )
+            }
     )
 }
 

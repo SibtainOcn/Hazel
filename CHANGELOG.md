@@ -29,12 +29,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reading a new link replaces the previous results, and the loading skeleton fills the screen from the top.
 - The batch sheet offers an instant quality ladder for audio (best, ~192 to ~64 kbps, worst) and more video heights (down to 144p, and worst), without reading every link first.
 - Media cards shrink slightly while their list scrolls (not the format list), in step with how fast it moves: a slow drag barely touches them, a flick pulls them in, and they spring back as soon as the list slows or stops. Chips and small buttons are drawn as flat surfaces.
+- The Thumbnail option opens a dialog with Cover art (on by default) and Crop to square (off by default), in the single and batch sheets. A live harness (`tools/test_thumbnail_embed_live.py`) checks both against real links for every audio format and video container the sheet offers.
+- The share sheet shows a shimmering "Fetching…" heading while a link is read, in place of blank placeholder bars.
+- The download sheet's Audio and Video tabs sit at the start of the sheet, with a short bar under the chosen one.
 - A read failure offers adding cookies, and the share sheet's failure dialog copies its log.
 
 ### Fixed (continued)
 - Two downloads could start at once when a link was shared while a saved queue was resuming, failing with "Process ID already exists".
 - Reading a new link during a download no longer changes that download's title, file name or history record.
 - An engine too old for the options the app passes is replaced with the bundled copy instead of failing every read.
+- A playlist or several links opening on the last card instead of the first: the list kept the scroll position of the previous results.
+- Cropping a cover to a square failed the whole download, and a cover that was already a JPEG was never cropped.
 - The Downloads tab's row layout stretching each row to many times its height when a long author left no room for the date; the tags now wrap to a second line and are cut short with an ellipsis rather than wrapped letter by letter. The card layout's date no longer overlaps its tags on narrow screens.
 
 ## [1.0.10] - 2026-09-27

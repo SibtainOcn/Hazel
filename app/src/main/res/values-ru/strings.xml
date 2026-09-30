@@ -556,4 +556,9 @@
     <string name="share_overlay_download_started">Загрузка добавлена в очередь</string>
     <string name="share_overlay_invalid_link">В общем содержимом не найдено допустимой веб-ссылки</string>
 
+    <string name="format_sheet_fetching">Получение…</string>
+    <string name="options_thumbnail_title">Миниатюра</string>
+    <string name="options_thumbnail_embed">Обложка</string>
+    <string name="options_thumbnail_crop">Обрезать до квадрата</string>
+    <string name="options_thumbnail_crop_body">Обложка вырезается из центра изображения — в форме, которую показывают музыкальные плееры.</string>
 </resources>

@@ -550,4 +550,9 @@
     <string name="share_overlay_download_started">Téléchargement ajouté à la file d\'attente</string>
     <string name="share_overlay_invalid_link">Aucun lien web valide trouvé dans le contenu partagé</string>
 
+    <string name="format_sheet_fetching">Récupération…</string>
+    <string name="options_thumbnail_title">Miniature</string>
+    <string name="options_thumbnail_embed">Pochette</string>
+    <string name="options_thumbnail_crop">Recadrer en carré</string>
+    <string name="options_thumbnail_crop_body">La pochette est découpée au centre de l\'image, au format affiché par les lecteurs de musique.</string>
 </resources>

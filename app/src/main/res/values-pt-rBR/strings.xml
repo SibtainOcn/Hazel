@@ -550,4 +550,9 @@
     <string name="share_overlay_download_started">Download adicionado à fila</string>
     <string name="share_overlay_invalid_link">Nenhum link web válido encontrado no conteúdo compartilhado</string>
 
+    <string name="format_sheet_fetching">Buscando…</string>
+    <string name="options_thumbnail_title">Miniatura</string>
+    <string name="options_thumbnail_embed">Capa</string>
+    <string name="options_thumbnail_crop">Cortar em quadrado</string>
+    <string name="options_thumbnail_crop_body">A capa é cortada do centro da imagem, no formato que os players de música mostram.</string>
 </resources>

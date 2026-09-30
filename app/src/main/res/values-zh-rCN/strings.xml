@@ -536,4 +536,9 @@
     <string name="share_overlay_download_started">已添加下载至队列</string>
     <string name="share_overlay_invalid_link">在分享的内容中未找到有效的网页链接</string>
 
+    <string name="format_sheet_fetching">正在获取…</string>
+    <string name="options_thumbnail_title">缩略图</string>
+    <string name="options_thumbnail_embed">封面</string>
+    <string name="options_thumbnail_crop">裁剪为正方形</string>
+    <string name="options_thumbnail_crop_body">封面从图片中央裁剪，形状与音乐播放器显示的一致。</string>
 </resources>

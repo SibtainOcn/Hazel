@@ -104,7 +104,7 @@ fun BatchActionBar(
                 BarChip(
                     label = stringResource(R.string.batch_bar_thumbnail),
                     icon = Icons.Filled.Image,
-                    selected = options.embedThumbnail,
+                    badge = options.thumbnailBadge,
                     onClick = onThumbnail
                 )
                 BarChip(

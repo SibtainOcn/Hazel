@@ -1,10 +1,18 @@
 package com.hazel.android.ui.screens.download
 
-import com.hazel.android.ui.components.LineShimmer
-import com.hazel.android.ui.components.ShimmerHost
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.hazel.android.ui.components.FlatChip
+import com.hazel.android.ui.components.ShimmerLabel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,9 +48,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -192,15 +198,19 @@ fun FormatSheet(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     if (isReadingLink) {
-                        // Still reading: the heading shimmers in place of the words, so the
-                        // sheet reads as filling in rather than as finished.
-                        ShimmerHost {
-                            Column {
-                                LineShimmer(width = 140.dp, height = 22.dp)
-                                Spacer(modifier = Modifier.height(8.dp))
-                                LineShimmer(width = 96.dp, height = 12.dp)
-                            }
-                        }
+                        // Still reading: the heading says so, with light running through
+                        // the word, and the line under it stays so nothing moves when the
+                        // read lands.
+                        ShimmerLabel(
+                            stringResource(R.string.format_sheet_fetching),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            stringResource(R.string.format_sheet_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
                     } else {
                         Text(
                             stringResource(R.string.format_sheet_title),
@@ -276,22 +286,27 @@ fun FormatSheet(
             Spacer(modifier = Modifier.height(12.dp))
 
             // ── Audio / Video tabs ──
-            val tabIndex = if (videoTab) 1 else 0
-            SecondaryTabRow(
-                selectedTabIndex = tabIndex,
-                containerColor = MaterialTheme.colorScheme.surface
+            //
+            // Two words at the start of the sheet rather than two halves of its width: the
+            // tabs are a choice of what to download, read along with the heading above
+            // them, and a short bar under the chosen word says which without ruling a line
+            // across the sheet.
+            Row(
+                // The words, not their touch targets, line up with the heading.
+                modifier = Modifier.offset(x = -SHEET_TAB_PADDING),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Tab(
+                SheetTab(
+                    label = stringResource(R.string.format_sheet_tab_audio),
                     selected = !videoTab,
-                    onClick = { videoTab = false },
                     enabled = info.audioFormats.isNotEmpty(),
-                    text = { Text(stringResource(R.string.format_sheet_tab_audio), fontWeight = FontWeight.SemiBold) }
+                    onClick = { videoTab = false }
                 )
-                Tab(
+                SheetTab(
+                    label = stringResource(R.string.format_sheet_tab_video),
                     selected = videoTab,
-                    onClick = { videoTab = true },
                     enabled = info.videoFormats.isNotEmpty(),
-                    text = { Text(stringResource(R.string.format_sheet_tab_video), fontWeight = FontWeight.SemiBold) }
+                    onClick = { videoTab = true }
                 )
             }
 
@@ -400,10 +415,8 @@ fun FormatSheet(
                     OptionChip(
                         label = stringResource(R.string.format_sheet_thumbnail),
                         icon = Icons.Filled.Image,
-                        selected = options.embedThumbnail,
-                        onClick = {
-                            onOptionsChange(options.copy(embedThumbnail = !options.embedThumbnail))
-                        }
+                        badge = options.thumbnailBadge,
+                        onClick = { openDialog = SheetDialog.THUMBNAIL }
                     )
                     // Named rather than valued: the bitrate belongs to a conversion, not to
                     // the stream picked above, and the chip is lit while one is set.
@@ -499,6 +512,12 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
+        SheetDialog.THUMBNAIL -> ThumbnailDialog(
+            options = options,
+            onChange = onOptionsChange,
+            onDismiss = { openDialog = SheetDialog.NONE }
+        )
+
         SheetDialog.CHAPTERS -> ChaptersDialog(
             options = options,
             isVideo = videoTab,
@@ -551,7 +570,50 @@ fun FormatSheet(
 }
 
 /** Which of the sheet's dialogs is open. Only one can be at a time. */
-private enum class SheetDialog { NONE, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY }
+private val SHEET_TAB_PADDING = 12.dp
+
+/** One of the sheet's Audio / Video tabs: its word, and a short bar under it when chosen. */
+@Composable
+private fun SheetTab(label: String, selected: Boolean, enabled: Boolean, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val textColor by animateColorAsState(
+        targetValue = when {
+            selected -> colors.primary
+            enabled -> colors.onSurface
+            else -> colors.onSurface.copy(alpha = 0.38f)
+        },
+        label = "sheetTabText"
+    )
+    val barWidth by animateDpAsState(
+        targetValue = if (selected) 32.dp else 0.dp,
+        animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium),
+        label = "sheetTabBar"
+    )
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .selectable(selected = selected, enabled = enabled, role = Role.Tab, onClick = onClick)
+            .padding(horizontal = SHEET_TAB_PADDING, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = textColor
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Box(
+            modifier = Modifier
+                .width(barWidth)
+                .height(3.dp)
+                .clip(RoundedCornerShape(50))
+                .background(colors.primary)
+        )
+    }
+}
+
+private enum class SheetDialog { NONE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY }
 
 /** Labelled box whose value the user can type into, matching the read-only fields' look. */
 @Composable

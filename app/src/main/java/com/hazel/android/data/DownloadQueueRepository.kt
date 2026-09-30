@@ -238,6 +238,7 @@ object DownloadQueueRepository {
         put("audioContainer", options.audioContainer)
         put("audioQuality", options.audioQuality)
         put("embedThumbnail", options.embedThumbnail)
+        put("cropThumbnail", options.cropThumbnail)
         put("filenameTemplate", options.filenameTemplate)
         put("sponsorBlock", JSONArray(options.sponsorBlockFilters.toList()))
         put("addChapters", options.addChapters)
@@ -256,6 +257,7 @@ object DownloadQueueRepository {
             audioContainer = json.optString("audioContainer"),
             audioQuality = json.optString("audioQuality"),
             embedThumbnail = json.optBoolean("embedThumbnail"),
+            cropThumbnail = json.optBoolean("cropThumbnail"),
             filenameTemplate = json.optString("filenameTemplate")
                 .ifBlank { DownloadOptions.DEFAULT_FILENAME_TEMPLATE },
             sponsorBlockFilters = buildSet {

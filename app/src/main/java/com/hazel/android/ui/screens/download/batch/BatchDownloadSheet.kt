@@ -62,6 +62,7 @@ import com.hazel.android.ui.screens.download.FilenameTemplateDialog
 import com.hazel.android.ui.screens.download.FormatSheet
 import com.hazel.android.ui.screens.download.SponsorBlockDialog
 import com.hazel.android.ui.screens.download.SubtitlesDialog
+import com.hazel.android.ui.screens.download.ThumbnailDialog
 import com.hazel.android.ui.screens.download.FormatSelectionSheet
 import com.hazel.android.util.StoragePaths
 import kotlin.math.roundToInt
@@ -366,9 +367,7 @@ fun BatchDownloadSheet(
                 },
                 onSaveDir = { openSheet = BatchSheet.SAVE_DIR },
                 onContainer = { openSheet = BatchSheet.CONTAINER },
-                onThumbnail = {
-                    onOptionsChange(options.copy(embedThumbnail = !options.embedThumbnail))
-                },
+                onThumbnail = { openSheet = BatchSheet.THUMBNAIL },
                 onChapters = { openSheet = BatchSheet.CHAPTERS },
                 onSubtitles = { openSheet = BatchSheet.SUBTITLES },
                 onSponsorBlock = { openSheet = BatchSheet.SPONSORBLOCK },
@@ -544,6 +543,12 @@ fun BatchDownloadSheet(
 
         // The remaining settings each open the dialog the single download sheet uses, so
         // there is one place where each of them is explained.
+        BatchSheet.THUMBNAIL -> ThumbnailDialog(
+            options = options,
+            onChange = onOptionsChange,
+            onDismiss = { openSheet = BatchSheet.NONE }
+        )
+
         BatchSheet.CHAPTERS -> ChaptersDialog(
             options = options,
             isVideo = state.videoTab,
@@ -580,7 +585,7 @@ fun BatchDownloadSheet(
 /** Which sheet the action bar or a row's type button has opened, if any. */
 private enum class BatchSheet {
     NONE, TYPE, ITEM_TYPE, QUALITY, AUDIO_FORMAT, BITRATE, CONTAINER, SAVE_DIR, AUDIO_LANGUAGE,
-    CHAPTERS, SUBTITLES, SPONSORBLOCK, FILENAME
+    THUMBNAIL, CHAPTERS, SUBTITLES, SPONSORBLOCK, FILENAME
 }
 
 /** The row among [choices] that stands for the set's current audio choice. */

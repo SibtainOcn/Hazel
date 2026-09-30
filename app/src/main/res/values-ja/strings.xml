@@ -536,4 +536,9 @@
     <string name="share_overlay_download_started">ダウンロードをキューに追加しました</string>
     <string name="share_overlay_invalid_link">共有されたコンテンツに有効なウェブリンクが見つかりません</string>
 
+    <string name="format_sheet_fetching">取得中…</string>
+    <string name="options_thumbnail_title">サムネイル</string>
+    <string name="options_thumbnail_embed">カバーアート</string>
+    <string name="options_thumbnail_crop">正方形に切り抜く</string>
+    <string name="options_thumbnail_crop_body">カバーは画像の中央から、音楽プレーヤーが表示する形に切り抜かれます。</string>
 </resources>

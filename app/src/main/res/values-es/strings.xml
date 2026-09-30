@@ -550,4 +550,9 @@
     <string name="share_overlay_download_started">Descarga añadida a la cola</string>
     <string name="share_overlay_invalid_link">No se encontró ningún enlace web válido en el contenido compartido</string>
 
+    <string name="format_sheet_fetching">Obteniendo…</string>
+    <string name="options_thumbnail_title">Miniatura</string>
+    <string name="options_thumbnail_embed">Portada</string>
+    <string name="options_thumbnail_crop">Recortar en cuadrado</string>
+    <string name="options_thumbnail_crop_body">La portada se recorta del centro de la imagen, con la forma que muestran los reproductores de música.</string>
 </resources>

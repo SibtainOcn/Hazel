@@ -16,7 +16,10 @@ data class DownloadOptions(
     /** Bitrate of an audio conversion, such as "192k". Blank leaves it to the encoder. */
     val audioQuality: String = "",
 
-    val embedThumbnail: Boolean = false,
+    /** `--embed-thumbnail`: the source's artwork as the file's cover. On unless turned off. */
+    val embedThumbnail: Boolean = true,
+    /** Crops the embedded cover to a square, the shape music players show. */
+    val cropThumbnail: Boolean = false,
     val filenameTemplate: String = DEFAULT_FILENAME_TEMPLATE,
 
     /** SponsorBlock category ids to cut out, e.g. `sponsor`, `intro`. Empty disables removal. */
@@ -38,6 +41,10 @@ data class DownloadOptions(
      */
     fun chapterBadge(isVideo: Boolean): Int =
         listOf(addChapters && isVideo, splitByChapters).count { it }
+
+    /** Count shown on the Thumbnail chip badge: cover art on, and cropped. */
+    val thumbnailBadge: Int
+        get() = listOf(embedThumbnail, embedThumbnail && cropThumbnail).count { it }
 
     /** Count shown on the Subtitles chip badge. */
     val subtitleBadge: Int

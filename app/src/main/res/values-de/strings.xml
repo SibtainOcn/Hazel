@@ -543,4 +543,9 @@
     <string name="share_overlay_download_started">Download zur Warteschlange hinzugefügt</string>
     <string name="share_overlay_invalid_link">Kein gültiger Weblink im geteilten Inhalt gefunden</string>
 
+    <string name="format_sheet_fetching">Wird abgerufen…</string>
+    <string name="options_thumbnail_title">Vorschaubild</string>
+    <string name="options_thumbnail_embed">Cover</string>
+    <string name="options_thumbnail_crop">Quadratisch zuschneiden</string>
+    <string name="options_thumbnail_crop_body">Das Cover wird aus der Bildmitte geschnitten, in der Form, die Musikplayer zeigen.</string>
 </resources>

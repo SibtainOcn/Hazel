@@ -1620,7 +1620,16 @@ class DownloadViewModel : ViewModel() {
         }
         if (options.embedThumbnail && artworkSupported) {
             addOption("--embed-thumbnail")
-            addOption("--convert-thumbnails", "jpg")
+            if (options.cropThumbnail) {
+                // The crop is a filter on the thumbnail's conversion, and yt-dlp skips the
+                // conversion of a thumbnail already in the target format: a JPEG cover (most
+                // music sites) would come through uncropped. Converting JPEG to PNG and
+                // everything else to JPEG sends every cover through the filter.
+                addOption("--convert-thumbnails", "jpg>png/jpg")
+                addOption("--ppa", "ThumbnailsConvertor:-vf $CROP_TO_SQUARE")
+            } else {
+                addOption("--convert-thumbnails", "jpg")
+            }
         }
 
         applyChapters(options, isVideo)
@@ -2230,5 +2239,13 @@ class DownloadViewModel : ViewModel() {
 
         /** Containers with no tag atom that can hold cover art. */
         val NO_ARTWORK_CONTAINERS = setOf("webm", "avi", "flv")
+
+        /**
+         * Centre crop to the shorter side, whichever way round the artwork is. yt-dlp splits
+         * post-processor arguments the way a shell would, so the double quotes are what keep
+         * the single quotes for ffmpeg; without them the commas split the filter and the
+         * whole download fails with "Filter not found".
+         */
+        const val CROP_TO_SQUARE = "crop=\"'if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\""
     }
 }

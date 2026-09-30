@@ -536,4 +536,9 @@
     <string name="share_overlay_download_started">Unduhan ditambahkan ke antrean</string>
     <string name="share_overlay_invalid_link">Tidak ada tautan web valid yang ditemukan dalam konten bersama</string>
 
+    <string name="format_sheet_fetching">Mengambil…</string>
+    <string name="options_thumbnail_title">Gambar mini</string>
+    <string name="options_thumbnail_embed">Sampul</string>
+    <string name="options_thumbnail_crop">Potong persegi</string>
+    <string name="options_thumbnail_crop_body">Sampul dipotong dari tengah gambar, dengan bentuk yang ditampilkan pemutar musik.</string>
 </resources>

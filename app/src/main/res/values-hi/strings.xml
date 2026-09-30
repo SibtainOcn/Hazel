@@ -543,4 +543,9 @@
     <string name="share_overlay_download_started">डाउनलोड कतार में जोड़ा गया</string>
     <string name="share_overlay_invalid_link">साझा की गई सामग्री में कोई मान्य वेब लिंक नहीं मिला</string>
 
+    <string name="format_sheet_fetching">प्राप्त किया जा रहा है…</string>
+    <string name="options_thumbnail_title">थंबनेल</string>
+    <string name="options_thumbnail_embed">कवर आर्ट</string>
+    <string name="options_thumbnail_crop">वर्गाकार काटें</string>
+    <string name="options_thumbnail_crop_body">कवर को चित्र के बीच से काटा जाता है, उसी आकार में जो म्यूज़िक प्लेयर दिखाते हैं।</string>
 </resources>

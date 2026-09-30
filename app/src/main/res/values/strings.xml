@@ -593,4 +593,9 @@
     <string name="share_overlay_download_started">Download added to queue</string>
     <string name="share_overlay_invalid_link">No valid web link found in shared content</string>
 
+    <string name="format_sheet_fetching">Fetching…</string>
+    <string name="options_thumbnail_title">Thumbnail</string>
+    <string name="options_thumbnail_embed">Cover art</string>
+    <string name="options_thumbnail_crop">Crop to square</string>
+    <string name="options_thumbnail_crop_body">The cover is cut from the centre of the artwork, the shape music players show.</string>
 </resources>

@@ -83,7 +83,11 @@ object SettingsRepository {
         val videoContainer = stringPreferencesKey("${prefix}video_container")
         val audioContainer = stringPreferencesKey("${prefix}audio_container")
         val audioQuality = stringPreferencesKey("${prefix}audio_quality")
-        val embedThumbnail = booleanPreferencesKey("${prefix}embed_thumbnail")
+        // A new name for the cover setting: every save wrote the old one, so it holds the
+        // old default of off for nearly everyone rather than a choice, and cover art is now
+        // on unless turned off.
+        val embedThumbnail = booleanPreferencesKey("${prefix}cover_art")
+        val cropThumbnail = booleanPreferencesKey("${prefix}crop_thumbnail")
         val filenameTemplate = stringPreferencesKey("${prefix}filename_template")
         val sponsorBlock = stringSetPreferencesKey("${prefix}sponsorblock_filters")
         val addChapters = booleanPreferencesKey("${prefix}add_chapters")
@@ -103,6 +107,7 @@ object SettingsRepository {
             audioContainer = this[keys.audioContainer] ?: defaults.audioContainer,
             audioQuality = this[keys.audioQuality] ?: defaults.audioQuality,
             embedThumbnail = this[keys.embedThumbnail] ?: defaults.embedThumbnail,
+            cropThumbnail = this[keys.cropThumbnail] ?: defaults.cropThumbnail,
             filenameTemplate = this[keys.filenameTemplate] ?: defaults.filenameTemplate,
             sponsorBlockFilters = this[keys.sponsorBlock] ?: defaults.sponsorBlockFilters,
             addChapters = this[keys.addChapters] ?: defaults.addChapters,
@@ -119,6 +124,7 @@ object SettingsRepository {
         this[keys.audioContainer] = options.audioContainer
         this[keys.audioQuality] = options.audioQuality
         this[keys.embedThumbnail] = options.embedThumbnail
+        this[keys.cropThumbnail] = options.cropThumbnail
         this[keys.filenameTemplate] = options.filenameTemplate
         this[keys.sponsorBlock] = options.sponsorBlockFilters
         this[keys.addChapters] = options.addChapters
