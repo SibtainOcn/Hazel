@@ -1,5 +1,7 @@
 package com.hazel.android.ui.navigation
 
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -130,6 +132,24 @@ fun AppNavigation(
 
     val downloadViewModel: com.hazel.android.download.DownloadViewModel =
         remember { com.hazel.android.download.DownloadViewModelHolder.get() }
+
+    // A download that could not reach its folder (an SD card taken out, full or no longer
+    // granting access) is reported wherever the user is in the app, including after it ran
+    // in the background or was started from the share sheet. Only this field is watched,
+    // so download progress does not recompose the whole app.
+    val saveFallback by remember(downloadViewModel) {
+        downloadViewModel.state
+            .map { it.saveFallback }
+            .distinctUntilChanged()
+    }.collectAsState(initial = null)
+    saveFallback?.let { fallback ->
+        com.hazel.android.ui.screens.download.SaveFallbackDialog(
+            wanted = fallback.wanted,
+            savedTo = fallback.savedTo,
+            titles = fallback.titles,
+            onDismiss = downloadViewModel::clearSaveFallback
+        )
+    }
 
     Scaffold(
         topBar = {

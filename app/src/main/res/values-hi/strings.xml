@@ -144,7 +144,6 @@
     <string name="format_sheet_save_location_body">इस फ़ोल्डर को अपने फ़ाइल मैनेजर में खोलें, या डाउनलोड सहेजने के लिए दूसरा चुनें।</string>
     <string name="format_sheet_open_folder">फ़ोल्डर खोलें</string>
     <string name="format_sheet_reset">रीसेट करें</string>
-    <string name="format_sheet_change">बदलें</string>
 
     <!-- ConverterScreen -->
     <string name="converter_label_convert_to">इसमें बदलें</string>
@@ -530,7 +529,7 @@
     <string name="storage_locations_limits">सीमाएँ</string>
     <string name="storage_locations_wifi_only_description">डाउनलोड मोबाइल डेटा पर चलने के बजाय इंतज़ार करते हैं</string>
     <string name="storage_locations_speed_limit_description">डाउनलोड कितनी तेज़ी से चल सकता है</string>
-    <string name="storage_locations_internal_note">सारी फ़ाइलें आपके डिवाइस के आंतरिक स्टोरेज में रखी जाती हैं। आप उन्हें किसी भी फ़ाइल मैनेजर ऐप से कभी भी देख सकते हैं।</string>
+    <string name="storage_locations_internal_note">जब तक आप SD कार्ड या कोई दूसरा फ़ोल्डर नहीं चुनते, डाउनलोड आंतरिक स्टोरेज में सहेजे जाते हैं। SD कार्ड पर जाने वाले डाउनलोड अपनी अस्थायी फ़ाइलें भी कार्ड पर ही रखते हैं, ताकि फ़ोन की जगह न भरे।</string>
     <string name="storage_locations_wifi_only">सिर्फ़ वाई-फ़ाई</string>
     <string name="storage_locations_speed_limit">गति सीमा</string>
 
@@ -695,4 +694,16 @@
     </plurals>
     <string name="home_update">अपडेट</string>
     <string name="home_update_available">अपडेट उपलब्ध है</string>
+    <string name="save_location_internal">आंतरिक स्टोरेज</string>
+    <string name="save_location_card_hint">कार्ड पर %1$s में सहेजता है</string>
+    <string name="save_location_free">%1$s खाली</string>
+    <string name="save_location_other">दूसरा फ़ोल्डर</string>
+    <string name="save_location_other_hint">इस डिवाइस या कार्ड का कोई भी फ़ोल्डर</string>
+    <string name="save_location_close">बंद करें</string>
+    <string name="save_location_error_title">वह फ़ोल्डर इस्तेमाल नहीं हो सका</string>
+    <string name="save_location_error_access">Android ने Hazel को उस फ़ोल्डर की पहुँच बनाए रखने नहीं दी। फिर कोशिश करें या कोई दूसरा चुनें।</string>
+    <string name="save_location_error_no_picker">इस डिवाइस पर कोई ऐप फ़ोल्डर नहीं चुन सकता।</string>
+    <string name="save_location_error_card_folder">कार्ड पर %1$s नहीं बन सका, इसलिए डाउनलोड आपके चुने फ़ोल्डर में सहेजे जाएँगे।</string>
+    <string name="save_fallback_title">दूसरी जगह सहेजा गया</string>
+    <string name="save_fallback_body">ये %1$s में नहीं लिखे जा सके। हो सकता है कार्ड निकाल दिया गया हो, भर गया हो या अब पहुँच न देता हो। इन्हें %2$s में सहेजा गया।</string>
 </resources>

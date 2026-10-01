@@ -134,6 +134,12 @@ data class DownloadState(
      * sanitized [error] is for inline messages; this is what the user can copy or act on.
      */
     val errorLog: String? = null,
+    /**
+     * Set when a download could not be written to the folder it was meant for, usually an
+     * SD card that was taken out, filled up or stopped granting access, and was saved
+     * somewhere else instead. Nothing is lost, but the user has to be told where it went.
+     */
+    val saveFallback: SaveFallback? = null,
     val isComplete: Boolean = false,
     /** Per-link state while several links download one after another. */
     val batch: List<BatchItem> = emptyList(),
@@ -959,6 +965,11 @@ class DownloadViewModel : ViewModel() {
         _state.value = _state.value.copy(isFetching = false, errorLog = message)
     }
 
+    /** Dismisses the saved-elsewhere dialog. */
+    fun clearSaveFallback() {
+        _state.value = _state.value.copy(saveFallback = null)
+    }
+
     /** Dismisses the failure dialog without changing anything else. */
     fun clearErrorLog() {
         _state.value = _state.value.copy(errorLog = null)
@@ -1188,7 +1199,7 @@ class DownloadViewModel : ViewModel() {
                 val plan = next.toPlan()
                 val options = next.options
                 downloadTreeUri = next.treeUri
-                downloadDir = workDirFor(plan.info.url)
+                downloadDir = workDirFor(plan.info.url, next.treeUri)
 
                 // The download uses the site credentials configured for this URL so that
                 // both the metadata probe and the download execute with matching access.
@@ -1371,7 +1382,7 @@ class DownloadViewModel : ViewModel() {
                 synchronized(queue) { queue.clear() }
                 // Paused downloads are given up with the rest, their partial files and their
                 // notification with them. Nothing is running any more to be caught by this.
-                runCatching { StoragePaths.tempDownloads.listFiles()?.forEach { it.deleteRecursively() } }
+                runCatching { com.hazel.android.util.SdCards.workRoots().forEach { root -> root.listFiles()?.forEach { it.deleteRecursively() } } }
                 DownloadNotificationHelper.cancelPaused(app)
                 _state.value = _state.value.copy(
                     batch = _state.value.batch.map {
@@ -1432,7 +1443,7 @@ class DownloadViewModel : ViewModel() {
     private fun discardHeldDownload() {
         val app = HazelApp.instance
         // Nothing is running, so every partial download on disk is one being given up.
-        runCatching { StoragePaths.tempDownloads.listFiles()?.forEach { it.deleteRecursively() } }
+        runCatching { com.hazel.android.util.SdCards.workRoots().forEach { root -> root.listFiles()?.forEach { it.deleteRecursively() } } }
         DownloadNotificationHelper.cancelProgress(app)
         DownloadNotificationHelper.showCancelled(app)
 
@@ -1538,7 +1549,7 @@ class DownloadViewModel : ViewModel() {
             val app = HazelApp.instance
             // Its own folder only: another download may be running beside it, and its
             // partial files are in a folder of their own.
-            runCatching { workDirFor(url).deleteRecursively() }
+            runCatching { workDirsFor(url).forEach { it.deleteRecursively() } }
             synchronized(queue) {
                 queue.removeAll { it.url == url }
             }
@@ -1777,6 +1788,9 @@ class DownloadViewModel : ViewModel() {
         addOption("-o", "${downloadDir.absolutePath}/${outputTemplate(options, title, author)}")
         addOption("--no-playlist")
         addOption("--no-mtime")
+        // A card is usually FAT or exFAT, which refuses names with characters such as : or ?
+        // in them, so a title carrying one would fail only at the very end of the download.
+        if (com.hazel.android.util.SdCards.isRemovable(downloadDir)) addOption("--windows-filenames")
 
         // A ceiling on transfer speed, when one was asked for. Left off entirely otherwise,
         // rather than passed as some very large number, so nothing stands between yt-dlp
@@ -2251,6 +2265,17 @@ class DownloadViewModel : ViewModel() {
                 downloadDir
             }
             savedPath = StoragePaths.downloadsDisplay(isAudio = isMusic)
+
+            // The picked folder refused the file. It was kept rather than lost, and the
+            // user is told where, once per run however many downloads it happened to.
+            if (tree != null) {
+                val wanted = com.hazel.android.util.MediaStoreHelper.describeTree(tree)
+                val savedTo = if (finalDir == downloadDir) finalDir.absolutePath else savedPath
+                val title = plan.title.ifBlank { fileName }
+                _state.value = _state.value.copy(
+                    saveFallback = SaveFallback.adding(_state.value.saveFallback, wanted, savedTo, title)
+                )
+            }
         }
 
         com.hazel.android.util.MediaStoreHelper.scanFiles(context, finalDir)
@@ -2688,14 +2713,39 @@ class DownloadViewModel : ViewModel() {
     }
 }
 
+/** Downloads that were saved somewhere other than the folder they were meant for. */
+data class SaveFallback(val wanted: String, val savedTo: String, val titles: List<String>) {
+    companion object {
+        /**
+         * [previous] with one more download, so a batch that hit the same problem is told
+         * once with every title rather than with a dialog per file. A different folder or
+         * destination starts a fresh notice.
+         */
+        fun adding(previous: SaveFallback?, wanted: String, savedTo: String, title: String): SaveFallback =
+            if (previous != null && previous.wanted == wanted && previous.savedTo == savedTo) {
+                previous.copy(titles = previous.titles + title)
+            } else {
+                SaveFallback(wanted = wanted, savedTo = savedTo, titles = listOf(title))
+            }
+    }
+}
+
 /**
- * The working folder of the download for [url], under the temporary downloads folder: the
- * same one every time that link is resumed, and never shared with another link.
+ * The working folder of the download for [url]: the same one every time that link is
+ * resumed, and never shared with another link. It sits on the SD card when [treeUri] saves
+ * to one, so the download's working space is taken from the card, and internally otherwise.
  */
-internal fun workDirFor(url: String): File {
+internal fun workDirFor(url: String, treeUri: String = ""): File =
+    File(com.hazel.android.util.SdCards.workRootFor(treeUri), workDirName(url))
+
+/** The working folder [url] may have on each storage, for throwing all of them away. */
+internal fun workDirsFor(url: String): List<File> =
+    com.hazel.android.util.SdCards.workRoots().map { File(it, workDirName(url)) }
+
+internal fun workDirName(url: String): String {
     val digest = java.security.MessageDigest.getInstance("SHA-1").digest(url.toByteArray())
     val key = digest.take(8).joinToString("") { "%02x".format(it) }
-    return File(StoragePaths.tempDownloads, "dl_$key")
+    return "dl_$key"
 }
 
 /**

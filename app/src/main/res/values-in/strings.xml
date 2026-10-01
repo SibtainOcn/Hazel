@@ -140,7 +140,6 @@
     <string name="format_sheet_save_location_body">Buka folder ini di pengelola file Anda, atau pilih folder lain untuk menyimpan unduhan.</string>
     <string name="format_sheet_open_folder">Buka folder</string>
     <string name="format_sheet_reset">Reset</string>
-    <string name="format_sheet_change">Ubah</string>
 
     <!-- ConverterScreen -->
     <string name="converter_label_convert_to">Konversi ke</string>
@@ -523,7 +522,7 @@
     <string name="storage_locations_limits">Batas</string>
     <string name="storage_locations_wifi_only_description">Unduhan menunggu alih-alih menggunakan data seluler</string>
     <string name="storage_locations_speed_limit_description">Batas kecepatan unduhan yang diizinkan</string>
-    <string name="storage_locations_internal_note">Semua file disimpan di penyimpanan internal perangkat Anda. Anda dapat mengaksesnya kapan saja menggunakan aplikasi pengelola file.</string>
+    <string name="storage_locations_internal_note">Unduhan disimpan di penyimpanan internal kecuali Anda memilih kartu SD atau folder lain. Unduhan ke kartu SD juga menyimpan file kerjanya di kartu, sehingga tidak memakai ruang ponsel.</string>
     <string name="storage_locations_wifi_only">Hanya Wi-Fi</string>
     <string name="storage_locations_speed_limit">Batas kecepatan</string>
 
@@ -687,4 +686,16 @@
     </plurals>
     <string name="home_update">Perbarui</string>
     <string name="home_update_available">Pembaruan tersedia</string>
+    <string name="save_location_internal">Penyimpanan internal</string>
+    <string name="save_location_card_hint">Disimpan ke %1$s di kartu</string>
+    <string name="save_location_free">%1$s kosong</string>
+    <string name="save_location_other">Folder lain</string>
+    <string name="save_location_other_hint">Folder mana pun di perangkat ini atau kartu</string>
+    <string name="save_location_close">Tutup</string>
+    <string name="save_location_error_title">Folder itu tidak bisa dipakai</string>
+    <string name="save_location_error_access">Android tidak mengizinkan Hazel mempertahankan akses ke folder itu. Coba lagi atau pilih folder lain.</string>
+    <string name="save_location_error_no_picker">Tidak ada aplikasi di perangkat ini yang bisa memilih folder.</string>
+    <string name="save_location_error_card_folder">Tidak bisa membuat %1$s di kartu, jadi unduhan akan disimpan di folder yang Anda pilih.</string>
+    <string name="save_fallback_title">Disimpan di tempat lain</string>
+    <string name="save_fallback_body">File ini tidak bisa ditulis ke %1$s. Kartu mungkin dilepas, penuh, atau tidak lagi mengizinkan akses. File disimpan ke %2$s.</string>
 </resources>

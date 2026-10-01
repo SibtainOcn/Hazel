@@ -144,7 +144,6 @@ fun DownloadScreen(
     val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
 
     // The kind whose folder the picker is choosing, set as it opens.
-    var pickingVideoDir by remember { mutableStateOf(true) }
 
 
     // Collected as null until the stored value arrives, so the dialog cannot flash up for
@@ -209,30 +208,9 @@ fun DownloadScreen(
     var sheetVisible by remember { mutableStateOf(false) }
     var batchSheetVisible by remember { mutableStateOf(false) }
 
-    // Picking a destination goes through the system document picker so the folder can sit
-    // anywhere, including on removable storage. The grant is persisted so the same folder
-    // stays writable on later launches.
-    val folderPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            try {
-                context.contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-                val forVideo = pickingVideoDir
-                scope.launch {
-                    SettingsRepository.setSaveDir(
-                        context, forVideo, uri.toString(), MediaStoreHelper.describeTree(uri)
-                    )
-                }
-            } catch (_: SecurityException) {
-                // The provider refused a lasting grant, so the built-in folder stays in use.
-            }
-        }
-    }
+    // Picking a destination, any folder or an SD card, with the grant persisted so the
+    // same folder stays writable on later launches.
+    val pickSaveDir = rememberSaveDirPicker(saveDirs)
 
     // Coming back from a successful sign-in, the link is read again: the cookies that were
     // just saved are picked up by the new attempt.
@@ -881,10 +859,6 @@ fun DownloadScreen(
         )
     }
 
-    val pickSaveDir: (Boolean) -> Unit = { isVideo ->
-        pickingVideoDir = isVideo
-        folderPicker.launch(saveDirs.of(isVideo).uri.takeIf { it.isNotBlank() }?.let(Uri::parse))
-    }
     val openSaveDirOf: (Boolean) -> Unit = { isVideo ->
         MediaOpener.openLocation(context, saveDirs.of(isVideo).uri, isVideo)
     }

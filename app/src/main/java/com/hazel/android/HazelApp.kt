@@ -42,6 +42,7 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
 
         // Initialize storage paths for downloads/conversions
         com.hazel.android.util.StoragePaths.init(this)
+        com.hazel.android.util.SdCards.init(this)
 
         // Install crash logger — captures uncaught exceptions in-memory
         CrashLogger.install(this)

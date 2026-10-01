@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Save downloads to an SD card. The save location in the download sheet, the batch sheet, the share overlay and More › Downloads lists Internal storage, each SD card that is in (with its free space) and Other folder, set apart for audio and video. Picking a card opens the system picker on that card (Android 10+ through the card itself, 8–9 at its root, 7 among the picker's places), and a card's root gets `Hazel/Audio` or `Hazel/Video` made inside it.
+- A download going to an SD card keeps its working files on the card too, so a large video does not have to fit in phone storage while it runs; names are kept to what the card's file system accepts.
+
+### Changed
+- Storage cleanup's Unfinished downloads, cancelling a queue and removing a paused download now also clear working files left on SD cards.
+- If the card is taken out, full or no longer allows access, downloads are saved to internal storage instead of failing, and a dialog says which ones and where they went (once per batch, wherever you are in the app). Problems while choosing a folder (access refused, no folder picker, the Hazel folder could not be made on the card) are shown in a dialog too.
+
 ## [1.1.10] - 2026-10-01
 ### Store
 - Search by words and play videos right on the home cards

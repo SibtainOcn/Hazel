@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Videocam
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.ui.screens.download.SaveDirDialog
+import com.hazel.android.ui.screens.download.rememberSaveDirPicker
 import com.hazel.android.util.MediaOpener
 import com.hazel.android.util.MediaStoreHelper
 import androidx.compose.foundation.layout.Box
@@ -79,31 +80,10 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
     val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
     // The kind whose folder is being looked at or chosen, or null when neither is.
     var dirDialogFor by remember { mutableStateOf<Boolean?>(null) }
-    var pickingVideoDir by remember { mutableStateOf(true) }
 
-    // The same picker the download sheet uses, with the grant kept so the folder stays
-    // writable on later launches. The choice is saved for the kind it was made for, and
-    // every download of that kind goes there until it is changed or reset.
-    val folderPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            try {
-                context.contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-                val forVideo = pickingVideoDir
-                scope.launch {
-                    SettingsRepository.setSaveDir(
-                        context, forVideo, uri.toString(), MediaStoreHelper.describeTree(uri)
-                    )
-                }
-            } catch (_: SecurityException) {
-                // The provider refused a lasting grant, so the folder in use stays as it was.
-            }
-        }
-    }
+    // The same picker the download sheet uses: any folder or an SD card, saved for the
+    // kind it was made for until it is changed or reset.
+    val pickSaveDir = rememberSaveDirPicker(saveDirs)
     val speedLimit by SettingsRepository.getSpeedLimit(context).collectAsState(initial = "")
     val concurrentFragments by SettingsRepository.getConcurrentFragments(context).collectAsState(initial = SettingsRepository.CONCURRENT_FRAGMENTS.last())
     val throttledRate by SettingsRepository.getThrottledRate(context).collectAsState(initial = "")
@@ -307,16 +287,16 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
 
     dirDialogFor?.let { isVideo ->
         SaveDirDialog(
+            isVideo = isVideo,
+            saveDir = saveDirs.of(isVideo),
             label = saveDirs.labelOf(isVideo),
-            isCustom = saveDirs.of(isVideo).isCustom,
             onOpen = {
                 dirDialogFor = null
                 MediaOpener.openLocation(context, saveDirs.of(isVideo).uri, isVideo)
             },
-            onPick = {
+            onPick = { card ->
                 dirDialogFor = null
-                pickingVideoDir = isVideo
-                folderPicker.launch(saveDirs.of(isVideo).uri.takeIf { it.isNotBlank() }?.let(Uri::parse))
+                pickSaveDir(isVideo, card)
             },
             onReset = {
                 dirDialogFor = null

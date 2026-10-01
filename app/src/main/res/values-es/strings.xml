@@ -148,7 +148,6 @@
     <string name="format_sheet_save_location_body">Abre esta carpeta en tu gestor de archivos, o elige otra donde guardar las descargas.</string>
     <string name="format_sheet_open_folder">Abrir la carpeta</string>
     <string name="format_sheet_reset">Restablecer</string>
-    <string name="format_sheet_change">Cambiar</string>
 
     <!-- ConverterScreen -->
     <string name="converter_label_convert_to">Convertir a</string>
@@ -537,7 +536,7 @@
     <string name="storage_locations_limits">Límites</string>
     <string name="storage_locations_wifi_only_description">Las descargas esperan en vez de tirar de los datos móviles</string>
     <string name="storage_locations_speed_limit_description">A qué velocidad se le permite ir a una descarga</string>
-    <string name="storage_locations_internal_note">Todos los archivos se guardan en el almacenamiento interno de tu dispositivo. Puedes acceder a ellos cuando quieras con cualquier gestor de archivos.</string>
+    <string name="storage_locations_internal_note">Las descargas se guardan en el almacenamiento interno salvo que elijas una tarjeta SD u otra carpeta. Las descargas a una tarjeta SD también guardan allí sus archivos temporales, así no ocupan espacio del teléfono.</string>
     <string name="storage_locations_wifi_only">Solo con Wi-Fi</string>
     <string name="storage_locations_speed_limit">Límite de velocidad</string>
 
@@ -703,4 +702,16 @@
     </plurals>
     <string name="home_update">Actualizar</string>
     <string name="home_update_available">Actualización disponible</string>
+    <string name="save_location_internal">Almacenamiento interno</string>
+    <string name="save_location_card_hint">Guarda en %1$s en la tarjeta</string>
+    <string name="save_location_free">%1$s libres</string>
+    <string name="save_location_other">Otra carpeta</string>
+    <string name="save_location_other_hint">Cualquier carpeta de este dispositivo o de una tarjeta</string>
+    <string name="save_location_close">Cerrar</string>
+    <string name="save_location_error_title">No se pudo usar esa carpeta</string>
+    <string name="save_location_error_access">Android no permitió que Hazel conservara el acceso a esa carpeta. Inténtalo de nuevo o elige otra.</string>
+    <string name="save_location_error_no_picker">Ninguna app de este dispositivo puede elegir carpetas.</string>
+    <string name="save_location_error_card_folder">No se pudo crear %1$s en la tarjeta, así que las descargas se guardarán en la carpeta elegida.</string>
+    <string name="save_fallback_title">Guardado en otro lugar</string>
+    <string name="save_fallback_body">No se pudieron escribir en %1$s. Puede que la tarjeta se haya quitado, esté llena o ya no permita el acceso. Se guardaron en %2$s.</string>
 </resources>
