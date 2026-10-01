@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [1.1.10] - 2026-10-01
+### Store
+- Search by words and play videos right on the home cards
+- Cut with a live preview, record live streams from the start
+- New Synthesizing, Advanced and Backup screens
+- Steadier YouTube reads with on-device PO tokens
+- Queue card now shows the real download state
+- Fixed long titles, chapter splits and subtitles failing downloads
+- Fixed engine updates breaking downloads in progress
+- Playlists no longer open as a single song
+
 ### Added
 - More › Synthesizing sets the saved download options the sheets start from: SponsorBlock (on or off, categories and server), bitrate, cover art and crop, preferred audio language and codec, audio format, subtitles (embed, keep the files, languages), video format, chapters, preferred video codec and quality, with a reset.
 - More › Advanced sets YouTube player clients, PO tokens and visitor data, YouTube metadata in the app's language (only languages YouTube accepts), other YouTube arguments, a pause between requests, skipping certificate checks and extra download arguments, applied to every read and download.
