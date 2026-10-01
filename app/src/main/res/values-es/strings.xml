@@ -466,6 +466,13 @@
     <string name="format_selection_confirm">Aceptar</string>
     <string name="format_selection_loading">Leyendo el resto de los formatos</string>
     <string name="format_audio_empty">Este enlace no tiene pistas de audio separadas</string>
+    <string name="format_sheet_section_details">Detalles</string>
+    <string name="sheet_link_title">Enlace</string>
+    <string name="sheet_link_copy">Copiar</string>
+    <string name="sheet_link_open">Abrir</string>
+    <string name="sheet_link_options">Opciones del enlace</string>
+    <string name="sheet_link_copied">Enlace copiado</string>
+    <string name="sheet_link_open_failed">Ninguna app puede abrir este enlace</string>
     <string name="format_sort_quality">Calidad</string>
     <string name="format_sort_file_size">Tamaño del archivo</string>
     <string name="format_sort_container">Contenedor</string>

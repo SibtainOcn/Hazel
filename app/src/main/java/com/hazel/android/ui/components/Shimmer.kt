@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hazel.android.ui.theme.SizeBadgeContainer
 import kotlin.math.cos
+import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.tan
 
@@ -92,8 +93,6 @@ private val BLOCK_GREY = Color(0xFFA6A6A6)
  * of the same hue.
  */
 private val SIZE_BLOCK_BLUE = lerp(SizeBadgeContainer, Color(0xFF8FB8F0), 0.55f)
-
-
 
 /**
  * Drives one sweep for everything inside it. Place it around a whole skeleton.
@@ -182,9 +181,20 @@ private const val GLINT_SWEEP_MS = 900
 private const val GLINT_ALPHA = 0.14f
 
 /**
+ * The sideways glint, for a single control rather than a column of them: quicker, and a
+ * little brighter, since it crosses a short wide shape in one pass and has to read at once.
+ */
+private const val GLINT_ACROSS_SWEEP_MS = 850
+private const val GLINT_ACROSS_ALPHA = 0.22f
+
+/**
  * Real content that is still filling in: everything inside is drawn as it is, at full
  * strength and still tappable, and a narrow glint runs across it on a loop for as long as
  * [active] holds.
+ *
+ * By default the glint runs top to bottom, the way a rail or a list is read. [across] turns
+ * it into a slanted band running left to right, for one wide control such as the quality
+ * row, where it stands in for a progress line under it.
  *
  * The glint is laid only over what the content painted (its blocks, not the gaps between
  * them), and in the theme's own text colour, so it lightens a dark surface and darkens a
@@ -195,6 +205,7 @@ private const val GLINT_ALPHA = 0.14f
 fun GlintHost(
     active: Boolean,
     modifier: Modifier = Modifier,
+    across: Boolean = false,
     content: @Composable () -> Unit
 ) {
     if (!active) {
@@ -207,12 +218,17 @@ fun GlintHost(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = GLINT_SWEEP_MS, easing = LinearEasing),
+            animation = tween(
+                durationMillis = if (across) GLINT_ACROSS_SWEEP_MS else GLINT_SWEEP_MS,
+                easing = LinearEasing
+            ),
             repeatMode = RepeatMode.Restart
         ),
         label = "glintSweep"
     )
-    val glint = MaterialTheme.colorScheme.onSurface.copy(alpha = GLINT_ALPHA)
+    val glint = MaterialTheme.colorScheme.onSurface.copy(
+        alpha = if (across) GLINT_ACROSS_ALPHA else GLINT_ALPHA
+    )
 
     Box(
         modifier = modifier
@@ -220,23 +236,35 @@ fun GlintHost(
             .drawWithContent {
                 drawContent()
 
-                // Runs top to bottom, the way the rail and lists it covers are read, and
-                // starts and ends wholly outside them so each pass leaves a moment of rest.
-                val band = size.width * 1.4f
-                val travel = size.height + band * 2f
-                val centre = -band + travel * progress.value
-                drawRect(
-                    brush = Brush.linearGradient(
-                        colorStops = arrayOf(
-                            0f to Color.Transparent,
-                            0.5f to glint,
-                            1f to Color.Transparent
-                        ),
+                val stops = arrayOf(
+                    0f to Color.Transparent,
+                    0.5f to glint,
+                    1f to Color.Transparent
+                )
+
+                // Each pass starts and ends wholly outside the content, so it leaves a
+                // moment of rest before the next.
+                val brush = if (across) {
+                    val band = max(size.height * 1.2f, size.width * 0.28f)
+                    val lean = size.height * 0.45f
+                    val travel = size.width + band * 2f
+                    val centre = -band + travel * progress.value
+                    Brush.linearGradient(
+                        colorStops = stops,
+                        start = Offset(centre - band / 2f, 0f),
+                        end = Offset(centre + band / 2f, lean)
+                    )
+                } else {
+                    val band = size.width * 1.4f
+                    val travel = size.height + band * 2f
+                    val centre = -band + travel * progress.value
+                    Brush.linearGradient(
+                        colorStops = stops,
                         start = Offset(0f, centre - band / 2f),
                         end = Offset(size.width * 0.35f, centre + band / 2f)
-                    ),
-                    blendMode = BlendMode.SrcAtop
-                )
+                    )
+                }
+                drawRect(brush = brush, blendMode = BlendMode.SrcAtop)
             }
     ) {
         content()
@@ -423,9 +451,12 @@ fun FormatListShimmer(rows: Int = 5, modifier: Modifier = Modifier) {
     }
 }
 
-/** How long the band takes to cross a [ShimmerLabel], and how wide it is. */
-private const val TEXT_SWEEP_MS = 2000
-private val TEXT_BAND_WIDTH = 125.dp
+/**
+ * How long the band takes to cross a [ShimmerLabel], and how wide it is. Quick and narrow,
+ * so a heading that is waiting reads as busy rather than idle.
+ */
+private const val TEXT_SWEEP_MS = 1000
+private val TEXT_BAND_WIDTH = 90.dp
 
 /**
  * Words with light running across them: the letters rest dim and a bright band sweeps

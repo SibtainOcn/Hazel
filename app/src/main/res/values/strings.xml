@@ -502,6 +502,13 @@
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Reading the rest of the formats</string>
     <string name="format_audio_empty">No separate audio streams for this link</string>
+    <string name="format_sheet_section_details">Details</string>
+    <string name="sheet_link_title">Link</string>
+    <string name="sheet_link_copy">Copy</string>
+    <string name="sheet_link_open">Open</string>
+    <string name="sheet_link_options">Link options</string>
+    <string name="sheet_link_copied">Link copied</string>
+    <string name="sheet_link_open_failed">No app can open this link</string>
     <string name="format_sort_quality">Quality</string>
     <string name="format_sort_file_size">File size</string>
     <string name="format_sort_container">Container</string>

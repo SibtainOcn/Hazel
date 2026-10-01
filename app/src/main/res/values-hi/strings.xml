@@ -460,6 +460,13 @@
     <string name="format_selection_confirm">ठीक है</string>
     <string name="format_selection_loading">बाकी फ़ॉर्मैट पढ़े जा रहे हैं</string>
     <string name="format_audio_empty">इस लिंक में अलग ऑडियो स्ट्रीम नहीं हैं</string>
+    <string name="format_sheet_section_details">विवरण</string>
+    <string name="sheet_link_title">लिंक</string>
+    <string name="sheet_link_copy">कॉपी करें</string>
+    <string name="sheet_link_open">खोलें</string>
+    <string name="sheet_link_options">लिंक विकल्प</string>
+    <string name="sheet_link_copied">लिंक कॉपी हुआ</string>
+    <string name="sheet_link_open_failed">कोई ऐप यह लिंक नहीं खोल सकता</string>
     <string name="format_sort_quality">क्वालिटी</string>
     <string name="format_sort_file_size">फ़ाइल का आकार</string>
     <string name="format_sort_container">कंटेनर</string>

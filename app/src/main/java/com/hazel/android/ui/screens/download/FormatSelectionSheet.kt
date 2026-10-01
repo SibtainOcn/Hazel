@@ -2,6 +2,14 @@ package com.hazel.android.ui.screens.download
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.geometry.Size
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
@@ -757,6 +765,11 @@ private fun SectionHeader(text: String, compact: Boolean = false, modifier: Modi
  * [compact] is the row as the pane beside the format rail draws it: a smaller block and
  * headline to fit the narrower width, on a step-up tone of its own so each row reads as
  * something to tap with the rail's stops beside it.
+ *
+ * [pendingBadges] says the formats are still being read. A row standing in for the best
+ * has nothing measured to show yet, so two empty pills hold the places the codec and the
+ * size will take, filling with colour on a loop. [popBadges] lets the real badges spring in
+ * when they arrive, for the one row in the download sheet that was waiting on them.
  */
 @Composable
 fun FormatRow(
@@ -765,7 +778,9 @@ fun FormatRow(
     onClick: () -> Unit,
     showChevron: Boolean = false,
     mergeAudioId: String? = null,
-    compact: Boolean = false
+    compact: Boolean = false,
+    pendingBadges: Boolean = false,
+    popBadges: Boolean = false
 ) {
     val scheme = MaterialTheme.colorScheme
     val fill by animateColorAsState(
@@ -834,12 +849,34 @@ fun FormatRow(
             // video row it repeats what the size already showed.
             val bitrate = format.bitrateLabel.takeIf { !format.hasVideo }.orEmpty()
 
-            if (mergeAudioId != null || codec.isNotBlank() ||
+            val hasBadges = mergeAudioId != null || codec.isNotBlank() ||
                 size.isNotBlank() || bitrate.isNotBlank()
-            ) {
+
+            // Starts small and springs to size once, when this format's badges first show.
+            val pop = remember(format.formatId) { Animatable(if (popBadges) BADGE_POP_FROM else 1f) }
+            LaunchedEffect(format.formatId, popBadges) {
+                if (popBadges && hasBadges) {
+                    pop.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessMediumLow))
+                } else {
+                    pop.snapTo(1f)
+                }
+            }
+
+            if (!hasBadges && pendingBadges) {
+                Spacer(modifier = Modifier.height(6.dp))
+                FillingBadges()
+            } else if (hasBadges) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    modifier = Modifier
+                        .graphicsLayer {
+                            val p = pop.value
+                            scaleX = p
+                            scaleY = p
+                            alpha = ((p - BADGE_POP_FROM) / (1f - BADGE_POP_FROM)).coerceIn(0f, 1f)
+                            transformOrigin = TransformOrigin(0f, 0.5f)
+                        }
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     if (mergeAudioId != null) {
@@ -910,6 +947,86 @@ private fun ContainerBadge(text: String, compact: Boolean = false) {
                 .padding(horizontal = 3.dp)
         )
     }
+}
+
+/** How small the badges start when they spring in. */
+private const val BADGE_POP_FROM = 0.6f
+
+/** One fill of a waiting pill, from empty through full to faded. */
+private const val BADGE_FILL_MS = 1300
+
+/** Share of a fill spent growing; the rest is spent full and fading out. */
+private const val BADGE_FILL_GROW = 0.7f
+
+/**
+ * The two pills that stand where the codec and the size will be, filling with colour while
+ * the formats are read: the codec's in the accent, the size's in its own blue, a beat
+ * behind. One loop drives both, and it is read while drawing, so the fill repaints the
+ * pills without recomposing them; it stops as soon as the row has real badges to show.
+ */
+@Composable
+private fun FillingBadges() {
+    val transition = rememberInfiniteTransition(label = "fillingBadges")
+    val progress = transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(BADGE_FILL_MS, easing = LinearEasing)),
+        label = "fillingBadgesFill"
+    )
+    val accent = MaterialTheme.colorScheme.primary
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        FillingPill(
+            width = 44.dp,
+            rest = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
+            fill = accent.copy(alpha = 0.45f),
+            progress = { progress.value },
+            phase = 0f
+        )
+        FillingPill(
+            width = 70.dp,
+            rest = SizeBadgeContainer,
+            fill = SIZE_FILL_BLUE,
+            progress = { progress.value },
+            phase = 0.2f
+        )
+    }
+}
+
+/** The size badge's blue, lifted, so the fill shows against the badge it is filling. */
+private val SIZE_FILL_BLUE = Color(0x998FB8F0)
+
+@Composable
+private fun FillingPill(
+    width: androidx.compose.ui.unit.Dp,
+    rest: Color,
+    fill: Color,
+    progress: () -> Float,
+    phase: Float
+) {
+    Box(
+        modifier = Modifier
+            .size(width = width, height = 22.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .drawBehind {
+                drawRect(rest)
+                val t = (progress() + 1f - phase) % 1f
+                val grown: Float
+                val alpha: Float
+                if (t < BADGE_FILL_GROW) {
+                    val x = t / BADGE_FILL_GROW
+                    // Eases out, so the fill races in and slows as it reaches the end.
+                    grown = 1f - (1f - x) * (1f - x)
+                    alpha = 1f
+                } else {
+                    grown = 1f
+                    alpha = 1f - (t - BADGE_FILL_GROW) / (1f - BADGE_FILL_GROW)
+                }
+                drawRect(
+                    color = fill.copy(alpha = fill.alpha * alpha),
+                    size = Size(size.width * grown, size.height)
+                )
+            }
+    )
 }
 
 /** How loud a badge is, from a plain measurement to the point of the row. */

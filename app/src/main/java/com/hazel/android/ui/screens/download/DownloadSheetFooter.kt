@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,11 +42,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
+import com.hazel.android.ui.components.FlatChip
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -58,61 +62,98 @@ import kotlinx.coroutines.launch
  * go and see what is behind it. It opens in the app that owns the site where there is one,
  * and in the browser otherwise.
  *
+ * With [linkAsButton] the address is not written out at all: a link button stands in for
+ * it, and tapping it asks which of the two is wanted, so a tap meant to copy does not also
+ * throw the user out to another app. The single-link sheet uses it, since the media it is
+ * about is already named in the sheet above.
+ *
  * Incognito sits beside it because this is where it applies: the sheet is the last moment
  * before a download is recorded, and a switch buried in a bar at the top of the app is not
  * where the decision is made. It is the same setting the rest of the app reads, so turning
  * it on here turns it on everywhere.
+ *
+ * What a tap did is said in a short message. Given [onFeedback], the message is handed to
+ * the sheet to show over itself, since a footer at the end of a long sheet can be below the
+ * screen's edge and a message under it would never be seen. Without it, the message shows
+ * under the footer, as it always has.
  */
 @Composable
 fun DownloadSheetFooter(
     label: String,
     modifier: Modifier = Modifier,
     /** Copied when the address is tapped. Blank for a sheet covering more than one link. */
-    copyText: String = label
+    copyText: String = label,
+    linkAsButton: Boolean = false,
+    onFeedback: ((String) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
 
-    // What the last tap did. It clears itself, so nothing has to be dismissed and the sheet
-    // does not keep an old answer on screen while the user reads the rest of it.
-    var feedback by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(feedback) {
-        if (feedback != null) {
+    // What the last tap did, when it is shown here. It clears itself, so nothing has to be
+    // dismissed and the sheet does not keep an old answer on screen.
+    var inlineFeedback by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(inlineFeedback) {
+        if (inlineFeedback != null) {
             delay(FEEDBACK_MS)
-            feedback = null
+            inlineFeedback = null
         }
     }
+    val say: (String) -> Unit = { message ->
+        if (onFeedback != null) onFeedback(message) else inlineFeedback = message
+    }
+
+    var linkDialogOpen by remember { mutableStateOf(false) }
+    val copiedMessage = stringResource(R.string.sheet_link_copied)
+    val openFailedMessage = stringResource(R.string.sheet_link_open_failed)
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Filled.Link,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                label,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable(enabled = copyText.isNotBlank()) {
-                        copySheetLink(context, copyText)
-                        feedback = if (openSheetLink(context, copyText)) {
-                            "Link copied and opened"
-                        } else {
-                            "Link copied"
+            if (linkAsButton) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                        .clickable(enabled = copyText.isNotBlank()) { linkDialogOpen = true },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.Link,
+                        contentDescription = stringResource(R.string.sheet_link_options),
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+            } else {
+                Icon(
+                    Icons.Filled.Link,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(enabled = copyText.isNotBlank()) {
+                            copySheetLink(context, copyText)
+                            say(
+                                if (openSheetLink(context, copyText)) "Link copied and opened"
+                                else "Link copied"
+                            )
                         }
-                    }
-            )
+                )
 
-            Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(12.dp))
+            }
 
             Box(
                 modifier = Modifier
@@ -125,7 +166,7 @@ fun DownloadSheetFooter(
                     .clickable {
                         val enabled = !incognito
                         scope.launch { SettingsRepository.setIncognito(context, enabled) }
-                        feedback = if (enabled) "Incognito: Enabled" else "Incognito: Disabled"
+                        say(if (enabled) "Incognito: Enabled" else "Incognito: Disabled")
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -144,28 +185,83 @@ fun DownloadSheetFooter(
         }
 
         AnimatedVisibility(
-            visible = feedback != null,
+            visible = inlineFeedback != null,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
             Column {
                 Spacer(modifier = Modifier.height(10.dp))
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.inverseSurface
-                ) {
-                    Text(
-                        feedback.orEmpty(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
-                    )
-                }
+                FeedbackToast(inlineFeedback.orEmpty())
             }
         }
     }
+
+    if (linkDialogOpen) {
+        LinkDialog(
+            url = copyText,
+            onCopy = {
+                copySheetLink(context, copyText)
+                linkDialogOpen = false
+                say(copiedMessage)
+            },
+            onOpen = {
+                linkDialogOpen = false
+                if (!openSheetLink(context, copyText)) say(openFailedMessage)
+            },
+            onDismiss = { linkDialogOpen = false }
+        )
+    }
+}
+
+/** The short message a sheet shows after a tap, in the inverse tone so it reads over anything. */
+@Composable
+internal fun FeedbackToast(message: String, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.inverseSurface
+    ) {
+        Text(
+            message,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
+        )
+    }
+}
+
+/**
+ * What the link button offers: the address itself, so it can be checked before anything is
+ * done with it, and the two things to do with it as plain chips.
+ */
+@Composable
+private fun LinkDialog(
+    url: String,
+    onCopy: () -> Unit,
+    onOpen: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Filled.Link, contentDescription = null) },
+        title = { Text(stringResource(R.string.sheet_link_title), fontWeight = FontWeight.Bold) },
+        text = {
+            Text(
+                url,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        confirmButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlatChip(label = stringResource(R.string.sheet_link_copy), onClick = onCopy)
+                FlatChip(label = stringResource(R.string.sheet_link_open), onClick = onOpen, selected = true)
+            }
+        }
+    )
 }
 
 /** Long enough to read, short enough that it is gone before it is in the way. */

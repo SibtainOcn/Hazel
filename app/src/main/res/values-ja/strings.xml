@@ -454,6 +454,13 @@
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">残りの形式を読み込み中</string>
     <string name="format_audio_empty">このリンクには個別の音声ストリームがありません</string>
+    <string name="format_sheet_section_details">詳細</string>
+    <string name="sheet_link_title">リンク</string>
+    <string name="sheet_link_copy">コピー</string>
+    <string name="sheet_link_open">開く</string>
+    <string name="sheet_link_options">リンクのオプション</string>
+    <string name="sheet_link_copied">リンクをコピーしました</string>
+    <string name="sheet_link_open_failed">このリンクを開けるアプリがありません</string>
     <string name="format_sort_quality">画質</string>
     <string name="format_sort_file_size">ファイルサイズ</string>
     <string name="format_sort_container">コンテナ</string>

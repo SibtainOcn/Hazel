@@ -472,6 +472,13 @@
     <string name="format_selection_confirm">ОК</string>
     <string name="format_selection_loading">Чтение остальных форматов</string>
     <string name="format_audio_empty">У этой ссылки нет отдельных аудиопотоков</string>
+    <string name="format_sheet_section_details">Подробности</string>
+    <string name="sheet_link_title">Ссылка</string>
+    <string name="sheet_link_copy">Копировать</string>
+    <string name="sheet_link_open">Открыть</string>
+    <string name="sheet_link_options">Действия со ссылкой</string>
+    <string name="sheet_link_copied">Ссылка скопирована</string>
+    <string name="sheet_link_open_failed">Нет приложения, чтобы открыть эту ссылку</string>
     <string name="format_sort_quality">Качество</string>
     <string name="format_sort_file_size">Размер файла</string>
     <string name="format_sort_container">Контейнер</string>

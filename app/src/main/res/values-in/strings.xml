@@ -454,6 +454,13 @@
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Membaca format lainnya</string>
     <string name="format_audio_empty">Tautan ini tidak memiliki aliran audio terpisah</string>
+    <string name="format_sheet_section_details">Detail</string>
+    <string name="sheet_link_title">Tautan</string>
+    <string name="sheet_link_copy">Salin</string>
+    <string name="sheet_link_open">Buka</string>
+    <string name="sheet_link_options">Opsi tautan</string>
+    <string name="sheet_link_copied">Tautan disalin</string>
+    <string name="sheet_link_open_failed">Tidak ada aplikasi yang dapat membuka tautan ini</string>
     <string name="format_sort_quality">Kualitas</string>
     <string name="format_sort_file_size">Ukuran file</string>
     <string name="format_sort_container">Wadah</string>
