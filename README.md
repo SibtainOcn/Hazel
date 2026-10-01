@@ -174,7 +174,7 @@ You should have received a copy of the GNU General Public License along with Haz
 ## 🧱 Credits
 
 Hazel is a GUI for [yt-dlp](https://github.com/yt-dlp/yt-dlp), based on [youtubedl-android](https://github.com/yausername/youtubedl-android).
-[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) for fast listing, search and playback streams, and [Media3 ExoPlayer](https://github.com/androidx/media) for playback.
+[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) for fast listing, search and playback streams, and [Media3 ExoPlayer](https://github.com/androidx/media) for playback. Some designs inspiration taken from [YTDLnis](https://github.com/deniscerri/ytdlnis)
 
 > *Special thanks to the [yt-dlp](https://github.com/yt-dlp/yt-dlp) team - without their work, Hazel wouldn't exist.*
 > 
