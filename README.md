@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/HAZEL-BANNER.png" alt="Hazel Banner" width="100%" />
+  <img src="assets/new-banner.png" alt="Hazel Banner" width="100%" />
 </p>
 
 <div align="center">
