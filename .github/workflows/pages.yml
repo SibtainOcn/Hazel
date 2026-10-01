@@ -1,0 +1,38 @@
+name: Pages
+
+# Publishes the pages/ folder (the donate page) to GitHub Pages.
+on:
+  push:
+    branches: [main]
+    paths: ['pages/**', 'assets/Haze.svg', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      # The page uses the logo from assets/ rather than a copy kept in pages/.
+      - name: Assemble site
+        run: |
+          mkdir _site
+          cp -r pages/. _site/
+          cp assets/Haze.svg _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
