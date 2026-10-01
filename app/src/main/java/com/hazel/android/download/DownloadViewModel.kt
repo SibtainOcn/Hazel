@@ -653,6 +653,7 @@ class DownloadViewModel : ViewModel() {
                 resolved = coroutineScope {
                     valid.mapIndexed { index, link ->
                         async(Dispatchers.IO) {
+                            val started = android.os.SystemClock.elapsedRealtime()
                             runCatching {
                                 expand(
                                     link,
@@ -662,8 +663,16 @@ class DownloadViewModel : ViewModel() {
                                     fetchMode, forceIpv4, listingSource,
                                     "${MediaProbe.PROBE_PROCESS_ID}_$index"
                                 )
+                            }.onSuccess { cards ->
+                                Log.d(
+                                    InfoCache.TRACE_TAG,
+                                    "link ${LinkKey.digest(link).take(8)} via ${listingSource.name}: " +
+                                        "${cards.size} card(s), formats=${cards.singleOrNull()?.hasResolvedFormats} " +
+                                        "in ${android.os.SystemClock.elapsedRealtime() - started} ms"
+                                )
                             }.onFailure { failure ->
                                 if (failure is CancellationException) throw failure
+                                Log.d(InfoCache.TRACE_TAG, "link ${LinkKey.digest(link).take(8)} failed in ${android.os.SystemClock.elapsedRealtime() - started} ms")
                                 lastFailure = failure.message?.trim().orEmpty()
                             }.getOrDefault(emptyList())
                         }
@@ -811,7 +820,8 @@ class DownloadViewModel : ViewModel() {
         // A link read recently is not read again. The engine costs seconds to start before
         // it does any work, so the cheapest read is the one that does not happen. This
         // holds across restarts as well: what the last read wrote is still on disk.
-        InfoCache.metadataFor(url)?.let { return listOf(it) }
+        // The chosen reader's own read first, then whichever reader read it last.
+        (InfoCache.metadataFor(url, source) ?: InfoCache.metadataFor(url))?.let { return listOf(it) }
         InfoCache.listingFor(url)?.let { listing ->
             return listing.entries.map(MediaProbe::pendingFor)
         }
@@ -839,12 +849,20 @@ class DownloadViewModel : ViewModel() {
     }
 
     /**
-     * Reads the formats of [infos] again, from the source rather than the cache, with
-     * [source] when one is given and the reader setting otherwise. This is the format
-     * list's update action, and what switching its formats source does.
+     * Reads the formats of [infos] with [source] when one is given and the reader setting
+     * otherwise.
+     *
+     * [fresh] is the format list's update action: the reader is asked again and its last
+     * read replaced. Without it, as when the list is switched to another reader, that
+     * reader's last read of the link is used where it has one, so switching back and forth
+     * costs a read only the first time.
      */
-    fun refreshFormats(infos: List<MediaInfo>, source: ListingSource? = null) {
-        infos.forEach { readFormatsOf(it, fresh = true, source = source) }
+    fun refreshFormats(infos: List<MediaInfo>, source: ListingSource? = null, fresh: Boolean = true) {
+        infos.forEach { info ->
+            // Nothing to do for a link already showing that reader's read, unless asked again.
+            if (!fresh && source != null && info.hasResolvedFormats && info.readBy == source) return@forEach
+            readFormatsOf(info, fresh = fresh, source = source)
+        }
     }
 
     /**
@@ -858,8 +876,16 @@ class DownloadViewModel : ViewModel() {
         if (!claimFormatRead(info.url)) return
 
         viewModelScope.launch(Dispatchers.IO) {
+            val started = android.os.SystemClock.elapsedRealtime()
             val resolved = try {
-                formatReads.withPermit { readFormats(info.url, fresh, source) }
+                formatReads.withPermit { readFormats(info.url, fresh, source) }.also {
+                    Log.d(
+                        InfoCache.TRACE_TAG,
+                        "formats ${LinkKey.digest(info.url).take(8)} asked=${source?.name ?: "setting"} " +
+                            "fresh=$fresh got=${it?.readBy?.name} formats=${it?.hasResolvedFormats} " +
+                            "in ${android.os.SystemClock.elapsedRealtime() - started} ms"
+                    )
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -902,24 +928,44 @@ class DownloadViewModel : ViewModel() {
     }
 
     /**
-     * One link's formats. A [fresh] read skips the cache and replaces what it held; a
-     * [source] overrides the reader setting for this read.
+     * One link's formats. A [fresh] read skips the cache and replaces what the reader held
+     * there, leaving the other reader's read alone; a [source] overrides the reader setting
+     * for this read, and names the slot of the cache it is answered from.
+     *
+     * A reader that cannot answer (NewPipe on a site it does not know, or on one with a saved
+     * sign-in it cannot send) falls back to yt-dlp, whose own last read is used first when
+     * the read is not a fresh one.
      */
     private suspend fun readFormats(url: String, fresh: Boolean, source: ListingSource?): MediaInfo? {
         val app = HazelApp.instance
         val reader = source ?: SettingsRepository.getListingSource(app).first()
         val access = CookieRepository.accessFor(app, url)
+        val newPipeCan = reader == ListingSource.NEWPIPE && !access.hasCookies && NewPipeEngine.handlesStream(url)
 
         if (fresh) {
-            InfoCache.invalidate(url)
+            InfoCache.invalidate(url, if (newPipeCan) ListingSource.NEWPIPE else ListingSource.YT_DLP)
         } else {
-            InfoCache.metadataFor(url)?.takeIf { it.hasResolvedFormats }?.let { return it }
+            val cached = when {
+                // A reader asked for by name is answered from its own reads, or, when it
+                // cannot read this link at all, from the reader it falls back to.
+                source != null -> InfoCache.metadataFor(url, if (newPipeCan) source else ListingSource.YT_DLP)
+                else -> InfoCache.metadataFor(url)
+            }
+            cached?.takeIf { it.hasResolvedFormats }?.let { return it }
         }
 
-        if (reader == ListingSource.NEWPIPE && !access.hasCookies && NewPipeEngine.handlesStream(url)) {
-            NewPipeEngine.single(url)?.takeIf { it.hasResolvedFormats }?.let {
-                InfoCache.put(url, it, rawJson = null)
-                return it
+        if (newPipeCan) {
+            runCatching { NewPipeEngine.single(url) }
+                .onFailure { if (it is CancellationException) throw it }
+                .getOrNull()
+                ?.takeIf { it.hasResolvedFormats }
+                ?.let {
+                    InfoCache.put(url, it, rawJson = null)
+                    return it
+                }
+            // NewPipe could not answer; yt-dlp's own last read stands in before a new one.
+            if (!fresh) {
+                InfoCache.metadataFor(url, ListingSource.YT_DLP)?.takeIf { it.hasResolvedFormats }?.let { return it }
             }
         }
 

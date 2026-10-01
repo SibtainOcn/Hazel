@@ -181,7 +181,18 @@
     <string name="more_converter">离线把视频转成音频</string>
     <string name="more_software_update">软件更新</string>
     <string name="more_support">支持 Hazel</string>
-    <string name="more_license">许可证</string>
+    <string name="more_documentation">文档</string>
+    <string name="docs_title">文档</string>
+    <string name="docs_back">返回</string>
+    <string name="docs_guide">使用指南</string>
+    <string name="docs_features">功能</string>
+    <string name="docs_faq">常见问题</string>
+    <string name="docs_changelog">新功能</string>
+    <string name="docs_license">许可证</string>
+    <string name="docs_open_in_browser">在浏览器中打开</string>
+    <string name="docs_error_title">无法加载此页面</string>
+    <string name="docs_error_body">请检查网络连接后重试。</string>
+    <string name="docs_retry">重试</string>
 
     <!-- SponsorScreen -->
     <string name="sponsor_back">返回</string>
@@ -243,6 +254,8 @@
     <string name="cleanup_category_engine_description">下载器和它的运行环境。清除能腾出最多空间，但下次下载时必须重新解包。</string>
     <string name="cleanup_category_other_cache_label">其他缓存文件</string>
     <string name="cleanup_category_other_cache_description">缩略图，以及浏览链接时缓存下来的其他内容。</string>
+    <string name="cleanup_category_link_reads_label">已保存的链接读取结果</string>
+    <string name="cleanup_category_link_reads_description">最近读取的 25 个链接的格式，再次打开时可立即显示。最多保留 6 小时；无痕模式下从不保存。</string>
     <string name="cleanup_confirm_category_title">清除这些文件？</string>
     <string name="cleanup_confirm_category_safe">将腾出 %1$s。你保存过的任何东西都不受影响。</string>
     <string name="cleanup_confirm_category_unsafe">将腾出 %1$s，下次下载会因为要重新解包而变慢。</string>
@@ -252,6 +265,7 @@
     <string name="cleanup_confirm_all_body">将腾出 %1$s。你的下载和已保存的登录信息都会保留，但下次下载会因为要重新解包引擎而变慢。</string>
     <string name="cleanup_confirm_all_confirm">全部清除</string>
     <string name="cleanup_confirm_all_cancel">取消</string>
+    <string name="cleanup_confirm_all_include_link_reads">同时清除已保存的链接读取结果（%1$s）</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">全部下载</string>
@@ -713,4 +727,8 @@
     <string name="save_location_error_card_folder">无法在存储卡上创建 %1$s，下载内容将保存到你选择的文件夹。</string>
     <string name="save_fallback_title">已保存到其他位置</string>
     <string name="save_fallback_body">无法写入 %1$s。存储卡可能已被移除、已满或不再允许访问。文件已改为保存到 %2$s。</string>
+    <string name="home_start_with">从这里开始</string>
+    <string name="home_start_paste">粘贴链接</string>
+    <string name="home_start_search">搜索</string>
+    <string name="home_start_downloads">下载</string>
 </resources>

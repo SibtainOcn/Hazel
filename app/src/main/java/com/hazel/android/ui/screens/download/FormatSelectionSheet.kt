@@ -83,6 +83,7 @@ import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.ui.components.FormatListShimmer
 import com.hazel.android.ui.components.GlintHost
+import com.hazel.android.ui.components.ShimmerLabel
 import com.hazel.android.download.qualityRung
 import com.hazel.android.ui.theme.SizeBadgeContainer
 import com.hazel.android.ui.theme.SizeBadgeContent
@@ -117,14 +118,15 @@ enum class FormatSort(@param:StringRes val labelRes: Int) {
  * either way, since picking an audio stream for a video download is allowed, but the one
  * being chosen leads.
  *
- * [isLoadingFormats] covers the case where the sheet is opened on a link that came from a
- * listing and has not been read yet. Only the generic entry is there to show at that point,
- * so the sheet says the rest is still coming rather than letting one row look like the
- * whole answer.
+ * [isLoadingFormats] covers the case where the sheet is opened on a link that has not been
+ * read yet. The ladder is there to choose from at that point, and is a full answer on its
+ * own, so the sheet says the rest is still coming under its title rather than standing
+ * placeholders under rows that are already real.
  *
  * The filter button narrows the list and orders it. Given [onRefresh], the sheet also offers
- * to read the formats again, and when [canChooseSource] says the links can be read by either
- * reader, to read them with the other one.
+ * to read the formats again (called with `fresh` set), and when [canChooseSource] says the
+ * links can be read by either reader, to switch to the other one (called without it, so a
+ * reader that has read the link before answers from its last read).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,7 +137,7 @@ fun FormatSelectionSheet(
     onDismiss: () -> Unit,
     audioFirst: Boolean = false,
     isLoadingFormats: Boolean = false,
-    onRefresh: ((ListingSource?) -> Unit)? = null,
+    onRefresh: ((source: ListingSource?, fresh: Boolean) -> Unit)? = null,
     canChooseSource: Boolean = false
 ) {
     // Half height on open. The sheet is a list, and a list is readable from the top down,
@@ -147,20 +149,26 @@ fun FormatSelectionSheet(
     var filterSheetOpen by remember { mutableStateOf(false) }
     var draft by remember { mutableStateOf(selected) }
 
-    // The reader these formats came from: the setting, until the user picks another here.
+    // The reader these formats came from: the one that read them, once they are read, and
+    // the setting before that. While a switch is reading, the reader picked is shown.
     val context = LocalContext.current
     val settingSource by remember(context) { SettingsRepository.getListingSource(context) }
         .collectAsState(initial = ListingSource.DEFAULT)
     var chosenSource by remember { mutableStateOf<ListingSource?>(null) }
-    val source = chosenSource ?: settingSource
+    val readSource = if (info.hasResolvedFormats) info.readBy else settingSource
 
-    // Set while an update the user asked for is running. The list it replaces is hidden
-    // behind the skeleton until then, so old rows are never mistaken for the new answer.
+    // Set while an update or a switch the user asked for is running. The list it replaces
+    // is hidden behind the skeleton until then, so old rows are never mistaken for the new
+    // answer. Only while something is actually being read: a switch answered from the cache
+    // can finish before the read is ever seen as running, and must not leave the list
+    // hidden behind it.
     var refreshing by remember { mutableStateOf(false) }
     LaunchedEffect(isLoadingFormats) { if (!isLoadingFormats) refreshing = false }
-    val refresh: (ListingSource?) -> Unit = { picked ->
+    val hidingRows = refreshing && isLoadingFormats
+    val source = (if (hidingRows) chosenSource else null) ?: readSource
+    val refresh: (ListingSource?, Boolean) -> Unit = { picked, fresh ->
         refreshing = true
-        onRefresh?.invoke(picked)
+        onRefresh?.invoke(picked, fresh)
     }
 
     // The stops and the rows under each are laid out once per ordering rather than per
@@ -246,7 +254,7 @@ fun FormatSelectionSheet(
                         icon = Icons.Filled.Refresh,
                         description = stringResource(R.string.format_update),
                         enabled = !isLoadingFormats,
-                        onClick = { refresh(chosenSource) }
+                        onClick = { refresh(readSource, true) }
                     )
                 }
 
@@ -275,10 +283,11 @@ fun FormatSelectionSheet(
             }
 
             if (isLoadingFormats) {
-                Text(
+                // Light runs through the line, so the list reads as still being filled in
+                // without placeholders standing under its rows.
+                ShimmerLabel(
                     stringResource(R.string.format_selection_loading),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -319,7 +328,7 @@ fun FormatSelectionSheet(
                     contentPadding = PaddingValues(bottom = bottomInset)
                 ) {
                     items(
-                        count = if (refreshing) 0 else rows.size,
+                        count = if (hidingRows) 0 else rows.size,
                         key = { rows[it].key },
                         contentType = { if (rows[it] is FormatListRow.Header) 0 else 1 }
                     ) { index ->
@@ -354,7 +363,7 @@ fun FormatSelectionSheet(
 
                     // Audio keeps its place on the rail whatever a source offers, so a link with
                     // no separate audio stream says so here rather than showing a blank pane.
-                    if (!isLoadingFormats && !refreshing && active.key == STOP_AUDIO && active.count == 0) {
+                    if (!isLoadingFormats && active.key == STOP_AUDIO && active.count == 0) {
                         item(key = "audio_empty", contentType = 3) {
                             Text(
                                 stringResource(R.string.format_audio_empty),
@@ -365,13 +374,15 @@ fun FormatSelectionSheet(
                         }
                     }
 
-                    // Skeletons stand where the rows still being read will land, so a list
-                    // holding only the generic entry reads as one that is still filling in
-                    // rather than as the whole answer.
-                    if (isLoadingFormats) {
+                    // Skeletons only stand in for a list with nothing to show: one hidden
+                    // behind an update, or a stop the read has not filled yet. Under rows
+                    // that are already there (the ladder a link opens with, while the link
+                    // is read) they would only look like rows that never arrive; the line
+                    // under the title and the rail's glint say the read is running.
+                    if (isLoadingFormats && (hidingRows || rows.isEmpty())) {
                         item(key = "loading", contentType = 2) {
                             FormatListShimmer(
-                                rows = if (refreshing) 6 else 4,
+                                rows = if (hidingRows) 6 else 4,
                                 modifier = Modifier.padding(horizontal = if (showRail) 4.dp else 14.dp)
                             )
                         }
@@ -396,9 +407,11 @@ fun FormatSelectionSheet(
             },
             onSource = { picked ->
                 filterSheetOpen = false
-                chosenSource = picked
-                filter = FormatFilter.ALL
-                refresh(picked)
+                if (picked != readSource || !info.hasResolvedFormats) {
+                    chosenSource = picked
+                    filter = FormatFilter.ALL
+                    refresh(picked, false)
+                }
             },
             onDismiss = { filterSheetOpen = false }
         )

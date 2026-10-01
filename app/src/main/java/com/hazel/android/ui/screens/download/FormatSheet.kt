@@ -131,7 +131,7 @@ fun FormatSheet(
     /** The link itself is still being read, so its details are not in yet. */
     isReadingLink: Boolean = false,
     /** Reads this link's formats again, with the given reader or the setting's. */
-    onRefreshFormats: ((ListingSource?) -> Unit)? = null,
+    onRefreshFormats: ((source: ListingSource?, fresh: Boolean) -> Unit)? = null,
     initialFormat: MediaFormat? = null,
     /** The soundtrack this link is already set to, for a link being adjusted again. */
     initialAudioLanguage: String? = null,

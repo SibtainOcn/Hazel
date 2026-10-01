@@ -24,6 +24,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -101,6 +102,13 @@ private fun overlayColorScheme(accentName: String): androidx.compose.material3.C
  */
 class ShareOverlayActivity : ComponentActivity() {
 
+    /**
+     * The link the sheet is for. A state rather than a local, because the activity is a
+     * single instance: a link shared while its sheet is still open, or left in the
+     * background, is delivered to [onNewIntent] here rather than opening a sheet of its own.
+     */
+    private var sharedUrl by mutableStateOf("")
+
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(AppLocale.wrap(newBase))
     }
@@ -120,177 +128,195 @@ class ShareOverlayActivity : ComponentActivity() {
         HazelApp.instance.startLibraryInit()
 
         val rawText = intent?.getStringExtra(Intent.EXTRA_TEXT) ?: intent?.dataString
-        val url = UrlExtractor.extract(rawText)
+        val firstUrl = UrlExtractor.extract(rawText)
 
-        if (url.isNullOrBlank()) {
+        if (firstUrl.isNullOrBlank()) {
             Toast.makeText(this, getString(R.string.share_overlay_invalid_link), Toast.LENGTH_SHORT).show()
             closeOverlay()
             return
         }
 
+        sharedUrl = firstUrl
+
         setContent {
-            val scope = rememberCoroutineScope()
-            val downloadViewModel = remember { DownloadViewModelHolder.get() }
-            val state by downloadViewModel.state.collectAsState()
-            val formatsReading by downloadViewModel.formatsReading.collectAsState()
+            // Keyed on the link, so a second share delivered to this same sheet starts over
+            // on the new link: its read, its placeholder and every choice on the sheet.
+            val url = sharedUrl
+            key(url) {
+                val scope = rememberCoroutineScope()
+                val downloadViewModel = remember { DownloadViewModelHolder.get() }
+                val state by downloadViewModel.state.collectAsState()
+                val formatsReading by downloadViewModel.formatsReading.collectAsState()
 
-            val options by SettingsRepository.getDownloadOptions(this)
-                .collectAsState(initial = DownloadOptions())
-            val saveDirs by SettingsRepository.getSaveDirs(this).collectAsState(initial = SaveDirs())
-            // The kind whose folder the picker is choosing, set as it opens.
-            val accentName by SettingsRepository.getAccentColor(this).collectAsState(initial = "Cyan")
+                val options by SettingsRepository.getDownloadOptions(this)
+                    .collectAsState(initial = DownloadOptions())
+                val saveDirs by SettingsRepository.getSaveDirs(this).collectAsState(initial = SaveDirs())
+                // The kind whose folder the picker is choosing, set as it opens.
+                val accentName by SettingsRepository.getAccentColor(this).collectAsState(initial = "Cyan")
 
-            LaunchedEffect(url) {
-                downloadViewModel.fetchShare(url)
-                val app = applicationContext
-                scope.launch(Dispatchers.IO) {
-                    if (!SettingsRepository.getIncognito(app).first()) {
-                        SearchHistoryRepository.record(app, url)
+                LaunchedEffect(url) {
+                    downloadViewModel.fetchShare(url)
+                    val app = applicationContext
+                    scope.launch(Dispatchers.IO) {
+                        if (!SettingsRepository.getIncognito(app).first()) {
+                            SearchHistoryRepository.record(app, url)
+                        }
                     }
                 }
-            }
 
-            // What the sheet shows before the read comes back: the link, and the generic
-            // "best" rows, which are enough to download with.
-            val bestVideo = stringResource(R.string.batch_quality_best)
-            val bestAudio = stringResource(R.string.audio_quality_best)
-            val worst = stringResource(R.string.batch_quality_worst)
-            val placeholder = remember(url, bestVideo, bestAudio, worst) {
-                GenericFormats.placeholder(url, bestVideo, bestAudio, worst)
-            }
+                // What the sheet shows before the read comes back: the link, and the generic
+                // "best" rows, which are enough to download with.
+                val bestVideo = stringResource(R.string.batch_quality_best)
+                val bestAudio = stringResource(R.string.audio_quality_best)
+                val worst = stringResource(R.string.batch_quality_worst)
+                val placeholder = remember(url, bestVideo, bestAudio, worst) {
+                    GenericFormats.placeholder(url, bestVideo, bestAudio, worst)
+                }
 
-            val pickSaveDir = rememberSaveDirPicker(saveDirs)
+                val pickSaveDir = rememberSaveDirPicker(saveDirs)
 
-            val openSaveDir: (Boolean) -> Unit = { isVideo ->
-                MediaOpener.openLocation(this@ShareOverlayActivity, saveDirs.of(isVideo).uri, isVideo)
-            }
-            val resetSaveDir: (Boolean) -> Unit = { isVideo ->
-                scope.launch { SettingsRepository.resetSaveDir(this@ShareOverlayActivity, isVideo) }
-            }
+                val openSaveDir: (Boolean) -> Unit = { isVideo ->
+                    MediaOpener.openLocation(this@ShareOverlayActivity, saveDirs.of(isVideo).uri, isVideo)
+                }
+                val resetSaveDir: (Boolean) -> Unit = { isVideo ->
+                    scope.launch { SettingsRepository.resetSaveDir(this@ShareOverlayActivity, isVideo) }
+                }
 
-            // Signing in from the failure dialog reads the link again with the new cookies.
-            val signInLauncher = rememberLauncherForActivityResult(
-                ActivityResultContracts.StartActivityForResult()
-            ) { result ->
-                if (result.resultCode == Activity.RESULT_OK) downloadViewModel.fetchShare(url)
-            }
+                // Signing in from the failure dialog reads the link again with the new cookies.
+                val signInLauncher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.StartActivityForResult()
+                ) { result ->
+                    if (result.resultCode == Activity.RESULT_OK) downloadViewModel.fetchShare(url)
+                }
 
-            MaterialTheme(colorScheme = overlayColorScheme(accentName), typography = HazelTypography) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    val readHere = state.url == url
-                    val results = if (readHere) state.results else emptyList()
-                    val failure = state.errorLog?.takeIf { readHere && !state.isFetching }
+                MaterialTheme(colorScheme = overlayColorScheme(accentName), typography = HazelTypography) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        val readHere = state.url == url
+                        val results = if (readHere) state.results else emptyList()
+                        val failure = state.errorLog?.takeIf { readHere && !state.isFetching }
 
-                    when {
-                        failure != null -> NoResultsDialog(
-                            message = failure,
-                            canFetchCookies = com.hazel.android.ui.screens.download.isCookieRelated(failure),
-                            canContinue = false,
-                            canAddCookies = true,
-                            onCopyLog = {
-                                copyToClipboard(this@ShareOverlayActivity, failure)
-                                Toast.makeText(
-                                    this@ShareOverlayActivity,
-                                    getString(R.string.history_failed_log_copied),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            },
-                            onGetCookies = {
-                                downloadViewModel.clearErrorLog()
-                                signInLauncher.launch(
-                                    CookieWebViewActivity.intent(this@ShareOverlayActivity, siteRootOf(url))
-                                )
-                            },
-                            onContinueAnyway = {},
-                            onDismiss = {
-                                downloadViewModel.clearErrorLog()
-                                closeOverlay()
-                            }
-                        )
-
-                        results.size > 1 -> BatchDownloadSheet(
-                            results = results,
-                            options = options,
-                            onOptionsChange = { changed ->
-                                scope.launch { SettingsRepository.setDownloadOptions(this@ShareOverlayActivity, changed) }
-                            },
-                            saveDirs = saveDirs,
-                            onOpenSaveDir = openSaveDir,
-                            onPickSaveDir = pickSaveDir,
-                            onResetSaveDir = resetSaveDir,
-                            onResolveFormats = downloadViewModel::resolveFormats,
-                            readingUrls = formatsReading,
-                            onRefreshFormats = downloadViewModel::refreshFormats,
-                            onRemove = downloadViewModel::removeResult,
-                            onDownload = { plans ->
-                                downloadViewModel.startBatch(applicationContext, plans, options, saveDirs = saveDirs)
-                                announceStarted()
-                                closeOverlay()
-                            },
-                            onDismiss = { closeOverlay() }
-                        )
-
-                        else -> {
-                            val resolved: MediaInfo? = results.singleOrNull()
-                            val info = resolved ?: placeholder
-                            LaunchedEffect(info.url, resolved != null) {
-                                if (resolved != null && !resolved.hasResolvedFormats) {
-                                    downloadViewModel.resolveFormats(resolved)
+                        when {
+                            failure != null -> NoResultsDialog(
+                                message = failure,
+                                canFetchCookies = com.hazel.android.ui.screens.download.isCookieRelated(failure),
+                                canContinue = false,
+                                canAddCookies = true,
+                                onCopyLog = {
+                                    copyToClipboard(this@ShareOverlayActivity, failure)
+                                    Toast.makeText(
+                                        this@ShareOverlayActivity,
+                                        getString(R.string.history_failed_log_copied),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                },
+                                onGetCookies = {
+                                    downloadViewModel.clearErrorLog()
+                                    signInLauncher.launch(
+                                        CookieWebViewActivity.intent(this@ShareOverlayActivity, siteRootOf(url))
+                                    )
+                                },
+                                onContinueAnyway = {},
+                                onDismiss = {
+                                    downloadViewModel.clearErrorLog()
+                                    closeOverlay()
                                 }
-                            }
-                            FormatSheet(
-                                info = info,
+                            )
+
+                            results.size > 1 -> BatchDownloadSheet(
+                                results = results,
                                 options = options,
                                 onOptionsChange = { changed ->
                                     scope.launch { SettingsRepository.setDownloadOptions(this@ShareOverlayActivity, changed) }
                                 },
                                 saveDirs = saveDirs,
-                                // The ladder is a full answer on its own, so no skeleton
-                                // stands under it; the header says the link is being read.
-                                isLoadingFormats = resolved != null && info.url in formatsReading,
-                                isReadingLink = resolved == null && state.isFetching,
-                                onRefreshFormats = resolved?.let { item ->
-                                    { source -> downloadViewModel.refreshFormats(listOf(item), source) }
-                                },
                                 onOpenSaveDir = openSaveDir,
                                 onPickSaveDir = pickSaveDir,
                                 onResetSaveDir = resetSaveDir,
-                                onDownload = { format, audioLanguage, title, author, oneOff ->
-                                    if (resolved != null) {
-                                        downloadViewModel.startDownload(
-                                            context = applicationContext,
-                                            format = format,
-                                            options = options.with(oneOff),
-                                            title = title,
-                                            author = author,
-                                            audioLanguage = audioLanguage,
-                                            info = resolved,
-                                            saveDirs = saveDirs
-                                        )
-                                    } else {
-                                        // Not read yet: the choice waits for the read and
-                                        // starts the moment it lands.
-                                        downloadViewModel.downloadOnceRead(
-                                            context = applicationContext,
-                                            url = url,
-                                            format = format,
-                                            options = options.with(oneOff),
-                                            title = title,
-                                            author = author,
-                                            audioLanguage = audioLanguage,
-                                            treeUri = saveDirs.of(format.hasVideo).uri
-                                        )
-                                    }
+                                onResolveFormats = downloadViewModel::resolveFormats,
+                                readingUrls = formatsReading,
+                                onRefreshFormats = downloadViewModel::refreshFormats,
+                                onRemove = downloadViewModel::removeResult,
+                                onDownload = { plans ->
+                                    downloadViewModel.startBatch(applicationContext, plans, options, saveDirs = saveDirs)
                                     announceStarted()
                                     closeOverlay()
                                 },
                                 onDismiss = { closeOverlay() }
                             )
+
+                            else -> {
+                                val resolved: MediaInfo? = results.singleOrNull()
+                                val info = resolved ?: placeholder
+                                LaunchedEffect(info.url, resolved != null) {
+                                    if (resolved != null && !resolved.hasResolvedFormats) {
+                                        downloadViewModel.resolveFormats(resolved)
+                                    }
+                                }
+                                FormatSheet(
+                                    info = info,
+                                    options = options,
+                                    onOptionsChange = { changed ->
+                                        scope.launch { SettingsRepository.setDownloadOptions(this@ShareOverlayActivity, changed) }
+                                    },
+                                    saveDirs = saveDirs,
+                                    // The ladder is a full answer on its own, so no skeleton
+                                    // stands under it; the header says the link is being read.
+                                    isLoadingFormats = resolved != null && info.url in formatsReading,
+                                    isReadingLink = resolved == null && state.isFetching,
+                                    onRefreshFormats = resolved?.let { item ->
+                                        { source, fresh -> downloadViewModel.refreshFormats(listOf(item), source, fresh) }
+                                    },
+                                    onOpenSaveDir = openSaveDir,
+                                    onPickSaveDir = pickSaveDir,
+                                    onResetSaveDir = resetSaveDir,
+                                    onDownload = { format, audioLanguage, title, author, oneOff ->
+                                        if (resolved != null) {
+                                            downloadViewModel.startDownload(
+                                                context = applicationContext,
+                                                format = format,
+                                                options = options.with(oneOff),
+                                                title = title,
+                                                author = author,
+                                                audioLanguage = audioLanguage,
+                                                info = resolved,
+                                                saveDirs = saveDirs
+                                            )
+                                        } else {
+                                            // Not read yet: the choice waits for the read and
+                                            // starts the moment it lands.
+                                            downloadViewModel.downloadOnceRead(
+                                                context = applicationContext,
+                                                url = url,
+                                                format = format,
+                                                options = options.with(oneOff),
+                                                title = title,
+                                                author = author,
+                                                audioLanguage = audioLanguage,
+                                                treeUri = saveDirs.of(format.hasVideo).uri
+                                            )
+                                        }
+                                        announceStarted()
+                                        closeOverlay()
+                                    },
+                                    onDismiss = { closeOverlay() }
+                                )
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val url = UrlExtractor.extract(intent.getStringExtra(Intent.EXTRA_TEXT) ?: intent.dataString)
+        if (url.isNullOrBlank()) {
+            Toast.makeText(this, getString(R.string.share_overlay_invalid_link), Toast.LENGTH_SHORT).show()
+            return
+        }
+        sharedUrl = url
     }
 
     private fun announceStarted() {

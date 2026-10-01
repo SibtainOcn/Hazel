@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- An empty home screen offers three starters as chips: Paste link, Search and Downloads.
+- Documentation in More, in place of the License row: User guide, Features, FAQ, What's new and License, read in the app. What's new and License are read straight from the repository's own files and drawn in the app's style, so they open quickly; the rest come from the Hazel website. Pages follow the app's light or dark tone, links to other sites open in the browser, each page has an Open in browser button, and a page that cannot load offers Try again.
 - Save downloads to an SD card. The save location in the download sheet, the batch sheet, the share overlay and More › Downloads lists Internal storage, each SD card that is in (with its free space) and Other folder, set apart for audio and video. Picking a card opens the system picker on that card (Android 10+ through the card itself, 8–9 at its root, 7 among the picker's places), and a card's root gets `Hazel/Audio` or `Hazel/Video` made inside it.
 - A download going to an SD card keeps its working files on the card too, so a large video does not have to fit in phone storage while it runs; names are kept to what the card's file system accepts.
 - Format list in two panes: a rail of All, one stop per quality the source offers (worked out from the picture size, so cropped and vertical video land on the step they belong to) and Audio, which is always there, beside a list that scrolls on its own. The rail only shows when there is something to split.
@@ -16,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The link button in the download sheets shows the address with Copy and Open (Copy takes every address of a set).
 
 ### Changed
+- Link reads now log which reader answered, whether it came from memory or disk, and how long it took (tag `HazelRead`; links appear only as a short hash), and each yt-dlp run logs its name and duration.
 - Storage cleanup's Unfinished downloads, cancelling a queue and removing a paused download now also clear working files left on SD cards.
 - If the card is taken out, full or no longer allows access, downloads are saved to internal storage instead of failing, and a dialog says which ones and where they went (once per batch, wherever you are in the app). Problems while choosing a folder (access refused, no folder picker, the Hazel folder could not be made on the card) are shown in a dialog too.
 - The single download sheet groups its controls into Details, Quality, Save and Adjust sections that open and close, each saying what it is set to while closed. Quality opens by default and at most two stay open, so the sheet fits the screen. Download is the one filled button, in the accent colour.
@@ -27,11 +30,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - While a link's formats are read, the quality row keeps the best as a stand-in and fills two waiting pills where the codec and size will go; the real badges spring in when they land. The rail glints, the skeleton rows take the colours of a real row, and the Fetching heading sweeps faster.
 - The quality steps a link offers before it is read (best, 2160p down to 144p, worst) are one list, used by the single sheet, the share sheet and the set of links; the set's video quality is picked in the same format list as everything else, and these steps carry an Auto tag. 144p is now offered before a link is read too.
 - The format list's options button uses a tune icon.
+- While a link is read, the format list shows its quality steps with a moving "Reading the rest of the formats" line instead of placeholder rows under them; placeholders only fill a list that has nothing to show yet.
+- Switching the format list between yt-dlp and NewPipe keeps each one's last read of the link, so switching back is instant instead of reading the link again. The format list shows the reader its rows actually came from, and changing the reader in settings no longer throws away saved reads.
+- Saved reads are kept for the last 25 links (was 40) and still survive the app being closed. A read is only reused while the settings it was made with still apply: changing PO tokens, player clients, YouTube extractor arguments, metadata language or browser imitation makes the next read a fresh one (YouTube settings only affect YouTube links). Reads made in incognito are kept in memory only and never written to disk.
+- Temporary Files lists Saved link reads on its own row, with its size, and clearing it also forgets the reads held in memory. Clear everything keeps them unless its new Also clear saved link reads box is ticked (off by default).
 - Removing a link from a set by swiping now asks first, needs half the row's width and only goes towards the Remove label.
 - Download all appears only for several pasted links or a playlist or channel, not for keyword search results.
 - The paste button shows whenever the clipboard holds something to paste, without Android announcing a clipboard read. It opens with its label for a new clip and folds to an icon, is not offered again for a clip already pasted, and stands aside while a read runs or Download all is shown.
 
 ### Fixed
+- Sharing a link while an earlier share sheet was still open, or left in the background, brought back the earlier link; the sheet now switches to the new one.
+- In the share sheet, placeholder rows stayed at the bottom of the format list under the quality steps for as long as the link was being read.
 - A quality picked from a shared link's sheet before the link was read was replaced by the default when the formats arrived; it is now carried onto the formats the link offers.
 - A long format id squeezed the quality name in the format list; the id is now cut short in its own space.
 - Option chips could be pushed off the edge of the download sheet on narrow screens or with long translations.

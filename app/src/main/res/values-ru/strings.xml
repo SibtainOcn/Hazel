@@ -193,7 +193,18 @@
     <string name="more_converter">Офлайн-конвертер видео в аудио</string>
     <string name="more_software_update">Обновление ПО</string>
     <string name="more_support">Поддержать Hazel</string>
-    <string name="more_license">Лицензия</string>
+    <string name="more_documentation">Документация</string>
+    <string name="docs_title">Документация</string>
+    <string name="docs_back">Назад</string>
+    <string name="docs_guide">Руководство</string>
+    <string name="docs_features">Возможности</string>
+    <string name="docs_faq">Вопросы и ответы</string>
+    <string name="docs_changelog">Что нового</string>
+    <string name="docs_license">Лицензия</string>
+    <string name="docs_open_in_browser">Открыть в браузере</string>
+    <string name="docs_error_title">Не удалось загрузить страницу</string>
+    <string name="docs_error_body">Проверьте подключение и попробуйте снова.</string>
+    <string name="docs_retry">Повторить</string>
 
     <!-- SponsorScreen -->
     <string name="sponsor_back">Назад</string>
@@ -255,6 +266,8 @@
     <string name="cleanup_category_engine_description">Загрузчик и среда его выполнения. Очистка освобождает больше всего места, но при следующей загрузке потребуется их распаковка.</string>
     <string name="cleanup_category_other_cache_label">Прочий кэш</string>
     <string name="cleanup_category_other_cache_description">Обложки и другие файлы, кэшированные при просмотре ссылок.</string>
+    <string name="cleanup_category_link_reads_label">Сохранённые данные ссылок</string>
+    <string name="cleanup_category_link_reads_description">Форматы последних 25 прочитанных ссылок, чтобы ссылка открывалась снова сразу. Хранятся до 6 часов; в режиме инкогнито не сохраняются.</string>
     <string name="cleanup_confirm_category_title">Очистить эти файлы?</string>
     <string name="cleanup_confirm_category_safe">Будет освобождено %1$s. Сохранённые файлы не будут затронуты.</string>
     <string name="cleanup_confirm_category_unsafe">Будет освобождено %1$s; следующая загрузка займёт больше времени из-за повторной распаковки.</string>
@@ -264,6 +277,7 @@
     <string name="cleanup_confirm_all_body">Будет освобождено %1$s. Загрузки и сохранённые сеансы входа сохранятся, но следующая загрузка займёт больше времени из-за повторной распаковки движка.</string>
     <string name="cleanup_confirm_all_confirm">Очистить всё</string>
     <string name="cleanup_confirm_all_cancel">Отмена</string>
+    <string name="cleanup_confirm_all_include_link_reads">Также очистить сохранённые данные ссылок (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">Все загрузки</string>
@@ -736,4 +750,8 @@
     <string name="save_location_error_card_folder">Не удалось создать %1$s на карте, поэтому загрузки будут сохраняться в выбранную папку.</string>
     <string name="save_fallback_title">Сохранено в другом месте</string>
     <string name="save_fallback_body">Не удалось записать в %1$s. Возможно, карту извлекли, она заполнена или больше не даёт доступа. Файлы сохранены в %2$s.</string>
+    <string name="home_start_with">Начните с</string>
+    <string name="home_start_paste">Вставить ссылку</string>
+    <string name="home_start_search">Поиск</string>
+    <string name="home_start_downloads">Загрузки</string>
 </resources>

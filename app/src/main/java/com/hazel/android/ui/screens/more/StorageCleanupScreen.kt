@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,8 +37,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
@@ -228,20 +232,53 @@ fun StorageCleanupScreen(onBack: () -> Unit) {
     }
 
     if (confirmingAll) {
+        // What Clear everything leaves unless asked: saved link reads only make reopening a
+        // link instant and take little room, so they are kept unless this is ticked. Off
+        // each time the dialog opens.
+        val optional = categories.filter { !it.inClearAll && it.bytes > 0 }
+        var includeOptional by remember { mutableStateOf(false) }
+        val clearing = categories.filter { it.inClearAll || includeOptional }
         AlertDialog(
             onDismissRequest = { confirmingAll = false },
             title = { Text(stringResource(R.string.cleanup_confirm_all_title), fontWeight = FontWeight.Bold) },
             text = {
-                Text(
-                    stringResource(
-                        R.string.cleanup_confirm_all_body,
-                        formatFileSize(total)
+                Column {
+                    Text(
+                        stringResource(
+                            R.string.cleanup_confirm_all_body,
+                            formatFileSize(clearing.sumOf { it.bytes }).ifBlank { "0 KB" }
+                        )
                     )
-                )
+                    if (optional.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .toggleable(
+                                    value = includeOptional,
+                                    role = Role.Checkbox,
+                                    onValueChange = { includeOptional = it }
+                                )
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(checked = includeOptional, onCheckedChange = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                stringResource(
+                                    R.string.cleanup_confirm_all_include_link_reads,
+                                    formatFileSize(optional.sumOf { it.bytes }).ifBlank { "0 KB" }
+                                ),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
             },
             confirmButton = {
                 TextButton(onClick = {
-                    val ids = categories.map { it.id }
+                    val ids = clearing.map { it.id }
                     confirmingAll = false
                     scope.launch {
                         ids.forEach { TempStorage.clear(context, it) }

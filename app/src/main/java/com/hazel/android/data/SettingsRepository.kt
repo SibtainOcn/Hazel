@@ -244,8 +244,9 @@ object SettingsRepository {
         context.dataStore.data.map { prefs -> ListingSource.fromName(prefs[LISTING_SOURCE_KEY]) }
 
     suspend fun setListingSource(context: Context, source: ListingSource) {
+        // Nothing is cleared: each reader keeps its own reads, so switching back finds the
+        // other reader's still there.
         context.dataStore.edit { prefs -> prefs[LISTING_SOURCE_KEY] = source.name }
-        InfoCache.clear()
     }
 
     fun getFetchMode(context: Context): Flow<FetchMode> =
@@ -367,6 +368,8 @@ object SettingsRepository {
 
     suspend fun setIncognito(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[INCOGNITO_KEY] = enabled }
+        // In force at once, so a read finishing a moment later is not written to disk.
+        com.hazel.android.download.ReadProfile.incognito = enabled
         if (enabled) HomeResultsRepository.clear(context)
     }
 

@@ -319,6 +319,13 @@ fun AppNavigation(
                             launchSingleTop = true
                             restoreState = true
                         }
+                    },
+                    onOpenDownloads = {
+                        navController.navigate(Screen.History.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }
@@ -341,7 +348,20 @@ fun AppNavigation(
                     onNavigateToSponsor = { navController.navigate("sponsor") },
                     onOpenBatterySettings = { openBatterySettings(context) },
                     onNavigateToStorageCleanup = { navController.navigate("storage_cleanup") },
-                    onNavigateToUpdate = { navController.navigate("software_update") }
+                    onNavigateToUpdate = { navController.navigate("software_update") },
+                    onNavigateToDocumentation = { navController.navigate("docs") }
+                )
+            }
+            composable("docs") {
+                com.hazel.android.ui.screens.more.DocumentationScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpen = { page -> navController.navigate("docs/${page.name}") }
+                )
+            }
+            composable("docs/{page}") { entry ->
+                com.hazel.android.ui.screens.more.DocumentationPageScreen(
+                    page = com.hazel.android.ui.screens.more.DocPage.fromName(entry.arguments?.getString("page")),
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable("cookies") {

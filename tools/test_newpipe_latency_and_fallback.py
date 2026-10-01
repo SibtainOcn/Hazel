@@ -331,6 +331,147 @@ def test_source_code_structure():
 
 
 # ===========================================================================
+# 4b. Per-Reader Read Cache: switching readers, settings stamps, incognito
+# ===========================================================================
+
+class ReadCacheModel:
+    """
+    A model of InfoCache's rules, to check the behaviour the app relies on:
+    - each reader (yt-dlp, NewPipe, any added later) keeps its own last read of a link;
+    - only yt-dlp's goes to disk, and survives a restart;
+    - a read is a miss once the settings it was stamped with no longer hold;
+    - a read made in incognito never reaches disk, and drops an older payload;
+    - a fresh read from one reader leaves the other's read in place.
+    """
+
+    TTL = 6 * 3600
+
+    def __init__(self):
+        self.memory = {"YT_DLP": {}, "NEWPIPE": {}}
+        self.disk = {}
+        self.incognito = False
+        self.stamp = ""
+        self.now = 0
+
+    def put(self, url, reader, info, raw_json=True):
+        self.memory[reader][url] = (info, self.now, self.stamp)
+        if reader != "YT_DLP" or not raw_json:
+            return
+        if self.incognito:
+            self.disk.pop(url, None)
+            return
+        self.disk[url] = (info, self.now, self.stamp)
+
+    def _entry(self, url, reader):
+        held = self.memory[reader].get(url)
+        if held is not None:
+            if self.now - held[1] > self.TTL:
+                del self.memory[reader][url]
+                return None
+            return held if held[2] == self.stamp else None
+        if reader != "YT_DLP":
+            return None
+        stored = self.disk.get(url)
+        if stored is None or self.now - stored[1] > self.TTL or stored[2] != self.stamp:
+            return None
+        self.memory[reader][url] = stored
+        return stored
+
+    def get(self, url, reader=None):
+        if reader is not None:
+            entry = self._entry(url, reader)
+            return entry[0] if entry else None
+        found = [e for e in (self._entry(url, r) for r in self.memory) if e]
+        return max(found, key=lambda e: e[1])[0] if found else None
+
+    def invalidate(self, url, reader):
+        self.memory[reader].pop(url, None)
+        if reader == "YT_DLP":
+            self.disk.pop(url, None)
+
+    def restart(self):
+        self.memory = {"YT_DLP": {}, "NEWPIPE": {}}
+
+
+def test_per_reader_cache():
+    print(f"\n{'='*70}\n  TEST 4b: Per-Reader Read Cache (switching, stamps, incognito)\n{'='*70}")
+    url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
+    cache = ReadCacheModel()
+    cache.put(url, "YT_DLP", "ytdlp-read")
+    cache.now += 5
+    cache.put(url, "NEWPIPE", "newpipe-read", raw_json=False)
+    check("Switching to NewPipe keeps yt-dlp's read", cache.get(url, "YT_DLP"), "ytdlp-read")
+    check("Switching back to yt-dlp needs no read", cache.get(url, "YT_DLP"), "ytdlp-read")
+    check("Unnamed lookup gives the latest reader's read", cache.get(url), "newpipe-read")
+
+    cache.invalidate(url, "NEWPIPE")
+    check("A fresh NewPipe read leaves yt-dlp's read alone", cache.get(url, "YT_DLP"), "ytdlp-read")
+
+    cache.restart()
+    check("yt-dlp's read survives a restart", cache.get(url, "YT_DLP"), "ytdlp-read")
+    check("NewPipe's read is memory only", cache.get(url, "NEWPIPE"), None)
+
+    cache.stamp = "po-token-A"
+    check("A read made under other settings is a miss", cache.get(url, "YT_DLP"), None)
+    cache.put(url, "YT_DLP", "read-with-token")
+    check("The next read under the new settings is served", cache.get(url, "YT_DLP"), "read-with-token")
+    cache.stamp = ""
+    check("Settings changed back: the token read is a miss", cache.get(url, "YT_DLP"), None)
+
+    private = ReadCacheModel()
+    private.put(url, "YT_DLP", "before-incognito")
+    private.incognito = True
+    private.now += 1
+    private.put(url, "YT_DLP", "incognito-read")
+    check("Incognito read is served while the app runs", private.get(url, "YT_DLP"), "incognito-read")
+    check("Incognito read never reaches disk, and the older payload is dropped", private.disk.get(url), None)
+    private.restart()
+    check("Nothing of an incognito read is left after a restart", private.get(url, "YT_DLP"), None)
+
+    expired = ReadCacheModel()
+    expired.put(url, "YT_DLP", "old")
+    expired.now += ReadCacheModel.TTL + 1
+    check("A read past its time is a miss", expired.get(url), None)
+
+    src = REPO_ROOT / "app/src/main/java/com/hazel/android/download"
+    cache_kt = (src / "InfoCache.kt").read_text(encoding="utf-8")
+    profile_kt = (src / "ReadProfile.kt").read_text(encoding="utf-8")
+    vm_kt = (src / "DownloadViewModel.kt").read_text(encoding="utf-8")
+    info_kt = (src / "MediaInfo.kt").read_text(encoding="utf-8")
+    lister_kt = (src / "extractor/newpipe/NewPipeLister.kt").read_text(encoding="utf-8")
+    sheet_kt = (REPO_ROOT / "app/src/main/java/com/hazel/android/ui/screens/download/FormatSelectionSheet.kt").read_text(encoding="utf-8")
+    app_kt = (REPO_ROOT / "app/src/main/java/com/hazel/android/HazelApp.kt").read_text(encoding="utf-8")
+
+    check_true("InfoCache keeps one memory slot per reader", "ListingSource.entries.associateWith" in cache_kt)
+    check_true("InfoCache files a read under the reader that made it", "reads.getValue(info.readBy)" in cache_kt)
+    check_true("InfoCache can drop one reader's read only", "fun invalidate(url: String, source: ListingSource)" in cache_kt)
+    check_true("InfoCache checks the settings stamp on disk reads", "storedStamp(url) != stamp" in cache_kt)
+    check_true("InfoCache checks the settings stamp before a download replays a payload", "storedStamp(url) != ReadProfile.stampFor(url)" in cache_kt)
+    check_true("InfoCache keeps incognito reads off disk", "if (ReadProfile.incognito)" in cache_kt)
+    check_true("InfoCache writes payloads atomically", "writeAtomically(fileFor(url), rawJson)" in cache_kt)
+    check_true("InfoCache keeps the last 25 links on disk", "MAX_ENTRIES = 25" in cache_kt)
+    check_true("ReadProfile scopes YouTube settings to YouTube links", "isYouTube(url)" in profile_kt)
+    check_true("ReadProfile stamps PO tokens and player clients", "validPoTokens()" in profile_kt and "playerClients" in profile_kt)
+    check_true("MediaInfo records which reader read it", "val readBy: ListingSource" in info_kt)
+    check_true("NewPipe reads are marked as NewPipe's", "readBy = ListingSource.NEWPIPE" in lister_kt)
+    check_true("Switching readers is not a fresh read", "refresh(picked, false)" in sheet_kt)
+    check_true("The update button is a fresh read", "refresh(readSource, true)" in sheet_kt)
+    check_true("A switch answered from the cache never leaves the list hidden", "val hidingRows = refreshing && isLoadingFormats" in sheet_kt)
+    check_true("No placeholders under rows that are already shown", "hidingRows || rows.isEmpty()" in sheet_kt)
+    check_true("View model reads a named reader's own slot", "InfoCache.metadataFor(url, if (newPipeCan) source else ListingSource.YT_DLP)" in vm_kt)
+    check_true("View model falls back to yt-dlp's last read when NewPipe cannot answer", "InfoCache.metadataFor(url, ListingSource.YT_DLP)" in vm_kt)
+    check_true("App keeps incognito mirrored for the cache", "ReadProfile.incognito = it" in app_kt)
+
+    temp_kt = (REPO_ROOT / "app/src/main/java/com/hazel/android/util/TempStorage.kt").read_text(encoding="utf-8")
+    cleanup_kt = (REPO_ROOT / "app/src/main/java/com/hazel/android/ui/screens/more/StorageCleanupScreen.kt").read_text(encoding="utf-8")
+    check_true("Cleanup lists saved link reads as a category of their own", "id = LINK_READS" in temp_kt and "InfoCache.diskBytes()" in temp_kt)
+    check_true("Clearing saved link reads goes through the cache, memory included", "LINK_READS -> InfoCache.clear()" in temp_kt)
+    check_true("Saved link reads are not counted again under other cached files", "InfoCache.DIRECTORY_NAME" in temp_kt)
+    check_true("Clear everything leaves saved link reads unless asked", "inClearAll = false" in temp_kt and "it.inClearAll || includeOptional" in cleanup_kt)
+    check_true("The ask starts off each time", "var includeOptional by remember { mutableStateOf(false) }" in cleanup_kt)
+
+# ===========================================================================
 # 5. Strict Zero-Occurrence Ban Check
 # ===========================================================================
 
@@ -371,6 +512,7 @@ def main():
     test_fallback_and_error_handling()
     test_latency_optimization()
     test_source_code_structure()
+    test_per_reader_cache()
     test_banned_names()
 
     print("\n" + "=" * 70)

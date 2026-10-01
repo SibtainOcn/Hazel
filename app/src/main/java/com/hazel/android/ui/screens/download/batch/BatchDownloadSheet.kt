@@ -158,7 +158,7 @@ fun BatchDownloadSheet(
     /** Links whose formats are being read right now. */
     readingUrls: Set<String> = emptySet(),
     /** Reads these links' formats again, with the given reader or the setting's. */
-    onRefreshFormats: (List<MediaInfo>, ListingSource?) -> Unit = { _, _ -> },
+    onRefreshFormats: (List<MediaInfo>, ListingSource?, Boolean) -> Unit = { _, _, _ -> },
     onRemove: (MediaInfo) -> Unit,
     onDownload: (List<DownloadPlan>) -> Unit,
     onDismiss: () -> Unit
@@ -693,7 +693,7 @@ fun BatchDownloadSheet(
             onOptionsChange = onOptionsChange,
             saveDirs = saveDirs,
             isLoadingFormats = focused.url in readingUrls,
-            onRefreshFormats = { source -> onRefreshFormats(listOf(focused), source) },
+            onRefreshFormats = { source, fresh -> onRefreshFormats(listOf(focused), source, fresh) },
             initialFormat = state.formatOf(focused),
             initialAudioLanguage = state.languageOf(focused),
             confirmAsApply = true,
@@ -791,7 +791,7 @@ fun BatchDownloadSheet(
                 onDismiss = { openSheet = BatchSheet.NONE },
                 audioFirst = true,
                 isLoadingFormats = targets.any { it.url in readingUrls },
-                onRefresh = { source -> onRefreshFormats(targets, source) },
+                onRefresh = { source, fresh -> onRefreshFormats(targets, source, fresh) },
                 canChooseSource = remember(targets) {
                     targets.isNotEmpty() && targets.all { NewPipeEngine.handlesStream(it.url) }
                 }

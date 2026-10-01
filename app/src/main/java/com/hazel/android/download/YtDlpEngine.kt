@@ -37,7 +37,7 @@ object YtDlpEngine {
         processId: String? = null,
         callback: ((Float, Long, String) -> Unit)? = null
     ): YoutubeDLResponse = try {
-        shared { YoutubeDL.getInstance().execute(request, processId, callback) }
+        shared(processId) { YoutubeDL.getInstance().execute(request, processId, callback) }
     } catch (e: YoutubeDL.CanceledException) {
         throw e
     } catch (e: Exception) {
@@ -52,7 +52,7 @@ object YtDlpEngine {
             }
             else -> throw e
         }
-        shared { YoutubeDL.getInstance().execute(request, processId, callback) }
+        shared(processId) { YoutubeDL.getInstance().execute(request, processId, callback) }
     }
 
     /**
@@ -68,12 +68,14 @@ object YtDlpEngine {
         }
     }
 
-    private fun <T> shared(block: () -> T): T {
+    private fun <T> shared(processId: String?, block: () -> T): T {
         lock.readLock().lock()
-        Log.d("Hazel", "yt-dlp run started (${lock.readLockCount} running)")
+        val started = android.os.SystemClock.elapsedRealtime()
+        Log.d("Hazel", "yt-dlp run started: ${processId ?: "unnamed"} (${lock.readLockCount} running)")
         try {
             return block()
         } finally {
+            Log.d("Hazel", "yt-dlp run ended: ${processId ?: "unnamed"} after ${android.os.SystemClock.elapsedRealtime() - started} ms")
             lock.readLock().unlock()
             // A binary fetched while a download was running waits for the first moment the
             // engine is free, which can be between two items of a batch.

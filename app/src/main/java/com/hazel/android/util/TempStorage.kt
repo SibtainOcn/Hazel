@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.StringRes
 import com.hazel.android.R
 import com.hazel.android.data.CookieRepository
+import com.hazel.android.download.InfoCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -25,7 +26,12 @@ data class TempCategory(
      * True when clearing this makes the app slower rather than losing anything, so the
      * screen can say which entries are free to remove and which have a consequence.
      */
-    val safeToClear: Boolean = true
+    val safeToClear: Boolean = true,
+    /**
+     * Whether Clear everything takes this as well. False for what only makes the app
+     * quicker and costs almost nothing to keep, so it is cleared on its own or by asking.
+     */
+    val inClearAll: Boolean = true
 )
 
 /**
@@ -47,6 +53,12 @@ object TempStorage {
      */
     private const val ENGINE_DIR = "youtubedl-android"
 
+    /** The formats of links read lately, kept so opening one again needs no read. */
+    const val LINK_READS = "link_reads"
+
+    /** Folders in the cache that have a category of their own, not counted as "other". */
+    private val OWN_CATEGORY = setOf("yt-dlp", ENGINE_DIR, InfoCache.DIRECTORY_NAME)
+
     suspend fun categories(context: Context): List<TempCategory> = withContext(Dispatchers.IO) {
         val cache = context.cacheDir
         val files = context.filesDir
@@ -57,6 +69,13 @@ object TempStorage {
                 labelRes = R.string.cleanup_category_link_data_label,
                 descriptionRes = R.string.cleanup_category_link_data_description,
                 bytes = sizeOf(File(cache, "yt-dlp"))
+            ),
+            TempCategory(
+                id = LINK_READS,
+                labelRes = R.string.cleanup_category_link_reads_label,
+                descriptionRes = R.string.cleanup_category_link_reads_description,
+                bytes = InfoCache.diskBytes(),
+                inClearAll = false
             ),
             TempCategory(
                 id = "partial_downloads",
@@ -104,6 +123,8 @@ object TempStorage {
 
         when (id) {
             "ytdlp_cache" -> wipe(File(cache, "yt-dlp"))
+            // Through the cache itself, so what it holds in memory goes with the files.
+            LINK_READS -> InfoCache.clear()
             "partial_downloads" -> SdCards.workRoots(context).forEach { wipe(it) }
             "converted" -> wipe(StoragePaths.tempConverted)
             "engine" -> {
@@ -111,11 +132,10 @@ object TempStorage {
                 wipe(File(cache, ENGINE_DIR))
             }
             "other_cache" -> {
-                val preserved = setOf("yt-dlp", ENGINE_DIR)
                 cache.listFiles()?.forEach { entry ->
                     // Saved sign-ins live here too, one file per site, and clearing the
                     // cache is not a request to sign out of everything.
-                    if (entry.name !in preserved && !entry.isCookieFile()) {
+                    if (entry.name !in OWN_CATEGORY && !entry.isCookieFile()) {
                         entry.deleteRecursively()
                     }
                 }
@@ -129,9 +149,8 @@ object TempStorage {
 
     /** Everything in the cache that is not already counted under its own category. */
     private fun otherCacheSize(context: Context): Long {
-        val counted = setOf("yt-dlp", ENGINE_DIR)
         return context.cacheDir.listFiles()
-            ?.filterNot { it.name in counted || it.isCookieFile() }
+            ?.filterNot { it.name in OWN_CATEGORY || it.isCookieFile() }
             ?.sumOf { sizeOf(it) }
             ?: 0L
     }

@@ -181,7 +181,18 @@
     <string name="more_converter">Konversi offline video ke audio</string>
     <string name="more_software_update">Pembaruan perangkat lunak</string>
     <string name="more_support">Dukung Hazel</string>
-    <string name="more_license">Lisensi</string>
+    <string name="more_documentation">Dokumentasi</string>
+    <string name="docs_title">Dokumentasi</string>
+    <string name="docs_back">Kembali</string>
+    <string name="docs_guide">Panduan</string>
+    <string name="docs_features">Fitur</string>
+    <string name="docs_faq">FAQ</string>
+    <string name="docs_changelog">Yang baru</string>
+    <string name="docs_license">Lisensi</string>
+    <string name="docs_open_in_browser">Buka di browser</string>
+    <string name="docs_error_title">Halaman ini tidak dapat dimuat</string>
+    <string name="docs_error_body">Periksa koneksi lalu coba lagi.</string>
+    <string name="docs_retry">Coba lagi</string>
 
     <!-- SponsorScreen -->
     <string name="sponsor_back">Kembali</string>
@@ -243,6 +254,8 @@
     <string name="cleanup_category_engine_description">Pengunduh dan lingkungan eksekusinya. Menghapusnya membebaskan paling banyak ruang, tetapi unduhan berikutnya harus mengekstraknya kembali.</string>
     <string name="cleanup_category_other_cache_label">File cache lainnya</string>
     <string name="cleanup_category_other_cache_description">Gambar mini dan file lain yang di-cache saat menjelajahi tautan.</string>
+    <string name="cleanup_category_link_reads_label">Bacaan tautan tersimpan</string>
+    <string name="cleanup_category_link_reads_description">Format dari 25 tautan terakhir yang dibaca, agar membukanya lagi langsung tampil. Disimpan hingga 6 jam; tidak pernah disimpan saat penyamaran.</string>
     <string name="cleanup_confirm_category_title">Hapus file-file ini?</string>
     <string name="cleanup_confirm_category_safe">%1$s ruang akan dikosongkan. File yang telah disimpan tidak akan terpengaruh.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s ruang akan dikosongkan, dan unduhan berikutnya akan membutuhkan waktu lebih lama karena komponen harus diekstrak ulang.</string>
@@ -252,6 +265,7 @@
     <string name="cleanup_confirm_all_body">%1$s ruang akan dikosongkan. Unduhan dan sesi masuk Anda akan tetap tersimpan, tetapi unduhan berikutnya akan membutuhkan waktu lebih lama karena mesin harus diekstrak ulang.</string>
     <string name="cleanup_confirm_all_confirm">Hapus semua</string>
     <string name="cleanup_confirm_all_cancel">Batal</string>
+    <string name="cleanup_confirm_all_include_link_reads">Hapus juga bacaan tautan tersimpan (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">Semua Unduhan</string>
@@ -713,4 +727,8 @@
     <string name="save_location_error_card_folder">Tidak bisa membuat %1$s di kartu, jadi unduhan akan disimpan di folder yang Anda pilih.</string>
     <string name="save_fallback_title">Disimpan di tempat lain</string>
     <string name="save_fallback_body">File ini tidak bisa ditulis ke %1$s. Kartu mungkin dilepas, penuh, atau tidak lagi mengizinkan akses. File disimpan ke %2$s.</string>
+    <string name="home_start_with">Mulai dengan</string>
+    <string name="home_start_paste">Tempel tautan</string>
+    <string name="home_start_search">Cari</string>
+    <string name="home_start_downloads">Unduhan</string>
 </resources>

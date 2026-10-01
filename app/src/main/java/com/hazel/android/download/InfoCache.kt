@@ -1,8 +1,10 @@
 package com.hazel.android.download
 
+import android.util.Log
 import com.hazel.android.HazelApp
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkEntry
+import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.util.LinkKey
 import org.json.JSONArray
 import org.json.JSONObject
@@ -30,10 +32,21 @@ import java.io.File
  * parsed form is rebuilt from it on the first miss. Only recent links are kept: this is a
  * convenience for links in current use, not a library.
  *
+ * Each reader keeps its own last read of a link ([MediaInfo.readBy] says which), so a format
+ * list switched from one reader to another and back finds the first read still here rather
+ * than reading the link again. Only the reader that leaves an engine payload, yt-dlp, goes to
+ * disk: it is the one that costs seconds of engine start-up, while an in-process reader such
+ * as NewPipe answers quickly enough that a file for it would buy nothing. A reader added
+ * later gets a slot of its own with no change here.
+ *
+ * Every read is stamped with the settings it depended on ([ReadProfile]), and one made under
+ * other settings is not served back. A read made in incognito is kept in memory only, so it
+ * leaves nothing on the device once the app is gone.
+ *
  * The JSON holds signed stream addresses that stop working after a few hours, so replaying
  * it into a download has the shorter life of the two windows below. Every reader treats a
  * miss as ordinary: nothing here is required to be present, and nothing here is trusted
- * once it is old.
+ * once it is old, made under other settings, or unreadable.
  */
 object InfoCache {
 
@@ -54,20 +67,27 @@ object InfoCache {
      * How many links keep their payload on disk. A payload can run to a megabyte, so this
      * stays modest; the oldest goes when a new one arrives.
      */
-    private const val MAX_ENTRIES = 40
+    private const val MAX_ENTRIES = 25
 
     /**
-     * How many parsed reads are held in memory. These are small, and a search or playlist
-     * opens many cards in a row, so far more are kept than payloads.
+     * How many parsed reads each reader holds in memory. These are small, and a search or
+     * playlist opens many cards in a row, so far more are kept than payloads.
      */
     private const val MAX_MEMORY_ENTRIES = 200
 
-    private data class Entry(val info: MediaInfo, val storedAt: Long)
+    /** The reader whose reads leave a payload, and so the one kept on disk. */
+    private val PERSISTED = ListingSource.YT_DLP
 
-    private val metadata = object : LinkedHashMap<String, Entry>(16, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Entry>) =
-            size > MAX_MEMORY_ENTRIES
-    }
+    private data class Entry(val info: MediaInfo, val storedAt: Long, val stamp: String)
+
+    /** Each reader's reads, newest last, bounded to [MAX_MEMORY_ENTRIES] apiece. */
+    private val reads: Map<ListingSource, LinkedHashMap<String, Entry>> =
+        ListingSource.entries.associateWith {
+            object : LinkedHashMap<String, Entry>(16, 0.75f, true) {
+                override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Entry>) =
+                    size > MAX_MEMORY_ENTRIES
+            }
+        }
 
     /**
      * Where reads are kept. The name carries a layout version: a build that changes how links
@@ -82,58 +102,109 @@ object InfoCache {
 
     private fun ensureDirectory(): File = directory.apply { if (!exists()) mkdirs() }
 
-    private const val DIRECTORY_NAME = "info-v2"
+    /** Also how the cleanup screen tells this folder apart from the rest of the cache. */
+    const val DIRECTORY_NAME = "info-v2"
 
     /** Layouts earlier builds wrote, removed on first use. */
     private val LEGACY_DIRECTORIES = listOf("info")
 
     /**
-     * Parsed metadata for [url], or null when nothing fresh is held.
+     * The latest read of [url] by any reader, or null when nothing fresh is held.
      *
-     * A miss in memory is not the end of the question: the payload the last read wrote is
-     * still on disk after the app has been closed and reopened, and parsing it again costs
-     * nothing next to reading the link. That is what makes a link pasted yesterday open its
-     * sheet at once today.
+     * The latest, because that is what the link was last shown as. A miss in memory is not
+     * the end of the question: the payload the last read wrote is still on disk after the
+     * app has been closed and reopened, and parsing it again costs nothing next to reading
+     * the link. That is what makes a link pasted yesterday open its sheet at once today.
      */
     @Synchronized
     fun metadataFor(url: String): MediaInfo? {
+        val stamp = ReadProfile.stampFor(url)
+        return ListingSource.entries
+            .mapNotNull { entryFor(url, it, stamp) }
+            .maxByOrNull { it.storedAt }
+            ?.info
+    }
+
+    /** What [source] read of [url] last, or null when it holds nothing fresh. */
+    @Synchronized
+    fun metadataFor(url: String, source: ListingSource): MediaInfo? =
+        entryFor(url, source, ReadProfile.stampFor(url))?.info
+
+    private fun entryFor(url: String, source: ListingSource, stamp: String): Entry? {
         val key = LinkKey.readKey(url)
-        metadata[key]?.let { entry ->
-            if (System.currentTimeMillis() - entry.storedAt <= METADATA_TTL_MS) return entry.info
-            metadata.remove(key)
+        val memory = reads.getValue(source)
+        memory[key]?.let { entry ->
+            if (System.currentTimeMillis() - entry.storedAt > METADATA_TTL_MS) {
+                memory.remove(key)
+                trace(url, source, "expired")
+                return null
+            }
+            // Held, but made under other settings: the disk holds nothing newer, so this
+            // is a miss, and the next read replaces it.
+            if (entry.stamp != stamp) {
+                trace(url, source, "other settings")
+                return null
+            }
+            trace(url, source, "hit, memory")
+            return entry
         }
 
-        val restored = restoreFromDisk(url) ?: return null
-        metadata[key] = Entry(restored, fileFor(url).lastModified())
-        return restored
+        if (source != PERSISTED) return null
+        val restored = restoreFromDisk(url, stamp) ?: return null
+        trace(url, source, "hit, disk")
+        return Entry(restored, fileFor(url).lastModified(), stamp).also { memory[key] = it }
     }
+
+    /** One line per lookup that found something, keyed by the link's digest, never its address. */
+    private fun trace(url: String, source: ListingSource, what: String) {
+        Log.d(TRACE_TAG, "cache ${LinkKey.digest(url).take(8)} ${source.name}: $what")
+    }
+
+    /** Shared by every line about reading a link, so one filter shows the whole story. */
+    const val TRACE_TAG = "HazelRead"
 
     /**
      * The engine's own JSON for [url], ready to be replayed, or null when there is nothing
-     * recent enough to trust.
+     * recent enough to trust or it was read under other settings.
      */
+    @Synchronized
     fun infoJsonFor(url: String): File? {
         val file = fileFor(url)
         if (!file.exists()) return null
         if (System.currentTimeMillis() - file.lastModified() > INFO_JSON_TTL_MS) return null
+        if (storedStamp(url) != ReadProfile.stampFor(url)) return null
         return file
     }
 
-    /** Records both halves of a completed read. */
+    /** Records both halves of a completed read, in the slot of the reader that made it. */
     @Synchronized
     fun put(url: String, info: MediaInfo, rawJson: String?) {
-        metadata[LinkKey.readKey(url)] = Entry(info, System.currentTimeMillis())
+        val stamp = ReadProfile.stampFor(url)
+        reads.getValue(info.readBy)[LinkKey.readKey(url)] = Entry(info, System.currentTimeMillis(), stamp)
 
         // A collection's payload describes the collection rather than a playable item, so
         // replaying it into a download would select nothing.
-        if (rawJson.isNullOrBlank()) return
-        runCatching { fileFor(url).writeText(rawJson) }
+        if (rawJson.isNullOrBlank() || info.readBy != PERSISTED) return
+
+        if (ReadProfile.incognito) {
+            // Nothing of this read goes to disk. An older payload for the link is dropped as
+            // well, so a download replays this read's formats rather than an earlier one's.
+            deleteFilesFor(url)
+            return
+        }
+
+        if (!writeAtomically(fileFor(url), rawJson)) return
 
         // Which reads needed the sign-in is the app's own finding rather than anything in
-        // the payload, so it is kept beside it: the file is there or it is not.
+        // the payload, so it is kept beside it: the file is there or it is not. The same
+        // goes for the settings it was read under.
         runCatching {
             val marker = signInMarkerFor(url)
             if (info.requiresSignIn) marker.writeText("1") else marker.delete()
+        }
+        runCatching {
+            val stampFile = stampFileFor(url)
+            if (stamp.isNotEmpty()) stampFile.writeText(stamp) else stampFile.delete()
         }
         trimToLimit()
     }
@@ -141,8 +212,10 @@ object InfoCache {
     /** What a collection held, so pasting it again does not walk it a second time. */
     @Synchronized
     fun putListing(url: String, contents: LinkContents.Many) {
+        if (ReadProfile.incognito) return
         val json = JSONObject().apply {
             put("title", contents.title)
+            put("stamp", ReadProfile.stampFor(url))
             put(
                 "entries",
                 JSONArray().apply {
@@ -160,7 +233,7 @@ object InfoCache {
                 }
             )
         }
-        runCatching { listingFileFor(url).writeText(json.toString()) }
+        writeAtomically(listingFileFor(url), json.toString())
         trimToLimit()
     }
 
@@ -176,6 +249,7 @@ object InfoCache {
 
         return runCatching {
             val json = JSONObject(file.readText())
+            if (json.optString("stamp") != ReadProfile.stampFor(url)) return null
             val array = json.optJSONArray("entries") ?: return null
             val entries = (0 until array.length()).mapNotNull { index ->
                 array.optJSONObject(index)?.let { entry ->
@@ -196,22 +270,37 @@ object InfoCache {
     }
 
     /**
-     * Drops everything held for [url].
+     * Drops everything held for [url], from every reader.
      *
      * Called when a download refuses the replayed metadata, which is the signal that the
      * addresses inside it have expired ahead of the window above.
      */
     @Synchronized
     fun invalidate(url: String) {
-        metadata.remove(LinkKey.readKey(url))
-        runCatching { fileFor(url).delete() }
-        runCatching { signInMarkerFor(url).delete() }
-        runCatching { listingFileFor(url).delete() }
+        val key = LinkKey.readKey(url)
+        reads.values.forEach { it.remove(key) }
+        deleteFilesFor(url)
     }
+
+    /**
+     * Drops what [source] read of [url], leaving the other readers' reads in place. For a
+     * fresh read from one reader, which should not cost the others theirs.
+     */
+    @Synchronized
+    fun invalidate(url: String, source: ListingSource) {
+        reads.getValue(source).remove(LinkKey.readKey(url))
+        if (source == PERSISTED) deleteFilesFor(url)
+    }
+
+    /** What the reads take on disk, for the cleanup screen. */
+    @Synchronized
+    fun diskBytes(): Long = runCatching {
+        directory.listFiles()?.sumOf { it.length() } ?: 0L
+    }.getOrDefault(0L)
 
     @Synchronized
     fun clear() {
-        metadata.clear()
+        reads.values.forEach { it.clear() }
         runCatching { ensureDirectory().listFiles()?.forEach { it.delete() } }
     }
 
@@ -226,26 +315,55 @@ object InfoCache {
     }
 
     /** Rebuilds the parsed form from the payload the last read left on disk. */
-    private fun restoreFromDisk(url: String): MediaInfo? {
+    private fun restoreFromDisk(url: String, stamp: String): MediaInfo? {
         val file = fileFor(url)
         if (!file.exists()) return null
         if (System.currentTimeMillis() - file.lastModified() > METADATA_TTL_MS) {
-            file.delete()
+            deleteFilesFor(url)
             return null
         }
+        if (storedStamp(url) != stamp) return null
 
         return runCatching {
             MediaProbe.parse(url, JSONObject(file.readText()))
                 .copy(requiresSignIn = signInMarkerFor(url).exists())
+        }.onFailure {
+            // A payload that no longer parses is of no use to anyone, the download included.
+            deleteFilesFor(url)
         }.getOrNull()
     }
+
+    /** The settings stamp the payload on disk was read under; blank for the defaults. */
+    private fun storedStamp(url: String): String =
+        runCatching { stampFileFor(url).takeIf { it.exists() }?.readText()?.trim() }.getOrNull().orEmpty()
+
+    private fun deleteFilesFor(url: String) {
+        runCatching { fileFor(url).delete() }
+        runCatching { signInMarkerFor(url).delete() }
+        runCatching { stampFileFor(url).delete() }
+        runCatching { listingFileFor(url).delete() }
+    }
+
+    /**
+     * Written beside the file and moved into place, so a reader that opens it meanwhile (a
+     * download replaying it, or another read) never meets half a file.
+     */
+    private fun writeAtomically(file: File, text: String): Boolean = runCatching {
+        val staging = File(file.parentFile, "${file.name}.tmp")
+        staging.writeText(text)
+        if (!staging.renameTo(file)) {
+            file.writeText(text)
+            staging.delete()
+        }
+        true
+    }.getOrDefault(false)
 
     /**
      * Keeps the newest [MAX_ENTRIES] links and deletes the rest.
      *
      * Counted by link rather than by file, since one link leaves a payload and may leave a
-     * marker beside it, and dropping half of a link would leave a record that says the
-     * wrong thing about it.
+     * marker and a stamp beside it, and dropping part of a link would leave a record that
+     * says the wrong thing about it.
      */
     private fun trimToLimit() {
         runCatching {
@@ -264,6 +382,8 @@ object InfoCache {
     private fun fileFor(url: String) = File(ensureDirectory(), "${LinkKey.digest(url)}.info.json")
 
     private fun signInMarkerFor(url: String) = File(ensureDirectory(), "${LinkKey.digest(url)}.signin")
+
+    private fun stampFileFor(url: String) = File(ensureDirectory(), "${LinkKey.digest(url)}.stamp")
 
     private fun listingFileFor(url: String) = File(ensureDirectory(), "${LinkKey.digest(url)}.list.json")
 }

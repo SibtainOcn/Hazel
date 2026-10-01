@@ -137,7 +137,9 @@ fun DownloadScreen(
     onSharesConsumed: () -> Unit = {},
     downloadViewModel: DownloadViewModel = viewModel(),
     /** Opens the queue screen, where a download in hand is paused, resumed or cancelled. */
-    onOpenQueue: () -> Unit = {}
+    onOpenQueue: () -> Unit = {},
+    /** Opens the downloads list, from the starters on an empty home screen. */
+    onOpenDownloads: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -200,6 +202,9 @@ fun DownloadScreen(
     }
 
     var searchOpen by remember { mutableStateOf(false) }
+    // Counts taps on the empty screen's Paste starter; the paste itself is set up further
+    // down, beside the paste button it shares its work with.
+    var pasteRequests by remember { mutableStateOf(0) }
     // The one card playing, if any. Starting another stops it. The player itself is held
     // here rather than in the card, so full screen cannot drop it along with the card when
     // the list lays itself out again.
@@ -661,6 +666,47 @@ fun DownloadScreen(
                         }
                     }
 
+                    // Nothing read yet: three ways to start, as plain chips rather than a
+                    // picture, so the empty screen offers something to do.
+                    if (!incognito && state.results.isEmpty() && !state.isFetching) {
+                        item(key = "starters") {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 160.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    stringResource(R.string.home_start_with),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                androidx.compose.foundation.layout.FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.padding(horizontal = 24.dp)
+                                ) {
+                                    com.hazel.android.ui.components.FlatChip(
+                                        label = stringResource(R.string.home_start_paste),
+                                        onClick = { pasteRequests++ }
+                                    )
+                                    com.hazel.android.ui.components.FlatChip(
+                                        label = stringResource(R.string.home_start_search),
+                                        onClick = {
+                                            cameFromShare = false
+                                            searchOpen = true
+                                        }
+                                    )
+                                    com.hazel.android.ui.components.FlatChip(
+                                        label = stringResource(R.string.home_start_downloads),
+                                        onClick = onOpenDownloads
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     if (incognito && state.results.isEmpty() && !state.isFetching) {
                         item(key = "incognito") {
                             Spacer(modifier = Modifier.height(72.dp))
@@ -747,6 +793,8 @@ fun DownloadScreen(
                         }
                     }
         }
+
+        LaunchedEffect(pasteRequests) { if (pasteRequests > 0) pasteFromClipboard() }
 
         // The paste button shows while the clipboard holds something to paste, the way a
         // copied link is nearly always what brings someone here. Its label shows for a
@@ -898,7 +946,7 @@ fun DownloadScreen(
                 isLoadingFormats = state.isFetching || info.url in formatsReading,
                 // A search or playlist card opens before its details are read.
                 isReadingLink = !info.hasResolvedFormats && info.url in formatsReading,
-                onRefreshFormats = { source -> downloadViewModel.refreshFormats(listOf(info), source) },
+                onRefreshFormats = { source, fresh -> downloadViewModel.refreshFormats(listOf(info), source, fresh) },
                 onOpenSaveDir = openSaveDirOf,
                 onPickSaveDir = pickSaveDir,
                 onResetSaveDir = resetSaveDir,
