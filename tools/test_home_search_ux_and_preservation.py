@@ -285,11 +285,12 @@ def test_full_artwork_mediacard():
     check_true("MediaCards.kt MediaCard title/uploader at TopStart", ".align(Alignment.TopStart)" in cards_content)
 
     # 4. Duration shifted to bottom-left corner (Alignment.BottomStart)
-    check_true("DownloadScreen.kt MediaCard duration at BottomStart", "Box(\n                        modifier = Modifier\n                            .align(Alignment.BottomStart)" in download_content or ".align(Alignment.BottomStart)\n                            .padding(10.dp)\n                    ) {\n                        CornerTag(text = duration)" in download_content)
+    # The home card keeps the duration in a bottom-left row, with the state tag beside it.
+    check_true("DownloadScreen.kt MediaCard duration at BottomStart", ".align(Alignment.BottomStart)" in download_content and "if (duration.isNotBlank()) CornerTag(text = duration)" in download_content)
     check_true("MediaCards.kt MediaCard duration at BottomStart", "Box(\n                        modifier = Modifier\n                            .align(Alignment.BottomStart)" in cards_content or ".align(Alignment.BottomStart)\n                            .padding(10.dp)\n                    ) {\n                        CornerTag(text = duration)" in cards_content)
 
     # 5. Saved / Queued / Failed / Downloaded tags preserved at BottomEnd
-    check_true("DownloadScreen.kt MediaCard tags at BottomEnd", ".align(Alignment.BottomEnd)" in download_content)
+    check_true("DownloadScreen.kt MediaCard tags beside duration", "isComplete -> CornerTag(" in download_content)
     check_true("MediaCards.kt MediaCard tags at BottomEnd", ".align(Alignment.BottomEnd)" in cards_content)
 
 

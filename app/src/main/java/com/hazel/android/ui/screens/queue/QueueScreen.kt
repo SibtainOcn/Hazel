@@ -33,7 +33,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -196,17 +196,20 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     selected = pagerState.currentPage == index,
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                     text = {
-                        BadgedBox(
-                            badge = {
-                                if (count > 0) {
-                                    Badge(
-                                        containerColor = if (tab == QueueTab.FAILED) MaterialTheme.colorScheme.error
-                                        else MaterialTheme.colorScheme.primary
-                                    ) { Text(count.toString()) }
-                                }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                stringResource(tab.labelRes),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                            if (count > 0) {
+                                Spacer(Modifier.width(6.dp))
+                                Badge(
+                                    containerColor = if (tab == QueueTab.FAILED) MaterialTheme.colorScheme.error
+                                    else MaterialTheme.colorScheme.primary
+                                ) { Text(count.toString()) }
                             }
-                        ) {
-                            Text(stringResource(tab.labelRes), maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
                 )
@@ -231,8 +234,11 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             isProcessing = item.isDownloading && state.isProcessing,
                             processingSteps = if (item.isDownloading) state.processingSteps else emptyList(),
                             processingStep = state.processingStep,
-                            progress = if (item.isDownloading) state.progress else 0f,
-                            totalBytes = if (item.isDownloading) state.totalBytes else 0L,
+                            // A paused item keeps the figures it stopped at, so its card
+                            // says how much is already in hand.
+                            progress = if (item.isDownloading || item.info.url == state.active?.url) state.progress else 0f,
+                            totalBytes = if (item.isDownloading || item.info.url == state.active?.url) state.totalBytes else 0L,
+                            eta = if (item.isDownloading) state.eta else "",
                             batchItem = item.batchItem,
                             waitingForWifi = state.waitingForWifi,
                             onCancel = { downloadViewModel.cancelItem(item.info.url) },

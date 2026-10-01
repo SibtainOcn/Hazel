@@ -19,7 +19,6 @@
     <string name="download_resume">Продолжить</string>
     <string name="download_cancel">Отмена</string>
     <string name="download_paused">Приостановлено</string>
-    <string name="download_processing">Обработка</string>
     <string name="download_waiting_wifi">Ожидание Wi-Fi</string>
     <string name="download_saved">Сохранено</string>
     <string name="download_queued">В очереди</string>
@@ -27,7 +26,6 @@
     <string name="download_failed">Ошибка</string>
     <string name="download_remove_link">Удалить ссылку</string>
     <string name="download_cancel_action">Отменить загрузку</string>
-    <string name="download_resume_action">Возобновить загрузку</string>
     <string name="download_pause_all">Приостановить все</string>
     <string name="download_resume_all">Возобновить все</string>
     <string name="download_cancel_all">Отменить все</string>
@@ -299,6 +297,7 @@
     <string name="queue_tab_queued">В очереди</string>
     <string name="queue_empty_running">Ничего не загружается</string>
     <string name="queue_empty_queued">Ничего не ожидает</string>
+    <string name="queue_header_eta">Осталось %1$s</string>
     <string name="history_sort_date">Дата добавления</string>
     <string name="history_sort_title">Название</string>
     <string name="history_sort_size">Размер файла</string>

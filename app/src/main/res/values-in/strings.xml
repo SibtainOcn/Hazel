@@ -19,7 +19,6 @@
     <string name="download_resume">Lanjutkan</string>
     <string name="download_cancel">Batal</string>
     <string name="download_paused">Dijeda</string>
-    <string name="download_processing">Memproses</string>
     <string name="download_waiting_wifi">Menunggu Wi-Fi</string>
     <string name="download_saved">Tersimpan</string>
     <string name="download_queued">Dalam antrean</string>
@@ -27,7 +26,6 @@
     <string name="download_failed">Gagal</string>
     <string name="download_remove_link">Hapus tautan</string>
     <string name="download_cancel_action">Batalkan unduhan</string>
-    <string name="download_resume_action">Lanjutkan unduhan</string>
     <string name="download_pause_all">Jeda semua</string>
     <string name="download_resume_all">Lanjutkan semua</string>
     <string name="download_cancel_all">Batalkan semua</string>
@@ -287,6 +285,7 @@
     <string name="queue_tab_queued">Dalam antrean</string>
     <string name="queue_empty_running">Tidak ada yang diunduh</string>
     <string name="queue_empty_queued">Tidak ada yang menunggu</string>
+    <string name="queue_header_eta">Sisa %1$s</string>
     <string name="history_sort_date">Tanggal ditambahkan</string>
     <string name="history_sort_title">Judul</string>
     <string name="history_sort_size">Ukuran file</string>

@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import com.hazel.android.download.ProcessingStep
+import kotlin.math.roundToInt
 
 /** How many stages are in view at once; the rest slide in as the download reaches them. */
 private const val VISIBLE_STEPS = 3
@@ -41,6 +42,10 @@ private const val VISIBLE_STEPS = 3
  * the middle, until the last three are in view. A glow in the accent colour sits behind the
  * current stage and travels with it.
  *
+ * While the streams are still being fetched, [fill] is how much of them is in: the line from
+ * the current stage fills to it and the percentage sits beside the stage's name. Without it
+ * the line only shimmers and the name stands alone.
+ *
  * Everything is drawn rather than laid out, so the slide and the fill redraw the artwork
  * without rebuilding the card.
  */
@@ -48,7 +53,8 @@ private const val VISIBLE_STEPS = 3
 fun ProcessingTracker(
     steps: List<ProcessingStep>,
     current: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    fill: Float? = null
 ) {
     val labels = steps.map { stringResource(it.label) }
     val shown = minOf(VISIBLE_STEPS, steps.size).coerceAtLeast(1)
@@ -93,6 +99,7 @@ fun ProcessingTracker(
     val accent = MaterialTheme.colorScheme.primary
     val ink = MaterialTheme.colorScheme.onSurface
     val shade = MaterialTheme.colorScheme.surface
+    val percent = fill?.let { "${(it.coerceIn(0f, 1f) * 100).roundToInt()}%" }
 
     Box(
         modifier = modifier
@@ -102,7 +109,9 @@ fun ProcessingTracker(
                 drawRect(shade.copy(alpha = 0.72f))
 
                 val slot = size.width / shown
-                val y = size.height * 0.44f
+                // Halfway down, so the dots and their names together sit centred
+                // between the title above and the figures below.
+                val y = size.height * 0.5f
                 fun xOf(index: Float) = (index - start + 0.5f) * slot
 
                 // The glow behind the current stage, drifting with it as it moves.
@@ -132,7 +141,12 @@ fun ProcessingTracker(
                     when {
                         i < at -> drawLine(accent, from, to, lineWidth, StrokeCap.Round)
                         i == at -> {
-                            drawLine(accent.copy(alpha = 0.45f), from, to, lineWidth, StrokeCap.Round)
+                            if (fill != null) {
+                                val reached = Offset(from.x + (to.x - from.x) * fill.coerceIn(0f, 1f), y)
+                                drawLine(accent, from, reached, lineWidth, StrokeCap.Round)
+                            } else {
+                                drawLine(accent.copy(alpha = 0.45f), from, to, lineWidth, StrokeCap.Round)
+                            }
                             // A bright band running along the line, over and over, so the
                             // stage reads as working rather than waiting.
                             val length = to.x - from.x
@@ -176,14 +190,25 @@ fun ProcessingTracker(
                     }
 
                     val text = measurer.measure(labels[i], labelStyle)
-                    drawText(
-                        textLayoutResult = text,
-                        color = ink.copy(alpha = if (i <= at) 1f else 0.5f),
-                        topLeft = Offset(
-                            x - text.size.width / 2f,
-                            y + 14.dp.toPx()
+                    val top = y + 14.dp.toPx()
+                    if (i == at && percent != null) {
+                        // The name and how far the fetch has got, centred together under the dot.
+                        val figure = measurer.measure(percent, labelStyle.copy(fontWeight = FontWeight.Bold))
+                        val space = 6.dp.toPx()
+                        val left = x - (text.size.width + space + figure.size.width) / 2f
+                        drawText(textLayoutResult = text, color = ink, topLeft = Offset(left, top))
+                        drawText(
+                            textLayoutResult = figure,
+                            color = accent,
+                            topLeft = Offset(left + text.size.width + space, top)
                         )
-                    )
+                    } else {
+                        drawText(
+                            textLayoutResult = text,
+                            color = ink.copy(alpha = if (i <= at) 1f else 0.5f),
+                            topLeft = Offset(x - text.size.width / 2f, top)
+                        )
+                    }
                 }
             }
     )

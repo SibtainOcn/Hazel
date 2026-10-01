@@ -41,16 +41,13 @@ import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -71,6 +68,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -83,6 +81,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.ui.components.FillingDownloadIcon
 import com.hazel.android.ui.components.ProcessingTracker
 import com.hazel.android.download.ProcessingStep
 import com.hazel.android.data.DownloadHistoryRepository
@@ -96,12 +95,10 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadViewModel
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
-import com.hazel.android.download.formatFileSize
 import com.hazel.android.ui.components.MediaCardShimmer
 import com.hazel.android.ui.components.ShimmerHost
 import com.hazel.android.ui.components.refreshShine
 import com.hazel.android.ui.components.rememberPresence
-import com.hazel.android.ui.components.ProcessingShimmer
 import com.hazel.android.ui.motion.M3Motion
 import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 import com.hazel.android.ui.screens.download.batch.BatchDownloadSheet
@@ -162,13 +159,22 @@ fun DownloadScreen(
     // for it down a list of queued links is the opposite of that. The list is reordered
     // rather than animated into place: a card sliding around under a moving progress bar
     // is harder to read than one that is simply where it belongs.
+    val listState = rememberLazyListState()
     val orderedResults = remember(state.results, state.info?.url, state.isDownloading) {
         val active = state.info?.url?.takeIf { state.isDownloading }
+        // The list anchors its scroll to the first visible card's key, so when a finished
+        // download dropped back from the top to its own place the viewport followed it,
+        // often to the end of the list. Pinning the position by index keeps the user where
+        // they were; read without observation so scrolling does not recompose this.
+        Snapshot.withoutReadObservation {
+            listState.requestScrollToItem(
+                listState.firstVisibleItemIndex,
+                listState.firstVisibleItemScrollOffset
+            )
+        }
         if (active == null) state.results
         else state.results.sortedByDescending { it.url == active }
     }
-
-    val listState = rememberLazyListState()
 
     // A new read empties the list and the skeleton takes its place, but the list's scroll
     // position outlives it: the next results opened where the last ones were left, which
@@ -575,7 +581,6 @@ fun DownloadScreen(
                                 processingSteps = if (isActive) state.processingSteps else emptyList(),
                                 processingStep = state.processingStep,
                                 progress = state.progress,
-                                totalBytes = state.totalBytes,
                                 isComplete = batchItem?.state == BatchState.DONE ||
                                         (!state.isMultiple && state.isComplete),
                                 batchItem = batchItem,
@@ -1135,12 +1140,11 @@ private fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifier
  *
  * The whole card is the download control: tapping anywhere on it opens the format sheet,
  * so there is no separate button competing with it. While this card's download runs it
- * carries the progress readout, and its centre becomes the cancel control.
+ * carries the progress readout, and its centre a download glyph that fills along with it.
  *
- * Once the transfer finishes and the streams are being merged and tagged, the cancel
- * control goes: there is no transfer left to stop, and offering to stop one would only
- * invite a tap that cannot do what it says. A sweep across the artwork takes its place, so
- * the card still reads as busy while that work runs.
+ * Once the transfer finishes and the streams are being merged and tagged, the filling glyph
+ * goes and the stage track takes the artwork over, so the card still reads as busy and says
+ * which stage the file is at.
  */
 @Composable
 private fun MediaCard(
@@ -1150,7 +1154,6 @@ private fun MediaCard(
     processingSteps: List<ProcessingStep> = emptyList(),
     processingStep: Int = 0,
     progress: Float,
-    totalBytes: Long,
     isComplete: Boolean,
     batchItem: BatchItem?,
     waitingForWifi: Boolean = false,
@@ -1164,12 +1167,6 @@ private fun MediaCard(
     onOpenSheet: () -> Unit,
     onOpenQueue: () -> Unit
 ) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = M3Motion.emphasized(300),
-        label = "cardProgress"
-    )
-
     val isPaused = batchItem?.state == BatchState.PAUSED
     val isQueued = batchItem?.state == BatchState.QUEUED
     // A download in hand is managed from the queue, so the card leads there instead of back
@@ -1224,6 +1221,24 @@ private fun MediaCard(
                     )
             )
 
+            if (isDownloading || isPaused) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f))
+                )
+            }
+
+            // The stage track goes under the title and the readouts, so its shade dims the
+            // artwork and not the words laid over it.
+            if (isProcessing && !isPaused && processingSteps.isNotEmpty()) {
+                ProcessingTracker(
+                    steps = processingSteps,
+                    current = processingStep,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
             // Title and author directly overlaid on top of the thumbnail
             Column(
                 modifier = Modifier
@@ -1256,84 +1271,20 @@ private fun MediaCard(
             }
 
             // A paused download is still a download in hand, so the artwork keeps the
-            // treatment that says so. Only the control in the middle changes: there is
-            // nothing to stop any more, and the thing to do is start it again.
+            // treatment that says so. The glyph in the middle holds where it stopped.
             if (isDownloading || isPaused) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.35f))
-                )
-
-                // Downloading status & percentage readout positioned in the bottom-left corner
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (isPaused) {
-                        OverlayChip(text = stringResource(R.string.download_paused), bold = true)
-                        if (totalBytes > 0) {
-                            val done = (totalBytes * animatedProgress).toLong()
-                            OverlayChip(
-                                text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
-                            )
-                        }
-                    } else if (isProcessing) {
-                        OverlayChip(text = stringResource(R.string.download_processing), bold = true)
-                    } else {
-                        OverlayChip(
-                            text = "%.1f %%".format(animatedProgress * 100),
-                            bold = true
-                        )
-                        if (totalBytes > 0) {
-                            val done = (totalBytes * animatedProgress).toLong()
-                            OverlayChip(
-                                text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
-                            )
-                        }
-                    }
-                }
-
-                if (isProcessing && !isPaused) {
-                    // The stages this download goes through, as far as it has got; the
-                    // plain sweep only stands in when no stages are known.
-                    if (processingSteps.isNotEmpty()) {
-                        ProcessingTracker(
-                            steps = processingSteps,
-                            current = processingStep,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        ProcessingShimmer(modifier = Modifier.fillMaxSize())
-                    }
-                } else {
-                    // The progress ring says how far along the download is. Stopping or
-                    // pausing it is done from the queue, which a tap on the card opens.
-                    Box(
+                if (!isProcessing || isPaused) {
+                    // The download glyph fills as the download does, straight on the artwork.
+                    // Stopping or pausing it is done from the queue, which a tap on the card
+                    // opens.
+                    FillingDownloadIcon(
+                        progress = progress,
+                        flowing = !isPaused,
+                        tint = if (isPaused) Color.White.copy(alpha = 0.7f) else Color.White,
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .size(60.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.55f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            progress = { animatedProgress },
-                            modifier = Modifier.size(60.dp),
-                            color = Color.White,
-                            trackColor = Color.Transparent,
-                            strokeWidth = 3.dp
-                        )
-                        Icon(
-                            if (isPaused) Icons.Filled.Pause else Icons.Filled.Download,
-                            contentDescription = null,
-                            modifier = Modifier.size(22.dp),
-                            tint = Color.White
-                        )
-                    }
+                            .size(40.dp)
+                    )
                 }
             }
 
@@ -1373,81 +1324,55 @@ private fun MediaCard(
                 }
             }
 
-            // Bottom left corner carries the duration, and bottom right corner carries
-            // whatever this link's state is: queued, failed, saved, or downloaded.
-            if (!isDownloading) {
+            // Bottom left corner carries the duration with this link's state beside it:
+            // paused, failed, saved, queued or downloaded. It stays while the download runs.
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 val duration = formatDuration(info.durationSeconds)
-                if (duration.isNotBlank()) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(10.dp)
-                    ) {
-                        CornerTag(text = duration)
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    when {
-                        batchItem?.state == BatchState.FAILED -> CornerTag(
-                            text = batchItem.error ?: stringResource(R.string.download_failed),
-                            background = MaterialTheme.colorScheme.error,
-                            foreground = MaterialTheme.colorScheme.onError
-                        )
-                        isComplete -> CornerTag(
-                            text = stringResource(R.string.download_saved),
-                            background = MaterialTheme.colorScheme.primary,
-                            foreground = MaterialTheme.colorScheme.onPrimary
-                        )
-                        batchItem?.state == BatchState.QUEUED -> CornerTag(text = stringResource(R.string.download_queued))
-                        alreadyDownloaded -> CornerTag(text = stringResource(R.string.download_downloaded))
-                    }
-                    if (!inHand) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color.Black.copy(alpha = 0.55f))
-                                .clickable(
-                                    onClickLabel = stringResource(R.string.player_play),
-                                    onClick = onPlay
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Filled.PlayArrow,
-                                contentDescription = stringResource(R.string.player_play),
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
+                if (duration.isNotBlank()) CornerTag(text = duration)
+                when {
+                    isPaused -> CornerTag(text = stringResource(R.string.download_paused))
+                    isDownloading -> Unit
+                    batchItem?.state == BatchState.FAILED -> CornerTag(
+                        text = batchItem.error ?: stringResource(R.string.download_failed),
+                        background = MaterialTheme.colorScheme.error,
+                        foreground = MaterialTheme.colorScheme.onError
+                    )
+                    isComplete -> CornerTag(
+                        text = stringResource(R.string.download_saved),
+                        background = MaterialTheme.colorScheme.primary,
+                        foreground = MaterialTheme.colorScheme.onPrimary
+                    )
+                    batchItem?.state == BatchState.QUEUED -> CornerTag(text = stringResource(R.string.download_queued))
+                    alreadyDownloaded -> CornerTag(text = stringResource(R.string.download_downloaded))
                 }
             }
 
-            // Filled line along the bottom edge of the thumbnail. Processing has no
-            // figure to fill it with, so the line runs on its own there.
-            if (isDownloading) {
-                val lineModifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .height(4.dp)
-
-                // While processing, the stage track over the artwork is the progress; a
-                // second line along the bottom only repeated it.
-                if (!isProcessing) {
-                    LinearProgressIndicator(
-                        progress = { animatedProgress },
-                        modifier = lineModifier,
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color.White.copy(alpha = 0.25f),
-                        drawStopIndicator = {}
+            // Bottom right corner plays the link, for one not in hand.
+            if (!inHand) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(10.dp)
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.55f))
+                        .clickable(
+                            onClickLabel = stringResource(R.string.player_play),
+                            onClick = onPlay
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.PlayArrow,
+                        contentDescription = stringResource(R.string.player_play),
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }

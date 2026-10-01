@@ -14,21 +14,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.WifiOff
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -93,9 +90,12 @@ fun CornerTag(
 }
 
 /**
- * Thumbnail, title and author for a resolved link or running download.
+ * A download in the queue: its artwork, title and author, and where it has got to.
  *
- * Used identically on the Home screen and Downloads screen for full visual parity.
+ * From the first byte to the saved file the artwork carries the stage track. While the
+ * streams are fetched, the line from Fetch fills with the transfer, the percentage sits beside
+ * Fetch, and how much of how much has arrived and how long is left sit under the
+ * track; after that the track moves through the stages yt-dlp runs. Pausing, resuming and cancelling are in the corner menu.
  */
 @Composable
 fun MediaCard(
@@ -106,6 +106,7 @@ fun MediaCard(
     processingStep: Int = 0,
     progress: Float = 0f,
     totalBytes: Long = 0L,
+    eta: String = "",
     isComplete: Boolean = false,
     batchItem: BatchItem? = null,
     waitingForWifi: Boolean = false,
@@ -124,6 +125,8 @@ fun MediaCard(
     var menuOpen by remember { mutableStateOf(false) }
     val isPaused = batchItem?.state == BatchState.PAUSED
     val isQueued = batchItem?.state == BatchState.QUEUED
+    val inHand = isDownloading || isPaused || isQueued
+    val transferring = isDownloading && !isProcessing
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -173,6 +176,26 @@ fun MediaCard(
                     )
             )
 
+            if (isDownloading || isPaused) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f))
+                )
+            }
+
+            // The stage track goes under the title and the readouts, so its shade dims the
+            // artwork and not the words laid over it. Fetch is the stage until the transfer is
+            // over, and its line fills with it.
+            if ((isDownloading || isPaused) && processingSteps.isNotEmpty()) {
+                ProcessingTracker(
+                    steps = processingSteps,
+                    current = if (isProcessing) processingStep else 0,
+                    fill = if (isProcessing) null else animatedProgress,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
             // Title and author directly overlaid on top of the thumbnail
             Column(
                 modifier = Modifier
@@ -181,7 +204,7 @@ fun MediaCard(
                     .padding(
                         start = 14.dp,
                         top = 12.dp,
-                        end = if (isDownloading || isPaused || isQueued) 48.dp else 14.dp
+                        end = if (inHand) 48.dp else 14.dp
                     )
             ) {
                 Text(
@@ -204,7 +227,7 @@ fun MediaCard(
                 }
             }
 
-            if (isDownloading || isPaused || isQueued) {
+            if (inHand) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -234,14 +257,17 @@ fun MediaCard(
                         if (isPaused) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.download_resume)) },
+                                leadingIcon = { Icon(Icons.Filled.PlayArrow, contentDescription = null) },
                                 onClick = {
                                     menuOpen = false
                                     onResume()
                                 }
                             )
                         } else if (isDownloading) {
+                            // Nothing is left to hold once the file is being worked on.
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.download_pause)) },
+                                leadingIcon = { Icon(Icons.Filled.Pause, contentDescription = null) },
                                 enabled = !isProcessing,
                                 onClick = {
                                     menuOpen = false
@@ -251,6 +277,7 @@ fun MediaCard(
                         }
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.download_cancel)) },
+                            leadingIcon = { Icon(Icons.Filled.Close, contentDescription = null) },
                             onClick = {
                                 menuOpen = false
                                 onCancel()
@@ -260,82 +287,49 @@ fun MediaCard(
                 }
             }
 
-
-            if (isDownloading || isPaused) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.35f))
-                )
-
-                // Downloading status & percentage readout positioned in the bottom-left corner
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (isPaused) {
-                        OverlayChip(text = stringResource(R.string.download_paused), bold = true)
-                        if (totalBytes > 0) {
-                            val done = (totalBytes * animatedProgress).toLong()
-                            OverlayChip(
-                                text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
-                            )
-                        }
-                    } else if (isProcessing) {
-                        OverlayChip(text = stringResource(R.string.download_processing), bold = true)
-                    } else {
-                        OverlayChip(
-                            text = "%.1f %%".format(animatedProgress * 100),
-                            bold = true
-                        )
-                        if (totalBytes > 0) {
-                            val done = (totalBytes * animatedProgress).toLong()
-                            OverlayChip(
-                                text = "${formatFileSize(done)} / ${formatFileSize(totalBytes)}"
-                            )
-                        }
+            // The figures sit under the track, in one pill on one line, for as long as bytes
+            // are moving, or held there while paused. How far along is on the track itself.
+            if (transferring || isPaused) {
+                val figures = buildList {
+                    if (isPaused) add(stringResource(R.string.download_paused))
+                    if (totalBytes > 0) {
+                        val done = (totalBytes * animatedProgress).toLong().coerceAtLeast(1L)
+                        add("${formatFileSize(done)} / ${formatFileSize(totalBytes)}")
                     }
+                    if (transferring && eta.isNotBlank()) add(stringResource(R.string.queue_header_eta, eta))
                 }
-
-                if (isProcessing && !isPaused) {
-                    // The stages this download goes through, as far as it has got; the
-                    // plain sweep only stands in when no stages are known.
-                    if (processingSteps.isNotEmpty()) {
-                        ProcessingTracker(
-                            steps = processingSteps,
-                            current = processingStep,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        ProcessingShimmer(modifier = Modifier.fillMaxSize())
-                    }
-                } else {
-                    Box(
+                if (figures.isNotEmpty()) {
+                    Surface(
                         modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(60.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.55f))
-                            .clickable(onClick = if (isPaused) onResume else onCancel),
-                        contentAlignment = Alignment.Center
+                            .align(Alignment.BottomStart)
+                            .padding(10.dp),
+                        shape = RoundedCornerShape(6.dp),
+                        color = Color.Black.copy(alpha = 0.6f)
                     ) {
-                        CircularProgressIndicator(
-                            progress = { animatedProgress },
-                            modifier = Modifier.size(60.dp),
-                            color = Color.White,
-                            trackColor = Color.Transparent,
-                            strokeWidth = 3.dp
-                        )
-                        Icon(
-                            if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Close,
-                            contentDescription =
-                                stringResource(if (isPaused) R.string.download_resume_action else R.string.download_cancel_action),
-                            modifier = Modifier.size(22.dp),
-                            tint = Color.White
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(7.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            figures.forEachIndexed { index, figure ->
+                                if (index > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(3.dp)
+                                            .clip(CircleShape)
+                                            .background(Color.White.copy(alpha = 0.6f))
+                                    )
+                                }
+                                Text(
+                                    figure,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = if (isPaused && index == 0) FontWeight.Bold else FontWeight.Medium,
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -375,7 +369,7 @@ fun MediaCard(
 
             // Bottom left corner carries the duration, and bottom right corner carries
             // whatever this link's state is: queued, failed, saved, or downloaded.
-            if (!isDownloading) {
+            if (!isDownloading && !isPaused) {
                 val duration = formatDuration(info.durationSeconds)
                 if (duration.isNotBlank()) {
                     Box(
@@ -408,26 +402,6 @@ fun MediaCard(
                         batchItem?.state == BatchState.QUEUED -> CornerTag(text = stringResource(R.string.download_queued))
                         alreadyDownloaded -> CornerTag(text = stringResource(R.string.download_downloaded))
                     }
-                }
-            }
-
-            // Filled line along the bottom edge of the thumbnail.
-            if (isDownloading) {
-                val lineModifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .height(4.dp)
-
-                // While processing, the stage track over the artwork is the progress; a
-                // second line along the bottom only repeated it.
-                if (!isProcessing) {
-                    LinearProgressIndicator(
-                        progress = { animatedProgress },
-                        modifier = lineModifier,
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color.White.copy(alpha = 0.25f),
-                        drawStopIndicator = {}
-                    )
                 }
             }
         }
