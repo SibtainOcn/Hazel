@@ -19,7 +19,6 @@
     <string name="download_resume">再開</string>
     <string name="download_cancel">キャンセル</string>
     <string name="download_paused">一時停止中</string>
-    <string name="download_processing">処理中</string>
     <string name="download_waiting_wifi">Wi-Fi待機中</string>
     <string name="download_saved">保存済み</string>
     <string name="download_queued">待機中</string>
@@ -27,7 +26,6 @@
     <string name="download_failed">失敗</string>
     <string name="download_remove_link">リンクを削除</string>
     <string name="download_cancel_action">ダウンロードをキャンセル</string>
-    <string name="download_resume_action">ダウンロードを再開</string>
     <string name="download_pause_all">すべて一時停止</string>
     <string name="download_resume_all">すべて再開</string>
     <string name="download_cancel_all">すべてキャンセル</string>
@@ -287,6 +285,7 @@
     <string name="queue_tab_queued">待機中</string>
     <string name="queue_empty_running">ダウンロード中の項目はありません</string>
     <string name="queue_empty_queued">待機中の項目はありません</string>
+    <string name="queue_header_eta">残り %1$s</string>
     <string name="history_sort_date">追加日</string>
     <string name="history_sort_title">タイトル</string>
     <string name="history_sort_size">ファイルサイズ</string>

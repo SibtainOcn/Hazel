@@ -1,6 +1,5 @@
 package com.hazel.android.ui.components
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -26,13 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -316,150 +310,6 @@ fun FormatListShimmer(rows: Int = 5, modifier: Modifier = Modifier) {
         }
     }
 }
-
-/**
- * What a card's artwork shows while the download is done and the app is working on the file
- * (merging, converting, embedding the cover).
- *
- * Three layers, all drawn rather than composed, so the animation redraws the artwork
- * without rebuilding the card:
- *
- *  - a train of thin light bands raking across the artwork one after another, quickly and
- *    without a rest between passes, so the surface reads as busy rather than as waiting;
- *  - a slow breath of shade and glow over the whole picture, so it never looks frozen
- *    between bands;
- *  - a spinning ring at the centre, where the pause and cancel control sits while the
- *    download runs, with a bright head and a fading tail, so what is happening has a place
- *    of its own on the card.
- *
- * The bands pair a light core with a dark edge, which keeps them visible on pale and dark
- * artwork alike; what they cross is the artwork, not an app surface, so the same drawing
- * works in either theme.
- */
-@Composable
-fun ProcessingShimmer(modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition(label = "processing")
-    val sweep by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = PROCESSING_SWEEP_MS, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "processingSweep"
-    )
-    val spin by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = PROCESSING_SPIN_MS, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "processingSpin"
-    )
-    val breath by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = PROCESSING_BREATH_MS, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "processingBreath"
-    )
-
-    Box(
-        modifier = modifier.drawBehind {
-            // Breath: the picture dims and lifts a little, over and over.
-            drawRect(Color.Black.copy(alpha = 0.10f + 0.12f * breath))
-            drawRect(
-                brush = Brush.radialGradient(
-                    colors = listOf(Color.White.copy(alpha = 0.04f + 0.08f * breath), Color.Transparent),
-                    center = center,
-                    radius = size.maxDimension * 0.6f
-                )
-            )
-
-            // Bands: a train of thin raked highlights.
-            val radians = Math.toRadians(SWEEP_TILT_DEGREES).toFloat()
-            val axisX = cos(radians)
-            val axisY = sin(radians)
-            val bandWidth = size.width * PROCESSING_BAND_WIDTH
-            val reach = size.width + kotlin.math.abs(axisY) * size.height + bandWidth * 2f
-            for (i in 0 until PROCESSING_BANDS) {
-                // Each band trails the one before it by a fixed share of the pass, and the
-                // train wraps, so there is always a band somewhere on the artwork.
-                val phase = (sweep - i * PROCESSING_BAND_GAP + 1f) % 1f
-                val centreX = -bandWidth + reach * phase
-                val centreY = size.height / 2f
-                val strength = 1f - i * 0.28f
-                val start = Offset(centreX - axisX * bandWidth / 2f, centreY - axisY * bandWidth / 2f)
-                val end = Offset(centreX + axisX * bandWidth / 2f, centreY + axisY * bandWidth / 2f)
-                drawRect(
-                    brush = Brush.linearGradient(
-                        colorStops = arrayOf(
-                            0f to Color.Transparent,
-                            0.30f to Color.Black.copy(alpha = 0.16f * strength),
-                            0.46f to Color.White.copy(alpha = 0.10f * strength),
-                            0.50f to Color.White.copy(alpha = 0.55f * strength),
-                            0.54f to Color.White.copy(alpha = 0.10f * strength),
-                            0.70f to Color.Black.copy(alpha = 0.16f * strength),
-                            1f to Color.Transparent
-                        ),
-                        start = start,
-                        end = end
-                    )
-                )
-            }
-
-            // Ring: a spinning comet at the centre, on a disc that keeps it legible over
-            // any artwork.
-            val ringRadius = PROCESSING_RING_RADIUS.toPx()
-            val stroke = PROCESSING_RING_STROKE.toPx()
-            drawCircle(
-                color = Color.Black.copy(alpha = 0.45f),
-                radius = ringRadius + stroke * 2.2f,
-                center = center
-            )
-            drawCircle(
-                color = Color.White.copy(alpha = 0.18f),
-                radius = ringRadius,
-                center = center,
-                style = Stroke(width = stroke)
-            )
-            rotate(degrees = spin, pivot = center) {
-                drawArc(
-                    brush = Brush.sweepGradient(
-                        0f to Color.Transparent,
-                        0.55f to Color.White.copy(alpha = 0.25f),
-                        0.78f to Color.White,
-                        0.78f to Color.Transparent,
-                        1f to Color.Transparent,
-                        center = center
-                    ),
-                    startAngle = 0f,
-                    sweepAngle = 280f,
-                    useCenter = false,
-                    topLeft = Offset(center.x - ringRadius, center.y - ringRadius),
-                    size = Size(ringRadius * 2f, ringRadius * 2f),
-                    style = Stroke(width = stroke, cap = StrokeCap.Round)
-                )
-            }
-        }
-    )
-}
-
-/** One pass of the band train, how many bands it has, and the gap between them. */
-private const val PROCESSING_SWEEP_MS = 1100
-private const val PROCESSING_BANDS = 3
-private const val PROCESSING_BAND_GAP = 0.14f
-private const val PROCESSING_BAND_WIDTH = 0.12f
-
-/** One turn of the centre ring, and one breath in or out. */
-private const val PROCESSING_SPIN_MS = 850
-private const val PROCESSING_BREATH_MS = 1300
-
-private val PROCESSING_RING_RADIUS = 20.dp
-private val PROCESSING_RING_STROKE = 3.5.dp
 
 /** How long the band takes to cross a [ShimmerLabel], and how wide it is. */
 private const val TEXT_SWEEP_MS = 2000

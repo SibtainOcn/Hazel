@@ -98,6 +98,11 @@ data class DownloadState(
     val progress: Float = 0f,
     /** Total transfer size reported by yt-dlp, 0 until its first progress line. */
     val totalBytes: Long = 0L,
+    /**
+     * Time remaining as yt-dlp last reported it (`00:14`), blank before its first progress
+     * line and once the transfer is over.
+     */
+    val eta: String = "",
     val status: String = "",
     /**
      * True once the transfer is done and yt-dlp has moved on to merging, converting or
@@ -1208,6 +1213,7 @@ class DownloadViewModel : ViewModel() {
                     active = plan.info,
                     progress = progressFloor,
                     totalBytes = expectedTotalBytes,
+                    eta = "",
                     status = opening,
                     isProcessing = false
                 )
@@ -1395,7 +1401,7 @@ class DownloadViewModel : ViewModel() {
     private fun holdForResume(item: QueuedDownload) {
         synchronized(queue) { queue.addFirst(item.copy(paused = true)) }
         markBatch(item.url, BatchState.PAUSED)
-        _state.value = _state.value.copy(status = "Paused", isProcessing = false)
+        _state.value = _state.value.copy(status = "Paused", isProcessing = false, eta = "")
 
         // The shade is told the same thing the card is, off the same figures. A download
         // held while the app is off screen otherwise loses its notification along with the
@@ -2121,22 +2127,41 @@ class DownloadViewModel : ViewModel() {
     private fun executeYtDlp(request: YoutubeDLRequest) {
         lastNotifiedAt = 0L
         val steps = plannedSteps
-        _state.value = _state.value.copy(processingSteps = steps, processingStep = 0)
+        // Whether this run has moved on from transferring to working on the file. Held here
+        // and written whole on every line, rather than OR-ed into what the state already
+        // said: a flag carried over from the item before, or put back by a write racing
+        // this one, otherwise stuck the card on the stage track while bytes were still
+        // arriving.
+        var postProcessing = false
+        _state.value = _state.value.copy(
+            processingSteps = steps,
+            processingStep = 0,
+            isProcessing = false,
+            eta = ""
+        )
         YtDlpEngine.execute(request, processId) { progress, _, line ->
             refreshFloorFromDisk()
             val percent = progress.coerceIn(0f, 100f).coerceAtLeast(progressFloor * 100f)
             val status = cleanProgressLine(line) ?: _state.value.status
-            val processing = _state.value.isProcessing || isPostProcessing(line)
+            when {
+                isPostProcessing(line) -> postProcessing = true
+                // A transfer line means bytes are moving, whatever came before it.
+                ProgressText.isTransferLine(line) -> postProcessing = false
+            }
             // Only ever forward: a stage the engine announces moves the card to it, and a
-            // line for one already passed (a second [Metadata], say) changes nothing.
+            // line for one already passed (a second [Metadata], say) changes nothing. Once
+            // the file is being worked on, fetching it is behind it.
             val announced = ProcessingStep.announcedBy(line)?.let { steps.indexOf(it) } ?: -1
-            _state.value = _state.value.copy(
+            val fetched = if (postProcessing && steps.size > 1) 1 else 0
+            val current = _state.value
+            _state.value = current.copy(
                 progress = percent / 100f,
                 totalBytes = if (expectedTotalBytes > 0) expectedTotalBytes
-                else parseTotalBytes(line) ?: _state.value.totalBytes,
+                else parseTotalBytes(line) ?: current.totalBytes,
+                eta = if (postProcessing) "" else ProgressText.eta(line) ?: current.eta,
                 status = status,
-                isProcessing = processing,
-                processingStep = maxOf(_state.value.processingStep, announced)
+                isProcessing = postProcessing,
+                processingStep = maxOf(current.processingStep, announced, fetched)
             )
 
             // Updates are paced by the clock rather than by the percentage. yt-dlp reports
@@ -2190,6 +2215,7 @@ class DownloadViewModel : ViewModel() {
         _state.value = _state.value.copy(
             status = "Saving",
             isProcessing = true,
+            eta = "",
             processingStep = _state.value.processingSteps.indexOf(ProcessingStep.SAVE)
                 .takeIf { it >= 0 } ?: _state.value.processingStep
         )

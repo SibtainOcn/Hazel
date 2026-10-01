@@ -19,7 +19,6 @@
     <string name="download_resume">Fortsetzen</string>
     <string name="download_cancel">Abbrechen</string>
     <string name="download_paused">Pausiert</string>
-    <string name="download_processing">Wird verarbeitet</string>
     <string name="download_waiting_wifi">Wartet auf WLAN</string>
     <string name="download_saved">Gespeichert</string>
     <string name="download_queued">In der Warteschlange</string>
@@ -27,7 +26,6 @@
     <string name="download_failed">Fehlgeschlagen</string>
     <string name="download_remove_link">Link entfernen</string>
     <string name="download_cancel_action">Download abbrechen</string>
-    <string name="download_resume_action">Download fortsetzen</string>
     <string name="download_pause_all">Alle pausieren</string>
     <string name="download_resume_all">Alle fortsetzen</string>
     <string name="download_cancel_all">Alle abbrechen</string>
@@ -291,6 +289,7 @@
     <string name="queue_tab_queued">Wartend</string>
     <string name="queue_empty_running">Es wird nichts heruntergeladen</string>
     <string name="queue_empty_queued">Nichts wartet</string>
+    <string name="queue_header_eta">Noch %1$s</string>
     <string name="history_sort_date">Hinzugefügt am</string>
     <string name="history_sort_title">Titel</string>
     <string name="history_sort_size">Dateigröße</string>

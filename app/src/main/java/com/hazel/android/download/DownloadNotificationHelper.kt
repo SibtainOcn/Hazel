@@ -289,8 +289,8 @@ object DownloadNotificationHelper {
             parts += "${formatSize(doneBytes)} / ${formatSize(totalBytes)}"
         }
 
-        RATE_PATTERN.find(statusLine)?.groupValues?.get(1)?.let { parts += it }
-        ETA_PATTERN.find(statusLine)?.groupValues?.get(1)?.let { parts += "ETA $it" }
+        ProgressText.rate(statusLine)?.let { parts += it }
+        ProgressText.eta(statusLine)?.let { parts += "ETA $it" }
 
         // Nothing measurable yet, so whatever stage the engine named stands in for it.
         if (parts.isEmpty()) return statusLine.ifBlank { "Downloading" }
@@ -304,12 +304,6 @@ object DownloadNotificationHelper {
         bytes >= 1_048_576 -> "%.1f MB".format(bytes / 1_048_576.0)
         else -> "%.0f KB".format(bytes / 1024.0)
     }
-
-    /** `at 2.35MiB/s` in a yt-dlp progress line. */
-    private val RATE_PATTERN = Regex("""at\s+([\d.]+\s*[KMG]iB/s)""", RegexOption.IGNORE_CASE)
-
-    /** `ETA 00:10` in a yt-dlp progress line. */
-    private val ETA_PATTERN = Regex("""ETA\s+([\d:]+)""", RegexOption.IGNORE_CASE)
 
     /**
      * Takes down whatever the download had in the shade, running or held.

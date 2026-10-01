@@ -19,7 +19,6 @@
     <string name="download_resume">继续</string>
     <string name="download_cancel">取消</string>
     <string name="download_paused">已暂停</string>
-    <string name="download_processing">正在处理</string>
     <string name="download_waiting_wifi">等待 Wi-Fi</string>
     <string name="download_saved">已保存</string>
     <string name="download_queued">排队中</string>
@@ -27,7 +26,6 @@
     <string name="download_failed">失败</string>
     <string name="download_remove_link">移除链接</string>
     <string name="download_cancel_action">取消下载</string>
-    <string name="download_resume_action">继续下载</string>
     <string name="download_pause_all">全部暂停</string>
     <string name="download_resume_all">全部继续</string>
     <string name="download_cancel_all">全部取消</string>
@@ -287,6 +285,7 @@
     <string name="queue_tab_queued">排队中</string>
     <string name="queue_empty_running">没有正在下载的内容</string>
     <string name="queue_empty_queued">没有等待中的内容</string>
+    <string name="queue_header_eta">剩余 %1$s</string>
     <string name="history_sort_date">添加日期</string>
     <string name="history_sort_title">标题</string>
     <string name="history_sort_size">文件大小</string>

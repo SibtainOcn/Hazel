@@ -19,7 +19,6 @@
     <string name="download_resume">फिर शुरू करें</string>
     <string name="download_cancel">रद्द करें</string>
     <string name="download_paused">रुका हुआ</string>
-    <string name="download_processing">तैयार किया जा रहा है</string>
     <string name="download_waiting_wifi">वाई-फ़ाई का इंतज़ार</string>
     <string name="download_saved">सहेजा गया</string>
     <string name="download_queued">कतार में</string>
@@ -27,7 +26,6 @@
     <string name="download_failed">विफल</string>
     <string name="download_remove_link">लिंक हटाएँ</string>
     <string name="download_cancel_action">डाउनलोड रद्द करें</string>
-    <string name="download_resume_action">डाउनलोड फिर शुरू करें</string>
     <string name="download_pause_all">सभी रोकें</string>
     <string name="download_resume_all">सभी जारी रखें</string>
     <string name="download_cancel_all">सभी रद्द करें</string>
@@ -291,6 +289,7 @@
     <string name="queue_tab_queued">कतार में</string>
     <string name="queue_empty_running">कुछ भी डाउनलोड नहीं हो रहा</string>
     <string name="queue_empty_queued">कुछ भी प्रतीक्षा में नहीं</string>
+    <string name="queue_header_eta">शेष %1$s</string>
     <string name="history_sort_date">जोड़ने की तारीख</string>
     <string name="history_sort_title">शीर्षक</string>
     <string name="history_sort_size">फ़ाइल आकार</string>
