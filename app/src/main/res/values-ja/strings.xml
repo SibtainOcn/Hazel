@@ -181,7 +181,18 @@
     <string name="more_converter">動画から音声へのオフライン変換</string>
     <string name="more_software_update">ソフトウェアの更新</string>
     <string name="more_support">Hazel を支援</string>
-    <string name="more_license">ライセンス</string>
+    <string name="more_documentation">ドキュメント</string>
+    <string name="docs_title">ドキュメント</string>
+    <string name="docs_back">戻る</string>
+    <string name="docs_guide">使い方ガイド</string>
+    <string name="docs_features">機能</string>
+    <string name="docs_faq">よくある質問</string>
+    <string name="docs_changelog">新機能</string>
+    <string name="docs_license">ライセンス</string>
+    <string name="docs_open_in_browser">ブラウザで開く</string>
+    <string name="docs_error_title">このページを読み込めませんでした</string>
+    <string name="docs_error_body">接続を確認して、もう一度お試しください。</string>
+    <string name="docs_retry">再試行</string>
 
     <!-- SponsorScreen -->
     <string name="sponsor_back">戻る</string>
@@ -243,6 +254,8 @@
     <string name="cleanup_category_engine_description">ダウンローダーとその実行環境です。消去すると最大の容量が解放されますが、次回ダウンロード時に再展開が必要になります。</string>
     <string name="cleanup_category_other_cache_label">その他のキャッシュファイル</string>
     <string name="cleanup_category_other_cache_description">リンク閲覧時にキャッシュされたサムネイルなどです。</string>
+    <string name="cleanup_category_link_reads_label">保存済みのリンク情報</string>
+    <string name="cleanup_category_link_reads_description">最近読み込んだ 25 件のリンクの形式です。もう一度開くとすぐに表示されます。最大 6 時間保持し、シークレットでは保存しません。</string>
     <string name="cleanup_confirm_category_title">これらの一時ファイルを削除しますか？</string>
     <string name="cleanup_confirm_category_safe">%1$s が解放されます。保存済みのファイルには影響ありません。</string>
     <string name="cleanup_confirm_category_unsafe">%1$s が解放されます。次回ダウンロード時に再展開するため時間がかかります。</string>
@@ -252,6 +265,7 @@
     <string name="cleanup_confirm_all_body">%1$s が解放されます。ダウンロードや保存されたログイン情報は保持されますが、エンジンの再展開のため次回ダウンロードに時間がかかります。</string>
     <string name="cleanup_confirm_all_confirm">すべて削除</string>
     <string name="cleanup_confirm_all_cancel">キャンセル</string>
+    <string name="cleanup_confirm_all_include_link_reads">保存済みのリンク情報も消去する（%1$s）</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">すべてのダウンロード</string>
@@ -385,8 +399,6 @@
     <string name="batch_type_sheet_subtitle">これらのリンクをどの形式でダウンロードするか</string>
     <string name="batch_type_audio">音声</string>
     <string name="batch_type_video">動画</string>
-    <string name="batch_format_title">形式</string>
-    <string name="batch_format_subtitle">形式を選択</string>
     <string name="batch_container_title">コンテナ</string>
     <string name="batch_container_subtitle">これらのリンクを保存するファイル形式</string>
     <string name="batch_save_dir_title">保存場所</string>
@@ -453,6 +465,23 @@
     <string name="format_selection_subtitle">形式を選択</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">残りの形式を読み込み中</string>
+    <string name="format_audio_empty">このリンクには個別の音声ストリームがありません</string>
+    <string name="format_generic_badge">自動</string>
+    <string name="format_sheet_section_details">詳細</string>
+    <string name="sheet_link_title">リンク</string>
+    <string name="sheet_link_copy">コピー</string>
+    <string name="sheet_link_open">開く</string>
+    <string name="sheet_link_options">リンクのオプション</string>
+    <string name="sheet_link_copied">リンクをコピーしました</string>
+    <string name="sheet_link_open_failed">このリンクを開けるアプリがありません</string>
+    <string name="sheet_cookies_site_saved">%1$s にログイン済み</string>
+    <string name="sheet_cookies_site_missing">%1$s のログインは保存されていません</string>
+    <string name="batch_search_open">リンクを検索</string>
+    <string name="batch_search_hint">これらのリンクを検索</string>
+    <string name="batch_search_close">検索を閉じる</string>
+    <string name="batch_search_none">一致するリンクはありません</string>
+    <string name="batch_remove_title">このリンクを削除しますか？</string>
+    <string name="batch_remove_body">%1$s はこのダウンロードから外されます。</string>
     <string name="format_sort_quality">画質</string>
     <string name="format_sort_file_size">ファイルサイズ</string>
     <string name="format_sort_container">コンテナ</string>
@@ -698,4 +727,8 @@
     <string name="save_location_error_card_folder">カードに %1$s を作成できなかったため、選択したフォルダに保存します。</string>
     <string name="save_fallback_title">別の場所に保存しました</string>
     <string name="save_fallback_body">%1$s に書き込めませんでした。カードが取り外されたか、容量不足か、アクセスが許可されていない可能性があります。代わりに %2$s に保存しました。</string>
+    <string name="home_start_with">はじめる</string>
+    <string name="home_start_paste">リンクを貼り付け</string>
+    <string name="home_start_search">検索</string>
+    <string name="home_start_downloads">ダウンロード</string>
 </resources>

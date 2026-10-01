@@ -1,5 +1,7 @@
 package com.hazel.android.download
 
+import com.hazel.android.download.extractor.ListingSource
+
 /**
  * Metadata for a single media URL, as reported by `yt-dlp --dump-json`.
  */
@@ -23,7 +25,12 @@ data class MediaInfo(
      * yt-dlp's `live_status`: "is_live", "is_upcoming", "post_live", "was_live", "not_live",
      * or blank when the source does not say. Decides whether the live stream options apply.
      */
-    val liveStatus: String = ""
+    val liveStatus: String = "",
+    /**
+     * Which reader produced the formats. Kept so a format list reopened on this link names
+     * the reader its rows came from, and so switching readers can find each one's last read.
+     */
+    val readBy: ListingSource = ListingSource.YT_DLP
 ) {
     /** Streaming now. */
     val isLive: Boolean get() = liveStatus == "is_live"

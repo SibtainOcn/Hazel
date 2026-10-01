@@ -5,6 +5,7 @@ import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.MediaProbe
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkEntry
+import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.util.UrlExtractor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -189,7 +190,8 @@ internal object NewPipeLister {
                 thumbnail = thumb,
                 durationSeconds = duration,
                 videoFormats = finalVideo,
-                audioFormats = finalAudio
+                audioFormats = finalAudio,
+                readBy = ListingSource.NEWPIPE
             )
         }.getOrNull()?.takeIf { it.title.isNotBlank() }
     }

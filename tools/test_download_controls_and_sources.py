@@ -540,7 +540,10 @@ def main():
     check_true("CookieRepository.kt clears InfoCache in deleteAll", "deleteAll" in cookie_repo_kt and "InfoCache.clear()" in cookie_repo_kt)
 
     settings_repo_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "data" / "SettingsRepository.kt").read_text(encoding="utf-8")
-    check_true("SettingsRepository.kt clears InfoCache on setListingSource", "setListingSource" in settings_repo_kt and "InfoCache.clear()" in settings_repo_kt)
+    # Each reader keeps its own reads, so changing the reader must not throw them away.
+    listing_body = settings_repo_kt.split("suspend fun setListingSource", 1)[1].split("\n    }", 1)[0]
+    check_true("SettingsRepository.kt keeps saved reads on setListingSource", "InfoCache.clear()" not in listing_body)
+    check_true("SettingsRepository.kt mirrors incognito for the cache at once", "ReadProfile.incognito = enabled" in settings_repo_kt)
 
     check_true("DownloadViewModel.kt uses available cookies for planAccess", "!access.hasCookies -> SiteAccess.NONE" in view_model_kt and "else -> access" in view_model_kt)
 

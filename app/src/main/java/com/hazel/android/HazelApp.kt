@@ -65,6 +65,13 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
                 com.hazel.android.download.AdvancedSettingsStore.current = it
             }
         }
+        // Incognito decides whether a read may be written to disk, which is asked from
+        // places that cannot wait on storage, so it is held in memory the same way.
+        applicationScope.launch {
+            com.hazel.android.data.SettingsRepository.getIncognito(this@HazelApp).collect {
+                com.hazel.android.download.ReadProfile.incognito = it
+            }
+        }
     }
 
     /**

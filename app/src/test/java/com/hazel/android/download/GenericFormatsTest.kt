@@ -22,10 +22,18 @@ class GenericFormatsTest {
     @Test
     fun `the placeholder offers both ladders before anything is read`() {
         val info = GenericFormats.placeholder("u", "Best", "Best audio", "Worst")
-        assertEquals(9, info.videoFormats.size)
+        // Best, eight heights from 2160p down to 144p, and worst.
+        assertEquals(10, info.videoFormats.size)
         assertEquals(7, info.audioFormats.size)
         assertEquals("bv*+ba/b", GenericFormats.heightCeiling(720).selector)
         assertEquals("res:720", GenericFormats.heightCeiling(720).sort)
+    }
+
+    @Test
+    fun `a ladder step reads back as the ceiling a set of links keeps`() {
+        assertEquals(0, GenericFormats.ceilingOf(MediaProbe.BEST_VIDEO))
+        assertEquals(WORST_HEIGHT, GenericFormats.ceilingOf(WORST_VIDEO))
+        assertEquals(720, GenericFormats.ceilingOf(GenericFormats.heightCeiling(720)))
     }
 
     @Test

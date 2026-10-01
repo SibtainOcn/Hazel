@@ -196,7 +196,18 @@
     <string name="more_converter">Offline convert video to audio</string>
     <string name="more_software_update">Software update</string>
     <string name="more_support">Support Hazel</string>
-    <string name="more_license">License</string>
+    <string name="more_documentation">Documentation</string>
+    <string name="docs_title">Documentation</string>
+    <string name="docs_back">Back</string>
+    <string name="docs_guide">User guide</string>
+    <string name="docs_features">Features</string>
+    <string name="docs_faq">FAQ</string>
+    <string name="docs_changelog">What\'s new</string>
+    <string name="docs_license">License</string>
+    <string name="docs_open_in_browser">Open in browser</string>
+    <string name="docs_error_title">Could not load this page</string>
+    <string name="docs_error_body">Check your connection and try again.</string>
+    <string name="docs_retry">Try again</string>
 
     <!-- SponsorScreen -->
     <string name="sponsor_back">Back</string>
@@ -258,6 +269,8 @@
     <string name="cleanup_category_engine_description">The downloader and its runtime. Clearing frees the most space, but the next download has to unpack them again.</string>
     <string name="cleanup_category_other_cache_label">Other cached files</string>
     <string name="cleanup_category_other_cache_description">Thumbnails and anything else cached while browsing links.</string>
+    <string name="cleanup_category_link_reads_label">Saved link reads</string>
+    <string name="cleanup_category_link_reads_description">Formats of the last 25 links read, so opening one again is instant. Kept for up to 6 hours; never written in incognito.</string>
     <!--
          Deliberately does not name the category. The row the user just tapped is still on
          screen behind the dialog, and dropping a translated noun into a sentence slot
@@ -272,6 +285,7 @@
     <string name="cleanup_confirm_all_body">%1$s will be freed. Your downloads and saved sign-ins are kept, but the next download will take longer while the engine is unpacked again.</string>
     <string name="cleanup_confirm_all_confirm">Clear everything</string>
     <string name="cleanup_confirm_all_cancel">Cancel</string>
+    <string name="cleanup_confirm_all_include_link_reads">Also clear saved link reads (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">All Downloads</string>
@@ -428,8 +442,6 @@
     <string name="batch_type_sheet_subtitle">What these links download as</string>
     <string name="batch_type_audio">Audio</string>
     <string name="batch_type_video">Video</string>
-    <string name="batch_format_title">Format</string>
-    <string name="batch_format_subtitle">Select format</string>
     <string name="batch_container_title">Container</string>
     <string name="batch_container_subtitle">The file these links are saved as</string>
     <string name="batch_save_dir_title">Save location</string>
@@ -501,6 +513,23 @@
     <string name="format_selection_subtitle">Select format</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Reading the rest of the formats</string>
+    <string name="format_audio_empty">No separate audio streams for this link</string>
+    <string name="format_generic_badge">Auto</string>
+    <string name="format_sheet_section_details">Details</string>
+    <string name="sheet_link_title">Link</string>
+    <string name="sheet_link_copy">Copy</string>
+    <string name="sheet_link_open">Open</string>
+    <string name="sheet_link_options">Link options</string>
+    <string name="sheet_link_copied">Link copied</string>
+    <string name="sheet_link_open_failed">No app can open this link</string>
+    <string name="sheet_cookies_site_saved">Signed in to %1$s</string>
+    <string name="sheet_cookies_site_missing">No sign-in saved for %1$s</string>
+    <string name="batch_search_open">Search links</string>
+    <string name="batch_search_hint">Search these links</string>
+    <string name="batch_search_close">Close search</string>
+    <string name="batch_search_none">No links match</string>
+    <string name="batch_remove_title">Remove this link?</string>
+    <string name="batch_remove_body">%1$s will be left out of this download.</string>
     <string name="format_sort_quality">Quality</string>
     <string name="format_sort_file_size">File size</string>
     <string name="format_sort_container">Container</string>
@@ -765,4 +794,8 @@
     <string name="save_location_error_card_folder">Couldn\'t create %1$s on the card, so downloads will be saved in the folder you picked.</string>
     <string name="save_fallback_title">Saved somewhere else</string>
     <string name="save_fallback_body">These couldn\'t be written to %1$s. The card may have been removed, be full or no longer allow access. They were saved to %2$s instead.</string>
+    <string name="home_start_with">Start with</string>
+    <string name="home_start_paste">Paste link</string>
+    <string name="home_start_search">Search</string>
+    <string name="home_start_downloads">Downloads</string>
 </resources>

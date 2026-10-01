@@ -1,9 +1,20 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import com.hazel.android.ui.screens.download.batch.BatchContainerSheet
+import kotlinx.coroutines.delay
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.offset
@@ -19,6 +30,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,45 +50,49 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.HighQuality
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.download.OneOffOptions
 import com.hazel.android.download.readableTitle
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.ContentCut
-import com.hazel.android.download.AUDIO_CONTAINERS
+import androidx.compose.material.icons.filled.Cookie
 import com.hazel.android.download.DownloadOptions
+import com.hazel.android.download.GenericFormats
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
-import com.hazel.android.download.VIDEO_CONTAINERS
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.newpipe.NewPipeEngine
 import com.hazel.android.download.languageLabel
@@ -85,6 +102,12 @@ import com.hazel.android.download.languageLabel
  *
  * The sheet opens part way up the screen and can be dragged the rest of the way, so the
  * media stays visible behind it while the first few controls are already in reach.
+ *
+ * Below the header and the Audio / Video tabs, the controls are grouped into sections that
+ * open and close: the details that name the file, the quality, where it is saved, and the
+ * adjustments. Each says what it is set to while it is closed, so the whole download can be
+ * read without opening any of them, and any number can be open at once. Quality opens with
+ * the sheet, since it is the one most people came to check.
  *
  * Only the currently chosen quality is shown here, as a single row. The full format list
  * lives in [FormatSelectionSheet], which gets a sheet of its own rather than growing this
@@ -96,7 +119,7 @@ import com.hazel.android.download.languageLabel
  * turns the download action into one that hands the choice back instead, since there the
  * download does not start until the whole set is sent.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun FormatSheet(
     info: MediaInfo,
@@ -108,7 +131,7 @@ fun FormatSheet(
     /** The link itself is still being read, so its details are not in yet. */
     isReadingLink: Boolean = false,
     /** Reads this link's formats again, with the given reader or the setting's. */
-    onRefreshFormats: ((ListingSource?) -> Unit)? = null,
+    onRefreshFormats: ((source: ListingSource?, fresh: Boolean) -> Unit)? = null,
     initialFormat: MediaFormat? = null,
     /** The soundtrack this link is already set to, for a link being adjusted again. */
     initialAudioLanguage: String? = null,
@@ -157,11 +180,23 @@ fun FormatSheet(
     val preferredLanguage = remember(info.url, info.hasResolvedFormats, options.preferredAudioLanguage) {
         info.languageMatching(options.preferredAudioLanguage)
     }
+    // What was picked in the format list for this link, kept apart from the defaults. A link
+    // opened before it was read offers its ladder, and a step picked from it then has to
+    // survive the formats arriving: it is carried onto what the link turned out to offer,
+    // and only without one does the sheet fall back to the setting's default.
+    var chosenVideo by remember(info.url) { mutableStateOf<MediaFormat?>(null) }
+    var chosenAudio by remember(info.url) { mutableStateOf<MediaFormat?>(null) }
+    val carry: (MediaFormat) -> MediaFormat = { choice ->
+        if (info.hasResolvedFormats) GenericFormats.applyTo(info, choice, preferredLanguage) ?: choice
+        else choice
+    }
+
     var pickedVideo by remember(
         info.url, info.hasResolvedFormats, options.videoQuality, options.preferredVideoCodec
     ) {
         mutableStateOf(
-            initialFormat?.takeIf { !it.isGeneric && it.hasVideo }
+            chosenVideo?.let(carry)
+                ?: initialFormat?.takeIf { !it.isGeneric && it.hasVideo }
                 ?: info.autoPick(
                     true,
                     initialFormat?.height ?: options.videoQuality,
@@ -174,7 +209,8 @@ fun FormatSheet(
         info.url, info.hasResolvedFormats, preferredLanguage, options.preferredAudioCodec
     ) {
         mutableStateOf(
-            initialFormat?.takeIf { !it.isGeneric && !it.hasVideo }
+            chosenAudio?.let(carry)
+                ?: initialFormat?.takeIf { !it.isGeneric && !it.hasVideo }
                 ?: info.bestAudioFor(preferredLanguage, options.audioCodecPreference)
                 ?: info.bestAudio
         )
@@ -207,14 +243,56 @@ fun FormatSheet(
     var formatSheetVisible by remember { mutableStateOf(false) }
     var languageSheetVisible by remember { mutableStateOf(false) }
 
+    // Which sections are open, oldest first. Opening one leaves the others as they were, up
+    // to [MAX_OPEN_SECTIONS]: past that the one opened longest ago closes, so the sheet never
+    // grows past the screen and the section just opened is always the one in view. Kept as
+    // one string so it survives a rotation or the process being recreated behind the sheet.
+    // Only Quality starts open: a closed section composes nothing but its header, so the
+    // sheet comes up with as little to lay out as possible, which is what keeps it quick
+    // when it opens straight over another app from a shared link.
+    var openSections by rememberSaveable(info.url) { mutableStateOf(SECTION_QUALITY) }
+    val openList = openSections.split(',').filter { it.isNotBlank() }
+    fun isOpen(section: String) = section in openList
+    fun toggle(section: String) {
+        openSections = (
+            if (section in openList) openList - section
+            else (openList + section).takeLast(MAX_OPEN_SECTIONS)
+        ).joinToString(",")
+    }
+    val detailsOpen = isOpen(SECTION_DETAILS)
+    val qualityOpen = isOpen(SECTION_QUALITY)
+    val saveOpen = isOpen(SECTION_SAVE)
+    val adjustOpen = isOpen(SECTION_ADJUST)
+
     val container = if (videoTab) options.videoContainer else options.audioContainer
-    val containerChoices = if (videoTab) VIDEO_CONTAINERS else AUDIO_CONTAINERS
+
+    // Whether the quality row is still standing in for formats not read yet, and whether it
+    // ever was in this sheet, so its badges spring in when they arrive and not on every open.
+    val formatsPending = isReadingLink || (isLoadingFormats && !info.hasResolvedFormats)
+    var waitedForFormats by remember(info.url) { mutableStateOf(false) }
+    LaunchedEffect(formatsPending) { if (formatsPending) waitedForFormats = true }
+
+    // The last message from the footer. A new object for every tap, so the same message
+    // twice in a row starts its time over; the text is kept apart so it stays on screen
+    // while the message fades out.
+    var feedback by remember { mutableStateOf<Feedback?>(null) }
+    var shownFeedback by remember { mutableStateOf("") }
+    LaunchedEffect(feedback) {
+        val current = feedback ?: return@LaunchedEffect
+        shownFeedback = current.message
+        delay(FEEDBACK_MS)
+        feedback = null
+    }
+
+    // One step up from the section, so a field reads as a field inside it.
+    val fieldColor = MaterialTheme.colorScheme.surfaceContainerHighest
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface
     ) {
+      Box {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
@@ -279,17 +357,23 @@ fun FormatSheet(
                     Spacer(modifier = Modifier.width(10.dp))
                 }
 
+                // The one filled control on the sheet, in the accent, so the thing the
+                // sheet is for is never mistaken for one of the settings around it.
                 Surface(
                     onClick = {
                         selected?.let {
-                            onDownload(it, audioLanguage, title.trim(), author.trim(), oneOff)
+                            // Live options only reach a download that can use them.
+                            val sent = if (info.isLive || info.isUpcoming) oneOff
+                            else oneOff.copy(liveFromStart = false, waitForVideo = false)
+                            onDownload(it, audioLanguage, title.trim(), author.trim(), sent)
                         }
                     },
                     enabled = selected != null,
-                    shape = RoundedCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(
-                        alpha = if (selected != null) 0.15f else 0.06f
-                    ),
+                    shape = RoundedCornerShape(22.dp),
+                    color = if (selected != null) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    contentColor = if (selected != null) MaterialTheme.colorScheme.onPrimary
+                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                     modifier = Modifier.height(44.dp)
                 ) {
                     Row(
@@ -299,15 +383,13 @@ fun FormatSheet(
                         Icon(
                             if (confirmAsApply) Icons.Filled.Check else Icons.Filled.Download,
                             null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             if (confirmAsApply) stringResource(R.string.format_sheet_ok) else stringResource(R.string.format_sheet_download),
                             style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
@@ -340,61 +422,63 @@ fun FormatSheet(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            EditableField(label = stringResource(R.string.format_sheet_label_title), value = title, onValueChange = { title = it })
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            // ── Details: what the file is called ──
+            SheetSection(
+                icon = Icons.Outlined.Description,
+                title = stringResource(R.string.format_sheet_section_details),
+                summary = listOf(title.trim(), author.trim()).filter { it.isNotBlank() }.joinToString(" · "),
+                expanded = detailsOpen,
+                onToggle = { toggle(SECTION_DETAILS) }
+            ) {
+                EditableField(
+                    label = stringResource(R.string.format_sheet_label_title),
+                    value = title,
+                    onValueChange = { title = it },
+                    color = fieldColor
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 EditableField(
                     label = stringResource(R.string.format_sheet_label_author),
                     value = author,
                     onValueChange = { author = it },
-                    modifier = Modifier.weight(1f)
-                )
-                DropdownField(
-                    label = stringResource(R.string.format_sheet_label_container),
-                    value = container.ifBlank { "Default" },
-                    choices = containerChoices,
-                    onSelect = { choice ->
-                        // "Default" is stored as blank: it means "add no container option".
-                        val stored = if (choice == "Default") "" else choice
-                        onOptionsChange(
-                            if (videoTab) options.copy(videoContainer = stored)
-                            else options.copy(audioContainer = stored)
-                        )
-                    },
-                    modifier = Modifier.weight(1f)
+                    color = fieldColor
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                if (videoTab) stringResource(R.string.format_sheet_video_quality) else stringResource(R.string.format_sheet_audio_quality),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
+            // ── Quality: the stream, and its soundtrack where there is a choice ──
             val current = selected
-            when {
-                // A sheet opened before the source has reported its formats shows the
-                // generic best row, which is what the download would use if it started
-                // now. It is replaced by the real best the moment the formats land, so
-                // the row always names something that can be downloaded.
-                current == null -> Text(
-                    if (videoTab) stringResource(R.string.format_sheet_no_video_stream)
-                    else stringResource(R.string.format_sheet_no_audio_stream),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
+            val noStream = if (videoTab) stringResource(R.string.format_sheet_no_video_stream)
+            else stringResource(R.string.format_sheet_no_audio_stream)
+            val languageName = audioLanguage?.let(::languageLabel)
+                ?.takeIf { info.audioLanguages.size > 1 }
+            SheetSection(
+                icon = Icons.Outlined.HighQuality,
+                title = if (videoTab) stringResource(R.string.format_sheet_video_quality)
+                else stringResource(R.string.format_sheet_audio_quality),
+                summary = current?.let { qualitySummary(it, languageName) } ?: noStream,
+                expanded = qualityOpen,
+                onToggle = { toggle(SECTION_QUALITY) }
+            ) {
+                when {
+                    // A sheet opened before the source has reported its formats shows the
+                    // generic best row, which is what the download would use if it started
+                    // now. It is replaced by the real best the moment the formats land, so
+                    // the row always names something that can be downloaded.
+                    current == null -> Text(
+                        noStream,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
 
-                else -> {
                     // One row, showing what will be downloaded. Tapping it opens the list.
-                    FormatRow(
+                    // Until the real list arrives the row stands in for the best: it stays
+                    // readable and tappable, and the places the codec and the size will
+                    // take are held by pills that keep filling, rather than a line under the
+                    // row or a blank placeholder in its place. When they land, the real
+                    // badges spring into those places.
+                    else -> FormatRow(
                         format = current,
                         selected = true,
                         onClick = { formatSheetVisible = true },
@@ -403,128 +487,190 @@ fun FormatSheet(
                         // that will be used is named alongside it.
                         mergeAudioId = info.mergeAudioFor(audioLanguage)
                             ?.formatId
-                            ?.takeIf { videoTab && current.hasVideo && !current.hasAudio }
+                            ?.takeIf { videoTab && current.hasVideo && !current.hasAudio },
+                        pendingBadges = formatsPending,
+                        popBadges = waitedForFormats
                     )
-                    // The row stands in for the best until the real list arrives.
-                    if (isLoadingFormats && !info.hasResolvedFormats) {
-                        LinearProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 6.dp)
-                                .height(2.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                        )
-                    }
+                }
+
+                // Only where there is a choice. A source with one soundtrack has nothing to
+                // ask about, which is nearly all of them.
+                if (info.audioLanguages.size > 1) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LanguageField(
+                        value = audioLanguage?.let(::languageLabel) ?: "Source default",
+                        onClick = { languageSheetVisible = true },
+                        color = fieldColor
+                    )
                 }
             }
 
-            // Only where there is a choice. A source with one soundtrack has nothing to
-            // ask about, which is nearly all of them.
-            if (info.audioLanguages.size > 1) {
-                Spacer(modifier = Modifier.height(10.dp))
-                LanguageField(
-                    value = audioLanguage?.let(::languageLabel) ?: "Source default",
-                    onClick = { languageSheetVisible = true }
+            // ── Save: where it goes and in what container ──
+            val containerLabel = container.ifBlank { "Default" }
+            SheetSection(
+                icon = Icons.Outlined.FolderOpen,
+                title = stringResource(R.string.format_sheet_save_dir),
+                summary = "${saveDirs.labelOf(videoTab)} · $containerLabel",
+                expanded = saveOpen,
+                onToggle = { toggle(SECTION_SAVE) }
+            ) {
+                SaveDirField(
+                    label = saveDirs.labelOf(videoTab),
+                    onClick = { openDialog = SheetDialog.SAVE_DIR },
+                    color = fieldColor
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                PickerField(
+                    label = stringResource(R.string.format_sheet_label_container),
+                    value = containerLabel,
+                    onClick = { openDialog = SheetDialog.CONTAINER },
+                    color = fieldColor
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SaveDirField(label = saveDirs.labelOf(videoTab), onClick = { openDialog = SheetDialog.SAVE_DIR })
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                if (videoTab) stringResource(R.string.format_sheet_adjust_video)
-                else stringResource(R.string.format_sheet_adjust_audio),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // ── Option chips ──
+            // ── Adjust: everything done to the file on the way ──
             //
             // Chapters and subtitles only apply to a video download; the audio tab shows
             // the split-by-chapters half of the chapters dialog and no subtitles at all,
             // which is what yt-dlp can actually act on for an audio-only extraction.
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            val thumbnailLabel = stringResource(R.string.format_sheet_thumbnail)
+            val bitrateLabel = stringResource(R.string.properties_bitrate)
+            val chaptersLabel = stringResource(R.string.format_sheet_chapters)
+            val subtitlesLabel = stringResource(R.string.format_sheet_subtitles)
+            val sponsorBlockLabel = stringResource(R.string.format_sheet_sponsorblock)
+            val filenameLabel = stringResource(R.string.format_sheet_filename_template)
+            val cutLabel = stringResource(R.string.options_cut_title)
+            val liveLabel = stringResource(R.string.options_live_title)
+            val cookiesLabel = stringResource(R.string.cookies_title)
+            val cookiesOn = rememberUseCookies()
+
+            val thumbnailOn = options.thumbnailBadge > 0
+            val bitrateOn = !videoTab && options.audioQuality.isNotBlank()
+            val chaptersOn = options.chapterBadge(videoTab) > 0
+            val subtitlesOn = videoTab && options.subtitleBadge > 0
+            val sponsorBlockOn = options.sponsorBlockBadge > 0
+            val cutOn = oneOff.hasSection
+            val liveOn = oneOff.liveFromStart || oneOff.waitForVideo
+            // A live option only does anything on a stream that is live or scheduled, the
+            // only links yt-dlp can use it on, so elsewhere the chip is shown but quiet.
+            val liveApplies = info.isLive || info.isUpcoming
+
+            SheetSection(
+                icon = Icons.Outlined.Tune,
+                title = if (videoTab) stringResource(R.string.format_sheet_adjust_video)
+                else stringResource(R.string.format_sheet_adjust_audio),
+                summary = listOfNotNull(
+                    thumbnailLabel.takeIf { thumbnailOn },
+                    bitrateLabel.takeIf { bitrateOn },
+                    chaptersLabel.takeIf { chaptersOn },
+                    subtitlesLabel.takeIf { subtitlesOn },
+                    sponsorBlockLabel.takeIf { sponsorBlockOn },
+                    cutLabel.takeIf { cutOn },
+                    liveLabel.takeIf { liveOn },
+                    cookiesLabel.takeIf { cookiesOn }
+                ).joinToString(", "),
+                expanded = adjustOpen,
+                onToggle = { toggle(SECTION_ADJUST) }
+            ) {
+                // Wraps rather than sitting in fixed rows, so a long label or a larger font
+                // moves a chip to the next line instead of pushing it off the edge.
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     OptionChip(
-                        label = stringResource(R.string.format_sheet_thumbnail),
+                        label = thumbnailLabel,
                         icon = Icons.Filled.Image,
-                        badge = options.thumbnailBadge,
+                        active = thumbnailOn,
                         onClick = { openDialog = SheetDialog.THUMBNAIL }
                     )
                     // Named rather than valued: the bitrate belongs to a conversion, not to
                     // the stream picked above, and the chip is lit while one is set.
                     if (!videoTab) {
                         OptionChip(
-                            label = stringResource(R.string.properties_bitrate),
+                            label = bitrateLabel,
                             icon = Icons.Filled.HighQuality,
-                            selected = options.audioQuality.isNotBlank(),
+                            active = bitrateOn,
                             onClick = { openDialog = SheetDialog.AUDIO_QUALITY }
                         )
                     }
                     OptionChip(
-                        label = stringResource(R.string.format_sheet_chapters),
+                        label = chaptersLabel,
                         icon = Icons.Filled.Book,
-                        badge = options.chapterBadge(videoTab),
+                        active = chaptersOn,
                         onClick = { openDialog = SheetDialog.CHAPTERS }
                     )
                     if (videoTab) {
                         OptionChip(
-                            label = stringResource(R.string.format_sheet_subtitles),
+                            label = subtitlesLabel,
                             icon = Icons.Filled.ClosedCaption,
-                            badge = options.subtitleBadge,
+                            active = subtitlesOn,
                             onClick = { openDialog = SheetDialog.SUBTITLES }
                         )
                     }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OptionChip(
-                        label = stringResource(R.string.format_sheet_sponsorblock),
+                        label = sponsorBlockLabel,
                         icon = Icons.Filled.Paid,
-                        badge = options.sponsorBlockBadge,
+                        active = sponsorBlockOn,
                         onClick = { openDialog = SheetDialog.SPONSORBLOCK }
                     )
                     OptionChip(
-                        label = stringResource(R.string.format_sheet_filename_template),
+                        label = filenameLabel,
                         icon = Icons.Filled.Edit,
+                        active = options.filenameTemplate.isNotBlank(),
                         onClick = { openDialog = SheetDialog.FILENAME }
                     )
-                }
-                // For this download alone, so not offered where the sheet only adjusts a link
-                // in a set. Live options show only on a stream that is live or scheduled,
-                // the only links yt-dlp can use them on.
-                if (!confirmAsApply) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OptionChip(
+                        label = cookiesLabel,
+                        icon = Icons.Filled.Cookie,
+                        active = cookiesOn,
+                        onClick = { openDialog = SheetDialog.COOKIES }
+                    )
+                    // For this download alone, so not offered where the sheet only adjusts
+                    // a link in a set.
+                    if (!confirmAsApply) {
                         OptionChip(
-                            label = stringResource(R.string.options_cut_title),
+                            label = cutLabel,
                             icon = Icons.Filled.ContentCut,
-                            badge = if (oneOff.hasSection) 1 else 0,
+                            active = cutOn,
                             onClick = { openDialog = SheetDialog.CUT }
                         )
-                        if (info.isLive || info.isUpcoming) {
-                            OptionChip(
-                                label = stringResource(R.string.options_live_title),
-                                icon = Icons.Filled.LiveTv,
-                                badge = listOf(oneOff.liveFromStart, oneOff.waitForVideo).count { it },
-                                onClick = { openDialog = SheetDialog.LIVE }
-                            )
-                        }
+                        OptionChip(
+                            label = liveLabel,
+                            icon = Icons.Filled.LiveTv,
+                            active = liveOn,
+                            quiet = !liveApplies,
+                            onClick = { openDialog = SheetDialog.LIVE }
+                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            DownloadSheetFooter(label = info.url)
+            DownloadSheetFooter(
+                label = info.url,
+                linkAsButton = true,
+                onFeedback = { message -> feedback = Feedback(message) }
+            )
 
             Spacer(modifier = Modifier.height(28.dp))
         }
+
+        // What the footer's buttons did, shown over the top of the sheet: the footer sits at
+        // the end of a sheet that can run past the screen, and a message under it would be
+        // out of sight exactly when it is needed.
+        androidx.compose.animation.AnimatedVisibility(
+            visible = feedback != null,
+            enter = slideInVertically { -it } + fadeIn(),
+            exit = slideOutVertically { -it } + fadeOut(),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(horizontal = 20.dp)
+        ) {
+            FeedbackToast(shownFeedback)
+        }
+      }
     }
 
     if (formatSheetVisible) {
@@ -532,11 +678,19 @@ fun FormatSheet(
             info = info,
             selected = selected,
             audioFirst = !videoTab,
-            isLoadingFormats = isLoadingFormats,
+            // A link still being read shows the ladder with the list's own loading state
+            // under it, the same as one whose formats are being read.
+            isLoadingFormats = isLoadingFormats || isReadingLink,
             onRefresh = onRefreshFormats,
             canChooseSource = remember(info.url) { NewPipeEngine.handlesStream(info.url) },
             onConfirm = { format ->
-                if (format.hasVideo) pickedVideo = format else pickedAudio = format
+                if (format.hasVideo) {
+                    pickedVideo = format
+                    chosenVideo = format
+                } else {
+                    pickedAudio = format
+                    chosenAudio = format
+                }
                 // Picking an audio stream from the video tab, or the other way round,
                 // moves the sheet to the tab that entry belongs to.
                 videoTab = format.hasVideo
@@ -633,6 +787,27 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
+        // A sheet of its own rather than a menu: nine audio containers are more than a menu
+        // anchored to a field shows comfortably, and the set-of-links sheet already picks
+        // the container this way.
+        SheetDialog.CONTAINER -> BatchContainerSheet(
+            isVideo = videoTab,
+            current = container,
+            onSelect = { stored ->
+                onOptionsChange(
+                    if (videoTab) options.copy(videoContainer = stored)
+                    else options.copy(audioContainer = stored)
+                )
+                openDialog = SheetDialog.NONE
+            },
+            onDismiss = { openDialog = SheetDialog.NONE }
+        )
+
+        SheetDialog.COOKIES -> CookiesDialog(
+            url = info.url,
+            onDismiss = { openDialog = SheetDialog.NONE }
+        )
+
         SheetDialog.SAVE_DIR -> SaveDirDialog(
             isVideo = videoTab,
             saveDir = saveDirs.of(videoTab),
@@ -654,7 +829,117 @@ fun FormatSheet(
     }
 }
 
-/** Which of the sheet's dialogs is open. Only one can be at a time. */
+/**
+ * The quality section's line while it is closed: the step, the codec, the size, and the
+ * soundtrack where the source has more than one.
+ */
+private fun qualitySummary(format: MediaFormat, language: String?): String =
+    listOf(format.shortLabel.uppercase(), format.codecLabel, format.sizeLabel, language.orEmpty())
+        .filter { it.isNotBlank() }
+        .joinToString(" · ")
+
+/**
+ * One of the sheet's sections: a header that says what the section holds and what it is set
+ * to, and the controls under it while it is open.
+ *
+ * Flat, on a step-up tone with no outline. The whole header is the switch, and the chevron
+ * turns with it; the turn is applied while drawing, so it repaints the arrow rather than
+ * recomposing the header. A closed section composes nothing below its header.
+ */
+@Composable
+internal fun SheetSection(
+    icon: ImageVector,
+    title: String,
+    summary: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    content: @Composable () -> Unit
+) {
+    val turn by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = "sectionChevron"
+    )
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = color
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(role = Role.Button, onClick = onToggle)
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    if (summary.isNotBlank()) {
+                        Text(
+                            summary,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    Icons.Filled.ExpandMore,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(22.dp)
+                        .graphicsLayer { rotationZ = turn },
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically(
+                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                    expandFrom = Alignment.Top
+                ) + fadeIn(tween(SECTION_FADE_MS)),
+                exit = shrinkVertically(
+                    animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                    shrinkTowards = Alignment.Top
+                ) + fadeOut(tween(SECTION_FADE_MS))
+            ) {
+                Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)) {
+                    content()
+                }
+            }
+        }
+    }
+}
+
+private const val SECTION_FADE_MS = 150
+
+/** How many sections can be open at once before the oldest closes. */
+private const val MAX_OPEN_SECTIONS = 2
+
+private const val SECTION_DETAILS = "details"
+private const val SECTION_QUALITY = "quality"
+private const val SECTION_SAVE = "save"
+private const val SECTION_ADJUST = "adjust"
+
 private val SHEET_TAB_PADDING = 12.dp
 
 /** One of the sheet's Audio / Video tabs: its word, and a short bar under it when chosen. */
@@ -698,7 +983,15 @@ private fun SheetTab(label: String, selected: Boolean, enabled: Boolean, onClick
     }
 }
 
-private enum class SheetDialog { NONE, CUT, LIVE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY }
+/** Which of the sheet's dialogs is open. Only one can be at a time. */
+private enum class SheetDialog { NONE, CUT, LIVE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY, CONTAINER, COOKIES }
+
+/** One message from the footer; a new one for every tap, so a repeat starts its time over. */
+private class Feedback(val message: String)
+
+/** The fill the sheet's fields rest on outside a section. */
+@Composable
+internal fun defaultFieldColor(): Color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
 
 /** Labelled box whose value the user can type into, matching the read-only fields' look. */
 @Composable
@@ -706,12 +999,13 @@ internal fun EditableField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    color: Color = defaultFieldColor()
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        color = color
     ) {
         Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
             Text(
@@ -734,70 +1028,54 @@ internal fun EditableField(
     }
 }
 
-/** Labelled box that opens a menu of fixed choices, used for the container picker. */
+/**
+ * Labelled box showing a fixed choice, which opens the sheet that changes it. Used for the
+ * container, whose choices are a sheet of their own.
+ */
 @Composable
-private fun DropdownField(
+internal fun PickerField(
     label: String,
     value: String,
-    choices: List<String>,
-    onSelect: (String) -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    color: Color = defaultFieldColor()
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box(modifier = modifier) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(10.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        color = color
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(start = 14.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier
-                    .clickable { expanded = true }
-                    .padding(start = 14.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        label,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(value, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
-                }
-                Icon(
-                    Icons.Filled.ArrowDropDown,
-                    contentDescription = stringResource(R.string.format_sheet_change_field),
-                    tint = MaterialTheme.colorScheme.primary
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
                 )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(value, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
             }
-        }
-
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            choices.forEach { choice ->
-                DropdownMenuItem(
-                    text = { Text(choice) },
-                    onClick = {
-                        onSelect(choice)
-                        expanded = false
-                    },
-                    trailingIcon = if (choice == value) {
-                        { Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }
-                    } else null
-                )
-            }
+            Icon(
+                Icons.Filled.ArrowDropDown,
+                contentDescription = stringResource(R.string.format_sheet_change_field),
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
 
 /** The soundtrack row, shown only for a source that published more than one. */
 @Composable
-private fun LanguageField(value: String, onClick: () -> Unit) {
+private fun LanguageField(value: String, onClick: () -> Unit, color: Color = defaultFieldColor()) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        color = color
     ) {
         Row(
             modifier = Modifier
@@ -827,11 +1105,11 @@ private fun LanguageField(value: String, onClick: () -> Unit) {
 
 /** The destination row. Tapping it leads to opening or changing the folder. */
 @Composable
-private fun SaveDirField(label: String, onClick: () -> Unit) {
+private fun SaveDirField(label: String, onClick: () -> Unit, color: Color = defaultFieldColor()) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        color = color
     ) {
         Row(
             modifier = Modifier
@@ -859,14 +1137,31 @@ private fun SaveDirField(label: String, onClick: () -> Unit) {
     }
 }
 
-/** Filter chip with an optional count badge, used for the adjust-download options. */
+/**
+ * One of the adjust options. While it is set it takes the accent, icon and all, so which
+ * options are on reads at a glance without a count beside each. [quiet] dims a chip whose
+ * option would have no effect on this link, while still letting it be opened.
+ */
 @Composable
-private fun OptionChip(
+internal fun OptionChip(
     label: String,
     icon: ImageVector,
-    selected: Boolean = false,
-    badge: Int = 0,
+    active: Boolean = false,
+    quiet: Boolean = false,
+    compact: Boolean = false,
     onClick: () -> Unit
 ) {
-    FlatChip(label = label, onClick = onClick, icon = icon, selected = selected, badge = badge)
+    val tint = when {
+        active -> MaterialTheme.colorScheme.primary
+        quiet -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    FlatChip(
+        label = label,
+        onClick = onClick,
+        selected = active,
+        leading = { Icon(icon, contentDescription = null, modifier = Modifier.size(if (compact) 15.dp else 16.dp), tint = tint) },
+        compact = compact,
+        modifier = Modifier.graphicsLayer { alpha = if (quiet && !active) 0.6f else 1f }
+    )
 }

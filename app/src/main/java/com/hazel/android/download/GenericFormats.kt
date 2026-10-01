@@ -11,8 +11,21 @@ package com.hazel.android.download
  */
 object GenericFormats {
 
-    /** Heights the video ladder offers, tallest first. */
-    val VIDEO_HEIGHTS = listOf(2160, 1440, 1080, 720, 480, 360, 240)
+    /**
+     * Heights the video ladder offers, tallest first. The one list of them: the sheet a link
+     * opens before it is read and the quality a set of links is given both offer these.
+     */
+    val VIDEO_HEIGHTS = listOf(2160, 1440, 1080, 720, 480, 360, 240, 144)
+
+    /**
+     * The quality ceiling a ladder row stands for, in the terms a set of links keeps it:
+     * 0 for best, [WORST_HEIGHT] for the smallest, the height otherwise.
+     */
+    fun ceilingOf(format: MediaFormat): Int = when (format.formatId) {
+        MediaProbe.BEST_VIDEO.formatId -> 0
+        WORST_VIDEO.formatId -> WORST_HEIGHT
+        else -> format.height
+    }
 
     /**
      * The video closest to [height] without going over, with sound. Expressed as a format

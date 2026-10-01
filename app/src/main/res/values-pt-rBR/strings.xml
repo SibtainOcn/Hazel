@@ -189,7 +189,18 @@
     <string name="more_converter">Converter vídeo em áudio offline</string>
     <string name="more_software_update">Atualização de software</string>
     <string name="more_support">Apoiar o Hazel</string>
-    <string name="more_license">Licença</string>
+    <string name="more_documentation">Documentação</string>
+    <string name="docs_title">Documentação</string>
+    <string name="docs_back">Voltar</string>
+    <string name="docs_guide">Guia de uso</string>
+    <string name="docs_features">Recursos</string>
+    <string name="docs_faq">Perguntas frequentes</string>
+    <string name="docs_changelog">Novidades</string>
+    <string name="docs_license">Licença</string>
+    <string name="docs_open_in_browser">Abrir no navegador</string>
+    <string name="docs_error_title">Não foi possível carregar esta página</string>
+    <string name="docs_error_body">Verifique sua conexão e tente de novo.</string>
+    <string name="docs_retry">Tentar de novo</string>
 
     <!-- SponsorScreen -->
     <string name="sponsor_back">Voltar</string>
@@ -251,6 +262,8 @@
     <string name="cleanup_category_engine_description">O baixador e o ambiente dele. Limpar libera mais espaço, mas o próximo download terá que descompactá-los de novo.</string>
     <string name="cleanup_category_other_cache_label">Outros arquivos em cache</string>
     <string name="cleanup_category_other_cache_description">Miniaturas e tudo o mais guardado em cache enquanto você navega pelos links.</string>
+    <string name="cleanup_category_link_reads_label">Leituras de links salvas</string>
+    <string name="cleanup_category_link_reads_description">Formatos dos últimos 25 links lidos, para que abrir um de novo seja instantâneo. Guardados por até 6 horas; nunca salvos no modo anônimo.</string>
     <string name="cleanup_confirm_category_title">Limpar estes arquivos?</string>
     <string name="cleanup_confirm_category_safe">%1$s serão liberados. Nada do que você salvou é afetado.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s serão liberados, e o próximo download vai demorar mais enquanto eles são descompactados de novo.</string>
@@ -260,6 +273,7 @@
     <string name="cleanup_confirm_all_body">%1$s serão liberados. Seus downloads e logins salvos são mantidos, mas o próximo download vai demorar mais enquanto o motor é descompactado de novo.</string>
     <string name="cleanup_confirm_all_confirm">Limpar tudo</string>
     <string name="cleanup_confirm_all_cancel">Cancelar</string>
+    <string name="cleanup_confirm_all_include_link_reads">Limpar também as leituras de links salvas (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">Todos os downloads</string>
@@ -393,8 +407,6 @@
     <string name="batch_type_sheet_subtitle">Como estes links vão ser baixados</string>
     <string name="batch_type_audio">Áudio</string>
     <string name="batch_type_video">Vídeo</string>
-    <string name="batch_format_title">Formato</string>
-    <string name="batch_format_subtitle">Escolha o formato</string>
     <string name="batch_container_title">Contêiner</string>
     <string name="batch_container_subtitle">O arquivo em que estes links são salvos</string>
     <string name="batch_save_dir_title">Onde salvar</string>
@@ -465,6 +477,23 @@
     <string name="format_selection_subtitle">Escolha o formato</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Lendo o resto dos formatos</string>
+    <string name="format_audio_empty">Este link não tem faixas de áudio separadas</string>
+    <string name="format_generic_badge">Auto</string>
+    <string name="format_sheet_section_details">Detalhes</string>
+    <string name="sheet_link_title">Link</string>
+    <string name="sheet_link_copy">Copiar</string>
+    <string name="sheet_link_open">Abrir</string>
+    <string name="sheet_link_options">Opções do link</string>
+    <string name="sheet_link_copied">Link copiado</string>
+    <string name="sheet_link_open_failed">Nenhum app pode abrir este link</string>
+    <string name="sheet_cookies_site_saved">Conectado em %1$s</string>
+    <string name="sheet_cookies_site_missing">Nenhum login salvo para %1$s</string>
+    <string name="batch_search_open">Pesquisar links</string>
+    <string name="batch_search_hint">Pesquisar nestes links</string>
+    <string name="batch_search_close">Fechar pesquisa</string>
+    <string name="batch_search_none">Nenhum link corresponde</string>
+    <string name="batch_remove_title">Remover este link?</string>
+    <string name="batch_remove_body">%1$s ficará de fora deste download.</string>
     <string name="format_sort_quality">Qualidade</string>
     <string name="format_sort_file_size">Tamanho do arquivo</string>
     <string name="format_sort_container">Contêiner</string>
@@ -714,4 +743,8 @@
     <string name="save_location_error_card_folder">Não foi possível criar %1$s no cartão, então os downloads serão salvos na pasta escolhida.</string>
     <string name="save_fallback_title">Salvo em outro lugar</string>
     <string name="save_fallback_body">Não foi possível gravar em %1$s. O cartão pode ter sido removido, estar cheio ou não permitir mais o acesso. Os arquivos foram salvos em %2$s.</string>
+    <string name="home_start_with">Comece por</string>
+    <string name="home_start_paste">Colar link</string>
+    <string name="home_start_search">Pesquisar</string>
+    <string name="home_start_downloads">Downloads</string>
 </resources>

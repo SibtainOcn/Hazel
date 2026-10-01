@@ -1,12 +1,10 @@
 package com.hazel.android.ui.screens.more
 
 import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -88,7 +86,8 @@ fun MoreScreen(
     onNavigateToSponsor: () -> Unit = {},
     onNavigateToProcessing: () -> Unit = {},
     onNavigateToAdvanced: () -> Unit = {},
-    onNavigateToBackup: () -> Unit = {}
+    onNavigateToBackup: () -> Unit = {},
+    onNavigateToDocumentation: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val listingSource by SettingsRepository.getListingSource(context).collectAsState(initial = ListingSource.DEFAULT)
@@ -531,37 +530,26 @@ fun MoreScreen(
             // address was reachable by two routes that behaved differently, and the one
             // that stayed is the one with something to say about why anyone would follow it.
 
-            // Opened in the user's own browser rather than in the app's, because a licence
-            // is a thing people save, share and read next to something else, and none of
-            // that is possible in a window that closes when this screen does.
+            // The guide, FAQ, what's new and the licence, read in the app. Each page has a
+            // button to open it in the browser, for saving or sharing it.
             ListItem(
-                headlineContent = { Text(stringResource(R.string.more_license)) },
+                headlineContent = { Text(stringResource(R.string.more_documentation)) },
                 leadingContent = {
                     Icon(
-                        Icons.Filled.Gavel, null,
+                        Icons.AutoMirrored.Filled.MenuBook, null,
                         tint = MaterialTheme.colorScheme.primary
                     )
                 },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { openExternally(context, LICENSE_URL) }
+                modifier = Modifier.clickable { onNavigateToDocumentation() }
             )
         }
     }
 }
-
-/**
- * Hands an address to whatever the user browses with.
- *
- * Failure is swallowed: a device with no browser at all cannot be helped by a crash, and
- * nothing that opens this way is load-bearing.
- */
-private fun openExternally(context: android.content.Context, url: String) {
-    runCatching {
-        context.startActivity(
-            Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        )
-    }
-}
-
-private const val LICENSE_URL = "https://github.com/SibtainOcn/Hazel/blob/main/LICENSE"
