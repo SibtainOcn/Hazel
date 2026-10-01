@@ -10,6 +10,11 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -311,6 +316,11 @@ fun DownloadScreen(
         }
     }
 
+    // The set action belongs to a set the user put together: several links pasted at once,
+    // or a playlist or channel read from one link. A keyword search lands several cards too,
+    // but those are a list to choose from rather than a set to take whole, so it stays away.
+    val showDownloadAll = pendingResults.size > 1 && !runInHand && state.searchQuery.isBlank()
+
     var alreadyHave by remember { mutableStateOf<HistoryEntry?>(null) }
 
     // Marks a link that arrived from another app's share sheet. That is the one route into
@@ -514,7 +524,7 @@ fun DownloadScreen(
                         end = 20.dp,
                         // Room for the action that floats over the list, on the same terms as
                         // the action itself.
-                        bottom = if (pendingResults.size > 1) 96.dp else 32.dp
+                        bottom = 96.dp
                     )
                 ) {
                     items(orderedResults, key = { it.url }) { info ->
@@ -686,13 +696,11 @@ fun DownloadScreen(
             }
         }
 
-        // ── Paste FAB on empty home screen ──
+        // ── Paste ──
         //
-        // Shown at the bottom-left corner when there is nothing on screen yet
-        // (no results, not fetching). A link is nearly always copied elsewhere first,
-        // so the first action on this screen is typically a paste. Having it one tap
-        // away without opening the full search screen saves a step.
-        val homeIsEmpty = state.results.isEmpty() && !state.isFetching
+        // A link is nearly always copied elsewhere first, so a paste is typically the first
+        // thing done on this screen. Having it one tap away without opening the full search
+        // screen saves a step.
         val homePasteClipboard = LocalClipboard.current
         var homePastePendingDupe by remember { mutableStateOf<Pair<List<String>, HistoryEntry>?>(null) }
 
@@ -712,9 +720,9 @@ fun DownloadScreen(
         }
 
 
-        if (homeIsEmpty) {
-            Surface(
-                onClick = {
+        // What a tap on the paste button does: the clip read as one link or several, with
+        // the repeat warning raised first for anything already saved.
+        val pasteFromClipboard: () -> Unit = {
                     scope.launch {
                         val pasted = homePasteClipboard.getClipEntry()?.clipData
                             ?.takeIf { it.itemCount > 0 }
@@ -738,33 +746,32 @@ fun DownloadScreen(
                             downloadViewModel.fetchAll(links)
                         }
                     }
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp)
-                    .height(52.dp),
-                shape = RoundedCornerShape(26.dp),
-                color = MaterialTheme.colorScheme.primary
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 22.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Filled.ContentPaste,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        stringResource(R.string.search_paste),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
+        }
+
+        // The paste button shows while the clipboard holds something to paste, the way a
+        // copied link is nearly always what brings someone here. Its label shows for a
+        // moment when a new clip arrives and then it folds to an icon. A clip that has
+        // been pasted is not offered again, and the button stands aside while a read is
+        // running or while the set action holds the corner.
+        val clipStamp = rememberClipStamp()
+        var usedClipStamp by rememberSaveable { mutableStateOf<Long?>(null) }
+        val showPaste = clipStamp != null && clipStamp != usedClipStamp &&
+            !state.isFetching && !showDownloadAll
+        androidx.compose.animation.AnimatedVisibility(
+            visible = showPaste,
+            enter = scaleIn() + fadeIn(),
+            exit = scaleOut() + fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(20.dp)
+        ) {
+            PasteButton(
+                stamp = clipStamp,
+                onClick = {
+                    usedClipStamp = clipStamp
+                    pasteFromClipboard()
                 }
-            }
+            )
         }
 
         // One action for the whole set, which is the point of collecting links together.
@@ -772,8 +779,8 @@ fun DownloadScreen(
         // Offered on what is actually left to fetch rather than on how long the list is. A
         // list of two where one is already saved is one download, and a set action that
         // opens a sheet holding a single card is a set action that should not have been
-        // there at all.
-        if (pendingResults.size > 1 && !runInHand) {
+        // there at all. Search results are left out: see [showDownloadAll].
+        if (showDownloadAll) {
             DownloadAllButton(
                 onClick = { batchSheetVisible = true },
                 modifier = Modifier
