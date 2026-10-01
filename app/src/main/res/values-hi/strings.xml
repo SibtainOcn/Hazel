@@ -467,6 +467,14 @@
     <string name="sheet_link_options">लिंक विकल्प</string>
     <string name="sheet_link_copied">लिंक कॉपी हुआ</string>
     <string name="sheet_link_open_failed">कोई ऐप यह लिंक नहीं खोल सकता</string>
+    <string name="sheet_cookies_site_saved">%1$s में साइन इन है</string>
+    <string name="sheet_cookies_site_missing">%1$s के लिए कोई साइन-इन सहेजा नहीं गया</string>
+    <string name="batch_search_open">लिंक खोजें</string>
+    <string name="batch_search_hint">इन लिंक में खोजें</string>
+    <string name="batch_search_close">खोज बंद करें</string>
+    <string name="batch_search_none">कोई लिंक मेल नहीं खाता</string>
+    <string name="batch_remove_title">यह लिंक हटाएँ?</string>
+    <string name="batch_remove_body">%1$s इस डाउनलोड में शामिल नहीं होगा।</string>
     <string name="format_sort_quality">क्वालिटी</string>
     <string name="format_sort_file_size">फ़ाइल का आकार</string>
     <string name="format_sort_container">कंटेनर</string>

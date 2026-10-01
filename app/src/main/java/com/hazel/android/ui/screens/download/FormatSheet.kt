@@ -88,6 +88,7 @@ import com.hazel.android.download.OneOffOptions
 import com.hazel.android.download.readableTitle
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.ContentCut
+import androidx.compose.material.icons.filled.Cookie
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
@@ -526,6 +527,8 @@ fun FormatSheet(
             val filenameLabel = stringResource(R.string.format_sheet_filename_template)
             val cutLabel = stringResource(R.string.options_cut_title)
             val liveLabel = stringResource(R.string.options_live_title)
+            val cookiesLabel = stringResource(R.string.cookies_title)
+            val cookiesOn = rememberUseCookies()
 
             val thumbnailOn = options.thumbnailBadge > 0
             val bitrateOn = !videoTab && options.audioQuality.isNotBlank()
@@ -549,7 +552,8 @@ fun FormatSheet(
                     subtitlesLabel.takeIf { subtitlesOn },
                     sponsorBlockLabel.takeIf { sponsorBlockOn },
                     cutLabel.takeIf { cutOn },
-                    liveLabel.takeIf { liveOn }
+                    liveLabel.takeIf { liveOn },
+                    cookiesLabel.takeIf { cookiesOn }
                 ).joinToString(", "),
                 expanded = adjustOpen,
                 onToggle = { toggle(SECTION_ADJUST) }
@@ -601,6 +605,12 @@ fun FormatSheet(
                         icon = Icons.Filled.Edit,
                         active = options.filenameTemplate.isNotBlank(),
                         onClick = { openDialog = SheetDialog.FILENAME }
+                    )
+                    OptionChip(
+                        label = cookiesLabel,
+                        icon = Icons.Filled.Cookie,
+                        active = cookiesOn,
+                        onClick = { openDialog = SheetDialog.COOKIES }
                     )
                     // For this download alone, so not offered where the sheet only adjusts
                     // a link in a set.
@@ -771,6 +781,11 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
+        SheetDialog.COOKIES -> CookiesDialog(
+            url = info.url,
+            onDismiss = { openDialog = SheetDialog.NONE }
+        )
+
         SheetDialog.SAVE_DIR -> SaveDirDialog(
             isVideo = videoTab,
             saveDir = saveDirs.of(videoTab),
@@ -810,12 +825,13 @@ private fun qualitySummary(format: MediaFormat, language: String?): String =
  * recomposing the header. A closed section composes nothing below its header.
  */
 @Composable
-private fun SheetSection(
+internal fun SheetSection(
     icon: ImageVector,
     title: String,
     summary: String,
     expanded: Boolean,
     onToggle: () -> Unit,
+    color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     content: @Composable () -> Unit
 ) {
     val turn by animateFloatAsState(
@@ -829,7 +845,7 @@ private fun SheetSection(
             .fillMaxWidth()
             .padding(bottom = 8.dp),
         shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
+        color = color
     ) {
         Column {
             Row(
@@ -946,14 +962,14 @@ private fun SheetTab(label: String, selected: Boolean, enabled: Boolean, onClick
 }
 
 /** Which of the sheet's dialogs is open. Only one can be at a time. */
-private enum class SheetDialog { NONE, CUT, LIVE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY, CONTAINER }
+private enum class SheetDialog { NONE, CUT, LIVE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY, CONTAINER, COOKIES }
 
 /** One message from the footer; a new one for every tap, so a repeat starts its time over. */
 private class Feedback(val message: String)
 
 /** The fill the sheet's fields rest on outside a section. */
 @Composable
-private fun defaultFieldColor(): Color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+internal fun defaultFieldColor(): Color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
 
 /** Labelled box whose value the user can type into, matching the read-only fields' look. */
 @Composable
@@ -995,7 +1011,7 @@ internal fun EditableField(
  * container, whose choices are a sheet of their own.
  */
 @Composable
-private fun PickerField(
+internal fun PickerField(
     label: String,
     value: String,
     onClick: () -> Unit,
@@ -1105,11 +1121,12 @@ private fun SaveDirField(label: String, onClick: () -> Unit, color: Color = defa
  * option would have no effect on this link, while still letting it be opened.
  */
 @Composable
-private fun OptionChip(
+internal fun OptionChip(
     label: String,
     icon: ImageVector,
     active: Boolean = false,
     quiet: Boolean = false,
+    compact: Boolean = false,
     onClick: () -> Unit
 ) {
     val tint = when {
@@ -1121,7 +1138,8 @@ private fun OptionChip(
         label = label,
         onClick = onClick,
         selected = active,
-        leading = { Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = tint) },
+        leading = { Icon(icon, contentDescription = null, modifier = Modifier.size(if (compact) 15.dp else 16.dp), tint = tint) },
+        compact = compact,
         modifier = Modifier.graphicsLayer { alpha = if (quiet && !active) 0.6f else 1f }
     )
 }

@@ -461,6 +461,14 @@
     <string name="sheet_link_options">Opsi tautan</string>
     <string name="sheet_link_copied">Tautan disalin</string>
     <string name="sheet_link_open_failed">Tidak ada aplikasi yang dapat membuka tautan ini</string>
+    <string name="sheet_cookies_site_saved">Masuk ke %1$s</string>
+    <string name="sheet_cookies_site_missing">Tidak ada login tersimpan untuk %1$s</string>
+    <string name="batch_search_open">Cari tautan</string>
+    <string name="batch_search_hint">Cari di tautan ini</string>
+    <string name="batch_search_close">Tutup pencarian</string>
+    <string name="batch_search_none">Tidak ada tautan yang cocok</string>
+    <string name="batch_remove_title">Hapus tautan ini?</string>
+    <string name="batch_remove_body">%1$s tidak akan disertakan dalam unduhan ini.</string>
     <string name="format_sort_quality">Kualitas</string>
     <string name="format_sort_file_size">Ukuran file</string>
     <string name="format_sort_container">Wadah</string>

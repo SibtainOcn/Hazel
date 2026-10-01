@@ -29,6 +29,14 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import com.hazel.android.ui.components.FlatChip
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,11 +80,50 @@ fun BatchDownloadCard(
     onTypeClick: () -> Unit,
     onRemove: () -> Unit
 ) {
-    val dismissState = rememberSwipeToDismissBoxState()
+    // Half the row's width before a swipe counts, and only towards the "Remove" label, so a
+    // sideways nudge while scrolling the list does not start one.
+    val dismissState = rememberSwipeToDismissBoxState(positionalThreshold = { it * 0.5f })
+    val scope = rememberCoroutineScope()
+    var confirmRemove by remember { mutableStateOf(false) }
+
+    // A swipe only asks. The row stays out of the way while the question is up, and slides
+    // back if the answer is no.
+    if (confirmRemove) {
+        val keep = {
+            confirmRemove = false
+            scope.launch { dismissState.reset() }
+            Unit
+        }
+        AlertDialog(
+            onDismissRequest = keep,
+            title = { Text(stringResource(R.string.batch_remove_title), fontWeight = FontWeight.Bold) },
+            text = {
+                Text(
+                    stringResource(R.string.batch_remove_body, info.title),
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            confirmButton = {
+                FlatChip(
+                    label = stringResource(R.string.batch_card_remove),
+                    selected = true,
+                    onClick = {
+                        confirmRemove = false
+                        onRemove()
+                    }
+                )
+            },
+            dismissButton = {
+                FlatChip(label = stringResource(R.string.options_text_input_cancel), onClick = keep)
+            }
+        )
+    }
 
     SwipeToDismissBox(
         state = dismissState,
-        onDismiss = { value -> if (value != SwipeToDismissBoxValue.Settled) onRemove() },
+        enableDismissFromStartToEnd = false,
+        onDismiss = { value -> if (value != SwipeToDismissBoxValue.Settled) confirmRemove = true },
         backgroundContent = {
             // Fills the row exactly, so nothing of it shows until the row is actually
             // dragged aside.

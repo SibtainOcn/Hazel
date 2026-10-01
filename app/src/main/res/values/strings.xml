@@ -509,6 +509,14 @@
     <string name="sheet_link_options">Link options</string>
     <string name="sheet_link_copied">Link copied</string>
     <string name="sheet_link_open_failed">No app can open this link</string>
+    <string name="sheet_cookies_site_saved">Signed in to %1$s</string>
+    <string name="sheet_cookies_site_missing">No sign-in saved for %1$s</string>
+    <string name="batch_search_open">Search links</string>
+    <string name="batch_search_hint">Search these links</string>
+    <string name="batch_search_close">Close search</string>
+    <string name="batch_search_none">No links match</string>
+    <string name="batch_remove_title">Remove this link?</string>
+    <string name="batch_remove_body">%1$s will be left out of this download.</string>
     <string name="format_sort_quality">Quality</string>
     <string name="format_sort_file_size">File size</string>
     <string name="format_sort_container">Container</string>

@@ -479,6 +479,14 @@
     <string name="sheet_link_options">Действия со ссылкой</string>
     <string name="sheet_link_copied">Ссылка скопирована</string>
     <string name="sheet_link_open_failed">Нет приложения, чтобы открыть эту ссылку</string>
+    <string name="sheet_cookies_site_saved">Вход выполнен на %1$s</string>
+    <string name="sheet_cookies_site_missing">Нет сохранённого входа для %1$s</string>
+    <string name="batch_search_open">Поиск ссылок</string>
+    <string name="batch_search_hint">Искать в этих ссылках</string>
+    <string name="batch_search_close">Закрыть поиск</string>
+    <string name="batch_search_none">Нет подходящих ссылок</string>
+    <string name="batch_remove_title">Убрать эту ссылку?</string>
+    <string name="batch_remove_body">%1$s не войдёт в эту загрузку.</string>
     <string name="format_sort_quality">Качество</string>
     <string name="format_sort_file_size">Размер файла</string>
     <string name="format_sort_container">Контейнер</string>

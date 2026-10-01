@@ -461,6 +461,14 @@
     <string name="sheet_link_options">リンクのオプション</string>
     <string name="sheet_link_copied">リンクをコピーしました</string>
     <string name="sheet_link_open_failed">このリンクを開けるアプリがありません</string>
+    <string name="sheet_cookies_site_saved">%1$s にログイン済み</string>
+    <string name="sheet_cookies_site_missing">%1$s のログインは保存されていません</string>
+    <string name="batch_search_open">リンクを検索</string>
+    <string name="batch_search_hint">これらのリンクを検索</string>
+    <string name="batch_search_close">検索を閉じる</string>
+    <string name="batch_search_none">一致するリンクはありません</string>
+    <string name="batch_remove_title">このリンクを削除しますか？</string>
+    <string name="batch_remove_body">%1$s はこのダウンロードから外されます。</string>
     <string name="format_sort_quality">画質</string>
     <string name="format_sort_file_size">ファイルサイズ</string>
     <string name="format_sort_container">コンテナ</string>

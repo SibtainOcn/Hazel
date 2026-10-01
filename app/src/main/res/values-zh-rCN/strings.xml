@@ -461,6 +461,14 @@
     <string name="sheet_link_options">链接选项</string>
     <string name="sheet_link_copied">链接已复制</string>
     <string name="sheet_link_open_failed">没有可打开此链接的应用</string>
+    <string name="sheet_cookies_site_saved">已登录 %1$s</string>
+    <string name="sheet_cookies_site_missing">未保存 %1$s 的登录</string>
+    <string name="batch_search_open">搜索链接</string>
+    <string name="batch_search_hint">在这些链接中搜索</string>
+    <string name="batch_search_close">关闭搜索</string>
+    <string name="batch_search_none">没有匹配的链接</string>
+    <string name="batch_remove_title">移除此链接？</string>
+    <string name="batch_remove_body">%1$s 将不会包含在此次下载中。</string>
     <string name="format_sort_quality">画质</string>
     <string name="format_sort_file_size">文件大小</string>
     <string name="format_sort_container">封装格式</string>

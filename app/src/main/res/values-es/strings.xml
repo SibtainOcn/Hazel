@@ -473,6 +473,14 @@
     <string name="sheet_link_options">Opciones del enlace</string>
     <string name="sheet_link_copied">Enlace copiado</string>
     <string name="sheet_link_open_failed">Ninguna app puede abrir este enlace</string>
+    <string name="sheet_cookies_site_saved">Sesión iniciada en %1$s</string>
+    <string name="sheet_cookies_site_missing">No hay sesión guardada para %1$s</string>
+    <string name="batch_search_open">Buscar enlaces</string>
+    <string name="batch_search_hint">Buscar en estos enlaces</string>
+    <string name="batch_search_close">Cerrar búsqueda</string>
+    <string name="batch_search_none">Ningún enlace coincide</string>
+    <string name="batch_remove_title">¿Quitar este enlace?</string>
+    <string name="batch_remove_body">%1$s quedará fuera de esta descarga.</string>
     <string name="format_sort_quality">Calidad</string>
     <string name="format_sort_file_size">Tamaño del archivo</string>
     <string name="format_sort_container">Contenedor</string>

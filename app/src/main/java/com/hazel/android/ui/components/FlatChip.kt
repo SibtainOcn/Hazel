@@ -25,7 +25,9 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 private val ChipShape = RoundedCornerShape(12.dp)
 
@@ -39,7 +41,9 @@ private fun restingFill(): Color = MaterialTheme.colorScheme.onSurface.copy(alph
  * takes the accent colour while it is on.
  *
  * [leading] replaces the icon where the icon itself carries state, such as a sort
- * direction arrow.
+ * direction arrow. [compact] trims the chip a little, for rows that hold many of them. The
+ * label always stays on one line and is cut short with an ellipsis rather than wrapping,
+ * so a long translation cannot break the chip's shape.
  */
 @Composable
 fun FlatChip(
@@ -49,7 +53,8 @@ fun FlatChip(
     icon: ImageVector? = null,
     selected: Boolean = false,
     badge: Int = 0,
-    leading: (@Composable () -> Unit)? = null
+    leading: (@Composable () -> Unit)? = null,
+    compact: Boolean = false
 ) {
     val content = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
     val chip = @Composable {
@@ -59,15 +64,15 @@ fun FlatChip(
             color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else restingFill(),
             contentColor = content,
             modifier = modifier
-                .height(36.dp)
+                .height(if (compact) 34.dp else 36.dp)
                 .semantics {
                     this.selected = selected
                     role = Role.Button
                 }
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(horizontal = if (compact) 10.dp else 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 when {
@@ -81,7 +86,10 @@ fun FlatChip(
                 Text(
                     label,
                     style = MaterialTheme.typography.labelLarge,
-                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
+                    fontSize = if (compact) 13.sp else MaterialTheme.typography.labelLarge.fontSize,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

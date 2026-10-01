@@ -76,6 +76,9 @@ import kotlinx.coroutines.launch
  * the sheet to show over itself, since a footer at the end of a long sheet can be below the
  * screen's edge and a message under it would never be seen. Without it, the message shows
  * under the footer, as it always has.
+ *
+ * The two buttons are also offered on their own, [SheetLinkButton] and [IncognitoButton],
+ * for a sheet that sets them in a row of its own.
  */
 @Composable
 fun DownloadSheetFooter(
@@ -87,9 +90,6 @@ fun DownloadSheetFooter(
     onFeedback: ((String) -> Unit)? = null
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
-    val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
 
     // What the last tap did, when it is shown here. It clears itself, so nothing has to be
     // dismissed and the sheet does not keep an old answer on screen.
@@ -104,28 +104,10 @@ fun DownloadSheetFooter(
         if (onFeedback != null) onFeedback(message) else inlineFeedback = message
     }
 
-    var linkDialogOpen by remember { mutableStateOf(false) }
-    val copiedMessage = stringResource(R.string.sheet_link_copied)
-    val openFailedMessage = stringResource(R.string.sheet_link_open_failed)
-
     Column(modifier = modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (linkAsButton) {
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                        .clickable(enabled = copyText.isNotBlank()) { linkDialogOpen = true },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Filled.Link,
-                        contentDescription = stringResource(R.string.sheet_link_options),
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+                SheetLinkButton(links = listOf(copyText).filter { it.isNotBlank() }, onFeedback = say)
                 Spacer(modifier = Modifier.weight(1f))
             } else {
                 Icon(
@@ -155,33 +137,7 @@ fun DownloadSheetFooter(
                 Spacer(modifier = Modifier.width(12.dp))
             }
 
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (incognito) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
-                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
-                    )
-                    .clickable {
-                        val enabled = !incognito
-                        scope.launch { SettingsRepository.setIncognito(context, enabled) }
-                        say(if (enabled) "Incognito: Enabled" else "Incognito: Disabled")
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.incognito),
-                    contentDescription = if (incognito) {
-                        "Incognito on, this download is not recorded"
-                    } else {
-                        "Incognito off"
-                    },
-                    modifier = Modifier.size(22.dp),
-                    tint = if (incognito) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
+            IncognitoButton(onFeedback = say)
         }
 
         AnimatedVisibility(
@@ -195,20 +151,100 @@ fun DownloadSheetFooter(
             }
         }
     }
+}
 
-    if (linkDialogOpen) {
+/**
+ * A round link button. Tapping it shows the address with Copy and Open, so a tap meant to
+ * copy does not also send the user to another app.
+ *
+ * Given several [links], as a set of links has, Copy takes all of them, one to a line, and
+ * Open is left out, since there is no one place to open.
+ */
+@Composable
+fun SheetLinkButton(
+    links: List<String>,
+    onFeedback: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    var dialogOpen by remember { mutableStateOf(false) }
+    val copiedMessage = stringResource(R.string.sheet_link_copied)
+    val openFailedMessage = stringResource(R.string.sheet_link_open_failed)
+
+    Box(
+        modifier = modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+            .clickable(enabled = links.isNotEmpty()) { dialogOpen = true },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            Icons.Filled.Link,
+            contentDescription = stringResource(R.string.sheet_link_options),
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+    }
+
+    if (dialogOpen) {
+        val single = links.singleOrNull()
         LinkDialog(
-            url = copyText,
+            text = links.joinToString("\n"),
             onCopy = {
-                copySheetLink(context, copyText)
-                linkDialogOpen = false
-                say(copiedMessage)
+                copySheetLink(context, links.joinToString("\n"))
+                dialogOpen = false
+                onFeedback(copiedMessage)
             },
-            onOpen = {
-                linkDialogOpen = false
-                if (!openSheetLink(context, copyText)) say(openFailedMessage)
+            onOpen = single?.let { url ->
+                {
+                    dialogOpen = false
+                    if (!openSheetLink(context, url)) onFeedback(openFailedMessage)
+                }
             },
-            onDismiss = { linkDialogOpen = false }
+            onDismiss = { dialogOpen = false }
+        )
+    }
+}
+
+/**
+ * The round incognito switch. It is the same setting the rest of the app reads, so turning
+ * it on here turns it on everywhere, and what it did is said through [onFeedback].
+ */
+@Composable
+fun IncognitoButton(
+    onFeedback: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
+
+    Box(
+        modifier = modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(
+                if (incognito) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+            )
+            .clickable {
+                val enabled = !incognito
+                scope.launch { SettingsRepository.setIncognito(context, enabled) }
+                onFeedback(if (enabled) "Incognito: Enabled" else "Incognito: Disabled")
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.incognito),
+            contentDescription = if (incognito) {
+                "Incognito on, this download is not recorded"
+            } else {
+                "Incognito off"
+            },
+            modifier = Modifier.size(22.dp),
+            tint = if (incognito) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
     }
 }
@@ -233,13 +269,14 @@ internal fun FeedbackToast(message: String, modifier: Modifier = Modifier) {
 
 /**
  * What the link button offers: the address itself, so it can be checked before anything is
- * done with it, and the two things to do with it as plain chips.
+ * done with it, and what to do with it as plain chips. [onOpen] is null where there is no
+ * single address to open.
  */
 @Composable
 private fun LinkDialog(
-    url: String,
+    text: String,
     onCopy: () -> Unit,
-    onOpen: () -> Unit,
+    onOpen: (() -> Unit)?,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -248,7 +285,7 @@ private fun LinkDialog(
         title = { Text(stringResource(R.string.sheet_link_title), fontWeight = FontWeight.Bold) },
         text = {
             Text(
-                url,
+                text,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 4,
@@ -258,7 +295,9 @@ private fun LinkDialog(
         confirmButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FlatChip(label = stringResource(R.string.sheet_link_copy), onClick = onCopy)
-                FlatChip(label = stringResource(R.string.sheet_link_open), onClick = onOpen, selected = true)
+                if (onOpen != null) {
+                    FlatChip(label = stringResource(R.string.sheet_link_open), onClick = onOpen, selected = true)
+                }
             }
         }
     )
