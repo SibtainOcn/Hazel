@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.10] - 2026-10-01
 ### Added
 - More › Synthesizing sets the saved download options the sheets start from: SponsorBlock (on or off, categories and server), bitrate, cover art and crop, preferred audio language and codec, audio format, subtitles (embed, keep the files, languages), video format, chapters, preferred video codec and quality, with a reset.
 - More › Advanced sets YouTube player clients, PO tokens and visitor data, YouTube metadata in the app's language (only languages YouTube accepts), other YouTube arguments, a pause between requests, skipping certificate checks and extra download arguments, applied to every read and download.
