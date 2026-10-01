@@ -41,12 +41,13 @@
 &nbsp;&nbsp;| &nbsp;&nbsp;
 <a href="README-sr.md">Српски</a>
 </div>
-
+<br> <!-- Adds vertical space here -->
 <div align="center">
 
-[![Android](https://img.shields.io/badge/Android-0A0A0A?style=for-the-badge&logo=android&logoColor=3DDC84)](https://github.com/SibtainOcn/Hazel/releases/latest)
+[![Android](https://img.shields.io/badge/Android-004242?style=for-the-badge&logo=android&logoColor=3DDC84)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Download](https://img.shields.io/badge/Download-0A0A0A?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/packages/com.hazel.android/)
+<a href="https://www.buymeacoffee.com/sibtainocean"><img src="https://img.shields.io/badge/-Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" /></a>
 
 ![API](https://img.shields.io/badge/API-24%2B-brightgreen?style=flat-square)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
@@ -59,7 +60,9 @@
 
 </div>
 
-## 📲 Screenshots
+*Лише посилання, наведені вище ([GitHub Releases](https://github.com/SibtainOcn/Hazel/releases/latest) та [F-Droid](https://f-droid.org/packages/com.hazel.android/)), є офіційними й надійними джерелами Hazel. Зверніть увагу: будь-які сторонні сайти чи продавці є неофіційними й діють повністю незалежно від мене.*
+
+## 📲 Знімки екрана
 
 <div>
 <img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" width="30%" />
@@ -78,69 +81,102 @@
 
 ## 💡 Можливості:
 
-- Завантаження аудіо та відео з YouTube, Instagram, TikTok, X, Reddit, SoundCloud та [понад 1000 інших сайтів](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
-- Вставка одного чи кількох посилань або всього списку відтворення / каналу для пакетного завантаження в один клік
-- **Hazel Instant** - поділіться посиланням із будь-якої програми, і завантаження розпочнеться негайно у вибраній якості
-- Вибір окремих аудіодоріжок, якщо джерело містить кілька мов звуку
-- Редагування назви, автора та формату / метаданих перед збереженням
-- Вибір різних форматів та контейнерів для завантаження
+- Завантажуйте аудіо та відео з YouTube, Instagram, TikTok, X, Reddit, SoundCloud та [понад 1000 інших сайтів](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+- Вставте одне посилання, кілька одразу або цілий плейлист / канал і завантажте все пакетом в один клік
+- **Hazel Instant** - поділіться посиланням з будь-якого іншого застосунку, і завантаження почнеться одразу в якості, яку ви задали один раз
+- Обирайте конкретні звукові доріжки, якщо джерело публікує кілька
+- Редагуйте назву, автора та тип файлу / метадані перед збереженням
+- Обирайте різні формати й контейнери завантаження
+
+### Пошук і відтворення
+- **Пошук** - вводьте слова замість посилання, щоб шукати на YouTube, YouTube Music, SoundCloud, Bandcamp, Bilibili, Niconico, PRX або Rokfin, з необов'язковими пошуковими підказками
+- **Відтворення перед завантаженням** - відтворюйте будь-який результат чи посилання просто в картці, зі смугою перемотування, подвійним дотиком для пропуску, повноекранним режимом і вибором якості, на будь-якому сайті, який читає Hazel
+- **Обрізання** - завантажуйте лише частину відео чи треку, обираючи відрізок у живому попередньому перегляді
+- **Прямі трансляції** - записуйте трансляцію з самого початку або дочекайтеся прем'єри й завантажте її
 
 ### Обробка
-- **Вибір мови** - зберігайте будь-якою мовою, наданою джерелом (українська, англійська, німецька, іспанська тощо)
-- **SponsorBlock** - автоматичний пропуск спонсорських вставок та заставок
-- **Розділи** - вбудовування у файл або поділ на окремі файли за розділами
-- **Субтитри** - вшивання у відео, збереження окремим файлом або обидва варіанти
+- **Вибір мови** - зберігайте будь-якою мовою, яку пропонує вихідне відео
+- **SponsorBlock** - вирізайте спонсорські вставки, заставки та інші сегменти
+- **Розділи** - вбудовуйте у файл або розбивайте на окремий файл для кожного розділу
+- **Субтитри** - обраними вами мовами
 
 ### Завантаження
-- Підтримка тривалого фонового завантаження через службу переднього плану
+- Підтримка тривалих фонових завантажень
 - Пауза, відновлення та скасування з картки або сповіщення
-- Режим «Тільки Wi-Fi» - перевірка перед стартом для уникнення обриву
+- Режим «лише Wi-Fi» - перевіряється під час запуску, тож передача, що вже триває, не переривається
+- Типово без обмеження швидкості, з паралельними фрагментами та необов'язковим лімітом
+- Ще не завантажені результати залишаються на головному екрані, доки ви їх не очистите
 
-### Конфіденційність
-- **Режим інкогніто** - завантаження не додаються до історії, а посилання не зберігаються
-- Без акаунтів, без аналітики, жодних передач стороннім сервісам
+### Приватність
+- **Інкогніто** - завантаження не додаються до бібліотеки, а посилання не запам'ятовуються
+- Жодних облікових записів, жодної аналітики, нічого нікуди не надсилається (пошукові підказки, типово вимкнені, надсилають введений текст до Google)
 
 ### Налаштування та персоналізація
-- Темна та світла теми з акцентним кольором
-- Мови програми - українська, англійська, німецька, іспанська, французька та системна за замовчуванням
-- Незалежне оновлення двигуна yt-dlp - канали Stable, Nightly або Master
-- Офлайн конвертер відео в аудіо
+- Темна й світла теми з акцентним кольором
+- Мови застосунку - англійська, іспанська, гінді, спрощена китайська, бразильська португальська, французька, німецька, російська, японська, індонезійська та мова системи
+- Незалежні оновлення рушія yt-dlp - канал Stable, Nightly або Master
+- Офлайн-конвертер відео в аудіо
+- **Резервне копіювання та відновлення** - налаштування, список завантажень, черга, cookies та історія пошуку
+
 
 ---
 ## ⬇️ Завантажити
 
-Для більшості пристроїв рекомендовано встановлювати APK для архітектури **arm64-v8a**
+Для більшості пристроїв рекомендується встановлювати версію APK **arm64-v8a**
 
-- Завантажити найновішу стабільну версію з [GitHub Releases](https://github.com/SibtainOcn/Hazel/releases/latest)
-  - Встановити [попередні версії](https://github.com/SibtainOcn/Hazel/releases/) для тестування новинок
+- Завантажте останню стабільну версію з [GitHub releases](https://github.com/SibtainOcn/Hazel/releases/latest)
+  - Встановлюйте [попередні](https://github.com/SibtainOcn/Hazel/releases/) версії, щоб допомогти нам тестувати нові функції та зміни
 
-- Стабільні випуски також доступні на [F-Droid](https://f-droid.org/packages/com.hazel.android/)
+- Стабільні версії також доступні в [F-Droid](https://f-droid.org/packages/com.hazel.android/)
 
-Hazel завжди буде безкоштовним та з відкритим кодом. Якщо вам подобається застосунок, [підтримайте проєкт](https://github.com/sponsors/SibtainOcn)!
+Hazel завжди буде безкоштовним і відкритим для всіх. Якщо він вам подобається, підтримайте проєкт через [GitHub Sponsors](https://github.com/sponsors/SibtainOcn) або [Buy Me a Coffee](https://www.buymeacoffee.com/sibtainocean)!
+
+### 🔗  Підключення до сторонніх застосунків
+Ім'я пакета застосунку - `com.hazel.android`.
+
+### ✅ Перевірка підпису застосунку
+Збірки Hazel відтворювані. Офіційні релізи підписані сертифікатом розробника, наведеним нижче. Якщо підпис вашого APK відрізняється, застосунок було змінено третьою стороною. Завжди перевіряйте, що користуєтеся застосунком з оригінальним підписом:
+
+```text
+Owner (DN): CN=sibtainocn
+SHA-256:    0377e9c8352c017e42583cea1715c40c400a51c4045c268825ffc9bae1305c86
+SHA-1:      d5c4a6a86d3cde1c1c722564f1efaf8893ea85a2
+MD5:        3bcce9e14c616a9087766563875978e6
+```
 
 ## 🤝 Участь у розробці
 
-Внески завжди вітаються!
+Будь-який внесок вітається!
 
 > [!Note]
 >
-> Перед надсиланням звітів про помилки або пропозицій ознайомтеся з [CONTRIBUTING.md](https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md).
+> Перш ніж надсилати повідомлення про помилки, запити функцій, питання чи інші ідеї щодо покращення, прочитайте [CONTRIBUTING.md](https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md) з інструкціями та правилами.
 
 ## 📄 Ліцензія
 
-[GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
+[GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
+
+Copyright (C) 2026 SibtainOcn
+
+Hazel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+Hazel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with Hazel. If not, see <https://www.gnu.org/licenses/>.
 
 > [!Warning]
 >
-> За винятком вихідного коду під ліцензією GPLv3, використання назви Hazel для завантажувачів або похідних збірок заборонено.
+> За винятком вихідного коду, що поширюється за ліцензією GPLv3, усім іншим сторонам заборонено використовувати назву Hazel для застосунку-завантажувача; те саме стосується похідних від Hazel. До похідних належать, зокрема, форки та неофіційні збірки.
 
 ## 🧱 Подяки
 
-Hazel - це графічний інтерфейс для [yt-dlp](https://github.com/yt-dlp/yt-dlp), створений на базі [youtubedl-android](https://github.com/yausername/youtubedl-android).
-[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor)
+Hazel - це графічний інтерфейс для [yt-dlp](https://github.com/yt-dlp/yt-dlp), заснований на [youtubedl-android](https://github.com/yausername/youtubedl-android).
+[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - для швидких списків, пошуку й потоків відтворення, та [Media3 ExoPlayer](https://github.com/androidx/media) - для відтворення.
 
+> *Окрема подяка команді [yt-dlp](https://github.com/yt-dlp/yt-dlp) - без їхньої роботи Hazel не існувало б.*
+>
 <div align="right">
 <table><td>
-<a href="#start-of-content">👆 Вгору</a>
+<a href="#start-of-content">👆 Догори</a>
 </td></table>
 </div>

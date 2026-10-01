@@ -41,12 +41,13 @@
 &nbsp;&nbsp;| &nbsp;&nbsp;
 <a href="README-sr.md">Српски</a>
 </div>
-
+<br> <!-- Adds vertical space here -->
 <div align="center">
 
-[![Android](https://img.shields.io/badge/Android-0A0A0A?style=for-the-badge&logo=android&logoColor=3DDC84)](https://github.com/SibtainOcn/Hazel/releases/latest)
+[![Android](https://img.shields.io/badge/Android-004242?style=for-the-badge&logo=android&logoColor=3DDC84)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Download](https://img.shields.io/badge/Download-0A0A0A?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/packages/com.hazel.android/)
+<a href="https://www.buymeacoffee.com/sibtainocean"><img src="https://img.shields.io/badge/-Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" /></a>
 
 ![API](https://img.shields.io/badge/API-24%2B-brightgreen?style=flat-square)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
@@ -59,7 +60,9 @@
 
 </div>
 
-## 📲 Screenshots
+*الروابط المذكورة أعلاه فقط ([GitHub Releases](https://github.com/SibtainOcn/Hazel/releases/latest) و [F-Droid](https://f-droid.org/packages/com.hazel.android/)) هي المصادر الرسمية والموثوقة لتطبيق Hazel. يُرجى العلم بأن أي مواقع خارجية أو بائعين من جهات خارجية هم غير رسميين ويعملون بشكل مستقل تمامًا عني.*
+
+## 📲 لقطات الشاشة
 
 <div>
 <img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" width="30%" />
@@ -78,69 +81,102 @@
 
 ## 💡 الميزات:
 
-- تنزيل الصوت والفيديو من YouTube وInstagram وTikTok وX وReddit وSoundCloud و[أكثر من 1000 موقع آخر](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
-- لصق رابط واحد أو عدة روابط أو قائمة تشغيل / قناة كاملة مع التنزيل المجمع بنقرة واحدة
-- **Hazel Instant** - شارك الرابط من أي تطبيق وسيبدأ التنزيل فورًا بالجودة المحددة مسبقًا
-- اختر مقاطع صوتية محددة عند توفر لغات صوتية متعددة في الفيديو المصدر
-- تعديل العنوان والمؤلف وصيغة الملف / البيانات الوصفية قبل الحفظ
-- تحديد صيغ وحاويات التنزيل المختلفة
+- نزّل الصوت والفيديو من YouTube وInstagram وTikTok وX وReddit وSoundCloud و[أكثر من 1000 موقع آخر](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+- الصق رابطًا واحدًا، أو عدة روابط معًا، أو قائمة تشغيل / قناة كاملة مع تنزيل دفعي بنقرة واحدة
+- **Hazel Instant** - شارك رابطًا من أي تطبيق آخر ويبدأ التنزيل فورًا بالجودة التي حددتها مرة واحدة
+- اختر مسارات صوتية محددة عندما ينشر المصدر عدة مسارات
+- عدّل العنوان والمؤلف ونوع الملف / البيانات الوصفية قبل الحفظ
+- اختر صيغ وحاويات تنزيل مختلفة
+
+### البحث والتشغيل
+- **البحث** - اكتب كلمات بدلًا من رابط للبحث في YouTube وYouTube Music وSoundCloud وBandcamp وBilibili وNiconico وPRX وRokfin، مع اقتراحات بحث اختيارية
+- **شغّل قبل التنزيل** - شغّل أي نتيجة أو رابط مباشرة على بطاقته، مع شريط تقدم والنقر المزدوج للتخطي وملء الشاشة واختيار الجودة، على أي موقع يستطيع Hazel قراءته
+- **القص** - نزّل جزءًا فقط من فيديو أو مقطع صوتي، مع اختيار النطاق على معاينة حية
+- **البث المباشر** - سجّل من بداية البث المباشر، أو انتظر العرض الأول ثم نزّله
 
 ### المعالجة
-- **اختيار اللغة** - احفظ بأي لغة يوفرها الفيديو المصدر (العربية، الإنجليزية، الهندية، الأردية، الألمانية، والمزيد)
-- **SponsorBlock** - تخطي الإعلانات والمقاطع الترويجية تلقائيًا
-- **الفصول** - تضمينها في الملف، أو تقسيمه إلى ملف لكل فصل
-- **الترجمات** - حرقها في الفيديو، حفظها بجانبه، أو كلاهما باللغات التي تختارها
+- **اختيار اللغة** - احفظ بأي لغة يوفرها الفيديو المصدر
+- **SponsorBlock** - احذف الإعلانات الدعائية والمقدمات والمقاطع الأخرى
+- **الفصول** - ضمّنها في الملف، أو قسّم الملف إلى ملف لكل فصل
+- **الترجمات** - باللغات التي تختارها
 
 ### التنزيلات
-- دعم التنزيل في الخلفية مع خدمات المقدمة المستقرة
-- إيقاف مؤقت واستئناف وإلغاء من البطاقة أو الإشعار
-- وضع Wi-Fi فقط - يتم التحقق منه عند البدء لعدم مقاطعة التنزيل الجاري
+- دعم التنزيلات الطويلة في الخلفية
+- أوقف مؤقتًا واستأنف وألغِ من البطاقة أو من الإشعار
+- وضع Wi-Fi فقط - يُفحص عند البدء، فلا يُقطع نقل جارٍ بالفعل
+- بلا حد للسرعة افتراضيًا، مع أجزاء متوازية وحد اختياري للسرعة
+- تبقى النتائج التي لم تنزّلها بعد على الشاشة الرئيسية حتى تمسحها
 
 ### الخصوصية
-- **الوضع المتخفي** - لا تُضاف التنزيلات إلى سجلك ولا يتم حفظ الروابط
-- بدون حسابات، بدون تحليلات، لا يُرسل أي شيء إلى جهات خارجية
+- **وضع التصفح المتخفي** - لا تُضاف التنزيلات إلى مكتبتك ولا تُحفظ الروابط
+- بلا حسابات، بلا تحليلات، لا يُرسل أي شيء إلى أي مكان (اقتراحات البحث، المعطلة افتراضيًا، ترسل ما تكتبه إلى Google)
 
 ### الإعدادات والتخصيص
-- مظهر داكن وفاتح مع تخصيص لون التمييز
-- لغات التطبيق - العربية، الإنجليزية، الإسبانية، الهندية، الصينية، البرتغالية، الفرنسية، الألمانية، الروسية، اليابانية، الإندونيسية، وافتراضي النظام
-- تحديثات مستقلة لمحرك yt-dlp - قنوات Stable أو Nightly أو Master
-- محول فيديو إلى صوت دون اتصال بالإنترنت
+- سمات داكنة وفاتحة مع لون مميز
+- لغات التطبيق - الإنجليزية، الإسبانية، الهندية، الصينية المبسطة، البرتغالية البرازيلية، الفرنسية، الألمانية، الروسية، اليابانية، الإندونيسية، ولغة النظام الافتراضية
+- تحديثات مستقلة لمحرك yt-dlp - قناة Stable أو Nightly أو Master
+- محوّل فيديو إلى صوت دون اتصال
+- **النسخ الاحتياطي والاستعادة** - الإعدادات وقائمة التنزيلات وقائمة الانتظار وملفات تعريف الارتباط وسجل البحث
+
 
 ---
 ## ⬇️ التنزيل
 
-لمعظم الأجهزة، يوصى بتثبيت إصدار **arm64-v8a** من ملفات APK
+لمعظم الأجهزة، يُنصح بتثبيت إصدار **arm64-v8a** من ملفات APK
 
-- تنزيل أحدث إصدار مستقر من [إصدارات GitHub](https://github.com/SibtainOcn/Hazel/releases/latest)
-  - تثبيت إصدارات [ما قبل الإصدار](https://github.com/SibtainOcn/Hazel/releases/) لمساعدتنا في اختبار الميزات الجديدة
+- نزّل أحدث إصدار مستقر من [GitHub releases](https://github.com/SibtainOcn/Hazel/releases/latest)
+  - ثبّت [الإصدارات التجريبية](https://github.com/SibtainOcn/Hazel/releases/) لمساعدتنا في اختبار الميزات والتغييرات الجديدة
 
-- الإصدارات المستقرة متوفرة أيضاً على [F-Droid](https://f-droid.org/packages/com.hazel.android/)
+- الإصدارات المستقرة متاحة أيضًا على [F-Droid](https://f-droid.org/packages/com.hazel.android/)
 
-سيبقى Hazel مجانياً ومفتوح المصدر للجميع دائماً. إذا أعجبك، يُرجى التفكير في [دعم المشروع](https://github.com/sponsors/SibtainOcn)!
+سيبقى Hazel دائمًا مجانيًا ومفتوح المصدر للجميع. إن أعجبك، فكّر في دعم المشروع عبر [GitHub Sponsors](https://github.com/sponsors/SibtainOcn) أو [Buy Me a Coffee](https://www.buymeacoffee.com/sibtainocean)!
+
+### 🔗  الربط مع تطبيقات الجهات الخارجية
+اسم حزمة التطبيق هو `com.hazel.android`.
+
+### ✅ التحقق من توقيع التطبيق
+إصدارات Hazel قابلة لإعادة الإنتاج. الإصدارات الرسمية موقّعة بشهادة المطوّر أدناه. إذا كان توقيع ملف APK لديك مختلفًا، فقد عدّلت جهة خارجية التطبيق. تحقّق دائمًا من أنك تستخدم التطبيق بالتوقيع الأصلي:
+
+```text
+Owner (DN): CN=sibtainocn
+SHA-256:    0377e9c8352c017e42583cea1715c40c400a51c4045c268825ffc9bae1305c86
+SHA-1:      d5c4a6a86d3cde1c1c722564f1efaf8893ea85a2
+MD5:        3bcce9e14c616a9087766563875978e6
+```
 
 ## 🤝 المساهمة
 
-المساهمات مرحب بها دائماً!
+المساهمات مرحّب بها!
 
 > [!Note]
 >
-> لإرسال تقارير الأخطاء أو طلبات الميزات، يرجى قراءة [CONTRIBUTING.md](https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md) أولاً.
+> لإرسال تقارير الأخطاء أو طلبات الميزات أو الأسئلة أو أي أفكار أخرى للتحسين، يُرجى قراءة [CONTRIBUTING.md](https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md) أولًا للاطلاع على التعليمات والإرشادات.
 
 ## 📄 الترخيص
 
-[GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
+[GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
+
+Copyright (C) 2026 SibtainOcn
+
+Hazel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+Hazel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with Hazel. If not, see <https://www.gnu.org/licenses/>.
 
 > [!Warning]
 >
-> باستثناء كود المصدر المرخص بموجب GPLv3، يُحظر على جميع الأطراف الأخرى استخدام اسم Hazel كتطبيق تنزيل، وينطبق الأمر ذاته على المشتقات.
+> باستثناء الشيفرة المصدرية المرخصة بموجب GPLv3، يُحظر على جميع الأطراف الأخرى استخدام اسم Hazel لتطبيق تنزيل، وينطبق الأمر نفسه على مشتقات Hazel. تشمل المشتقات على سبيل المثال لا الحصر التفرعات (forks) والإصدارات غير الرسمية.
 
-## 🧱 شكر وتقدير
+## 🧱 الشكر والتقدير
 
-تطبيق Hazel هو واجهة رسومية لـ [yt-dlp](https://github.com/yt-dlp/yt-dlp)، قائم على [youtubedl-android](https://github.com/yausername/youtubedl-android).
-[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor)
+Hazel واجهة رسومية لـ [yt-dlp](https://github.com/yt-dlp/yt-dlp)، مبنية على [youtubedl-android](https://github.com/yausername/youtubedl-android).
+[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) للقوائم والبحث وبث التشغيل السريع، و[Media3 ExoPlayer](https://github.com/androidx/media) للتشغيل.
 
+> *شكر خاص لفريق [yt-dlp](https://github.com/yt-dlp/yt-dlp) - لولا عملهم لما وُجد Hazel.*
+>
 <div align="right">
 <table><td>
-<a href="#start-of-content">👆 الانتقال إلى الأعلى</a>
+<a href="#start-of-content">👆 العودة إلى الأعلى</a>
 </td></table>
 </div>
