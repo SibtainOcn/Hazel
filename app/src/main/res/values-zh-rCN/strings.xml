@@ -385,8 +385,6 @@
     <string name="batch_type_sheet_subtitle">这些链接会以什么形式下载</string>
     <string name="batch_type_audio">音频</string>
     <string name="batch_type_video">视频</string>
-    <string name="batch_format_title">格式</string>
-    <string name="batch_format_subtitle">选择格式</string>
     <string name="batch_container_title">封装格式</string>
     <string name="batch_container_subtitle">这些链接会保存成哪种文件</string>
     <string name="batch_save_dir_title">保存位置</string>
@@ -454,6 +452,7 @@
     <string name="format_selection_confirm">确定</string>
     <string name="format_selection_loading">正在读取其余的格式</string>
     <string name="format_audio_empty">此链接没有单独的音频流</string>
+    <string name="format_generic_badge">自动</string>
     <string name="format_sheet_section_details">详细信息</string>
     <string name="sheet_link_title">链接</string>
     <string name="sheet_link_copy">复制</string>

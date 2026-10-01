@@ -393,8 +393,6 @@
     <string name="batch_type_sheet_subtitle">Sous quelle forme ces liens sont téléchargés</string>
     <string name="batch_type_audio">Audio</string>
     <string name="batch_type_video">Vidéo</string>
-    <string name="batch_format_title">Format</string>
-    <string name="batch_format_subtitle">Choisir le format</string>
     <string name="batch_container_title">Conteneur</string>
     <string name="batch_container_subtitle">Le fichier dans lequel ces liens sont enregistrés</string>
     <string name="batch_save_dir_title">Emplacement</string>
@@ -466,6 +464,7 @@
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Lecture du reste des formats</string>
     <string name="format_audio_empty">Ce lien n’a pas de flux audio séparés</string>
+    <string name="format_generic_badge">Auto</string>
     <string name="format_sheet_section_details">Détails</string>
     <string name="sheet_link_title">Lien</string>
     <string name="sheet_link_copy">Copier</string>

@@ -397,8 +397,6 @@
     <string name="batch_type_sheet_subtitle">В каком виде сохранять эти ссылки</string>
     <string name="batch_type_audio">Аудио</string>
     <string name="batch_type_video">Видео</string>
-    <string name="batch_format_title">Формат</string>
-    <string name="batch_format_subtitle">Выберите формат</string>
     <string name="batch_container_title">Контейнер</string>
     <string name="batch_container_subtitle">Формат файла для сохранения ссылок</string>
     <string name="batch_save_dir_title">Место сохранения</string>
@@ -472,6 +470,7 @@
     <string name="format_selection_confirm">ОК</string>
     <string name="format_selection_loading">Чтение остальных форматов</string>
     <string name="format_audio_empty">У этой ссылки нет отдельных аудиопотоков</string>
+    <string name="format_generic_badge">Авто</string>
     <string name="format_sheet_section_details">Подробности</string>
     <string name="sheet_link_title">Ссылка</string>
     <string name="sheet_link_copy">Копировать</string>

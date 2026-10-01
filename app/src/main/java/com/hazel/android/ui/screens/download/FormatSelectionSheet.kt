@@ -17,7 +17,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.collectAsState
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.background
@@ -235,7 +235,7 @@ fun FormatSelectionSheet(
                 }
 
                 HeaderIconButton(
-                    icon = Icons.Filled.FilterList,
+                    icon = Icons.Outlined.Tune,
                     description = stringResource(R.string.format_filter_title),
                     onClick = { filterSheetOpen = true }
                 )
@@ -725,7 +725,7 @@ private fun List<MediaFormat>.sortedBy(sort: FormatSort): List<MediaFormat> {
  * the narrower pane beside the rail, a plain label, since the rail already frames the list.
  */
 @Composable
-private fun SectionHeader(text: String, compact: Boolean = false, modifier: Modifier = Modifier) {
+private fun SectionHeader(text: String, modifier: Modifier = Modifier, compact: Boolean = false) {
     if (compact) {
         Text(
             text,
@@ -847,10 +847,12 @@ fun FormatRow(
             val size = format.sizeLabel
             // The bitrate says something the resolution does not only for audio; on a
             // video row it repeats what the size already showed.
-            val bitrate = format.bitrateLabel.takeIf { !format.hasVideo }.orEmpty()
+            val generic = format.isGeneric
+            // A ladder row's bitrate is its name already, so it is not repeated as a badge.
+            val bitrate = format.bitrateLabel.takeIf { !format.hasVideo && !generic }.orEmpty()
 
             val hasBadges = mergeAudioId != null || codec.isNotBlank() ||
-                size.isNotBlank() || bitrate.isNotBlank()
+                size.isNotBlank() || bitrate.isNotBlank() || generic
 
             // Starts small and springs to size once, when this format's badges first show.
             val pop = remember(format.formatId) { Animatable(if (popBadges) BADGE_POP_FROM else 1f) }
@@ -862,7 +864,9 @@ fun FormatRow(
                 }
             }
 
-            if (!hasBadges && pendingBadges) {
+            // A ladder row while the formats are read holds the places the real badges will
+            // take, rather than saying it will be matched later.
+            if (pendingBadges && (generic || !hasBadges)) {
                 Spacer(modifier = Modifier.height(6.dp))
                 FillingBadges()
             } else if (hasBadges) {
@@ -886,6 +890,9 @@ fun FormatRow(
                             tone = BadgeTone.SOLID
                         )
                     }
+                    // Said once, on the ladder's rows: the step is matched to a real stream
+                    // when the download starts, so there is no codec or size to show yet.
+                    if (generic) MetaBadge(stringResource(R.string.format_generic_badge), tone = BadgeTone.ACCENT)
                     if (codec.isNotBlank()) MetaBadge(codec)
                     if (size.isNotBlank()) MetaBadge(size, tone = BadgeTone.SIZE)
                     if (bitrate.isNotBlank()) MetaBadge(bitrate, tone = BadgeTone.ACCENT)

@@ -90,6 +90,7 @@ import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.Cookie
 import com.hazel.android.download.DownloadOptions
+import com.hazel.android.download.GenericFormats
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.extractor.ListingSource
@@ -179,11 +180,23 @@ fun FormatSheet(
     val preferredLanguage = remember(info.url, info.hasResolvedFormats, options.preferredAudioLanguage) {
         info.languageMatching(options.preferredAudioLanguage)
     }
+    // What was picked in the format list for this link, kept apart from the defaults. A link
+    // opened before it was read offers its ladder, and a step picked from it then has to
+    // survive the formats arriving: it is carried onto what the link turned out to offer,
+    // and only without one does the sheet fall back to the setting's default.
+    var chosenVideo by remember(info.url) { mutableStateOf<MediaFormat?>(null) }
+    var chosenAudio by remember(info.url) { mutableStateOf<MediaFormat?>(null) }
+    val carry: (MediaFormat) -> MediaFormat = { choice ->
+        if (info.hasResolvedFormats) GenericFormats.applyTo(info, choice, preferredLanguage) ?: choice
+        else choice
+    }
+
     var pickedVideo by remember(
         info.url, info.hasResolvedFormats, options.videoQuality, options.preferredVideoCodec
     ) {
         mutableStateOf(
-            initialFormat?.takeIf { !it.isGeneric && it.hasVideo }
+            chosenVideo?.let(carry)
+                ?: initialFormat?.takeIf { !it.isGeneric && it.hasVideo }
                 ?: info.autoPick(
                     true,
                     initialFormat?.height ?: options.videoQuality,
@@ -196,7 +209,8 @@ fun FormatSheet(
         info.url, info.hasResolvedFormats, preferredLanguage, options.preferredAudioCodec
     ) {
         mutableStateOf(
-            initialFormat?.takeIf { !it.isGeneric && !it.hasVideo }
+            chosenAudio?.let(carry)
+                ?: initialFormat?.takeIf { !it.isGeneric && !it.hasVideo }
                 ?: info.bestAudioFor(preferredLanguage, options.audioCodecPreference)
                 ?: info.bestAudio
         )
@@ -664,11 +678,19 @@ fun FormatSheet(
             info = info,
             selected = selected,
             audioFirst = !videoTab,
-            isLoadingFormats = isLoadingFormats,
+            // A link still being read shows the ladder with the list's own loading state
+            // under it, the same as one whose formats are being read.
+            isLoadingFormats = isLoadingFormats || isReadingLink,
             onRefresh = onRefreshFormats,
             canChooseSource = remember(info.url) { NewPipeEngine.handlesStream(info.url) },
             onConfirm = { format ->
-                if (format.hasVideo) pickedVideo = format else pickedAudio = format
+                if (format.hasVideo) {
+                    pickedVideo = format
+                    chosenVideo = format
+                } else {
+                    pickedAudio = format
+                    chosenAudio = format
+                }
                 // Picking an audio stream from the video tab, or the other way round,
                 // moves the sheet to the tab that entry belongs to.
                 videoTab = format.hasVideo

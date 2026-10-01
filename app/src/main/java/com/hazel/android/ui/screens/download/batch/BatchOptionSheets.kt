@@ -107,45 +107,6 @@ fun BatchDownloadTypeSheet(
     }
 }
 
-/** The height ceiling every link resolves against. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BatchQualitySheet(
-    maxHeight: Int,
-    onSelect: (Int) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = batchSheetColor
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            SheetHeader(
-                stringResource(R.string.batch_format_title),
-                stringResource(R.string.batch_format_subtitle)
-            )
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                    start = 20.dp, end = 20.dp, bottom = 32.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(BATCH_QUALITY_STEPS, key = { it.first }) { (height, labelRes) ->
-                    ChoiceRow(
-                        label = stringResource(labelRes),
-                        selected = height == maxHeight,
-                        onClick = { onSelect(height) }
-                    )
-                }
-            }
-        }
-    }
-}
-
 /** The bitrate an audio conversion in the set is encoded at. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -96,6 +96,7 @@ import com.hazel.android.download.extractor.newpipe.NewPipeEngine
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.WORST_HEIGHT
 import com.hazel.android.download.BatchAudioFormats
+import com.hazel.android.download.GenericFormats
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.download.languageLabel
 import com.hazel.android.ui.screens.download.AudioLanguageSheet
@@ -751,14 +752,24 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
-        BatchSheet.QUALITY -> BatchQualitySheet(
-            maxHeight = state.maxHeight,
-            onSelect = {
-                state.setQualityCeiling(it)
-                openSheet = BatchSheet.NONE
-            },
-            onDismiss = { openSheet = BatchSheet.NONE }
-        )
+        // The same ladder a link offers before it is read, in the same format list, so a
+        // ceiling for the set and a step for one link look and read alike.
+        BatchSheet.QUALITY -> {
+            val bestLabel = stringResource(R.string.batch_quality_best)
+            val worstLabel = stringResource(R.string.batch_quality_worst)
+            val ladder = remember(bestLabel, worstLabel) {
+                GenericFormats.videoLadder(bestLabel, worstLabel)
+            }
+            FormatSelectionSheet(
+                info = remember(ladder) { ladderAsInfo(ladder) },
+                selected = ladder.firstOrNull { GenericFormats.ceilingOf(it) == state.maxHeight },
+                onConfirm = { step ->
+                    state.setQualityCeiling(GenericFormats.ceilingOf(step))
+                    openSheet = BatchSheet.NONE
+                },
+                onDismiss = { openSheet = BatchSheet.NONE }
+            )
+        }
 
         // The same format list a single link opens, holding what the targeted links share.
         BatchSheet.AUDIO_FORMAT -> {
@@ -1011,6 +1022,17 @@ private fun currentAudioChoice(
     val id = state.audioChoice?.formatId ?: BatchAudioFormats.BEST.formatId
     return choices.firstOrNull { it.formatId == id }
 }
+
+/** The video ladder in the shape the format list reads. */
+private fun ladderAsInfo(ladder: List<MediaFormat>) = MediaInfo(
+    url = "",
+    title = "",
+    uploader = "",
+    thumbnail = null,
+    durationSeconds = 0,
+    videoFormats = ladder,
+    audioFormats = emptyList()
+)
 
 /** The shared formats in the shape the format list reads. */
 private fun choicesAsInfo(choices: List<MediaFormat>) = MediaInfo(

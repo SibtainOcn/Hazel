@@ -10,10 +10,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Save downloads to an SD card. The save location in the download sheet, the batch sheet, the share overlay and More › Downloads lists Internal storage, each SD card that is in (with its free space) and Other folder, set apart for audio and video. Picking a card opens the system picker on that card (Android 10+ through the card itself, 8–9 at its root, 7 among the picker's places), and a card's root gets `Hazel/Audio` or `Hazel/Video` made inside it.
 - A download going to an SD card keeps its working files on the card too, so a large video does not have to fit in phone storage while it runs; names are kept to what the card's file system accepts.
+- Format list in two panes: a rail of All, one stop per quality the source offers (worked out from the picture size, so cropped and vertical video land on the step they belong to) and Audio, which is always there, beside a list that scrolls on its own. The rail only shows when there is something to split.
+- Search inside the set-of-links sheet: a search button beside the count opens a field in that row that narrows the list by title, channel or address, with a close button; tapping elsewhere closes it when nothing is typed.
+- Cookies in the Adjust section of both download sheets: the app's own Use cookies switch, whether a sign-in is saved for the link's site, and a Sign in button that opens the sign-in page.
+- The link button in the download sheets shows the address with Copy and Open (Copy takes every address of a set).
 
 ### Changed
 - Storage cleanup's Unfinished downloads, cancelling a queue and removing a paused download now also clear working files left on SD cards.
 - If the card is taken out, full or no longer allows access, downloads are saved to internal storage instead of failing, and a dialog says which ones and where they went (once per batch, wherever you are in the app). Problems while choosing a folder (access refused, no folder picker, the Hazel folder could not be made on the card) are shown in a dialog too.
+- The single download sheet groups its controls into Details, Quality, Save and Adjust sections that open and close, each saying what it is set to while closed. Quality opens by default and at most two stay open, so the sheet fits the screen. Download is the one filled button, in the accent colour.
+- The set-of-links sheet uses more of the width. Its options and container moved into a collapsible Adjust section as compact chips; type, quality and folder stay in the bottom row with the link and incognito buttons at its end; the keyboard opens over the sheet instead of lifting it.
+- Adjust options take the accent colour while on instead of showing a count; chips wrap onto new lines and a long label is cut short instead of breaking the chip. Live is always shown, quiet where it does not apply, and its options only reach downloads of live or upcoming streams.
+- Container opens a sheet of choices instead of a menu.
+- Messages from the link and incognito buttons show over the top of the sheet, where they are always in view.
+- The size badge is a fixed steel blue in every theme rather than violet.
+- While a link's formats are read, the quality row keeps the best as a stand-in and fills two waiting pills where the codec and size will go; the real badges spring in when they land. The rail glints, the skeleton rows take the colours of a real row, and the Fetching heading sweeps faster.
+- The quality steps a link offers before it is read (best, 2160p down to 144p, worst) are one list, used by the single sheet, the share sheet and the set of links; the set's video quality is picked in the same format list as everything else, and these steps carry an Auto tag. 144p is now offered before a link is read too.
+- The format list's options button uses a tune icon.
+- Removing a link from a set by swiping now asks first, needs half the row's width and only goes towards the Remove label.
+- Download all appears only for several pasted links or a playlist or channel, not for keyword search results.
+- The paste button shows whenever the clipboard holds something to paste, without Android announcing a clipboard read. It opens with its label for a new clip and folds to an icon, is not offered again for a clip already pasted, and stands aside while a read runs or Download all is shown.
+
+### Fixed
+- A quality picked from a shared link's sheet before the link was read was replaced by the default when the formats arrived; it is now carried onto the formats the link offers.
+- A long format id squeezed the quality name in the format list; the id is now cut short in its own space.
+- Option chips could be pushed off the edge of the download sheet on narrow screens or with long translations.
 
 ## [1.1.10] - 2026-10-01
 ### Store

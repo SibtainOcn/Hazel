@@ -385,8 +385,6 @@
     <string name="batch_type_sheet_subtitle">Format unduhan tautan-tautan ini</string>
     <string name="batch_type_audio">Audio</string>
     <string name="batch_type_video">Video</string>
-    <string name="batch_format_title">Format</string>
-    <string name="batch_format_subtitle">Pilih format</string>
     <string name="batch_container_title">Wadah</string>
     <string name="batch_container_subtitle">Format file penyimpanan tautan-tautan ini</string>
     <string name="batch_save_dir_title">Lokasi penyimpanan</string>
@@ -454,6 +452,7 @@
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Membaca format lainnya</string>
     <string name="format_audio_empty">Tautan ini tidak memiliki aliran audio terpisah</string>
+    <string name="format_generic_badge">Otomatis</string>
     <string name="format_sheet_section_details">Detail</string>
     <string name="sheet_link_title">Tautan</string>
     <string name="sheet_link_copy">Salin</string>

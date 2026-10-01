@@ -385,8 +385,6 @@
     <string name="batch_type_sheet_subtitle">これらのリンクをどの形式でダウンロードするか</string>
     <string name="batch_type_audio">音声</string>
     <string name="batch_type_video">動画</string>
-    <string name="batch_format_title">形式</string>
-    <string name="batch_format_subtitle">形式を選択</string>
     <string name="batch_container_title">コンテナ</string>
     <string name="batch_container_subtitle">これらのリンクを保存するファイル形式</string>
     <string name="batch_save_dir_title">保存場所</string>
@@ -454,6 +452,7 @@
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">残りの形式を読み込み中</string>
     <string name="format_audio_empty">このリンクには個別の音声ストリームがありません</string>
+    <string name="format_generic_badge">自動</string>
     <string name="format_sheet_section_details">詳細</string>
     <string name="sheet_link_title">リンク</string>
     <string name="sheet_link_copy">コピー</string>

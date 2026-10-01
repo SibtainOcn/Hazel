@@ -428,8 +428,6 @@
     <string name="batch_type_sheet_subtitle">What these links download as</string>
     <string name="batch_type_audio">Audio</string>
     <string name="batch_type_video">Video</string>
-    <string name="batch_format_title">Format</string>
-    <string name="batch_format_subtitle">Select format</string>
     <string name="batch_container_title">Container</string>
     <string name="batch_container_subtitle">The file these links are saved as</string>
     <string name="batch_save_dir_title">Save location</string>
@@ -502,6 +500,7 @@
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Reading the rest of the formats</string>
     <string name="format_audio_empty">No separate audio streams for this link</string>
+    <string name="format_generic_badge">Auto</string>
     <string name="format_sheet_section_details">Details</string>
     <string name="sheet_link_title">Link</string>
     <string name="sheet_link_copy">Copy</string>

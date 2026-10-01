@@ -389,8 +389,6 @@
     <string name="batch_type_sheet_subtitle">ये लिंक किस रूप में डाउनलोड होंगे</string>
     <string name="batch_type_audio">ऑडियो</string>
     <string name="batch_type_video">वीडियो</string>
-    <string name="batch_format_title">फ़ॉर्मैट</string>
-    <string name="batch_format_subtitle">फ़ॉर्मैट चुनें</string>
     <string name="batch_container_title">कंटेनर</string>
     <string name="batch_container_subtitle">ये लिंक जिस फ़ाइल के रूप में सहेजे जाएँगे</string>
     <string name="batch_save_dir_title">सहेजने की जगह</string>
@@ -460,6 +458,7 @@
     <string name="format_selection_confirm">ठीक है</string>
     <string name="format_selection_loading">बाकी फ़ॉर्मैट पढ़े जा रहे हैं</string>
     <string name="format_audio_empty">इस लिंक में अलग ऑडियो स्ट्रीम नहीं हैं</string>
+    <string name="format_generic_badge">ऑटो</string>
     <string name="format_sheet_section_details">विवरण</string>
     <string name="sheet_link_title">लिंक</string>
     <string name="sheet_link_copy">कॉपी करें</string>
