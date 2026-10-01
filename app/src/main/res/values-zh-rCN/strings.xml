@@ -453,6 +453,7 @@
     <string name="format_selection_subtitle">选择格式</string>
     <string name="format_selection_confirm">确定</string>
     <string name="format_selection_loading">正在读取其余的格式</string>
+    <string name="format_audio_empty">此链接没有单独的音频流</string>
     <string name="format_sort_quality">画质</string>
     <string name="format_sort_file_size">文件大小</string>
     <string name="format_sort_container">封装格式</string>

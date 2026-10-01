@@ -85,8 +85,11 @@ val InfoBlue = Color(0xFF64B5F6)
 // rather than another tone of the accent, which the codec and the bitrate beside it already
 // use. Fixed rather than themed on purpose: the accent is a personal choice and this is a
 // piece of information, and it should read the same whichever colour the app is set to.
-val SizeBadgeContainer = Color(0xFF4A4458)
-val SizeBadgeContent = Color(0xFFEADDFF)
+//
+// A deep steel blue: far enough from the default cyan accent to read as its own thing, dark
+// enough that its pale label holds on the paper ground of the light theme as well as on black.
+val SizeBadgeContainer = Color(0xFF1F3A5C)
+val SizeBadgeContent = Color(0xFFD3E5FF)
 
 // Progress
 val ProgressTrackDark = Color(0xFF1A1A1A)

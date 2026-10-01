@@ -1,6 +1,11 @@
 package com.hazel.android.ui.screens.download
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.collectAsState
 import androidx.compose.material.icons.filled.Refresh
@@ -15,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -24,6 +30,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -50,12 +57,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hazel.android.R
@@ -65,6 +74,8 @@ import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.ui.components.FormatListShimmer
+import com.hazel.android.ui.components.GlintHost
+import com.hazel.android.download.qualityRung
 import com.hazel.android.ui.theme.SizeBadgeContainer
 import com.hazel.android.ui.theme.SizeBadgeContent
 
@@ -84,13 +95,19 @@ enum class FormatSort(@param:StringRes val labelRes: Int) {
 /**
  * The full format list, opened from the quality row in the download sheet.
  *
- * It opens half way up the screen and can be dragged to full height. Half is where it is
- * useful: the rows are large enough to read at a glance, and the media behind the sheet
- * stays visible while a few of them are already in reach.
+ * Laid out in two panes. A rail down the left holds one stop per resolution the source
+ * reported, with "All" above them and the audio streams below, and the list on the right
+ * scrolls on its own and shows only what the stop holds. A ladder of forty streams is read
+ * one rung at a time that way, rather than by scrolling past every 4K entry to reach 1080p.
+ * Where there is nothing to split (a source with one resolution, or the audio choices a set
+ * of links shares) the rail is left out and the list takes the whole width.
+ *
+ * It opens half way up the screen and can be dragged to full height, on the stop holding the
+ * current choice, scrolled to it.
  *
  * [audioFirst] carries which tab the download sheet is on. The list holds both kinds
  * either way, since picking an audio stream for a video download is allowed, but the one
- * being chosen leads and the sheet opens scrolled to the current choice.
+ * being chosen leads.
  *
  * [isLoadingFormats] covers the case where the sheet is opened on a link that came from a
  * listing and has not been read yet. Only the generic entry is there to show at that point,
@@ -138,23 +155,47 @@ fun FormatSelectionSheet(
         onRefresh?.invoke(picked)
     }
 
-    // The rows are laid out once per ordering rather than per frame. Each carries the text
-    // it draws, so scrolling does no formatting work and a fast fling has nothing to do
-    // but draw.
+    // The stops and the rows under each are laid out once per ordering rather than per
+    // frame or per tap. Each row carries the text it draws, so switching stops and scrolling
+    // do no formatting work and a fast fling has nothing to do but draw.
     val videoTitle = stringResource(R.string.format_sheet_tab_video)
     val audioTitle = stringResource(R.string.format_sheet_tab_audio)
-    val rows = remember(info, sort, filter, audioFirst, videoTitle, audioTitle) {
-        buildRows(info, sort, filter, audioFirst, videoTitle, audioTitle)
+    val allLabel = stringResource(R.string.format_filter_all)
+    val stops = remember(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel) {
+        buildStops(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel)
     }
+
+    // The rail earns its width only when it splits the list into more than one part. While
+    // a link is still being read, a video list will have resolutions to split into shortly,
+    // so the rail is there from the start rather than pushing the list aside as they land.
+    val showRail = stops.size > 2 || (isLoadingFormats && info.videoFormats.isNotEmpty())
+
+    // Opens on the stop holding what was chosen when the sheet opened. Read from the choice
+    // at opening rather than the draft, so tapping a row under "All" does not move the rail.
+    val openedOn = remember { selected?.formatId }
+    var pickedStop by remember { mutableStateOf<String?>(null) }
+    val active = remember(stops, pickedStop, showRail) {
+        if (!showRail) stops.first()
+        else stops.firstOrNull { it.key == pickedStop }
+            ?: stops.firstOrNull { it.key != STOP_ALL && it.holds(openedOn) }
+            ?: stops.firstOrNull { audioFirst && it.key == STOP_AUDIO }
+            ?: stops.first()
+    }
+    val rows = active.rows
 
     val listState = rememberLazyListState()
 
-    // Opens on what is currently chosen. A list of forty entries that opens at the top of
-    // the wrong section hides the one row the user came to confirm. The row above it comes
-    // along, so the header saying which kind of stream this is stays in view.
-    LaunchedEffect(rows) {
+    // On a stop that holds the current choice the list opens scrolled to it, with the row
+    // above coming along for context. A stop that does not hold it opens at its top. Rows
+    // rebuilt while formats arrive leave the scroll where it is.
+    var shownStop by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(active.key, rows) {
         val index = rows.indexOfFirst { it is FormatListRow.Entry && it.format.formatId == draft?.formatId }
-        if (index > 0) listState.scrollToItem((index - 1).coerceAtLeast(0))
+        when {
+            index > 0 -> listState.scrollToItem(index - 1)
+            shownStop != active.key -> listState.scrollToItem(0)
+        }
+        shownStop = active.key
     }
 
     ModalBottomSheet(
@@ -235,43 +276,97 @@ fun FormatSelectionSheet(
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            LazyColumn(
-                state = listState,
+            // Clears the system's own bar, so the last row can be read and tapped rather
+            // than sitting under it.
+            val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 24.dp
+
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f, fill = false),
-                // Clears the system's own bar, so the last row can be read and tapped
-                // rather than sitting under it.
-                contentPadding = WindowInsets.navigationBars
-                    .asPaddingValues()
-                    .let { PaddingValues(bottom = it.calculateBottomPadding() + 24.dp) }
+                    // With a rail the panes take the sheet's full height, so switching to a
+                    // stop with fewer rows does not make the sheet jump.
+                    .weight(1f, fill = showRail)
+                    .padding(horizontal = if (showRail) 12.dp else 0.dp)
             ) {
-                items(
-                    count = if (refreshing) 0 else rows.size,
-                    key = { rows[it].key },
-                    contentType = { if (rows[it] is FormatListRow.Header) 0 else 1 }
-                ) { index ->
-                    when (val row = rows[index]) {
-                        is FormatListRow.Header -> SectionHeader(row.title)
-                        is FormatListRow.Entry -> FormatRow(
-                            format = row.format,
-                            // By id: a list rebuilt while formats arrive holds new objects
-                            // for the same entries.
-                            selected = row.format.formatId == draft?.formatId,
-                            onClick = { draft = row.format }
-                        )
-                    }
+                if (showRail) {
+                    FormatRail(
+                        stops = stops,
+                        activeKey = active.key,
+                        loading = isLoadingFormats,
+                        bottomInset = bottomInset,
+                        onPick = { pickedStop = it },
+                        modifier = Modifier
+                            .width(RAIL_WIDTH)
+                            .fillMaxHeight()
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
                 }
 
-                // Skeletons stand where the rows still being read will land, so a list
-                // holding only the generic entry reads as one that is still filling in
-                // rather than as the whole answer.
-                if (isLoadingFormats) {
-                    item(key = "loading", contentType = 2) {
-                        FormatListShimmer(
-                            rows = if (refreshing) 6 else 4,
-                            modifier = Modifier.padding(horizontal = 14.dp)
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .then(if (showRail) Modifier.fillMaxHeight() else Modifier),
+                    verticalArrangement = Arrangement.spacedBy(if (showRail) 6.dp else 0.dp),
+                    contentPadding = PaddingValues(bottom = bottomInset)
+                ) {
+                    items(
+                        count = if (refreshing) 0 else rows.size,
+                        key = { rows[it].key },
+                        contentType = { if (rows[it] is FormatListRow.Header) 0 else 1 }
+                    ) { index ->
+                        // Rows keep their keys across stops, so the one list moves between
+                        // them: rows that stay slide into place and the rest fade.
+                        val motion = Modifier.animateItem(
+                            fadeInSpec = tween(ROW_FADE_MS),
+                            placementSpec = spring(
+                                stiffness = Spring.StiffnessMediumLow,
+                                visibilityThreshold = IntOffset.VisibilityThreshold
+                            ),
+                            fadeOutSpec = tween(ROW_FADE_MS)
                         )
+                        when (val row = rows[index]) {
+                            is FormatListRow.Header -> SectionHeader(
+                                row.title,
+                                compact = showRail,
+                                modifier = motion
+                            )
+                            is FormatListRow.Entry -> Box(modifier = motion) {
+                                FormatRow(
+                                    format = row.format,
+                                    // By id: a list rebuilt while formats arrive holds new
+                                    // objects for the same entries.
+                                    selected = row.format.formatId == draft?.formatId,
+                                    onClick = { draft = row.format },
+                                    compact = showRail
+                                )
+                            }
+                        }
+                    }
+
+                    // Audio keeps its place on the rail whatever a source offers, so a link with
+                    // no separate audio stream says so here rather than showing a blank pane.
+                    if (!isLoadingFormats && !refreshing && active.key == STOP_AUDIO && active.count == 0) {
+                        item(key = "audio_empty", contentType = 3) {
+                            Text(
+                                stringResource(R.string.format_audio_empty),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp)
+                            )
+                        }
+                    }
+
+                    // Skeletons stand where the rows still being read will land, so a list
+                    // holding only the generic entry reads as one that is still filling in
+                    // rather than as the whole answer.
+                    if (isLoadingFormats) {
+                        item(key = "loading", contentType = 2) {
+                            FormatListShimmer(
+                                rows = if (refreshing) 6 else 4,
+                                modifier = Modifier.padding(horizontal = if (showRail) 4.dp else 14.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -301,6 +396,113 @@ fun FormatSelectionSheet(
         )
     }
 }
+
+private val RAIL_WIDTH = 76.dp
+private const val ROW_FADE_MS = 140
+private const val STOP_ALL = "all"
+private const val STOP_AUDIO = "audio"
+
+/**
+ * The column of stops down the left of the sheet. It scrolls on its own where a source
+ * reports more resolutions than fit, and otherwise stays still while the list moves.
+ *
+ * While formats are still being read, a glint runs down the stops themselves rather than
+ * past placeholders below them: the stops already there are real, and their counts and the
+ * steps still to come change as the rest arrives, so it is the rail as a whole that is
+ * marked as not finished.
+ */
+@Composable
+private fun FormatRail(
+    stops: List<FormatStop>,
+    activeKey: String,
+    loading: Boolean,
+    bottomInset: androidx.compose.ui.unit.Dp,
+    onPick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    GlintHost(active = loading, modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = bottomInset),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            stops.forEach { stop ->
+                RailStop(
+                    label = stop.label,
+                    count = stop.count,
+                    icon = if (stop.key == STOP_AUDIO) Icons.Filled.MusicNote else null,
+                    selected = stop.key == activeKey,
+                    onClick = { onPick(stop.key) }
+                )
+            }
+        }
+    }
+}
+
+private val RAIL_STOP_HEIGHT = 54.dp
+
+/**
+ * One stop on the rail: its label and how many formats it holds.
+ *
+ * Flat, as the rest of the sheet is: a step-up tone at rest and the accent's tint when
+ * chosen, cross-faded rather than switched. The fill is read while drawing, so the fade
+ * repaints the block without recomposing it.
+ */
+@Composable
+private fun RailStop(
+    label: String,
+    count: Int,
+    icon: ImageVector?,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val scheme = MaterialTheme.colorScheme
+    val fill by animateColorAsState(
+        if (selected) scheme.primary.copy(alpha = 0.16f) else scheme.surfaceContainerHigh,
+        animationSpec = tween(STOP_FADE_MS),
+        label = "railFill"
+    )
+    val content by animateColorAsState(
+        if (selected) scheme.primary else scheme.onSurface,
+        animationSpec = tween(STOP_FADE_MS),
+        label = "railContent"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(RAIL_STOP_HEIGHT)
+            .clip(RoundedCornerShape(16.dp))
+            .drawBehind { drawRect(fill) }
+            .clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        if (icon != null) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = content)
+        }
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = content,
+            modifier = Modifier.padding(horizontal = 4.dp)
+        )
+        if (icon == null || count > 0) {
+            Text(
+                count.toString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = content.copy(alpha = 0.55f)
+            )
+        }
+    }
+}
+
+private const val STOP_FADE_MS = 160
 
 /** A round button in the sheet's header, drawn the way the sort button always was. */
 @Composable
@@ -428,32 +630,69 @@ private sealed interface FormatListRow {
 }
 
 /**
- * Flattens the two tabs into the single list the sheet scrolls.
+ * One stop on the rail and the rows the list shows while it is chosen.
  *
- * The kind being chosen leads, and a section with nothing in it is left out rather than
- * shown as a header with no rows under it.
+ * [count] is worked out here, once, rather than by the rail on every draw.
  */
-private fun buildRows(
+@Immutable
+private class FormatStop(val key: String, val label: String, val rows: List<FormatListRow>) {
+    val count: Int = rows.count { it is FormatListRow.Entry }
+
+    fun holds(formatId: String?): Boolean =
+        formatId != null && rows.any { it is FormatListRow.Entry && it.format.formatId == formatId }
+}
+
+/**
+ * Splits the formats into the rail's stops: "All" first, holding both kinds under their
+ * headers with the one being chosen leading; then one stop per resolution, highest first;
+ * then the audio streams, which keep their stop even when there are none.
+ *
+ * A resolution's rows keep the order the list is sorted in. Video the source gave no height
+ * for, and the generic rows that let the engine decide, have no rung of their own and are
+ * found under "All". Entries keep the keys they have under "All", so moving between stops
+ * moves the same rows rather than drawing new ones.
+ */
+private fun buildStops(
     info: MediaInfo,
     sort: FormatSort,
     filter: FormatFilter,
     audioFirst: Boolean,
     videoTitle: String,
-    audioTitle: String
-): List<FormatListRow> {
+    audioTitle: String,
+    allLabel: String
+): List<FormatStop> {
     val video = filter.apply(info.videoFormats, audio = false).sortedBy(sort)
     val audio = filter.apply(info.audioFormats, audio = true).sortedBy(sort)
 
+    fun entries(title: String, formats: List<MediaFormat>): List<FormatListRow> =
+        formats.map { FormatListRow.Entry(it, title) }
+
+    // A section with nothing in it is left out rather than shown as a header with no rows.
     fun section(title: String, formats: List<MediaFormat>): List<FormatListRow> =
         if (formats.isEmpty()) emptyList()
-        else buildList {
-            add(FormatListRow.Header(title))
-            formats.forEach { add(FormatListRow.Entry(it, title)) }
-        }
+        else listOf(FormatListRow.Header(title)) + entries(title, formats)
 
     val videoRows = section(videoTitle, video)
     val audioRows = section(audioTitle, audio)
-    return if (audioFirst) audioRows + videoRows else videoRows + audioRows
+    val all = if (audioFirst) audioRows + videoRows else videoRows + audioRows
+
+    // The steps come from what the source offers, read through [qualityRung] so a cropped
+    // or vertical picture lands on the step it belongs to rather than a rung of its own.
+    val byRung = video
+        .filter { !it.isGeneric }
+        .groupBy { it.qualityRung() }
+        .filterKeys { it > 0 }
+        .toSortedMap(compareByDescending { it })
+
+    return buildList {
+        add(FormatStop(STOP_ALL, allLabel, all))
+        byRung.forEach { (rung, formats) ->
+            add(FormatStop("h$rung", "${rung}P", entries(videoTitle, formats)))
+        }
+        // Always there, so the audio streams are found in the same place on every link,
+        // including while they are still being read.
+        add(FormatStop(STOP_AUDIO, audioTitle, entries(audioTitle, audio)))
+    }
 }
 
 /**
@@ -473,11 +712,24 @@ private fun List<MediaFormat>.sortedBy(sort: FormatSort): List<MediaFormat> {
     return generic + ordered
 }
 
-/** Full width bar naming the kind of stream the rows under it hold. */
+/**
+ * Names the kind of stream the rows under it hold. Full width bar in the single list; in
+ * the narrower pane beside the rail, a plain label, since the rail already frames the list.
+ */
 @Composable
-private fun SectionHeader(text: String) {
+private fun SectionHeader(text: String, compact: Boolean = false, modifier: Modifier = Modifier) {
+    if (compact) {
+        Text(
+            text,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = modifier.padding(start = 6.dp, top = 6.dp, bottom = 2.dp)
+        )
+        return
+    }
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
     ) {
         Text(
@@ -501,6 +753,10 @@ private fun SectionHeader(text: String) {
  * Shared with the download sheet, which shows a single instance of this row for whatever is
  * currently selected. [showChevron] marks that instance as the thing you tap to open the
  * full list.
+ *
+ * [compact] is the row as the pane beside the format rail draws it: a smaller block and
+ * headline to fit the narrower width, on a step-up tone of its own so each row reads as
+ * something to tap with the rail's stops beside it.
  */
 @Composable
 fun FormatRow(
@@ -508,90 +764,106 @@ fun FormatRow(
     selected: Boolean,
     onClick: () -> Unit,
     showChevron: Boolean = false,
-    mergeAudioId: String? = null
+    mergeAudioId: String? = null,
+    compact: Boolean = false
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-        else Color.Transparent
+    val scheme = MaterialTheme.colorScheme
+    val fill by animateColorAsState(
+        when {
+            selected -> scheme.primary.copy(alpha = 0.14f)
+            compact -> scheme.surfaceContainerHigh
+            else -> Color.Transparent
+        },
+        animationSpec = tween(STOP_FADE_MS),
+        label = "formatRowFill"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .drawBehind { drawRect(fill) }
+            .clickable(onClick = onClick)
+            .padding(horizontal = if (compact) 10.dp else 14.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .clickable(onClick = onClick)
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ContainerBadge(text = format.displayContainer)
+        ContainerBadge(text = format.displayContainer, compact = compact)
 
-            Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(if (compact) 10.dp else 12.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.Top) {
-                    val headline = format.label.uppercase()
-                    Text(
-                        headline,
-                        style = MaterialTheme.typography.titleLarge,
-                        // A resolution is short and reads well large. The notes a source
-                        // puts on an audio stream are a sentence, and at the same size they
-                        // take two lines and shout over the rest of the row.
-                        fontSize = if (headline.length > LONG_HEADLINE) 16.sp else 20.sp,
-                        fontWeight = FontWeight.Normal,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = if (selected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        "id: ${shortId(format.formatId)}",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                // Badges are omitted entirely when the extractor did not report them,
-                // which is common outside the largest sites.
-                val codec = format.codecLabel
-                val size = format.sizeLabel
-                // The bitrate says something the resolution does not only for audio; on a
-                // video row it repeats what the size already showed.
-                val bitrate = format.bitrateLabel.takeIf { !format.hasVideo }.orEmpty()
-
-                if (mergeAudioId != null || codec.isNotBlank() ||
-                    size.isNotBlank() || bitrate.isNotBlank()
-                ) {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        if (mergeAudioId != null) {
-                            MetaBadge(
-                                text = "id: ${shortId(mergeAudioId)}",
-                                icon = Icons.Filled.MusicNote,
-                                tone = BadgeTone.SOLID
-                            )
-                        }
-                        if (codec.isNotBlank()) MetaBadge(codec)
-                        if (size.isNotBlank()) MetaBadge(size, tone = BadgeTone.SIZE)
-                        if (bitrate.isNotBlank()) MetaBadge(bitrate, tone = BadgeTone.ACCENT)
-                    }
-                }
-            }
-
-            if (showChevron) {
-                Spacer(modifier = Modifier.width(6.dp))
-                Icon(
-                    Icons.Filled.UnfoldMore,
-                    contentDescription = stringResource(R.string.format_selection_change),
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+        Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.Top) {
+                val headline = format.label.uppercase()
+                val long = headline.length > LONG_HEADLINE
+                Text(
+                    headline,
+                    style = MaterialTheme.typography.titleLarge,
+                    // A resolution is short and reads well large. The notes a source
+                    // puts on an audio stream are a sentence, and at the same size they
+                    // take two lines and shout over the rest of the row.
+                    fontSize = when {
+                        compact -> if (long) 13.sp else 15.sp
+                        long -> 16.sp
+                        else -> 20.sp
+                    },
+                    fontWeight = if (compact) FontWeight.SemiBold else FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = if (selected) scheme.primary else scheme.onSurface,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                Spacer(modifier = Modifier.width(if (compact) 6.dp else 8.dp))
+                // Bounded, so a long DASH id ("dash-1234…") ellipsizes in its own corner
+                // rather than squeezing the headline down to nothing.
+                Text(
+                    "id: ${shortId(format.formatId)}",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontSize = if (compact) 10.sp else MaterialTheme.typography.labelMedium.fontSize,
+                    color = scheme.onSurface.copy(alpha = 0.45f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.widthIn(max = if (compact) 64.dp else 96.dp)
                 )
             }
+
+            // Badges are omitted entirely when the extractor did not report them,
+            // which is common outside the largest sites.
+            val codec = format.codecLabel
+            val size = format.sizeLabel
+            // The bitrate says something the resolution does not only for audio; on a
+            // video row it repeats what the size already showed.
+            val bitrate = format.bitrateLabel.takeIf { !format.hasVideo }.orEmpty()
+
+            if (mergeAudioId != null || codec.isNotBlank() ||
+                size.isNotBlank() || bitrate.isNotBlank()
+            ) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    if (mergeAudioId != null) {
+                        MetaBadge(
+                            text = "id: ${shortId(mergeAudioId)}",
+                            icon = Icons.Filled.MusicNote,
+                            tone = BadgeTone.SOLID
+                        )
+                    }
+                    if (codec.isNotBlank()) MetaBadge(codec)
+                    if (size.isNotBlank()) MetaBadge(size, tone = BadgeTone.SIZE)
+                    if (bitrate.isNotBlank()) MetaBadge(bitrate, tone = BadgeTone.ACCENT)
+                }
+            }
+        }
+
+        if (showChevron) {
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                Icons.Filled.UnfoldMore,
+                contentDescription = stringResource(R.string.format_selection_change),
+                modifier = Modifier.size(18.dp),
+                tint = scheme.primary.copy(alpha = 0.7f)
+            )
         }
     }
 }
@@ -611,19 +883,19 @@ private const val LONG_HEADLINE = 22
 
 /** The container block a row leads with, sized the same whatever the word inside it is. */
 @Composable
-private fun ContainerBadge(text: String) {
+private fun ContainerBadge(text: String, compact: Boolean = false) {
     Box(
         modifier = Modifier
-            .size(width = 60.dp, height = 52.dp)
+            .size(width = if (compact) 48.dp else 60.dp, height = if (compact) 44.dp else 52.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colorScheme.primary),
         contentAlignment = Alignment.Center
     ) {
         val cleanText = text.trim().uppercase()
         val fontSize = when {
-            cleanText.length > 5 -> 10.sp
-            cleanText.length >= 4 -> 11.5.sp
-            else -> 13.sp
+            cleanText.length > 5 -> if (compact) 9.sp else 10.sp
+            cleanText.length >= 4 -> if (compact) 10.sp else 11.5.sp
+            else -> if (compact) 12.sp else 13.sp
         }
         Text(
             text = cleanText,

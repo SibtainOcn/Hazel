@@ -459,6 +459,7 @@
     <string name="format_selection_subtitle">Format wählen</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Die übrigen Formate werden gelesen</string>
+    <string name="format_audio_empty">Für diesen Link gibt es keine separaten Audiospuren</string>
     <string name="format_sort_quality">Qualität</string>
     <string name="format_sort_file_size">Dateigröße</string>
     <string name="format_sort_container">Container</string>

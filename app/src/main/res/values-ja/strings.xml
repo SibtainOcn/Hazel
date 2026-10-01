@@ -453,6 +453,7 @@
     <string name="format_selection_subtitle">形式を選択</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">残りの形式を読み込み中</string>
+    <string name="format_audio_empty">このリンクには個別の音声ストリームがありません</string>
     <string name="format_sort_quality">画質</string>
     <string name="format_sort_file_size">ファイルサイズ</string>
     <string name="format_sort_container">コンテナ</string>

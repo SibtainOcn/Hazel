@@ -501,6 +501,7 @@
     <string name="format_selection_subtitle">Select format</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Reading the rest of the formats</string>
+    <string name="format_audio_empty">No separate audio streams for this link</string>
     <string name="format_sort_quality">Quality</string>
     <string name="format_sort_file_size">File size</string>
     <string name="format_sort_container">Container</string>
