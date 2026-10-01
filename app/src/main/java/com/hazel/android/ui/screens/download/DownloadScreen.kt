@@ -670,12 +670,12 @@ fun DownloadScreen(
                     // picture, so the empty screen offers something to do.
                     if (!incognito && state.results.isEmpty() && !state.isFetching) {
                         item(key = "starters") {
-                            // Fills most of the space under the search bar, so the chips sit
+                            // Fills the space under the search bar, so the chips sit
                             // in its middle rather than near the top.
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .fillParentMaxHeight(0.8f),
+                                    .fillParentMaxHeight(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
