@@ -653,7 +653,6 @@ class DownloadViewModel : ViewModel() {
                 resolved = coroutineScope {
                     valid.mapIndexed { index, link ->
                         async(Dispatchers.IO) {
-                            val started = android.os.SystemClock.elapsedRealtime()
                             runCatching {
                                 expand(
                                     link,
@@ -663,16 +662,8 @@ class DownloadViewModel : ViewModel() {
                                     fetchMode, forceIpv4, listingSource,
                                     "${MediaProbe.PROBE_PROCESS_ID}_$index"
                                 )
-                            }.onSuccess { cards ->
-                                Log.d(
-                                    InfoCache.TRACE_TAG,
-                                    "link ${LinkKey.digest(link).take(8)} via ${listingSource.name}: " +
-                                        "${cards.size} card(s), formats=${cards.singleOrNull()?.hasResolvedFormats} " +
-                                        "in ${android.os.SystemClock.elapsedRealtime() - started} ms"
-                                )
                             }.onFailure { failure ->
                                 if (failure is CancellationException) throw failure
-                                Log.d(InfoCache.TRACE_TAG, "link ${LinkKey.digest(link).take(8)} failed in ${android.os.SystemClock.elapsedRealtime() - started} ms")
                                 lastFailure = failure.message?.trim().orEmpty()
                             }.getOrDefault(emptyList())
                         }
@@ -876,16 +867,8 @@ class DownloadViewModel : ViewModel() {
         if (!claimFormatRead(info.url)) return
 
         viewModelScope.launch(Dispatchers.IO) {
-            val started = android.os.SystemClock.elapsedRealtime()
             val resolved = try {
-                formatReads.withPermit { readFormats(info.url, fresh, source) }.also {
-                    Log.d(
-                        InfoCache.TRACE_TAG,
-                        "formats ${LinkKey.digest(info.url).take(8)} asked=${source?.name ?: "setting"} " +
-                            "fresh=$fresh got=${it?.readBy?.name} formats=${it?.hasResolvedFormats} " +
-                            "in ${android.os.SystemClock.elapsedRealtime() - started} ms"
-                    )
-                }
+                formatReads.withPermit { readFormats(info.url, fresh, source) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

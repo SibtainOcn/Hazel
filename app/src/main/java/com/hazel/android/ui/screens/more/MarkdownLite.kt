@@ -20,7 +20,7 @@ body{margin:0;padding:8px 20px 40px;background:$background;color:$text;font:15px
 h1{font-size:22px;margin:18px 0 8px}h2{font-size:19px;margin:26px 0 6px;color:$accent}h3{font-size:15px;margin:16px 0 4px;text-transform:uppercase;letter-spacing:.04em;color:$muted}
 ul{padding-left:18px;margin:4px 0}li{margin:4px 0}p{margin:8px 0}
 code{font:13px monospace;background:rgba(127,127,127,.18);padding:1px 5px;border-radius:5px}
-a{color:$accent}pre{white-space:pre-wrap;font:13px/1.5 monospace;margin:0}
+a{color:$accent}.c{text-align:center}pre{white-space:pre-wrap;font:13px/1.5 monospace;margin:0}
 </style></head><body>$body</body></html>"""
     }
 
@@ -75,8 +75,27 @@ a{color:$accent}pre{white-space:pre-wrap;font:13px/1.5 monospace;margin:0}
         return out.toString()
     }
 
-    /** A plain text file, such as the licence, kept as it is laid out. */
-    fun plainText(text: String): String = "<pre>${escape(text)}</pre>"
+    /**
+     * A plain text file such as the licence, reflowed for a phone. Such files are wrapped
+     * by hand at about 75 characters, which breaks badly on a narrow screen, so each block
+     * between blank lines becomes one paragraph. A block indented far in (the centred title
+     * lines) is centred, and a short block ending without a full stop, or a numbered one
+     * like "0. Definitions.", reads as a heading.
+     */
+    fun plainText(text: String): String = text.replace("\r", "")
+        .split(Regex("\\n\\s*\\n"))
+        .filter { it.isNotBlank() }
+        .joinToString("") { block ->
+            val lines = block.lines().filter { it.isNotBlank() }
+            val joined = escape(lines.joinToString(" ") { it.trim() }.replace(Regex("\\s{2,}"), " "))
+            val centred = lines.all { it.length - it.trimStart().length >= 8 }
+            val numberedTitle = lines.size == 1 && Regex("^\\s*\\d+\\.\\s+\\S.{0,60}$").matches(lines[0])
+            when {
+                centred -> "<p class=\"c\"><strong>$joined</strong></p>"
+                numberedTitle || (lines.size == 1 && joined.length < 40 && !joined.endsWith(".")) -> "<h3>$joined</h3>"
+                else -> "<p>$joined</p>"
+            }
+        }
 
     private fun inline(text: String): String {
         // Code first, so nothing inside backticks is read as bold or a link.

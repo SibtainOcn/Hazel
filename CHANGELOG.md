@@ -18,7 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The link button in the download sheets shows the address with Copy and Open (Copy takes every address of a set).
 
 ### Changed
-- Link reads now log which reader answered, whether it came from memory or disk, and how long it took (tag `HazelRead`; links appear only as a short hash), and each yt-dlp run logs its name and duration.
 - Storage cleanup's Unfinished downloads, cancelling a queue and removing a paused download now also clear working files left on SD cards.
 - If the card is taken out, full or no longer allows access, downloads are saved to internal storage instead of failing, and a dialog says which ones and where they went (once per batch, wherever you are in the app). Problems while choosing a folder (access refused, no folder picker, the Hazel folder could not be made on the card) are shown in a dialog too.
 - The single download sheet groups its controls into Details, Quality, Save and Adjust sections that open and close, each saying what it is set to while closed. Quality opens by default and at most two stay open, so the sheet fits the screen. Download is the one filled button, in the accent colour.

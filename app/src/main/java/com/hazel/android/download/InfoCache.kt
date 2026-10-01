@@ -1,6 +1,5 @@
 package com.hazel.android.download
 
-import android.util.Log
 import com.hazel.android.HazelApp
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkEntry
@@ -136,32 +135,18 @@ object InfoCache {
         memory[key]?.let { entry ->
             if (System.currentTimeMillis() - entry.storedAt > METADATA_TTL_MS) {
                 memory.remove(key)
-                trace(url, source, "expired")
                 return null
             }
             // Held, but made under other settings: the disk holds nothing newer, so this
             // is a miss, and the next read replaces it.
-            if (entry.stamp != stamp) {
-                trace(url, source, "other settings")
-                return null
-            }
-            trace(url, source, "hit, memory")
-            return entry
+            return entry.takeIf { it.stamp == stamp }
         }
 
         if (source != PERSISTED) return null
         val restored = restoreFromDisk(url, stamp) ?: return null
-        trace(url, source, "hit, disk")
         return Entry(restored, fileFor(url).lastModified(), stamp).also { memory[key] = it }
     }
 
-    /** One line per lookup that found something, keyed by the link's digest, never its address. */
-    private fun trace(url: String, source: ListingSource, what: String) {
-        Log.d(TRACE_TAG, "cache ${LinkKey.digest(url).take(8)} ${source.name}: $what")
-    }
-
-    /** Shared by every line about reading a link, so one filter shows the whole story. */
-    const val TRACE_TAG = "HazelRead"
 
     /**
      * The engine's own JSON for [url], ready to be replayed, or null when there is nothing

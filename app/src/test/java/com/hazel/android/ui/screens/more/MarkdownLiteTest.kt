@@ -35,7 +35,13 @@ class MarkdownLiteTest {
     }
 
     @Test
-    fun `plain text keeps its layout`() {
-        assertEquals("<pre>a &amp; b\n  c</pre>", MarkdownLite.plainText("a & b\n  c"))
+    fun `a hand wrapped text file is reflowed into paragraphs and headings`() {
+        val text = "                    GNU LICENSE\n                 Version 3\n\n" +
+            "  The licence is\nwrapped by hand & here.\n\n  0. Definitions.\n\n  TERMS AND CONDITIONS\n"
+        assertEquals(
+            "<p class=\"c\"><strong>GNU LICENSE Version 3</strong></p>" +
+                "<p>The licence is wrapped by hand &amp; here.</p><h3>0. Definitions.</h3><h3>TERMS AND CONDITIONS</h3>",
+            MarkdownLite.plainText(text)
+        )
     }
 }
