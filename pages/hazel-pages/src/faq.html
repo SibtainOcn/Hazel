@@ -1,0 +1,135 @@
+  <div class="page-head">
+    <div class="wrap">
+      <div class="eyebrow accent reveal">FAQ</div>
+      <h1 class="reveal">Questions, answered.</h1>
+      <p class="reveal">The things people ask most about Hazel. Can't find yours? Search below, or ask on GitHub.</p>
+    </div>
+  </div>
+
+  <div class="wrap faq-wrap">
+    <div class="faq-search reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="faq-q" placeholder="Search questions, for example SD card or slow" autocomplete="off" aria-label="Search questions">
+    </div>
+
+    <div class="faq-grid">
+      <nav class="faq-cats" aria-label="Topics">
+        <a href="#general">The basics <span data-count="general"></span></a>
+        <a href="#downloads">Downloading <span data-count="downloads"></span></a>
+        <a href="#storage">Files and storage <span data-count="storage"></span></a>
+        <a href="#trouble">When something goes wrong <span data-count="trouble"></span></a>
+        <a href="#safety">Privacy and safety <span data-count="safety"></span></a>
+      </nav>
+
+      <div>
+        <div class="faq-group" id="general">
+          <h2>The basics</h2>
+          <div class="items">
+            <details class="q"><summary>Is Hazel really free?<span class="plus"></span></summary><div class="a">
+              <p>Yes. No ads, no subscription, no paid version and nothing locked. Hazel is open source, and it's kept going by people who choose to <a class="link" href="support.html">support it</a>.</p></div></details>
+            <details class="q"><summary>Why isn't Hazel on the Play Store?<span class="plus"></span></summary><div class="a">
+              <p>Google doesn't allow apps that download from YouTube on the Play Store. Hazel is available from <a class="link" href="https://github.com/SibtainOcn/Hazel/releases/latest">GitHub Releases</a> and <a class="link" href="https://f-droid.org/packages/com.hazel.android/">F-Droid</a> instead. Those are the only official sources.</p></div></details>
+            <details class="q"><summary>Which phones does it work on?<span class="plus"></span></summary><div class="a">
+              <p>Any Android phone or tablet running Android 7 or newer. On GitHub, the file with <span class="mono">arm64-v8a</span> in its name suits almost every phone. The other files are for older or unusual devices.</p></div></details>
+            <details class="q"><summary>Which websites can I download from?<span class="plus"></span></summary><div class="a">
+              <p>More than a thousand, including YouTube, YouTube Music, Instagram, TikTok, X, Reddit, Facebook, SoundCloud, Bandcamp, Vimeo and Twitch. The full list is <a class="link" href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">here</a>.</p></div></details>
+            <details class="q"><summary>Is there an iPhone or computer version?<span class="plus"></span></summary><div class="a">
+              <p>No. Hazel is made for Android only.</p></div></details>
+            <details class="q"><summary>Can I change the language or theme?<span class="plus"></span></summary><div class="a">
+              <p>Yes. Hazel follows your phone's language and comes in {{language_words}} languages. Change it in More, Language. Dark and light themes and the accent colour are in More, Appearance.</p></div></details>
+            <details class="q"><summary>How do I update Hazel?<span class="plus"></span></summary><div class="a">
+              <p>Open More, Software update. The first row checks for a new version of Hazel itself. If you installed from F-Droid, updates come through the F-Droid app instead.</p></div></details>
+            <details class="q"><summary>Does Hazel work without internet?<span class="plus"></span></summary><div class="a">
+              <p>Downloading needs a connection, but everything you have saved plays offline in any player. Converting a video you already have to audio works offline too.</p></div></details>
+          </div>
+        </div>
+
+        <div class="faq-group" id="downloads">
+          <h2>Downloading</h2>
+          <div class="items">
+            <details class="q"><summary>How do I save just the music from a video?<span class="plus"></span></summary><div class="a">
+              <p>In the download sheet, switch to the Audio tab before you tap Download. You can choose the format there, and Hazel adds the cover art and title for you.</p></div></details>
+            <details class="q"><summary>Can I download a whole playlist or channel?<span class="plus"></span></summary><div class="a">
+              <p>Yes. Paste the playlist or channel link and tap Download all. You can still change the settings for any single item first. See <a class="link" href="guide.html#playlists">Playlists</a> in the guide.</p></div></details>
+            <details class="q"><summary>What's the fastest way to save something I'm watching?<span class="plus"></span></summary><div class="a">
+              <p>Tap Share in the app you're watching in and pick Hazel. A download sheet opens right over that app, set to your usual quality. Tap Download and keep watching.</p></div></details>
+            <details class="q"><summary>Can I save only part of a video?<span class="plus"></span></summary><div class="a">
+              <p>Yes. Tap Cut in the download sheet and choose the start and end on the preview.</p></div></details>
+            <details class="q"><summary>Do downloads continue if I close the app?<span class="plus"></span></summary><div class="a">
+              <p>Yes. They keep running in the background, and you can pause or cancel them from the notification. If your phone stops them anyway, allow unrestricted battery use in More, Background downloads.</p></div></details>
+            <details class="q"><summary>Can I make Hazel wait for Wi-Fi?<span class="plus"></span></summary><div class="a">
+              <p>Yes. Turn on Wi-Fi only in More, Downloads. Downloads then wait until you're on Wi-Fi. A download that has already started won't be cut off halfway.</p></div></details>
+            <details class="q"><summary>Can I record a live stream?<span class="plus"></span></summary><div class="a">
+              <p>Yes, from its very start. For a premiere that hasn't begun, Hazel can wait and download it as soon as it goes live.</p></div></details>
+            <details class="q"><summary>Can I get subtitles?<span class="plus"></span></summary><div class="a">
+              <p>Yes. Tap Subtitles in the download sheet and pick the languages. They can be added into the video, saved as separate files next to it, or both.</p></div></details>
+            <details class="q"><summary>It says Waiting for Wi-Fi. Why?<span class="plus"></span></summary><div class="a">
+              <p>Wi-Fi only is turned on in More, Downloads, and you are on mobile data. The download starts by itself as soon as you are back on Wi-Fi, or you can turn the setting off.</p></div></details>
+            <details class="q"><summary>Can I turn a video I already have into music?<span class="plus"></span></summary><div class="a">
+              <p>Yes. More, Offline convert video to audio picks a video from your phone and saves the sound as an audio file. Nothing is uploaded; it all happens on your phone.</p></div></details>
+          </div>
+        </div>
+
+        <div class="faq-group" id="storage">
+          <h2>Files and storage</h2>
+          <div class="items">
+            <details class="q"><summary>Where are my downloads saved?<span class="plus"></span></summary><div class="a">
+              <p>Music goes to <span class="mono">Download/Hazel/Audio</span> and video to <span class="mono">Download/Hazel/Video</span>, where any music or gallery app finds them. You can also open them from the library in Hazel.</p></div></details>
+            <details class="q"><summary>Can I save to my SD card?<span class="plus"></span></summary><div class="a">
+              <p>Yes. Open More, Downloads, tap Audio or Video, and choose your SD card. Music and video can each go to a different place. Downloads going to the card also work on the card, so they don't fill up your phone along the way. See <a class="link" href="guide.html#storage">the guide</a> for the steps.</p></div></details>
+            <details class="q"><summary>What happens if I take the SD card out?<span class="plus"></span></summary><div class="a">
+              <p>Nothing is lost. Downloads that can't reach the card are saved to your phone instead, and Hazel tells you which files went where. Put the card back and new downloads go there again.</p></div></details>
+            <details class="q"><summary>Hazel is using a lot of space. What can I clear?<span class="plus"></span></summary><div class="a">
+              <p>Open More, Temporary Files. It shows what's taking space, such as unfinished downloads, and clears it in a tap. Your saved music and videos are never touched.</p></div></details>
+            <details class="q"><summary>How do I move Hazel to a new phone?<span class="plus"></span></summary><div class="a">
+              <p>Use More, Backup to save your settings, history, queue and sign-ins to a file. Copy the file to your new phone and restore it there. Your music and video files are copied like any other files.</p></div></details>
+            <details class="q"><summary>Will my downloads show up in my gallery or music app?<span class="plus"></span></summary><div class="a">
+              <p>Yes. Files are saved where those apps look, so music appears in your music player and videos in your gallery, usually within a few seconds.</p></div></details>
+            <details class="q"><summary>How big will a download be?<span class="plus"></span></summary><div class="a">
+              <p>The download sheet shows the size of each quality before you start, so you can pick a smaller one to save space.</p></div></details>
+          </div>
+        </div>
+
+        <div class="faq-group" id="trouble">
+          <h2>When something goes wrong</h2>
+          <div class="items">
+            <details class="q"><summary>A download suddenly stopped working. What do I do?<span class="plus"></span></summary><div class="a">
+              <p>Websites change often, and that can break downloads for a while. Open More, Software update and tap Check now. Switching to the Nightly channel gets fixes even sooner.</p>
+              <p>If it still fails, open the error and copy it into a <a class="link" href="https://github.com/SibtainOcn/Hazel/issues">report on GitHub</a>.</p></div></details>
+            <details class="q"><summary>It says I need to sign in, or that the video is private.<span class="plus"></span></summary><div class="a">
+              <p>Some videos are only visible when signed in. Open More, Cookies, sign in to the site there, and try again. Your sign-in stays on your phone and is only used for that site.</p></div></details>
+            <details class="q"><summary>Links take a long time to read.<span class="plus"></span></summary><div class="a">
+              <p>On a weak connection, open More, Link Reading and choose Thorough. It waits longer and retries more before giving up.</p></div></details>
+            <details class="q"><summary>Downloads are slow.<span class="plus"></span></summary><div class="a">
+              <p>Check that no speed limit is set in More, Downloads. Turning on Refresh slow links there can help when a site slows a download down on purpose.</p></div></details>
+            <details class="q"><summary>Where do I report a bug or ask for a feature?<span class="plus"></span></summary><div class="a">
+              <p>On <a class="link" href="https://github.com/SibtainOcn/Hazel/issues">GitHub Issues</a>. Please read the <a class="link" href="https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md">contributing notes</a> first, and include the error text if there is one.</p></div></details>
+          </div>
+        </div>
+
+        <div class="faq-group" id="safety">
+          <h2>Privacy and safety</h2>
+          <div class="items">
+            <details class="q"><summary>Does Hazel collect any data about me?<span class="plus"></span></summary><div class="a">
+              <p>No. There's no account, no analytics and no ads. Hazel has no servers of its own; your phone only talks to the sites you download from.</p>
+              <p>One exception you control: search suggestions, which are off by default, send what you type to Google to suggest searches.</p></div></details>
+            <details class="q"><summary>What does incognito do?<span class="plus"></span></summary><div class="a">
+              <p>Tap the ghost at the top right of the home screen. While it's on, downloads aren't added to your library and links and searches aren't remembered. The files still save as usual.</p></div></details>
+            <details class="q"><summary>How do I know my copy is genuine?<span class="plus"></span></summary><div class="a">
+              <p>Only install Hazel from GitHub Releases or F-Droid. To double check, compare your app's signing certificate with the SHA-256 fingerprint on the <a class="link" href="index.html#install">home page</a>, for example with the AppVerifier app. If it doesn't match, uninstall it.</p></div></details>
+            <details class="q"><summary>Is it legal to download videos?<span class="plus"></span></summary><div class="a">
+              <p>That depends on where you live and what you download. Only save content you have the right to, and respect each site's terms.</p></div></details>
+            <details class="q"><summary>Can other apps send links to Hazel?<span class="plus"></span></summary><div class="a">
+              <p>Yes. Any app that can share a link can send it to Hazel. For developers, the package name is <span class="mono">com.hazel.android</span>.</p></div></details>
+          </div>
+        </div>
+
+        <div class="faq-empty" id="faq-empty">No questions match that. Try a different word, or <a class="link" href="https://github.com/SibtainOcn/Hazel/issues">ask on GitHub</a>.</div>
+
+        <div class="faq-still reveal">
+          <div><h3>Still have a question?</h3><p>Ask on GitHub and someone will help.</p></div>
+          <a class="btn btn-ghost" href="https://github.com/SibtainOcn/Hazel/issues">Ask on GitHub</a>
+        </div>
+      </div>
+    </div>
+  </div>

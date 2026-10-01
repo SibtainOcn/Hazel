@@ -1,36 +1,84 @@
 name: Pages
 
-# Publishes the pages/ folder (the donate page) to GitHub Pages.
+# Publishes GitHub Pages:
+#   /        the donate page (pages/index.html), linked from F-Droid, kept as it is
+#   /hazel/  the Hazel website, built from pages/hazel-pages by tools/build_site.py
+# Pull requests that touch the website only run the build and its checks.
 on:
   push:
     branches: [main]
-    paths: ['pages/**', 'assets/Haze.svg', '.github/workflows/pages.yml']
+    paths:
+      - 'pages/**'
+      - 'tools/build_site.py'
+      - 'assets/Haze.svg'
+      - 'fastlane/metadata/android/en-US/images/phoneScreenshots/**'
+      - 'CHANGELOG.md'
+      - 'app/build.gradle.kts'
+      - 'app/src/main/res/values-*/strings.xml'
+      - '.github/workflows/pages.yml'
+  pull_request:
+    paths:
+      - 'pages/**'
+      - 'tools/build_site.py'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  check:
+    name: Website checks
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # Fails on fancy punctuation, unfilled placeholders, and local links, images or
+      # anchors that point nowhere.
+      - name: Build and check the website
+        run: python tools/build_site.py
+      # Outside links too, so a moved release page or renamed doc is caught.
+      - name: Check outside links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress --max-retries 2 --accept 200,429 --exclude 'fonts\.(googleapis|gstatic)\.com' 'pages/hazel-pages/_build/*.html'
+          fail: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hazel-website
+          path: pages/hazel-pages/_build
+
+  deploy:
+    name: Deploy
+    needs: check
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      # The page uses the logo from assets/ rather than a copy kept in pages/.
+      - uses: actions/download-artifact@v4
+        with:
+          name: hazel-website
+          path: website
       - name: Assemble site
         run: |
           mkdir _site
-          cp -r pages/. _site/
+          cp pages/index.html _site/
           cp assets/Haze.svg _site/
+          cp -r website _site/hazel
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

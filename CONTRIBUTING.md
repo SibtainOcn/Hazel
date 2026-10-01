@@ -29,6 +29,15 @@ Before submitting code directly to the repository, please leave a comment on the
 ## Building from Source
 Fork this project, import and compile it with the latest version of Android Studio Canary.
 
+## Website and Documentation
+The website, user guide and FAQ live in `pages/hazel-pages`. The donate page at `pages/index.html` is separate and stays as it is, because F-Droid links to it.
+
+- **Where to edit:** page content is in `pages/hazel-pages/src` (`index.html`, `guide.html`, `faq.html`, `support.html`), and styles and scripts are in `pages/hazel-pages/static`. The shared header and footer are in `tools/build_site.py`.
+- **What fills itself in:** the version (from `app/build.gradle.kts`), the app languages (from the `values-*` folders), the "What's new" line (from the newest section of `CHANGELOG.md`) and the screenshots (from `fastlane`). Don't type these into the pages.
+- **Build and preview:** run `python tools/build_site.py`, then open `pages/hazel-pages/_build/index.html`. The build fails on long dashes, arrows, ellipses or bullet characters, on unfilled placeholders, and on local links, images or `#anchors` that point nowhere. CI also checks outside links.
+- **Keep the docs in step:** a pull request that changes something users see (a setting, a menu name, a new feature) should update the matching part of `guide.html` or `faq.html` in the same pull request.
+- **Writing style:** plain, friendly language, with no technical terms where an everyday word works.
+
 ## AI Contribution Guidelines
 
 Using Generative AI tools is completely acceptable, but we expect all contributors to maintain high standards of quality, accountability, and legal compliance. By submitting AI-assisted work, you accept full ownership of the submitted content and guarantee that no copyrighted third-party material is involved.

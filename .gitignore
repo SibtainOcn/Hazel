@@ -68,3 +68,4 @@ main.tf
 *.terraform.lock.hcl
 *.tfstate
 *.tfstate.*
+pages/hazel-pages/_build/

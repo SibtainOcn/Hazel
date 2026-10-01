@@ -1,0 +1,227 @@
+  <div class="page-head">
+    <div class="wrap">
+      <div class="eyebrow accent reveal">Guide</div>
+      <h1 class="reveal">Everything you need to know, step by step.</h1>
+      <p class="reveal">From installing Hazel to saving whole playlists onto your SD card. Each part stands on its own, so jump to whatever you need.</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="doc">
+      <aside class="toc" aria-label="On this page">
+        <span class="eyebrow">On this page</span>
+        <ol>
+          <li><a href="#install">Install Hazel</a></li>
+          <li><a href="#first">Your first download</a></li>
+          <li><a href="#playlists">Playlists and many links</a></li>
+          <li><a href="#share">Share from other apps</a></li>
+          <li><a href="#search">Search and play</a></li>
+          <li><a href="#options">Quality and extras</a></li>
+          <li><a href="#storage">Where your files go</a></li>
+          <li><a href="#background">Background downloads</a></li>
+          <li><a href="#signin">Sites that need a sign-in</a></li>
+          <li><a href="#updates">Keeping Hazel working</a></li>
+          <li><a href="#privacy">Incognito</a></li>
+          <li><a href="#convert">Convert to audio</a></li>
+          <li><a href="#backup">Backup and tidying up</a></li>
+        </ol>
+      </aside>
+
+      <div class="article">
+        <div class="toc-mobile">
+          <label class="eyebrow" for="jump" style="display:block;margin-bottom:8px">Jump to</label>
+          <select id="jump" data-jump>
+            <option value="install">Install Hazel</option>
+            <option value="first">Your first download</option>
+            <option value="playlists">Playlists and many links</option>
+            <option value="share">Share from other apps</option>
+            <option value="search">Search and play</option>
+            <option value="options">Quality and extras</option>
+            <option value="storage">Where your files go</option>
+            <option value="background">Background downloads</option>
+            <option value="signin">Sites that need a sign-in</option>
+            <option value="updates">Keeping Hazel working</option>
+            <option value="privacy">Incognito</option>
+            <option value="convert">Convert to audio</option>
+            <option value="backup">Backup and tidying up</option>
+          </select>
+        </div>
+
+        <section id="install" class="reveal">
+          <div class="eyebrow num">01</div>
+          <h2>Install Hazel</h2>
+          <p>Hazel isn't on the Play Store. There are two official places to get it, and you should only ever install it from one of them.</p>
+          <ol class="steps-list">
+            <li><div><b>Choose where to get it.</b> <a class="link" href="https://f-droid.org/packages/com.hazel.android/">F-Droid</a> keeps Hazel updated for you if you already use it. Otherwise, get it from <a class="link" href="https://github.com/SibtainOcn/Hazel/releases/latest">GitHub Releases</a>.</div></li>
+            <li><div><b>Pick the right file on GitHub.</b> The one with <span class="mono">arm64-v8a</span> in its name works on almost every phone made in the last several years.</div></li>
+            <li><div><b>Open the downloaded file.</b> The first time, Android asks you to allow installs from your browser or file manager. Allow it, then tap Install.</div></li>
+          </ol>
+          <div class="tip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.5 3.2 8.4 7.5 9.5 4.3-1.1 7.5-5 7.5-9.5V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+            <p>Got Hazel from somewhere else? Check it against the fingerprint on the <a class="link" href="index.html#install">home page</a>. A copy that doesn't match has been changed by someone else.</p>
+          </div>
+        </section>
+
+        <section id="first" class="reveal">
+          <div class="eyebrow num">02</div>
+          <h2>Your first download</h2>
+          <p>This is the whole thing in four taps.</p>
+          <ol class="steps-list">
+            <li><div><b>Copy a link</b> from the app or website you're watching in. Most apps have it under Share, then Copy link.</div></li>
+            <li><div><b>Open Hazel and paste it</b> into the box at the top of the home screen. Hazel reads the link and shows the video.</div></li>
+            <li><div><b>Tap Download.</b> A sheet opens where you can choose music or video, the quality, and the title and artist the file will have.</div></li>
+            <li><div><b>Tap Download again.</b> You can follow it on the Downloads tab, and it shows up in your library when it's done.</div></li>
+          </ol>
+          <div class="figure-row" data-gallery>
+            <div class="track">
+            <figure><div class="device"><img src="assets/screens/4.jpg" alt="The download sheet" loading="lazy"></div><figcaption>The download sheet</figcaption></figure>
+            <figure><div class="device"><img src="assets/screens/6.jpg" alt="A download in progress" loading="lazy"></div><figcaption>Following a download</figcaption></figure></div>
+            <div class="gallery-nav"><button type="button" data-dir="-1" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><button type="button" data-dir="1" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></div>
+          </div>
+        </section>
+
+        <section id="playlists" class="reveal">
+          <div class="eyebrow num">03</div>
+          <h2>Playlists and many links</h2>
+          <p>Paste a playlist or a channel link, or several links at once, and Hazel lists everything it found.</p>
+          <ul class="list">
+            <li><div><b>Download all</b> saves every item with the same settings.</div></li>
+            <li><div>Tap any single item to give it its own quality or type, for example music only for one song in a video playlist.</div></li>
+            <li><div>Links you read but haven't downloaded stay on the home screen, even after closing the app, until you clear them.</div></li>
+          </ul>
+          <div class="tip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+            <p>Long lists can take a while. You can close the app; the downloads keep going and the notification shows how far along they are.</p>
+          </div>
+        </section>
+
+        <section id="share" class="reveal">
+          <div class="eyebrow num">04</div>
+          <h2>Share from other apps</h2>
+          <p>The quickest way to save something is without opening Hazel at all.</p>
+          <ol class="steps-list">
+            <li><div>In the app you're watching in, tap <b>Share</b> and pick <b>Hazel</b>.</div></li>
+            <li><div>A download sheet opens right over that app, already set to your usual quality and format.</div></li>
+            <li><div>Tap <b>Download</b> and carry on watching. Hazel takes it from there in the background.</div></li>
+          </ol>
+          <p>Your default quality, format and extras live in <span class="path"><span>More</span><span>Synthesizing</span></span>.</p>
+        </section>
+
+        <section id="search" class="reveal">
+          <div class="eyebrow num">05</div>
+          <h2>Search and play</h2>
+          <p>No link? Type words into the same box on the home screen and Hazel searches for you. You can choose where it searches, such as YouTube, YouTube Music, SoundCloud or Bandcamp.</p>
+          <ul class="list">
+            <li><div>Tap a result to play it right on its card, with a seek bar, full screen and quality choice.</div></li>
+            <li><div>Double tap the left or right side to skip back or forward.</div></li>
+            <li><div>Your recent searches are kept so you can pick up again. Incognito mode turns that off.</div></li>
+          </ul>
+        </section>
+
+        <section id="options" class="reveal">
+          <div class="eyebrow num">06</div>
+          <h2>Quality and extras</h2>
+          <p>The download sheet is simple at first glance. Everything below is optional.</p>
+          <h3>Quality and format</h3>
+          <p>Choose anything from a small file up to 4K, with the size shown before you start. For music, pick the audio format your player likes best.</p>
+          <h3>Cut</h3>
+          <p>Save only part of a video or song. Drag the start and end on the live preview, or type exact times.</p>
+          <h3>Cleaner files</h3>
+          <ul class="list">
+            <li><div><b>SponsorBlock</b> skips sponsor messages, intros and other segments that people have marked.</div></li>
+            <li><div><b>Chapters</b> can be kept inside the file, or split into one file per chapter.</div></li>
+            <li><div><b>Subtitles</b> in the languages you pick, added to the video or saved next to it.</div></li>
+            <li><div><b>Audio language</b> lets you choose the soundtrack when a video has several.</div></li>
+            <li><div><b>Cover art</b> adds the thumbnail to music files, cropped square if you like.</div></li>
+          </ul>
+          <h3>Live streams</h3>
+          <p>For a live stream you can record from the very beginning. For a premiere that hasn't started, Hazel can wait and download it once it goes live.</p>
+        </section>
+
+        <section id="storage" class="reveal">
+          <div class="eyebrow num">07</div>
+          <h2>Where your files go</h2>
+          <p>By default, music goes to <span class="mono">Download/Hazel/Audio</span> and video to <span class="mono">Download/Hazel/Video</span> on your phone. Any music or gallery app can find them there.</p>
+          <h3>Saving to an SD card</h3>
+          <ol class="steps-list">
+            <li><div>Open <span class="path"><span>More</span><span>Downloads</span></span> and tap <b>Audio</b> or <b>Video</b>. You can also tap the folder in any download sheet.</div></li>
+            <li><div>Choose your SD card from the list. The card's free space is shown next to it.</div></li>
+            <li><div>Android opens the card. Tap <b>Use this folder</b> and allow access. Hazel creates a tidy <span class="mono">Hazel/Video</span> or <span class="mono">Hazel/Audio</span> folder for you.</div></li>
+          </ol>
+          <p>Downloads going to the card also do their work on the card, so a large video doesn't fill up your phone while it downloads.</p>
+          <div class="tip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+            <p>If the card is taken out or gets full, nothing is lost. Hazel saves to your phone instead and tells you which files went where.</p>
+          </div>
+          <p>Prefer a specific folder? Choose <b>Another folder</b> and pick anywhere on the phone or card. Choose <b>Phone storage</b> to go back to the default at any time.</p>
+        </section>
+
+        <section id="background" class="reveal">
+          <div class="eyebrow num">08</div>
+          <h2>Background downloads</h2>
+          <p>Downloads keep going when you lock the phone or switch apps. Pause, resume or cancel them from the notification, or from the Downloads tab.</p>
+          <ul class="list">
+            <li><div><b>Wi-Fi only.</b> Turn it on in <span class="path"><span>More</span><span>Downloads</span></span> and downloads wait until you're on Wi-Fi. One that has already started isn't cut off.</div></li>
+            <li><div><b>Speed limit.</b> Off by default. Set one there too if Hazel shouldn't use your whole connection.</div></li>
+            <li><div><b>Failed downloads</b> are kept on the Failed tab so you can retry them.</div></li>
+          </ul>
+          <div class="tip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 11v2M7 10v4M10 10v4"/></svg>
+            <p>Some phones stop apps in the background to save battery. If long downloads stop on their own, open <span class="path"><span>More</span><span>Background downloads</span></span> and allow unrestricted battery use.</p>
+          </div>
+        </section>
+
+        <section id="signin" class="reveal">
+          <div class="eyebrow num">09</div>
+          <h2>Sites that need a sign-in</h2>
+          <p>Some videos are only visible when you're signed in, like private posts or age-restricted videos. Hazel can use your sign-in for those sites.</p>
+          <ol class="steps-list">
+            <li><div>Open <span class="path"><span>More</span><span>Cookies</span></span>.</div></li>
+            <li><div>Sign in to the site inside Hazel, or import a cookies file you exported from your browser.</div></li>
+            <li><div>Try the link again. Hazel uses that sign-in only for that site.</div></li>
+          </ol>
+          <p>Your sign-in stays on your phone. Clearing temporary files doesn't remove it; delete it from the same screen when you no longer need it.</p>
+        </section>
+
+        <section id="updates" class="reveal">
+          <div class="eyebrow num">10</div>
+          <h2>Keeping Hazel working</h2>
+          <p>Websites change often, and sometimes a change stops downloads from working for a day or two. Hazel can update the part that does the downloading on its own, without waiting for a new app version.</p>
+          <ul class="list">
+            <li><div>Open <span class="path"><span>More</span><span>Software update</span></span> and tap <b>Check now</b>.</div></li>
+            <li><div><b>Stable</b> is right for most people. <b>Nightly</b> gets fixes sooner, which helps when a site has just changed.</div></li>
+            <li><div>Turn on automatic updates and it stays current by itself.</div></li>
+          </ul>
+          <p>If a link still won't read, <span class="path"><span>More</span><span>Link Reading</span></span> has a slower, more patient mode for weak connections.</p>
+        </section>
+
+        <section id="privacy" class="reveal">
+          <div class="eyebrow num">11</div>
+          <h2>Incognito</h2>
+          <p>Tap the ghost at the top right of the home screen. While it's on, downloads aren't added to your library and links and searches aren't remembered. The files themselves still save as usual.</p>
+        </section>
+
+        <section id="convert" class="reveal">
+          <div class="eyebrow num">12</div>
+          <h2>Convert to audio</h2>
+          <p>Already have a video on your phone and only want the sound? Open <span class="path"><span>More</span><span>Offline convert video to audio</span></span>, pick the video, choose a format, and save. It works without a connection, and nothing leaves your phone.</p>
+        </section>
+
+        <section id="backup" class="reveal">
+          <div class="eyebrow num">13</div>
+          <h2>Backup and tidying up</h2>
+          <h3>Backup</h3>
+          <p><span class="path"><span>More</span><span>Backup</span></span> saves your settings, download history, queue, sign-ins and searches to a file. Restore it on a new phone and everything merges in, with queued downloads waiting paused.</p>
+          <h3>Temporary files</h3>
+          <p><span class="path"><span>More</span><span>Temporary Files</span></span> shows the space Hazel uses for unfinished downloads and other leftovers, including on your SD card, and clears them in a tap. Your saved music and videos are never touched.</p>
+          <h3>Look and language</h3>
+          <p>Choose a dark or light theme and an accent colour in <span class="path"><span>More</span><span>Appearance</span></span>, and the app language in <span class="path"><span>More</span><span>Language</span></span>.</p>
+
+          <div class="next-up">
+            <a href="faq.html"><small>Still stuck?</small><b>Common questions</b></a>
+            <a href="https://github.com/SibtainOcn/Hazel/issues"><small>Found a problem?</small><b>Report it on GitHub</b></a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
