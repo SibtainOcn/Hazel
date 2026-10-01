@@ -254,9 +254,7 @@ object MediaStoreHelper {
     ): Boolean {
         val files = tempDir.listFiles()?.filter { it.isFile } ?: return true
         val resolver = context.contentResolver
-        val parent = DocumentsContract.buildDocumentUriUsingTree(
-            treeUri, DocumentsContract.getTreeDocumentId(treeUri)
-        )
+        val parent = folderDocument(treeUri)
 
         var allMoved = true
         for (file in files) {
@@ -286,19 +284,47 @@ object MediaStoreHelper {
      */
     fun describeTree(treeUri: Uri): String {
         val id = try {
-            DocumentsContract.getTreeDocumentId(treeUri)
+            folderDocumentId(treeUri)
         } catch (_: Exception) {
             return treeUri.toString()
         }
+        return describeDocumentId(id, SdCards::nameOf)
+    }
+
+    /**
+     * [describeTree] for a document id: the path alone on internal storage, and on a card
+     * the card's own name in front of it when [cardName] knows the card.
+     */
+    fun describeDocumentId(id: String, cardName: (String) -> String?): String {
         val volume = id.substringBefore(':', "")
         val path = id.substringAfter(':', "")
         return when {
             path.isBlank() && volume.isBlank() -> id
             volume == "primary" -> path.ifBlank { "Internal storage" }
-            path.isBlank() -> volume
-            else -> "$volume/$path"
+            path.isBlank() -> cardName(volume) ?: volume
+            else -> "${cardName(volume) ?: volume}/$path"
         }
     }
+
+    /**
+     * The document id of a saved folder. Usually that is a picked tree's own root, but a
+     * folder made inside a picked tree, such as Hazel/Video on a card, is kept as a
+     * document URI under that tree, and its id is the one after "document".
+     */
+    fun folderDocumentId(uri: Uri): String =
+        if (isDocumentInTree(uri)) DocumentsContract.getDocumentId(uri)
+        else DocumentsContract.getTreeDocumentId(uri)
+
+    /** A saved folder as a document URI that files can be created in and that can be viewed. */
+    fun folderDocument(uri: Uri): Uri =
+        if (isDocumentInTree(uri)) uri
+        else DocumentsContract.buildDocumentUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri))
+
+    private fun isDocumentInTree(uri: Uri): Boolean = isDocumentInTree(uri.pathSegments)
+
+    /** True for the segments of tree/<root>/document/<id>, a folder kept inside a picked tree. */
+    fun isDocumentInTree(segments: List<String>): Boolean =
+        segments.size >= 4 && segments[0] == "tree" && segments[2] == "document"
 
     /**
      * Scan files with MediaScanner so they appear in gallery/music apps.

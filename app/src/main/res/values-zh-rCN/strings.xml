@@ -140,7 +140,6 @@
     <string name="format_sheet_save_location_body">在文件管理器中打开这个文件夹，或者另选一个用来保存下载。</string>
     <string name="format_sheet_open_folder">打开文件夹</string>
     <string name="format_sheet_reset">重置</string>
-    <string name="format_sheet_change">更改</string>
 
     <!-- ConverterScreen -->
     <string name="converter_label_convert_to">转换为</string>
@@ -523,7 +522,7 @@
     <string name="storage_locations_limits">限制</string>
     <string name="storage_locations_wifi_only_description">下载会等待，而不使用移动数据</string>
     <string name="storage_locations_speed_limit_description">允许下载达到多快</string>
-    <string name="storage_locations_internal_note">所有文件都保存在设备的内部存储中。你随时可以用任何文件管理器应用访问它们。</string>
+    <string name="storage_locations_internal_note">除非你选择 SD 卡或其他文件夹，下载内容都会保存到内部存储。保存到 SD 卡的下载，其临时文件也会放在卡上，不占用手机空间。</string>
     <string name="storage_locations_wifi_only">仅 Wi-Fi</string>
     <string name="storage_locations_speed_limit">速度限制</string>
 
@@ -687,4 +686,16 @@
     </plurals>
     <string name="home_update">更新</string>
     <string name="home_update_available">有可用更新</string>
+    <string name="save_location_internal">内部存储</string>
+    <string name="save_location_card_hint">保存到存储卡上的 %1$s</string>
+    <string name="save_location_free">可用 %1$s</string>
+    <string name="save_location_other">其他文件夹</string>
+    <string name="save_location_other_hint">此设备或存储卡上的任意文件夹</string>
+    <string name="save_location_close">关闭</string>
+    <string name="save_location_error_title">无法使用该文件夹</string>
+    <string name="save_location_error_access">Android 未允许 Hazel 保留对该文件夹的访问权限。请重试或选择其他文件夹。</string>
+    <string name="save_location_error_no_picker">此设备上没有可选择文件夹的应用。</string>
+    <string name="save_location_error_card_folder">无法在存储卡上创建 %1$s，下载内容将保存到你选择的文件夹。</string>
+    <string name="save_fallback_title">已保存到其他位置</string>
+    <string name="save_fallback_body">无法写入 %1$s。存储卡可能已被移除、已满或不再允许访问。文件已改为保存到 %2$s。</string>
 </resources>

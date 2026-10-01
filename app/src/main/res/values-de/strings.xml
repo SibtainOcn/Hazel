@@ -144,7 +144,6 @@
     <string name="format_sheet_save_location_body">Öffne diesen Ordner in deinem Dateimanager, oder wähle einen anderen für deine Downloads.</string>
     <string name="format_sheet_open_folder">Ordner öffnen</string>
     <string name="format_sheet_reset">Zurücksetzen</string>
-    <string name="format_sheet_change">Ändern</string>
 
     <!-- ConverterScreen -->
     <string name="converter_label_convert_to">Umwandeln in</string>
@@ -530,7 +529,7 @@
     <string name="storage_locations_limits">Grenzen</string>
     <string name="storage_locations_wifi_only_description">Downloads warten, statt über mobile Daten zu laufen</string>
     <string name="storage_locations_speed_limit_description">Wie schnell ein Download laufen darf</string>
-    <string name="storage_locations_internal_note">Alle Dateien liegen im internen Speicher deines Geräts. Du kommst jederzeit mit jedem Dateimanager an sie heran.</string>
+    <string name="storage_locations_internal_note">Downloads werden im internen Speicher gespeichert, sofern du keine SD-Karte oder keinen anderen Ordner wählst. Downloads auf eine SD-Karte legen auch ihre Arbeitsdateien auf der Karte ab und belegen so keinen Telefonspeicher.</string>
     <string name="storage_locations_wifi_only">Nur WLAN</string>
     <string name="storage_locations_speed_limit">Geschwindigkeitsgrenze</string>
 
@@ -695,4 +694,16 @@
     </plurals>
     <string name="home_update">Update</string>
     <string name="home_update_available">Update verfügbar</string>
+    <string name="save_location_internal">Interner Speicher</string>
+    <string name="save_location_card_hint">Speichert in %1$s auf der Karte</string>
+    <string name="save_location_free">%1$s frei</string>
+    <string name="save_location_other">Anderer Ordner</string>
+    <string name="save_location_other_hint">Beliebiger Ordner auf diesem Gerät oder einer Karte</string>
+    <string name="save_location_close">Schließen</string>
+    <string name="save_location_error_title">Ordner nicht verwendbar</string>
+    <string name="save_location_error_access">Android hat Hazel keinen dauerhaften Zugriff auf diesen Ordner gegeben. Versuche es erneut oder wähle einen anderen.</string>
+    <string name="save_location_error_no_picker">Keine App auf diesem Gerät kann Ordner auswählen.</string>
+    <string name="save_location_error_card_folder">%1$s konnte auf der Karte nicht erstellt werden, daher wird im gewählten Ordner gespeichert.</string>
+    <string name="save_fallback_title">An anderem Ort gespeichert</string>
+    <string name="save_fallback_body">Diese Dateien konnten nicht in %1$s geschrieben werden. Die Karte wurde vielleicht entfernt, ist voll oder erlaubt keinen Zugriff mehr. Sie wurden stattdessen in %2$s gespeichert.</string>
 </resources>

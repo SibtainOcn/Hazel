@@ -71,7 +71,7 @@ class DownloadActionReceiver : BroadcastReceiver() {
                         try {
                             DownloadQueueRepository.load(app).filter { it.paused }.forEach {
                                 DownloadQueueRepository.remove(app, it.url)
-                                runCatching { workDirFor(it.url).deleteRecursively() }
+                                runCatching { workDirsFor(it.url).forEach { dir -> dir.deleteRecursively() } }
                             }
                         } finally {
                             pending.finish()

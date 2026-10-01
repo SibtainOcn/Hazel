@@ -152,7 +152,6 @@
     <string name="format_sheet_save_location_body">Откройте эту папку в файловом менеджере или выберите другую для сохранения загрузок.</string>
     <string name="format_sheet_open_folder">Открыть папку</string>
     <string name="format_sheet_reset">Сбросить</string>
-    <string name="format_sheet_change">Изменить</string>
 
     <!-- ConverterScreen -->
     <string name="converter_label_convert_to">Конвертировать в</string>
@@ -544,7 +543,7 @@
     <string name="storage_locations_limits">Ограничения</string>
     <string name="storage_locations_wifi_only_description">Загрузки приостанавливаются, чтобы не расходовать мобильные данные</string>
     <string name="storage_locations_speed_limit_description">Максимально допустимая скорость загрузки</string>
-    <string name="storage_locations_internal_note">Все файлы хранятся во внутренней памяти вашего устройства. Вы можете получить к ним доступ в любое время через любой файловый менеджер.</string>
+    <string name="storage_locations_internal_note">Загрузки сохраняются во внутреннюю память, если не выбрана SD-карта или другая папка. Загрузки на SD-карту хранят и рабочие файлы на карте, не занимая память телефона.</string>
     <string name="storage_locations_wifi_only">Только по Wi-Fi</string>
     <string name="storage_locations_speed_limit">Ограничение скорости</string>
 
@@ -710,4 +709,16 @@
     </plurals>
     <string name="home_update">Обновить</string>
     <string name="home_update_available">Доступно обновление</string>
+    <string name="save_location_internal">Внутренняя память</string>
+    <string name="save_location_card_hint">Сохраняет в %1$s на карте</string>
+    <string name="save_location_free">Свободно: %1$s</string>
+    <string name="save_location_other">Другая папка</string>
+    <string name="save_location_other_hint">Любая папка на устройстве или карте</string>
+    <string name="save_location_close">Закрыть</string>
+    <string name="save_location_error_title">Не удалось использовать папку</string>
+    <string name="save_location_error_access">Android не позволил Hazel сохранить доступ к этой папке. Попробуйте снова или выберите другую.</string>
+    <string name="save_location_error_no_picker">На этом устройстве нет приложения для выбора папок.</string>
+    <string name="save_location_error_card_folder">Не удалось создать %1$s на карте, поэтому загрузки будут сохраняться в выбранную папку.</string>
+    <string name="save_fallback_title">Сохранено в другом месте</string>
+    <string name="save_fallback_body">Не удалось записать в %1$s. Возможно, карту извлекли, она заполнена или больше не даёт доступа. Файлы сохранены в %2$s.</string>
 </resources>

@@ -148,7 +148,6 @@
     <string name="format_sheet_save_location_body">Abra esta pasta no seu gerenciador de arquivos, ou escolha outra para salvar os downloads.</string>
     <string name="format_sheet_open_folder">Abrir a pasta</string>
     <string name="format_sheet_reset">Redefinir</string>
-    <string name="format_sheet_change">Mudar</string>
 
     <!-- ConverterScreen -->
     <string name="converter_label_convert_to">Converter para</string>
@@ -537,7 +536,7 @@
     <string name="storage_locations_limits">Limites</string>
     <string name="storage_locations_wifi_only_description">Os downloads esperam em vez de usar os dados móveis</string>
     <string name="storage_locations_speed_limit_description">A que velocidade um download pode ir</string>
-    <string name="storage_locations_internal_note">Todos os arquivos ficam no armazenamento interno do seu aparelho. Você pode acessá-los quando quiser com qualquer gerenciador de arquivos.</string>
+    <string name="storage_locations_internal_note">Os downloads são salvos no armazenamento interno, a menos que você escolha um cartão SD ou outra pasta. Downloads para um cartão SD também mantêm os arquivos temporários no cartão, sem ocupar espaço do celular.</string>
     <string name="storage_locations_wifi_only">Só no Wi-Fi</string>
     <string name="storage_locations_speed_limit">Limite de velocidade</string>
 
@@ -703,4 +702,16 @@
     </plurals>
     <string name="home_update">Atualizar</string>
     <string name="home_update_available">Atualização disponível</string>
+    <string name="save_location_internal">Armazenamento interno</string>
+    <string name="save_location_card_hint">Salva em %1$s no cartão</string>
+    <string name="save_location_free">%1$s livres</string>
+    <string name="save_location_other">Outra pasta</string>
+    <string name="save_location_other_hint">Qualquer pasta deste aparelho ou de um cartão</string>
+    <string name="save_location_close">Fechar</string>
+    <string name="save_location_error_title">Não foi possível usar essa pasta</string>
+    <string name="save_location_error_access">O Android não deixou o Hazel manter o acesso a essa pasta. Tente de novo ou escolha outra.</string>
+    <string name="save_location_error_no_picker">Nenhum app deste aparelho consegue escolher pastas.</string>
+    <string name="save_location_error_card_folder">Não foi possível criar %1$s no cartão, então os downloads serão salvos na pasta escolhida.</string>
+    <string name="save_fallback_title">Salvo em outro lugar</string>
+    <string name="save_fallback_body">Não foi possível gravar em %1$s. O cartão pode ter sido removido, estar cheio ou não permitir mais o acesso. Os arquivos foram salvos em %2$s.</string>
 </resources>

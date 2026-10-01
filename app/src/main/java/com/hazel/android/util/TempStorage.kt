@@ -62,7 +62,8 @@ object TempStorage {
                 id = "partial_downloads",
                 labelRes = R.string.cleanup_category_partial_downloads_label,
                 descriptionRes = R.string.cleanup_category_partial_downloads_description,
-                bytes = sizeOf(StoragePaths.tempDownloads)
+                // Counted on the SD card as well: a download saved to a card works there.
+                bytes = SdCards.workRoots(context).sumOf { sizeOf(it) }
             ),
             TempCategory(
                 id = "converted",
@@ -103,7 +104,7 @@ object TempStorage {
 
         when (id) {
             "ytdlp_cache" -> wipe(File(cache, "yt-dlp"))
-            "partial_downloads" -> wipe(StoragePaths.tempDownloads)
+            "partial_downloads" -> SdCards.workRoots(context).forEach { wipe(it) }
             "converted" -> wipe(StoragePaths.tempConverted)
             "engine" -> {
                 wipe(File(files, ENGINE_DIR))

@@ -155,7 +155,6 @@
     <string name="format_sheet_save_location_body">Open this folder in your file manager, or pick a different one to save downloads into.</string>
     <string name="format_sheet_open_folder">Open folder</string>
     <string name="format_sheet_reset">Reset</string>
-    <string name="format_sheet_change">Change</string>
 
     <!-- ConverterScreen -->
     <string name="converter_label_convert_to">Convert to</string>
@@ -580,7 +579,7 @@
     <string name="storage_locations_limits">Limits</string>
     <string name="storage_locations_wifi_only_description">Downloads wait rather than run on mobile data</string>
     <string name="storage_locations_speed_limit_description">How fast a download is allowed to go</string>
-    <string name="storage_locations_internal_note">All files are stored in your device\'s internal storage. You can access them anytime using any file manager app.</string>
+    <string name="storage_locations_internal_note">Downloads are saved to internal storage unless you pick an SD card or another folder. Downloads going to an SD card keep their working files on the card too, so they don\'t use phone space while they run.</string>
     <string name="storage_locations_wifi_only">Wi-Fi only</string>
     <string name="storage_locations_speed_limit">Speed limit</string>
 
@@ -754,4 +753,16 @@
     <string name="player_quality_value" translatable="false">%1$dp</string>
     <string name="home_update">Update</string>
     <string name="home_update_available">Update available</string>
+    <string name="save_location_internal">Internal storage</string>
+    <string name="save_location_card_hint">Saves to %1$s on the card</string>
+    <string name="save_location_free">%1$s free</string>
+    <string name="save_location_other">Other folder</string>
+    <string name="save_location_other_hint">Any folder on this device or a card</string>
+    <string name="save_location_close">Close</string>
+    <string name="save_location_error_title">Couldn\'t use that folder</string>
+    <string name="save_location_error_access">Android didn\'t let Hazel keep access to that folder. Try again, or pick a different one.</string>
+    <string name="save_location_error_no_picker">No app on this device can pick folders.</string>
+    <string name="save_location_error_card_folder">Couldn\'t create %1$s on the card, so downloads will be saved in the folder you picked.</string>
+    <string name="save_fallback_title">Saved somewhere else</string>
+    <string name="save_fallback_body">These couldn\'t be written to %1$s. The card may have been removed, be full or no longer allow access. They were saved to %2$s instead.</string>
 </resources>

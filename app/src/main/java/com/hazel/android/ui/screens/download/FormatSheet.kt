@@ -12,6 +12,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.hazel.android.data.SaveDirs
+import com.hazel.android.util.SdCard
 import com.hazel.android.ui.components.FlatChip
 import com.hazel.android.ui.components.ShimmerLabel
 import androidx.compose.foundation.clickable
@@ -119,7 +120,8 @@ fun FormatSheet(
     onPlay: (() -> Unit)? = null,
     /** Each is given the kind the sheet is on: true for video. */
     onOpenSaveDir: (isVideo: Boolean) -> Unit,
-    onPickSaveDir: (isVideo: Boolean) -> Unit,
+    /** Given the card to save to, or null to pick any folder. */
+    onPickSaveDir: (isVideo: Boolean, card: SdCard?) -> Unit,
     onResetSaveDir: (isVideo: Boolean) -> Unit,
     onDownload: (
         format: MediaFormat,
@@ -632,15 +634,16 @@ fun FormatSheet(
         )
 
         SheetDialog.SAVE_DIR -> SaveDirDialog(
+            isVideo = videoTab,
+            saveDir = saveDirs.of(videoTab),
             label = saveDirs.labelOf(videoTab),
-            isCustom = saveDirs.of(videoTab).isCustom,
             onOpen = {
                 openDialog = SheetDialog.NONE
                 onOpenSaveDir(videoTab)
             },
-            onPick = {
+            onPick = { card ->
                 openDialog = SheetDialog.NONE
-                onPickSaveDir(videoTab)
+                onPickSaveDir(videoTab, card)
             },
             onReset = {
                 openDialog = SheetDialog.NONE
@@ -854,43 +857,6 @@ private fun SaveDirField(label: String, onClick: () -> Unit) {
             )
         }
     }
-}
-
-/** Where one kind of download is saved, with opening, changing and resetting it. */
-@Composable
-internal fun SaveDirDialog(
-    label: String,
-    isCustom: Boolean,
-    onOpen: () -> Unit,
-    onPick: () -> Unit,
-    onReset: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Filled.Folder, null) },
-        title = { Text(stringResource(R.string.format_sheet_save_location_title), fontWeight = FontWeight.Bold) },
-        text = {
-            Column {
-                Text(label, style = MaterialTheme.typography.bodyMedium)
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    stringResource(R.string.format_sheet_save_location_body),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
-        },
-        confirmButton = { TextButton(onClick = onOpen) { Text(stringResource(R.string.format_sheet_open_folder)) } },
-        dismissButton = {
-            Row {
-                if (isCustom) {
-                    TextButton(onClick = onReset) { Text(stringResource(R.string.format_sheet_reset)) }
-                }
-                TextButton(onClick = onPick) { Text(stringResource(R.string.format_sheet_change)) }
-            }
-        }
-    )
 }
 
 /** Filter chip with an optional count badge, used for the adjust-download options. */

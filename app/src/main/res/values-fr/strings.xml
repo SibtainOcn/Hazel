@@ -148,7 +148,6 @@
     <string name="format_sheet_save_location_body">Ouvrez ce dossier dans votre gestionnaire de fichiers, ou choisissez-en un autre où enregistrer les téléchargements.</string>
     <string name="format_sheet_open_folder">Ouvrir le dossier</string>
     <string name="format_sheet_reset">Réinitialiser</string>
-    <string name="format_sheet_change">Modifier</string>
 
     <!-- ConverterScreen -->
     <string name="converter_label_convert_to">Convertir en</string>
@@ -537,7 +536,7 @@
     <string name="storage_locations_limits">Limites</string>
     <string name="storage_locations_wifi_only_description">Les téléchargements attendent au lieu d\'utiliser les données mobiles</string>
     <string name="storage_locations_speed_limit_description">À quelle vitesse un téléchargement peut aller</string>
-    <string name="storage_locations_internal_note">Tous les fichiers sont conservés dans le stockage interne de votre appareil. Vous pouvez y accéder à tout moment avec n\'importe quel gestionnaire de fichiers.</string>
+    <string name="storage_locations_internal_note">Les téléchargements sont enregistrés dans le stockage interne, sauf si vous choisissez une carte SD ou un autre dossier. Les téléchargements vers une carte SD y gardent aussi leurs fichiers de travail, sans occuper l\'espace du téléphone.</string>
     <string name="storage_locations_wifi_only">Wi-Fi uniquement</string>
     <string name="storage_locations_speed_limit">Limite de vitesse</string>
 
@@ -703,4 +702,16 @@
     </plurals>
     <string name="home_update">Mettre à jour</string>
     <string name="home_update_available">Mise à jour disponible</string>
+    <string name="save_location_internal">Stockage interne</string>
+    <string name="save_location_card_hint">Enregistre dans %1$s sur la carte</string>
+    <string name="save_location_free">%1$s libres</string>
+    <string name="save_location_other">Autre dossier</string>
+    <string name="save_location_other_hint">N\'importe quel dossier de l\'appareil ou d\'une carte</string>
+    <string name="save_location_close">Fermer</string>
+    <string name="save_location_error_title">Impossible d\'utiliser ce dossier</string>
+    <string name="save_location_error_access">Android n\'a pas laissé Hazel garder l\'accès à ce dossier. Réessayez ou choisissez-en un autre.</string>
+    <string name="save_location_error_no_picker">Aucune app de cet appareil ne peut choisir de dossier.</string>
+    <string name="save_location_error_card_folder">Impossible de créer %1$s sur la carte, les téléchargements iront donc dans le dossier choisi.</string>
+    <string name="save_fallback_title">Enregistré ailleurs</string>
+    <string name="save_fallback_body">Impossible d\'écrire ces fichiers dans %1$s. La carte a peut-être été retirée, est pleine ou n\'autorise plus l\'accès. Ils ont été enregistrés dans %2$s.</string>
 </resources>

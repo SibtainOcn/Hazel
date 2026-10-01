@@ -93,9 +93,7 @@ object FolderUtil {
      */
     fun openTree(context: Context, treeUri: Uri) {
         val documentUri = runCatching {
-            DocumentsContract.buildDocumentUriUsingTree(
-                treeUri, DocumentsContract.getTreeDocumentId(treeUri)
-            )
+            MediaStoreHelper.folderDocument(treeUri)
         }.getOrDefault(treeUri)
 
         if (startView(context, documentUri, "vnd.android.document/directory")) return

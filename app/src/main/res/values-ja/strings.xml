@@ -140,7 +140,6 @@
     <string name="format_sheet_save_location_body">ファイルマネージャーでこのフォルダを開くか、ダウンロードを保存する別のフォルダを選択してください。</string>
     <string name="format_sheet_open_folder">フォルダを開く</string>
     <string name="format_sheet_reset">リセット</string>
-    <string name="format_sheet_change">変更</string>
 
     <!-- ConverterScreen -->
     <string name="converter_label_convert_to">変換先形式</string>
@@ -523,7 +522,7 @@
     <string name="storage_locations_limits">制限</string>
     <string name="storage_locations_wifi_only_description">モバイルデータ通信を使用せず待機します</string>
     <string name="storage_locations_speed_limit_description">ダウンロードの最大許容速度</string>
-    <string name="storage_locations_internal_note">すべてのファイルはお使いの端末の内部ストレージに保存されます。ファイルマネージャーアプリからいつでもアクセスできます。</string>
+    <string name="storage_locations_internal_note">SDカードや別のフォルダを選ばない限り、ダウンロードは内部ストレージに保存されます。SDカードへのダウンロードは作業ファイルもカード上に置くため、端末の容量を使いません。</string>
     <string name="storage_locations_wifi_only">Wi-Fi のみ</string>
     <string name="storage_locations_speed_limit">速度制限</string>
 
@@ -687,4 +686,16 @@
     </plurals>
     <string name="home_update">更新</string>
     <string name="home_update_available">アップデートがあります</string>
+    <string name="save_location_internal">内部ストレージ</string>
+    <string name="save_location_card_hint">カードの %1$s に保存</string>
+    <string name="save_location_free">空き %1$s</string>
+    <string name="save_location_other">その他のフォルダ</string>
+    <string name="save_location_other_hint">この端末またはカード上の任意のフォルダ</string>
+    <string name="save_location_close">閉じる</string>
+    <string name="save_location_error_title">そのフォルダを使用できません</string>
+    <string name="save_location_error_access">Android により、Hazel はそのフォルダへのアクセスを保持できませんでした。もう一度試すか、別のフォルダを選んでください。</string>
+    <string name="save_location_error_no_picker">この端末にはフォルダを選択できるアプリがありません。</string>
+    <string name="save_location_error_card_folder">カードに %1$s を作成できなかったため、選択したフォルダに保存します。</string>
+    <string name="save_fallback_title">別の場所に保存しました</string>
+    <string name="save_fallback_body">%1$s に書き込めませんでした。カードが取り外されたか、容量不足か、アクセスが許可されていない可能性があります。代わりに %2$s に保存しました。</string>
 </resources>

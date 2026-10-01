@@ -1,5 +1,6 @@
 package com.hazel.android.ui.share
 
+import com.hazel.android.ui.screens.download.rememberSaveDirPicker
 import androidx.compose.ui.res.stringResource
 import com.hazel.android.download.GenericFormats
 import android.app.Activity
@@ -137,7 +138,6 @@ class ShareOverlayActivity : ComponentActivity() {
                 .collectAsState(initial = DownloadOptions())
             val saveDirs by SettingsRepository.getSaveDirs(this).collectAsState(initial = SaveDirs())
             // The kind whose folder the picker is choosing, set as it opens.
-            var pickingVideoDir by remember { mutableStateOf(true) }
             val accentName by SettingsRepository.getAccentColor(this).collectAsState(initial = "Cyan")
 
             LaunchedEffect(url) {
@@ -159,33 +159,10 @@ class ShareOverlayActivity : ComponentActivity() {
                 GenericFormats.placeholder(url, bestVideo, bestAudio, worst)
             }
 
-            val folderPicker = rememberLauncherForActivityResult(
-                ActivityResultContracts.OpenDocumentTree()
-            ) { uri: Uri? ->
-                if (uri != null) {
-                    try {
-                        contentResolver.takePersistableUriPermission(
-                            uri,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        )
-                        val forVideo = pickingVideoDir
-                        scope.launch {
-                            SettingsRepository.setSaveDir(
-                                this@ShareOverlayActivity, forVideo, uri.toString(), MediaStoreHelper.describeTree(uri)
-                            )
-                        }
-                    } catch (_: SecurityException) {
-                        // The persistable grant was refused; the default folder stays in use.
-                    }
-                }
-            }
+            val pickSaveDir = rememberSaveDirPicker(saveDirs)
 
             val openSaveDir: (Boolean) -> Unit = { isVideo ->
                 MediaOpener.openLocation(this@ShareOverlayActivity, saveDirs.of(isVideo).uri, isVideo)
-            }
-            val pickSaveDir: (Boolean) -> Unit = { isVideo ->
-                pickingVideoDir = isVideo
-                folderPicker.launch(saveDirs.of(isVideo).uri.takeIf { it.isNotBlank() }?.let(Uri::parse))
             }
             val resetSaveDir: (Boolean) -> Unit = { isVideo ->
                 scope.launch { SettingsRepository.resetSaveDir(this@ShareOverlayActivity, isVideo) }

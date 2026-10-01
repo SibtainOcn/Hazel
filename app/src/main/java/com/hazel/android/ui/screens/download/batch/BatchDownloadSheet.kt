@@ -66,6 +66,7 @@ import com.hazel.android.ui.screens.download.SubtitlesDialog
 import com.hazel.android.ui.screens.download.ThumbnailDialog
 import com.hazel.android.ui.screens.download.FormatSelectionSheet
 import com.hazel.android.data.SaveDirs
+import com.hazel.android.util.SdCard
 import kotlin.math.roundToInt
 
 /**
@@ -95,7 +96,7 @@ fun BatchDownloadSheet(
     saveDirs: SaveDirs,
     /** Each is given the kind in question: true for video. */
     onOpenSaveDir: (isVideo: Boolean) -> Unit,
-    onPickSaveDir: (isVideo: Boolean) -> Unit,
+    onPickSaveDir: (isVideo: Boolean, card: SdCard?) -> Unit,
     onResetSaveDir: (isVideo: Boolean) -> Unit,
     onResolveFormats: (MediaInfo) -> Unit,
     /** Links whose formats are being read right now. */
@@ -536,14 +537,20 @@ fun BatchDownloadSheet(
         )
 
         BatchSheet.SAVE_DIR -> BatchSaveDirSheet(
+            isVideo = state.videoTab,
+            saveDir = saveDirs.of(state.videoTab),
             saveDirLabel = saveDirs.labelOf(state.videoTab),
             onOpen = {
                 openSheet = BatchSheet.NONE
                 onOpenSaveDir(state.videoTab)
             },
-            onPick = {
+            onPick = { card ->
                 openSheet = BatchSheet.NONE
-                onPickSaveDir(state.videoTab)
+                onPickSaveDir(state.videoTab, card)
+            },
+            onReset = {
+                openSheet = BatchSheet.NONE
+                onResetSaveDir(state.videoTab)
             },
             onDismiss = { openSheet = BatchSheet.NONE }
         )
