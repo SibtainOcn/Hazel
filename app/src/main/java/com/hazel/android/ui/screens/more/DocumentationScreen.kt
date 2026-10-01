@@ -10,6 +10,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,7 +38,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -244,11 +244,7 @@ fun DocumentationPageScreen(
             )
         }
 
-        if (loading && !failed) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        } else {
-            Spacer(modifier = Modifier.height(4.dp))
-        }
+        Spacer(modifier = Modifier.height(4.dp))
 
         Box(modifier = Modifier.fillMaxSize()) {
             AndroidView(
@@ -298,6 +294,19 @@ fun DocumentationPageScreen(
                     }
                 }
             )
+
+            // Until the page has drawn, the shape loader stands over it, so the screen is
+            // never a blank sheet while the page or file is fetched.
+            if (loading && !failed) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(background),
+                    contentAlignment = Alignment.Center
+                ) {
+                    com.hazel.android.ui.components.HazelLoadingIndicator(size = 56.dp)
+                }
+            }
 
             if (failed) {
                 Column(
