@@ -1,0 +1,40 @@
+# Opens update PRs only; CI checks each one and nothing merges by itself.
+version: 2
+
+registries:
+  jitpack:
+    type: maven-repository
+    url: https://jitpack.io
+
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    registries:
+      - jitpack
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: deps
+    allow:
+      # https://github.com/TeamNewPipe/NewPipeExtractor
+      - dependency-name: com.github.teamnewpipe:newpipeextractor
+      # https://github.com/yausername/youtubedl-android
+      - dependency-name: io.github.junkfood02.youtubedl-android:*
+    groups:
+      youtubedl-android:
+        patterns:
+          - io.github.junkfood02.youtubedl-android:*
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns:
+          - "*"
