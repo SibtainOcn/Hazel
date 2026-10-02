@@ -17,8 +17,8 @@ and that the flags below are the ones the Kotlin passes.
 Needs network, yt-dlp and ffmpeg/ffprobe, so it is not part of test_all.py:
 
     pip install -U yt-dlp
-    python tools/live/test_sponsorblock_live.py            # full run
-    python tools/live/test_sponsorblock_live.py --static   # flag check only, no network
+    python tools/tests/live/test_sponsorblock_live.py            # full run
+    python tools/tests/live/test_sponsorblock_live.py --static   # flag check only, no network
 
 A source the network refuses (YouTube asking a server address to sign in, say) is
 reported as SKIP rather than FAIL: that says nothing about the flags.
@@ -33,7 +33,7 @@ import sys
 import tempfile
 import urllib.request
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 KOTLIN = os.path.join(ROOT, "app/src/main/java/com/hazel/android/download")
 VIEW_MODEL = os.path.join(KOTLIN, "DownloadViewModel.kt")
 OPTIONS = os.path.join(KOTLIN, "DownloadOptions.kt")

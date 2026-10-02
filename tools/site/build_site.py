@@ -3,17 +3,17 @@ Builds the Hazel website (pages/hazel-pages) into pages/hazel-pages/_build.
 
 Each page body in src/ is wrapped in the shared head, nav and footer. Facts that change with
 the app are read from the repository at build time rather than written into the pages:
-the version from app/build.gradle.kts, the languages from the app's values-* folders, the
+the version from app/build.gradle.kts, the languages from locales_config.xml, the
 "What's new" line from CHANGELOG.md, and the screenshots from fastlane.
 
 Then every page is checked: plain punctuation only, no unfilled placeholder, and every
 local link, image and #anchor resolves. Any failure exits non-zero, which fails CI.
 
-    python tools/build_site.py
+    python tools/site/build_site.py
 """
 import html as _html, pathlib, re, shutil, sys
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 SITE = ROOT / 'pages' / 'hazel-pages'
 SRC = SITE / 'src'
 STATIC = SITE / 'static'
@@ -122,10 +122,16 @@ def version():
 
 
 def languages():
-    """English plus every translated values-* folder of the app."""
-    res = ROOT / 'app' / 'src' / 'main' / 'res'
-    codes = ['en'] + sorted(p.name[len('values-'):] for p in res.glob('values-*')
-                            if (p / 'strings.xml').exists() and re.fullmatch(r'values-[a-z]{2}(-r[A-Z]{2})?', p.name))
+    """
+    English plus the languages the app offers, read from locales_config.xml. Not the
+    values-* folders: a new language can be merged long before it is listed (at 80%),
+    and the site should only promise what people can actually pick.
+    """
+    config = (ROOT / 'app' / 'src' / 'main' / 'res' / 'xml' / 'locales_config.xml').read_text(encoding='utf-8')
+    # zh-CN in the config is the zh-rCN folder, which is how NATIVE names it.
+    tags = [re.sub(r'-([A-Z]{2})$', r'-r\1', t)
+            for t in re.findall(r'<locale\s+android:name="([^"]+)"', config)]
+    codes = ['en'] + sorted(t for t in tags if t != 'en')
     return [NATIVE.get(c, c) for c in codes]
 
 

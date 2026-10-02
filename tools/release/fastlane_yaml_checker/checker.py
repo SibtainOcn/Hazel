@@ -14,7 +14,7 @@ Checks performed:
 6. Optional auto-fix (--fix) to format YAML according to fdroid rewritemeta rules.
 
 Usage:
-    python tools/fastlane_yaml_checker/checker.py [--yaml <path>] [--fix] [--check-urls]
+    python tools/release/fastlane_yaml_checker/checker.py [--yaml <path>] [--fix] [--check-urls]
 """
 
 import argparse
@@ -30,7 +30,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 
 # ANSI Colors
 GREEN = "\033[92m"

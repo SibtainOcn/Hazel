@@ -3,11 +3,11 @@ Self-tests for the Hazel string extraction and translation work.
 
 Pure Python 3, no dependencies. Run it from the repository root.
 
-    python tools/check.py resources
-    python tools/check.py file app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt
-    python tools/check.py progress
-    python tools/check.py translations
-    python tools/check.py all app/src/main/.../FormatSheet.kt
+    python tools/strings/check.py resources
+    python tools/strings/check.py file app/src/main/java/com/hazel/android/ui/screens/download/FormatSheet.kt
+    python tools/strings/check.py progress
+    python tools/strings/check.py translations [--strict]
+    python tools/strings/check.py all app/src/main/.../FormatSheet.kt
 
 Exit code 0 means the check passed. Anything else means it did not, and no further
 file may be touched until it is 0 again.
@@ -22,11 +22,18 @@ from pathlib import Path
 
 # ---------------------------------------------------------------- plumbing
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 STRINGS = ROOT / "app/src/main/res/values/strings.xml"
 RES_DIR = ROOT / "app/src/main/res"
 SRC_DIR = ROOT / "app/src/main/java"
-ALLOWLIST = ROOT / "tools/literal-allowlist.txt"
+ALLOWLIST = ROOT / "tools/strings/literal-allowlist.txt"
+LOCALES_CONFIG = RES_DIR / "xml/locales_config.xml"
+APP_LOCALE = SRC_DIR / "com/hazel/android/util/AppLocale.kt"
+# A language is offered to people, in the app's picker and in Android's own language
+# settings, only once this much of it is translated. Below it the folder still ships and
+# Android still uses what is there, but nobody is invited to pick a language that is
+# mostly English.
+LISTED_MIN_PERCENT = 80
 
 _failed = False
 
@@ -80,15 +87,32 @@ def read(path):
 
 # ---------------------------------------------------------------- resources
 
-# Anything that looks like an Android format specifier.
-PLACEHOLDER = re.compile(r"%(?:\d+\$)?[sdfx]|%%")
+# Anything that looks like a format specifier: Android's (%s, %1$d, %.1f, %,d, %%) and
+# yt-dlp's output templates (%(title)s), which the app passes through untouched. No space
+# flag, so "50% done" is plain text and not a specifier.
+PLACEHOLDER = re.compile(
+    r"%\([A-Za-z_.]+\)[sd]"
+    r"|%(?:\d+\$)?[-#+0,(]*\d*(?:\.\d+)?[sdfxXeEgGcbh%]"
+)
+# A web address in a translation that the English does not have is the one way a
+# translation can send a user somewhere new, so every address must come from the source.
+URL = re.compile(r"https?://[^\s<>\"']+")
 # Everything a translator must copy through untouched.
 MARKUP = re.compile(r"</?(?:b|i|u|a|xliff:g)\b[^>]*>")
 
 
-def parse_source():
-    """Every entry in values/strings.xml, in file order."""
-    root = ET.parse(STRINGS).getroot()
+def inner(el):
+    """
+    The whole value, inline markup included. el.text alone stops at the first child, so
+    "Tap <b>Save</b> to %1$s" would read as "Tap " and everything after it, markup and
+    placeholder alike, would go unchecked.
+    """
+    return (el.text or "") + "".join(ET.tostring(c, encoding="unicode") for c in el)
+
+
+def parse_entries(path):
+    """Every string and plural in one strings.xml: name -> (kind, value, translatable)."""
+    root = ET.parse(path).getroot()
     entries = {}
     for el in root:
         if el.tag not in ("string", "plurals"):
@@ -96,11 +120,41 @@ def parse_source():
         name = el.get("name")
         translatable = el.get("translatable", "true") != "false"
         if el.tag == "string":
-            entries[name] = ("string", el.text or "", translatable)
+            entries[name] = ("string", inner(el), translatable)
         else:
-            items = {i.get("quantity"): (i.text or "") for i in el.findall("item")}
+            items = {i.get("quantity"): inner(i) for i in el.findall("item")}
             entries[name] = ("plurals", items, translatable)
     return entries
+
+
+def parse_source():
+    return parse_entries(STRINGS)
+
+
+def texts(kind, value):
+    return [value] if kind == "string" else list(value.values())
+
+
+def value_problems(text):
+    """
+    What is wrong with one resource value on its own, the same in every language. Each of
+    these compiles and then shows the user something other than what was written.
+    """
+    out = []
+    # A value wrapped whole in double quotes is Android's way to keep leading spaces, and
+    # inside it an apostrophe needs no escape.
+    quoted = re.fullmatch(r'\s*"(.*)"\s*', text, re.S)
+    if quoted:
+        text = quoted.group(1)
+    if not text.strip():
+        out.append("is empty, the user would see a blank")
+    if re.match(r"\s*[@?]", text):
+        out.append("starts with @ or ?, which Android reads as a reference, write \\@ or \\?")
+    if not quoted and re.search(r"(?<!\\)'", text):
+        out.append("has an unescaped apostrophe, write \\'")
+    if re.search(r'(?<!\\)"', re.sub(r"<[^>]*>", "", text)):
+        out.append('has an unescaped double quote, which Android drops, write \\"')
+    return out
 
 
 def check_resources():
@@ -174,22 +228,18 @@ def check_resources():
     else:
         ok("no orphan keys")
 
-    section("escaping")
-    trouble = []
-    for m in re.finditer(r"<string[^>]*>(.*?)</string>", raw, re.S):
-        value = m.group(1)
-        line = raw[: m.start()].count("\n") + 1
-        if re.search(r"(?<!\\)'", value):
-            trouble.append("line %d: unescaped apostrophe, write \\'" % line)
-        if re.search(r"&(?!amp;|lt;|gt;|quot;|apos;|#)", value):
-            trouble.append("line %d: bare ampersand, write &amp;" % line)
-    if trouble:
-        for t in trouble:
-            fail(t)
-    else:
-        ok("apostrophes and ampersands escaped")
-
     entries = parse_source()
+
+    section("values")
+    # A bare ampersand never gets this far: the XML would not have parsed above.
+    trouble = False
+    for name, (kind, value, _) in entries.items():
+        for t in texts(kind, value):
+            for problem in value_problems(t):
+                fail("%s %s" % (name, problem))
+                trouble = True
+    if not trouble:
+        ok("no empty values, stray references, or unescaped quotes")
 
     section("plurals")
     bad_plural = False
@@ -387,7 +437,7 @@ def check_file(target):
         fail("literals neither extracted nor dispositioned, %d of them:" % len(hits))
         for num, text in hits:
             print("      %d: %s" % (num, text[:110]))
-        print("   -> extract each one, OR append a line to tools/literal-allowlist.txt:")
+        print("   -> extract each one, OR append a line to tools/strings/literal-allowlist.txt:")
         print("      %s:<line>: <why this text never reaches a user>" % rel)
     else:
         ok("every literal extracted or dispositioned")
@@ -456,7 +506,19 @@ CLDR = {
 }
 
 
-def check_translations():
+def check_translations(strict=False):
+    """
+    Two kinds of finding, kept apart on purpose.
+
+    A translation that is wrong fails: a broken placeholder crashes or shows a raw token, a
+    changed link sends people somewhere the English does not, a key the source does not
+    have is dead text. Those are never acceptable, from anyone.
+
+    A translation that is incomplete is reported. Android shows the English for any key a
+    language has not translated yet, so a missing key is a gap, not a fault. Failing on it
+    would mean nobody could add one English string without writing every language, which
+    is not something a contributor can do. --strict fails on it as well, for a release.
+    """
     source = parse_source()
     expected = {n for n, (_, _, t) in source.items() if t}
     untranslatable = {n for n, (_, _, t) in source.items() if not t}
@@ -467,6 +529,7 @@ def check_translations():
         print("no values-* folders yet, nothing to check")
         return
 
+    coverage = []
     for folder in folders:
         code = folder.name[len("values-"):]
         lang = code.split("-")[0]
@@ -474,34 +537,34 @@ def check_translations():
         path = folder / "strings.xml"
 
         try:
-            root = ET.parse(path).getroot()
+            got = {n: (k, v) for n, (k, v, _) in parse_entries(path).items()}
         except ET.ParseError as e:
             fail("%s is not well formed XML: %s" % (folder.name, e))
+            coverage.append((folder.name, 0, len(expected)))
             continue
 
-        got = {}
-        for el in root:
-            if el.tag not in ("string", "plurals"):
-                continue
-            if el.tag == "string":
-                got[el.get("name")] = ("string", el.text or "")
-            else:
-                got[el.get("name")] = (
-                    "plurals",
-                    {i.get("quantity"): (i.text or "") for i in el.findall("item")},
-                )
+        names = re.findall(r'<(?:string|plurals)\b[^>]*\bname="([^"]+)"', read(path))
+        dupes = sorted({n for n in names if names.count(n) > 1})
+        if dupes:
+            fail("%s defines keys twice, the last one silently wins: %s"
+                 % (folder.name, ", ".join(dupes)))
 
         missing = sorted(expected - set(got))
-        extra = sorted(set(got) - expected)
+        extra = sorted(set(got) - expected - untranslatable)
         leaked = sorted(set(got) & untranslatable)
+        coverage.append((folder.name, len(expected) - len(missing), len(expected)))
 
-        if missing:
-            fail("%s is missing %d keys: %s" % (folder.name, len(missing), ", ".join(missing[:12])))
         if extra:
-            fail("%s invented keys that are not in the source: %s" % (folder.name, ", ".join(extra[:12])))
+            fail("%s has keys that are not in the source: %s" % (folder.name, ", ".join(extra[:12])))
         if leaked:
             fail("%s translated keys marked translatable=false: %s" % (folder.name, ", ".join(leaked)))
-        if not (missing or extra or leaked):
+        if missing:
+            shown = ", ".join(missing[:12]) + (", ..." if len(missing) > 12 else "")
+            if strict:
+                fail("%s is missing %d keys: %s" % (folder.name, len(missing), shown))
+            else:
+                print("   untranslated, shown in English: %d keys: %s" % (len(missing), shown))
+        if not (missing or extra or leaked or dupes):
             ok("key set matches the source exactly, %d entries" % len(got))
 
         bad = False
@@ -514,18 +577,34 @@ def check_translations():
                 bad = True
                 continue
 
-            src_texts = [svalue] if skind == "string" else list(svalue.values())
-            got_texts = [gvalue] if gkind == "string" else list(gvalue.values())
+            src_texts = texts(skind, svalue)
+            got_texts = texts(gkind, gvalue)
 
-            want = sorted(set(PLACEHOLDER.findall(" ".join(src_texts))))
             for t in got_texts:
-                have = sorted(set(PLACEHOLDER.findall(t)))
-                if want and have != want:
+                for problem in value_problems(t):
+                    fail("%s: %s %s" % (folder.name, name, problem))
+                    bad = True
+
+            # Compared both ways: a placeholder the source does not have is as broken as
+            # one that went missing, it formats an argument that is never passed.
+            want = sorted(set(PLACEHOLDER.findall(" ".join(src_texts))))
+            if gkind == "string":
+                have = sorted(set(PLACEHOLDER.findall(got_texts[0])))
+                if have != want:
                     fail("%s: %s placeholders changed, source has %s and this has %s"
                          % (folder.name, name, want or "none", have or "none"))
                     bad = True
-                    break
+            else:
+                # A plural form may leave the count out ("un fichier"), so each form may
+                # use fewer, but none may use one the source lacks.
+                for t in got_texts:
+                    have = set(PLACEHOLDER.findall(t))
+                    if have - set(want):
+                        fail("%s: plural %s uses placeholders the source does not have: %s"
+                             % (folder.name, name, sorted(have - set(want))))
+                        bad = True
 
+            # Attributes are part of the tag, so a link whose href was changed fails here.
             want_markup = sorted(MARKUP.findall(" ".join(src_texts)))
             have_markup = sorted(MARKUP.findall(" ".join(got_texts)))
             if want_markup != have_markup:
@@ -533,11 +612,12 @@ def check_translations():
                      % (folder.name, name, want_markup or "none", have_markup or "none"))
                 bad = True
 
-            for t in got_texts:
-                if re.search(r"(?<!\\)'", t):
-                    fail("%s: %s has an unescaped apostrophe, write \\'" % (folder.name, name))
-                    bad = True
-                    break
+            new_urls = sorted(set(URL.findall(" ".join(got_texts)))
+                              - set(URL.findall(" ".join(src_texts))))
+            if new_urls:
+                fail("%s: %s links to addresses the source does not: %s"
+                     % (folder.name, name, ", ".join(new_urls)))
+                bad = True
 
             if gkind == "plurals":
                 legal = CLDR.get(lang)
@@ -560,7 +640,57 @@ def check_translations():
                     print("   note: no CLDR table for '%s', plural categories unchecked" % lang)
 
         if not bad:
-            ok("placeholders, markup, escaping and plural categories all match")
+            ok("placeholders, markup, links, escaping and plural categories all match")
+
+    section("coverage")
+    width = max(len(c[0]) for c in coverage)
+    for folder, done, total in sorted(coverage, key=lambda c: (-c[1], c[0])):
+        pct = 100 * done // total if total else 100
+        print("  %-*s %3d%%  %d/%d" % (width, folder, pct, done, total))
+
+    check_listed({folder_tag(f): (100 * d // t if t else 100) for f, d, t in coverage})
+
+
+def folder_tag(folder):
+    """values-pt-rBR -> pt-BR, the form both language lists use."""
+    return folder[len("values-"):].replace("-r", "-")
+
+
+def check_listed(percent):
+    """
+    The languages people can pick, against what is actually translated.
+
+    Two lists offer them: the app's own picker in AppLocale.kt and locales_config.xml,
+    which Android 13+ reads for its per-app language setting. They must name the same
+    languages, each must have a folder, and each must be at least LISTED_MIN_PERCENT
+    translated. A new language arriving at 10% is fine; listing it is the step that waits.
+    """
+    section("listed languages")
+    if not (LOCALES_CONFIG.exists() and APP_LOCALE.exists()):
+        fail("cannot find %s or %s" % (LOCALES_CONFIG.relative_to(ROOT), APP_LOCALE.relative_to(ROOT)))
+        return
+    system = set(re.findall(r'<locale\s+android:name="([^"]+)"', read(LOCALES_CONFIG))) - {"en"}
+    in_app = set(re.findall(r'Language\(\s*"([^"]+)"', read(APP_LOCALE))) - {"en"}
+
+    bad = False
+    for tag in sorted(system ^ in_app):
+        where = "locales_config.xml" if tag in system else "AppLocale.kt"
+        fail("%s is listed in %s only, list it in both or neither" % (tag, where))
+        bad = True
+    for tag in sorted(system | in_app):
+        if tag not in percent:
+            fail("%s is listed but has no values folder" % tag)
+            bad = True
+        elif percent[tag] < LISTED_MIN_PERCENT:
+            fail("%s is listed but only %d%% translated, it needs %d%% to be offered"
+                 % (tag, percent[tag], LISTED_MIN_PERCENT))
+            bad = True
+    ready = sorted(t for t, pc in percent.items()
+                   if t not in system | in_app and pc >= LISTED_MIN_PERCENT)
+    for tag in ready:
+        print("   note: %s is %d%% translated and could be listed" % (tag, percent[tag]))
+    if not bad:
+        ok("%d languages listed, all at least %d%% translated" % (len(system), LISTED_MIN_PERCENT))
 
 
 # ---------------------------------------------------------------- audit a commit
@@ -695,7 +825,9 @@ def check_build():
     if report is None:
         print("no lint report produced, skipping")
         return
-    rules = ("MissingTranslation", "ExtraTranslation", "StringFormat",
+    # MissingTranslation is not here: an untranslated key falls back to English and is
+    # reported by the translations check instead.
+    rules = ("ExtraTranslation", "StringFormat",
              "StringFormatMatches", "ImpliedQuantity", "MissingQuantity")
     hits = [l for l in read(report).splitlines() if any(r in l for r in rules)]
     if hits:
@@ -709,13 +841,13 @@ def check_build():
 # ---------------------------------------------------------------- entry
 
 USAGE = """usage:
-  python tools/check.py resources
-  python tools/check.py file <path/to/File.kt>
-  python tools/check.py progress
-  python tools/check.py translations
-  python tools/check.py build
-  python tools/check.py all <path/to/File.kt>
-  python tools/check.py audit <commit> [<commit> ...]
+  python tools/strings/check.py resources
+  python tools/strings/check.py file <path/to/File.kt>
+  python tools/strings/check.py progress
+  python tools/strings/check.py translations [--strict]
+  python tools/strings/check.py build
+  python tools/strings/check.py all <path/to/File.kt>
+  python tools/strings/check.py audit <commit> [<commit> ...]
 """
 
 
@@ -731,7 +863,7 @@ def main(argv):
         check_progress()
         return 0
     elif cmd == "translations":
-        check_translations()
+        check_translations(strict="--strict" in argv[2:])
     elif cmd == "build":
         check_build()
     elif cmd == "audit":

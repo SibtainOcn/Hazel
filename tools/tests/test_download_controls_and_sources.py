@@ -8,7 +8,7 @@ Comprehensive Test Harness for Hazel:
 5. Multi-Locale String Resource Parity across 10 Locales
 
 Run:
-    python tools/test_download_controls_and_sources.py
+    python tools/tests/test_download_controls_and_sources.py
 Exit:
     0 on success, 1 on any failure.
 """
@@ -23,7 +23,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
 PASS_COUNT = 0
 FAIL_COUNT = 0

@@ -24,10 +24,10 @@ Needs yt-dlp, ffmpeg/ffprobe and mutagen, and the network for the real sites. No
 test_all.py; run it by hand when the download flags change:
 
     pip install -U yt-dlp mutagen
-    python tools/live/test_thumbnail_embed_live.py              # full matrix
-    python tools/live/test_thumbnail_embed_live.py --quick      # fewer formats per source
-    python tools/live/test_thumbnail_embed_live.py --local      # stand-ins only, no network
-    python tools/live/test_thumbnail_embed_live.py --static     # flag check only
+    python tools/tests/live/test_thumbnail_embed_live.py              # full matrix
+    python tools/tests/live/test_thumbnail_embed_live.py --quick      # fewer formats per source
+    python tools/tests/live/test_thumbnail_embed_live.py --local      # stand-ins only, no network
+    python tools/tests/live/test_thumbnail_embed_live.py --static     # flag check only
 
 A site that refuses the network the run is on (one asking a server address to sign in,
 say) is reported as SKIP rather than FAIL: that says nothing about the flags.
@@ -42,7 +42,7 @@ import subprocess
 import sys
 import tempfile
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 VIEW_MODEL = os.path.join(ROOT, "app/src/main/java/com/hazel/android/download/DownloadViewModel.kt")
 
 # ── The app's flags, kept word for word with DownloadViewModel ──────────────────────────

@@ -7,9 +7,9 @@ For each link it runs the real yt-dlp, makes the same stream choice as
 headers the player would send. A pass means the bytes are really media: an MP4 or WebM
 header, MP3/AAC/Opus/FLAC audio, an HLS playlist or a DASH manifest.
 
-    python tools/live/test_playback_live.py              # every source
-    python tools/live/test_playback_live.py reddit ted   # just these
-    python tools/live/test_playback_live.py --save-fixtures
+    python tools/tests/live/test_playback_live.py              # every source
+    python tools/tests/live/test_playback_live.py reddit ted   # just these
+    python tools/tests/live/test_playback_live.py --save-fixtures
 
 --save-fixtures writes each source's format list, with the addresses replaced, to
 app/src/test/resources/playback/ for use as test fixtures. --static checks, without the network, that the rules
@@ -24,7 +24,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 RESOLVER = ROOT / "app/src/main/java/com/hazel/android/download/playback/StreamResolver.kt"
 FIXTURES = ROOT / "app/src/test/resources/playback"
 

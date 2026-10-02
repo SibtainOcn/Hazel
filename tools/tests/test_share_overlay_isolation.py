@@ -18,7 +18,7 @@ Verifies:
 8. Dark overlay theme using the user's accent colour.
 
 Run:
-    python tools/test_share_overlay_isolation.py
+    python tools/tests/test_share_overlay_isolation.py
 """
 
 import os
@@ -30,7 +30,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
 PASS_COUNT = 0
 FAIL_COUNT = 0

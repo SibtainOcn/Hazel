@@ -4,16 +4,16 @@ Master Test Runner for Hazel.
 
 Executes all verification and test suites locally with a single command:
 1. Release versioning check (GitHub public repo release vs Gradle inside version)
-2. Resource integrity (tools/check.py resources)
-3. Translation parity across 10 locales (tools/check.py translations)
-4. String literal extraction progress (tools/check.py progress)
-5. Artist metadata test harness (tools/test_artist_metadata.py)
-6. Release readiness & regression harness (tools/test_release_regression_harness.py)
-7. Controls & multi-source harness (tools/test_download_controls_and_sources.py)
+2. Resource integrity (tools/strings/check.py resources)
+3. Translation correctness, untranslated keys reported (tools/strings/check.py translations)
+4. String literal extraction progress (tools/strings/check.py progress)
+5. Artist metadata test harness (tools/tests/test_artist_metadata.py)
+6. Release readiness & regression harness (tools/tests/test_release_regression_harness.py)
+7. Controls & multi-source harness (tools/tests/test_download_controls_and_sources.py)
 8. JVM unit tests (gradlew :app:testDebugUnitTest)
 
 Usage:
-    python tools/test_all.py
+    python tools/tests/test_all.py
 Exit:
     0 if all verification and test suites pass, 1 if any suite fails.
 """
@@ -31,7 +31,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 IS_WINDOWS = sys.platform.startswith("win")
 GRADLE_CMD = [str(REPO_ROOT / "gradlew.bat")] if IS_WINDOWS else [str(REPO_ROOT / "gradlew")]
 GITHUB_REPO = "SibtainOcn/Hazel"
@@ -200,16 +200,16 @@ def main():
 
     # Step 2..8: Execution of all verification and test suites
     steps = [
-        ("String Resources Check", [py, "tools/check.py", "resources"]),
-        ("10-Locale Translation Parity", [py, "tools/check.py", "translations"]),
-        ("Literal Extraction Progress", [py, "tools/check.py", "progress"]),
-        ("Artist Metadata Harness", [py, "tools/test_artist_metadata.py"]),
-        ("Home Search UX & Data Preservation Harness", [py, "tools/test_home_search_ux_and_preservation.py"]),
-        ("Release Regression Harness", [py, "tools/test_release_regression_harness.py"]),
-        ("Controls & Multi-Source Harness", [py, "tools/test_download_controls_and_sources.py"]),
-        ("Share Overlay Isolation & Safety Harness", [py, "tools/test_share_overlay_isolation.py"]),
-        ("NewPipe Latency & Multi-Source Harness", [py, "tools/test_newpipe_latency_and_fallback.py"]),
-        ("Software Update & Flavors Harness", [py, "tools/test_software_update_and_flavors.py"]),
+        ("String Resources Check", [py, "tools/strings/check.py", "resources"]),
+        ("Translation Correctness", [py, "tools/strings/check.py", "translations"]),
+        ("Literal Extraction Progress", [py, "tools/strings/check.py", "progress"]),
+        ("Artist Metadata Harness", [py, "tools/tests/test_artist_metadata.py"]),
+        ("Home Search UX & Data Preservation Harness", [py, "tools/tests/test_home_search_ux_and_preservation.py"]),
+        ("Release Regression Harness", [py, "tools/tests/test_release_regression_harness.py"]),
+        ("Controls & Multi-Source Harness", [py, "tools/tests/test_download_controls_and_sources.py"]),
+        ("Share Overlay Isolation & Safety Harness", [py, "tools/tests/test_share_overlay_isolation.py"]),
+        ("NewPipe Latency & Multi-Source Harness", [py, "tools/tests/test_newpipe_latency_and_fallback.py"]),
+        ("Software Update & Flavors Harness", [py, "tools/tests/test_software_update_and_flavors.py"]),
         ("Gradle JVM Unit Tests", GRADLE_CMD + [":app:test", "--console=plain"]),
     ]
 
@@ -248,7 +248,7 @@ def main():
         if not version_updated:
             print("  ALL TEST SUITES PASSED!")
             print("  Remember: version NOT update you must update for the newer version relase")
-            print("  (Run tools/release.ps1 <new_version> when ready to cut the release)")
+            print("  (Run tools/release/release.ps1 <new_version> when ready to cut the release)")
         else:
             print("  ALL SUITES PASSED AND VERSION IS READY FOR RELEASE!")
         print("=" * 70)

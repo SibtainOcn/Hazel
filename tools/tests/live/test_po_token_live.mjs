@@ -6,7 +6,7 @@
 // them, and reports whether the web client's formats came through.
 //
 // Needs network access and Playwright:
-//   NODE_PATH=$(npm root -g) node tools/live/test_po_token_live.mjs [--verify] [VIDEO_URL]
+//   NODE_PATH=$(npm root -g) node tools/tests/live/test_po_token_live.mjs [--verify] [VIDEO_URL]
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";

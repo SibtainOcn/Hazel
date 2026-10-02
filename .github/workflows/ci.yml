@@ -34,9 +34,7 @@ jobs:
   # plural with no 'other', an unescaped apostrophe or a sentence assembled out of
   # translated fragments all compile perfectly and are only visible here.
   #
-  # Android's own lint owns the half of this that it knows about, which is translation
-  # parity and format strings. Those rules find nothing until a values-* folder exists, so
-  # they run inside the build job's lint rather than being a gate of their own yet.
+  # Translation completeness is reported here, not enforced: see the translations step.
   strings:
     name: String resources
     runs-on: ubuntu-latest
@@ -46,13 +44,27 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Check the source resources
-        run: python3 tools/check.py resources
+        run: python3 tools/strings/check.py resources
 
-      # Passes trivially while there are no translations, and starts doing the work the day
-      # the first values-* folder lands: key parity, placeholders, inline markup, escaping
-      # and the plural categories each language actually defines.
+      # Fails on a translation that is wrong: a changed or added placeholder, changed markup
+      # or link, a key the source does not have, an empty value, bad escaping, or plural
+      # categories the language does not define. A key that is not translated yet is not a
+      # failure, since Android shows the English for it; it is listed with each language's
+      # coverage in the job summary. That keeps a pull request that adds English text green.
       - name: Check the translations
-        run: python3 tools/check.py translations
+        run: |
+          set -o pipefail
+          {
+            echo "## Translations"
+            echo
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          out=$(mktemp)
+          python3 tools/strings/check.py translations | tee "$out"
+          status=$?
+          sed -n '/--- coverage ---/,$p' "$out" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          exit $status
 
       # Reported rather than enforced. The count only falls, so a number that went up is
       # worth seeing on the pull request without failing it.
@@ -63,7 +75,7 @@ jobs:
             echo "## Text still written as a literal"
             echo
             echo '```'
-            python3 tools/check.py progress
+            python3 tools/strings/check.py progress
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -89,10 +101,10 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Run artist metadata & format test harness
-        run: python3 tools/test_artist_metadata.py
+        run: python3 tools/tests/test_artist_metadata.py
 
       - name: Run release readiness & regression test harness
-        run: python3 tools/test_release_regression_harness.py
+        run: python3 tools/tests/test_release_regression_harness.py
 
       # The unit tests are pure JVM: no emulator, no device, no Android framework. That is
       # what keeps this job to seconds, and it is the property to protect as the suite grows.

@@ -13,7 +13,7 @@ Validates:
 8. Downloads Screen Search Bar AnimatedVisibility and outside-click dismissal.
 
 Run:
-    python tools/test_home_search_ux_and_preservation.py
+    python tools/tests/test_home_search_ux_and_preservation.py
 Exit:
     0 on success, 1 on any failure.
 """
@@ -28,7 +28,7 @@ from urllib.parse import urlparse
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
 PASS_COUNT = 0
 FAIL_COUNT = 0
