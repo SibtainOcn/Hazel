@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.11] - 2026-10-02
 ### Added
 - Hazel Instant is back as a second share target. Sharing a link to it starts the download with no sheet: the link is read in the background and downloaded at the preferred quality and folders from settings (a playlist or channel downloads every entry). A small dialog confirms it with a shimmering Hazel mark, OK and a tune button that opens Synthesizing, and closes itself after 3 seconds. The download is on the queue screen from the moment it is shared, waiting while the link is read; a link that cannot be read goes under Failed with its log and a Retry, and a notification says why, with Sign in when the site wants one. Its read is separate from the home screen, so a link being read there or a second Instant share does not drop it, sharing the same link twice gives one download, and the download keeps running after the dialog is closed.
 - Getting started in More, above Documentation, shows the first-launch walkthrough again. The walkthrough has a new Share to Hazel step (download right away with your preferred settings, or wait for the details and choose every option), and the Hazel Instant step says what Instant does now.
