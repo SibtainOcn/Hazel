@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
@@ -504,6 +505,102 @@ class DownloadViewModel : ViewModel() {
                         app, sanitizeError(log), signInUrl = signInTargetFor(log, url)
                     )
                 }
+            }
+        }
+    }
+
+    /** Links Hazel Instant is reading right now, so the same share twice is one download. */
+    private val instantReads = mutableSetOf<String>()
+
+    /**
+     * Hazel Instant: reads [url] and downloads it with the saved settings, without a sheet.
+     *
+     * The read is its own and leaves the home screen alone, so a link being read there, or a
+     * second Instant share a moment later, neither drops this one nor is dropped by it.
+     *
+     * The download service is started here, while the share overlay is still in front:
+     * Android 12 and later refuse a foreground service started from the background, and the
+     * read can easily outlast the overlay. It is let go again if the read fails and nothing
+     * else needs it. A failure is reported by notification, with a sign-in button where the
+     * site asked for one.
+     */
+    fun instantDownload(context: Context, url: String) {
+        val app = context.applicationContext
+        val first = synchronized(instantReads) { instantReads.add(url) }
+        if (!first) return
+        DownloadService.start(app, url)
+
+        // On the queue as waiting while it is read, so the queue screen shows it from the
+        // moment it was shared. Replaced by its real entries once the download starts.
+        val waiting = BatchItem(url = url, title = url)
+        _state.update { it.copy(batch = it.batch + waiting) }
+        val dropWaiting = { _state.update { s -> s.copy(batch = s.batch - waiting) } }
+
+        viewModelScope.launch {
+            var failure: String? = null
+            try {
+                if (!SettingsRepository.getIncognito(app).first()) {
+                    withContext(Dispatchers.IO) { SearchHistoryRepository.record(app, url) }
+                }
+                val options = SettingsRepository.getDownloadOptions(app).first()
+                val dirs = SettingsRepository.getSaveDirs(app).first()
+                val step = options.videoQuality.takeIf { it > 0 }
+                    ?.let { GenericFormats.heightCeiling(it) }
+                    ?: MediaProbe.BEST_VIDEO
+
+                val items = withContext(Dispatchers.IO) {
+                    expand(
+                        url,
+                        CookieRepository.accessFor(app, url),
+                        SettingsRepository.getFetchMode(app).first(),
+                        SettingsRepository.getForceIpv4(app).first(),
+                        SettingsRepository.getListingSource(app).first(),
+                        "${MediaProbe.PROBE_PROCESS_ID}_instant_${LinkKey.digest(url)}"
+                    )
+                }
+                val plans = items.map { info ->
+                    val format = GenericFormats.applyTo(info, step, null) ?: step
+                    DownloadPlan(info, format, info.title, info.uploader, null)
+                }
+                dropWaiting()
+                if (plans.isEmpty()) failure = app.getString(R.string.no_results_error_title)
+                else startBatch(app, plans, options, saveDirs = dirs)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                failure = e.message?.trim().orEmpty().ifBlank { app.getString(R.string.no_results_error_title) }
+            } finally {
+                if (failure != null) dropWaiting()
+                val idle = synchronized(instantReads) {
+                    instantReads.remove(url)
+                    instantReads.isEmpty()
+                }
+                // Let go of the service only when nothing else is holding it: no other
+                // Instant read waiting and no download running or queued.
+                if (failure != null && idle && synchronized(queue) { runOwner == null && queue.isEmpty() }) {
+                    DownloadService.stop(app)
+                }
+            }
+            failure?.let { log ->
+                Log.w("Hazel", "Instant download failed: $log")
+                // Under Failed on the queue screen with its log. With no payload to replay,
+                // Retry there reads the link again.
+                downloadScope.launch {
+                    com.hazel.android.data.FailedDownloadRepository.record(
+                        app,
+                        com.hazel.android.data.FailedDownload(
+                            url = url,
+                            title = url,
+                            author = "",
+                            thumbnail = null,
+                            isVideo = true,
+                            errorLog = log
+                        )
+                    )
+                }
+                DownloadNotificationHelper.showError(
+                    app, sanitizeError(log), signInUrl = signInTargetFor(log, url)
+                )
             }
         }
     }

@@ -66,7 +66,7 @@ object InfoCache {
      * How many links keep their payload on disk. A payload can run to a megabyte, so this
      * stays modest; the oldest goes when a new one arrives.
      */
-    private const val MAX_ENTRIES = 25
+    private const val MAX_ENTRIES = 50
 
     /**
      * How many parsed reads each reader holds in memory. These are small, and a search or

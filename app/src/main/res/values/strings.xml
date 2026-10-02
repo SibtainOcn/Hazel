@@ -115,7 +115,7 @@
     <string name="guide_step5_title">Notifications</string>
     <string name="guide_step_paste_link">Paste a link into the search field to download it. You can add multiple links or entire playlists at once.</string>
     <string name="guide_step_pick_format">Tap a card to pick the exact format. All available qualities are listed with size and codec options.</string>
-    <string name="guide_step_share_instant">Share a link to Hazel Instant from any app to download instantly at your preset quality.</string>
+    <string name="guide_step_share_instant">Share to Hazel Instant to skip the sheet. It reads the link and starts the download with your preferred settings; the tune button opens Synthesizing to change them.</string>
     <string name="guide_step_battery_unrestricted">Set battery use to unrestricted, otherwise Android may stop background downloads when you leave the app.</string>
     <string name="guide_step_notifications">Get notified about download progress and completions in the background.</string>
     <string name="guide_allow">Allow</string>
@@ -270,7 +270,7 @@
     <string name="cleanup_category_other_cache_label">Other cached files</string>
     <string name="cleanup_category_other_cache_description">Thumbnails and anything else cached while browsing links.</string>
     <string name="cleanup_category_link_reads_label">Saved link reads</string>
-    <string name="cleanup_category_link_reads_description">Formats of the last 25 links read, so opening one again is instant. Kept for up to 6 hours; never written in incognito.</string>
+    <string name="cleanup_category_link_reads_description">Formats of the last 50 links read, so opening one again is instant. Kept for up to 6 hours; never written in incognito.</string>
     <!--
          Deliberately does not name the category. The row the user just tapped is still on
          screen behind the dialog, and dropping a translated noun into a sentence slot
@@ -346,11 +346,6 @@
     <string name="history_retrying_toast">Retrying download…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">Properties</string>
-    <string name="properties_status">Status</string>
-    <string name="properties_status_present">On this device</string>
-    <string name="properties_status_deleted">Deleted from this device</string>
-    <string name="properties_kind">Kind</string>
     <string name="properties_kind_video">Video</string>
     <string name="properties_kind_audio">Audio</string>
     <string name="properties_quality">Quality</string>
@@ -368,8 +363,6 @@
     <string name="properties_saved_to">Saved to</string>
     <string name="properties_downloaded">Downloaded</string>
     <string name="properties_source">Source</string>
-    <string name="properties_link_copied_opened">Link copied and opened</string>
-    <string name="properties_link_copied">Link copied</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">Back</string>
@@ -798,4 +791,12 @@
     <string name="home_start_paste">Paste link</string>
     <string name="home_start_search">Search</string>
     <string name="home_start_downloads">Downloads</string>
+    <string name="more_getting_started">Getting started</string>
+    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_started">Download started</string>
+    <string name="instant_ok">OK</string>
+    <string name="instant_settings">Synthesizing settings</string>
+    <string name="guide_step_share_title">Share to Hazel</string>
+    <string name="guide_step_share_sheet">Share a link to Hazel from any app. Download right away with your preferred settings, or wait a moment for the details and choose every option.</string>
+    <string name="instant_closing">Closing in %1$d s</string>
 </resources>

@@ -100,7 +100,7 @@
     <string name="guide_step5_title">通知</string>
     <string name="guide_step_paste_link">検索バーにリンクを貼り付けてダウンロードします。複数のリンクやプレイリストの追加も可能です</string>
     <string name="guide_step_pick_format">カードをタップして詳細な形式を選択します。利用可能なすべての画質がサイズとコーデック付きで表示されます。</string>
-    <string name="guide_step_share_instant">任意のアプリからHazel 即時にリンクを共有すると、設定した画質ですぐにダウンロードできます。</string>
+    <string name="guide_step_share_instant">Hazel Instant に共有するとシートを省略できます。リンクを読み取り、好みの設定でダウンロードを開始します。調整ボタンで合成を開いて設定を変更できます。</string>
     <string name="guide_step_battery_unrestricted">バッテリー使用を「無制限」に設定してください。制限されている場合、アプリを離れた際にAndroidがダウンロードを停止することがあります。</string>
     <string name="guide_step_notifications">バックグラウンドでのダウンロード進捗や完了の通知を受け取ります。</string>
     <string name="guide_allow">許可</string>
@@ -255,7 +255,7 @@
     <string name="cleanup_category_other_cache_label">その他のキャッシュファイル</string>
     <string name="cleanup_category_other_cache_description">リンク閲覧時にキャッシュされたサムネイルなどです。</string>
     <string name="cleanup_category_link_reads_label">保存済みのリンク情報</string>
-    <string name="cleanup_category_link_reads_description">最近読み込んだ 25 件のリンクの形式です。もう一度開くとすぐに表示されます。最大 6 時間保持し、シークレットでは保存しません。</string>
+    <string name="cleanup_category_link_reads_description">最近読み込んだ 50 件のリンクの形式です。もう一度開くとすぐに表示されます。最大 6 時間保持し、シークレットでは保存しません。</string>
     <string name="cleanup_confirm_category_title">これらの一時ファイルを削除しますか？</string>
     <string name="cleanup_confirm_category_safe">%1$s が解放されます。保存済みのファイルには影響ありません。</string>
     <string name="cleanup_confirm_category_unsafe">%1$s が解放されます。次回ダウンロード時に再展開するため時間がかかります。</string>
@@ -326,11 +326,6 @@
     <string name="history_retrying_toast">ダウンロードを再試行しています…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">プロパティ</string>
-    <string name="properties_status">状態</string>
-    <string name="properties_status_present">端末上に存在</string>
-    <string name="properties_status_deleted">端末から削除済み</string>
-    <string name="properties_kind">種類</string>
     <string name="properties_kind_video">動画</string>
     <string name="properties_kind_audio">音声</string>
     <string name="properties_quality">品質</string>
@@ -347,8 +342,6 @@
     <string name="properties_saved_to">保存先</string>
     <string name="properties_downloaded">ダウンロード日時</string>
     <string name="properties_source">ソース</string>
-    <string name="properties_link_copied_opened">リンクをコピーして開きました</string>
-    <string name="properties_link_copied">リンクをコピーしました</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">戻る</string>
@@ -731,4 +724,12 @@
     <string name="home_start_paste">リンクを貼り付け</string>
     <string name="home_start_search">検索</string>
     <string name="home_start_downloads">ダウンロード</string>
+    <string name="more_getting_started">はじめに</string>
+    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_started">ダウンロードを開始しました</string>
+    <string name="instant_ok">OK</string>
+    <string name="instant_settings">合成の設定</string>
+    <string name="guide_step_share_title">Hazel に共有</string>
+    <string name="guide_step_share_sheet">どのアプリからでもリンクを Hazel に共有できます。好みの設定ですぐにダウンロードするか、詳細が届くのを少し待ってすべてのオプションを選べます。</string>
+    <string name="instant_closing">%1$d 秒後に閉じます</string>
 </resources>

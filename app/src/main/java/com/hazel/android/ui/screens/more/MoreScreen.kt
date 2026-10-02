@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Folder
@@ -529,6 +530,36 @@ fun MoreScreen(
             // other ways of helping that cost nothing. It was here as well, so the same
             // address was reachable by two routes that behaved differently, and the one
             // that stayed is the one with something to say about why anyone would follow it.
+
+            // The first-launch carousel again, for anyone who skipped it or installed before
+            // it said what it says now.
+            var guideOpen by remember { mutableStateOf(false) }
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.more_getting_started)) },
+                leadingContent = {
+                    Icon(Icons.Filled.Bolt, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { guideOpen = true }
+            )
+            if (guideOpen) {
+                com.hazel.android.ui.screens.download.GettingStartedDialog(
+                    onOpenBatterySettings = onOpenBatterySettings,
+                    onDismiss = { guideOpen = false }
+                )
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
 
             // The guide, FAQ, what's new and the licence, read in the app. Each page has a
             // button to open it in the browser, for saving or sharing it.

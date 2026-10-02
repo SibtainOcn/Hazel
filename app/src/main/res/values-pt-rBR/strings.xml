@@ -108,7 +108,7 @@
     <string name="guide_step5_title">Notificações</string>
     <string name="guide_step_paste_link">Cole um link no campo de pesquisa para baixá-lo. Você pode adicionar vários links e playlists</string>
     <string name="guide_step_pick_format">Toque em um cartão para escolher o formato exato. Todas as qualidades disponíveis são listadas com o tamanho e o codec.</string>
-    <string name="guide_step_share_instant">Compartilhe um link com o Hazel Instantâneo de qualquer aplicativo para baixar na hora, na qualidade que você definiu.</string>
+    <string name="guide_step_share_instant">Compartilhe com o Hazel Instant para pular a folha. Ele lê o link e inicia o download com suas configurações preferidas; o botão de ajuste abre Síntese para alterá-las.</string>
     <string name="guide_step_battery_unrestricted">Defina o uso da bateria como irrestrito, senão o Android pode interromper os downloads quando você sair do aplicativo.</string>
     <string name="guide_step_notifications">Receba avisos sobre o progresso dos downloads e arquivos concluídos em segundo plano.</string>
     <string name="guide_allow">Permitir</string>
@@ -263,7 +263,7 @@
     <string name="cleanup_category_other_cache_label">Outros arquivos em cache</string>
     <string name="cleanup_category_other_cache_description">Miniaturas e tudo o mais guardado em cache enquanto você navega pelos links.</string>
     <string name="cleanup_category_link_reads_label">Leituras de links salvas</string>
-    <string name="cleanup_category_link_reads_description">Formatos dos últimos 25 links lidos, para que abrir um de novo seja instantâneo. Guardados por até 6 horas; nunca salvos no modo anônimo.</string>
+    <string name="cleanup_category_link_reads_description">Formatos dos últimos 50 links lidos, para que abrir um de novo seja instantâneo. Guardados por até 6 horas; nunca salvos no modo anônimo.</string>
     <string name="cleanup_confirm_category_title">Limpar estes arquivos?</string>
     <string name="cleanup_confirm_category_safe">%1$s serão liberados. Nada do que você salvou é afetado.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s serão liberados, e o próximo download vai demorar mais enquanto eles são descompactados de novo.</string>
@@ -334,11 +334,6 @@
     <string name="history_retrying_toast">Tentando baixar novamente…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">Propriedades</string>
-    <string name="properties_status">Situação</string>
-    <string name="properties_status_present">Neste aparelho</string>
-    <string name="properties_status_deleted">Excluído deste aparelho</string>
-    <string name="properties_kind">Tipo</string>
     <string name="properties_kind_video">Vídeo</string>
     <string name="properties_kind_audio">Áudio</string>
     <string name="properties_quality">Qualidade</string>
@@ -355,8 +350,6 @@
     <string name="properties_saved_to">Salvo em</string>
     <string name="properties_downloaded">Baixado</string>
     <string name="properties_source">Origem</string>
-    <string name="properties_link_copied_opened">Link copiado e aberto</string>
-    <string name="properties_link_copied">Link copiado</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">Voltar</string>
@@ -747,4 +740,12 @@
     <string name="home_start_paste">Colar link</string>
     <string name="home_start_search">Pesquisar</string>
     <string name="home_start_downloads">Downloads</string>
+    <string name="more_getting_started">Primeiros passos</string>
+    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_started">Download iniciado</string>
+    <string name="instant_ok">OK</string>
+    <string name="instant_settings">Configurações de síntese</string>
+    <string name="guide_step_share_title">Compartilhar com o Hazel</string>
+    <string name="guide_step_share_sheet">Compartilhe um link com o Hazel de qualquer app. Baixe na hora com suas configurações preferidas, ou espere um instante pelos detalhes e escolha cada opção.</string>
+    <string name="instant_closing">Fecha em %1$d s</string>
 </resources>

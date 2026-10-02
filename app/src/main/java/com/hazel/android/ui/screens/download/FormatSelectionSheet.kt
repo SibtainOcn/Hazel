@@ -138,7 +138,8 @@ fun FormatSelectionSheet(
     audioFirst: Boolean = false,
     isLoadingFormats: Boolean = false,
     onRefresh: ((source: ListingSource?, fresh: Boolean) -> Unit)? = null,
-    canChooseSource: Boolean = false
+    canChooseSource: Boolean = false,
+    preferredHeight: Int = 0
 ) {
     // Half height on open. The sheet is a list, and a list is readable from the top down,
     // so the whole screen is offered rather than demanded.
@@ -186,15 +187,19 @@ fun FormatSelectionSheet(
     // so the rail is there from the start rather than pushing the list aside as they land.
     val showRail = stops.size > 2 || (isLoadingFormats && info.videoFormats.isNotEmpty())
 
-    // Opens on the stop holding what was chosen when the sheet opened. Read from the choice
-    // at opening rather than the draft, so tapping a row under "All" does not move the rail.
-    val openedOn = remember { selected?.formatId }
+    // Opens on the step of the preferred quality set in settings, or the nearest one below
+    // it, so the list starts where the download would land. With no preference it opens on
+    // "All", which holds every choice.
     var pickedStop by remember { mutableStateOf<String?>(null) }
-    val active = remember(stops, pickedStop, showRail) {
+    val active = remember(stops, pickedStop, showRail, preferredHeight) {
         if (!showRail) stops.first()
         else stops.firstOrNull { it.key == pickedStop }
-            ?: stops.firstOrNull { it.key != STOP_ALL && it.holds(openedOn) }
             ?: stops.firstOrNull { audioFirst && it.key == STOP_AUDIO }
+            ?: preferredHeight.takeIf { it > 0 }?.let { ceiling ->
+                stops.firstOrNull { stop ->
+                    stop.key.startsWith("h") && (stop.key.drop(1).toIntOrNull() ?: Int.MAX_VALUE) <= ceiling
+                }
+            }
             ?: stops.first()
     }
     val rows = active.rows
@@ -658,9 +663,6 @@ private sealed interface FormatListRow {
 @Immutable
 private class FormatStop(val key: String, val label: String, val rows: List<FormatListRow>) {
     val count: Int = rows.count { it is FormatListRow.Entry }
-
-    fun holds(formatId: String?): Boolean =
-        formatId != null && rows.any { it is FormatListRow.Entry && it.format.formatId == formatId }
 }
 
 /**
@@ -693,8 +695,10 @@ private fun buildStops(
         if (formats.isEmpty()) emptyList()
         else listOf(FormatListRow.Header(title)) + entries(title, formats)
 
-    val videoRows = section(videoTitle, video)
-    val audioRows = section(audioTitle, audio)
+    // The kind that leads "All" goes without a header: the rail already says what the stop
+    // is, and a label above the first row only pushes the list out of line with the rail.
+    val videoRows = if (audioFirst) section(videoTitle, video) else entries(videoTitle, video)
+    val audioRows = if (audioFirst) entries(audioTitle, audio) else section(audioTitle, audio)
     val all = if (audioFirst) audioRows + videoRows else videoRows + audioRows
 
     // The steps come from what the source offers, read through [qualityRung] so a cropped

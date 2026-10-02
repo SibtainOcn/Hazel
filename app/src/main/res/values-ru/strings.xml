@@ -112,7 +112,7 @@
     <string name="guide_step5_title">Уведомления</string>
     <string name="guide_step_paste_link">Вставьте ссылку в поле поиска, чтобы скачать её. Можно добавлять несколько ссылок и плейлисты</string>
     <string name="guide_step_pick_format">Нажмите на карточку для выбора точного формата. Все доступные варианты перечислены с размером и кодеком.</string>
-    <string name="guide_step_share_instant">Поделитесь ссылкой в Hazel Мгновенно из любого приложения для быстрой загрузки с заданным качеством.</string>
+    <string name="guide_step_share_instant">Поделитесь в Hazel Instant, чтобы пропустить окно. Ссылка будет прочитана, и загрузка начнётся с предпочтительными настройками; кнопка настройки открывает обработку, чтобы их изменить.</string>
     <string name="guide_step_battery_unrestricted">Установите работу от батареи без ограничений, иначе Android может остановить загрузку при выходе из приложения.</string>
     <string name="guide_step_notifications">Получайте уведомления о ходе и завершении загрузок в фоновом режиме.</string>
     <string name="guide_allow">Разрешить</string>
@@ -267,7 +267,7 @@
     <string name="cleanup_category_other_cache_label">Прочий кэш</string>
     <string name="cleanup_category_other_cache_description">Обложки и другие файлы, кэшированные при просмотре ссылок.</string>
     <string name="cleanup_category_link_reads_label">Сохранённые данные ссылок</string>
-    <string name="cleanup_category_link_reads_description">Форматы последних 25 прочитанных ссылок, чтобы ссылка открывалась снова сразу. Хранятся до 6 часов; в режиме инкогнито не сохраняются.</string>
+    <string name="cleanup_category_link_reads_description">Форматы последних 50 прочитанных ссылок, чтобы ссылка открывалась снова сразу. Хранятся до 6 часов; в режиме инкогнито не сохраняются.</string>
     <string name="cleanup_confirm_category_title">Очистить эти файлы?</string>
     <string name="cleanup_confirm_category_safe">Будет освобождено %1$s. Сохранённые файлы не будут затронуты.</string>
     <string name="cleanup_confirm_category_unsafe">Будет освобождено %1$s; следующая загрузка займёт больше времени из-за повторной распаковки.</string>
@@ -338,11 +338,6 @@
     <string name="history_retrying_toast">Повторная попытка загрузки…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">Свойства</string>
-    <string name="properties_status">Статус</string>
-    <string name="properties_status_present">На этом устройстве</string>
-    <string name="properties_status_deleted">Удалено с устройства</string>
-    <string name="properties_kind">Тип</string>
     <string name="properties_kind_video">Видео</string>
     <string name="properties_kind_audio">Аудио</string>
     <string name="properties_quality">Качество</string>
@@ -359,8 +354,6 @@
     <string name="properties_saved_to">Сохранено в</string>
     <string name="properties_downloaded">Загружено</string>
     <string name="properties_source">Источник</string>
-    <string name="properties_link_copied_opened">Ссылка скопирована и открыта</string>
-    <string name="properties_link_copied">Ссылка скопирована</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">Назад</string>
@@ -754,4 +747,12 @@
     <string name="home_start_paste">Вставить ссылку</string>
     <string name="home_start_search">Поиск</string>
     <string name="home_start_downloads">Загрузки</string>
+    <string name="more_getting_started">Начало работы</string>
+    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_started">Загрузка началась</string>
+    <string name="instant_ok">ОК</string>
+    <string name="instant_settings">Настройки обработки</string>
+    <string name="guide_step_share_title">Поделиться в Hazel</string>
+    <string name="guide_step_share_sheet">Поделитесь ссылкой в Hazel из любого приложения. Скачайте сразу с предпочтительными настройками или подождите детали и выберите каждый параметр.</string>
+    <string name="instant_closing">Закроется через %1$d с</string>
 </resources>

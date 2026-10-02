@@ -86,6 +86,23 @@
         </activity>
 
         <!--
+            Hazel Instant: the second share target. It reads the shared link and downloads it
+            with the saved settings, showing only a small confirmation over the app.
+        -->
+        <activity-alias
+            android:name=".InstantShareActivity"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:label="@string/instant_label"
+            android:icon="@mipmap/ic_launcher">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+
+        <!--
              Holds the process open while a download runs. It does no work of its own: the
              queue lives in the app, and this only stops the system stopping it.
         -->

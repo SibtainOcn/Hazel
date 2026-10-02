@@ -100,7 +100,7 @@
     <string name="guide_step5_title">通知权限</string>
     <string name="guide_step_paste_link">把链接粘贴到搜索框即可下载。你可以添加多个链接和播放列表</string>
     <string name="guide_step_pick_format">点按卡片可以挑选具体格式。所有可用画质都会连同体积和编码一起列出。</string>
-    <string name="guide_step_share_instant">从任意应用把链接分享给 Hazel 即时下载，就会按你设定的画质立刻下载。</string>
+    <string name="guide_step_share_instant">分享到 Hazel Instant 可跳过面板。它会读取链接并按你的偏好设置开始下载；调节按钮可打开合成以更改设置。</string>
     <string name="guide_step_battery_unrestricted">请把电池用量设为不受限制，否则你离开应用时 Android 可能会中止下载。</string>
     <string name="guide_step_notifications">在后台接收下载进度以及文件完成的即时通知。</string>
     <string name="guide_allow">允许</string>
@@ -255,7 +255,7 @@
     <string name="cleanup_category_other_cache_label">其他缓存文件</string>
     <string name="cleanup_category_other_cache_description">缩略图，以及浏览链接时缓存下来的其他内容。</string>
     <string name="cleanup_category_link_reads_label">已保存的链接读取结果</string>
-    <string name="cleanup_category_link_reads_description">最近读取的 25 个链接的格式，再次打开时可立即显示。最多保留 6 小时；无痕模式下从不保存。</string>
+    <string name="cleanup_category_link_reads_description">最近读取的 50 个链接的格式，再次打开时可立即显示。最多保留 6 小时；无痕模式下从不保存。</string>
     <string name="cleanup_confirm_category_title">清除这些文件？</string>
     <string name="cleanup_confirm_category_safe">将腾出 %1$s。你保存过的任何东西都不受影响。</string>
     <string name="cleanup_confirm_category_unsafe">将腾出 %1$s，下次下载会因为要重新解包而变慢。</string>
@@ -326,11 +326,6 @@
     <string name="history_retrying_toast">正在重试下载…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">属性</string>
-    <string name="properties_status">状态</string>
-    <string name="properties_status_present">在本设备上</string>
-    <string name="properties_status_deleted">已从本设备删除</string>
-    <string name="properties_kind">类型</string>
     <string name="properties_kind_video">视频</string>
     <string name="properties_kind_audio">音频</string>
     <string name="properties_quality">画质</string>
@@ -347,8 +342,6 @@
     <string name="properties_saved_to">保存到</string>
     <string name="properties_downloaded">下载时间</string>
     <string name="properties_source">来源</string>
-    <string name="properties_link_copied_opened">链接已复制并打开</string>
-    <string name="properties_link_copied">链接已复制</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">返回</string>
@@ -731,4 +724,12 @@
     <string name="home_start_paste">粘贴链接</string>
     <string name="home_start_search">搜索</string>
     <string name="home_start_downloads">下载</string>
+    <string name="more_getting_started">入门指南</string>
+    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_started">已开始下载</string>
+    <string name="instant_ok">确定</string>
+    <string name="instant_settings">合成设置</string>
+    <string name="guide_step_share_title">分享到 Hazel</string>
+    <string name="guide_step_share_sheet">从任意应用将链接分享到 Hazel。可按偏好设置立即下载，或稍等片刻获取详情后选择每个选项。</string>
+    <string name="instant_closing">%1$d 秒后关闭</string>
 </resources>
