@@ -36,8 +36,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       # Fails on fancy punctuation, unfilled placeholders, and local links, images or
@@ -51,7 +51,7 @@ jobs:
         with:
           args: --no-progress --max-retries 4 --retry-wait-time 5 --accept 200,429,502,503,504 --exclude 'fonts\.(googleapis|gstatic)\.com' 'pages/hazel-pages/_build/*.html'
           fail: true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: hazel-website
           path: pages/hazel-pages/_build
@@ -68,9 +68,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/configure-pages@v6
+      - uses: actions/download-artifact@v8
         with:
           name: hazel-website
           path: website
@@ -80,8 +80,8 @@ jobs:
           cp pages/index.html _site/
           cp assets/Haze.svg _site/
           cp -r website _site/hazel
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
