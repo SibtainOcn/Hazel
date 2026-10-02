@@ -747,4 +747,5 @@
     <string name="instant_settings">Configurações de síntese</string>
     <string name="guide_step_share_title">Compartilhar com o Hazel</string>
     <string name="guide_step_share_sheet">Compartilhe um link com o Hazel de qualquer app. Baixe na hora com suas configurações preferidas, ou espere um instante pelos detalhes e escolha cada opção.</string>
+    <string name="instant_closing">Fecha em %1$d s</string>
 </resources>

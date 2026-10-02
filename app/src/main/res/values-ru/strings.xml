@@ -754,4 +754,5 @@
     <string name="instant_settings">Настройки обработки</string>
     <string name="guide_step_share_title">Поделиться в Hazel</string>
     <string name="guide_step_share_sheet">Поделитесь ссылкой в Hazel из любого приложения. Скачайте сразу с предпочтительными настройками или подождите детали и выберите каждый параметр.</string>
+    <string name="instant_closing">Закроется через %1$d с</string>
 </resources>

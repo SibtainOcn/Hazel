@@ -731,4 +731,5 @@
     <string name="instant_settings">合成の設定</string>
     <string name="guide_step_share_title">Hazel に共有</string>
     <string name="guide_step_share_sheet">どのアプリからでもリンクを Hazel に共有できます。好みの設定ですぐにダウンロードするか、詳細が届くのを少し待ってすべてのオプションを選べます。</string>
+    <string name="instant_closing">%1$d 秒後に閉じます</string>
 </resources>

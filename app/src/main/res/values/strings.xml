@@ -798,4 +798,5 @@
     <string name="instant_settings">Synthesizing settings</string>
     <string name="guide_step_share_title">Share to Hazel</string>
     <string name="guide_step_share_sheet">Share a link to Hazel from any app. Download right away with your preferred settings, or wait a moment for the details and choose every option.</string>
+    <string name="instant_closing">Closing in %1$d s</string>
 </resources>
