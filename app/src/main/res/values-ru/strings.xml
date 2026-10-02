@@ -338,11 +338,6 @@
     <string name="history_retrying_toast">Повторная попытка загрузки…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">Свойства</string>
-    <string name="properties_status">Статус</string>
-    <string name="properties_status_present">На этом устройстве</string>
-    <string name="properties_status_deleted">Удалено с устройства</string>
-    <string name="properties_kind">Тип</string>
     <string name="properties_kind_video">Видео</string>
     <string name="properties_kind_audio">Аудио</string>
     <string name="properties_quality">Качество</string>

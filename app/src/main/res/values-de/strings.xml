@@ -330,11 +330,6 @@
     <string name="history_retrying_toast">Download wird wiederholt…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">Eigenschaften</string>
-    <string name="properties_status">Status</string>
-    <string name="properties_status_present">Auf diesem Gerät</string>
-    <string name="properties_status_deleted">Von diesem Gerät gelöscht</string>
-    <string name="properties_kind">Art</string>
     <string name="properties_kind_video">Video</string>
     <string name="properties_kind_audio">Audio</string>
     <string name="properties_quality">Qualität</string>

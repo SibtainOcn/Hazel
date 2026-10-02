@@ -326,11 +326,6 @@
     <string name="history_retrying_toast">Mencoba mengunduh lagi…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">Properti</string>
-    <string name="properties_status">Status</string>
-    <string name="properties_status_present">Ada di perangkat ini</string>
-    <string name="properties_status_deleted">Dihapus dari perangkat ini</string>
-    <string name="properties_kind">Jenis</string>
     <string name="properties_kind_video">Video</string>
     <string name="properties_kind_audio">Audio</string>
     <string name="properties_quality">Kualitas</string>

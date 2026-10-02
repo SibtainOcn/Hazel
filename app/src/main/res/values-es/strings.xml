@@ -334,11 +334,6 @@
     <string name="history_retrying_toast">Reintentando descarga…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">Propiedades</string>
-    <string name="properties_status">Estado</string>
-    <string name="properties_status_present">En este dispositivo</string>
-    <string name="properties_status_deleted">Eliminado de este dispositivo</string>
-    <string name="properties_kind">Tipo</string>
     <string name="properties_kind_video">Vídeo</string>
     <string name="properties_kind_audio">Audio</string>
     <string name="properties_quality">Calidad</string>

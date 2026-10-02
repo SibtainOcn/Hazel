@@ -330,11 +330,6 @@
     <string name="history_retrying_toast">डाउनलोड का पुनः प्रयास किया जा रहा है…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">विवरण</string>
-    <string name="properties_status">स्थिति</string>
-    <string name="properties_status_present">इस डिवाइस पर है</string>
-    <string name="properties_status_deleted">इस डिवाइस से हटाई गई</string>
-    <string name="properties_kind">प्रकार</string>
     <string name="properties_kind_video">वीडियो</string>
     <string name="properties_kind_audio">ऑडियो</string>
     <string name="properties_quality">क्वालिटी</string>

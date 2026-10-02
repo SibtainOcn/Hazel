@@ -124,14 +124,6 @@ fun DownloadPropertiesSheet(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            Text(
-                stringResource(R.string.properties_title),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
             // The download itself, so the details underneath are read against the thing
             // they describe rather than against a filename.
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -192,18 +184,6 @@ fun DownloadPropertiesSheet(
             // Gathered first, then drawn, so a section with nothing in it does not leave a
             // heading and an empty panel behind.
             val media = buildList {
-                add(
-                    stringResource(R.string.properties_status) to stringResource(
-                        if (present) R.string.properties_status_present
-                        else R.string.properties_status_deleted
-                    )
-                )
-                add(
-                    stringResource(R.string.properties_kind) to stringResource(
-                        if (entry.isVideo) R.string.properties_kind_video
-                        else R.string.properties_kind_audio
-                    )
-                )
                 entry.formatLabel.ifBlank { null }
                     ?.let { add(stringResource(R.string.properties_quality) to it) }
                 facts.resolution.ifBlank { null }
@@ -256,7 +236,7 @@ fun DownloadPropertiesSheet(
                     ?.let { add(stringResource(R.string.properties_source) to it) }
             }
 
-            DetailPanel(media, panelColor, missing = !present)
+            DetailPanel(media, panelColor)
             Spacer(modifier = Modifier.height(12.dp))
             DetailPanel(file, panelColor)
             Spacer(modifier = Modifier.height(12.dp))
@@ -331,8 +311,7 @@ fun DownloadPropertiesSheet(
 @Composable
 private fun DetailPanel(
     rows: List<Pair<String, String>>,
-    color: Color,
-    missing: Boolean = false
+    color: Color
 ) {
     if (rows.isEmpty()) return
 
@@ -351,15 +330,7 @@ private fun DetailPanel(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)
                     )
                 }
-                DetailRow(
-                    label = label,
-                    value = value,
-                    // The status leads the panel, so the first row is the one that says
-                    // the file has gone. Asked by position rather than by matching the
-                    // label against a word, which is a comparison that stops holding the
-                    // moment the label is translated.
-                    emphasis = missing && index == 0
-                )
+                DetailRow(label = label, value = value)
             }
         }
     }
@@ -372,7 +343,7 @@ private fun DetailPanel(
  * and a filename is forty, so weighting the label would shorten the wrong half.
  */
 @Composable
-private fun DetailRow(label: String, value: String, emphasis: Boolean = false) {
+private fun DetailRow(label: String, value: String) {
     Row(
         modifier = Modifier.padding(vertical = 11.dp),
         verticalAlignment = Alignment.Top
@@ -388,8 +359,7 @@ private fun DetailRow(label: String, value: String, emphasis: Boolean = false) {
             value,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
-            color = if (emphasis) MaterialTheme.colorScheme.error
-            else MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
     }

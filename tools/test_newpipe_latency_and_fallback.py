@@ -450,7 +450,7 @@ def test_per_reader_cache():
     check_true("InfoCache checks the settings stamp before a download replays a payload", "storedStamp(url) != ReadProfile.stampFor(url)" in cache_kt)
     check_true("InfoCache keeps incognito reads off disk", "if (ReadProfile.incognito)" in cache_kt)
     check_true("InfoCache writes payloads atomically", "writeAtomically(fileFor(url), rawJson)" in cache_kt)
-    check_true("InfoCache keeps the last 25 links on disk", "MAX_ENTRIES = 25" in cache_kt)
+    check_true("InfoCache keeps the last 50 links on disk", "MAX_ENTRIES = 50" in cache_kt)
     check_true("ReadProfile scopes YouTube settings to YouTube links", "isYouTube(url)" in profile_kt)
     check_true("ReadProfile stamps PO tokens and player clients", "validPoTokens()" in profile_kt and "playerClients" in profile_kt)
     check_true("MediaInfo records which reader read it", "val readBy: ListingSource" in info_kt)

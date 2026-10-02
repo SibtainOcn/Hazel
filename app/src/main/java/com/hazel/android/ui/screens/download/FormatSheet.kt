@@ -683,6 +683,7 @@ fun FormatSheet(
             isLoadingFormats = isLoadingFormats || isReadingLink,
             onRefresh = onRefreshFormats,
             canChooseSource = remember(info.url) { NewPipeEngine.handlesStream(info.url) },
+            preferredHeight = options.videoQuality,
             onConfirm = { format ->
                 if (format.hasVideo) {
                     pickedVideo = format

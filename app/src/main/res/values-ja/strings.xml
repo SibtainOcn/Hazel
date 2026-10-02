@@ -326,11 +326,6 @@
     <string name="history_retrying_toast">ダウンロードを再試行しています…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">プロパティ</string>
-    <string name="properties_status">状態</string>
-    <string name="properties_status_present">端末上に存在</string>
-    <string name="properties_status_deleted">端末から削除済み</string>
-    <string name="properties_kind">種類</string>
     <string name="properties_kind_video">動画</string>
     <string name="properties_kind_audio">音声</string>
     <string name="properties_quality">品質</string>

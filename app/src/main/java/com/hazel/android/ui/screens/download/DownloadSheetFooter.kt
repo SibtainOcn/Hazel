@@ -145,7 +145,7 @@ fun DownloadSheetFooter(
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            Column {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(modifier = Modifier.height(10.dp))
                 FeedbackToast(inlineFeedback.orEmpty())
             }
@@ -252,17 +252,19 @@ fun IncognitoButton(
 /** The short message a sheet shows after a tap, in the inverse tone so it reads over anything. */
 @Composable
 internal fun FeedbackToast(message: String, modifier: Modifier = Modifier) {
+    // Sized to its words, like a system toast, so a one-word message is not a banner.
     Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.inverseSurface
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.inverseSurface,
+        shadowElevation = 4.dp
     ) {
         Text(
             message,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.inverseOnSurface,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
         )
     }
 }

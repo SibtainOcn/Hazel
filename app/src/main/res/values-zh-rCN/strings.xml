@@ -326,11 +326,6 @@
     <string name="history_retrying_toast">正在重试下载…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">属性</string>
-    <string name="properties_status">状态</string>
-    <string name="properties_status_present">在本设备上</string>
-    <string name="properties_status_deleted">已从本设备删除</string>
-    <string name="properties_kind">类型</string>
     <string name="properties_kind_video">视频</string>
     <string name="properties_kind_audio">音频</string>
     <string name="properties_quality">画质</string>

@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The link button in the download sheets shows the address with Copy and Open (Copy takes every address of a set).
 
 ### Changed
+- The format list opens on the quality step set as preferred in settings (or the nearest one below it), and on All when no preference is set, instead of always on the highest step.
+- Under All, the kind listed first no longer has a Video (or Audio) header above it, so the first row lines up with the rail.
+- Download properties drop the Properties title and the Status and Kind rows; the thumbnail and title lead the sheet.
+- Messages in the download sheets, such as turning incognito on or off, show as a small toast sized to the text instead of a full width bar.
+- Store screenshots 4, 5 and 10 are replaced with current ones.
 - Storage cleanup's Unfinished downloads, cancelling a queue and removing a paused download now also clear working files left on SD cards.
 - If the card is taken out, full or no longer allows access, downloads are saved to internal storage instead of failing, and a dialog says which ones and where they went (once per batch, wherever you are in the app). Problems while choosing a folder (access refused, no folder picker, the Hazel folder could not be made on the card) are shown in a dialog too.
 - The single download sheet groups its controls into Details, Quality, Save and Adjust sections that open and close, each saying what it is set to while closed. Quality opens by default and at most two stay open, so the sheet fits the screen. Download is the one filled button, in the accent colour.
@@ -31,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The format list's options button uses a tune icon.
 - While a link is read, the format list shows its quality steps with a moving "Reading the rest of the formats" line instead of placeholder rows under them; placeholders only fill a list that has nothing to show yet.
 - Switching the format list between yt-dlp and NewPipe keeps each one's last read of the link, so switching back is instant instead of reading the link again. The format list shows the reader its rows actually came from, and changing the reader in settings no longer throws away saved reads.
-- Saved reads are kept for the last 25 links (was 40) and still survive the app being closed. A read is only reused while the settings it was made with still apply: changing PO tokens, player clients, YouTube extractor arguments, metadata language or browser imitation makes the next read a fresh one (YouTube settings only affect YouTube links). Reads made in incognito are kept in memory only and never written to disk.
+- Saved reads are kept for the last 50 links (was 40) and still survive the app being closed. A read is only reused while the settings it was made with still apply: changing PO tokens, player clients, YouTube extractor arguments, metadata language or browser imitation makes the next read a fresh one (YouTube settings only affect YouTube links). Reads made in incognito are kept in memory only and never written to disk.
 - Temporary Files lists Saved link reads on its own row, with its size, and clearing it also forgets the reads held in memory. Clear everything keeps them unless its new Also clear saved link reads box is ticked (off by default).
 - Removing a link from a set by swiping now asks first, needs half the row's width and only goes towards the Remove label.
 - Download all appears only for several pasted links or a playlist or channel, not for keyword search results.

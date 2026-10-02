@@ -334,11 +334,6 @@
     <string name="history_retrying_toast">Nouvelle tentative de téléchargement…</string>
 
     <!-- DownloadPropertiesSheet -->
-    <string name="properties_title">Propriétés</string>
-    <string name="properties_status">État</string>
-    <string name="properties_status_present">Sur cet appareil</string>
-    <string name="properties_status_deleted">Supprimé de cet appareil</string>
-    <string name="properties_kind">Type</string>
     <string name="properties_kind_video">Vidéo</string>
     <string name="properties_kind_audio">Audio</string>
     <string name="properties_quality">Qualité</string>
