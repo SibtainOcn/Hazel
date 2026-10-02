@@ -104,7 +104,7 @@
     <string name="guide_step5_title">सूचनाएं</string>
     <string name="guide_step_paste_link">डाउनलोड करने के लिए खोज बॉक्स में लिंक चिपकाएँ। आप कई लिंक और प्लेलिस्ट भी जोड़ सकते हैं</string>
     <string name="guide_step_pick_format">सही फ़ॉर्मैट चुनने के लिए किसी कार्ड पर टैप करें। हर उपलब्ध क्वालिटी उसके आकार और कोडेक के साथ दिखाई जाती है।</string>
-    <string name="guide_step_share_instant">किसी भी ऐप से Hazel इंस्टेंट को लिंक साझा करें और तय की गई क्वालिटी में तुरंत डाउनलोड करें।</string>
+    <string name="guide_step_share_instant">शीट छोड़ने के लिए Hazel Instant पर शेयर करें। यह लिंक पढ़कर आपकी पसंदीदा सेटिंग्स से डाउनलोड शुरू करता है; ट्यून बटन उन्हें बदलने के लिए सिंथेसाइज़िंग खोलता है।</string>
     <string name="guide_step_battery_unrestricted">बैटरी उपयोग को अप्रतिबंधित पर रखें, वरना ऐप से बाहर जाते ही Android डाउनलोड रोक सकता है।</string>
     <string name="guide_step_notifications">पृष्ठभूमि में डाउनलोड प्रगति और पूरी हुई फ़ाइलों के बारे में सूचनाएं प्राप्त करें।</string>
     <string name="guide_allow">अनुमति दें</string>
@@ -259,7 +259,7 @@
     <string name="cleanup_category_other_cache_label">अन्य कैश की गई फ़ाइलें</string>
     <string name="cleanup_category_other_cache_description">थंबनेल और लिंक देखते समय कैश हुआ बाकी सब कुछ।</string>
     <string name="cleanup_category_link_reads_label">सहेजी गई लिंक जानकारी</string>
-    <string name="cleanup_category_link_reads_description">पिछले 25 पढ़े गए लिंक के फ़ॉर्मेट, ताकि किसी को दोबारा खोलना तुरंत हो। 6 घंटे तक रखे जाते हैं; इनकॉग्निटो में कभी सहेजे नहीं जाते।</string>
+    <string name="cleanup_category_link_reads_description">पिछले 50 पढ़े गए लिंक के फ़ॉर्मेट, ताकि किसी को दोबारा खोलना तुरंत हो। 6 घंटे तक रखे जाते हैं; इनकॉग्निटो में कभी सहेजे नहीं जाते।</string>
     <string name="cleanup_confirm_category_title">ये फ़ाइलें मिटाएँ?</string>
     <string name="cleanup_confirm_category_safe">%1$s खाली हो जाएगा। आपकी सहेजी हुई किसी चीज़ पर असर नहीं पड़ेगा।</string>
     <string name="cleanup_confirm_category_unsafe">%1$s खाली हो जाएगा, और अगला डाउनलोड इन्हें फिर से खोलने में ज़्यादा समय लेगा।</string>
@@ -732,4 +732,11 @@
     <string name="home_start_paste">लिंक पेस्ट करें</string>
     <string name="home_start_search">खोजें</string>
     <string name="home_start_downloads">डाउनलोड</string>
+    <string name="more_getting_started">शुरुआत करें</string>
+    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_started">डाउनलोड शुरू हुआ</string>
+    <string name="instant_ok">ठीक है</string>
+    <string name="instant_settings">सिंथेसाइज़िंग सेटिंग्स</string>
+    <string name="guide_step_share_title">Hazel पर शेयर करें</string>
+    <string name="guide_step_share_sheet">किसी भी ऐप से Hazel पर लिंक शेयर करें। अपनी पसंदीदा सेटिंग्स के साथ तुरंत डाउनलोड करें, या विवरण आने तक थोड़ा रुककर हर विकल्प चुनें।</string>
 </resources>

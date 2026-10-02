@@ -61,12 +61,13 @@ import com.hazel.android.util.PermissionHelper
 /**
  * Getting-started onboarding stepper carousel, shown on first app launch.
  *
- * 5 slides introduce core capabilities:
+ * 6 slides introduce core capabilities:
  * 1. Paste and Download
  * 2. Format Selection
- * 3. Hazel Instant
- * 4. Battery Optimization (Deny or Allow options of equal size)
- * 5. Notifications (Deny or Allow options of equal size)
+ * 3. Share to Hazel
+ * 4. Hazel Instant
+ * 5. Battery Optimization (Deny or Allow options of equal size)
+ * 6. Notifications (Deny or Allow options of equal size)
  *
  * Designed with a deep dark (#000000 / #0A0A0A) background, fine subtle blue
  * gradient, crisp white primary actions, and clean minimalist styling.
@@ -77,7 +78,7 @@ fun GettingStartedDialog(
     onDismiss: () -> Unit
 ) {
     var currentStep by remember { mutableIntStateOf(1) }
-    val totalSteps = 5
+    val totalSteps = 6
     val context = LocalContext.current
 
     // Dismiss with notification permission request
@@ -312,8 +313,8 @@ fun GettingStartedDialog(
 
                         Spacer(modifier = Modifier.width(10.dp))
 
-                        if (currentStep == 4) {
-                            // Step 4 (Battery Optimization): Deny & Allow buttons of equal size
+                        if (currentStep == 5) {
+                            // Step 5 (Battery Optimization): Deny & Allow buttons of equal size
                             Surface(
                                 onClick = { currentStep++ },
                                 modifier = Modifier
@@ -363,7 +364,7 @@ fun GettingStartedDialog(
                                     )
                                 }
                             }
-                        } else if (currentStep == 5) {
+                        } else if (currentStep == 6) {
                             // Step 5 (Notifications): Deny & Allow buttons of equal size
                             Surface(
                                 onClick = dismissNoPermission,
@@ -458,13 +459,14 @@ private data class StepInfo(
 )
 
 /**
- * Returns the content for each of the 5 getting-started steps.
+ * Returns the content for each of the 6 getting-started steps.
  *
  * Step 1: Paste and Download (link icon)
  * Step 2: Format Selection (sliders-horizontal icon)
- * Step 3: Hazel Instant (the app's own Hazel SVG bolt icon)
- * Step 4: Battery Optimization (battery charge icon)
- * Step 5: Notifications (bell icon)
+ * Step 3: Share to Hazel (share icon)
+ * Step 4: Hazel Instant (the app's own Hazel SVG bolt icon)
+ * Step 5: Battery Optimization (battery charge icon)
+ * Step 6: Notifications (bell icon)
  */
 private fun stepData(step: Int): StepInfo = when (step) {
     1 -> StepInfo(
@@ -478,16 +480,21 @@ private fun stepData(step: Int): StepInfo = when (step) {
         iconRes = R.drawable.more_tab
     )
     3 -> StepInfo(
+        titleRes = R.string.guide_step_share_title,
+        descRes = R.string.guide_step_share_sheet,
+        iconRes = R.drawable.ic_share
+    )
+    4 -> StepInfo(
         titleRes = R.string.guide_step3_title,
         descRes = R.string.guide_step_share_instant,
         iconRes = R.drawable.ic_hazel_bolt
     )
-    4 -> StepInfo(
+    5 -> StepInfo(
         titleRes = R.string.guide_step4_title,
         descRes = R.string.guide_step_battery_unrestricted,
         iconRes = R.drawable.battery_charge
     )
-    5 -> StepInfo(
+    6 -> StepInfo(
         titleRes = R.string.guide_step5_title,
         descRes = R.string.guide_step_notifications,
         iconRes = R.drawable.ic_bell

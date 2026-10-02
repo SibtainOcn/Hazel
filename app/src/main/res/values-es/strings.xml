@@ -108,7 +108,7 @@
     <string name="guide_step5_title">Notificaciones</string>
     <string name="guide_step_paste_link">Pega un enlace en el campo de búsqueda para descargarlo. Puedes añadir varios enlaces y listas de reproducción</string>
     <string name="guide_step_pick_format">Toca una tarjeta para elegir el formato exacto. Se listan todas las calidades disponibles con su tamaño y su códec.</string>
-    <string name="guide_step_share_instant">Comparte un enlace con Hazel Instantáneo desde cualquier aplicación para descargar al instante con la calidad que hayas fijado.</string>
+    <string name="guide_step_share_instant">Comparte con Hazel Instant para saltarte la hoja. Lee el enlace y empieza la descarga con tus ajustes preferidos; el botón de ajustes abre Síntesis para cambiarlos.</string>
     <string name="guide_step_battery_unrestricted">Pon el uso de batería en sin restricciones; si no, Android puede detener las descargas cuando salgas de la aplicación.</string>
     <string name="guide_step_notifications">Recibe avisos sobre el progreso de descarga y archivos completados en segundo plano.</string>
     <string name="guide_allow">Permitir</string>
@@ -263,7 +263,7 @@
     <string name="cleanup_category_other_cache_label">Otros archivos en caché</string>
     <string name="cleanup_category_other_cache_description">Miniaturas y todo lo demás guardado mientras se exploran enlaces.</string>
     <string name="cleanup_category_link_reads_label">Lecturas de enlaces guardadas</string>
-    <string name="cleanup_category_link_reads_description">Formatos de los últimos 25 enlaces leídos, para que abrir uno de nuevo sea instantáneo. Se guardan hasta 6 horas; nunca en modo incógnito.</string>
+    <string name="cleanup_category_link_reads_description">Formatos de los últimos 50 enlaces leídos, para que abrir uno de nuevo sea instantáneo. Se guardan hasta 6 horas; nunca en modo incógnito.</string>
     <string name="cleanup_confirm_category_title">¿Borrar estos archivos?</string>
     <string name="cleanup_confirm_category_safe">Se liberarán %1$s. Nada de lo que has guardado se ve afectado.</string>
     <string name="cleanup_confirm_category_unsafe">Se liberarán %1$s, y la siguiente descarga tardará más mientras se desempaquetan otra vez.</string>
@@ -740,4 +740,11 @@
     <string name="home_start_paste">Pegar enlace</string>
     <string name="home_start_search">Buscar</string>
     <string name="home_start_downloads">Descargas</string>
+    <string name="more_getting_started">Primeros pasos</string>
+    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_started">Descarga iniciada</string>
+    <string name="instant_ok">Aceptar</string>
+    <string name="instant_settings">Ajustes de síntesis</string>
+    <string name="guide_step_share_title">Compartir con Hazel</string>
+    <string name="guide_step_share_sheet">Comparte un enlace con Hazel desde cualquier app. Descarga al momento con tus ajustes preferidos, o espera un instante a los detalles y elige cada opción.</string>
 </resources>

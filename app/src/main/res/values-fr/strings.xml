@@ -108,7 +108,7 @@
     <string name="guide_step5_title">Notifications</string>
     <string name="guide_step_paste_link">Collez un lien dans le champ de recherche pour le télécharger. Vous pouvez ajouter plusieurs liens et des playlists</string>
     <string name="guide_step_pick_format">Touchez une carte pour choisir le format exact. Toutes les qualités disponibles sont listées avec leur taille et leur codec.</string>
-    <string name="guide_step_share_instant">Partagez un lien vers Hazel Instantané depuis n\'importe quelle application pour le télécharger aussitôt dans la qualité que vous avez définie.</string>
+    <string name="guide_step_share_instant">Partagez vers Hazel Instant pour passer la feuille. Le lien est lu et le téléchargement démarre avec vos réglages préférés ; le bouton de réglage ouvre Synthèse pour les modifier.</string>
     <string name="guide_step_battery_unrestricted">Réglez l\'usage de la batterie sur illimité, sinon Android peut arrêter les téléchargements quand vous quittez l\'application.</string>
     <string name="guide_step_notifications">Recevez des notifications sur l\'avancement des téléchargements et les fichiers terminés en arrière-plan.</string>
     <string name="guide_allow">Autoriser</string>
@@ -263,7 +263,7 @@
     <string name="cleanup_category_other_cache_label">Autres fichiers en cache</string>
     <string name="cleanup_category_other_cache_description">Les miniatures et tout ce qui a été mis en cache pendant la consultation des liens.</string>
     <string name="cleanup_category_link_reads_label">Lectures de liens enregistrées</string>
-    <string name="cleanup_category_link_reads_description">Formats des 25 derniers liens lus, pour qu’un lien rouvert s’affiche aussitôt. Gardées jusqu’à 6 heures ; jamais enregistrées en navigation privée.</string>
+    <string name="cleanup_category_link_reads_description">Formats des 50 derniers liens lus, pour qu’un lien rouvert s’affiche aussitôt. Gardées jusqu’à 6 heures ; jamais enregistrées en navigation privée.</string>
     <string name="cleanup_confirm_category_title">Effacer ces fichiers ?</string>
     <string name="cleanup_confirm_category_safe">%1$s seront libérés. Rien de ce que vous avez enregistré n\'est touché.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s seront libérés, et le prochain téléchargement prendra plus de temps pendant leur décompression.</string>
@@ -740,4 +740,11 @@
     <string name="home_start_paste">Coller un lien</string>
     <string name="home_start_search">Rechercher</string>
     <string name="home_start_downloads">Téléchargements</string>
+    <string name="more_getting_started">Prise en main</string>
+    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_started">Téléchargement lancé</string>
+    <string name="instant_ok">OK</string>
+    <string name="instant_settings">Réglages de synthèse</string>
+    <string name="guide_step_share_title">Partager vers Hazel</string>
+    <string name="guide_step_share_sheet">Partagez un lien vers Hazel depuis n’importe quelle app. Téléchargez tout de suite avec vos réglages préférés, ou attendez un instant les détails pour choisir chaque option.</string>
 </resources>

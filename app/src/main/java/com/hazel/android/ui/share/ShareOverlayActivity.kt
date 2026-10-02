@@ -109,6 +109,15 @@ class ShareOverlayActivity : ComponentActivity() {
      */
     private var sharedUrl by mutableStateOf("")
 
+    /**
+     * Whether the link came through Hazel Instant. Both share targets resolve to this class,
+     * so the component name is the only place the difference shows. Instant does not ask:
+     * it reads the link and downloads it with the saved settings.
+     */
+    private var instant by mutableStateOf(false)
+
+    private fun Intent.isInstant() = component?.className?.endsWith(INSTANT_ALIAS) == true
+
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(AppLocale.wrap(newBase))
     }
@@ -137,6 +146,12 @@ class ShareOverlayActivity : ComponentActivity() {
         }
 
         sharedUrl = firstUrl
+        instant = intent.isInstant()
+        // Only on a first start: an activity brought back after its process was reclaimed
+        // must not download the same link a second time.
+        if (instant && savedInstanceState == null) {
+            DownloadViewModelHolder.get().instantDownload(this, firstUrl)
+        }
 
         setContent {
             // Keyed on the link, so a second share delivered to this same sheet starts over
@@ -155,6 +170,9 @@ class ShareOverlayActivity : ComponentActivity() {
                 val accentName by SettingsRepository.getAccentColor(this).collectAsState(initial = "Cyan")
 
                 LaunchedEffect(url) {
+                    // Instant was handed its link in onCreate or onNewIntent, outside the
+                    // composition, so closing the dialog cannot cancel it.
+                    if (instant) return@LaunchedEffect
                     downloadViewModel.fetchShare(url)
                     val app = applicationContext
                     scope.launch(Dispatchers.IO) {
@@ -196,6 +214,20 @@ class ShareOverlayActivity : ComponentActivity() {
                         val failure = state.errorLog?.takeIf { readHere && !state.isFetching }
 
                         when {
+                            // A failed read is reported by a notification, as any download
+                            // that fails in the background is.
+                            instant -> InstantDialog(
+                                onConfirm = { closeOverlay() },
+                                onTune = {
+                                    startActivity(
+                                        Intent(this@ShareOverlayActivity, com.hazel.android.MainActivity::class.java)
+                                            .putExtra(com.hazel.android.MainActivity.EXTRA_NAVIGATE_TO, "processing")
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                    )
+                                    closeOverlay()
+                                }
+                            )
+
                             failure != null -> NoResultsDialog(
                                 message = failure,
                                 canFetchCookies = com.hazel.android.ui.screens.download.isCookieRelated(failure),
@@ -317,11 +349,17 @@ class ShareOverlayActivity : ComponentActivity() {
             Toast.makeText(this, getString(R.string.share_overlay_invalid_link), Toast.LENGTH_SHORT).show()
             return
         }
+        instant = intent.isInstant()
+        if (instant) DownloadViewModelHolder.get().instantDownload(this, url)
         sharedUrl = url
     }
 
     private fun announceStarted() {
         Toast.makeText(applicationContext, getString(R.string.share_overlay_download_started), Toast.LENGTH_SHORT).show()
+    }
+
+    private companion object {
+        const val INSTANT_ALIAS = "InstantShareActivity"
     }
 
     private fun closeOverlay() {

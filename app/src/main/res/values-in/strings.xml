@@ -100,7 +100,7 @@
     <string name="guide_step5_title">Notifikasi</string>
     <string name="guide_step_paste_link">Tempel tautan ke bidang pencarian untuk mengunduhnya. Anda dapat menambahkan beberapa tautan dan daftar putar</string>
     <string name="guide_step_pick_format">Ketuk kartu untuk memilih format yang tepat. Semua kualitas yang tersedia tercantum beserta ukuran dan codec.</string>
-    <string name="guide_step_share_instant">Bagikan tautan ke Hazel Instan dari aplikasi apa pun untuk mengunduh langsung pada kualitas yang Anda tentukan.</string>
+    <string name="guide_step_share_instant">Bagikan ke Hazel Instant untuk melewati lembar. Tautan dibaca dan unduhan dimulai dengan pengaturan pilihan Anda; tombol atur membuka Sintesis untuk mengubahnya.</string>
     <string name="guide_step_battery_unrestricted">Atur penggunaan baterai ke tanpa batas, jika tidak Android dapat menghentikan unduhan saat Anda keluar dari aplikasi.</string>
     <string name="guide_step_notifications">Dapatkan pemberitahuan tentang kemajuan unduhan dan file yang selesai di latar belakang.</string>
     <string name="guide_allow">Izinkan</string>
@@ -255,7 +255,7 @@
     <string name="cleanup_category_other_cache_label">File cache lainnya</string>
     <string name="cleanup_category_other_cache_description">Gambar mini dan file lain yang di-cache saat menjelajahi tautan.</string>
     <string name="cleanup_category_link_reads_label">Bacaan tautan tersimpan</string>
-    <string name="cleanup_category_link_reads_description">Format dari 25 tautan terakhir yang dibaca, agar membukanya lagi langsung tampil. Disimpan hingga 6 jam; tidak pernah disimpan saat penyamaran.</string>
+    <string name="cleanup_category_link_reads_description">Format dari 50 tautan terakhir yang dibaca, agar membukanya lagi langsung tampil. Disimpan hingga 6 jam; tidak pernah disimpan saat penyamaran.</string>
     <string name="cleanup_confirm_category_title">Hapus file-file ini?</string>
     <string name="cleanup_confirm_category_safe">%1$s ruang akan dikosongkan. File yang telah disimpan tidak akan terpengaruh.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s ruang akan dikosongkan, dan unduhan berikutnya akan membutuhkan waktu lebih lama karena komponen harus diekstrak ulang.</string>
@@ -724,4 +724,11 @@
     <string name="home_start_paste">Tempel tautan</string>
     <string name="home_start_search">Cari</string>
     <string name="home_start_downloads">Unduhan</string>
+    <string name="more_getting_started">Memulai</string>
+    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_started">Unduhan dimulai</string>
+    <string name="instant_ok">OK</string>
+    <string name="instant_settings">Pengaturan sintesis</string>
+    <string name="guide_step_share_title">Bagikan ke Hazel</string>
+    <string name="guide_step_share_sheet">Bagikan tautan ke Hazel dari aplikasi apa pun. Unduh langsung dengan pengaturan pilihan Anda, atau tunggu sebentar untuk detailnya dan pilih setiap opsi.</string>
 </resources>

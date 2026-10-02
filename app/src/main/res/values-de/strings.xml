@@ -104,7 +104,7 @@
     <string name="guide_step5_title">Benachrichtigungen</string>
     <string name="guide_step_paste_link">Füge einen Link ins Suchfeld ein, um ihn herunterzuladen. Du kannst mehrere Links und Playlists hinzufügen</string>
     <string name="guide_step_pick_format">Tippe eine Karte an, um das genaue Format zu wählen. Alle verfügbaren Qualitäten stehen mit Größe und Codec dabei.</string>
-    <string name="guide_step_share_instant">Teile aus jeder App einen Link mit Hazel Sofort, um ihn gleich in der von dir eingestellten Qualität herunterzuladen.</string>
+    <string name="guide_step_share_instant">Teile an Hazel Instant, um das Blatt zu überspringen. Der Link wird gelesen und der Download startet mit deinen bevorzugten Einstellungen; die Regler-Taste öffnet Synthese, um sie zu ändern.</string>
     <string name="guide_step_battery_unrestricted">Stelle die Akkunutzung auf uneingeschränkt, sonst kann Android Downloads stoppen, sobald du die App verlässt.</string>
     <string name="guide_step_notifications">Erhalte Benachrichtigungen über den Downloadfortschritt und abgeschlossene Dateien im Hintergrund.</string>
     <string name="guide_allow">Zulassen</string>
@@ -259,7 +259,7 @@
     <string name="cleanup_category_other_cache_label">Andere zwischengespeicherte Dateien</string>
     <string name="cleanup_category_other_cache_description">Vorschaubilder und alles andere, was beim Durchsehen von Links zwischengespeichert wurde.</string>
     <string name="cleanup_category_link_reads_label">Gespeicherte Link-Abfragen</string>
-    <string name="cleanup_category_link_reads_description">Formate der letzten 25 gelesenen Links, damit sich einer sofort wieder öffnet. Bis zu 6 Stunden behalten; im Inkognito-Modus nie gespeichert.</string>
+    <string name="cleanup_category_link_reads_description">Formate der letzten 50 gelesenen Links, damit sich einer sofort wieder öffnet. Bis zu 6 Stunden behalten; im Inkognito-Modus nie gespeichert.</string>
     <string name="cleanup_confirm_category_title">Diese Dateien löschen?</string>
     <string name="cleanup_confirm_category_safe">%1$s werden frei. Nichts von dem, was du gespeichert hast, ist betroffen.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s werden frei, und der nächste Download dauert länger, während sie erneut entpackt werden.</string>
@@ -732,4 +732,11 @@
     <string name="home_start_paste">Link einfügen</string>
     <string name="home_start_search">Suchen</string>
     <string name="home_start_downloads">Downloads</string>
+    <string name="more_getting_started">Erste Schritte</string>
+    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_started">Download gestartet</string>
+    <string name="instant_ok">OK</string>
+    <string name="instant_settings">Synthese-Einstellungen</string>
+    <string name="guide_step_share_title">An Hazel teilen</string>
+    <string name="guide_step_share_sheet">Teile einen Link aus jeder App an Hazel. Lade sofort mit deinen bevorzugten Einstellungen herunter oder warte kurz auf die Details und wähle jede Option.</string>
 </resources>
