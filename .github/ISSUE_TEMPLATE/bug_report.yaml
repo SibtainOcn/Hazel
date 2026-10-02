@@ -3,22 +3,12 @@ description: Report an issue or unexpected behavior in Hazel
 title: "[Bug]: "
 labels: [bug]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        ### Before Submitting an Issue
-
-        * **Site & Extraction Failures** (HTTP 403, bot verification, unsupported links): Hazel uses `yt-dlp` for all network media extraction. Go to **Settings > Engine** and update to the newest yt-dlp release first. If the platform is still failing, check whether the issue is already tracked on the [yt-dlp issue tracker](https://github.com/yt-dlp/yt-dlp/issues).
-        * **App-Level Defects**: Crashes, frozen views, queue state corruption, storage access issues, UI/theme glitches, or preference persistence bugs belong directly here.
-
   - type: checkboxes
     id: checks
     attributes:
       label: Prerequisites
       options:
         - label: I am testing against the newest available Hazel build
-          required: true
-        - label: I verified whether updating yt-dlp in Settings > Engine resolves the problem
           required: true
         - label: I searched open and closed tickets to ensure this is not a duplicate
           required: true
@@ -91,7 +81,7 @@ body:
     id: media
     attributes:
       label: Visual Demonstration
-      description: Attach screenshots or a brief screen recording highlighting the defect.
+      description: Attach screenshots or a brief screen recording highlighting the defect. Crop out account names, notifications and private links.
     validations:
       required: false
 
