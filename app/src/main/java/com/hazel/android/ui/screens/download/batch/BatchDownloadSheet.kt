@@ -4,6 +4,8 @@ import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -157,6 +159,8 @@ fun BatchDownloadSheet(
     onResolveFormats: (MediaInfo) -> Unit,
     /** Links whose formats are being read right now. */
     readingUrls: Set<String> = emptySet(),
+    /** The one link the set was read from, such as a playlist, which the link button opens. */
+    sourceUrl: String? = null,
     /** Reads these links' formats again, with the given reader or the setting's. */
     onRefreshFormats: (List<MediaInfo>, ListingSource?, Boolean) -> Unit = { _, _, _ -> },
     onRemove: (MediaInfo) -> Unit,
@@ -657,7 +661,11 @@ fun BatchDownloadSheet(
                 // to open the one link a set of one holds; incognito applies to the run.
                 trailing = {
                     val say: (String) -> Unit = { message -> feedback = BatchFeedback(message) }
-                    SheetLinkButton(links = remember(results) { results.map { it.url } }, onFeedback = say)
+                    SheetLinkButton(
+                        links = remember(results) { results.map { it.url } },
+                        onFeedback = say,
+                        sourceUrl = sourceUrl?.trim()?.takeIf { it.startsWith("http") && it.none(Char::isWhitespace) }
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     IncognitoButton(onFeedback = say)
                 }
@@ -670,10 +678,10 @@ fun BatchDownloadSheet(
         // view however far down the footer sits.
         androidx.compose.animation.AnimatedVisibility(
             visible = feedback != null,
-            enter = slideInVertically { -it } + fadeIn(),
-            exit = slideOutVertically { -it } + fadeOut(),
+            enter = fadeIn() + scaleIn(initialScale = 0.9f),
+            exit = fadeOut() + scaleOut(targetScale = 0.9f),
             modifier = Modifier
-                .align(Alignment.TopCenter)
+                .align(Alignment.Center)
                 .padding(horizontal = SIDE)
         ) {
             FeedbackToast(shownFeedback)

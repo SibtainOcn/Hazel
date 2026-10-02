@@ -363,8 +363,6 @@
     <string name="properties_saved_to">Saved to</string>
     <string name="properties_downloaded">Downloaded</string>
     <string name="properties_source">Source</string>
-    <string name="properties_link_copied_opened">Link copied and opened</string>
-    <string name="properties_link_copied">Link copied</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">Back</string>

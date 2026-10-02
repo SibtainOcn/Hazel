@@ -346,8 +346,6 @@
     <string name="properties_saved_to">यहाँ सहेजा गया</string>
     <string name="properties_downloaded">डाउनलोड किया</string>
     <string name="properties_source">स्रोत</string>
-    <string name="properties_link_copied_opened">लिंक कॉपी करके खोला गया</string>
-    <string name="properties_link_copied">लिंक कॉपी हुआ</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">वापस</string>

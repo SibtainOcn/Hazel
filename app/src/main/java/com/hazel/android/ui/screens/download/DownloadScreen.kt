@@ -988,6 +988,7 @@ fun DownloadScreen(
     if (batchSheetVisible) {
         BatchDownloadSheet(
             results = pendingResults,
+            sourceUrl = state.url,
             options = options,
             onOptionsChange = {
                 scope.launch { SettingsRepository.setDownloadOptions(context, it) }

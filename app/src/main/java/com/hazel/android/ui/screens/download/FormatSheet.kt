@@ -10,6 +10,8 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import com.hazel.android.ui.screens.download.batch.BatchContainerSheet
@@ -649,8 +651,7 @@ fun FormatSheet(
             Spacer(modifier = Modifier.height(14.dp))
 
             DownloadSheetFooter(
-                label = info.url,
-                linkAsButton = true,
+                link = info.url,
                 onFeedback = { message -> feedback = Feedback(message) }
             )
 
@@ -662,10 +663,10 @@ fun FormatSheet(
         // out of sight exactly when it is needed.
         androidx.compose.animation.AnimatedVisibility(
             visible = feedback != null,
-            enter = slideInVertically { -it } + fadeIn(),
-            exit = slideOutVertically { -it } + fadeOut(),
+            enter = fadeIn() + scaleIn(initialScale = 0.9f),
+            exit = fadeOut() + scaleOut(targetScale = 0.9f),
             modifier = Modifier
-                .align(Alignment.TopCenter)
+                .align(Alignment.Center)
                 .padding(horizontal = 20.dp)
         ) {
             FeedbackToast(shownFeedback)

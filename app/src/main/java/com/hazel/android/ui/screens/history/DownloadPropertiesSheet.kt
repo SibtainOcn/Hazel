@@ -55,8 +55,7 @@ import com.hazel.android.data.HistoryEntry
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.ui.screens.download.FEEDBACK_MS
-import com.hazel.android.ui.screens.download.copySheetLink
-import com.hazel.android.ui.screens.download.openSheetLink
+import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.util.MediaFacts
 import com.hazel.android.util.MediaProbeFacts
 import kotlinx.coroutines.delay
@@ -244,9 +243,9 @@ fun DownloadPropertiesSheet(
 
             Spacer(modifier = Modifier.height(22.dp))
 
-            // The line that closes the sheet, as the download sheet closes with the same
-            // thing. Copied because the address is often wanted somewhere else, opened
-            // because the other reason to look at a link is to go and see what is behind it.
+            // The line that closes the sheet. Tapping it offers Copy and Open, the same
+            // dialog as every other link in the app.
+            var linkDialogOpen by remember { mutableStateOf(false) }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     Icons.Filled.Link,
@@ -263,16 +262,15 @@ fun DownloadPropertiesSheet(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .weight(1f)
-                        .clickable(enabled = entry.url.isNotBlank()) {
-                            copySheetLink(context, entry.url)
-                            feedback = context.getString(
-                                if (openSheetLink(context, entry.url)) {
-                                    R.string.properties_link_copied_opened
-                                } else {
-                                    R.string.properties_link_copied
-                                }
-                            )
-                        }
+                        .clickable(enabled = entry.url.isNotBlank()) { linkDialogOpen = true }
+                )
+            }
+
+            if (linkDialogOpen) {
+                LinkOptionsDialog(
+                    links = listOf(entry.url),
+                    onFeedback = { feedback = it },
+                    onDismiss = { linkDialogOpen = false }
                 )
             }
 

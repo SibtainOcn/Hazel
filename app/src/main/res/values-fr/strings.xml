@@ -350,8 +350,6 @@
     <string name="properties_saved_to">Enregistré dans</string>
     <string name="properties_downloaded">Téléchargé le</string>
     <string name="properties_source">Source</string>
-    <string name="properties_link_copied_opened">Lien copié et ouvert</string>
-    <string name="properties_link_copied">Lien copié</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">Retour</string>

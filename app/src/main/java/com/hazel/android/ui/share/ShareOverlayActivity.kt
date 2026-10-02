@@ -224,6 +224,7 @@ class ShareOverlayActivity : ComponentActivity() {
 
                             results.size > 1 -> BatchDownloadSheet(
                                 results = results,
+                                sourceUrl = url,
                                 options = options,
                                 onOptionsChange = { changed ->
                                     scope.launch { SettingsRepository.setDownloadOptions(this@ShareOverlayActivity, changed) }
