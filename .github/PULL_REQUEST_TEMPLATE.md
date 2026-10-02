@@ -1,7 +1,19 @@
+<!--
+Thanks for contributing! Before you submit:
+
+- Small fix (typo, one-line change)? Fill in "What this changes" and delete the rest.
+- Translating? Please use Weblate instead of a pull request:
+  https://hosted.weblate.org/engage/hazel/
+- Text inside these comment marks is hidden in the published PR. You can leave it or
+  delete it.
+- Delete any section that does not apply.
+-->
+
 ## What this changes
 
 <!-- One or two sentences. What does the user (or the code) do differently after this? -->
 
+<!-- Link the issue this fixes, for example "Closes #42". Delete the line if there is none. -->
 Closes #
 
 ## Why
@@ -9,6 +21,8 @@ Closes #
 <!-- The problem this solves. Link the issue where it was discussed. -->
 
 ## Type
+
+<!-- Tick one: put an x between the brackets, like [x]. -->
 
 - [ ] Bug fix
 - [ ] New feature
@@ -19,15 +33,14 @@ Closes #
 
 ## How I tested it
 
-<!-- Device or emulator, Android version, and the steps you took. -->
+<!-- CI runs the string checks and unit tests on this PR by itself. A real device is the
+one thing it cannot check. -->
+
+- [ ] Installed and tried the change on a device or emulator
+- [ ] `./gradlew :app:testDebugUnitTest` passes locally
 
 - Device / Android version:
 - Steps:
-
-- [ ] `python tools/strings/check.py resources` passes
-- [ ] `python tools/strings/check.py translations` passes
-- [ ] `./gradlew :app:testDebugUnitTest` passes
-- [ ] Installed and tried the change on a device or emulator
 
 ## Screenshots
 
