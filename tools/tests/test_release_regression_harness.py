@@ -14,7 +14,7 @@ including:
 8. UI Assets & Resource Parity (Launcher Icon colors, 10-locale strings, Sponsor links)
 
 Run:
-    python tools/test_release_regression_harness.py
+    python tools/tests/test_release_regression_harness.py
 Exit:
     0 on success, 1 on any failure.
 """
@@ -30,7 +30,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # ---------------------------------------------------------------------------
 # Test Framework

@@ -2,24 +2,24 @@ name: Pages
 
 # Publishes GitHub Pages:
 #   /        the donate page (pages/index.html), linked from F-Droid, kept as it is
-#   /hazel/  the Hazel website, built from pages/hazel-pages by tools/build_site.py
+#   /hazel/  the Hazel website, built from pages/hazel-pages by tools/site/build_site.py
 # Pull requests that touch the website only run the build and its checks.
 on:
   push:
     branches: [main]
     paths:
       - 'pages/**'
-      - 'tools/build_site.py'
+      - 'tools/site/build_site.py'
       - 'assets/Haze.svg'
       - 'fastlane/metadata/android/en-US/images/phoneScreenshots/**'
       - 'CHANGELOG.md'
       - 'app/build.gradle.kts'
-      - 'app/src/main/res/values-*/strings.xml'
+      - 'app/src/main/res/xml/locales_config.xml'
       - '.github/workflows/pages.yml'
   pull_request:
     paths:
       - 'pages/**'
-      - 'tools/build_site.py'
+      - 'tools/site/build_site.py'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -43,7 +43,7 @@ jobs:
       # Fails on fancy punctuation, unfilled placeholders, and local links, images or
       # anchors that point nowhere.
       - name: Build and check the website
-        run: python tools/build_site.py
+        run: python tools/site/build_site.py
       # Outside links too, so a moved release page or renamed doc is caught. A busy
       # server (429, 502-504) is not a broken link, so those pass after the retries.
       - name: Check outside links

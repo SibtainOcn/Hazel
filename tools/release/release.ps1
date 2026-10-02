@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Cuts a Hazel release: bumps the versions, writes the store changelogs, tags, pushes.
+    Cuts a Hazel release: bumps the versions, checks the store changelogs and translations, tags, pushes.
 
 .DESCRIPTION
     Every release moves the same four things, and every one of them is silent when it goes
@@ -41,7 +41,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$repo = Split-Path -Parent $PSScriptRoot
+$repo = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $repo
 
 function Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
@@ -101,6 +101,51 @@ foreach ($abi in $abis.Keys) {
     '      {0,-12} {1}' -f $abi, ($newCode + $abis[$abi]) | Write-Host -ForegroundColor Gray
 }
 
+# ---------------------------------------------------------------- store changelogs
+
+Step "Checking the store changelogs"
+
+# These are written by hand: a release's notes are too long to cut down to F-Droid's 500
+# characters automatically. One file per APK version code, checked before anything is
+# written so a missing one stops the release with nothing changed.
+$changelogDir = 'fastlane/metadata/android/en-US/changelogs'
+$problems = @()
+foreach ($abi in $abis.Keys) {
+    $name = "$($newCode + $abis[$abi]).txt"
+    $path = Join-Path $changelogDir $name
+    if (-not (Test-Path $path)) {
+        $problems += "$name is missing"
+        continue
+    }
+    $length = (Get-Content $path -Raw -Encoding UTF8).Length
+    if ($length -eq 0) { $problems += "$name is empty" }
+    elseif ($length -gt 500) { $problems += "$name is $length characters, over F-Droid's 500" }
+    else { Info "$name ($length characters)" }
+}
+if ($problems) {
+    Die ("Write the store changelogs in $changelogDir first:`n    " + ($problems -join "`n    "))
+}
+
+# ---------------------------------------------------------------- translations
+
+Step "Checking the translations"
+
+# Stops on a translation that is wrong, or a listed language under 80%. A key not yet
+# translated only warns: Android shows the English for it, so it is safe to release.
+$py = if (Get-Command python -ErrorAction SilentlyContinue) { 'python' } else { 'python3' }
+$report = & $py tools/strings/check.py translations 2>&1
+if ($LASTEXITCODE -ne 0) {
+    $report | Where-Object { $_ -match '^FAIL' } | ForEach-Object { Warn $_ }
+    Die "The translations check failed. Run: python tools/strings/check.py translations"
+}
+$partial = $report | Where-Object { $_ -match '^\s+values-\S+\s+\d+%' -and $_ -notmatch '\s100%' }
+if ($partial) {
+    Warn "not fully translated, the rest shows in English:"
+    $partial | ForEach-Object { Warn $_.Trim() }
+} else {
+    Info "every language fully translated"
+}
+
 # ---------------------------------------------------------------- changelog
 
 Step "Checking CHANGELOG.md"
@@ -131,27 +176,6 @@ if ($DryRun) {
 } else {
     Set-Content $buildFile $newBuild -NoNewline -Encoding UTF8
     Info "written"
-}
-
-Step "Generating the store changelogs"
-
-# No -PVERSION_NAME. The version was just written into app/build.gradle.kts above, and the
-# task reads it from there, which is the same value CI and the F-Droid server build from.
-# Passing it again would let this one path disagree with the other two.
-#
-# Not --quiet either: the task warns when the section is long enough that the listings will
-# truncate it, and that warning is only useful to the person cutting the release.
-$gradlew = Join-Path $repo 'gradlew.bat'
-if ($DryRun) {
-    Info "would run: .\gradlew.bat :app:generateFastlaneChangelogs"
-} else {
-    & $gradlew ':app:generateFastlaneChangelogs' --console=plain
-    $written = Get-ChildItem 'fastlane/metadata/android/en-US/changelogs' -Filter "$newCode*" -ErrorAction SilentlyContinue
-    if (-not $written) {
-        Warn "no changelog files for $newCode were produced. Check the task output."
-    } else {
-        Info ("wrote: " + (($written | ForEach-Object { $_.Name }) -join ', '))
-    }
 }
 
 # ---------------------------------------------------------------- commit and tag

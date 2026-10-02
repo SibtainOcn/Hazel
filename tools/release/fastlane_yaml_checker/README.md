@@ -40,16 +40,16 @@ Run the checker from the repository root:
 
 ```bash
 # Run all default checks (Fastlane store metadata + in-repo F-Droid recipes)
-python tools/fastlane_yaml_checker/checker.py
+python tools/release/fastlane_yaml_checker/checker.py
 
 # Check a specific F-Droid recipe YAML file
-python tools/fastlane_yaml_checker/checker.py --yaml fastlane/com.hazel.android.yml
+python tools/release/fastlane_yaml_checker/checker.py --yaml fastlane/com.hazel.android.yml
 
 # Automatically format and fix formatting discrepancies in-place
-python tools/fastlane_yaml_checker/checker.py --yaml path/to/com.hazel.android.yml --fix
+python tools/release/fastlane_yaml_checker/checker.py --yaml path/to/com.hazel.android.yml --fix
 
 # Verify reproducible binary download URLs live against GitHub Releases
-python tools/fastlane_yaml_checker/checker.py --check-urls
+python tools/release/fastlane_yaml_checker/checker.py --check-urls
 ```
 
 ## Exit Status

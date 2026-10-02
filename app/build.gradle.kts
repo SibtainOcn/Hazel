@@ -79,7 +79,7 @@ gradle.taskGraph.whenReady {
 // and failing the build. The same is true of reading them from a property: a build argument
 // is not in the file either.
 //
-// tools/release.ps1 rewrites both when a release is cut, so nothing here is edited by hand.
+// tools/release/release.ps1 rewrites both when a release is cut, so nothing here is edited by hand.
 //
 // The code is a plain counter with two digits kept free at the end for the architecture. Its
 // only rule is that it increases; it says nothing about the version a person reads.

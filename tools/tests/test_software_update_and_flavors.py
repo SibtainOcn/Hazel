@@ -30,7 +30,7 @@ Verifies:
    - more_software_update and more_software_update_subtitle present across all 10 locales.
 
 Run:
-    python tools/test_software_update_and_flavors.py
+    python tools/tests/test_software_update_and_flavors.py
 """
 
 import os
@@ -43,7 +43,7 @@ import xml.etree.ElementTree as ET
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 APP_DIR = REPO_ROOT / "app"
 RES_DIR = APP_DIR / "src" / "main" / "res"
 

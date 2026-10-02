@@ -1,0 +1,10 @@
+# Every pull request asks the maintainer for review. With branch protection's "Require
+# review from Code Owners" on, nothing merges to main without that approval.
+* @SibtainOcn
+
+# Release, signing and CI changes can ship code to every user, so they are named
+# separately to make them easy to spot in a review.
+/.github/                     @SibtainOcn
+/tools/release/               @SibtainOcn
+/app/build.gradle.kts         @SibtainOcn
+/fastlane/                    @SibtainOcn

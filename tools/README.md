@@ -5,7 +5,7 @@ nowhere else. This file says how to keep it that way, how to check it, and how t
 language.
 
 Read the section that matches what you are doing. If you are an agent, read the whole
-thing before writing anything, and read [`BLOCKED.md`](BLOCKED.md) as well.
+thing before writing anything, and read [`BLOCKED.md`](strings/BLOCKED.md) as well.
 
 | I want to | Go to |
 |---|---|
@@ -22,14 +22,23 @@ thing before writing anything, and read [`BLOCKED.md`](BLOCKED.md) as well.
 
 ```
 tools/
-  check.py                             the gate: run it, believe it
-  test_all.py                          master runner: checks GitHub release versioning & runs all suites
-  test_release_regression_harness.py   comprehensive release readiness & regression harness
-  test_artist_metadata.py              artist metadata and colon handling harness
-  literal-allowlist.txt                literals deliberately left in the Kotlin, each with a reason
-  BLOCKED.md                           text that needs a code change before it can be extracted
-  fastlane_yaml_checker/               Fastlane store metadata & F-Droid recipe strict validator & formatter
   README.md                            this file
+  strings/                             text and translations
+    check.py                           the gate: run it, believe it
+    literal-allowlist.txt              literals deliberately left in the Kotlin, each with a reason
+    BLOCKED.md                         text that needs a code change before it can be extracted
+  tests/                               harnesses that read the source, no network
+    test_all.py                        master runner: checks GitHub release versioning & runs all suites
+    test_release_regression_harness.py comprehensive release readiness & regression harness
+    test_artist_metadata.py            artist metadata and colon handling harness
+    test_*.py                          the other feature harnesses test_all.py runs
+    live/                              network tests, run by hand
+  release/                             cutting a release and the F-Droid side of it
+    README.md                          how to cut a release and what stops one
+    release.ps1                        bumps versions, checks store changelogs and translations, tags, pushes
+    fastlane_yaml_checker/             Fastlane store metadata & F-Droid recipe strict validator & formatter
+  site/
+    build_site.py                      builds the Hazel website for Pages
 app/src/main/res/
   values/strings.xml                   the English source. Every key starts life here.
   values-<lang>/strings.xml            one per language, added in Job 2
@@ -146,12 +155,12 @@ Moving text that is already written out of Kotlin and into `strings.xml`. **One 
 time.** The loop exists so that when something breaks, exactly one file can be responsible.
 
 ```
-1. python tools/check.py progress          pick the file at the top
+1. python tools/strings/check.py progress          pick the file at the top
 2. read that file, all of it, before writing anything
 3. extract that file's text, and only that file's
-4. python tools/check.py all <that file>
+4. python tools/strings/check.py all <that file>
 5. green -> commit that one file. red -> fix it. either way, do not start another.
-6. python tools/check.py audit HEAD        after committing
+6. python tools/strings/check.py audit HEAD        after committing
 ```
 
 ### Copy, do not edit
@@ -172,7 +181,7 @@ or tidy something on the way past. The gate fails on an import nothing uses and 
 that deletes far more than it adds, because both are what pattern matching looks like.
 
 If a string cannot be moved without changing a function signature, **stop and write it in
-[`BLOCKED.md`](BLOCKED.md)**. Do not invent a `Context` parameter, do not change a
+[`BLOCKED.md`](strings/BLOCKED.md)**. Do not invent a `Context` parameter, do not change a
 constructor. Those need a decision first and they are a separate pass.
 
 ### Commit message
@@ -209,7 +218,7 @@ part of the work.
 4. Plural categories are per language. Spanish needs `one`, `many`, `other`. Arabic needs
    six. Japanese needs only `other`. The checker knows the table and will say what is
    missing or surplus.
-5. `python tools/check.py translations`
+5. `python tools/strings/check.py translations`
 
 ### What the translation check enforces
 
@@ -235,13 +244,13 @@ still deserves a pass on a device before shipping.
 ## The checker
 
 ```
-python tools/check.py resources          strings.xml integrity, seconds, no build
-python tools/check.py file <path>        one file: blast radius, imports, literals
-python tools/check.py progress           what is left, per file
-python tools/check.py translations       every values-* against the source
-python tools/check.py build              assembleDebug, unit tests, resource lint
-python tools/check.py all <path>         resources + file + build
-python tools/check.py audit <commit>     proves a commit copied rather than reworded
+python tools/strings/check.py resources          strings.xml integrity, seconds, no build
+python tools/strings/check.py file <path>        one file: blast radius, imports, literals
+python tools/strings/check.py progress           what is left, per file
+python tools/strings/check.py translations       every values-* against the source
+python tools/strings/check.py build              assembleDebug, unit tests, resource lint
+python tools/strings/check.py all <path>         resources + file + build
+python tools/strings/check.py audit <commit>     proves a commit copied rather than reworded
 ```
 
 Exit code 0 is `PASS`. Anything else is `NOT DONE`.
@@ -316,7 +325,7 @@ time the real count went up.
 Before cutting a release or submitting a Merge Request to `fdroiddata`, validate all store metadata and recipe files with the strict checker:
 
 ```bash
-python tools/fastlane_yaml_checker/checker.py
+python tools/release/fastlane_yaml_checker/checker.py
 ```
 
 ### What it guarantees:
@@ -327,6 +336,6 @@ python tools/fastlane_yaml_checker/checker.py
 
 To auto-format or fix formatting discrepancies:
 ```bash
-python tools/fastlane_yaml_checker/checker.py --yaml path/to/com.hazel.android.yml --fix
+python tools/release/fastlane_yaml_checker/checker.py --yaml path/to/com.hazel.android.yml --fix
 ```
 
