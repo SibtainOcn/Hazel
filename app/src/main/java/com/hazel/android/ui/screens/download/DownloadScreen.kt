@@ -324,7 +324,9 @@ fun DownloadScreen(
     // The set action belongs to a set the user put together: several links pasted at once,
     // or a playlist or channel read from one link. A keyword search lands several cards too,
     // but those are a list to choose from rather than a set to take whole, so it stays away.
-    val showDownloadAll = pendingResults.size > 1 && !runInHand && state.searchQuery.isBlank()
+    // Stays once the set is saved, so the whole set can be taken again.
+    val showDownloadAll = state.results.size > 1 && !runInHand && state.searchQuery.isBlank()
+    val downloadAllResults = pendingResults.ifEmpty { state.results }
 
     var alreadyHave by remember { mutableStateOf<HistoryEntry?>(null) }
 
@@ -548,7 +550,12 @@ fun DownloadScreen(
                         )
 
                         val batchItem = state.batch.firstOrNull { it.url == info.url }
-                        val isActive = state.isDownloading && state.active?.url == info.url
+                        // The item's own state says which card is running; the shared pointer
+                        // only stands in for a link the run has no list entry for.
+                        val isActive = state.isDownloading && when (batchItem) {
+                            null -> state.active?.url == info.url
+                            else -> batchItem.state == BatchState.DOWNLOADING
+                        }
 
                         // A card that came from a listing carries no formats yet. Reading them
                         // starts with the sheet, so the wait happens against an open sheet
@@ -577,7 +584,7 @@ fun DownloadScreen(
                                 isComplete = batchItem?.state == BatchState.DONE ||
                                         (!state.isMultiple && state.isComplete),
                                 batchItem = batchItem,
-                                waitingForWifi = state.waitingForWifi,
+                                waitingForWifi = state.waitingForWifi && batchItem?.state == BatchState.QUEUED,
                                 alreadyDownloaded = info.url in savedUrls,
                                 player = playback?.takeIf { playingUrl == info.url },
                                 playerFullscreen = playerFullscreen,
@@ -825,12 +832,9 @@ fun DownloadScreen(
             )
         }
 
-        // One action for the whole set, which is the point of collecting links together.
-        //
-        // Offered on what is actually left to fetch rather than on how long the list is. A
-        // list of two where one is already saved is one download, and a set action that
-        // opens a sheet holding a single card is a set action that should not have been
-        // there at all. Search results are left out: see [showDownloadAll].
+        // One action for the whole set, which is the point of collecting links together. It
+        // takes what is left to fetch, or the whole set again once all of it is saved.
+        // Search results are left out: see [showDownloadAll].
         if (showDownloadAll) {
             DownloadAllButton(
                 onClick = { batchSheetVisible = true },
@@ -987,7 +991,7 @@ fun DownloadScreen(
 
     if (batchSheetVisible) {
         BatchDownloadSheet(
-            results = pendingResults,
+            results = downloadAllResults,
             sourceUrl = state.url,
             options = options,
             onOptionsChange = {
@@ -1319,6 +1323,23 @@ private fun MediaCard(
                             .size(40.dp)
                     )
                 }
+            }
+
+            // Waiting its turn: the same glyph, empty and still.
+            if (isQueued && !isDownloading && !waitingForWifi) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f))
+                )
+                FillingDownloadIcon(
+                    progress = 0f,
+                    flowing = false,
+                    tint = Color.White.copy(alpha = 0.7f),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(40.dp)
+                )
             }
 
             // Held back for want of Wi-Fi. The artwork is darkened exactly as a
