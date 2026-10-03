@@ -180,7 +180,9 @@ fun FailedCard(
                 color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
             ) {
                 Text(
-                    text = item.errorLog.lines().firstOrNull { it.isNotBlank() }
+                    // Warnings print before the error that stopped the run.
+                    text = item.errorLog.lines().lastOrNull { it.trimStart().startsWith("ERROR:") }
+                        ?: item.errorLog.lines().firstOrNull { it.isNotBlank() }
                         ?: stringResource(R.string.history_empty_failed),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,

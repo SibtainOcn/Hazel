@@ -69,9 +69,6 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
     private val _notifyFailed = MutableStateFlow(true)
     val notifyFailed: StateFlow<Boolean> = _notifyFailed.asStateFlow()
 
-    private val _verifySignature = MutableStateFlow(true)
-    val verifySignature: StateFlow<Boolean> = _verifySignature.asStateFlow()
-
     private var updateJob: Job? = null
 
     init {
@@ -84,7 +81,6 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
             _notifyAvailable.value = SettingsRepository.getUpdateNotifyAvailable(getApplication()).first()
             _notifyComplete.value = SettingsRepository.getUpdateNotifyComplete(getApplication()).first()
             _notifyFailed.value = SettingsRepository.getUpdateNotifyFailed(getApplication()).first()
-            _verifySignature.value = SettingsRepository.getUpdateVerifySignature(getApplication()).first()
 
             checkForUpdate()
         }
@@ -126,11 +122,6 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
     fun setNotifyFailed(enabled: Boolean) {
         _notifyFailed.value = enabled
         viewModelScope.launch { SettingsRepository.setUpdateNotifyFailed(getApplication(), enabled) }
-    }
-
-    fun setVerifySignature(enabled: Boolean) {
-        _verifySignature.value = enabled
-        viewModelScope.launch { SettingsRepository.setUpdateVerifySignature(getApplication(), enabled) }
     }
 
     /** Ask GitHub for the channel's latest release and compare it to what's installed. */

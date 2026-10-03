@@ -44,7 +44,7 @@ object YtDlpEngine {
         when {
             isDamagedBinary(e) -> {
                 Log.w("Hazel", "yt-dlp binary is damaged, restoring the bundled copy: ${e.message}")
-                YtDlpUpdater.ensureValidBinary(HazelApp.instance)
+                YtDlpUpdater.ensureValidBinary(HazelApp.instance, confirmedBroken = true)
             }
             isOutdatedBinary(e) -> {
                 Log.w("Hazel", "yt-dlp binary is too old for this app, restoring the bundled copy")

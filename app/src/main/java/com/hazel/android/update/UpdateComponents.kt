@@ -1,6 +1,7 @@
 package com.hazel.android.update
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,11 +25,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -376,4 +380,24 @@ fun UpdateSegmentedButton(
             }
         }
     }
+}
+
+/** Calm wavy progress for update downloads; [progress] null (size unknown or done) shows full. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun UpdateWavyProgress(progress: Float?, modifier: Modifier = Modifier) {
+    val shown by animateFloatAsState(
+        targetValue = progress ?: 1f,
+        animationSpec = tween(durationMillis = 600),
+        label = "updateProgress"
+    )
+    LinearWavyProgressIndicator(
+        progress = { shown },
+        modifier = modifier.fillMaxWidth(),
+        color = UpdateTokens.RunStrong,
+        trackColor = if (UpdateTokens.isDark) Color.White.copy(alpha = 0.10f) else Color.Black.copy(alpha = 0.08f),
+        amplitude = { WavyProgressIndicatorDefaults.indicatorAmplitude(it) * 0.6f },
+        wavelength = 48.dp,
+        waveSpeed = 12.dp
+    )
 }

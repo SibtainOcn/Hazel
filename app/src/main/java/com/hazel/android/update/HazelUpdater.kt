@@ -530,7 +530,9 @@ object HazelUpdater {
         try {
             val installedEngine = YtDlpUpdater.installedVersion(context)
             if (installedEngine != null) {
-                val channel = YtDlpUpdater.Channel.STABLE
+                val channel = YtDlpUpdater.Channel.fromLabel(
+                    com.hazel.android.data.SettingsRepository.getYtDlpChannel(context).first()
+                )
                 val releaseInfo = YtDlpUpdater.latestRelease(channel)
                 val hasYtDlpUpdate = releaseInfo != null && YtDlpUpdater.isNewer(releaseInfo.version, installedEngine)
                 com.hazel.android.data.SettingsRepository.setYtDlpUpdateAvailable(context, hasYtDlpUpdate)

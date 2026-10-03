@@ -486,6 +486,14 @@
     <!-- Names the progress channel in the system notification settings. -->
     <string name="notification_channel_progress_description">Download progress, shows icon in status bar</string>
     <string name="notification_channel_complete_description">Download completion alerts</string>
+    <string name="ytdlp_update_channel_name">Engine updates</string>
+    <string name="ytdlp_update_channel_description">yt-dlp engine update alerts</string>
+    <string name="ytdlp_update_available_title">yt-dlp %1$s is available</string>
+    <string name="ytdlp_update_available_text">Open Hazel to update the download engine</string>
+    <string name="ytdlp_update_installed_title">yt-dlp updated to %1$s</string>
+    <string name="ytdlp_update_installed_text">The download engine is up to date</string>
+    <string name="ytdlp_update_failed_title">yt-dlp %1$s could not be installed</string>
+    <string name="ytdlp_update_failed_text">Hazel kept the current engine and will try again later</string>
     <string name="notification_action_pause">Pause</string>
     <string name="notification_action_resume">Resume</string>
     <string name="notification_action_cancel">Cancel</string>

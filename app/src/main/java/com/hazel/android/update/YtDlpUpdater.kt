@@ -18,9 +18,14 @@ import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
+import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.zip.ZipFile
 
 /**
  * Updates the yt-dlp binary from the yt-dlp GitHub releases, independently of the
@@ -70,6 +75,10 @@ object YtDlpUpdater {
 
     private val isUpdating = AtomicBoolean(false)
 
+    /** Last `--version` answer, keyed to the size and time of the file it came from. */
+    @Volatile
+    private var knownVersion: Pair<String, String>? = null
+
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
@@ -83,16 +92,123 @@ object YtDlpUpdater {
     private fun stagedBinary(context: Context) = File(engineDir(context), "yt-dlp.staged")
     private fun stagedTag(context: Context) = File(engineDir(context), "yt-dlp.staged.tag")
 
-    /** Whether [file] is a complete yt-dlp zip rather than a truncated or foreign file. */
-    private fun isValidBinary(file: File): Boolean {
+    /** The build a swap replaced, kept until the new one has started. */
+    private fun previousBinary(context: Context) = File(engineDir(context), "yt-dlp.previous")
+
+    /** Tag of a build that would not start here, so auto-update skips it. */
+    private fun rejectedTag(context: Context) = File(engineDir(context), "yt-dlp.rejected.tag")
+
+    /**
+     * Whether the live binary starts on this device's Python; null when the library itself
+     * won't start. Bypasses [YtDlpEngine] so it can run while a swap holds the engine.
+     */
+    private fun runsOnDevice(context: Context): Boolean? {
+        try {
+            YoutubeDL.getInstance().init(context)
+        } catch (e: Exception) {
+            Log.w("Hazel", "yt-dlp health check skipped, the engine did not start: ${e.message}")
+            return null
+        }
+        val processId = "ytdlp-health-${System.nanoTime()}"
+        val run = healthExecutor.submit<Boolean> {
+            val request = YoutubeDLRequest(emptyList<String>()).addOption("--version")
+            YoutubeDL.getInstance().execute(request, processId).out.isNotBlank()
+        }
+        return try {
+            run.get(HEALTH_CHECK_TIMEOUT_S, TimeUnit.SECONDS)
+        } catch (e: TimeoutException) {
+            // Undecided rather than broken: a slow device must not lose a good build.
+            Log.w("Hazel", "yt-dlp health check timed out")
+            runCatching { YoutubeDL.getInstance().destroyProcessById(processId) }
+            null
+        } catch (e: ExecutionException) {
+            if (e.cause is YoutubeDL.CanceledException) return null
+            Log.w("Hazel", "yt-dlp health check failed: ${e.cause?.message}")
+            false
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private val healthExecutor = Executors.newCachedThreadPool()
+    private const val HEALTH_CHECK_TIMEOUT_S = 60L
+
+    /**
+     * Whether [file] is a complete yt-dlp zip rather than a truncated or foreign file.
+     *
+     * Not [java.util.zip.ZipFile]: yt-dlp is a zip behind a shebang line, which Android's
+     * ZipFile rejects outright. The zip is read from its end record, as Python does.
+     */
+    internal fun isValidBinary(file: File): Boolean {
         if (!file.isFile || file.length() < MIN_BINARY_BYTES) return false
         return try {
-            ZipFile(file).use { zip ->
-                zip.getEntry("__main__.py") != null || zip.getEntry("yt_dlp/__init__.py") != null
-            }
+            RandomAccessFile(file, "r").use { zip -> zipEntryNames(zip)?.any { it in MAIN_ENTRIES } == true }
         } catch (_: Exception) {
             false
         }
+    }
+
+    private val MAIN_ENTRIES = setOf("__main__.py", "yt_dlp/__init__.py")
+
+    private const val EOCD_SIG = 0x06054b50
+    private const val CEN_SIG = 0x02014b50
+    private const val LOC_SIG = 0x04034b50
+    private const val EOCD_SIZE = 22
+    private const val CEN_HEADER_SIZE = 46
+
+    /**
+     * Entry names of [zip], or null when it is not a whole zip. Leading bytes are allowed.
+     * Only the local headers of [MAIN_ENTRIES] are read, to keep the check to a few reads.
+     */
+    private fun zipEntryNames(zip: RandomAccessFile): List<String>? {
+        val length = zip.length()
+        val tailSize = minOf(length, (EOCD_SIZE + 0xFFFF).toLong()).toInt()
+        val tail = ByteArray(tailSize)
+        zip.seek(length - tailSize)
+        zip.readFully(tail)
+        val tailBuf = ByteBuffer.wrap(tail).order(ByteOrder.LITTLE_ENDIAN)
+
+        // The comment length must land on the end, so a signature inside the comment is skipped.
+        val eocd = (tailSize - EOCD_SIZE downTo 0).firstOrNull {
+            tailBuf.getInt(it) == EOCD_SIG &&
+                it + EOCD_SIZE + (tailBuf.getShort(it + 20).toInt() and 0xFFFF) == tailSize
+        } ?: return null
+        val entryCount = tailBuf.getShort(eocd + 10).toInt() and 0xFFFF
+        val cenSize = tailBuf.getInt(eocd + 12).toLong() and 0xFFFFFFFFL
+        val cenOffset = tailBuf.getInt(eocd + 16).toLong() and 0xFFFFFFFFL
+
+        // Gap between where the directory is and where it says it is = bytes ahead of the zip.
+        val cenPos = length - tailSize + eocd - cenSize
+        val shift = cenPos - cenOffset
+        if (cenPos < 0 || shift < 0) return null
+
+        val cen = ByteArray(cenSize.toInt())
+        zip.seek(cenPos)
+        zip.readFully(cen)
+        val cenBuf = ByteBuffer.wrap(cen).order(ByteOrder.LITTLE_ENDIAN)
+        val local = ByteArray(4)
+        val localBuf = ByteBuffer.wrap(local).order(ByteOrder.LITTLE_ENDIAN)
+
+        val names = ArrayList<String>(entryCount)
+        var pos = 0
+        repeat(entryCount) {
+            if (pos + CEN_HEADER_SIZE > cen.size || cenBuf.getInt(pos) != CEN_SIG) return null
+            val nameLen = cenBuf.getShort(pos + 28).toInt() and 0xFFFF
+            val extraLen = cenBuf.getShort(pos + 30).toInt() and 0xFFFF
+            val commentLen = cenBuf.getShort(pos + 32).toInt() and 0xFFFF
+            val localOffset = (cenBuf.getInt(pos + 42).toLong() and 0xFFFFFFFFL) + shift
+            if (pos + CEN_HEADER_SIZE + nameLen > cen.size) return null
+            if (localOffset + 4 > cenPos) return null
+            val name = String(cen, pos + CEN_HEADER_SIZE, nameLen, Charsets.UTF_8)
+            if (name in MAIN_ENTRIES) {
+                zip.seek(localOffset)
+                zip.readFully(local)
+                if (localBuf.getInt(0) != LOC_SIG) return null
+            }
+            names += name
+            pos += CEN_HEADER_SIZE + nameLen + extraLen + commentLen
+        }
+        return names
     }
 
     /**
@@ -102,12 +218,28 @@ object YtDlpUpdater {
      * import error. When that is what is on disk it is replaced with the copy bundled in
      * the app, so the engine works again even if it is a release behind.
      *
+     * A binary that fails the check but still starts is kept, so the check alone never
+     * undoes an update. Pass [confirmedBroken] when a real run has already failed on it.
+     *
      * Returns true when a valid binary is in place.
      */
     @Synchronized
-    fun ensureValidBinary(context: Context): Boolean {
+    fun ensureValidBinary(context: Context, confirmedBroken: Boolean = false): Boolean {
         val binary = liveBinary(context)
         if (isValidBinary(binary)) return true
+
+        // A swap interrupted between its two renames.
+        val previous = previousBinary(context)
+        if (!binary.exists() && isValidBinary(previous) && previous.renameTo(binary)) {
+            binary.setExecutable(true, false)
+            Log.w("Hazel", "yt-dlp swap was interrupted, put the previous build back")
+            return true
+        }
+
+        if (!confirmedBroken && binary.isFile && runsOnDevice(context) != false) {
+            Log.w("Hazel", "yt-dlp binary failed the zip check but starts, keeping it")
+            return true
+        }
 
         Log.w("Hazel", "yt-dlp binary is missing or damaged, restoring the bundled copy")
         return try {
@@ -157,8 +289,12 @@ object YtDlpUpdater {
     /**
      * Puts a downloaded build live if one is waiting and nothing is running.
      *
-     * The rename is atomic on the same filesystem, so a run either sees the old file or the
-     * new one, never half of each. Returns true when a staged build went live.
+     * The rename is atomic, so a run sees the old file or the new one, never half of each.
+     * The new build must start on this device's Python before any run reaches it; otherwise
+     * the previous build is put back and the tag is remembered.
+     *
+     * Returns true when a staged build went live. A refused build is deleted, so a caller
+     * can tell a refusal from a busy engine.
      */
     fun applyStagedUpdate(context: Context): Boolean {
         val staged = stagedBinary(context)
@@ -167,29 +303,62 @@ object YtDlpUpdater {
         return YtDlpEngine.whenIdle {
             synchronized(this) {
                 if (!staged.exists()) return@synchronized false
-                if (!isValidBinary(staged)) {
-                    staged.delete()
-                    stagedTag(context).delete()
-                    return@synchronized false
-                }
                 val tag = runCatching { stagedTag(context).readText().trim() }.getOrDefault("")
+                // Before the swap, so the library never finds the slot empty and unpacks its own copy.
+                runCatching { YoutubeDL.getInstance().init(context) }
                 liveDir(context).mkdirs()
                 val live = liveBinary(context)
-                if (!staged.renameTo(live)) return@synchronized false
-
+                val previous = previousBinary(context)
+                previous.delete()
+                val keptPrevious = live.isFile && live.renameTo(previous)
+                if (!staged.renameTo(live)) {
+                    if (keptPrevious) previous.renameTo(live)
+                    Log.w("Hazel", "yt-dlp ${tag.ifBlank { "update" }} could not be moved into place")
+                    discardStaged(context)
+                    notifyFailed(context, tag)
+                    return@synchronized false
+                }
                 live.setExecutable(true, false)
+
+                // Starting is the test; the zip check only decides when the engine can't run one.
+                val runs = runsOnDevice(context) ?: isValidBinary(live)
+                if (!runs) {
+                    Log.w("Hazel", "yt-dlp ${tag.ifBlank { "update" }} does not start here, keeping the previous build")
+                    live.delete()
+                    if (!(keptPrevious && previous.renameTo(live))) {
+                        ensureValidBinary(context, confirmedBroken = true)
+                    }
+                    live.setExecutable(true, false)
+                    if (tag.isNotBlank()) runCatching { rejectedTag(context).writeText(tag) }
+                    stagedTag(context).delete()
+                    notifyFailed(context, tag)
+                    return@synchronized false
+                }
+
+                previous.delete()
+                rejectedTag(context).delete()
                 stagedTag(context).delete()
                 context.getSharedPreferences(LIBRARY_PREFS, Context.MODE_PRIVATE).edit().apply {
                     if (tag.isNotBlank()) putString(VERSION_KEY, tag).putString(VERSION_NAME_KEY, tag)
                     else remove(VERSION_KEY).remove(VERSION_NAME_KEY)
                 }.apply()
                 Log.i("Hazel", "yt-dlp ${tag.ifBlank { "update" }} is now live")
+                if (tag.isNotBlank()) YtDlpUpdateNotifier.post(context, YtDlpUpdateNotifier.Event.INSTALLED, tag)
                 true
             }
         } ?: run {
             Log.i("Hazel", "yt-dlp update staged; it goes live once the running jobs finish")
             false
         }
+    }
+
+    private fun discardStaged(context: Context) {
+        stagedBinary(context).delete()
+        stagedTag(context).delete()
+    }
+
+    private fun notifyFailed(context: Context, tag: String) {
+        if (tag.isNotBlank()) YtDlpUpdateNotifier.post(context, YtDlpUpdateNotifier.Event.FAILED, tag)
     }
 
     /**
@@ -200,9 +369,13 @@ object YtDlpUpdater {
      * successful in-app update. Returns null when yt-dlp is not initialized.
      */
     suspend fun installedVersion(context: Context): String? = withContext(Dispatchers.IO) {
+        val binary = liveBinary(context)
+        val stamp = "${binary.length()}:${binary.lastModified()}"
+        knownVersion?.let { (forStamp, version) -> if (forStamp == stamp) return@withContext version }
         try {
             val request = YoutubeDLRequest(emptyList<String>()).addOption("--version")
             YtDlpEngine.execute(request).out.trim().ifBlank { null }
+                ?.also { knownVersion = stamp to it }
         } catch (_: Exception) {
             // Library not initialized, or the binary is unusable: fall back to the
             // version recorded by the last successful update.
@@ -352,10 +525,10 @@ object YtDlpUpdater {
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) throw IOException("HTTP ${response.code}")
                 val total = response.body.contentLength().coerceAtLeast(0L)
+                var done = 0L
                 response.body.byteStream().use { input ->
                     partial.outputStream().use { output ->
                         val buffer = ByteArray(64 * 1024)
-                        var done = 0L
                         while (true) {
                             ensureActive()
                             val read = input.read(buffer)
@@ -366,8 +539,9 @@ object YtDlpUpdater {
                         }
                     }
                 }
+                if (total > 0 && done != total) throw IOException("yt-dlp download ended at $done of $total bytes")
             }
-            if (!isValidBinary(partial)) throw IOException("Downloaded yt-dlp is not a valid build")
+            if (partial.length() < MIN_BINARY_BYTES) throw IOException("Downloaded yt-dlp is too small to be a build")
 
             synchronized(this@YtDlpUpdater) {
                 staged.delete()
@@ -423,24 +597,29 @@ object YtDlpUpdater {
     /**
      * Keeps yt-dlp current without the user opening the update screen.
      *
-     * Follows the update screen's own settings: nothing happens with automatic download
-     * off, and nothing on a metered connection with Wi-Fi only on. The new build is staged
-     * in the background and goes live as soon as no run needs the old one. Returns true
-     * when a newer build was fetched.
+     * Follows the update screen's settings: with automatic download off, or on a metered
+     * connection with Wi-Fi only on, a newer release is only announced. Returns true when
+     * a newer build was fetched.
      */
     suspend fun autoUpdateIfAvailable(context: Context): Boolean = withContext(Dispatchers.IO) {
         if (!isUpdating.compareAndSet(false, true)) return@withContext false
+        var target: String? = null
         try {
-            if (!SettingsRepository.getUpdateAutoDownload(context).first()) return@withContext false
-            if (SettingsRepository.getUpdateWifiOnly(context).first() && !onUnmeteredNetwork(context)) {
-                return@withContext false
-            }
-
             val channel = Channel.fromLabel(SettingsRepository.getYtDlpChannel(context).first())
             val remote = latestRelease(channel) ?: return@withContext false
             val current = installedVersion(context)
             if (!isNewer(remote.version, current)) return@withContext false
 
+            val autoDownload = SettingsRepository.getUpdateAutoDownload(context).first()
+            val wifiOnly = SettingsRepository.getUpdateWifiOnly(context).first()
+            if (!autoDownload || (wifiOnly && !onUnmeteredNetwork(context))) {
+                YtDlpUpdateNotifier.post(context, YtDlpUpdateNotifier.Event.AVAILABLE, remote.version)
+                return@withContext false
+            }
+            val rejected = runCatching { rejectedTag(context).readText().trim() }.getOrNull()
+            if (rejected == remote.version) return@withContext false
+
+            target = remote.version
             val alreadyStaged = runCatching { stagedTag(context).readText().trim() }.getOrNull()
             if (alreadyStaged != remote.version || !stagedBinary(context).exists()) {
                 Log.i("Hazel", "Fetching yt-dlp ${remote.version} (${channel.label})")
@@ -450,6 +629,7 @@ object YtDlpUpdater {
             true
         } catch (e: Exception) {
             Log.w("Hazel", "yt-dlp auto-update failed: ${e.message}")
+            target?.let { notifyFailed(context, it) }
             false
         } finally {
             isUpdating.set(false)
