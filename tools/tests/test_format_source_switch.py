@@ -13,6 +13,8 @@ Verifies:
    superseded read's answer is not applied. An opening read (resolveFormats) never queues.
 4. The batch audio list hands its links to the sheet, so it gets the notice too.
 5. The notice's text exists in every language, with apostrophes escaped.
+6. A list either reader has read holds the engine's best on top and its worst at the
+   bottom, for video and audio, under every filter and ordering; a ladder is left as it is.
 
 Run:
     python tools/tests/test_format_source_switch.py
@@ -246,6 +248,46 @@ def test_strings():
                            not re.search(r"(?<!\\)'", m.group(1)))
 
 
+# ===========================================================================
+# 6. Best on top, worst at the bottom
+# ===========================================================================
+
+def with_ends(formats, best, worst, read):
+    """A model of FormatSelectionSheet's withEnds."""
+    if not read:
+        return formats
+    return [best] + [f for f in formats if f not in (best, worst)] + [worst]
+
+
+def test_format_ends():
+    print("\n--- Suite 6: Best on top, worst at the bottom ---")
+    check("yt-dlp read (no generic rows) gets both ends",
+          with_ends(["1080", "720", "233"], "best", "worst", True), ["best", "1080", "720", "233"] + ["worst"])
+    check("NewPipe read (best already on top) keeps one best",
+          with_ends(["best", "1080", "720"], "best", "worst", True), ["best", "1080", "720", "worst"])
+    check("A best sorted elsewhere is moved to the top",
+          with_ends(["1080", "best", "720"], "best", "worst", True), ["best", "1080", "720", "worst"])
+    check("The ladder a link opens with is left alone",
+          with_ends(["best", "~1080p", "worst"], "best", "worst", False), ["best", "~1080p", "worst"])
+
+    sheet = read(SRC / "ui/screens/download/FormatSelectionSheet.kt")
+    stops = block(sheet, "private fun buildStops(", 3200)
+    check_true("Video list gets the ends after filtering and sorting",
+               ".sortedBy(sort)\n        .withEnds(MediaProbe.BEST_VIDEO" in stops and "WORST_VIDEO.copy(label = ends.worst)" in stops)
+    check_true("Audio list gets the ends after filtering and sorting",
+               ".withEnds(BatchAudioFormats.BEST" in stops and "BatchAudioFormats.WORST.copy(label = ends.worst)" in stops)
+    check_true("Ends only on a read list",
+               "read = info.videoFormats.any { !it.isGeneric }" in stops
+               and "read = info.audioFormats.any { !it.isGeneric }" in stops)
+    ends = block(sheet, "private fun List<MediaFormat>.withEnds(", 400)
+    check_true("withEnds puts best first and worst last",
+               "listOf(best) + middle + worst" in ends and "if (!read) return this" in ends)
+    check_true("Ends are named like the ladder's",
+               "R.string.batch_quality_best" in sheet and "R.string.audio_quality_best" in sheet
+               and "R.string.batch_quality_worst" in sheet)
+    check_true("Rung stops still leave generic rows out", ".filter { !it.isGeneric }" in stops)
+
+
 def main():
     print("=" * 70)
     print("  Hazel Format Source Switch Test Harness")
@@ -257,6 +299,7 @@ def main():
     test_read_queue_model()
     test_batch_wiring()
     test_strings()
+    test_format_ends()
 
     print("\n" + "=" * 70)
     print(f"  TOTAL CHECKS: {PASS_COUNT + FAIL_COUNT}")

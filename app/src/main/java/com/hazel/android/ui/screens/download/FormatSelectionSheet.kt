@@ -84,6 +84,9 @@ import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
+import com.hazel.android.download.MediaProbe
+import com.hazel.android.download.BatchAudioFormats
+import com.hazel.android.download.WORST_VIDEO
 import com.hazel.android.ui.components.FormatListShimmer
 import com.hazel.android.ui.components.GlintHost
 import com.hazel.android.ui.components.ShimmerLabel
@@ -191,8 +194,14 @@ fun FormatSelectionSheet(
     val videoTitle = stringResource(R.string.format_sheet_tab_video)
     val audioTitle = stringResource(R.string.format_sheet_tab_audio)
     val allLabel = stringResource(R.string.format_filter_all)
-    val stops = remember(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel) {
-        buildStops(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel)
+    // The same names the ladder a link opens with gives its ends.
+    val ends = FormatEnds(
+        bestVideo = stringResource(R.string.batch_quality_best),
+        bestAudio = stringResource(R.string.audio_quality_best),
+        worst = stringResource(R.string.batch_quality_worst)
+    )
+    val stops = remember(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel, ends) {
+        buildStops(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel, ends)
     }
 
     // The rail earns its width only when it splits the list into more than one part. While
@@ -715,10 +724,15 @@ private fun buildStops(
     audioFirst: Boolean,
     videoTitle: String,
     audioTitle: String,
-    allLabel: String
+    allLabel: String,
+    ends: FormatEnds
 ): List<FormatStop> {
     val video = filter.apply(info.videoFormats, audio = false).sortedBy(sort)
+        .withEnds(MediaProbe.BEST_VIDEO.copy(label = ends.bestVideo), WORST_VIDEO.copy(label = ends.worst),
+            read = info.videoFormats.any { !it.isGeneric })
     val audio = filter.apply(info.audioFormats, audio = true).sortedBy(sort)
+        .withEnds(BatchAudioFormats.BEST.copy(label = ends.bestAudio), BatchAudioFormats.WORST.copy(label = ends.worst),
+            read = info.audioFormats.any { !it.isGeneric })
 
     fun entries(title: String, formats: List<MediaFormat>): List<FormatListRow> =
         formats.map { FormatListRow.Entry(it, title) }
@@ -751,6 +765,23 @@ private fun buildStops(
         // including while they are still being read.
         add(FormatStop(STOP_AUDIO, audioTitle, entries(audioTitle, audio)))
     }
+}
+
+/** What the engine's own best and worst rows are called, in the user's language. */
+@Immutable
+private data class FormatEnds(val bestVideo: String, val bestAudio: String, val worst: String)
+
+/**
+ * A kind's list, once the source has read it, between the engine's own best on top and its
+ * worst at the bottom, whichever reader read it and however the list is ordered: yt-dlp
+ * lists no such rows and NewPipe only a best one, so the ends were missing or found in
+ * different places from one read to the next. A list not read yet is the ladder, which
+ * holds both already.
+ */
+private fun List<MediaFormat>.withEnds(best: MediaFormat, worst: MediaFormat, read: Boolean): List<MediaFormat> {
+    if (!read) return this
+    val middle = filterNot { it.formatId == best.formatId || it.formatId == worst.formatId }
+    return listOf(best) + middle + worst
 }
 
 /**
