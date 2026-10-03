@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.12] - 2026-10-03
 ### Fixed
 - yt-dlp updates install again. Every downloaded build was wrongly rejected as damaged and each launch went back to the bundled yt-dlp, which YouTube now refuses with HTTP 403. A new build now goes live only after it starts on the device, and the previous one is kept if it does not.
 - The yt-dlp update notifications (new version, installed, failed) now post; the unused verify switch is gone.
