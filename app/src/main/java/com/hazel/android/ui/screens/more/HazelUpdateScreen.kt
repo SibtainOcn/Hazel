@@ -45,7 +45,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -75,6 +74,7 @@ import com.hazel.android.update.HazelUpdateViewModel
 import com.hazel.android.update.HazelUpdater
 import com.hazel.android.update.UpdateListGroup
 import com.hazel.android.update.UpdateListItem
+import com.hazel.android.update.UpdateWavyProgress
 import com.hazel.android.update.UpdateSectionLabel
 import com.hazel.android.update.UpdateSegmentedButton
 import com.hazel.android.update.UpdateSwitch
@@ -636,15 +636,7 @@ private fun HazelStatusCard(
                     (state.progressBytes.toFloat() / state.totalBytes.toFloat()).coerceIn(0f, 1f)
                 } else 0f
 
-                LinearProgressIndicator(
-                    progress = { pct },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(5.dp)
-                        .clip(RoundedCornerShape(3.dp)),
-                    color = UpdateTokens.RunStrong,
-                    trackColor = if (UpdateTokens.isDark) Color.White.copy(alpha = 0.10f) else Color.Black.copy(alpha = 0.08f)
-                )
+                UpdateWavyProgress(progress = if (state.totalBytes > 0) pct else null)
 
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(

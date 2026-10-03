@@ -37,7 +37,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -76,7 +75,6 @@ fun YtDlpUpdateScreen(
     val notifyAvailable by viewModel.notifyAvailable.collectAsState()
     val notifyComplete by viewModel.notifyComplete.collectAsState()
     val notifyFailed by viewModel.notifyFailed.collectAsState()
-    val verifySignature by viewModel.verifySignature.collectAsState()
 
     val displayInstalled = installedVersion ?: YtDlpUpdater.cachedVersion(context) ?: "Bundled"
 
@@ -221,7 +219,7 @@ fun YtDlpUpdateScreen(
             }
 
             // ── Source & Verification ──
-            UpdateSectionLabel(text = "Source & verification")
+            UpdateSectionLabel(text = "Source")
             UpdateListGroup {
                 UpdateListItem(
                     icon = Icons.Filled.Security,
@@ -235,18 +233,6 @@ fun YtDlpUpdateScreen(
                             contentDescription = null,
                             tint = UpdateTokens.OnSurfaceDim,
                             modifier = Modifier.size(16.dp)
-                        )
-                    }
-                )
-                UpdateListItem(
-                    icon = Icons.Filled.VerifiedUser,
-                    primary = "Verify signing key",
-                    secondary = "Match the release signature before installing",
-                    showDivider = true,
-                    trailing = {
-                        UpdateSwitch(
-                            checked = verifySignature,
-                            onCheckedChange = { viewModel.setVerifySignature(it) }
                         )
                     }
                 )
@@ -483,13 +469,12 @@ private fun YtDlpStatusCard(
             // Continuous progress indicator while updating
             if (state is UpdateViewModel.UiState.Updating) {
                 Spacer(modifier = Modifier.height(20.dp))
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(3.dp)),
-                    color = UpdateTokens.RunStrong,
-                    trackColor = if (UpdateTokens.isDark) Color.White.copy(alpha = 0.10f) else Color.Black.copy(alpha = 0.08f)
+                UpdateWavyProgress(
+                    progress = when {
+                        state.totalBytes > 0 -> (state.progressBytes.toFloat() / state.totalBytes).coerceIn(0f, 1f)
+                        state.progressBytes > 0 -> null
+                        else -> 0f
+                    }
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
