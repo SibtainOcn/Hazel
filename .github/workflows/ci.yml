@@ -1,6 +1,7 @@
 name: CI
 
-# Runs on every pull request and on every push to main.
+# Runs on every pull request and on every push to main or nightly. Nightly gathers changes
+# for testing before they reach main, so it is checked the same way and built as debug.
 #
 # The two jobs are independent and start together, so the whole check finishes in about the
 # time the slower of the two takes. Tests never wait on a packaging step, and a compile
@@ -11,9 +12,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [main, "feat/**"]
+    branches: [main, nightly, "feat/**"]
   push:
-    branches: [main]
+    branches: [main, nightly]
   workflow_dispatch:
 
 # A new push replaces the run still going for the same branch, rather than queueing behind
