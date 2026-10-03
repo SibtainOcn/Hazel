@@ -7,6 +7,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 
 /**
  * Keeps a running download alive once the app is no longer on screen.
@@ -95,7 +96,7 @@ class DownloadService : Service() {
             runCatching {
                 val intent = Intent(context, DownloadService::class.java)
                     .putExtra(EXTRA_TITLE, title)
-                context.startForegroundService(intent)
+                ContextCompat.startForegroundService(context, intent)
                 startRequested = true
             }
         }
@@ -121,7 +122,7 @@ class DownloadService : Service() {
             runCatching {
                 val intent = Intent(context, DownloadService::class.java)
                     .setAction(ACTION_STOP)
-                context.startForegroundService(intent)
+                ContextCompat.startForegroundService(context, intent)
             }
         }
     }
