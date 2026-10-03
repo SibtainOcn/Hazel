@@ -62,6 +62,7 @@ import com.hazel.android.download.playback.PlaybackController
 import com.hazel.android.ui.components.FlatChip
 import com.hazel.android.ui.components.player.PlayerSurface
 import com.hazel.android.ui.components.player.rememberPlaybackController
+import com.hazel.android.ui.components.keepFlingInSheet
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 
@@ -147,6 +148,7 @@ fun CutSheet(
     ) {
         Column(
             modifier = Modifier
+                .keepFlingInSheet()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 16.dp)

@@ -98,6 +98,7 @@ import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.newpipe.NewPipeEngine
 import com.hazel.android.download.languageLabel
+import com.hazel.android.ui.components.keepFlingInSheet
 
 /**
  * Everything you can adjust before a download starts.
@@ -297,6 +298,7 @@ fun FormatSheet(
       Box {
         Column(
             modifier = Modifier
+                .keepFlingInSheet()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {

@@ -87,6 +87,7 @@ import com.hazel.android.ui.components.ShimmerLabel
 import com.hazel.android.download.qualityRung
 import com.hazel.android.ui.theme.SizeBadgeContainer
 import com.hazel.android.ui.theme.SizeBadgeContent
+import com.hazel.android.ui.components.keepFlingInSheet
 
 /**
  * How the format list is ordered. The default is what the probe already sorted for.
@@ -328,7 +329,8 @@ fun FormatSelectionSheet(
                     state = listState,
                     modifier = Modifier
                         .weight(1f)
-                        .then(if (showRail) Modifier.fillMaxHeight() else Modifier),
+                        .then(if (showRail) Modifier.fillMaxHeight() else Modifier)
+                        .keepFlingInSheet(),
                     verticalArrangement = Arrangement.spacedBy(if (showRail) 6.dp else 0.dp),
                     contentPadding = PaddingValues(bottom = bottomInset)
                 ) {
@@ -450,6 +452,7 @@ private fun FormatRail(
         Column(
             modifier = Modifier
                 .fillMaxHeight()
+                .keepFlingInSheet()
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = bottomInset),
             verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -582,6 +585,7 @@ private fun FormatFilterSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .keepFlingInSheet()
                 .verticalScroll(rememberScrollState())
                 .padding(top = 20.dp, bottom = 24.dp)
         ) {

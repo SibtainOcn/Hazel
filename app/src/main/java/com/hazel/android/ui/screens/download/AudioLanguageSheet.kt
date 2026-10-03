@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import androidx.compose.ui.unit.sp
 import com.hazel.android.download.languageLabel
+import com.hazel.android.ui.components.keepFlingInSheet
 
 /**
  * Which soundtrack a download takes.
@@ -95,7 +96,8 @@ fun AudioLanguageSheet(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f, fill = false),
+                    .weight(1f, fill = false)
+                    .keepFlingInSheet(),
                 contentPadding = WindowInsets.navigationBars
                     .asPaddingValues()
                     .let { PaddingValues(bottom = it.calculateBottomPadding() + 24.dp) }

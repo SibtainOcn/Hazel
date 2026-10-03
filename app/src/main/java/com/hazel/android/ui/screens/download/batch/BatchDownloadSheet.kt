@@ -119,6 +119,7 @@ import com.hazel.android.ui.screens.download.ThumbnailDialog
 import com.hazel.android.ui.screens.download.FormatSelectionSheet
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.util.SdCard
+import com.hazel.android.ui.components.keepFlingInSheet
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -453,6 +454,7 @@ fun BatchDownloadSheet(
                     .fillMaxWidth()
                     .weight(1f, fill = false)
                     .heightIn(max = 280.dp)
+                    .keepFlingInSheet()
                     .nestedScroll(shrink),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     horizontal = SIDE
