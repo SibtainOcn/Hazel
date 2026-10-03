@@ -369,27 +369,20 @@
     <string name="cookies_toast_entry_copied">Copié dans le presse-papiers</string>
     <string name="cookies_use_title">Utiliser les cookies</string>
     <string name="cookies_use_description">Transmettre les connexions enregistrées au téléchargeur</string>
-    <string name="cookies_new">Nouveau cookie</string>
-    <string name="cookies_import_file_button">Importer un fichier</string>
     <string name="cookies_empty_title">Aucun cookie enregistré</string>
     <string name="cookies_empty_body">Ajoutez-en un pour télécharger des contenus soumis à une limite d\'âge, privés ou réservés aux membres.</string>
     <string name="cookies_delete_title">Supprimer les cookies</string>
     <string name="cookies_delete_body">Retirer la connexion enregistrée pour %1$s ?</string>
     <string name="cookies_delete_confirm">Supprimer</string>
-    <string name="cookies_delete_cancel">Annuler</string>
     <string name="cookies_delete_all_title">Supprimer tous les cookies</string>
     <string name="cookies_delete_all_body">Toutes les connexions enregistrées seront retirées. C\'est irréversible.</string>
     <string name="cookies_delete_all_confirm">Tout supprimer</string>
-    <string name="cookies_delete_all_cancel">Annuler</string>
     <string name="cookies_row_fallback_name">Cookies</string>
-    <string name="cookies_sheet_title">Cookies</string>
     <string name="cookies_sheet_copy">Copier les cookies</string>
     <string name="cookies_sheet_delete">Supprimer les cookies</string>
     <string name="cookies_field_title">Titre</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">Enregistrer</string>
-    <string name="cookies_sheet_get">Obtenir les cookies</string>
-    <string name="cookies_sheet_update">Mettre à jour</string>
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Meilleure qualité</string>
@@ -756,4 +749,25 @@
     <string name="ytdlp_update_installed_text">Le moteur de téléchargement est à jour</string>
     <string name="ytdlp_update_failed_title">Impossible d\'installer yt-dlp %1$s</string>
     <string name="ytdlp_update_failed_text">Hazel garde le moteur actuel et réessaiera plus tard</string>
+    <string name="cookies_description">Connectez-vous une fois à un site et Hazel s\'en sert pour les téléchargements soumis à une limite d\'âge, privés ou réservés aux membres.</string>
+    <string name="cookies_section_general">Général</string>
+    <string name="cookies_section_add">Ajouter</string>
+    <string name="cookies_section_saved">Connexions enregistrées</string>
+    <string name="cookies_add_sign_in">Se connecter à un site</string>
+    <string name="cookies_add_sign_in_summary">Ouvrir le site et enregistrer ses cookies</string>
+    <string name="cookies_add_import_file_summary">Un fichier de cookies Netscape exporté depuis un navigateur</string>
+    <string name="cookies_off_hint">Activez Utiliser les cookies pour les envoyer avec les téléchargements.</string>
+    <string name="cookies_expires">Expire %1$s</string>
+    <string name="cookies_expired">Expirés</string>
+    <string name="cookies_session_only">Session uniquement</string>
+    <string name="cookies_add_body">Hazel ouvre la page de connexion du site et enregistre ses cookies une fois que vous avez terminé.</string>
+    <string name="cookies_add_continue">Continuer</string>
+    <string name="cookies_show">Afficher les cookies</string>
+    <string name="cookies_hide">Masquer les cookies</string>
+    <string name="cookies_sign_in_again">Se reconnecter</string>
+    <plurals name="cookies_count">
+        <item quantity="one">%d cookie</item>
+        <item quantity="many">%d cookies</item>
+        <item quantity="other">%d cookies</item>
+    </plurals>
 </resources>

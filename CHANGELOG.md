@@ -14,12 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A failed download shows the error that stopped it rather than the first warning.
 - With several downloads in the queue, the filling download glyph and the stage track show on the card that is actually downloading, not on the one before or after it.
 - Waiting for Wi-Fi shows only on queued cards, not on every card on the home screen.
+- The address field for a new sign-in no longer starts with the cursor before `https://`, which turned typing into `vimeo.comhttps://`.
+- Scrolling the cookie text to its end no longer drags and stretches the sheet around it.
 
 ### Changed
 - The update screens use a calm wavy progress bar.
 - Queued cards on the home screen show the download glyph, empty and still, until their turn.
 - Download all stays on a playlist or a set of pasted links while it downloads and after it is saved. It offers what is not queued yet, the whole set again once it is saved, and opens the queue when every link is already in it. Search results still never show it.
 - Paste sits above Download all instead of hiding behind it.
+- The Cookies screen is laid out like the other settings screens: Use cookies, ways to add a sign-in, and the saved sign-ins on cards. Each saved site shows how many cookies it holds and when they expire, with expired sets marked in red, instead of raw cookie text.
+- Signing in to a new site takes just its address in a sheet, and a bare address such as `vimeo.com` works. A saved site opens a sheet to rename it, change its address, show or copy its cookies, sign in again or delete it.
 
 ## [1.1.11] - 2026-10-02
 ### Added

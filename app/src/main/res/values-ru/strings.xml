@@ -373,27 +373,20 @@
     <string name="cookies_toast_entry_copied">Скопировано в буфер обмена</string>
     <string name="cookies_use_title">Использовать cookie</string>
     <string name="cookies_use_description">Передавать сохранённые данные входа загрузчику</string>
-    <string name="cookies_new">Новые cookie</string>
-    <string name="cookies_import_file_button">Импортировать файл</string>
     <string name="cookies_empty_title">Нет сохранённых cookie</string>
     <string name="cookies_empty_body">Добавьте их для загрузки материалов с возрастным ограничением, приватных или доступных только спонсорам.</string>
     <string name="cookies_delete_title">Удалить cookie</string>
     <string name="cookies_delete_body">Удалить сохранённые данные входа для %1$s?</string>
     <string name="cookies_delete_confirm">Удалить</string>
-    <string name="cookies_delete_cancel">Отмена</string>
     <string name="cookies_delete_all_title">Удалить все cookie</string>
     <string name="cookies_delete_all_body">Все сохранённые сеансы входа будут удалены. Это действие нельзя отменить.</string>
     <string name="cookies_delete_all_confirm">Удалить все</string>
-    <string name="cookies_delete_all_cancel">Отмена</string>
     <string name="cookies_row_fallback_name">Cookie</string>
-    <string name="cookies_sheet_title">Файлы cookie</string>
     <string name="cookies_sheet_copy">Копировать cookie</string>
     <string name="cookies_sheet_delete">Удалить cookie</string>
     <string name="cookies_field_title">Название</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">Сохранить</string>
-    <string name="cookies_sheet_get">Получить cookie</string>
-    <string name="cookies_sheet_update">Обновить</string>
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Наилучшее качество</string>
@@ -763,4 +756,26 @@
     <string name="ytdlp_update_installed_text">Движок загрузки обновлён</string>
     <string name="ytdlp_update_failed_title">Не удалось установить yt-dlp %1$s</string>
     <string name="ytdlp_update_failed_text">Hazel оставил текущий движок и попробует позже</string>
+    <string name="cookies_description">Войдите на сайт один раз, и Hazel будет использовать вход для загрузок с возрастными ограничениями, приватных и только для участников.</string>
+    <string name="cookies_section_general">Общие</string>
+    <string name="cookies_section_add">Добавить</string>
+    <string name="cookies_section_saved">Сохранённые входы</string>
+    <string name="cookies_add_sign_in">Войти на сайт</string>
+    <string name="cookies_add_sign_in_summary">Открыть сайт и сохранить его cookies</string>
+    <string name="cookies_add_import_file_summary">Файл cookies в формате Netscape, экспортированный из браузера</string>
+    <string name="cookies_off_hint">Включите «Использовать cookies», чтобы передавать их при загрузке.</string>
+    <string name="cookies_expires">Истекает %1$s</string>
+    <string name="cookies_expired">Истекли</string>
+    <string name="cookies_session_only">Только на сеанс</string>
+    <string name="cookies_add_body">Hazel откроет страницу входа на сайт и сохранит его cookies, когда вы закончите.</string>
+    <string name="cookies_add_continue">Продолжить</string>
+    <string name="cookies_show">Показать cookies</string>
+    <string name="cookies_hide">Скрыть cookies</string>
+    <string name="cookies_sign_in_again">Войти снова</string>
+    <plurals name="cookies_count">
+        <item quantity="one">%d cookie</item>
+        <item quantity="few">%d cookie</item>
+        <item quantity="many">%d cookie</item>
+        <item quantity="other">%d cookie</item>
+    </plurals>
 </resources>

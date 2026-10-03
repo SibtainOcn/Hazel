@@ -34,6 +34,9 @@ data class CookieEntry(
         content.lineSequence().take(lines).joinToString("\n").take(300)
 }
 
+/** [expiresAt] is in epoch seconds, null when every cookie lasts only for the session. */
+data class CookieSummary(val site: String, val count: Int, val expiresAt: Long?)
+
 /**
  * Stores the user's cookie sets and keeps the file yt-dlp reads in step with them.
  *
@@ -385,6 +388,19 @@ object CookieRepository {
         "vm.tiktok.com" to "tiktok.com",
         "vt.tiktok.com" to "tiktok.com"
     )
+
+    /** The site a saved set is for, its cookie count and when its longest-lived cookie ends. */
+    fun summaryOf(entry: CookieEntry): CookieSummary {
+        val cookies = entry.content.lineSequence().filter { isCookieLine(it) }.toList()
+        val expiries = cookies.mapNotNull { line ->
+            val fields = line.split('\t').takeIf { it.size >= 7 } ?: line.trim().split(Regex("\\s+"))
+            fields.getOrNull(4)?.toLongOrNull()?.takeIf { it > 0 }
+        }
+        val site = hostOf(entry.url).ifBlank {
+            cookies.firstNotNullOfOrNull { domainOf(it).takeIf(String::isNotBlank) }.orEmpty()
+        }
+        return CookieSummary(site = site, count = cookies.size, expiresAt = expiries.maxOrNull())
+    }
 
     /** Whole cookie file as text, for copying out. */
     suspend fun exportText(context: Context): String = withContext(Dispatchers.IO) {

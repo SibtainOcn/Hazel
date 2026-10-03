@@ -365,27 +365,20 @@
     <string name="cookies_toast_entry_copied">क्लिपबोर्ड में कॉपी हुआ</string>
     <string name="cookies_use_title">कुकीज़ इस्तेमाल करें</string>
     <string name="cookies_use_description">सहेजे गए साइन इन डाउनलोडर को दें</string>
-    <string name="cookies_new">नई कुकी</string>
-    <string name="cookies_import_file_button">फ़ाइल आयात करें</string>
     <string name="cookies_empty_title">कोई कुकी सहेजी नहीं है</string>
     <string name="cookies_empty_body">आयु प्रतिबंधित, निजी या सिर्फ़ सदस्यों वाला कंटेंट डाउनलोड करने के लिए एक जोड़ें।</string>
     <string name="cookies_delete_title">कुकीज़ हटाएँ</string>
     <string name="cookies_delete_body">%1$s का सहेजा हुआ साइन इन हटाएँ?</string>
     <string name="cookies_delete_confirm">हटाएँ</string>
-    <string name="cookies_delete_cancel">रद्द करें</string>
     <string name="cookies_delete_all_title">सारी कुकीज़ हटाएँ</string>
     <string name="cookies_delete_all_body">हर सहेजा हुआ साइन इन हटा दिया जाएगा। इसे वापस नहीं लाया जा सकता।</string>
     <string name="cookies_delete_all_confirm">सब हटाएँ</string>
-    <string name="cookies_delete_all_cancel">रद्द करें</string>
     <string name="cookies_row_fallback_name">कुकीज़</string>
-    <string name="cookies_sheet_title">कुकीज़</string>
     <string name="cookies_sheet_copy">कुकीज़ कॉपी करें</string>
     <string name="cookies_sheet_delete">कुकीज़ हटाएँ</string>
     <string name="cookies_field_title">शीर्षक</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">सहेजें</string>
-    <string name="cookies_sheet_get">कुकीज़ लें</string>
-    <string name="cookies_sheet_update">अपडेट करें</string>
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">सबसे अच्छी क्वालिटी</string>
@@ -748,4 +741,24 @@
     <string name="ytdlp_update_installed_text">डाउनलोड इंजन अपडेटेड है</string>
     <string name="ytdlp_update_failed_title">yt-dlp %1$s इंस्टॉल नहीं हो सका</string>
     <string name="ytdlp_update_failed_text">Hazel ने मौजूदा इंजन रखा है और बाद में फिर कोशिश करेगा</string>
+    <string name="cookies_description">किसी साइट में एक बार साइन इन करें, फिर Hazel उम्र-प्रतिबंधित, निजी और सदस्यों के लिए डाउनलोड में इसका उपयोग करेगा।</string>
+    <string name="cookies_section_general">सामान्य</string>
+    <string name="cookies_section_add">जोड़ें</string>
+    <string name="cookies_section_saved">सहेजे गए साइन-इन</string>
+    <string name="cookies_add_sign_in">किसी साइट में साइन इन करें</string>
+    <string name="cookies_add_sign_in_summary">साइट खोलें और उसकी कुकीज़ सहेजें</string>
+    <string name="cookies_add_import_file_summary">ब्राउज़र से एक्सपोर्ट की गई Netscape कुकी फ़ाइल</string>
+    <string name="cookies_off_hint">डाउनलोड के साथ इन्हें भेजने के लिए कुकीज़ का उपयोग करें चालू करें।</string>
+    <string name="cookies_expires">समाप्ति %1$s</string>
+    <string name="cookies_expired">समाप्त</string>
+    <string name="cookies_session_only">केवल सत्र</string>
+    <string name="cookies_add_body">Hazel साइट का साइन-इन पेज खोलता है और आपके पूरा करने पर उसकी कुकीज़ सहेजता है।</string>
+    <string name="cookies_add_continue">जारी रखें</string>
+    <string name="cookies_show">कुकीज़ दिखाएं</string>
+    <string name="cookies_hide">कुकीज़ छिपाएं</string>
+    <string name="cookies_sign_in_again">फिर से साइन इन करें</string>
+    <plurals name="cookies_count">
+        <item quantity="one">%d कुकी</item>
+        <item quantity="other">%d कुकीज़</item>
+    </plurals>
 </resources>
