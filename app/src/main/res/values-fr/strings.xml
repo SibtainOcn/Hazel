@@ -489,6 +489,8 @@
     <string name="format_filter_smallest">Format le plus léger (par résolution)</string>
     <string name="format_filter_generic">Générique</string>
     <string name="format_source_title">Source des formats</string>
+    <string name="format_source_signed_in_title">NewPipe ne peut pas utiliser votre connexion</string>
+    <string name="format_source_signed_in_body">Ce site a une connexion enregistrée et Utiliser les cookies est activé. NewPipe n\'envoie pas de cookies, donc yt-dlp lit les formats. Désactivez Utiliser les cookies dans Cookies pour les lire avec NewPipe.</string>
     <string name="format_sort_title">Trier par</string>
     <string name="format_update">Actualiser</string>
 
@@ -734,7 +736,7 @@
     <string name="home_start_search">Rechercher</string>
     <string name="home_start_downloads">Téléchargements</string>
     <string name="more_getting_started">Prise en main</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">Téléchargement lancé</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Réglages de synthèse</string>

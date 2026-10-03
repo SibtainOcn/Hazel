@@ -477,6 +477,8 @@
     <string name="format_filter_smallest">最小格式（按分辨率）</string>
     <string name="format_filter_generic">通用</string>
     <string name="format_source_title">格式来源</string>
+    <string name="format_source_signed_in_title">NewPipe 无法使用你的登录信息</string>
+    <string name="format_source_signed_in_body">此网站已保存登录信息，且“使用 Cookie”已开启。NewPipe 不发送 Cookie，因此由 yt-dlp 读取格式。在 Cookie 中关闭“使用 Cookie”即可用 NewPipe 读取。</string>
     <string name="format_sort_title">排序方式</string>
     <string name="format_update">更新</string>
 
@@ -718,7 +720,7 @@
     <string name="home_start_search">搜索</string>
     <string name="home_start_downloads">下载</string>
     <string name="more_getting_started">入门指南</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">已开始下载</string>
     <string name="instant_ok">确定</string>
     <string name="instant_settings">合成设置</string>

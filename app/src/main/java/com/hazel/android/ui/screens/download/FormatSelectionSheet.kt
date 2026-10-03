@@ -48,12 +48,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.UnfoldMore
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -78,9 +80,13 @@ import androidx.compose.ui.unit.sp
 import com.hazel.android.R
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.FormatFilter
+import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.MediaInfo
+import com.hazel.android.download.MediaProbe
+import com.hazel.android.download.BatchAudioFormats
+import com.hazel.android.download.WORST_VIDEO
 import com.hazel.android.ui.components.FormatListShimmer
 import com.hazel.android.ui.components.GlintHost
 import com.hazel.android.ui.components.ShimmerLabel
@@ -127,7 +133,9 @@ enum class FormatSort(@param:StringRes val labelRes: Int) {
  * The filter button narrows the list and orders it. Given [onRefresh], the sheet also offers
  * to read the formats again (called with `fresh` set), and when [canChooseSource] says the
  * links can be read by either reader, to switch to the other one (called without it, so a
- * reader that has read the link before answers from its last read).
+ * reader that has read the link before answers from its last read). [linkUrls] are the links
+ * these formats belong to, where that is not [info]'s own address: NewPipe sends no cookies,
+ * so picking it for a site with a saved sign-in in use explains that instead of reading.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,6 +148,7 @@ fun FormatSelectionSheet(
     isLoadingFormats: Boolean = false,
     onRefresh: ((source: ListingSource?, fresh: Boolean) -> Unit)? = null,
     canChooseSource: Boolean = false,
+    linkUrls: List<String> = listOf(info.url),
     preferredHeight: Int = 0
 ) {
     // Half height on open. The sheet is a list, and a list is readable from the top down,
@@ -157,6 +166,12 @@ fun FormatSelectionSheet(
     val settingSource by remember(context) { SettingsRepository.getListingSource(context) }
         .collectAsState(initial = ListingSource.DEFAULT)
     var chosenSource by remember { mutableStateOf<ListingSource?>(null) }
+
+    // A saved sign-in for these links keeps them on yt-dlp, which is the only reader that
+    // can send it. Picking NewPipe then says why rather than quietly reading with yt-dlp.
+    val signedIn by remember(context, linkUrls) { CookieRepository.signsIn(context, linkUrls) }
+        .collectAsState(initial = false)
+    var signInNotice by remember { mutableStateOf(false) }
     val readSource = if (info.hasResolvedFormats) info.readBy else settingSource
 
     // Set while an update or a switch the user asked for is running. The list it replaces
@@ -179,8 +194,14 @@ fun FormatSelectionSheet(
     val videoTitle = stringResource(R.string.format_sheet_tab_video)
     val audioTitle = stringResource(R.string.format_sheet_tab_audio)
     val allLabel = stringResource(R.string.format_filter_all)
-    val stops = remember(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel) {
-        buildStops(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel)
+    // The same names the ladder a link opens with gives its ends.
+    val ends = FormatEnds(
+        bestVideo = stringResource(R.string.batch_quality_best),
+        bestAudio = stringResource(R.string.audio_quality_best),
+        worst = stringResource(R.string.batch_quality_worst)
+    )
+    val stops = remember(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel, ends) {
+        buildStops(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel, ends)
     }
 
     // The rail earns its width only when it splits the list into more than one part. While
@@ -414,13 +435,30 @@ fun FormatSelectionSheet(
             },
             onSource = { picked ->
                 filterSheetOpen = false
-                if (picked != readSource || !info.hasResolvedFormats) {
+                if (picked == ListingSource.NEWPIPE && signedIn) {
+                    signInNotice = true
+                } else if (picked != readSource || !info.hasResolvedFormats) {
                     chosenSource = picked
                     filter = FormatFilter.ALL
                     refresh(picked, false)
                 }
             },
             onDismiss = { filterSheetOpen = false }
+        )
+    }
+
+    if (signInNotice) {
+        AlertDialog(
+            onDismissRequest = { signInNotice = false },
+            title = {
+                Text(stringResource(R.string.format_source_signed_in_title), fontWeight = FontWeight.Bold)
+            },
+            text = { Text(stringResource(R.string.format_source_signed_in_body)) },
+            confirmButton = {
+                TextButton(onClick = { signInNotice = false }) {
+                    Text(stringResource(R.string.format_sheet_ok))
+                }
+            }
         )
     }
 }
@@ -686,10 +724,15 @@ private fun buildStops(
     audioFirst: Boolean,
     videoTitle: String,
     audioTitle: String,
-    allLabel: String
+    allLabel: String,
+    ends: FormatEnds
 ): List<FormatStop> {
     val video = filter.apply(info.videoFormats, audio = false).sortedBy(sort)
+        .withEnds(MediaProbe.BEST_VIDEO.copy(label = ends.bestVideo), WORST_VIDEO.copy(label = ends.worst),
+            read = info.videoFormats.any { !it.isGeneric })
     val audio = filter.apply(info.audioFormats, audio = true).sortedBy(sort)
+        .withEnds(BatchAudioFormats.BEST.copy(label = ends.bestAudio), BatchAudioFormats.WORST.copy(label = ends.worst),
+            read = info.audioFormats.any { !it.isGeneric })
 
     fun entries(title: String, formats: List<MediaFormat>): List<FormatListRow> =
         formats.map { FormatListRow.Entry(it, title) }
@@ -722,6 +765,23 @@ private fun buildStops(
         // including while they are still being read.
         add(FormatStop(STOP_AUDIO, audioTitle, entries(audioTitle, audio)))
     }
+}
+
+/** What the engine's own best and worst rows are called, in the user's language. */
+@Immutable
+private data class FormatEnds(val bestVideo: String, val bestAudio: String, val worst: String)
+
+/**
+ * A kind's list, once the source has read it, between the engine's own best on top and its
+ * worst at the bottom, whichever reader read it and however the list is ordered: yt-dlp
+ * lists no such rows and NewPipe only a best one, so the ends were missing or found in
+ * different places from one read to the next. A list not read yet is the ladder, which
+ * holds both already.
+ */
+private fun List<MediaFormat>.withEnds(best: MediaFormat, worst: MediaFormat, read: Boolean): List<MediaFormat> {
+    if (!read) return this
+    val middle = filterNot { it.formatId == best.formatId || it.formatId == worst.formatId }
+    return listOf(best) + middle + worst
 }
 
 /**

@@ -8,6 +8,7 @@ import com.hazel.android.download.InfoCache
 import com.hazel.android.download.SiteAccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -277,6 +278,23 @@ object CookieRepository {
         val file = writeSiteFile(context, site, entries) ?: return SiteAccess.NONE
         return SiteAccess(cookieFile = file, userAgent = getUserAgent(context).first())
     }
+
+    /**
+     * Whether a fetch of any of [urls] goes out signed in, as [accessFor] would decide it,
+     * without writing the cookie file. For screens that only need to say so: NewPipe sends
+     * no cookies, so a site with a saved sign-in is always read by yt-dlp.
+     */
+    fun signsIn(context: Context, urls: List<String>): Flow<Boolean> =
+        combine(getUseCookies(context), getEntries(context)) { use, entries ->
+            signsIn(use, entries, urls)
+        }
+
+    /** [signsIn] on what is saved, apart from the store so it can be checked on its own. */
+    internal fun signsIn(useCookies: Boolean, entries: List<CookieEntry>, urls: List<String>): Boolean =
+        useCookies && urls.any { url ->
+            val site = siteKeyOf(hostOf(url)) ?: return@any false
+            entries.any { it.enabled && it.content.isNotBlank() && covers(it, site) }
+        }
 
     /** Whether a saved sign-in belongs to [site]. */
     private fun covers(entry: CookieEntry, site: String): Boolean {

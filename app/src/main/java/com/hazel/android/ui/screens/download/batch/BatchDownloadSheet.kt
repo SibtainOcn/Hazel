@@ -802,6 +802,7 @@ fun BatchDownloadSheet(
                 audioFirst = true,
                 isLoadingFormats = targets.any { it.url in readingUrls },
                 onRefresh = { source, fresh -> onRefreshFormats(targets, source, fresh) },
+                linkUrls = remember(targets) { targets.map { it.url } },
                 canChooseSource = remember(targets) {
                     targets.isNotEmpty() && targets.all { NewPipeEngine.handlesStream(it.url) }
                 }

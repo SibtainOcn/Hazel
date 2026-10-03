@@ -208,6 +208,8 @@ def main():
         ("Release Regression Harness", [py, "tools/tests/test_release_regression_harness.py"]),
         ("Controls & Multi-Source Harness", [py, "tools/tests/test_download_controls_and_sources.py"]),
         ("Share Overlay Isolation & Safety Harness", [py, "tools/tests/test_share_overlay_isolation.py"]),
+        ("Format Source Switch Harness", [py, "tools/tests/test_format_source_switch.py"]),
+        ("Back-to-Back Downloads Harness", [py, "tools/tests/test_queue_back_to_back.py"]),
         ("Software Update & Flavors Harness", [py, "tools/tests/test_software_update_and_flavors.py"]),
         ("Gradle JVM Unit Tests", GRADLE_CMD + [":app:test", "--console=plain"]),
     ]

@@ -196,12 +196,10 @@ fun DownloadScreen(
     // True once anything has moved under the pinned header. The header does not slide away
     // on scroll, which is the usual trick, because the field and the layout switch are what
     // the screen is for; it separates itself from the list instead, so the two stop reading
-    // as one surface the moment they start overlapping.
-    val listScrolled by remember {
-        derivedStateOf {
-            listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0
-        }
-    }
+    // as one surface the moment they start overlapping. Asked of the scroll itself rather
+    // than of the first visible row: the empty screen leads with a row of no height, which
+    // made its starters the first visible row and drew the separator over a blank screen.
+    val listScrolled by remember { derivedStateOf { listState.canScrollBackward } }
 
     var searchOpen by remember { mutableStateOf(false) }
     // Counts taps on the empty screen's Paste starter; the paste itself is set up further
