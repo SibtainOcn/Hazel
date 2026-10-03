@@ -107,6 +107,19 @@ object DownloadQueueRepository {
         }
     }
 
+    /**
+     * Replaces the stored queue with what [current] gives when the write's turn comes, not
+     * when it was asked for. A link added and written down while this waited its turn is
+     * then still in what is written, rather than written over by an older copy.
+     */
+    suspend fun saveCurrent(context: Context, current: () -> List<QueuedDownload>) = withContext(Dispatchers.IO) {
+        context.dataStore.edit { prefs ->
+            val items = current()
+            if (items.isEmpty()) prefs.remove(QUEUE_KEY)
+            else prefs[QUEUE_KEY] = encode(items)
+        }
+    }
+
     /** Adds to the end of the queue, ignoring a link already waiting there. */
     suspend fun add(context: Context, items: List<QueuedDownload>) = withContext(Dispatchers.IO) {
         if (items.isEmpty()) return@withContext

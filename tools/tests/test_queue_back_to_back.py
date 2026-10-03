@@ -154,6 +154,18 @@ def test_model():
         else:
             check_true("Old close (let go first) stopped a run under a new link, as found", broken)
 
+    # The run's last save racing a link added and written down meanwhile. Writes take
+    # turns; the old save wrote a copy taken before its turn, the new one reads at its turn.
+    def save_race(read_at_write):
+        memory, stored = ["paused"], ["paused"]
+        copy = list(memory)                 # the old save's copy, taken first
+        memory.append("new")                 # startBatch adds it in memory...
+        stored = stored + ["new"]            # ...and its write takes its turn first
+        stored = list(memory) if read_at_write else copy
+        return "new" in stored
+    check("Old last save wrote over a link written down meanwhile, as found", save_race(False), False)
+    check("New last save keeps it", save_race(True), True)
+
     p = Pipeline()
     p.run_queue()
     running = p.start_batch_locked("second")
@@ -194,6 +206,17 @@ def test_code():
     check_true("The run lets go if it ends any other way",
                "job.invokeOnCompletion {\n            synchronized(queue) { if (runOwner === token) runOwner = null }" in vm)
     check("Nothing else lets the run go", vm.count("runOwner = null"), 2)
+    check_true("The run's last save reads the queue when it writes, not before",
+               "DownloadQueueRepository.saveCurrent(app) {" in run
+               and "DownloadQueueRepository.save(app, remaining)" not in run)
+    check_true("The save comes before the run lets go",
+               run.find("DownloadQueueRepository.saveCurrent(app)") < run.find("val more = synchronized(queue) {"))
+    repo = (REPO_ROOT / "app/src/main/java/com/hazel/android/data/DownloadQueueRepository.kt").read_text(encoding="utf-8")
+    save = block(repo, "suspend fun saveCurrent(", 400)
+    check_true("saveCurrent asks for the queue inside the write",
+               save.find("context.dataStore.edit { prefs ->") < save.find("val items = current()"))
+    check_true("Adding a link written down meanwhile merges rather than replaces",
+               "val merged = existing + items.filterNot { it.url in known }" in repo)
 
 
 # ===========================================================================

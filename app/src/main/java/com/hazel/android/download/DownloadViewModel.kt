@@ -572,11 +572,17 @@ class DownloadViewModel : ViewModel() {
                 dropWaiting()
                 if (plans.isEmpty()) failure = app.getString(R.string.no_results_error_title)
                 else {
-                    // On the home screen as well, as a download started there would be, so
-                    // opening the app shows the card filling rather than an empty screen.
-                    // Newest first, and a link already there keeps its one card.
-                    _state.update { s -> s.copy(
-                        results = items + s.results.filterNot { shown -> items.any { it.url == shown.url } }
+                    // On the home screen as well, so opening the app shows the card filling
+                    // rather than an empty screen. It takes the screen as a link read there
+                    // does: the last results, search words and message go, and the shared
+                    // link stands in the bar. A read running on the home screen is left to
+                    // finish; it is what the user is looking at.
+                    _state.update { s -> if (s.isFetching) s else s.copy(
+                        url = url,
+                        searchQuery = "",
+                        error = null,
+                        results = items,
+                        savedAside = false
                     ) }
                     startBatch(app, plans, options, saveDirs = dirs)
                 }
@@ -1543,10 +1549,14 @@ class DownloadViewModel : ViewModel() {
             // next launch carries on. A run the user cancelled leaves nothing: they stopped
             // it on purpose, and a queue that came back on the next launch would be the app
             // overruling that.
-            val remaining =
+            //
+            // Read as the write happens rather than before it: a link queued meanwhile has
+            // been written down already, and an older copy would write over it. The run
+            // still holds the queue, so nothing is taken out of it in between.
+            DownloadQueueRepository.saveCurrent(app) {
                 if (isBatchCancelled) emptyList()
                 else synchronized(queue) { queue.toList() }
-            DownloadQueueRepository.save(app, remaining)
+            }
             if (isBatchCancelled) {
                 synchronized(queue) { queue.clear() }
                 // Paused downloads are given up with the rest, their partial files and their

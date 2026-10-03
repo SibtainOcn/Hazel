@@ -250,12 +250,16 @@ def test_single_share_target():
     check_true("startDirect removed from the view model", "fun startDirect(" not in vm_content)
     check_true("instantSource removed from the state", "instantSource" not in vm_content)
 
-    # An Instant download lands on the home screen like one started there, newest first.
-    instant = vm_content[vm_content.find("fun instantDownload("):][:4000]
-    check_true("Instant adds its links to the home screen's cards",
-               "results = items + s.results.filterNot { shown -> items.any { it.url == shown.url } }" in instant)
+    # An Instant download takes the home screen as a link read there does.
+    instant = vm_content[vm_content.find("fun instantDownload("):][:4500]
+    takes = instant[instant.find("_state.update { s -> if (s.isFetching) s else s.copy("):][:300]
+    check_true("Instant replaces the home screen's results with its links", "results = items," in takes)
+    check_true("Instant clears search words and the last message, and shows its link",
+               "searchQuery = \"\"" in takes and "error = null" in takes and "url = url" in takes)
+    check_true("Instant leaves a read running on the home screen alone", takes.startswith("_state.update { s -> if (s.isFetching) s else"))
+    check_true("Instant does not pick a link for the sheet (no sheet opens on its own)", "info =" not in takes)
     check_true("Instant's cards are added before the download starts",
-               0 <= instant.find("results = items +") < instant.find("startBatch(app, plans"))
+               0 <= instant.find("results = items,") < instant.find("startBatch(app, plans"))
 
 
 # ===========================================================================
