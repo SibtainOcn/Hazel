@@ -365,27 +365,20 @@
     <string name="cookies_toast_entry_copied">In die Zwischenablage kopiert</string>
     <string name="cookies_use_title">Cookies verwenden</string>
     <string name="cookies_use_description">Gespeicherte Anmeldungen an den Downloader geben</string>
-    <string name="cookies_new">Neues Cookie</string>
-    <string name="cookies_import_file_button">Datei importieren</string>
     <string name="cookies_empty_title">Keine Cookies gespeichert</string>
     <string name="cookies_empty_body">Füge eines hinzu, um Inhalte mit Altersfreigabe, private oder nur für Mitglieder herunterzuladen.</string>
     <string name="cookies_delete_title">Cookies löschen</string>
     <string name="cookies_delete_body">Die gespeicherte Anmeldung für %1$s entfernen?</string>
     <string name="cookies_delete_confirm">Löschen</string>
-    <string name="cookies_delete_cancel">Abbrechen</string>
     <string name="cookies_delete_all_title">Alle Cookies löschen</string>
     <string name="cookies_delete_all_body">Jede gespeicherte Anmeldung wird entfernt. Das lässt sich nicht rückgängig machen.</string>
     <string name="cookies_delete_all_confirm">Alle löschen</string>
-    <string name="cookies_delete_all_cancel">Abbrechen</string>
     <string name="cookies_row_fallback_name">Cookies</string>
-    <string name="cookies_sheet_title">Cookies</string>
     <string name="cookies_sheet_copy">Cookies kopieren</string>
     <string name="cookies_sheet_delete">Cookies löschen</string>
     <string name="cookies_field_title">Titel</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">Speichern</string>
-    <string name="cookies_sheet_get">Cookies holen</string>
-    <string name="cookies_sheet_update">Aktualisieren</string>
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Beste Qualität</string>
@@ -748,4 +741,24 @@
     <string name="ytdlp_update_installed_text">Die Download-Engine ist auf dem neuesten Stand</string>
     <string name="ytdlp_update_failed_title">yt-dlp %1$s konnte nicht installiert werden</string>
     <string name="ytdlp_update_failed_text">Hazel behält die aktuelle Engine und versucht es später erneut</string>
+    <string name="cookies_description">Melde dich einmal bei einer Website an, und Hazel nutzt das für altersbeschränkte, private und Mitglieder-Downloads.</string>
+    <string name="cookies_section_general">Allgemein</string>
+    <string name="cookies_section_add">Hinzufügen</string>
+    <string name="cookies_section_saved">Gespeicherte Anmeldungen</string>
+    <string name="cookies_add_sign_in">Bei einer Website anmelden</string>
+    <string name="cookies_add_sign_in_summary">Website öffnen und ihre Cookies speichern</string>
+    <string name="cookies_add_import_file_summary">Eine aus einem Browser exportierte Netscape-Cookie-Datei</string>
+    <string name="cookies_off_hint">Aktiviere „Cookies verwenden“, um sie bei Downloads mitzusenden.</string>
+    <string name="cookies_expires">Läuft ab %1$s</string>
+    <string name="cookies_expired">Abgelaufen</string>
+    <string name="cookies_session_only">Nur für die Sitzung</string>
+    <string name="cookies_add_body">Hazel öffnet die Anmeldeseite der Website und speichert ihre Cookies, wenn du fertig bist.</string>
+    <string name="cookies_add_continue">Weiter</string>
+    <string name="cookies_show">Cookies anzeigen</string>
+    <string name="cookies_hide">Cookies ausblenden</string>
+    <string name="cookies_sign_in_again">Erneut anmelden</string>
+    <plurals name="cookies_count">
+        <item quantity="one">%d Cookie</item>
+        <item quantity="other">%d Cookies</item>
+    </plurals>
 </resources>

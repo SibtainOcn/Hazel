@@ -361,27 +361,20 @@
     <string name="cookies_toast_entry_copied">已复制到剪贴板</string>
     <string name="cookies_use_title">使用 Cookie</string>
     <string name="cookies_use_description">把已保存的登录信息交给下载器</string>
-    <string name="cookies_new">新建 Cookie</string>
-    <string name="cookies_import_file_button">导入文件</string>
     <string name="cookies_empty_title">没有保存任何 Cookie</string>
     <string name="cookies_empty_body">添加一个，就能下载有年龄限制、私密或仅会员可见的内容。</string>
     <string name="cookies_delete_title">删除 Cookie</string>
     <string name="cookies_delete_body">要移除 %1$s 的已保存登录信息吗？</string>
     <string name="cookies_delete_confirm">删除</string>
-    <string name="cookies_delete_cancel">取消</string>
     <string name="cookies_delete_all_title">删除全部 Cookie</string>
     <string name="cookies_delete_all_body">所有已保存的登录信息都会被移除。此操作无法撤销。</string>
     <string name="cookies_delete_all_confirm">全部删除</string>
-    <string name="cookies_delete_all_cancel">取消</string>
     <string name="cookies_row_fallback_name">Cookie</string>
-    <string name="cookies_sheet_title">Cookie</string>
     <string name="cookies_sheet_copy">复制 Cookie</string>
     <string name="cookies_sheet_delete">删除 Cookie</string>
     <string name="cookies_field_title">标题</string>
     <string name="cookies_field_url">网址</string>
     <string name="cookies_sheet_save">保存</string>
-    <string name="cookies_sheet_get">获取 Cookie</string>
-    <string name="cookies_sheet_update">更新</string>
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">最佳画质</string>
@@ -740,4 +733,23 @@
     <string name="ytdlp_update_installed_text">下载引擎已是最新版本</string>
     <string name="ytdlp_update_failed_title">无法安装 yt-dlp %1$s</string>
     <string name="ytdlp_update_failed_text">Hazel 保留了当前引擎，稍后会重试</string>
+    <string name="cookies_description">在网站登录一次，Hazel 就会用它下载有年龄限制、私密和仅限会员的内容。</string>
+    <string name="cookies_section_general">常规</string>
+    <string name="cookies_section_add">添加</string>
+    <string name="cookies_section_saved">已保存的登录</string>
+    <string name="cookies_add_sign_in">登录网站</string>
+    <string name="cookies_add_sign_in_summary">打开网站并保存其 Cookie</string>
+    <string name="cookies_add_import_file_summary">从浏览器导出的 Netscape Cookie 文件</string>
+    <string name="cookies_off_hint">开启“使用 Cookie”即可在下载时发送它们。</string>
+    <string name="cookies_expires">到期 %1$s</string>
+    <string name="cookies_expired">已过期</string>
+    <string name="cookies_session_only">仅限会话</string>
+    <string name="cookies_add_body">Hazel 会打开网站的登录页面，并在您完成后保存其 Cookie。</string>
+    <string name="cookies_add_continue">继续</string>
+    <string name="cookies_show">显示 Cookie</string>
+    <string name="cookies_hide">隐藏 Cookie</string>
+    <string name="cookies_sign_in_again">重新登录</string>
+    <plurals name="cookies_count">
+        <item quantity="other">%d 个 Cookie</item>
+    </plurals>
 </resources>

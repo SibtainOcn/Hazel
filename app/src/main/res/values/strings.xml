@@ -383,28 +383,41 @@
     <string name="cookies_toast_entry_copied">Copied to clipboard</string>
     <string name="cookies_use_title">Use cookies</string>
     <string name="cookies_use_description">Pass saved sign-ins to the downloader</string>
-    <string name="cookies_new">New cookie</string>
-    <string name="cookies_import_file_button">Import file</string>
     <string name="cookies_empty_title">No cookies saved</string>
     <string name="cookies_empty_body">Add one to download age-restricted, private, or members-only media.</string>
     <string name="cookies_delete_title">Delete cookies</string>
     <string name="cookies_delete_body">Remove the saved sign-in for %1$s?</string>
     <string name="cookies_delete_confirm">Delete</string>
-    <string name="cookies_delete_cancel">Cancel</string>
     <string name="cookies_delete_all_title">Delete all cookies</string>
     <string name="cookies_delete_all_body">Every saved sign-in will be removed. This cannot be undone.</string>
     <string name="cookies_delete_all_confirm">Delete all</string>
-    <string name="cookies_delete_all_cancel">Cancel</string>
     <!-- Stands in for the address on a row that has neither an address nor a label. -->
     <string name="cookies_row_fallback_name">Cookies</string>
-    <string name="cookies_sheet_title">Cookies</string>
     <string name="cookies_sheet_copy">Copy cookies</string>
     <string name="cookies_sheet_delete">Delete cookies</string>
     <string name="cookies_field_title">Title</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">Save</string>
-    <string name="cookies_sheet_get">Get cookies</string>
-    <string name="cookies_sheet_update">Update</string>
+    <string name="cookies_description">Sign in to a site once and Hazel uses it for age-restricted, private and members-only downloads.</string>
+    <string name="cookies_section_general">General</string>
+    <string name="cookies_section_add">Add</string>
+    <string name="cookies_section_saved">Saved sign-ins</string>
+    <string name="cookies_add_sign_in">Sign in to a site</string>
+    <string name="cookies_add_sign_in_summary">Open the site and save its cookies</string>
+    <string name="cookies_add_import_file_summary">A Netscape cookie file exported from a browser</string>
+    <string name="cookies_off_hint">Turn on Use cookies to send these with downloads.</string>
+    <plurals name="cookies_count">
+        <item quantity="one">%d cookie</item>
+        <item quantity="other">%d cookies</item>
+    </plurals>
+    <string name="cookies_expires">Expires %1$s</string>
+    <string name="cookies_expired">Expired</string>
+    <string name="cookies_session_only">Session only</string>
+    <string name="cookies_add_body">Hazel opens the site\'s sign-in page and saves its cookies when you\'re done.</string>
+    <string name="cookies_add_continue">Continue</string>
+    <string name="cookies_show">Show cookies</string>
+    <string name="cookies_hide">Hide cookies</string>
+    <string name="cookies_sign_in_again">Sign in again</string>
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Best quality</string>

@@ -361,27 +361,20 @@
     <string name="cookies_toast_entry_copied">Disalin ke papan klip</string>
     <string name="cookies_use_title">Gunakan cookie</string>
     <string name="cookies_use_description">Teruskan sesi masuk yang tersimpan ke pengunduh</string>
-    <string name="cookies_new">Cookie baru</string>
-    <string name="cookies_import_file_button">Impor berkas</string>
     <string name="cookies_empty_title">Belum ada cookie yang tersimpan</string>
     <string name="cookies_empty_body">Tambahkan untuk mengunduh media dengan pembatasan usia, privat, atau khusus anggota.</string>
     <string name="cookies_delete_title">Hapus cookie</string>
     <string name="cookies_delete_body">Hapus informasi masuk yang tersimpan untuk %1$s?</string>
     <string name="cookies_delete_confirm">Hapus</string>
-    <string name="cookies_delete_cancel">Batal</string>
     <string name="cookies_delete_all_title">Hapus semua cookie</string>
     <string name="cookies_delete_all_body">Semua sesi masuk yang tersimpan akan dihapus. Tindakan ini tidak dapat dibatalkan.</string>
     <string name="cookies_delete_all_confirm">Hapus semua</string>
-    <string name="cookies_delete_all_cancel">Batal</string>
     <string name="cookies_row_fallback_name">Cookie</string>
-    <string name="cookies_sheet_title">Cookie</string>
     <string name="cookies_sheet_copy">Salin cookie</string>
     <string name="cookies_sheet_delete">Hapus cookie</string>
     <string name="cookies_field_title">Judul</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">Simpan</string>
-    <string name="cookies_sheet_get">Dapatkan cookie</string>
-    <string name="cookies_sheet_update">Perbarui</string>
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Kualitas terbaik</string>
@@ -740,4 +733,23 @@
     <string name="ytdlp_update_installed_text">Mesin unduhan sudah terbaru</string>
     <string name="ytdlp_update_failed_title">yt-dlp %1$s tidak dapat dipasang</string>
     <string name="ytdlp_update_failed_text">Hazel mempertahankan mesin saat ini dan akan mencoba lagi nanti</string>
+    <string name="cookies_description">Masuk ke situs sekali, lalu Hazel memakainya untuk unduhan yang dibatasi usia, privat, dan khusus anggota.</string>
+    <string name="cookies_section_general">Umum</string>
+    <string name="cookies_section_add">Tambah</string>
+    <string name="cookies_section_saved">Login tersimpan</string>
+    <string name="cookies_add_sign_in">Masuk ke situs</string>
+    <string name="cookies_add_sign_in_summary">Buka situs dan simpan cookie-nya</string>
+    <string name="cookies_add_import_file_summary">File cookie Netscape yang diekspor dari browser</string>
+    <string name="cookies_off_hint">Aktifkan Gunakan cookie untuk mengirimnya bersama unduhan.</string>
+    <string name="cookies_expires">Kedaluwarsa %1$s</string>
+    <string name="cookies_expired">Kedaluwarsa</string>
+    <string name="cookies_session_only">Hanya sesi</string>
+    <string name="cookies_add_body">Hazel membuka halaman masuk situs dan menyimpan cookie-nya setelah Anda selesai.</string>
+    <string name="cookies_add_continue">Lanjutkan</string>
+    <string name="cookies_show">Tampilkan cookie</string>
+    <string name="cookies_hide">Sembunyikan cookie</string>
+    <string name="cookies_sign_in_again">Masuk lagi</string>
+    <plurals name="cookies_count">
+        <item quantity="other">%d cookie</item>
+    </plurals>
 </resources>

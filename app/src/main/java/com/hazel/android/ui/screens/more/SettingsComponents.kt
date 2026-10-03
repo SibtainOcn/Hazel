@@ -164,6 +164,19 @@ internal fun ValueSettingRow(
     SettingRow(icon = icon, title = title, summary = value, enabled = enabled, onClick = onClick, valueStyle = true)
 }
 
+/** A row that does something when tapped, with an optional item at its end. */
+@Composable
+internal fun ActionSettingRow(
+    icon: ImageVector,
+    title: String,
+    onClick: () -> Unit,
+    summary: String? = null,
+    enabled: Boolean = true,
+    trailing: (@Composable () -> Unit)? = null
+) {
+    SettingRow(icon = icon, title = title, summary = summary, enabled = enabled, onClick = onClick, trailing = trailing)
+}
+
 @Composable
 private fun SettingRow(
     icon: ImageVector,

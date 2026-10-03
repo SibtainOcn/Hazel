@@ -361,27 +361,20 @@
     <string name="cookies_toast_entry_copied">クリップボードにコピーしました</string>
     <string name="cookies_use_title">Cookieを使用</string>
     <string name="cookies_use_description">保存されたログイン情報をダウンローダーに渡す</string>
-    <string name="cookies_new">新しいCookie</string>
-    <string name="cookies_import_file_button">ファイルをインポート</string>
     <string name="cookies_empty_title">保存されたCookieはありません</string>
     <string name="cookies_empty_body">年齢制限付き、非公開、またはメンバー限定のコンテンツをダウンロードするには追加してください。</string>
     <string name="cookies_delete_title">Cookieを削除</string>
     <string name="cookies_delete_body">%1$s の保存済みログイン情報を削除しますか？</string>
     <string name="cookies_delete_confirm">削除</string>
-    <string name="cookies_delete_cancel">キャンセル</string>
     <string name="cookies_delete_all_title">すべてのCookieを削除</string>
     <string name="cookies_delete_all_body">保存されたすべてのログイン情報が削除されます。この操作は元に戻せません。</string>
     <string name="cookies_delete_all_confirm">すべて削除</string>
-    <string name="cookies_delete_all_cancel">キャンセル</string>
     <string name="cookies_row_fallback_name">Cookie</string>
-    <string name="cookies_sheet_title">Cookie</string>
     <string name="cookies_sheet_copy">Cookieをコピー</string>
     <string name="cookies_sheet_delete">Cookieを削除</string>
     <string name="cookies_field_title">タイトル</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">保存</string>
-    <string name="cookies_sheet_get">Cookieを取得</string>
-    <string name="cookies_sheet_update">更新</string>
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">最高画質</string>
@@ -740,4 +733,23 @@
     <string name="ytdlp_update_installed_text">ダウンロードエンジンは最新です</string>
     <string name="ytdlp_update_failed_title">yt-dlp %1$s をインストールできませんでした</string>
     <string name="ytdlp_update_failed_text">Hazel は現在のエンジンを維持し、後でもう一度試します</string>
+    <string name="cookies_description">サイトに一度サインインすると、Hazel は年齢制限付き・非公開・メンバー限定のダウンロードにそれを使います。</string>
+    <string name="cookies_section_general">全般</string>
+    <string name="cookies_section_add">追加</string>
+    <string name="cookies_section_saved">保存済みのサインイン</string>
+    <string name="cookies_add_sign_in">サイトにサインイン</string>
+    <string name="cookies_add_sign_in_summary">サイトを開いて Cookie を保存</string>
+    <string name="cookies_add_import_file_summary">ブラウザからエクスポートした Netscape Cookie ファイル</string>
+    <string name="cookies_off_hint">ダウンロード時に送るには「Cookie を使用」をオンにしてください。</string>
+    <string name="cookies_expires">有効期限 %1$s</string>
+    <string name="cookies_expired">期限切れ</string>
+    <string name="cookies_session_only">セッションのみ</string>
+    <string name="cookies_add_body">Hazel がサイトのサインインページを開き、完了したら Cookie を保存します。</string>
+    <string name="cookies_add_continue">続行</string>
+    <string name="cookies_show">Cookie を表示</string>
+    <string name="cookies_hide">Cookie を非表示</string>
+    <string name="cookies_sign_in_again">もう一度サインイン</string>
+    <plurals name="cookies_count">
+        <item quantity="other">Cookie %d 件</item>
+    </plurals>
 </resources>

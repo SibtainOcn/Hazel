@@ -369,27 +369,20 @@
     <string name="cookies_toast_entry_copied">Copiado para a área de transferência</string>
     <string name="cookies_use_title">Usar cookies</string>
     <string name="cookies_use_description">Passar os logins salvos para o baixador</string>
-    <string name="cookies_new">Novo cookie</string>
-    <string name="cookies_import_file_button">Importar arquivo</string>
     <string name="cookies_empty_title">Nenhum cookie salvo</string>
     <string name="cookies_empty_body">Adicione um para baixar conteúdo com restrição de idade, privado ou só para membros.</string>
     <string name="cookies_delete_title">Excluir os cookies</string>
     <string name="cookies_delete_body">Remover o login salvo de %1$s?</string>
     <string name="cookies_delete_confirm">Excluir</string>
-    <string name="cookies_delete_cancel">Cancelar</string>
     <string name="cookies_delete_all_title">Excluir todos os cookies</string>
     <string name="cookies_delete_all_body">Todos os logins salvos serão removidos. Isso não pode ser desfeito.</string>
     <string name="cookies_delete_all_confirm">Excluir tudo</string>
-    <string name="cookies_delete_all_cancel">Cancelar</string>
     <string name="cookies_row_fallback_name">Cookies</string>
-    <string name="cookies_sheet_title">Cookies</string>
     <string name="cookies_sheet_copy">Copiar os cookies</string>
     <string name="cookies_sheet_delete">Excluir os cookies</string>
     <string name="cookies_field_title">Título</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">Salvar</string>
-    <string name="cookies_sheet_get">Obter cookies</string>
-    <string name="cookies_sheet_update">Atualizar</string>
 
     <!-- Batch option sheets -->
     <string name="batch_quality_best">Melhor qualidade</string>
@@ -756,4 +749,25 @@
     <string name="ytdlp_update_installed_text">O mecanismo de download está atualizado</string>
     <string name="ytdlp_update_failed_title">Não foi possível instalar o yt-dlp %1$s</string>
     <string name="ytdlp_update_failed_text">O Hazel manteve o mecanismo atual e tentará novamente mais tarde</string>
+    <string name="cookies_description">Entre em um site uma vez e o Hazel usa isso em downloads com restrição de idade, privados e exclusivos para membros.</string>
+    <string name="cookies_section_general">Geral</string>
+    <string name="cookies_section_add">Adicionar</string>
+    <string name="cookies_section_saved">Logins salvos</string>
+    <string name="cookies_add_sign_in">Entrar em um site</string>
+    <string name="cookies_add_sign_in_summary">Abra o site e salve os cookies</string>
+    <string name="cookies_add_import_file_summary">Um arquivo de cookies Netscape exportado de um navegador</string>
+    <string name="cookies_off_hint">Ative Usar cookies para enviá-los com os downloads.</string>
+    <string name="cookies_expires">Expira %1$s</string>
+    <string name="cookies_expired">Expirados</string>
+    <string name="cookies_session_only">Somente sessão</string>
+    <string name="cookies_add_body">O Hazel abre a página de login do site e salva os cookies quando você terminar.</string>
+    <string name="cookies_add_continue">Continuar</string>
+    <string name="cookies_show">Mostrar cookies</string>
+    <string name="cookies_hide">Ocultar cookies</string>
+    <string name="cookies_sign_in_again">Entrar novamente</string>
+    <plurals name="cookies_count">
+        <item quantity="one">%d cookie</item>
+        <item quantity="many">%d cookies</item>
+        <item quantity="other">%d cookies</item>
+    </plurals>
 </resources>
