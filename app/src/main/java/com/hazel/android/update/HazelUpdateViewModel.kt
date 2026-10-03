@@ -43,24 +43,6 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
     private val _channel = MutableStateFlow(HazelUpdater.Channel.STABLE)
     val channel: StateFlow<HazelUpdater.Channel> = _channel.asStateFlow()
 
-    private val _autoDownload = MutableStateFlow(true)
-    val autoDownload: StateFlow<Boolean> = _autoDownload.asStateFlow()
-
-    private val _wifiOnly = MutableStateFlow(false)
-    val wifiOnly: StateFlow<Boolean> = _wifiOnly.asStateFlow()
-
-    private val _notifyAvailable = MutableStateFlow(true)
-    val notifyAvailable: StateFlow<Boolean> = _notifyAvailable.asStateFlow()
-
-    private val _notifyComplete = MutableStateFlow(true)
-    val notifyComplete: StateFlow<Boolean> = _notifyComplete.asStateFlow()
-
-    private val _notifyFailed = MutableStateFlow(true)
-    val notifyFailed: StateFlow<Boolean> = _notifyFailed.asStateFlow()
-
-    private val _verifySignature = MutableStateFlow(true)
-    val verifySignature: StateFlow<Boolean> = _verifySignature.asStateFlow()
-
     private var downloadJob: Job? = null
 
     init {
@@ -68,12 +50,6 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
             _channel.value = HazelUpdater.Channel.fromLabel(
                 SettingsRepository.getHazelChannel(getApplication()).first()
             )
-            _autoDownload.value = SettingsRepository.getUpdateAutoDownload(getApplication()).first()
-            _wifiOnly.value = SettingsRepository.getUpdateWifiOnly(getApplication()).first()
-            _notifyAvailable.value = SettingsRepository.getUpdateNotifyAvailable(getApplication()).first()
-            _notifyComplete.value = SettingsRepository.getUpdateNotifyComplete(getApplication()).first()
-            _notifyFailed.value = SettingsRepository.getUpdateNotifyFailed(getApplication()).first()
-            _verifySignature.value = SettingsRepository.getUpdateVerifySignature(getApplication()).first()
 
             checkForUpdate()
         }
@@ -87,36 +63,6 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
             SettingsRepository.setHazelChannel(getApplication(), channel.label)
         }
         checkForUpdate()
-    }
-
-    fun setAutoDownload(enabled: Boolean) {
-        _autoDownload.value = enabled
-        viewModelScope.launch { SettingsRepository.setUpdateAutoDownload(getApplication(), enabled) }
-    }
-
-    fun setWifiOnly(enabled: Boolean) {
-        _wifiOnly.value = enabled
-        viewModelScope.launch { SettingsRepository.setUpdateWifiOnly(getApplication(), enabled) }
-    }
-
-    fun setNotifyAvailable(enabled: Boolean) {
-        _notifyAvailable.value = enabled
-        viewModelScope.launch { SettingsRepository.setUpdateNotifyAvailable(getApplication(), enabled) }
-    }
-
-    fun setNotifyComplete(enabled: Boolean) {
-        _notifyComplete.value = enabled
-        viewModelScope.launch { SettingsRepository.setUpdateNotifyComplete(getApplication(), enabled) }
-    }
-
-    fun setNotifyFailed(enabled: Boolean) {
-        _notifyFailed.value = enabled
-        viewModelScope.launch { SettingsRepository.setUpdateNotifyFailed(getApplication(), enabled) }
-    }
-
-    fun setVerifySignature(enabled: Boolean) {
-        _verifySignature.value = enabled
-        viewModelScope.launch { SettingsRepository.setUpdateVerifySignature(getApplication(), enabled) }
     }
 
     fun checkForUpdate() {

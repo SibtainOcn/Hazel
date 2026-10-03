@@ -32,14 +32,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -77,7 +73,6 @@ import com.hazel.android.update.UpdateListItem
 import com.hazel.android.update.UpdateWavyProgress
 import com.hazel.android.update.UpdateSectionLabel
 import com.hazel.android.update.UpdateSegmentedButton
-import com.hazel.android.update.UpdateSwitch
 import com.hazel.android.update.UpdateTokens
 import com.hazel.android.update.UpdateTopBar
 import com.hazel.android.util.openInAppBrowser
@@ -92,12 +87,6 @@ fun HazelUpdateScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val channel by viewModel.channel.collectAsState()
-    val autoDownload by viewModel.autoDownload.collectAsState()
-    val wifiOnly by viewModel.wifiOnly.collectAsState()
-    val notifyAvailable by viewModel.notifyAvailable.collectAsState()
-    val notifyComplete by viewModel.notifyComplete.collectAsState()
-    val notifyFailed by viewModel.notifyFailed.collectAsState()
-    val verifySignature by viewModel.verifySignature.collectAsState()
 
     var showInstallPermissionDialog by remember { mutableStateOf(false) }
     var waitingForInstallPermission by remember { mutableStateOf(false) }
@@ -283,78 +272,8 @@ fun HazelUpdateScreen(
                 )
             }
 
-            // ── Automatic Updates ──
-            UpdateSectionLabel(text = "Automatic updates")
-            UpdateListGroup {
-                UpdateListItem(
-                    icon = Icons.Filled.CloudDownload,
-                    primary = "Auto-download updates",
-                    secondary = "Fetch new builds from the release feed automatically",
-                    showDivider = false,
-                    trailing = {
-                        UpdateSwitch(
-                            checked = autoDownload,
-                            onCheckedChange = { viewModel.setAutoDownload(it) }
-                        )
-                    }
-                )
-                UpdateListItem(
-                    icon = Icons.Filled.Wifi,
-                    primary = "Install on Wi-Fi only",
-                    secondary = "Skip downloads on mobile data",
-                    showDivider = true,
-                    trailing = {
-                        UpdateSwitch(
-                            checked = wifiOnly,
-                            onCheckedChange = { viewModel.setWifiOnly(it) }
-                        )
-                    }
-                )
-            }
-
-            // ── Notifications ──
-            UpdateSectionLabel(text = "Notifications")
-            UpdateListGroup {
-                UpdateListItem(
-                    icon = Icons.Filled.Notifications,
-                    primary = "New version available",
-                    secondary = "Notify when an update is ready to install",
-                    showDivider = false,
-                    trailing = {
-                        UpdateSwitch(
-                            checked = notifyAvailable,
-                            onCheckedChange = { viewModel.setNotifyAvailable(it) }
-                        )
-                    }
-                )
-                UpdateListItem(
-                    icon = Icons.Filled.VerifiedUser,
-                    primary = "Install complete",
-                    secondary = "Confirm once an update finishes installing",
-                    showDivider = true,
-                    trailing = {
-                        UpdateSwitch(
-                            checked = notifyComplete,
-                            onCheckedChange = { viewModel.setNotifyComplete(it) }
-                        )
-                    }
-                )
-                UpdateListItem(
-                    icon = Icons.Filled.Close,
-                    primary = "Update failed",
-                    secondary = "Alert if a download or install couldn't finish",
-                    showDivider = true,
-                    trailing = {
-                        UpdateSwitch(
-                            checked = notifyFailed,
-                            onCheckedChange = { viewModel.setNotifyFailed(it) }
-                        )
-                    }
-                )
-            }
-
-            // ── Source & Verification ──
-            UpdateSectionLabel(text = "Source & verification")
+            // ── Source ──
+            UpdateSectionLabel(text = "Source")
             UpdateListGroup {
                 UpdateListItem(
                     icon = Icons.Filled.Security,
@@ -368,18 +287,6 @@ fun HazelUpdateScreen(
                             contentDescription = null,
                             tint = UpdateTokens.OnSurfaceDim,
                             modifier = Modifier.size(16.dp)
-                        )
-                    }
-                )
-                UpdateListItem(
-                    icon = Icons.Filled.VerifiedUser,
-                    primary = "Verify signing key",
-                    secondary = "Match the release signature before installing",
-                    showDivider = true,
-                    trailing = {
-                        UpdateSwitch(
-                            checked = verifySignature,
-                            onCheckedChange = { viewModel.setVerifySignature(it) }
                         )
                     }
                 )

@@ -579,7 +579,6 @@ object SettingsRepository {
     private val UPDATE_NOTIFY_AVAILABLE_KEY = booleanPreferencesKey("update_notify_available")
     private val UPDATE_NOTIFY_COMPLETE_KEY = booleanPreferencesKey("update_notify_complete")
     private val UPDATE_NOTIFY_FAILED_KEY = booleanPreferencesKey("update_notify_failed")
-    private val UPDATE_VERIFY_SIGNATURE_KEY = booleanPreferencesKey("update_verify_signature")
 
     fun getHazelChannel(context: Context): Flow<String> {
         return context.dataStore.data.map { prefs -> prefs[HAZEL_CHANNEL_KEY] ?: "Stable" }
@@ -623,12 +622,6 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[UPDATE_NOTIFY_FAILED_KEY] = enabled }
     }
 
-    fun getUpdateVerifySignature(context: Context): Flow<Boolean> {
-        return context.dataStore.data.map { prefs -> prefs[UPDATE_VERIFY_SIGNATURE_KEY] ?: true }
-    }
-    suspend fun setUpdateVerifySignature(context: Context, enabled: Boolean) {
-        context.dataStore.edit { prefs -> prefs[UPDATE_VERIFY_SIGNATURE_KEY] = enabled }
-    }
 
     // Dynamic update availability indicators for UI red dot badges
     private val HAS_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("has_update_available")
