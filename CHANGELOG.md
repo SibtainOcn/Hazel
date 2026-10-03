@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Switching the formats source while the list is still loading is no longer dropped. The switch runs as soon as the current read ends, and the list shows its answer.
 - Once a link is read, its format list always starts with Best quality and ends with Worst quality, for video and audio, whichever source read it. A yt-dlp read showed neither, and a NewPipe read only Best.
 - The second share target is labelled Instant, so share sheets that put the app name above it no longer show "Hazel Hazel Instant".
+- A link shared or downloaded just as the previous download finished no longer has its download service stopped and its card shown as finished under it. The run now closes in one step, and a link that arrives while it closes starts the next run.
 - A download shared to Instant now has its card on the home screen too, filling as it downloads, as one started in the app does. Before, opening the app showed nothing until the queue screen was opened.
 - The empty home screen no longer shows a faint band under the search bar. It is the separator for a scrolled list, and the empty screen was counted as scrolled.
 - The sign-in page opens at once with the shape loader, which stays until the site shows something, instead of a black screen. The browser is started after the screen is up rather than before it.

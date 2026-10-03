@@ -1355,15 +1355,12 @@ class DownloadViewModel : ViewModel() {
 
             while (true) {
                 if (isBatchCancelled) break
-                // Released in the same step that finds the queue empty, so a link added a
-                // moment later starts a run of its own instead of waiting on this one.
-                //
                 // A paused link stays where it is and is stepped over: the user stopped it,
-                // and starting something else is not a reason to start it again.
+                // and starting something else is not a reason to start it again. The run
+                // is let go only once it has closed, below.
                 val next = synchronized(queue) {
                     val index = queue.indexOfFirst { !it.paused }
-                    (if (index >= 0) queue.removeAt(index) else null)
-                        .also { if (it == null && runOwner === token) runOwner = null }
+                    if (index >= 0) queue.removeAt(index) else null
                 } ?: break
                 val plan = next.toPlan()
                 val options = next.options
@@ -1565,8 +1562,20 @@ class DownloadViewModel : ViewModel() {
                 ) }
             }
 
-            DownloadService.stop(app)
-            finishBatch(app)
+            // Closed and let go in one step, under the lock startBatch takes. Let go any
+            // earlier, a link shared as the last one finished started a run of its own, and
+            // this one then stopped the service and reported the run over under it. A link
+            // that arrived while this was closing is handed to a new run instead.
+            val more = synchronized(queue) {
+                val more = !isBatchCancelled && queue.any { !it.paused }
+                if (!more) {
+                    DownloadService.stop(app)
+                    finishBatch(app)
+                }
+                if (runOwner === token) runOwner = null
+                more
+            }
+            if (more) runQueue(app, resumed = false)
         }
         job.invokeOnCompletion {
             synchronized(queue) { if (runOwner === token) runOwner = null }
