@@ -483,6 +483,8 @@
     <string name="format_filter_smallest">सबसे छोटा फ़ॉर्मैट (प्रति रेज़ोल्यूशन)</string>
     <string name="format_filter_generic">सामान्य</string>
     <string name="format_source_title">फ़ॉर्मैट स्रोत</string>
+    <string name="format_source_signed_in_title">NewPipe आपके साइन-इन का उपयोग नहीं कर सकता</string>
+    <string name="format_source_signed_in_body">इस साइट का साइन-इन सहेजा गया है और कुकीज़ इस्तेमाल करें चालू है। NewPipe कुकीज़ नहीं भेजता, इसलिए फ़ॉर्मेट yt-dlp पढ़ता है। NewPipe से पढ़ने के लिए कुकीज़ में कुकीज़ इस्तेमाल करें बंद करें।</string>
     <string name="format_sort_title">क्रमबद्ध करें</string>
     <string name="format_update">अपडेट करें</string>
 

@@ -483,6 +483,8 @@
     <string name="format_filter_smallest">Kleinstes Format (pro Auflösung)</string>
     <string name="format_filter_generic">Generisch</string>
     <string name="format_source_title">Formatquelle</string>
+    <string name="format_source_signed_in_title">NewPipe kann deine Anmeldung nicht nutzen</string>
+    <string name="format_source_signed_in_body">Für diese Seite ist eine Anmeldung gespeichert und Cookies verwenden ist an. NewPipe sendet keine Cookies, daher liest yt-dlp die Formate. Schalte Cookies verwenden unter Cookies aus, um sie mit NewPipe zu lesen.</string>
     <string name="format_sort_title">Sortieren nach</string>
     <string name="format_update">Aktualisieren</string>
 

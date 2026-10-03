@@ -553,6 +553,8 @@
     <string name="format_filter_smallest">Smallest format (per resolution)</string>
     <string name="format_filter_generic">Generic</string>
     <string name="format_source_title">Formats source</string>
+    <string name="format_source_signed_in_title">NewPipe can\'t use your sign-in</string>
+    <string name="format_source_signed_in_body">This site has a saved sign-in and Use cookies is on. NewPipe sends no cookies, so its formats are read by yt-dlp. Turn off Use cookies in Cookies to read them with NewPipe.</string>
     <string name="format_sort_title">Sort by</string>
     <string name="format_update">Update</string>
 

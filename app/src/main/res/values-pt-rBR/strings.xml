@@ -489,6 +489,8 @@
     <string name="format_filter_smallest">Menor formato (por resolução)</string>
     <string name="format_filter_generic">Genérico</string>
     <string name="format_source_title">Fonte dos formatos</string>
+    <string name="format_source_signed_in_title">O NewPipe não pode usar seu login</string>
+    <string name="format_source_signed_in_body">Este site tem um login salvo e Usar cookies está ativado. O NewPipe não envia cookies, então os formatos são lidos pelo yt-dlp. Desative Usar cookies em Cookies para lê-los com o NewPipe.</string>
     <string name="format_sort_title">Ordenar por</string>
     <string name="format_update">Atualizar</string>
 

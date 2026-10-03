@@ -489,6 +489,8 @@
     <string name="format_filter_smallest">Formato más pequeño (por resolución)</string>
     <string name="format_filter_generic">Genérico</string>
     <string name="format_source_title">Origen de los formatos</string>
+    <string name="format_source_signed_in_title">NewPipe no puede usar tu inicio de sesión</string>
+    <string name="format_source_signed_in_body">Este sitio tiene un inicio de sesión guardado y Usar cookies está activado. NewPipe no envía cookies, así que yt-dlp lee los formatos. Desactiva Usar cookies en Cookies para leerlos con NewPipe.</string>
     <string name="format_sort_title">Ordenar por</string>
     <string name="format_update">Actualizar</string>
 

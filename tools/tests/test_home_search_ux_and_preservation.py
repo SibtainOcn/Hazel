@@ -190,7 +190,7 @@ def test_home_screen_components():
     check_true("Paste button has rounded pill height of 52.dp", ".height(52.dp)" in content)
     check_true("Paste button has RoundedCornerShape(26.dp)", "RoundedCornerShape(26.dp)" in content)
     # The paste button is its own composable (PasteButton.kt): it shows while the clipboard
-    # holds a clip not pasted yet, folds to its icon, and stands aside for Download all.
+    # holds a clip not pasted yet, folds to its icon, and sits above Download all.
     paste_file = REPO_ROOT / "app/src/main/java/com/hazel/android/ui/screens/download/PasteButton.kt"
     check_true("PasteButton.kt exists", paste_file.is_file())
     paste = paste_file.read_text(encoding="utf-8") if paste_file.is_file() else ""
@@ -199,8 +199,10 @@ def test_home_screen_components():
     check_true("Paste check reads the clip description only, never the text",
                "primaryClipDescription" in paste and "primaryClip?" not in paste and ".getItemAt(" not in paste)
     check_true("DownloadScreen shows PasteButton", "PasteButton(" in content)
-    check_true("Paste button shows only for a new clip, and never over Download all",
-               "clipStamp != null" in content and "clipStamp != usedClipStamp" in content and "!showDownloadAll" in content)
+    # Paste sits above Download all rather than hiding behind it (1.1.12).
+    check_true("Paste button shows only for a new clip, above Download all",
+               "clipStamp != null" in content and "clipStamp != usedClipStamp" in content
+               and 0 <= content.find("PasteButton(") < content.find("if (showDownloadAll)"))
 
     # 2. UrlSearchBar clickability architecture
     check_true("UrlSearchBar Surface has onClick = onOpenSearch", "Surface(\n        onClick = onOpenSearch" in content or "Surface(onClick = onOpenSearch" in content)

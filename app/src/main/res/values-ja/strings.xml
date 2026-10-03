@@ -477,6 +477,8 @@
     <string name="format_filter_smallest">最小フォーマット（解像度ごと）</string>
     <string name="format_filter_generic">汎用</string>
     <string name="format_source_title">フォーマットの取得元</string>
+    <string name="format_source_signed_in_title">NewPipe ではサインインを使えません</string>
+    <string name="format_source_signed_in_body">このサイトにはサインインが保存されており、Cookieを使用がオンです。NewPipe は Cookie を送信しないため、形式は yt-dlp が読み込みます。NewPipe で読み込むには、Cookie で Cookieを使用をオフにしてください。</string>
     <string name="format_sort_title">並べ替え</string>
     <string name="format_update">更新</string>
 

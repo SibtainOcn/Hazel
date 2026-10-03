@@ -232,6 +232,13 @@ class DownloadViewModel : ViewModel() {
     private val _formatsReading = MutableStateFlow<Set<String>>(emptySet())
     val formatsReading: StateFlow<Set<String>> = _formatsReading.asStateFlow()
 
+    /**
+     * A read asked for by name while another read of the same link was running: a switch
+     * of reader or an update from the format list. It runs as soon as that read ends, and
+     * the read it follows is not applied, since it answers a question no longer asked.
+     */
+    private val queuedFormatReads = mutableMapOf<String, Pair<Boolean, ListingSource?>>()
+
     /** Caps how many links have their formats read at the same time. */
     private val formatReads = Semaphore(FORMAT_READS_AT_ONCE)
 
@@ -949,7 +956,7 @@ class DownloadViewModel : ViewModel() {
         infos.forEach { info ->
             // Nothing to do for a link already showing that reader's read, unless asked again.
             if (!fresh && source != null && info.hasResolvedFormats && info.readBy == source) return@forEach
-            readFormatsOf(info, fresh = fresh, source = source)
+            readFormatsOf(info, fresh = fresh, source = source, queueIfRunning = true)
         }
     }
 
@@ -960,10 +967,28 @@ class DownloadViewModel : ViewModel() {
      * own, and a playlist of eighty started at once would starve the device rather than
      * finish any sooner.
      */
-    private fun readFormatsOf(info: MediaInfo, fresh: Boolean, source: ListingSource?) {
-        if (!claimFormatRead(info.url)) return
+    private fun readFormatsOf(
+        info: MediaInfo,
+        fresh: Boolean,
+        source: ListingSource?,
+        queueIfRunning: Boolean = false
+    ) {
+        // Under the queue's lock, so a read ending at this moment either sees this request
+        // queued or has already let its claim go.
+        val claimed = synchronized(queuedFormatReads) {
+            claimFormatRead(info.url).also { claimed ->
+                // The newest request wins: picking NewPipe and then yt-dlp while the first
+                // read runs ends on yt-dlp.
+                if (!claimed && queueIfRunning) queuedFormatReads[info.url] = fresh to source
+            }
+        }
+        if (claimed) startFormatRead(info, fresh, source)
+    }
 
+    /** Runs one read of [info]'s formats; the caller holds its claim in [_formatsReading]. */
+    private fun startFormatRead(info: MediaInfo, fresh: Boolean, source: ListingSource?) {
         viewModelScope.launch(Dispatchers.IO) {
+            var next: Pair<Boolean, ListingSource?>? = null
             val resolved = try {
                 formatReads.withPermit { readFormats(info.url, fresh, source) }
             } catch (e: CancellationException) {
@@ -972,7 +997,17 @@ class DownloadViewModel : ViewModel() {
                 Log.w("Hazel", "Format read failed for ${info.url}: ${e.message}")
                 null
             } finally {
-                _formatsReading.update { it - info.url }
+                // A queued read takes over the claim rather than letting it go, so the list
+                // stays in its loading state from one read to the next.
+                next = synchronized(queuedFormatReads) {
+                    queuedFormatReads.remove(info.url).also { queued ->
+                        if (queued == null) _formatsReading.update { it - info.url }
+                    }
+                }
+            }
+            next?.let { (queuedFresh, queuedSource) ->
+                startFormatRead(info, queuedFresh, queuedSource)
+                return@launch
             }
             if (resolved == null) return@launch
 

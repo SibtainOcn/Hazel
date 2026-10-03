@@ -477,6 +477,8 @@
     <string name="format_filter_smallest">Format terkecil (per resolusi)</string>
     <string name="format_filter_generic">Generik</string>
     <string name="format_source_title">Sumber format</string>
+    <string name="format_source_signed_in_title">NewPipe tidak dapat memakai login Anda</string>
+    <string name="format_source_signed_in_body">Situs ini punya login tersimpan dan Gunakan cookie aktif. NewPipe tidak mengirim cookie, jadi formatnya dibaca oleh yt-dlp. Matikan Gunakan cookie di Cookie untuk membacanya dengan NewPipe.</string>
     <string name="format_sort_title">Urutkan menurut</string>
     <string name="format_update">Perbarui</string>
 
