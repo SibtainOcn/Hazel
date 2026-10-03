@@ -37,13 +37,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -53,6 +56,7 @@ import com.hazel.android.R
 import com.hazel.android.data.CookieEntry
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SettingsRepository
+import com.hazel.android.ui.components.HazelLoadingIndicator
 import com.hazel.android.ui.theme.HazelTheme
 import com.hazel.android.util.CookieExtractor
 import kotlinx.coroutines.flow.first
@@ -67,6 +71,10 @@ import kotlinx.coroutines.launch
  *
  * Cookies are cleared on entry, so each sign-in starts from a clean session and one site's
  * cookies can never end up filed under another.
+ *
+ * The screen and its loader are drawn first. Clearing the cookies and making the WebView
+ * both start the browser engine, which holds the main thread for a moment the first time,
+ * so they wait for that first frame rather than keeping the screen from appearing at all.
  */
 class CookieWebViewActivity : ComponentActivity() {
 
@@ -80,7 +88,9 @@ class CookieWebViewActivity : ComponentActivity() {
             ?: return finish()
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
 
-        if (savedInstanceState == null) CookieExtractor.clearAll()
+        // A fresh sign-in starts from no cookies; a screen rebuilt after a rotation keeps
+        // the session it was in the middle of.
+        val clearFirst = savedInstanceState == null
 
         setContent {
             val savedTheme by SettingsRepository.isDarkTheme(this).collectAsState(initial = null)
@@ -90,16 +100,25 @@ class CookieWebViewActivity : ComponentActivity() {
                 darkTheme = savedTheme ?: true,
                 accentName = accentName ?: return@setContent
             ) {
-                CookieWebViewScreen(url = url, title = title)
+                CookieWebViewScreen(url = url, title = title, clearFirst = clearFirst)
             }
         }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @androidx.compose.runtime.Composable
-    private fun CookieWebViewScreen(url: String, title: String) {
+    private fun CookieWebViewScreen(url: String, title: String, clearFirst: Boolean) {
         var pageTitle by remember { mutableStateOf(url) }
         var progress by remember { mutableStateOf(0) }
+        // The browser is started once the screen is up, and the loader stays until the
+        // first page has something to show.
+        var browserReady by remember { mutableStateOf(false) }
+        var firstPaint by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            withFrameNanos { }
+            if (clearFirst) CookieExtractor.clearAll()
+            browserReady = true
+        }
         var desktopMode by remember { mutableStateOf(false) }
         var saving by remember { mutableStateOf(false) }
 
@@ -192,35 +211,49 @@ class CookieWebViewActivity : ComponentActivity() {
                 )
             }
         ) { innerPadding ->
-            Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                if (progress in 1..99) {
-                    LinearProgressIndicator(
-                        progress = { progress / 100f },
-                        modifier = Modifier.fillMaxWidth()
+            val background = MaterialTheme.colorScheme.background.toArgb()
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    if (firstPaint && progress in 1..99) {
+                        LinearProgressIndicator(
+                            progress = { progress / 100f },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    if (browserReady) AndroidView(
+                        modifier = Modifier.fillMaxSize(),
+                        factory = { context ->
+                            WebView(context).apply {
+                                configure(this)
+                                // The screen's own tone until the page paints, not a black box.
+                                setBackgroundColor(background)
+                                webViewClient = object : WebViewClient() {
+                                    override fun onPageCommitVisible(view: WebView?, committedUrl: String?) {
+                                        super.onPageCommitVisible(view, committedUrl)
+                                        firstPaint = true
+                                    }
+    
+                                    override fun onPageFinished(view: WebView?, finishedUrl: String?) {
+                                        super.onPageFinished(view, finishedUrl)
+                                        firstPaint = true
+                                        pageTitle = view?.title?.takeIf { it.isNotBlank() }
+                                            ?: finishedUrl.orEmpty()
+                                    }
+                                }
+                                webChromeClient = object : WebChromeClient() {
+                                    override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                                        progress = newProgress
+                                    }
+                                }
+                                webView = this
+                                loadUrl(url)
+                            }
+                        }
                     )
                 }
-                AndroidView(
-                    modifier = Modifier.fillMaxSize(),
-                    factory = { context ->
-                        WebView(context).apply {
-                            configure(this)
-                            webViewClient = object : WebViewClient() {
-                                override fun onPageFinished(view: WebView?, finishedUrl: String?) {
-                                    super.onPageFinished(view, finishedUrl)
-                                    pageTitle = view?.title?.takeIf { it.isNotBlank() }
-                                        ?: finishedUrl.orEmpty()
-                                }
-                            }
-                            webChromeClient = object : WebChromeClient() {
-                                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                                    progress = newProgress
-                                }
-                            }
-                            webView = this
-                            loadUrl(url)
-                        }
-                    }
-                )
+                if (!firstPaint) {
+                    HazelLoadingIndicator(size = 48.dp, modifier = Modifier.align(Alignment.Center))
+                }
             }
         }
     }

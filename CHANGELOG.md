@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Switching the formats source while the list is still loading is no longer dropped. The switch runs as soon as the current read ends, and the list shows its answer.
 - Once a link is read, its format list always starts with Best quality and ends with Worst quality, for video and audio, whichever source read it. A yt-dlp read showed neither, and a NewPipe read only Best.
 - The second share target is labelled Instant, so share sheets that put the app name above it no longer show "Hazel Hazel Instant".
+- The sign-in page opens at once with the shape loader, which stays until the site shows something, instead of a black screen. The browser is started after the screen is up rather than before it.
 
 ## [1.1.12] - 2026-10-03
 ### Fixed
