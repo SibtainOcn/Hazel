@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - With several downloads in the queue, the filling download glyph and the stage track show on the card that is actually downloading, not on the one before or after it.
 - Waiting for Wi-Fi shows only on queued cards, not on every card on the home screen.
 - The address field for a new sign-in no longer starts with the cursor before `https://`, which turned typing into `vimeo.comhttps://`.
-- Scrolling the cookie text to its end no longer drags and stretches the sheet around it.
+- Flinging a list in a sheet to its end no longer stretches and drags the sheet, which then sprang back. This covers the format, cut, audio language, link list, batch audio quality, language, download details and cookie sheets. Dragging down from the top of a list still closes the sheet.
 
 ### Changed
 - The update screens use a calm wavy progress bar.

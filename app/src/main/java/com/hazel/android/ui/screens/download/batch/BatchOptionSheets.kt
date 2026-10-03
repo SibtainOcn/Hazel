@@ -48,6 +48,7 @@ import com.hazel.android.download.AUDIO_CONTAINERS
 import com.hazel.android.download.AUDIO_QUALITY_STEPS
 import com.hazel.android.download.VIDEO_CONTAINERS
 import com.hazel.android.download.WORST_HEIGHT
+import com.hazel.android.ui.components.keepFlingInSheet
 
 /**
  * The heights the action bar offers, paired with what each is called.
@@ -128,7 +129,7 @@ fun BatchBitrateSheet(
                 stringResource(R.string.batch_audio_quality_subtitle)
             )
             LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().keepFlingInSheet(),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     start = 20.dp, end = 20.dp, bottom = 32.dp
                 ),

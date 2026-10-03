@@ -58,6 +58,7 @@ import com.hazel.android.ui.screens.download.FEEDBACK_MS
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.util.MediaFacts
 import com.hazel.android.util.MediaProbeFacts
+import com.hazel.android.ui.components.keepFlingInSheet
 import kotlinx.coroutines.delay
 
 /**
@@ -120,6 +121,7 @@ fun DownloadPropertiesSheet(
     ) {
         Column(
             modifier = Modifier
+                .keepFlingInSheet()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {

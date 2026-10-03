@@ -75,10 +75,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
@@ -88,13 +84,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.data.CookieEntry
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.CookieSummary
 import com.hazel.android.ui.components.HazelLoadingIndicator
+import com.hazel.android.ui.components.keepFlingInSheet
 import com.hazel.android.ui.screens.more.ActionSettingRow
 import com.hazel.android.ui.screens.more.ConfirmSettingDialog
 import com.hazel.android.ui.screens.more.SettingsSection
@@ -623,6 +619,7 @@ private fun CookieDetailSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
             modifier = Modifier
+                .keepFlingInSheet()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 28.dp)
@@ -711,7 +708,7 @@ private fun CookieDetailSheet(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .heightIn(max = 220.dp)
-                                .nestedScroll(KeepLeftoverScroll)
+                                .keepFlingInSheet()
                                 .verticalScroll(rememberScrollState())
                                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                         )
@@ -767,15 +764,6 @@ private fun CookieDetailSheet(
 
 private fun isWebAddress(url: String): Boolean =
     url.startsWith("http://") || url.startsWith("https://")
-
-/**
- * Keeps the cookie text's leftover scroll and fling to itself. Passed on, they reached the
- * sheet, which began to drag and stretch at the end of the text and then sprang back.
- */
-private val KeepLeftoverScroll = object : NestedScrollConnection {
-    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource) = available
-    override suspend fun onPostFling(consumed: Velocity, available: Velocity) = available
-}
 
 /** A bare `example.com` is taken as https. */
 private fun withScheme(url: String): String =

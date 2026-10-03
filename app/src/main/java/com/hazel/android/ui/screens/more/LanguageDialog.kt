@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.util.AppLocale
+import com.hazel.android.ui.components.keepFlingInSheet
 
 /**
  * The language picker.
@@ -133,7 +134,7 @@ fun LanguageSheet(
             // ── The languages, two to a row ──
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
-                modifier = Modifier.heightIn(max = 460.dp),
+                modifier = Modifier.heightIn(max = 460.dp).keepFlingInSheet(),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     start = 18.dp, end = 18.dp, top = 16.dp, bottom = 28.dp
                 ),
