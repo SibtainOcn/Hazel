@@ -324,7 +324,19 @@ fun DownloadScreen(
     // The set action belongs to a set the user put together: several links pasted at once,
     // or a playlist or channel read from one link. A keyword search lands several cards too,
     // but those are a list to choose from rather than a set to take whole, so it stays away.
-    val showDownloadAll = pendingResults.size > 1 && !runInHand && state.searchQuery.isBlank()
+    // Shown for a set the whole time it is on screen, while it downloads and after it is
+    // saved. It offers what is not already in the queue, the whole set again once all of
+    // it is saved, and the queue itself when every link is already in hand.
+    val showDownloadAll = state.results.size > 1 && state.searchQuery.isBlank()
+    val inHandUrls = state.batch.filter {
+        it.state == BatchState.QUEUED || it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED
+    }.mapTo(mutableSetOf()) { it.url }
+    val notInHand = pendingResults.filterNot { it.url in inHandUrls }
+    val downloadAllResults = when {
+        notInHand.isNotEmpty() -> notInHand
+        runInHand -> emptyList()
+        else -> state.results
+    }
 
     var alreadyHave by remember { mutableStateOf<HistoryEntry?>(null) }
 
@@ -548,7 +560,12 @@ fun DownloadScreen(
                         )
 
                         val batchItem = state.batch.firstOrNull { it.url == info.url }
-                        val isActive = state.isDownloading && state.active?.url == info.url
+                        // The item's own state says which card is running; the shared pointer
+                        // only stands in for a link the run has no list entry for.
+                        val isActive = state.isDownloading && when (batchItem) {
+                            null -> state.active?.url == info.url
+                            else -> batchItem.state == BatchState.DOWNLOADING
+                        }
 
                         // A card that came from a listing carries no formats yet. Reading them
                         // starts with the sheet, so the wait happens against an open sheet
@@ -577,7 +594,7 @@ fun DownloadScreen(
                                 isComplete = batchItem?.state == BatchState.DONE ||
                                         (!state.isMultiple && state.isComplete),
                                 batchItem = batchItem,
-                                waitingForWifi = state.waitingForWifi,
+                                waitingForWifi = state.waitingForWifi && batchItem?.state == BatchState.QUEUED,
                                 alreadyDownloaded = info.url in savedUrls,
                                 player = playback?.takeIf { playingUrl == info.url },
                                 playerFullscreen = playerFullscreen,
@@ -803,41 +820,40 @@ fun DownloadScreen(
         // copied link is nearly always what brings someone here. Its label shows for a
         // moment when a new clip arrives and then it folds to an icon. A clip that has
         // been pasted is not offered again, and the button stands aside while a read is
-        // running or while the set action holds the corner.
+        // running. It sits above the set action when both are there.
         val clipStamp = rememberClipStamp()
         var usedClipStamp by rememberSaveable { mutableStateOf<Long?>(null) }
-        val showPaste = clipStamp != null && clipStamp != usedClipStamp &&
-            !state.isFetching && !showDownloadAll
-        androidx.compose.animation.AnimatedVisibility(
-            visible = showPaste,
-            enter = scaleIn() + fadeIn(),
-            exit = scaleOut() + fadeOut(),
+        val showPaste = clipStamp != null && clipStamp != usedClipStamp && !state.isFetching
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(20.dp)
+                .padding(20.dp),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            PasteButton(
-                stamp = clipStamp,
-                onClick = {
-                    usedClipStamp = clipStamp
-                    pasteFromClipboard()
-                }
-            )
-        }
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showPaste,
+                enter = scaleIn() + fadeIn(),
+                exit = scaleOut() + fadeOut()
+            ) {
+                PasteButton(
+                    stamp = clipStamp,
+                    onClick = {
+                        usedClipStamp = clipStamp
+                        pasteFromClipboard()
+                    }
+                )
+            }
 
-        // One action for the whole set, which is the point of collecting links together.
-        //
-        // Offered on what is actually left to fetch rather than on how long the list is. A
-        // list of two where one is already saved is one download, and a set action that
-        // opens a sheet holding a single card is a set action that should not have been
-        // there at all. Search results are left out: see [showDownloadAll].
-        if (showDownloadAll) {
-            DownloadAllButton(
-                onClick = { batchSheetVisible = true },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp)
-            )
+            // One action for the whole set, which is the point of collecting links together.
+            // Search results are left out: see [showDownloadAll].
+            if (showDownloadAll) {
+                DownloadAllButton(
+                    onClick = {
+                        if (downloadAllResults.isEmpty()) onOpenQueue() else batchSheetVisible = true
+                    }
+                )
+            }
         }
     }
 
@@ -987,7 +1003,7 @@ fun DownloadScreen(
 
     if (batchSheetVisible) {
         BatchDownloadSheet(
-            results = pendingResults,
+            results = downloadAllResults,
             sourceUrl = state.url,
             options = options,
             onOptionsChange = {
@@ -1319,6 +1335,23 @@ private fun MediaCard(
                             .size(40.dp)
                     )
                 }
+            }
+
+            // Waiting its turn: the same glyph, empty and still.
+            if (isQueued && !isDownloading && !waitingForWifi) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f))
+                )
+                FillingDownloadIcon(
+                    progress = 0f,
+                    flowing = false,
+                    tint = Color.White.copy(alpha = 0.7f),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(40.dp)
+                )
             }
 
             // Held back for want of Wi-Fi. The artwork is darkened exactly as a

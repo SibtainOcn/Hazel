@@ -12,9 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Hazel update screen no longer shows automatic update, notification and verify switches that did nothing there and quietly changed the yt-dlp update settings.
 - Nightly and Master users no longer see a false engine update badge.
 - A failed download shows the error that stopped it rather than the first warning.
+- With several downloads in the queue, the filling download glyph and the stage track show on the card that is actually downloading, not on the one before or after it.
+- Waiting for Wi-Fi shows only on queued cards, not on every card on the home screen.
 
 ### Changed
 - The update screens use a calm wavy progress bar.
+- Queued cards on the home screen show the download glyph, empty and still, until their turn.
+- Download all stays on a playlist or a set of pasted links while it downloads and after it is saved. It offers what is not queued yet, the whole set again once it is saved, and opens the queue when every link is already in it. Search results still never show it.
+- Paste sits above Download all instead of hiding behind it.
 
 ## [1.1.11] - 2026-10-02
 ### Added

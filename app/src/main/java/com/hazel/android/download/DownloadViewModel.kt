@@ -335,8 +335,8 @@ class DownloadViewModel : ViewModel() {
             // A link the user paused is shown as paused and left alone. Only what was
             // still owed when the app went away is picked up, which is the difference
             // between carrying on and overriding a decision already made.
-            _state.value = _state.value.copy(
-                results = plans.map { it.info } + _state.value.results.filterNot { existing ->
+            _state.update { s -> s.copy(
+                results = plans.map { it.info } + s.results.filterNot { existing ->
                     plans.any { it.info.url == existing.url }
                 },
                 batch = pending.map {
@@ -346,7 +346,7 @@ class DownloadViewModel : ViewModel() {
                         state = if (it.paused) BatchState.PAUSED else BatchState.QUEUED
                     )
                 }
-            )
+            ) }
 
             val owed = pending.filterNot { it.paused }
             if (owed.isEmpty()) return@launch
@@ -400,7 +400,7 @@ class DownloadViewModel : ViewModel() {
     // ── URL input ──
 
     fun onUrlChange(url: String) {
-        _state.value = _state.value.copy(url = url, error = null)
+        _state.update { s -> s.copy(url = url, error = null) }
     }
 
     fun clearUrl() {
@@ -431,17 +431,17 @@ class DownloadViewModel : ViewModel() {
 
     /** Points the sheet at one of several resolved links. */
     fun selectResult(info: MediaInfo) {
-        _state.value = _state.value.copy(info = info)
+        _state.update { s -> s.copy(info = info) }
     }
 
     /** Drops one link from the resolved list without touching the others. */
     fun removeResult(info: MediaInfo) {
         val remaining = _state.value.results.filterNot { it.url == info.url }
-        _state.value = _state.value.copy(
+        _state.update { s -> s.copy(
             results = remaining,
-            info = if (_state.value.info?.url == info.url) remaining.firstOrNull()
-            else _state.value.info
-        )
+            info = if (s.info?.url == info.url) remaining.firstOrNull()
+            else s.info
+        ) }
     }
 
     /**
@@ -687,9 +687,9 @@ class DownloadViewModel : ViewModel() {
 
         val valid = targets.filter { URL_PATTERN.matches(it) }
         if (valid.isEmpty()) {
-            _state.value = _state.value.copy(
+            _state.update { s -> s.copy(
                 error = HazelApp.instance.getString(R.string.fetch_invalid_url)
-            )
+            ) }
             return
         }
 
@@ -710,7 +710,7 @@ class DownloadViewModel : ViewModel() {
             it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED ||
                 it.state == BatchState.QUEUED
         }
-        _state.value = _state.value.copy(
+        _state.update { s -> s.copy(
             url = valid.first(),
             isFetching = true,
             error = null,
@@ -720,12 +720,12 @@ class DownloadViewModel : ViewModel() {
             // from the old results carry on in the queue.
             results = emptyList(),
             info = null,
-            batch = if (runInHand) _state.value.batch else emptyList(),
+            batch = if (runInHand) s.batch else emptyList(),
             isComplete = false,
             fetchProgress = "",
             fetchCount = valid.size,
             searchQuery = ""
-        )
+        ) }
 
         fetchJob = viewModelScope.launch {
             val app = HazelApp.instance
@@ -739,9 +739,9 @@ class DownloadViewModel : ViewModel() {
 
             try {
                 if (valid.size > 1) {
-                    _state.value = _state.value.copy(
+                    _state.update { s -> s.copy(
                         fetchProgress = HazelApp.instance.getString(R.string.fetch_settings_reading_links)
-                    )
+                    ) }
                 }
 
                 // Each pasted link is asked what it holds, and a link holding a collection
@@ -773,16 +773,16 @@ class DownloadViewModel : ViewModel() {
                     lastFailure = HazelApp.instance.getString(R.string.no_results_error_title)
                 }
             } catch (_: CancellationException) {
-                _state.value = _state.value.copy(isFetching = false, fetchProgress = "")
+                _state.update { s -> s.copy(isFetching = false, fetchProgress = "") }
                 return@launch
             } catch (e: Exception) {
                 lastFailure = e.message?.trim().orEmpty()
                 val message = sanitizeError(lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) })
-                _state.value = _state.value.copy(
+                _state.update { s -> s.copy(
                     isFetching = false,
                     fetchProgress = "",
                     errorLog = lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) }
-                )
+                ) }
                 if (notifyFailure) {
                     DownloadNotificationHelper.showError(
                         app, message, signInUrl = signInTargetFor(lastFailure, valid.first())
@@ -799,21 +799,21 @@ class DownloadViewModel : ViewModel() {
                 )
             }
 
-            _state.value = if (resolved.isEmpty()) {
-                _state.value.copy(
+            _state.update { s -> if (resolved.isEmpty()) {
+                s.copy(
                     isFetching = false,
                     fetchProgress = "",
                     errorLog = lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) }
                 )
             } else {
-                _state.value.copy(
+                s.copy(
                     isFetching = false,
                     fetchProgress = "",
                     results = resolved,
                     info = resolved.singleOrNull(),
                     savedAside = false
                 )
-            }
+            } }
         }
     }
 
@@ -837,18 +837,18 @@ class DownloadViewModel : ViewModel() {
             it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED ||
                 it.state == BatchState.QUEUED
         }
-        _state.value = _state.value.copy(
+        _state.update { s -> s.copy(
             isFetching = true,
             error = null,
             errorLog = null,
             results = emptyList(),
             info = null,
-            batch = if (runInHand) _state.value.batch else emptyList(),
+            batch = if (runInHand) s.batch else emptyList(),
             isComplete = false,
             fetchProgress = "",
             fetchCount = SEARCH_SKELETONS,
             searchQuery = text
-        )
+        ) }
 
         fetchJob = viewModelScope.launch {
             val found = try {
@@ -1088,17 +1088,17 @@ class DownloadViewModel : ViewModel() {
      */
     fun showFailure(message: String) {
         if (message.isBlank()) return
-        _state.value = _state.value.copy(isFetching = false, errorLog = message)
+        _state.update { s -> s.copy(isFetching = false, errorLog = message) }
     }
 
     /** Dismisses the saved-elsewhere dialog. */
     fun clearSaveFallback() {
-        _state.value = _state.value.copy(saveFallback = null)
+        _state.update { s -> s.copy(saveFallback = null) }
     }
 
     /** Dismisses the failure dialog without changing anything else. */
     fun clearErrorLog() {
-        _state.value = _state.value.copy(errorLog = null)
+        _state.update { s -> s.copy(errorLog = null) }
     }
 
     /**
@@ -1109,11 +1109,11 @@ class DownloadViewModel : ViewModel() {
         val url = _state.value.url.trim()
         if (url.isBlank()) return
         val fallback = MediaProbe.fallbackFor(url)
-        _state.value = _state.value.copy(
+        _state.update { s -> s.copy(
             errorLog = null,
-            results = listOf(fallback) + _state.value.results.filterNot { it.url == fallback.url },
+            results = listOf(fallback) + s.results.filterNot { it.url == fallback.url },
             info = fallback
-        )
+        ) }
     }
 
     // ── Download ──
@@ -1137,7 +1137,7 @@ class DownloadViewModel : ViewModel() {
     ) {
         val targetInfo = info ?: _state.value.info ?: _state.value.results.firstOrNull() ?: return
         if (_state.value.info == null) {
-            _state.value = _state.value.copy(info = targetInfo)
+            _state.update { s -> s.copy(info = targetInfo) }
         }
         startBatch(
             context = context,
@@ -1196,11 +1196,11 @@ class DownloadViewModel : ViewModel() {
         if (alreadyRunning) {
             // The run in flight picks these up on its own. Only the list the screen shows
             // needs saying, so the new links appear as waiting rather than as nothing.
-            _state.value = _state.value.copy(
-                batch = _state.value.batch + plans.map {
+            _state.update { s -> s.copy(
+                batch = s.batch + plans.map {
                     BatchItem(url = it.info.url, title = it.title)
                 }
-            )
+            ) }
             return
         }
 
@@ -1213,7 +1213,7 @@ class DownloadViewModel : ViewModel() {
         downloadContext = context.applicationContext
         downloadTreeUri = treeUri
 
-        _state.value = _state.value.copy(
+        _state.update { s -> s.copy(
             isDownloading = true,
             isComplete = false,
             progress = 0f,
@@ -1224,11 +1224,11 @@ class DownloadViewModel : ViewModel() {
             waitingForWifi = false,
             // What is still owed from before (a paused download, links waiting behind it)
             // stays on the list next to the new links rather than vanishing from it.
-            batch = _state.value.batch.filter {
+            batch = s.batch.filter {
                 (it.state == BatchState.PAUSED || it.state == BatchState.QUEUED) &&
                     plans.none { plan -> plan.info.url == it.url }
             } + plans.map { BatchItem(url = it.info.url, title = it.title) }
-        )
+        ) }
 
         runQueue(context.applicationContext, resumed = false)
     }
@@ -1257,7 +1257,7 @@ class DownloadViewModel : ViewModel() {
         if (resumed) {
             isBatchCancelled = false
             downloadContext = app
-            _state.value = _state.value.copy(
+            _state.update { s -> s.copy(
                 isDownloading = true,
                 isComplete = false,
                 progress = 0f,
@@ -1266,7 +1266,7 @@ class DownloadViewModel : ViewModel() {
                 isProcessing = false,
                 error = null,
                 waitingForWifi = false
-            )
+            ) }
         }
 
         val firstTitle = synchronized(queue) { queue.firstOrNull() }?.title.orEmpty()
@@ -1345,15 +1345,18 @@ class DownloadViewModel : ViewModel() {
                 progressFloor = fractionOnDisk()
 
                 val opening = if (progressFloor > 0f) "Resuming" else "Starting download"
-                _state.value = _state.value.copy(
+                _state.update { s -> s.copy(
                     info = plan.info,
                     active = plan.info,
                     progress = progressFloor,
                     totalBytes = expectedTotalBytes,
                     eta = "",
                     status = opening,
-                    isProcessing = false
-                )
+                    isProcessing = false,
+                    // The last item's stages would otherwise show on this one until its first line.
+                    processingSteps = emptyList(),
+                    processingStep = 0
+                ) }
                 DownloadNotificationHelper.showProgress(
                     app, (progressFloor * 100f).toInt(), opening, plan.title
                 )
@@ -1510,13 +1513,13 @@ class DownloadViewModel : ViewModel() {
                 // notification with them. Nothing is running any more to be caught by this.
                 runCatching { com.hazel.android.util.SdCards.workRoots().forEach { root -> root.listFiles()?.forEach { it.deleteRecursively() } } }
                 DownloadNotificationHelper.cancelPaused(app)
-                _state.value = _state.value.copy(
-                    batch = _state.value.batch.map {
+                _state.update { s -> s.copy(
+                    batch = s.batch.map {
                         if (it.state == BatchState.PAUSED || it.state == BatchState.QUEUED || it.state == BatchState.DOWNLOADING) {
                             it.copy(state = BatchState.FAILED, error = "Cancelled")
                         } else it
                     }
-                )
+                ) }
             }
 
             DownloadService.stop(app)
@@ -1538,7 +1541,7 @@ class DownloadViewModel : ViewModel() {
     private fun holdForResume(item: QueuedDownload) {
         synchronized(queue) { queue.addFirst(item.copy(paused = true)) }
         markBatch(item.url, BatchState.PAUSED)
-        _state.value = _state.value.copy(status = "Paused", isProcessing = false, eta = "")
+        _state.update { s -> s.copy(status = "Paused", isProcessing = false, eta = "") }
 
         // The shade is told the same thing the card is, off the same figures. A download
         // held while the app is off screen otherwise loses its notification along with the
@@ -1574,8 +1577,8 @@ class DownloadViewModel : ViewModel() {
         DownloadNotificationHelper.showCancelled(app)
 
         synchronized(queue) { queue.clear() }
-        _state.value = _state.value.copy(
-            batch = _state.value.batch.map {
+        _state.update { s -> s.copy(
+            batch = s.batch.map {
                 if (it.state == BatchState.PAUSED || it.state == BatchState.QUEUED) {
                     it.copy(state = BatchState.FAILED, error = "Cancelled")
                 } else it
@@ -1585,7 +1588,7 @@ class DownloadViewModel : ViewModel() {
             isProcessing = false,
             progress = 0f,
             status = ""
-        )
+        ) }
 
         downloadScope.launch {
             DownloadQueueRepository.save(app, emptyList())
@@ -1593,11 +1596,11 @@ class DownloadViewModel : ViewModel() {
     }
 
     private fun markBatch(url: String, state: BatchState, error: String? = null) {
-        _state.value = _state.value.copy(
-            batch = _state.value.batch.map {
+        _state.update { s -> s.copy(
+            batch = s.batch.map {
                 if (it.url == url) it.copy(state = state, error = error) else it
             }
-        )
+        ) }
 
         // Taken off the written-down queue once it is settled either way. A link kept there
         // after it finished would download itself again on the next launch. A paused one is
@@ -1616,7 +1619,7 @@ class DownloadViewModel : ViewModel() {
         // Only count actual failures, NOT user-cancelled items!
         val trueFailed = current.batch.count { it.state == BatchState.FAILED && it.error != "Cancelled" }
 
-        _state.value = current.copy(
+        _state.update { s -> s.copy(
             isDownloading = false,
             active = null,
             isComplete = done > 0,
@@ -1628,7 +1631,7 @@ class DownloadViewModel : ViewModel() {
                 trueFailed > 0 -> "$trueFailed of ${current.batch.size} failed"
                 else -> null
             }
-        )
+        ) }
 
         when {
             isBatchCancelled && done == 0 -> DownloadNotificationHelper.showCancelled(context)
@@ -1694,12 +1697,12 @@ class DownloadViewModel : ViewModel() {
             val hasActiveOrQueued = synchronized(queue) { queue.isNotEmpty() } ||
                     _state.value.batch.any { it.url != url && (it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED || it.state == BatchState.QUEUED) }
             if (!hasActiveOrQueued && !_state.value.isDownloading) {
-                _state.value = _state.value.copy(
+                _state.update { s -> s.copy(
                     isDownloading = false,
                     isProcessing = false,
                     waitingForWifi = false,
                     status = ""
-                )
+                ) }
                 DownloadNotificationHelper.cancelProgress(app)
             }
         }
@@ -1713,13 +1716,13 @@ class DownloadViewModel : ViewModel() {
         isCancelled = true
         isBatchCancelled = true
 
-        _state.value = _state.value.copy(
-            batch = _state.value.batch.map {
+        _state.update { s -> s.copy(
+            batch = s.batch.map {
                 if (it.state == BatchState.PAUSED || it.state == BatchState.QUEUED || it.state == BatchState.DOWNLOADING) {
                     it.copy(state = BatchState.FAILED, error = "Cancelled")
                 } else it
             }
-        )
+        ) }
 
         // A paused download has no process left to kill and no run left to tidy up after
         // it, so giving it up has to be done here. Without this the record survived the
@@ -1792,11 +1795,11 @@ class DownloadViewModel : ViewModel() {
 
             DownloadNotificationHelper.cancelPaused(app)
             DownloadQueueRepository.clearPaused(app)
-            _state.value = _state.value.copy(
-                batch = _state.value.batch.map {
+            _state.update { s -> s.copy(
+                batch = s.batch.map {
                     if (it.state == BatchState.PAUSED) it.copy(state = BatchState.QUEUED) else it
                 }
-            )
+            ) }
             // Joins the run in flight if there is one, and starts one if there is not.
             runQueue(app, resumed = !_state.value.isDownloading)
         }
@@ -1816,9 +1819,9 @@ class DownloadViewModel : ViewModel() {
                 }
             }
         }
-        _state.value = _state.value.copy(
-            batch = _state.value.batch.filterNot { it.url == url }
-        )
+        _state.update { s -> s.copy(
+            batch = s.batch.filterNot { it.url == url }
+        ) }
         downloadScope.launch {
             DownloadQueueRepository.remove(context, url)
         }
@@ -1839,11 +1842,11 @@ class DownloadViewModel : ViewModel() {
         }.toMutableSet()
         // A waiting link written down by an earlier session is only on disk.
         val activeUrl = _state.value.active?.url?.takeIf { _state.value.isDownloading }
-        _state.value = _state.value.copy(
-            batch = _state.value.batch.filterNot {
+        _state.update { s -> s.copy(
+            batch = s.batch.filterNot {
                 it.state == BatchState.QUEUED || it.url in cleared
             }
-        )
+        ) }
         downloadScope.launch {
             DownloadQueueRepository.load(context)
                 .filter { !it.paused && it.url != activeUrl }
@@ -2273,12 +2276,12 @@ class DownloadViewModel : ViewModel() {
         // this one, otherwise stuck the card on the stage track while bytes were still
         // arriving.
         var postProcessing = false
-        _state.value = _state.value.copy(
+        _state.update { s -> s.copy(
             processingSteps = steps,
             processingStep = 0,
             isProcessing = false,
             eta = ""
-        )
+        ) }
         YtDlpEngine.execute(request, processId) { progress, _, line ->
             refreshFloorFromDisk()
             val percent = progress.coerceIn(0f, 100f).coerceAtLeast(progressFloor * 100f)
@@ -2293,8 +2296,7 @@ class DownloadViewModel : ViewModel() {
             // the file is being worked on, fetching it is behind it.
             val announced = ProcessingStep.announcedBy(line)?.let { steps.indexOf(it) } ?: -1
             val fetched = if (postProcessing && steps.size > 1) 1 else 0
-            val current = _state.value
-            _state.value = current.copy(
+            _state.update { current -> current.copy(
                 progress = percent / 100f,
                 totalBytes = if (expectedTotalBytes > 0) expectedTotalBytes
                 else parseTotalBytes(line) ?: current.totalBytes,
@@ -2302,7 +2304,7 @@ class DownloadViewModel : ViewModel() {
                 status = status,
                 isProcessing = postProcessing,
                 processingStep = maxOf(current.processingStep, announced, fetched)
-            )
+            ) }
 
             // Updates are paced by the clock rather than by the percentage. yt-dlp reports
             // the same percentage for seconds at a time on a large transfer while the speed
@@ -2352,13 +2354,13 @@ class DownloadViewModel : ViewModel() {
         // file and its length is no longer a question with a cheap answer.
         val finalSizeBytes = latestFile?.length()?.takeIf { it > 0 } ?: _state.value.totalBytes
 
-        _state.value = _state.value.copy(
+        _state.update { s -> s.copy(
             status = "Saving",
             isProcessing = true,
             eta = "",
-            processingStep = _state.value.processingSteps.indexOf(ProcessingStep.SAVE)
-                .takeIf { it >= 0 } ?: _state.value.processingStep
-        )
+            processingStep = s.processingSteps.indexOf(ProcessingStep.SAVE)
+                .takeIf { it >= 0 } ?: s.processingStep
+        ) }
 
         val tree = downloadTreeUri.takeIf { it.isNotBlank() }?.let(android.net.Uri::parse)
 
@@ -2398,9 +2400,9 @@ class DownloadViewModel : ViewModel() {
                 val wanted = com.hazel.android.util.MediaStoreHelper.describeTree(tree)
                 val savedTo = if (finalDir == downloadDir) finalDir.absolutePath else savedPath
                 val title = plan.title.ifBlank { fileName }
-                _state.value = _state.value.copy(
-                    saveFallback = SaveFallback.adding(_state.value.saveFallback, wanted, savedTo, title)
-                )
+                _state.update { s -> s.copy(
+                    saveFallback = SaveFallback.adding(s.saveFallback, wanted, savedTo, title)
+                ) }
             }
         }
 
@@ -2409,13 +2411,13 @@ class DownloadViewModel : ViewModel() {
         // move could not publish stays in it, and a folder with anything in it is not deleted.
         runCatching { downloadDir.delete() }
 
-        _state.value = _state.value.copy(
+        _state.update { s -> s.copy(
             progress = 1f,
             status = "",
             isProcessing = false,
             fileName = fileName,
             savedPath = savedPath
-        )
+        ) }
 
         // The media's own title heads the completion notification rather than the file
         // name, which carries the template's separators and the container extension.
@@ -2574,28 +2576,28 @@ class DownloadViewModel : ViewModel() {
      * that got somewhere and stopped.
      */
     private fun holdForWifi(context: Context) {
-        _state.value = _state.value.copy(
+        _state.update { s -> s.copy(
             isDownloading = false,
             progress = 0f,
             status = "",
             isProcessing = false,
             error = null,
             waitingForWifi = true
-        )
+        ) }
         DownloadNotificationHelper.showWaitingForWifi(context)
     }
 
     private fun fail(context: Context, message: String) {
         // Nothing on disk is touched: this is a run that could not start, and the folder
         // last worked in may be a paused download's, whose partial files are its progress.
-        _state.value = _state.value.copy(
+        _state.update { s -> s.copy(
             isDownloading = false,
             active = null,
             progress = 0f,
             status = "",
             isProcessing = false,
             error = message
-        )
+        ) }
         DownloadNotificationHelper.showError(context, message)
     }
 
