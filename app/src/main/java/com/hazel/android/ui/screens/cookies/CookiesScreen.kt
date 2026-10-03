@@ -61,6 +61,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
@@ -84,6 +85,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun CookiesScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
 
     val useCookiesFlow = remember(context) { CookieRepository.getUseCookies(context) }
@@ -115,19 +117,19 @@ fun CookiesScreen(onBack: () -> Unit) {
                         stream.bufferedReader(Charsets.UTF_8).readText()
                     }.orEmpty()
                     if (text.isBlank()) {
-                        toast(context, context.getString(R.string.cookies_toast_file_no_data))
+                        toast(context, resources.getString(R.string.cookies_toast_file_no_data))
                         return@launch
                     }
                     val imported = CookieRepository.importText(context, text, fileName)
                     toast(
                         context,
-                        context.getString(
+                        resources.getString(
                             if (imported) R.string.cookies_toast_imported
                             else R.string.cookies_toast_file_no_data
                         )
                     )
                 } catch (e: Exception) {
-                    toast(context, context.getString(R.string.cookies_toast_import_failed))
+                    toast(context, resources.getString(R.string.cookies_toast_import_failed))
                 }
             }
         }
@@ -178,11 +180,11 @@ fun CookiesScreen(onBack: () -> Unit) {
                                 val text = readClipboard(context)
                                 val imported = CookieRepository.importText(
                                     context, text,
-                                    context.getString(R.string.cookies_imported_title)
+                                    resources.getString(R.string.cookies_imported_title)
                                 )
                                 toast(
                                     context,
-                                    context.getString(
+                                    resources.getString(
                                         if (imported) R.string.cookies_toast_imported
                                         else R.string.cookies_toast_no_data
                                     )
@@ -197,10 +199,10 @@ fun CookiesScreen(onBack: () -> Unit) {
                             scope.launch {
                                 val text = CookieRepository.exportText(context)
                                 if (text.isBlank()) {
-                                    toast(context, context.getString(R.string.cookies_toast_nothing_to_export))
+                                    toast(context, resources.getString(R.string.cookies_toast_nothing_to_export))
                                 } else {
                                     writeClipboard(context, text)
-                                    toast(context, context.getString(R.string.cookies_toast_exported))
+                                    toast(context, resources.getString(R.string.cookies_toast_exported))
                                 }
                             }
                         }
@@ -342,7 +344,7 @@ fun CookiesScreen(onBack: () -> Unit) {
             },
             onCopy = { entry ->
                 writeClipboard(context, CookieRepository.FILE_HEADER + "\n" + entry.content)
-                toast(context, context.getString(R.string.cookies_toast_entry_copied))
+                toast(context, resources.getString(R.string.cookies_toast_entry_copied))
             },
             onDelete = { entry ->
                 editing = null

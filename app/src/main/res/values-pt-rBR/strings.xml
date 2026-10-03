@@ -748,4 +748,12 @@
     <string name="guide_step_share_title">Compartilhar com o Hazel</string>
     <string name="guide_step_share_sheet">Compartilhe um link com o Hazel de qualquer app. Baixe na hora com suas configurações preferidas, ou espere um instante pelos detalhes e escolha cada opção.</string>
     <string name="instant_closing">Fecha em %1$d s</string>
+    <string name="ytdlp_update_channel_name">Atualizações do mecanismo</string>
+    <string name="ytdlp_update_channel_description">Alertas de atualização do mecanismo yt-dlp</string>
+    <string name="ytdlp_update_available_title">yt-dlp %1$s está disponível</string>
+    <string name="ytdlp_update_available_text">Abra o Hazel para atualizar o mecanismo de download</string>
+    <string name="ytdlp_update_installed_title">yt-dlp atualizado para %1$s</string>
+    <string name="ytdlp_update_installed_text">O mecanismo de download está atualizado</string>
+    <string name="ytdlp_update_failed_title">Não foi possível instalar o yt-dlp %1$s</string>
+    <string name="ytdlp_update_failed_text">O Hazel manteve o mecanismo atual e tentará novamente mais tarde</string>
 </resources>

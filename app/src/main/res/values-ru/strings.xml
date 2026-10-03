@@ -755,4 +755,12 @@
     <string name="guide_step_share_title">Поделиться в Hazel</string>
     <string name="guide_step_share_sheet">Поделитесь ссылкой в Hazel из любого приложения. Скачайте сразу с предпочтительными настройками или подождите детали и выберите каждый параметр.</string>
     <string name="instant_closing">Закроется через %1$d с</string>
+    <string name="ytdlp_update_channel_name">Обновления движка</string>
+    <string name="ytdlp_update_channel_description">Уведомления об обновлениях движка yt-dlp</string>
+    <string name="ytdlp_update_available_title">Доступна версия yt-dlp %1$s</string>
+    <string name="ytdlp_update_available_text">Откройте Hazel, чтобы обновить движок загрузки</string>
+    <string name="ytdlp_update_installed_title">yt-dlp обновлён до %1$s</string>
+    <string name="ytdlp_update_installed_text">Движок загрузки обновлён</string>
+    <string name="ytdlp_update_failed_title">Не удалось установить yt-dlp %1$s</string>
+    <string name="ytdlp_update_failed_text">Hazel оставил текущий движок и попробует позже</string>
 </resources>

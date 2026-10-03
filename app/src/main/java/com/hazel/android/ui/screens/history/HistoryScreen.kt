@@ -85,6 +85,7 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -120,6 +121,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HistoryScreen() {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val keyboard = LocalSoftwareKeyboardController.current
 
@@ -371,7 +373,7 @@ fun HistoryScreen() {
                                 presence[entry.id] = false
                                 Toast.makeText(
                                     context,
-                                    context.getString(R.string.history_toast_file_gone),
+                                    resources.getString(R.string.history_toast_file_gone),
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -480,7 +482,7 @@ fun HistoryScreen() {
                         val deleted = DownloadHistoryRepository.deleteFile(context, entry)
                         Toast.makeText(
                             context,
-                            context.getString(
+                            resources.getString(
                                 if (deleted) R.string.history_toast_file_deleted
                                 else R.string.history_toast_file_delete_failed
                             ),

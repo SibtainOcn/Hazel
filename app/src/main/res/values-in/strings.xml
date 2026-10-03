@@ -732,4 +732,12 @@
     <string name="guide_step_share_title">Bagikan ke Hazel</string>
     <string name="guide_step_share_sheet">Bagikan tautan ke Hazel dari aplikasi apa pun. Unduh langsung dengan pengaturan pilihan Anda, atau tunggu sebentar untuk detailnya dan pilih setiap opsi.</string>
     <string name="instant_closing">Ditutup dalam %1$d dtk</string>
+    <string name="ytdlp_update_channel_name">Pembaruan mesin</string>
+    <string name="ytdlp_update_channel_description">Pemberitahuan pembaruan mesin yt-dlp</string>
+    <string name="ytdlp_update_available_title">yt-dlp %1$s tersedia</string>
+    <string name="ytdlp_update_available_text">Buka Hazel untuk memperbarui mesin unduhan</string>
+    <string name="ytdlp_update_installed_title">yt-dlp diperbarui ke %1$s</string>
+    <string name="ytdlp_update_installed_text">Mesin unduhan sudah terbaru</string>
+    <string name="ytdlp_update_failed_title">yt-dlp %1$s tidak dapat dipasang</string>
+    <string name="ytdlp_update_failed_text">Hazel mempertahankan mesin saat ini dan akan mencoba lagi nanti</string>
 </resources>

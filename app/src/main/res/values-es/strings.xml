@@ -748,4 +748,12 @@
     <string name="guide_step_share_title">Compartir con Hazel</string>
     <string name="guide_step_share_sheet">Comparte un enlace con Hazel desde cualquier app. Descarga al momento con tus ajustes preferidos, o espera un instante a los detalles y elige cada opción.</string>
     <string name="instant_closing">Se cierra en %1$d s</string>
+    <string name="ytdlp_update_channel_name">Actualizaciones del motor</string>
+    <string name="ytdlp_update_channel_description">Avisos de actualización del motor yt-dlp</string>
+    <string name="ytdlp_update_available_title">yt-dlp %1$s está disponible</string>
+    <string name="ytdlp_update_available_text">Abre Hazel para actualizar el motor de descargas</string>
+    <string name="ytdlp_update_installed_title">yt-dlp actualizado a %1$s</string>
+    <string name="ytdlp_update_installed_text">El motor de descargas está actualizado</string>
+    <string name="ytdlp_update_failed_title">No se pudo instalar yt-dlp %1$s</string>
+    <string name="ytdlp_update_failed_text">Hazel mantiene el motor actual y lo volverá a intentar más tarde</string>
 </resources>

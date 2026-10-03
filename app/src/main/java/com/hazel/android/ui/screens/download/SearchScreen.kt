@@ -61,6 +61,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -106,6 +107,7 @@ fun SearchScreen(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val keyboard = LocalSoftwareKeyboardController.current
     val clipboard = LocalClipboard.current
@@ -231,7 +233,7 @@ fun SearchScreen(
         if (pasted.isBlank()) {
             Toast.makeText(
                 context,
-                context.getString(R.string.search_nothing_to_paste),
+                resources.getString(R.string.search_nothing_to_paste),
                 Toast.LENGTH_SHORT
             ).show()
             return@launch
