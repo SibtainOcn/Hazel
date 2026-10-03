@@ -54,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -91,6 +92,7 @@ private enum class QueueTab(val labelRes: Int) {
 @Composable
 fun QueueScreen(downloadViewModel: DownloadViewModel) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
 
     val state by downloadViewModel.state.collectAsState()
@@ -277,7 +279,7 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             onRetry = {
                                 Toast.makeText(
                                     context,
-                                    context.getString(R.string.history_retrying_toast),
+                                    resources.getString(R.string.history_retrying_toast),
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 downloadViewModel.retryFailed(context, item)
@@ -296,7 +298,7 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
             item = item,
             onCopy = {
                 copyToClipboard(context, item.errorLog)
-                Toast.makeText(context, context.getString(R.string.history_failed_log_copied), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, resources.getString(R.string.history_failed_log_copied), Toast.LENGTH_SHORT).show()
             },
             onDismiss = { viewLog = null }
         )

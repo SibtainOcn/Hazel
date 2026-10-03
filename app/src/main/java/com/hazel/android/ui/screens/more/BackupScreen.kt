@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import com.hazel.android.R
 import com.hazel.android.data.BackupCategory
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun BackupScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val autoBackup by BackupRepository.getAutoBackup(context).collectAsState(initial = true)
     val folderLabel by BackupRepository.getFolderLabel(context).collectAsState(initial = "")
@@ -138,7 +140,7 @@ fun BackupScreen(onBack: () -> Unit) {
                 scope.launch {
                     val name = BackupRepository.backup(context, chosen)
                     busy = false
-                    toast(name?.let { context.getString(R.string.backup_saved, it) } ?: backupFailed)
+                    toast(name?.let { resources.getString(R.string.backup_saved, it) } ?: backupFailed)
                 }
             },
             onDismiss = { choosingBackup = false }

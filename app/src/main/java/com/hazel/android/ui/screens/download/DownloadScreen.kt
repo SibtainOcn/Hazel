@@ -79,6 +79,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
@@ -142,6 +143,7 @@ fun DownloadScreen(
     onOpenDownloads: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val state by downloadViewModel.state.collectAsState()
     val formatsReading by downloadViewModel.formatsReading.collectAsState()
@@ -795,7 +797,7 @@ fun DownloadScreen(
                             ?.getItemAt(0)?.coerceToText(context)?.toString()
                             .orEmpty().trim()
                         if (pasted.isBlank()) {
-                            Toast.makeText(context, context.getString(R.string.search_nothing_to_paste), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, resources.getString(R.string.search_nothing_to_paste), Toast.LENGTH_SHORT).show()
                             return@launch
                         }
                         val links = pasted.split(Regex("""\s+""")).map { it.trim() }.filter { it.isNotBlank() }.distinct()
