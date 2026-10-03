@@ -815,7 +815,7 @@
     <string name="home_start_search">Search</string>
     <string name="home_start_downloads">Downloads</string>
     <string name="more_getting_started">Getting started</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">Download started</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Synthesizing settings</string>

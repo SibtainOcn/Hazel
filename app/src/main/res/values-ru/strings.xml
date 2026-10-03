@@ -743,7 +743,7 @@
     <string name="home_start_search">Поиск</string>
     <string name="home_start_downloads">Загрузки</string>
     <string name="more_getting_started">Начало работы</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">Загрузка началась</string>
     <string name="instant_ok">ОК</string>
     <string name="instant_settings">Настройки обработки</string>

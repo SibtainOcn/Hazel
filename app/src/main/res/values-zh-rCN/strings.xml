@@ -720,7 +720,7 @@
     <string name="home_start_search">搜索</string>
     <string name="home_start_downloads">下载</string>
     <string name="more_getting_started">入门指南</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">已开始下载</string>
     <string name="instant_ok">确定</string>
     <string name="instant_settings">合成设置</string>

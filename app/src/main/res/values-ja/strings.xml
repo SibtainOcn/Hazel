@@ -720,7 +720,7 @@
     <string name="home_start_search">検索</string>
     <string name="home_start_downloads">ダウンロード</string>
     <string name="more_getting_started">はじめに</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">ダウンロードを開始しました</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">合成の設定</string>

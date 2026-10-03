@@ -728,7 +728,7 @@
     <string name="home_start_search">Suchen</string>
     <string name="home_start_downloads">Downloads</string>
     <string name="more_getting_started">Erste Schritte</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">Download gestartet</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Synthese-Einstellungen</string>
