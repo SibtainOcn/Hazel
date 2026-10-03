@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - The update screens use a calm wavy progress bar.
 - Queued cards on the home screen show the download glyph, empty and still, until their turn.
-- Download all stays on the home screen after the set is saved, to download the whole set again.
+- Download all stays on a playlist or a set of pasted links while it downloads and after it is saved. It offers what is not queued yet, the whole set again once it is saved, and opens the queue when every link is already in it. Search results still never show it.
+- Paste sits above Download all instead of hiding behind it.
 
 ## [1.1.11] - 2026-10-02
 ### Added

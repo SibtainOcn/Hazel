@@ -324,9 +324,19 @@ fun DownloadScreen(
     // The set action belongs to a set the user put together: several links pasted at once,
     // or a playlist or channel read from one link. A keyword search lands several cards too,
     // but those are a list to choose from rather than a set to take whole, so it stays away.
-    // Stays once the set is saved, so the whole set can be taken again.
-    val showDownloadAll = state.results.size > 1 && !runInHand && state.searchQuery.isBlank()
-    val downloadAllResults = pendingResults.ifEmpty { state.results }
+    // Shown for a set the whole time it is on screen, while it downloads and after it is
+    // saved. It offers what is not already in the queue, the whole set again once all of
+    // it is saved, and the queue itself when every link is already in hand.
+    val showDownloadAll = state.results.size > 1 && state.searchQuery.isBlank()
+    val inHandUrls = state.batch.filter {
+        it.state == BatchState.QUEUED || it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED
+    }.mapTo(mutableSetOf()) { it.url }
+    val notInHand = pendingResults.filterNot { it.url in inHandUrls }
+    val downloadAllResults = when {
+        notInHand.isNotEmpty() -> notInHand
+        runInHand -> emptyList()
+        else -> state.results
+    }
 
     var alreadyHave by remember { mutableStateOf<HistoryEntry?>(null) }
 
@@ -810,38 +820,40 @@ fun DownloadScreen(
         // copied link is nearly always what brings someone here. Its label shows for a
         // moment when a new clip arrives and then it folds to an icon. A clip that has
         // been pasted is not offered again, and the button stands aside while a read is
-        // running or while the set action holds the corner.
+        // running. It sits above the set action when both are there.
         val clipStamp = rememberClipStamp()
         var usedClipStamp by rememberSaveable { mutableStateOf<Long?>(null) }
-        val showPaste = clipStamp != null && clipStamp != usedClipStamp &&
-            !state.isFetching && !showDownloadAll
-        androidx.compose.animation.AnimatedVisibility(
-            visible = showPaste,
-            enter = scaleIn() + fadeIn(),
-            exit = scaleOut() + fadeOut(),
+        val showPaste = clipStamp != null && clipStamp != usedClipStamp && !state.isFetching
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(20.dp)
+                .padding(20.dp),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            PasteButton(
-                stamp = clipStamp,
-                onClick = {
-                    usedClipStamp = clipStamp
-                    pasteFromClipboard()
-                }
-            )
-        }
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showPaste,
+                enter = scaleIn() + fadeIn(),
+                exit = scaleOut() + fadeOut()
+            ) {
+                PasteButton(
+                    stamp = clipStamp,
+                    onClick = {
+                        usedClipStamp = clipStamp
+                        pasteFromClipboard()
+                    }
+                )
+            }
 
-        // One action for the whole set, which is the point of collecting links together. It
-        // takes what is left to fetch, or the whole set again once all of it is saved.
-        // Search results are left out: see [showDownloadAll].
-        if (showDownloadAll) {
-            DownloadAllButton(
-                onClick = { batchSheetVisible = true },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp)
-            )
+            // One action for the whole set, which is the point of collecting links together.
+            // Search results are left out: see [showDownloadAll].
+            if (showDownloadAll) {
+                DownloadAllButton(
+                    onClick = {
+                        if (downloadAllResults.isEmpty()) onOpenQueue() else batchSheetVisible = true
+                    }
+                )
+            }
         }
     }
 
