@@ -732,4 +732,12 @@
     <string name="guide_step_share_title">Hazel に共有</string>
     <string name="guide_step_share_sheet">どのアプリからでもリンクを Hazel に共有できます。好みの設定ですぐにダウンロードするか、詳細が届くのを少し待ってすべてのオプションを選べます。</string>
     <string name="instant_closing">%1$d 秒後に閉じます</string>
+    <string name="ytdlp_update_channel_name">エンジンの更新</string>
+    <string name="ytdlp_update_channel_description">yt-dlp エンジンの更新通知</string>
+    <string name="ytdlp_update_available_title">yt-dlp %1$s が利用可能です</string>
+    <string name="ytdlp_update_available_text">Hazel を開いてダウンロードエンジンを更新してください</string>
+    <string name="ytdlp_update_installed_title">yt-dlp を %1$s に更新しました</string>
+    <string name="ytdlp_update_installed_text">ダウンロードエンジンは最新です</string>
+    <string name="ytdlp_update_failed_title">yt-dlp %1$s をインストールできませんでした</string>
+    <string name="ytdlp_update_failed_text">Hazel は現在のエンジンを維持し、後でもう一度試します</string>
 </resources>

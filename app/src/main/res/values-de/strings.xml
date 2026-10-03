@@ -740,4 +740,12 @@
     <string name="guide_step_share_title">An Hazel teilen</string>
     <string name="guide_step_share_sheet">Teile einen Link aus jeder App an Hazel. Lade sofort mit deinen bevorzugten Einstellungen herunter oder warte kurz auf die Details und wähle jede Option.</string>
     <string name="instant_closing">Schließt in %1$d s</string>
+    <string name="ytdlp_update_channel_name">Engine-Updates</string>
+    <string name="ytdlp_update_channel_description">Hinweise zu Updates der yt-dlp-Engine</string>
+    <string name="ytdlp_update_available_title">yt-dlp %1$s ist verfügbar</string>
+    <string name="ytdlp_update_available_text">Öffne Hazel, um die Download-Engine zu aktualisieren</string>
+    <string name="ytdlp_update_installed_title">yt-dlp auf %1$s aktualisiert</string>
+    <string name="ytdlp_update_installed_text">Die Download-Engine ist auf dem neuesten Stand</string>
+    <string name="ytdlp_update_failed_title">yt-dlp %1$s konnte nicht installiert werden</string>
+    <string name="ytdlp_update_failed_text">Hazel behält die aktuelle Engine und versucht es später erneut</string>
 </resources>

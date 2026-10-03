@@ -740,4 +740,12 @@
     <string name="guide_step_share_title">Hazel पर शेयर करें</string>
     <string name="guide_step_share_sheet">किसी भी ऐप से Hazel पर लिंक शेयर करें। अपनी पसंदीदा सेटिंग्स के साथ तुरंत डाउनलोड करें, या विवरण आने तक थोड़ा रुककर हर विकल्प चुनें।</string>
     <string name="instant_closing">%1$d से. में बंद होगा</string>
+    <string name="ytdlp_update_channel_name">इंजन अपडेट</string>
+    <string name="ytdlp_update_channel_description">yt-dlp इंजन अपडेट की सूचनाएं</string>
+    <string name="ytdlp_update_available_title">yt-dlp %1$s उपलब्ध है</string>
+    <string name="ytdlp_update_available_text">डाउनलोड इंजन अपडेट करने के लिए Hazel खोलें</string>
+    <string name="ytdlp_update_installed_title">yt-dlp %1$s पर अपडेट हो गया</string>
+    <string name="ytdlp_update_installed_text">डाउनलोड इंजन अपडेटेड है</string>
+    <string name="ytdlp_update_failed_title">yt-dlp %1$s इंस्टॉल नहीं हो सका</string>
+    <string name="ytdlp_update_failed_text">Hazel ने मौजूदा इंजन रखा है और बाद में फिर कोशिश करेगा</string>
 </resources>

@@ -732,4 +732,12 @@
     <string name="guide_step_share_title">分享到 Hazel</string>
     <string name="guide_step_share_sheet">从任意应用将链接分享到 Hazel。可按偏好设置立即下载，或稍等片刻获取详情后选择每个选项。</string>
     <string name="instant_closing">%1$d 秒后关闭</string>
+    <string name="ytdlp_update_channel_name">引擎更新</string>
+    <string name="ytdlp_update_channel_description">yt-dlp 引擎更新提醒</string>
+    <string name="ytdlp_update_available_title">yt-dlp %1$s 可用</string>
+    <string name="ytdlp_update_available_text">打开 Hazel 以更新下载引擎</string>
+    <string name="ytdlp_update_installed_title">yt-dlp 已更新到 %1$s</string>
+    <string name="ytdlp_update_installed_text">下载引擎已是最新版本</string>
+    <string name="ytdlp_update_failed_title">无法安装 yt-dlp %1$s</string>
+    <string name="ytdlp_update_failed_text">Hazel 保留了当前引擎，稍后会重试</string>
 </resources>
