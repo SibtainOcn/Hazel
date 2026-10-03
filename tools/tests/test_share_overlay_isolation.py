@@ -250,6 +250,13 @@ def test_single_share_target():
     check_true("startDirect removed from the view model", "fun startDirect(" not in vm_content)
     check_true("instantSource removed from the state", "instantSource" not in vm_content)
 
+    # An Instant download lands on the home screen like one started there, newest first.
+    instant = vm_content[vm_content.find("fun instantDownload("):][:4000]
+    check_true("Instant adds its links to the home screen's cards",
+               "results = items + s.results.filterNot { shown -> items.any { it.url == shown.url } }" in instant)
+    check_true("Instant's cards are added before the download starts",
+               0 <= instant.find("results = items +") < instant.find("startBatch(app, plans"))
+
 
 # ===========================================================================
 # 4. The sheet opens at once and a choice waits for the read

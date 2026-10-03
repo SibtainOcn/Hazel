@@ -571,7 +571,15 @@ class DownloadViewModel : ViewModel() {
                 }
                 dropWaiting()
                 if (plans.isEmpty()) failure = app.getString(R.string.no_results_error_title)
-                else startBatch(app, plans, options, saveDirs = dirs)
+                else {
+                    // On the home screen as well, as a download started there would be, so
+                    // opening the app shows the card filling rather than an empty screen.
+                    // Newest first, and a link already there keeps its one card.
+                    _state.update { s -> s.copy(
+                        results = items + s.results.filterNot { shown -> items.any { it.url == shown.url } }
+                    ) }
+                    startBatch(app, plans, options, saveDirs = dirs)
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
