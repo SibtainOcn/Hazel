@@ -1,0 +1,7 @@
+* Fixed: engine updates failing and downloads stopping with an error
+* Engine updates are safer: a bad update is undone automatically, with a notification when one is ready
+* Redesigned Cookies screen: see each saved site, its cookie count and expiry, and turn sites on or off
+* Fixed: the wrong download showing progress when several downloads run
+* Download all now stays available on playlists and multiple links
+* Smoother scrolling in all sheets
+* Fixed a crash on Android 7
