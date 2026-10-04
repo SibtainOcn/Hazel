@@ -148,16 +148,6 @@ MD5:        3bcce9e14c616a9087766563875978e6
 
 Contributions are welcome!
 
-You can help translate Hazel on [Hosted Weblate](https://hosted.weblate.org/engage/hazel/). No coding or Git needed.
-
-<a href="https://hosted.weblate.org/engage/hazel/">
-<img src="https://hosted.weblate.org/widgets/hazel/-/app/open-graph.png" alt="Translation status" />
-</a>
-
-<a href="https://hosted.weblate.org/engage/hazel/">
-<img src="https://hosted.weblate.org/widgets/hazel/-/multi-auto.svg" alt="Translation status by language" />
-</a>
-
 > [!Note]
 >
 > For submitting bug reports, feature requests, questions, or any other ideas to improve, please read [CONTRIBUTING.md](https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md) for instructions and guidelines first.
