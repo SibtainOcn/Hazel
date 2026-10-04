@@ -42,27 +42,29 @@ import com.hazel.android.R
  * actually printed: it usually names the exact reason, it is what a bug report needs, and
  * summarising it would throw away the only copy.
  *
- * The actions are ordered by what can actually fix it. Where the reason is a missing
- * sign-in, collecting cookies is offered, because that is the one thing that resolves it.
- * Otherwise going ahead is offered, since a link whose metadata read failed can often still
- * be downloaded.
+ * Beside copying the log, at most one action is offered, and only one that can fix what the
+ * engine reported ([failureKind]): signing in where it asked for an account, adding cookies
+ * where the source refused an anonymous request, and going ahead where the read failed for
+ * no reason that rules the download out. Media that is gone, or a site that is not
+ * supported, has no fix to offer, so the dialog only says so.
  */
 @Composable
 fun NoResultsDialog(
     message: String,
     canFetchCookies: Boolean,
     canContinue: Boolean,
-    /**
-     * Whether there is a site to sign in to. Offered on any failure, as a second action
-     * where the failure does not already read as a missing sign-in: a source that refuses
-     * an anonymous request often gives no hint that a sign-in would answer it.
-     */
+    /** Whether there is a site to sign in to, for a source that refused the request. */
     canAddCookies: Boolean = false,
     onCopyLog: () -> Unit,
     onGetCookies: () -> Unit,
     onContinueAnyway: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val kind = remember(message) { failureKind(message) }
+    val signIn = kind == FailureKind.SIGN_IN && canFetchCookies
+    val addCookies = kind == FailureKind.REFUSED && canAddCookies
+    val goAhead = kind == FailureKind.OTHER && canContinue
+
     AlertDialog(
         onDismissRequest = onDismiss,
         // The darkest tone rather than a lifted panel, and the screen's width less a margin.
@@ -85,7 +87,7 @@ fun NoResultsDialog(
         },
         title = {
             Text(
-                stringResource(if (canFetchCookies) R.string.no_results_sign_in_title else R.string.no_results_error_title),
+                stringResource(if (signIn) R.string.no_results_sign_in_title else R.string.no_results_error_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -95,9 +97,12 @@ fun NoResultsDialog(
                 Text(
                     stringResource(
                         when {
-                            canFetchCookies -> R.string.no_results_sign_in_body
-                            canContinue -> R.string.no_results_continue_body
-                            else -> R.string.no_results_refused_body
+                            signIn -> R.string.no_results_sign_in_body
+                            kind == FailureKind.GONE -> R.string.no_results_gone_body
+                            kind == FailureKind.UNSUPPORTED -> R.string.no_results_unsupported_body
+                            kind == FailureKind.REFUSED -> R.string.no_results_refused_body
+                            goAhead -> R.string.no_results_continue_body
+                            else -> R.string.no_results_generic_body
                         }
                     ),
                     style = MaterialTheme.typography.bodyMedium,
@@ -154,16 +159,14 @@ fun NoResultsDialog(
                     Text(stringResource(R.string.no_results_copy_log), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Spacer(modifier = Modifier.width(4.dp))
-                if (canAddCookies && !canFetchCookies) {
-                    TextButton(onClick = onGetCookies) {
-                        Text(stringResource(R.string.no_results_add_cookies))
-                    }
-                }
                 when {
-                    canFetchCookies -> TextButton(onClick = onGetCookies) {
+                    signIn -> TextButton(onClick = onGetCookies) {
                         Text(stringResource(R.string.no_results_sign_in), fontWeight = FontWeight.SemiBold)
                     }
-                    canContinue -> TextButton(onClick = onContinueAnyway) {
+                    addCookies -> TextButton(onClick = onGetCookies) {
+                        Text(stringResource(R.string.no_results_add_cookies), fontWeight = FontWeight.SemiBold)
+                    }
+                    goAhead -> TextButton(onClick = onContinueAnyway) {
                         Text(stringResource(R.string.no_results_try_anyway), fontWeight = FontWeight.SemiBold)
                     }
                     else -> TextButton(onClick = onDismiss) {
@@ -177,6 +180,80 @@ fun NoResultsDialog(
 
 /** Lines of the engine's report the dialog shows before it scrolls. */
 private const val LOG_LINES = 7
+
+/** What a failed read came down to, as far as what the user can do about it. */
+internal enum class FailureKind {
+    /** The source wants an account. Signing in answers it. */
+    SIGN_IN,
+
+    /** The media is not there: removed, deleted, or never existed. */
+    GONE,
+
+    /** No extractor knows the site. */
+    UNSUPPORTED,
+
+    /** The source turned an anonymous request away. Cookies may get past it. */
+    REFUSED,
+
+    /** Anything else. The download itself may still work. */
+    OTHER
+}
+
+/**
+ * Sorts the engine's report into a [FailureKind].
+ *
+ * The order is the point. A region block reads "not available" too, so it goes first. Media
+ * removed for good comes before a sign-in, since "the account associated with this video has
+ * been terminated" names an account without one helping. A plain "unavailable" comes after
+ * it, since a site that wants a login often says its content "is not available" as well.
+ */
+internal fun failureKind(message: String): FailureKind {
+    val lower = message.lowercase()
+    return when {
+        "unsupported url" in lower -> FailureKind.UNSUPPORTED
+        REGION_MARKERS.any { it in lower } -> FailureKind.REFUSED
+        REMOVED_MARKERS.any { it in lower } -> FailureKind.GONE
+        isCookieRelated(message) -> FailureKind.SIGN_IN
+        // A rate limit can read "Video unavailable" for media that is there.
+        RATE_LIMIT_MARKERS.any { it in lower } -> FailureKind.REFUSED
+        UNAVAILABLE_MARKERS.any { it in lower } -> FailureKind.GONE
+        REFUSED_MARKERS.any { it in lower } -> FailureKind.REFUSED
+        else -> FailureKind.OTHER
+    }
+}
+
+private val REGION_MARKERS = listOf("in your country", "geo restrict", "geo-restrict", "not available in your")
+
+/** Gone for good, whatever account asks for it. */
+private val REMOVED_MARKERS = listOf(
+    "has been removed",
+    "been deleted",
+    "no longer available",
+    "has been terminated"
+)
+
+private val RATE_LIMIT_MARKERS = listOf("try again later", "rate-limit", "rate limit")
+
+/** Not there, where no sign-in was asked for. */
+private val UNAVAILABLE_MARKERS = listOf(
+    "video unavailable",
+    "video is unavailable",
+    "video is not available",
+    "does not exist",
+    "http error 404",
+    ": not found",
+    "no video could be found",
+    "no video formats found",
+    "no media found"
+)
+
+private val REFUSED_MARKERS = listOf(
+    "http error 403",
+    "403: forbidden",
+    "http error 429",
+    "too many requests",
+    "http error 401"
+)
 
 /**
  * Whether a failure looks like it would be solved by signing in.
@@ -194,6 +271,8 @@ private val COOKIE_MARKERS = listOf(
     "sign in",
     "log in",
     "login",
+    "logged in",
+    "logged-in",
     "confirm your age",
     "age-restricted",
     "private video",

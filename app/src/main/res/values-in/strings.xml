@@ -85,6 +85,9 @@
     <string name="no_results_sign_in_body">Sumber memerlukan akun sebelum dapat diakses. Masuk akan menyimpan cookie untuk situs tersebut dan mencoba lagi.</string>
     <string name="no_results_continue_body">Rincian tidak dapat dibaca, tetapi unduhan mungkin tetap berhasil. Melanjutkan akan menggunakan kualitas terbaik yang tersedia.</string>
     <string name="no_results_refused_body">Sumber menolak permintaan.</string>
+    <string name="no_results_gone_body">Media ini tidak tersedia. Mungkin sudah dihapus, atau tautannya salah.</string>
+    <string name="no_results_unsupported_body">Situs ini tidak didukung, jadi tidak ada yang bisa diunduh di sini.</string>
+    <string name="no_results_generic_body">Detail tautan ini tidak dapat dibaca.</string>
     <string name="no_results_engine_report">Laporan mesin</string>
     <string name="no_results_copy_log">Salin log</string>
     <string name="no_results_sign_in">Masuk</string>

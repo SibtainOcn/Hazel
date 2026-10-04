@@ -100,6 +100,9 @@
     <string name="no_results_sign_in_body">The source wants an account before it will hand this over. Signing in saves cookies for the site and tries again.</string>
     <string name="no_results_continue_body">The details could not be read, but the download itself may still work. Going ahead offers the best available quality.</string>
     <string name="no_results_refused_body">The source refused the request.</string>
+    <string name="no_results_gone_body">This media isn\'t available. It may have been removed or deleted, or the link may be wrong.</string>
+    <string name="no_results_unsupported_body">This site isn\'t supported, so there is nothing here to download.</string>
+    <string name="no_results_generic_body">The details of this link could not be read.</string>
     <string name="no_results_engine_report">What the engine reported</string>
     <string name="no_results_copy_log">Copy log</string>
     <string name="no_results_sign_in">Sign in</string>

@@ -97,6 +97,9 @@
     <string name="no_results_sign_in_body">Для доступа требуется аккаунт. Вход сохранит файлы cookie сайта и повторит попытку.</string>
     <string name="no_results_continue_body">Не удалось прочитать сведения, но сама загрузка может сработать. Продолжение загрузит наилучшее доступное качество.</string>
     <string name="no_results_refused_body">Источник отклонил запрос.</string>
+    <string name="no_results_gone_body">Это медиа недоступно. Возможно, его удалили или ссылка неверна.</string>
+    <string name="no_results_unsupported_body">Этот сайт не поддерживается, скачать здесь нечего.</string>
+    <string name="no_results_generic_body">Не удалось прочитать данные этой ссылки.</string>
     <string name="no_results_engine_report">Отчёт движка</string>
     <string name="no_results_copy_log">Копировать журнал</string>
     <string name="no_results_sign_in">Войти</string>

@@ -93,6 +93,9 @@
     <string name="no_results_sign_in_body">La source demande un compte avant de livrer ceci. Se connecter enregistre les cookies du site et réessaie.</string>
     <string name="no_results_continue_body">Les détails n\'ont pas pu être lus, mais le téléchargement peut tout de même fonctionner. En continuant, la meilleure qualité disponible est proposée.</string>
     <string name="no_results_refused_body">La source a refusé la demande.</string>
+    <string name="no_results_gone_body">Ce média n’est pas disponible. Il a peut-être été retiré ou supprimé, ou le lien est erroné.</string>
+    <string name="no_results_unsupported_body">Ce site n’est pas pris en charge : il n’y a rien à télécharger ici.</string>
+    <string name="no_results_generic_body">Les détails de ce lien n’ont pas pu être lus.</string>
     <string name="no_results_engine_report">Ce que le moteur a signalé</string>
     <string name="no_results_copy_log">Copier le journal</string>
     <string name="no_results_sign_in">Se connecter</string>

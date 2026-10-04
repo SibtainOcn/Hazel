@@ -93,6 +93,9 @@
     <string name="no_results_sign_in_body">A fonte exige uma conta antes de entregar isto. Ao entrar, os cookies do site são salvos e a tentativa é refeita.</string>
     <string name="no_results_continue_body">Os detalhes não puderam ser lidos, mas o download em si ainda pode funcionar. Seguir em frente oferece a melhor qualidade disponível.</string>
     <string name="no_results_refused_body">A fonte recusou o pedido.</string>
+    <string name="no_results_gone_body">Esta mídia não está disponível. Pode ter sido removida ou apagada, ou o link pode estar errado.</string>
+    <string name="no_results_unsupported_body">Este site não é compatível, então não há nada aqui para baixar.</string>
+    <string name="no_results_generic_body">Não foi possível ler os detalhes deste link.</string>
     <string name="no_results_engine_report">O que o motor relatou</string>
     <string name="no_results_copy_log">Copiar o registro</string>
     <string name="no_results_sign_in">Entrar</string>

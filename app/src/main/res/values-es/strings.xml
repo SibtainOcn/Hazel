@@ -93,6 +93,9 @@
     <string name="no_results_sign_in_body">La fuente pide una cuenta antes de entregar esto. Al iniciar sesión se guardan las cookies del sitio y se vuelve a intentar.</string>
     <string name="no_results_continue_body">No se pudieron leer los detalles, pero la descarga aún puede funcionar. Si sigues adelante, se ofrece la mejor calidad disponible.</string>
     <string name="no_results_refused_body">La fuente rechazó la petición.</string>
+    <string name="no_results_gone_body">Este contenido no está disponible. Puede que se haya eliminado o que el enlace esté mal.</string>
+    <string name="no_results_unsupported_body">Este sitio no es compatible, así que aquí no hay nada que descargar.</string>
+    <string name="no_results_generic_body">No se pudieron leer los detalles de este enlace.</string>
     <string name="no_results_engine_report">Lo que informó el motor</string>
     <string name="no_results_copy_log">Copiar el registro</string>
     <string name="no_results_sign_in">Iniciar sesión</string>

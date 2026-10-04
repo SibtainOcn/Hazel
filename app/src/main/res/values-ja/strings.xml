@@ -85,6 +85,9 @@
     <string name="no_results_sign_in_body">このソースを取得するにはアカウントが必要です。ログインするとCookieが保存され、再試行されます。</string>
     <string name="no_results_continue_body">詳細は読み込めませんでしたが、ダウンロード自体は可能な場合があります。続行すると利用可能な最高画質で取得します。</string>
     <string name="no_results_refused_body">ソースによってリクエストが拒否されました。</string>
+    <string name="no_results_gone_body">このメディアは利用できません。削除されたか、リンクが間違っている可能性があります。</string>
+    <string name="no_results_unsupported_body">このサイトには対応していないため、ダウンロードできるものはありません。</string>
+    <string name="no_results_generic_body">このリンクの詳細を読み込めませんでした。</string>
     <string name="no_results_engine_report">エンジンのレポート</string>
     <string name="no_results_copy_log">ログをコピー</string>
     <string name="no_results_sign_in">ログイン</string>
