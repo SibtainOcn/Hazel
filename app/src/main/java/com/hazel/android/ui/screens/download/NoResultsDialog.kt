@@ -1,12 +1,10 @@
 package com.hazel.android.ui.screens.download
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,11 +20,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.hazel.android.R
@@ -112,6 +115,23 @@ fun NoResultsDialog(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
+                // Seven lines high whatever the report's length, scrolling inside past that, so
+                // the dialog keeps its shape. Lines wrap: a phone is too narrow for a log to
+                // run wide, and the end of an error line is the part that says why.
+                val logStyle = MaterialTheme.typography.bodySmall
+                val logHeight = with(LocalDensity.current) { logStyle.lineHeight.toDp() } * LOG_LINES
+                val errorColor = MaterialTheme.colorScheme.error
+                val textColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+                val report = remember(message, errorColor, textColor) {
+                    buildAnnotatedString {
+                        val lines = message.trim().lines()
+                        lines.forEachIndexed { index, line ->
+                            val isError = line.trimStart().startsWith("ERROR:")
+                            withStyle(SpanStyle(color = if (isError) errorColor else textColor)) { append(line) }
+                            if (index < lines.lastIndex) append('\n')
+                        }
+                    }
+                }
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -119,19 +139,11 @@ fun NoResultsDialog(
                 ) {
                     Column(
                         modifier = Modifier
-                            .heightIn(max = 260.dp)
+                            .height(logHeight + 24.dp)
                             .verticalScroll(rememberScrollState())
                             .padding(12.dp)
                     ) {
-                        Text(
-                            message.trim(),
-                            style = MaterialTheme.typography.bodySmall,
-                            // Monospaced and free to run wide, because the output is
-                            // aligned text and rewrapping it hides the shape of the error.
-                            fontFamily = FontFamily.Monospace,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
-                            modifier = Modifier.horizontalScroll(rememberScrollState())
-                        )
+                        Text(report, style = logStyle, fontFamily = FontFamily.Monospace)
                     }
                 }
             }
@@ -162,6 +174,9 @@ fun NoResultsDialog(
         }
     )
 }
+
+/** Lines of the engine's report the dialog shows before it scrolls. */
+private const val LOG_LINES = 7
 
 /**
  * Whether a failure looks like it would be solved by signing in.

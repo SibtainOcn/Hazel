@@ -84,7 +84,10 @@ private fun overlayColorScheme(accentName: String): androidx.compose.material3.C
         surfaceContainerLow = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
         surfaceContainer = androidx.compose.ui.graphics.Color(0xFF141414),
         surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFF1E1E1E),
-        surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFF262626)
+        surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFF262626),
+        // Set as the app sets it; left to Material, an error here was a pale pink.
+        error = com.hazel.android.ui.theme.ErrorRed,
+        onError = androidx.compose.ui.graphics.Color.White
     )
 }
 

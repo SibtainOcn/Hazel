@@ -89,8 +89,8 @@ private val FailedScrim = Brush.verticalGradient(
 /** Three buttons share a row under the log, so each keeps its words rather than its margins. */
 private val LogButtonPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp)
 
-/** The error red, light enough to read on dark artwork in either theme. */
-private val ErrorOnArtwork = Color(0xFFFFB4AB)
+/** A true red, bright enough to read on dark artwork in either theme. */
+private val ErrorOnArtwork = Color(0xFFFF5A52)
 
 /** A link waiting its turn, with the choice it will download as. */
 @Composable

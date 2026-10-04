@@ -41,7 +41,7 @@ fun HazelTheme(
             surfaceContainerHigh = DarkSurfaceContainerHigh,
             surfaceContainerHighest = DarkSurfaceContainerHighest,
             error = ErrorRed,
-            onError = DarkBackground,
+            onError = Color.White,
         )
     } else {
         lightColorScheme(
