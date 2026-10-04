@@ -920,6 +920,7 @@ fun DownloadScreen(
             canFetchCookies = isCookieRelated(log) && state.url.isNotBlank(),
             canContinue = state.url.isNotBlank(),
             canAddCookies = state.url.isNotBlank(),
+            link = state.url,
             onCopyLog = {
                 copyToClipboard(context, log)
                 downloadViewModel.clearErrorLog()

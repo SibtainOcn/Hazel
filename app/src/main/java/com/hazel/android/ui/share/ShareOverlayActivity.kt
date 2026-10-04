@@ -239,6 +239,7 @@ class ShareOverlayActivity : ComponentActivity() {
 
                             failure != null -> NoResultsDialog(
                                 message = failure,
+                                link = url,
                                 canFetchCookies = com.hazel.android.ui.screens.download.isCookieRelated(failure),
                                 canContinue = false,
                                 canAddCookies = true,

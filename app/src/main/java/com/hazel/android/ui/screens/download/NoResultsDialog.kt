@@ -13,8 +13,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -55,6 +58,8 @@ fun NoResultsDialog(
     canContinue: Boolean,
     /** Whether there is a site to sign in to, for a source that refused the request. */
     canAddCookies: Boolean = false,
+    /** The link that failed, copied by the link button. No button without one. */
+    link: String? = null,
     onCopyLog: () -> Unit,
     onGetCookies: () -> Unit,
     onContinueAnyway: () -> Unit,
@@ -64,6 +69,7 @@ fun NoResultsDialog(
     val signIn = kind == FailureKind.SIGN_IN && canFetchCookies
     val addCookies = kind == FailureKind.REFUSED && canAddCookies
     val goAhead = kind == FailureKind.OTHER && canContinue
+    val context = LocalContext.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -154,7 +160,23 @@ fun NoResultsDialog(
             }
         },
         confirmButton = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // The link on its own at the start, the answers to the failure at the end.
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                if (!link.isNullOrBlank()) {
+                    IconButton(onClick = {
+                        com.hazel.android.util.copyToClipboard(context, link)
+                        android.widget.Toast.makeText(
+                            context, context.getString(R.string.sheet_link_copied), android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }) {
+                        Icon(
+                            Icons.Filled.Link,
+                            contentDescription = stringResource(R.string.failed_copy_url),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.weight(1f))
                 TextButton(onClick = onCopyLog) {
                     Text(stringResource(R.string.no_results_copy_log), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
