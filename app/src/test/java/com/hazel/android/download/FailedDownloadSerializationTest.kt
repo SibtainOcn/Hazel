@@ -20,7 +20,8 @@ class FailedDownloadSerializationTest {
             isVideo = true,
             errorLog = "HTTP 403: Forbidden\nTraceback info here",
             failedAt = 1700000000000L,
-            queuedPayload = "{\"url\":\"https://example.com/watch?v=fail123\"}"
+            queuedPayload = "{\"url\":\"https://example.com/watch?v=fail123\"}",
+            stoppedAt = "Stopped at: Extracting audio · 100% downloaded"
         )
 
         val encoded = FailedDownloadRepository.encode(listOf(entry))
@@ -37,6 +38,7 @@ class FailedDownloadSerializationTest {
         assertEquals(entry.errorLog, decoded.errorLog)
         assertEquals(entry.failedAt, decoded.failedAt)
         assertEquals(entry.queuedPayload, decoded.queuedPayload)
+        assertEquals(entry.stoppedAt, decoded.stoppedAt)
     }
 
     @Test

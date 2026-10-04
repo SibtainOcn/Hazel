@@ -333,7 +333,16 @@ fun AppNavigation(
                 HistoryScreen()
             }
             composable(Screen.Queue.route) {
-                QueueScreen(downloadViewModel = downloadViewModel)
+                QueueScreen(
+                    downloadViewModel = downloadViewModel,
+                    onOpenHome = {
+                        navController.navigate(Screen.Download.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
             composable(Screen.More.route) {
                 MoreScreen(

@@ -320,6 +320,11 @@
     <string name="history_failed_copy_log">复制日志</string>
     <string name="history_failed_log_copied">错误日志已复制到剪贴板</string>
     <string name="history_failed_retry">重试</string>
+    <string name="queue_failed_choose_again">换一种方式下载</string>
+    <string name="queue_failed_busy">正在读取另一个链接，请稍后再试。</string>
+    <string name="queue_failed_select">选择失败项</string>
+    <string name="failed_stopped_at">停止于：%1$s · 已下载 %2$d%%</string>
+    <string name="failed_copy_url">复制链接</string>
     <string name="history_failed_dismiss">关闭</string>
     <string name="history_failed_clear_all">清除所有失败项</string>
     <string name="history_queue_clear_all">清空队列</string>

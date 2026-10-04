@@ -1530,6 +1530,16 @@ class DownloadViewModel : ViewModel() {
                         error = e.message ?: "Download failed"
                     )
                     val queuedPayload = DownloadQueueRepository.encodeItem(next)
+                    // The stage it had reached and how much had arrived, so a failure part way
+                    // through says where, which the engine's own log often leaves unsaid.
+                    val stoppedAt = _state.value.let { s ->
+                        val step = s.processingSteps.getOrNull(s.processingStep) ?: ProcessingStep.FETCH
+                        app.getString(
+                            R.string.failed_stopped_at,
+                            app.getString(step.label),
+                            (s.progress * 100).toInt().coerceIn(0, 100)
+                        )
+                    }
                     downloadScope.launch {
                         com.hazel.android.data.FailedDownloadRepository.record(
                             app,
@@ -1540,7 +1550,8 @@ class DownloadViewModel : ViewModel() {
                                 thumbnail = plan.info.thumbnail,
                                 isVideo = plan.format.hasVideo,
                                 errorLog = e.message ?: "Download failed",
-                                queuedPayload = queuedPayload
+                                queuedPayload = queuedPayload,
+                                stoppedAt = stoppedAt
                             )
                         )
                     }
@@ -1927,17 +1938,32 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
-    /** Retries a failed download, either directly from its queued payload or by fetching anew. */
+    /**
+     * Retries a failed download the way it ran: a download that had started is started
+     * again from what it was given, and a link Instant could not read goes back to Instant.
+     *
+     * The failure stays listed until the retry settles it: a download that finishes clears
+     * it, and one that fails again replaces it. Cleared up front, a retry that failed the
+     * same way left nothing on the list.
+     */
     fun retryFailed(context: Context, failed: com.hazel.android.data.FailedDownload) {
-        downloadScope.launch {
-            com.hazel.android.data.FailedDownloadRepository.remove(context, failed.id)
-        }
         val queued = DownloadQueueRepository.decodeItem(failed.queuedPayload)
         if (queued != null) {
             startBatch(context, listOf(queued.toPlan()), queued.options, queued.treeUri)
         } else {
-            fetchAll(listOf(failed.url))
+            instantDownload(context, failed.url)
         }
+    }
+
+    /**
+     * Reads a failed link again so its sheet opens, for a choice other than the one that
+     * failed. The failure stays listed until a download of the link finishes, since this read
+     * can fail as well. False while another read is running and this one cannot start.
+     */
+    fun reopenFailed(failed: com.hazel.android.data.FailedDownload): Boolean {
+        if (_state.value.isFetching) return false
+        fetchAll(listOf(failed.url))
+        return true
     }
 
     // ── Internals ──

@@ -328,6 +328,11 @@
     <string name="history_failed_copy_log">Copiar registro</string>
     <string name="history_failed_log_copied">Registro de errores copiado al portapapeles</string>
     <string name="history_failed_retry">Reintentar</string>
+    <string name="queue_failed_choose_again">Descargar de otra forma</string>
+    <string name="queue_failed_busy">Se está leyendo otro enlace. Inténtalo de nuevo en un momento.</string>
+    <string name="queue_failed_select">Seleccionar fallidas</string>
+    <string name="failed_stopped_at">Se detuvo en: %1$s · %2$d%% descargado</string>
+    <string name="failed_copy_url">Copiar URL</string>
     <string name="history_failed_dismiss">Descartar</string>
     <string name="history_failed_clear_all">Borrar todos los fallidos</string>
     <string name="history_queue_clear_all">Borrar la cola</string>
