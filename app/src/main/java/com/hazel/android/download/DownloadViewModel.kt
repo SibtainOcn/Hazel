@@ -1955,17 +1955,6 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Reads a failed link again so its sheet opens, for a choice other than the one that
-     * failed. The failure stays listed until a download of the link finishes, since this read
-     * can fail as well. False while another read is running and this one cannot start.
-     */
-    fun reopenFailed(failed: com.hazel.android.data.FailedDownload): Boolean {
-        if (_state.value.isFetching) return false
-        fetchAll(listOf(failed.url))
-        return true
-    }
-
     // ── Internals ──
 
     /**

@@ -321,8 +321,8 @@
     <string name="history_failed_log_copied">Catatan kesalahan disalin ke papan klip</string>
     <string name="history_failed_retry">Coba lagi</string>
     <string name="queue_failed_choose_again">Unduh dengan cara lain</string>
-    <string name="queue_failed_busy">Tautan lain sedang dibaca. Coba lagi sebentar lagi.</string>
     <string name="queue_failed_select">Pilih yang gagal</string>
+    <string name="queue_failed_retrying">Mencoba lagi</string>
     <string name="failed_stopped_at">Berhenti di: %1$s · %2$d%% terunduh</string>
     <string name="failed_copy_url">Salin URL</string>
     <string name="history_failed_dismiss">Tutup</string>

@@ -325,8 +325,8 @@
     <string name="history_failed_log_copied">त्रुटि लॉग क्लिपबोर्ड पर कॉपी किया गया</string>
     <string name="history_failed_retry">पुनः प्रयास करें</string>
     <string name="queue_failed_choose_again">दूसरे तरीके से डाउनलोड करें</string>
-    <string name="queue_failed_busy">एक और लिंक पढ़ा जा रहा है। थोड़ी देर में फिर कोशिश करें।</string>
     <string name="queue_failed_select">विफल चुनें</string>
+    <string name="queue_failed_retrying">फिर से कोशिश</string>
     <string name="failed_stopped_at">यहाँ रुका: %1$s · %2$d%% डाउनलोड हुआ</string>
     <string name="failed_copy_url">URL कॉपी करें</string>
     <string name="history_failed_dismiss">खारिज करें</string>

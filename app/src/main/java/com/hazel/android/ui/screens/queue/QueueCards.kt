@@ -156,7 +156,9 @@ fun FailedCard(
     onRetry: () -> Unit,
     onDismiss: () -> Unit,
     onLongPress: () -> Unit = {},
-    selected: Boolean? = null
+    selected: Boolean? = null,
+    /** Its link is being read or downloaded again; the outcome settles the entry. */
+    retrying: Boolean = false
 ) {
     val picking = selected != null
     val reason = remember(item.errorLog) { shortReason(item.errorLog) }
@@ -268,7 +270,11 @@ fun FailedCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     KindIcon(item.isVideo)
-                    CardTag(
+                    if (retrying) CardTag(
+                        text = stringResource(R.string.queue_failed_retrying),
+                        background = MaterialTheme.colorScheme.primary,
+                        foreground = MaterialTheme.colorScheme.onPrimary
+                    ) else CardTag(
                         text = stringResource(R.string.download_failed),
                         background = MaterialTheme.colorScheme.error,
                         foreground = MaterialTheme.colorScheme.onError
@@ -283,7 +289,7 @@ fun FailedCard(
                         label = stringResource(R.string.history_failed_error_log),
                         onClick = onViewLog
                     )
-                    CardPill(
+                    if (!retrying) CardPill(
                         icon = Icons.Filled.Refresh,
                         label = stringResource(R.string.history_failed_retry),
                         onClick = onRetry,

@@ -333,8 +333,8 @@
     <string name="history_failed_log_copied">Журнал ошибок скопирован в буфер обмена</string>
     <string name="history_failed_retry">Повторить</string>
     <string name="queue_failed_choose_again">Скачать иначе</string>
-    <string name="queue_failed_busy">Сейчас читается другая ссылка. Попробуйте ещё раз чуть позже.</string>
     <string name="queue_failed_select">Выбрать неудачные</string>
+    <string name="queue_failed_retrying">Повтор</string>
     <string name="failed_stopped_at">Остановлено на этапе: %1$s · загружено %2$d%%</string>
     <string name="failed_copy_url">Копировать URL</string>
     <string name="history_failed_dismiss">Закрыть</string>

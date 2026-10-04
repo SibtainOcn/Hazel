@@ -212,6 +212,12 @@ class ShareOverlayActivity : ComponentActivity() {
                         val readHere = state.url == url
                         val results = if (readHere) state.results else emptyList()
                         val failure = state.errorLog?.takeIf { readHere && !state.isFetching }
+                        // A link on the failed list that fails to read again keeps its entry,
+                        // with this attempt's log in place of the last one.
+                        LaunchedEffect(failure) {
+                            val log = failure ?: return@LaunchedEffect
+                            com.hazel.android.data.FailedDownloadRepository.refreshLog(applicationContext, url, log)
+                        }
 
                         when {
                             // A failed read is reported by a notification, as any download

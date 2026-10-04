@@ -73,6 +73,24 @@ object FailedDownloadRepository {
         }
     }
 
+    /**
+     * Gives a listed failure of [url] the log of a newer attempt that failed too, keeping its
+     * title and artwork, and moves it to the top. A link not listed is left unlisted: this
+     * keeps a failure current, it does not record one.
+     */
+    suspend fun refreshLog(context: Context, url: String, errorLog: String) = withContext(Dispatchers.IO) {
+        val now = System.currentTimeMillis()
+        fun List<FailedDownload>.refreshed(): List<FailedDownload> {
+            val (hit, rest) = partition { same(it.url, url) }
+            return hit.map { it.copy(errorLog = errorLog, failedAt = now, stoppedAt = null) } + rest
+        }
+        unsaved.update { it.refreshed() }
+        context.dataStore.edit { prefs ->
+            val saved = decode(prefs[FAILED_KEY])
+            if (saved.any { same(it.url, url) }) prefs[FAILED_KEY] = encode(saved.refreshed())
+        }
+    }
+
     suspend fun remove(context: Context, id: Long) = removeAll(context, setOf(id))
 
     /** Removes every failure in [ids] in one write. */

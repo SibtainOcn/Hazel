@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Synthesizing has a "Download sheet opens on" setting, Video or Audio, for the tab a link's sheet and a set of links open on. A link with no audio still opens on Video.
 
 ### Changed
-- Failed downloads are drawn like the cards on the home screen: the artwork with the title, source, time and reason over it, and Error Log and Retry on the card. Tapping the card reads the link again and opens its sheet, to download it another way. The error log opens on a sheet with wrapped lines, sized to the log.
+- Failed downloads are drawn like the cards on the home screen: the artwork with the title, source, time and reason over it, and Error Log and Retry on the card. Tapping the card opens the link's download sheet over the queue, loading as it reads, to download it another way; a read that fails there updates the card's log. A card being retried says Retrying until it settles. The error log opens on a sheet with wrapped lines, sized to the log.
 - The failed list keeps the last 100 failures.
 - Choice dialogs in the settings are more compact, and a choice is applied with OK instead of the moment it is tapped.
 

@@ -96,7 +96,7 @@ private enum class QueueTab(val labelRes: Int) {
  * holds, so a failure is visible without opening it.
  */
 @Composable
-fun QueueScreen(downloadViewModel: DownloadViewModel, onOpenHome: () -> Unit) {
+fun QueueScreen(downloadViewModel: DownloadViewModel) {
     val context = LocalContext.current
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
@@ -115,11 +115,26 @@ fun QueueScreen(downloadViewModel: DownloadViewModel, onOpenHome: () -> Unit) {
         downloadViewModel.retryFailed(context, item)
     }
 
-    // Read again on the home screen, whose sheet opens on it when the read lands.
+    // The link's own sheet, over the queue: it opens at once, fills as the link is read and
+    // says so there if the read fails. The failure stays listed until a download settles it.
     fun reopen(item: FailedDownload) {
-        if (downloadViewModel.reopenFailed(item)) onOpenHome()
-        else Toast.makeText(context, resources.getString(R.string.queue_failed_busy), Toast.LENGTH_SHORT).show()
+        context.startActivity(
+            android.content.Intent(context, com.hazel.android.ui.share.ShareOverlayActivity::class.java)
+                .setAction(android.content.Intent.ACTION_SEND)
+                .setType("text/plain")
+                .putExtra(android.content.Intent.EXTRA_TEXT, item.url)
+        )
     }
+
+    // Failures whose link is being read, waiting or downloading again: shown as retrying
+    // until that settles, when a finished download clears them and a failure replaces them.
+    val inHandUrls = buildList {
+        addAll(runningUrls)
+        addAll(waiting.map { it.url })
+        state.batch.filter { it.state != BatchState.DONE && it.state != BatchState.FAILED }.forEach { add(it.url) }
+    }
+    fun retrying(item: FailedDownload) =
+        inHandUrls.any { it == item.url || com.hazel.android.util.LinkKey.sameMedia(it, item.url) }
 
     val pagerState = rememberPagerState(pageCount = { QueueTab.entries.size })
     var menuOpen by remember { mutableStateOf(false) }
@@ -347,6 +362,7 @@ fun QueueScreen(downloadViewModel: DownloadViewModel, onOpenHome: () -> Unit) {
                         FailedCard(
                             item = item,
                             selected = picked?.let { item.id in it },
+                            retrying = retrying(item),
                             onLongPress = { toggle(item.id) },
                             onOpen = { if (picked != null) toggle(item.id) else reopen(item) },
                             onViewLog = { viewLog = item },
