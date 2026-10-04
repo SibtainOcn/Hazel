@@ -10,6 +10,8 @@ Run:  python test_artist_metadata.py
 Exit: 0 on success, 1 on any failure.
 """
 
+import os
+import re
 import sys
 
 
@@ -68,13 +70,33 @@ def resolve_uploader_entry(entry: dict) -> str:
 
 # ---------- applyMetadata simulation ----------
 
+def literal_from(value: str) -> str:
+    """Port of DownloadViewModel.asLiteralFrom()."""
+    return value.replace("%", "%%").replace(":", "\\:") + " "
+
+
+def read_as_field_name(from_part: str) -> bool:
+    """yt-dlp's MetadataParserPP.field_to_template: a FROM of only letters is a field name."""
+    return re.match(r"[a-zA-Z_]+$", from_part) is not None
+
+
+def resolved_value(pm_value: str) -> str:
+    """
+    What a --parse-metadata built here sets its field to: the FROM after the colon split,
+    rendered as a template (%% is %), with the trailing space the TO matches taken off.
+    """
+    from_part = parse_metadata_from(pm_value)
+    assert not read_as_field_name(from_part), f"yt-dlp would read {from_part!r} as a field"
+    return from_part.replace("%%", "%")[:-1]
+
+
 def apply_metadata_args(title: str, author: str) -> list[tuple[str, str]]:
     """
     Simulates the yt-dlp CLI arguments that the rewritten applyMetadata() would
     produce. Returns a list of (option, value) tuples.
 
-    Colons in the FROM portion of --parse-metadata are escaped as \\: so yt-dlp's
-    first-colon split treats them as literal characters.
+    The FROM is written as literal text by literal_from(), the port of asLiteralFrom(),
+    and its TO ends in the space literal_from() adds.
     """
     if not title.strip() and not author.strip():
         return []
@@ -82,12 +104,10 @@ def apply_metadata_args(title: str, author: str) -> list[tuple[str, str]]:
     args: list[tuple[str, str]] = [("--embed-metadata", "")]
 
     if title.strip():
-        escaped = title.replace(":", "\\:")
-        args.append(("--parse-metadata", f"{escaped}:%(title)s"))
+        args.append(("--parse-metadata", f"{literal_from(title)}:%(title)s "))
 
     if author.strip():
-        escaped = author.replace(":", "\\:")
-        args.append(("--parse-metadata", f"{escaped}:%(uploader)s"))
+        args.append(("--parse-metadata", f"{literal_from(author)}:%(uploader)s "))
         # Map uploader -> artist tag
         args.append(("--parse-metadata", "%(uploader)s:%(artist)s"))
 
@@ -329,11 +349,9 @@ def test_colon_in_title_produces_escaped_arg():
         len(pm) > 0,
         True,
     )
-    # The FROM portion, when parsed, should resolve back to the original title
-    from_part = parse_metadata_from(pm[0][1])
     check(
         "colon in title round-trips correctly",
-        from_part,
+        resolved_value(pm[0][1]),
         "Episode 1: Pilot",
     )
 
@@ -347,10 +365,9 @@ def test_colon_in_author_produces_escaped_arg():
         len(pm) > 0,
         True,
     )
-    from_part = parse_metadata_from(pm[0][1])
     check(
         "colon in author round-trips correctly",
-        from_part,
+        resolved_value(pm[0][1]),
         "Artist A : Feat B",
     )
 
@@ -395,7 +412,7 @@ def test_title_without_colon_unchanged():
     check(
         "title without colon -> no escaping needed",
         pm[0][1],
-        "Simple Title:%(title)s",
+        "Simple Title :%(title)s ",
     )
 
 
@@ -406,14 +423,49 @@ def test_multiple_colons_all_escaped():
     check(
         "multiple colons all escaped",
         pm[0][1],
-        r"A\:B\:C\:D:%(title)s",
+        r"A\:B\:C\:D :%(title)s ",
     )
-    from_part = parse_metadata_from(pm[0][1])
     check(
         "multiple colons round-trip correctly",
-        from_part,
+        resolved_value(pm[0][1]),
         "A:B:C:D",
     )
+
+
+# ===== One-word values and percent signs =====
+
+def test_one_word_title_is_not_a_field_name():
+    """A one-word title was read by yt-dlp as a field name and saved as "NA"."""
+    for word in ("Flickermood", "Intro", "x_y"):
+        pm = [v for k, v in apply_metadata_args(word, "") if k == "--parse-metadata"]
+        from_part = parse_metadata_from(pm[0])
+        check(f"one-word title {word!r} is not read as a field", read_as_field_name(from_part), False)
+        check(f"one-word title {word!r} round-trips", resolved_value(pm[0]), word)
+
+
+def test_one_word_author_keeps_artist():
+    """A one-word uploader such as "Forss" set uploader, and so artist, to "NA"."""
+    pm = [v for k, v in apply_metadata_args("", "Forss") if k == "--parse-metadata"]
+    check("one-word author round-trips", resolved_value(pm[0]), "Forss")
+
+
+def test_percent_stays_literal():
+    """A title holding a template field is written as text, not expanded."""
+    for title in ("100% (live)", "%(id)s trick"):
+        pm = [v for k, v in apply_metadata_args(title, "") if k == "--parse-metadata"]
+        check(f"percent in {title!r} round-trips", resolved_value(pm[0]), title)
+
+
+def test_kotlin_matches_simulation():
+    """The Kotlin builds the same arguments simulated here."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
+                        "app/src/main/java/com/hazel/android/download/DownloadViewModel.kt")
+    with open(path, encoding="utf-8") as f:
+        kotlin = f.read()
+    check("Kotlin escapes % and : and adds the space",
+          'replace("%", "%%").replace(":", """\\:""") + " "' in kotlin, True)
+    check("Kotlin title TO ends in the space", '${title.asLiteralFrom()}:%(title)s "' in kotlin, True)
+    check("Kotlin author TO ends in the space", '${author.asLiteralFrom()}:%(uploader)s "' in kotlin, True)
 
 
 # ===== Regression: existing behaviour preserved =====
@@ -424,12 +476,12 @@ def test_normal_title_and_author():
     pm_values = [v for k, v in args if k == "--parse-metadata"]
     check(
         "normal title -> correct --parse-metadata",
-        "My Video:%(title)s" in pm_values,
+        "My Video :%(title)s " in pm_values,
         True,
     )
     check(
         "normal author -> correct --parse-metadata",
-        "My Channel:%(uploader)s" in pm_values,
+        "My Channel :%(uploader)s " in pm_values,
         True,
     )
     check(
@@ -462,7 +514,7 @@ def test_only_author_produces_embed_and_mapping():
     pm_values = [v for k, v in args if k == "--parse-metadata"]
     check(
         "author only -> uploader mapping",
-        "Author Only:%(uploader)s" in pm_values,
+        "Author Only :%(uploader)s " in pm_values,
         True,
     )
     check(
@@ -588,6 +640,10 @@ def main():
     test_author_produces_artist_mapping()
     test_title_without_colon_unchanged()
     test_multiple_colons_all_escaped()
+    test_one_word_title_is_not_a_field_name()
+    test_one_word_author_keeps_artist()
+    test_percent_stays_literal()
+    test_kotlin_matches_simulation()
 
     print("\n--- Audio Format Resolution (Issue #3) ---")
     test_jiosaavn_audio_format_detected_without_acodec()

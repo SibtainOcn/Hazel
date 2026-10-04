@@ -2247,10 +2247,8 @@ class DownloadViewModel : ViewModel() {
     /**
      * Writes an edited title or author into the file's tags.
      *
-     * yt-dlp reads `--parse-metadata` as `FROM:TO`, splitting on the first unescaped colon.
-     * Colons inside the user's value are escaped as `\:` so they pass through the split
-     * as literal characters. This fixes the previous approach of skipping values that
-     * contained colons altogether.
+     * yt-dlp reads `--parse-metadata` as `FROM:TO`, splitting on the first unescaped colon,
+     * and FROM as an output template, so the value is written as one: see [asLiteralFrom].
      *
      * The author is also copied into the `artist` metadata slot, which is what
      * `FFmpegMetadataPP` writes as the ID3 / Vorbis / MP4 artist tag. Without this,
@@ -2263,17 +2261,28 @@ class DownloadViewModel : ViewModel() {
         addOption("--embed-metadata")
 
         if (title.isNotBlank()) {
-            val escaped = title.replace(":", """\:""")
-            addOption("--parse-metadata", "$escaped:%(title)s")
+            addOption("--parse-metadata", "${title.asLiteralFrom()}:%(title)s ")
         }
 
         if (author.isNotBlank()) {
-            val escaped = author.replace(":", """\:""")
-            addOption("--parse-metadata", "$escaped:%(uploader)s")
+            addOption("--parse-metadata", "${author.asLiteralFrom()}:%(uploader)s ")
             // Map uploader → artist tag so audio files get a proper artist ID3/Vorbis tag
             addOption("--parse-metadata", "%(uploader)s:%(artist)s")
         }
     }
+
+    /**
+     * [this] as the FROM of a `--parse-metadata` that sets a field to exactly this text.
+     *
+     * Colons are escaped so the FROM:TO split passes them through, and percent signs so a
+     * title holding "%(" is not read as a field. A FROM made only of letters is taken by
+     * yt-dlp as the name of a field rather than as text, so a one-word title such as
+     * "Flickermood" read the missing field "Flickermood" and was saved as "NA". The space
+     * added at the end keeps it text, and the TO it is paired with ends in the same space,
+     * so the space is matched off again rather than kept.
+     */
+    private fun String.asLiteralFrom(): String =
+        replace("%", "%%").replace(":", """\:""") + " "
 
     /**
      * Resolves the output template against the title and author shown in the sheet.

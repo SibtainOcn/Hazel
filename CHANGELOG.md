@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Choice dialogs in the settings are more compact, and a choice is applied with OK instead of the moment it is tapped.
 
 ### Fixed
+- A download whose title is a single word, such as "Flickermood", is no longer saved as "NA". A one-word author no longer has its artist tag written as "NA" either.
 - Hazel Instant can save audio again. Synthesizing has an "Instant saves as" choice of Video or Audio only. Audio only takes the source's best audio stream, in the preferred language and codec where it has them, and saves it in the chosen audio format with its cover. Since 1.1.10, Instant always saved video.
 - Picking NewPipe as the formats source for a site with a saved sign-in now says why it cannot be used, instead of doing nothing. NewPipe sends no cookies, so such a site is always read by yt-dlp; the notice shows only when the link's own site has a saved sign-in and Use cookies is on.
 - Switching the formats source while the list is still loading is no longer dropped. The switch runs as soon as the current read ends, and the list shows its answer.
