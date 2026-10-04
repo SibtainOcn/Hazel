@@ -322,6 +322,11 @@
     <string name="history_failed_retry">Coba lagi</string>
     <string name="queue_failed_choose_again">Unduh dengan cara lain</string>
     <string name="queue_failed_select">Pilih yang gagal</string>
+    <string name="queue_failed_remove">Hapus</string>
+    <string name="queue_failed_remove_body">Unduhan ini keluar dari daftar beserta lognya. File yang sudah diunduh tidak tersentuh.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="other">Hapus %d unduhan gagal?</item>
+    </plurals>
     <string name="queue_failed_retrying">Mencoba lagi</string>
     <string name="failed_stopped_at">Berhenti di: %1$s · %2$d%% terunduh</string>
     <string name="failed_copy_url">Salin URL</string>

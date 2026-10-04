@@ -326,6 +326,12 @@
     <string name="history_failed_retry">पुनः प्रयास करें</string>
     <string name="queue_failed_choose_again">दूसरे तरीके से डाउनलोड करें</string>
     <string name="queue_failed_select">विफल चुनें</string>
+    <string name="queue_failed_remove">हटाएँ</string>
+    <string name="queue_failed_remove_body">वे अपने लॉग के साथ सूची से हट जाते हैं। आपकी डाउनलोड की गई फ़ाइलें नहीं छुई जातीं।</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">%d विफल डाउनलोड हटाएँ?</item>
+        <item quantity="other">%d विफल डाउनलोड हटाएँ?</item>
+    </plurals>
     <string name="queue_failed_retrying">फिर से कोशिश</string>
     <string name="failed_stopped_at">यहाँ रुका: %1$s · %2$d%% डाउनलोड हुआ</string>
     <string name="failed_copy_url">URL कॉपी करें</string>

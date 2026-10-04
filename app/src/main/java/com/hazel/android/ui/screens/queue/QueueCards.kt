@@ -171,15 +171,9 @@ fun FailedCard(
         .filter { it.isNotBlank() }.joinToString(" · ")
     val thumbnail = item.thumbnail ?: remember(item.url) { youtubeThumbnail(item.url) }
 
-    val shape = RoundedCornerShape(20.dp)
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(
-                if (selected == true) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape)
-                else Modifier
-            ),
-        shape = shape,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
     ) {
         Box(
@@ -209,6 +203,23 @@ fun FailedCard(
                 )
             }
             Box(modifier = Modifier.fillMaxSize().background(FailedScrim))
+
+            // Picked: a frosted wash of the accent over the whole card, rather than a frame
+            // around it, so the card reads as lit up and stays the same size.
+            if (selected == true) {
+                val accent = MaterialTheme.colorScheme.primary
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White.copy(alpha = 0.06f))
+                        .background(
+                            Brush.verticalGradient(
+                                0f to accent.copy(alpha = 0.34f),
+                                1f to accent.copy(alpha = 0.16f)
+                            )
+                        )
+                )
+            }
 
             Column(
                 modifier = Modifier

@@ -322,6 +322,11 @@
     <string name="history_failed_retry">再試行</string>
     <string name="queue_failed_choose_again">別の方法でダウンロード</string>
     <string name="queue_failed_select">失敗を選択</string>
+    <string name="queue_failed_remove">削除</string>
+    <string name="queue_failed_remove_body">ログとともにリストから消えます。ダウンロード済みのファイルはそのままです。</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="other">失敗した %d 件を削除しますか？</item>
+    </plurals>
     <string name="queue_failed_retrying">再試行中</string>
     <string name="failed_stopped_at">停止した段階: %1$s · %2$d%% ダウンロード済み</string>
     <string name="failed_copy_url">URLをコピー</string>

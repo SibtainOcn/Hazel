@@ -334,6 +334,14 @@
     <string name="history_failed_retry">Повторить</string>
     <string name="queue_failed_choose_again">Скачать иначе</string>
     <string name="queue_failed_select">Выбрать неудачные</string>
+    <string name="queue_failed_remove">Убрать</string>
+    <string name="queue_failed_remove_body">Они исчезнут из списка вместе с журналами. Скачанные файлы не затрагиваются.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">Убрать %d неудачную загрузку?</item>
+        <item quantity="few">Убрать %d неудачные загрузки?</item>
+        <item quantity="many">Убрать %d неудачных загрузок?</item>
+        <item quantity="other">Убрать %d неудачной загрузки?</item>
+    </plurals>
     <string name="queue_failed_retrying">Повтор</string>
     <string name="failed_stopped_at">Остановлено на этапе: %1$s · загружено %2$d%%</string>
     <string name="failed_copy_url">Копировать URL</string>

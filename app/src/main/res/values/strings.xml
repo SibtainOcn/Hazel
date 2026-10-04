@@ -342,6 +342,12 @@
     <string name="history_failed_retry">Retry</string>
     <string name="queue_failed_choose_again">Download another way</string>
     <string name="queue_failed_select">Select failed</string>
+    <string name="queue_failed_remove">Remove</string>
+    <string name="queue_failed_remove_body">They leave the list with their logs. Your downloaded files are not touched.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">Remove %d failed download?</item>
+        <item quantity="other">Remove %d failed downloads?</item>
+    </plurals>
     <string name="queue_failed_retrying">Retrying</string>
     <string name="failed_stopped_at">Stopped at: %1$s · %2$d%% downloaded</string>
     <string name="failed_copy_url">Copy URL</string>

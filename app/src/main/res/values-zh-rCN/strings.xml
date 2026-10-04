@@ -322,6 +322,11 @@
     <string name="history_failed_retry">重试</string>
     <string name="queue_failed_choose_again">换一种方式下载</string>
     <string name="queue_failed_select">选择失败项</string>
+    <string name="queue_failed_remove">移除</string>
+    <string name="queue_failed_remove_body">它们会连同日志一起从列表中移除。已下载的文件不受影响。</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="other">移除 %d 个失败的下载？</item>
+    </plurals>
     <string name="queue_failed_retrying">正在重试</string>
     <string name="failed_stopped_at">停止于：%1$s · 已下载 %2$d%%</string>
     <string name="failed_copy_url">复制链接</string>

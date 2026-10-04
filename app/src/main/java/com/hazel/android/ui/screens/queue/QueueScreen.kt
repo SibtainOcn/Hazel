@@ -141,6 +141,7 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
     var confirmCancelAll by remember { mutableStateOf(false) }
     var confirmClearQueue by remember { mutableStateOf(false) }
     var confirmClearFailed by remember { mutableStateOf(false) }
+    var confirmRemovePicked by remember { mutableStateOf<Set<Long>?>(null) }
     var viewLog by remember { mutableStateOf<FailedDownload?>(null) }
 
     // Failures picked for removal; null while not picking. Picking ends on leaving the
@@ -184,10 +185,7 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
             }
             IconButton(
                 enabled = picking.isNotEmpty(),
-                onClick = {
-                    scope.launch { FailedDownloadRepository.removeAll(context, picking) }
-                    picked = null
-                }
+                onClick = { confirmRemovePicked = picking }
             ) {
                 Icon(Icons.Filled.Delete, stringResource(R.string.batch_menu_remove_selected))
             }
@@ -420,6 +418,19 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                 downloadViewModel.clearQueue(context)
             },
             onDismiss = { confirmClearQueue = false }
+        )
+    }
+    confirmRemovePicked?.let { ids ->
+        ConfirmDialog(
+            title = pluralStringResource(R.plurals.queue_failed_remove_title, ids.size, ids.size),
+            body = stringResource(R.string.queue_failed_remove_body),
+            confirm = stringResource(R.string.queue_failed_remove),
+            onConfirm = {
+                confirmRemovePicked = null
+                picked = null
+                scope.launch { FailedDownloadRepository.removeAll(context, ids) }
+            },
+            onDismiss = { confirmRemovePicked = null }
         )
     }
     if (confirmClearFailed) {

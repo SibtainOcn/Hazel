@@ -330,6 +330,13 @@
     <string name="history_failed_retry">Réessayer</string>
     <string name="queue_failed_choose_again">Télécharger autrement</string>
     <string name="queue_failed_select">Sélectionner les échecs</string>
+    <string name="queue_failed_remove">Retirer</string>
+    <string name="queue_failed_remove_body">Ils quittent la liste avec leurs journaux. Vos fichiers téléchargés ne sont pas touchés.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">Retirer %d téléchargement échoué ?</item>
+        <item quantity="many">Retirer %d de téléchargements échoués ?</item>
+        <item quantity="other">Retirer %d téléchargements échoués ?</item>
+    </plurals>
     <string name="queue_failed_retrying">Nouvel essai</string>
     <string name="failed_stopped_at">Arrêté à : %1$s · %2$d%% téléchargé</string>
     <string name="failed_copy_url">Copier l’URL</string>
