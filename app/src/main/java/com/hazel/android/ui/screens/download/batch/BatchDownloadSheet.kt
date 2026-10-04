@@ -180,6 +180,10 @@ fun BatchDownloadSheet(
     ) {
         state.applyPreferences(options)
     }
+    // Kept apart from the rest, so a later change of settings does not move the tab back.
+    LaunchedEffect(options.sheetOpensOnAudio) {
+        state.setDownloadType(!options.sheetOpensOnAudio)
+    }
     var openSheet by remember { mutableStateOf(BatchSheet.NONE) }
     var listMenuOpen by remember { mutableStateOf(false) }
 
