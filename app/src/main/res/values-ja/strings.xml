@@ -574,6 +574,8 @@
     <string name="processing_video_quality">動画の画質</string>
     <string name="processing_instant_save_as">Instant の保存形式</string>
     <string name="processing_instant_audio_only">音声のみ</string>
+    <string name="processing_section_kind">音声か動画か</string>
+    <string name="processing_sheet_opens_on">ダウンロードシートの初期タブ</string>
     <string name="processing_sub_original">元の言語（自動）</string>
     <string name="processing_reset">すべてデフォルトに戻す</string>
     <string name="processing_reset_title">合成の設定をリセットしますか？</string>

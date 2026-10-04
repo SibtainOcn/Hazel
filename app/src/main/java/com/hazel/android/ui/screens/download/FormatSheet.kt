@@ -164,9 +164,13 @@ fun FormatSheet(
     // condition of using it. The set-of-links sheet already opens this way.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    // Open on whichever tab the source actually has formats for.
-    var videoTab by remember(info.url) {
-        mutableStateOf(initialFormat?.hasVideo ?: info.videoFormats.isNotEmpty())
+    // Open on the tab the settings name, if the source has formats for it, or else on the
+    // one it has. A format the sheet was opened with decides it outright.
+    var videoTab by remember(info.url, options.sheetOpensOnAudio) {
+        mutableStateOf(
+            initialFormat?.hasVideo
+                ?: (info.videoFormats.isNotEmpty() && !(options.sheetOpensOnAudio && info.audioFormats.isNotEmpty()))
+        )
     }
 
     // What each tab is set to, held apart rather than as one selection. A single slot

@@ -56,6 +56,8 @@ data class DownloadOptions(
     val preferredVideoCodec: String = "",
     /** Video quality to start from: 0 is best, a height is a ceiling, [WORST_HEIGHT] worst. */
     val videoQuality: Int = 0,
+    /** The download sheet opens on its Audio tab rather than Video, where the link has audio. */
+    val sheetOpensOnAudio: Boolean = false,
 
     // ── For one download only. Set from the sheet as the download starts, carried with it
     // in the queue, and never saved as a setting, so the next download does not inherit a

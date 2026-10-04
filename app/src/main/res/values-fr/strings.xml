@@ -588,6 +588,8 @@
     <string name="processing_video_quality">Qualité vidéo</string>
     <string name="processing_instant_save_as">Instant enregistre en</string>
     <string name="processing_instant_audio_only">Audio seul</string>
+    <string name="processing_section_kind">Audio ou vidéo</string>
+    <string name="processing_sheet_opens_on">La feuille de téléchargement s’ouvre sur</string>
     <string name="processing_sub_original">Langue d\'origine (automatique)</string>
     <string name="processing_reset">Tout réinitialiser</string>
     <string name="processing_reset_title">Réinitialiser les réglages de synthèse ?</string>

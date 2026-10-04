@@ -574,6 +574,8 @@
     <string name="processing_video_quality">Kualitas video</string>
     <string name="processing_instant_save_as">Instant menyimpan sebagai</string>
     <string name="processing_instant_audio_only">Audio saja</string>
+    <string name="processing_section_kind">Audio atau video</string>
+    <string name="processing_sheet_opens_on">Lembar unduhan terbuka di</string>
     <string name="processing_sub_original">Bahasa asli (otomatis)</string>
     <string name="processing_reset">Atur ulang semua ke bawaan</string>
     <string name="processing_reset_title">Atur ulang pengaturan sintesis?</string>

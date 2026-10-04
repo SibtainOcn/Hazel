@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Subtitles
+import androidx.compose.material.icons.filled.Tab
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.VideoSettings
 import androidx.compose.runtime.Composable
@@ -50,7 +51,8 @@ import kotlinx.coroutines.launch
  * These are the same settings the download sheet changes. A change made in the sheet is
  * saved here and a change made here is what the next sheet opens with, so there is one set
  * of settings rather than defaults and overrides that drift apart. The one exception is
- * whether Hazel Instant saves audio or video, which a sheet is told by its tab.
+ * whether Hazel Instant saves audio or video, which a sheet is told by its tab; the tab a
+ * sheet opens on is set here too.
  */
 @Composable
 fun ProcessingScreen(onBack: () -> Unit) {
@@ -75,9 +77,9 @@ fun ProcessingScreen(onBack: () -> Unit) {
         description = stringResource(R.string.processing_description),
         onBack = onBack
     ) {
-        // ── Hazel Instant ──
+        // ── Audio or video ──
         SettingsSection(
-            title = stringResource(R.string.instant_label),
+            title = stringResource(R.string.processing_section_kind),
             rows = listOf<@Composable () -> Unit>(
                 {
                     ValueSettingRow(
@@ -88,6 +90,17 @@ fun ProcessingScreen(onBack: () -> Unit) {
                             else R.string.format_sheet_tab_video
                         ),
                         onClick = { dialog = ProcessingDialog.INSTANT_SAVE_AS }
+                    )
+                },
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.Tab,
+                        title = stringResource(R.string.processing_sheet_opens_on),
+                        value = stringResource(
+                            if (options.sheetOpensOnAudio) R.string.format_sheet_tab_audio
+                            else R.string.format_sheet_tab_video
+                        ),
+                        onClick = { dialog = ProcessingDialog.SHEET_OPENS_ON }
                     )
                 }
             )
@@ -299,6 +312,20 @@ fun ProcessingScreen(onBack: () -> Unit) {
             onDismiss = close
         )
 
+        ProcessingDialog.SHEET_OPENS_ON -> SingleChoiceDialog(
+            title = stringResource(R.string.processing_sheet_opens_on),
+            choices = listOf(
+                false to stringResource(R.string.format_sheet_tab_video),
+                true to stringResource(R.string.format_sheet_tab_audio)
+            ),
+            selected = options.sheetOpensOnAudio,
+            onSelect = { audio ->
+                update { it.copy(sheetOpensOnAudio = audio) }
+                close()
+            },
+            onDismiss = close
+        )
+
         ProcessingDialog.SPONSORBLOCK -> SponsorBlockDialog(
             options = options,
             onConfirm = { changed ->
@@ -426,7 +453,8 @@ fun ProcessingScreen(onBack: () -> Unit) {
 }
 
 private enum class ProcessingDialog {
-    NONE, INSTANT_SAVE_AS, SPONSORBLOCK, SPONSORBLOCK_SERVER, BITRATE, AUDIO_LANGUAGE, AUDIO_CODEC, AUDIO_FORMAT,
+    NONE, INSTANT_SAVE_AS, SHEET_OPENS_ON, SPONSORBLOCK, SPONSORBLOCK_SERVER, BITRATE,
+    AUDIO_LANGUAGE, AUDIO_CODEC, AUDIO_FORMAT,
     SUBTITLE_LANGUAGES, VIDEO_FORMAT, VIDEO_CODEC, VIDEO_QUALITY, RESET
 }
 

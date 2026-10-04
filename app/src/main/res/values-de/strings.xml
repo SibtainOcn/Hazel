@@ -581,6 +581,8 @@
     <string name="processing_video_quality">Videoqualität</string>
     <string name="processing_instant_save_as">Instant speichert als</string>
     <string name="processing_instant_audio_only">Nur Audio</string>
+    <string name="processing_section_kind">Audio oder Video</string>
+    <string name="processing_sheet_opens_on">Download-Blatt öffnet mit</string>
     <string name="processing_sub_original">Originalsprache (automatisch)</string>
     <string name="processing_reset">Alles auf Standard zurücksetzen</string>
     <string name="processing_reset_title">Syntheseeinstellungen zurücksetzen?</string>
