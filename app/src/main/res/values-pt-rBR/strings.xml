@@ -93,6 +93,9 @@
     <string name="no_results_sign_in_body">A fonte exige uma conta antes de entregar isto. Ao entrar, os cookies do site são salvos e a tentativa é refeita.</string>
     <string name="no_results_continue_body">Os detalhes não puderam ser lidos, mas o download em si ainda pode funcionar. Seguir em frente oferece a melhor qualidade disponível.</string>
     <string name="no_results_refused_body">A fonte recusou o pedido.</string>
+    <string name="no_results_gone_body">Esta mídia não está disponível. Pode ter sido removida ou apagada, ou o link pode estar errado.</string>
+    <string name="no_results_unsupported_body">Este site não é compatível, então não há nada aqui para baixar.</string>
+    <string name="no_results_generic_body">Não foi possível ler os detalhes deste link.</string>
     <string name="no_results_engine_report">O que o motor relatou</string>
     <string name="no_results_copy_log">Copiar o registro</string>
     <string name="no_results_sign_in">Entrar</string>
@@ -328,6 +331,18 @@
     <string name="history_failed_copy_log">Copiar registro</string>
     <string name="history_failed_log_copied">Registro de erros copiado para a área de transferência</string>
     <string name="history_failed_retry">Tentar novamente</string>
+    <string name="queue_failed_choose_again">Baixar de outro jeito</string>
+    <string name="queue_failed_select">Selecionar falhas</string>
+    <string name="queue_failed_remove">Remover</string>
+    <string name="queue_failed_remove_body">Eles saem da lista com seus registros. Seus arquivos baixados não são afetados.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">Remover %d download com falha?</item>
+        <item quantity="many">Remover %d de downloads com falha?</item>
+        <item quantity="other">Remover %d downloads com falha?</item>
+    </plurals>
+    <string name="queue_failed_retrying">Tentando de novo</string>
+    <string name="failed_stopped_at">Parou em: %1$s · %2$d%% baixado</string>
+    <string name="failed_copy_url">Copiar URL</string>
     <string name="history_failed_dismiss">Dispensar</string>
     <string name="history_failed_clear_all">Limpar todos os que falharam</string>
     <string name="history_queue_clear_all">Limpar fila</string>

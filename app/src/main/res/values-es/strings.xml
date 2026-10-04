@@ -93,6 +93,9 @@
     <string name="no_results_sign_in_body">La fuente pide una cuenta antes de entregar esto. Al iniciar sesión se guardan las cookies del sitio y se vuelve a intentar.</string>
     <string name="no_results_continue_body">No se pudieron leer los detalles, pero la descarga aún puede funcionar. Si sigues adelante, se ofrece la mejor calidad disponible.</string>
     <string name="no_results_refused_body">La fuente rechazó la petición.</string>
+    <string name="no_results_gone_body">Este contenido no está disponible. Puede que se haya eliminado o que el enlace esté mal.</string>
+    <string name="no_results_unsupported_body">Este sitio no es compatible, así que aquí no hay nada que descargar.</string>
+    <string name="no_results_generic_body">No se pudieron leer los detalles de este enlace.</string>
     <string name="no_results_engine_report">Lo que informó el motor</string>
     <string name="no_results_copy_log">Copiar el registro</string>
     <string name="no_results_sign_in">Iniciar sesión</string>
@@ -328,6 +331,18 @@
     <string name="history_failed_copy_log">Copiar registro</string>
     <string name="history_failed_log_copied">Registro de errores copiado al portapapeles</string>
     <string name="history_failed_retry">Reintentar</string>
+    <string name="queue_failed_choose_again">Descargar de otra forma</string>
+    <string name="queue_failed_select">Seleccionar fallidas</string>
+    <string name="queue_failed_remove">Quitar</string>
+    <string name="queue_failed_remove_body">Salen de la lista con sus registros. Tus archivos descargados no se tocan.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">¿Quitar %d descarga fallida?</item>
+        <item quantity="many">¿Quitar %d de descargas fallidas?</item>
+        <item quantity="other">¿Quitar %d descargas fallidas?</item>
+    </plurals>
+    <string name="queue_failed_retrying">Reintentando</string>
+    <string name="failed_stopped_at">Se detuvo en: %1$s · %2$d%% descargado</string>
+    <string name="failed_copy_url">Copiar URL</string>
     <string name="history_failed_dismiss">Descartar</string>
     <string name="history_failed_clear_all">Borrar todos los fallidos</string>
     <string name="history_queue_clear_all">Borrar la cola</string>

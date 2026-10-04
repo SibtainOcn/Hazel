@@ -7,6 +7,12 @@ import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
 import androidx.compose.foundation.lazy.rememberLazyListState
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -104,17 +110,86 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
     val waiting = queueList.filterNot { it.url in runningUrls || it.paused }
     val failed = failedList.sortedByDescending { it.failedAt }
 
+    fun retry(item: FailedDownload) {
+        Toast.makeText(context, resources.getString(R.string.history_retrying_toast), Toast.LENGTH_SHORT).show()
+        downloadViewModel.retryFailed(context, item)
+    }
+
+    // The link's own sheet, over the queue: it opens at once, fills as the link is read and
+    // says so there if the read fails. The failure stays listed until a download settles it.
+    fun reopen(item: FailedDownload) {
+        context.startActivity(
+            android.content.Intent(context, com.hazel.android.ui.share.ShareOverlayActivity::class.java)
+                .setAction(android.content.Intent.ACTION_SEND)
+                .setType("text/plain")
+                .putExtra(android.content.Intent.EXTRA_TEXT, item.url)
+        )
+    }
+
+    // Failures whose link is being read, waiting or downloading again: shown as retrying
+    // until that settles, when a finished download clears them and a failure replaces them.
+    val inHandUrls = buildList {
+        addAll(runningUrls)
+        addAll(waiting.map { it.url })
+        state.batch.filter { it.state != BatchState.DONE && it.state != BatchState.FAILED }.forEach { add(it.url) }
+    }
+    fun retrying(item: FailedDownload) =
+        inHandUrls.any { it == item.url || com.hazel.android.util.LinkKey.sameMedia(it, item.url) }
+
     val pagerState = rememberPagerState(pageCount = { QueueTab.entries.size })
     var menuOpen by remember { mutableStateOf(false) }
     var confirmCancelAll by remember { mutableStateOf(false) }
     var confirmClearQueue by remember { mutableStateOf(false) }
     var confirmClearFailed by remember { mutableStateOf(false) }
+    var confirmRemovePicked by remember { mutableStateOf<Set<Long>?>(null) }
     var viewLog by remember { mutableStateOf<FailedDownload?>(null) }
+
+    // Failures picked for removal; null while not picking. Picking ends on leaving the
+    // Failed tab or with Back, and drops failures that have gone from the list meanwhile.
+    var picked by remember { mutableStateOf<Set<Long>?>(null) }
+    LaunchedEffect(pagerState.currentPage) {
+        if (QueueTab.entries[pagerState.currentPage] != QueueTab.FAILED) picked = null
+    }
+    LaunchedEffect(failed) {
+        picked = picked?.let { ids -> ids intersect failed.mapTo(mutableSetOf()) { it.id } }
+    }
+    BackHandler(enabled = picked != null) { picked = null }
+    fun toggle(id: Long) {
+        picked = picked?.let { if (id in it) it - id else it + id } ?: setOf(id)
+    }
 
     val anythingInHand = running.isNotEmpty() || waiting.isNotEmpty()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(
+        val picking = picked
+        if (picking != null) Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { picked = null }) {
+                Icon(Icons.Filled.Close, stringResource(R.string.history_clear_dialog_cancel))
+            }
+            Text(
+                pluralStringResource(R.plurals.batch_selected, picking.size, picking.size),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = {
+                val all = failed.mapTo(mutableSetOf()) { it.id }
+                picked = if (picking.size == all.size) emptySet() else all
+            }) {
+                Icon(Icons.Filled.SelectAll, stringResource(R.string.batch_menu_select_all))
+            }
+            IconButton(
+                enabled = picking.isNotEmpty(),
+                onClick = { confirmRemovePicked = picking }
+            ) {
+                Icon(Icons.Filled.Delete, stringResource(R.string.batch_menu_remove_selected))
+            }
+        } else Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 20.dp, end = 4.dp, top = 8.dp, bottom = 4.dp),
@@ -170,6 +245,15 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                         onClick = {
                             menuOpen = false
                             confirmClearQueue = true
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.queue_failed_select)) },
+                        enabled = failed.isNotEmpty(),
+                        onClick = {
+                            menuOpen = false
+                            picked = emptySet()
+                            scope.launch { pagerState.animateScrollToPage(QueueTab.FAILED.ordinal) }
                         }
                     )
                     DropdownMenuItem(
@@ -275,15 +359,12 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                         Box(modifier = Modifier.scrollShrink(shrink)) {
                         FailedCard(
                             item = item,
+                            selected = picked?.let { item.id in it },
+                            retrying = retrying(item),
+                            onLongPress = { toggle(item.id) },
+                            onOpen = { if (picked != null) toggle(item.id) else reopen(item) },
                             onViewLog = { viewLog = item },
-                            onRetry = {
-                                Toast.makeText(
-                                    context,
-                                    resources.getString(R.string.history_retrying_toast),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                downloadViewModel.retryFailed(context, item)
-                            },
+                            onRetry = { retry(item) },
                             onDismiss = { scope.launch { FailedDownloadRepository.remove(context, item.id) } }
                         )
                         }
@@ -294,10 +375,18 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
     }
 
     viewLog?.let { item ->
-        FailureLogDialog(
+        FailureLogSheet(
             item = item,
+            onCopyUrl = {
+                copyToClipboard(context, item.url)
+                Toast.makeText(context, resources.getString(R.string.sheet_link_copied), Toast.LENGTH_SHORT).show()
+            },
+            onRetry = {
+                viewLog = null
+                retry(item)
+            },
             onCopy = {
-                copyToClipboard(context, item.errorLog)
+                copyToClipboard(context, listOfNotNull(item.stoppedAt, item.errorLog).joinToString("\n\n"))
                 Toast.makeText(context, resources.getString(R.string.history_failed_log_copied), Toast.LENGTH_SHORT).show()
             },
             onDismiss = { viewLog = null }
@@ -329,6 +418,19 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                 downloadViewModel.clearQueue(context)
             },
             onDismiss = { confirmClearQueue = false }
+        )
+    }
+    confirmRemovePicked?.let { ids ->
+        ConfirmDialog(
+            title = pluralStringResource(R.plurals.queue_failed_remove_title, ids.size, ids.size),
+            body = stringResource(R.string.queue_failed_remove_body),
+            confirm = stringResource(R.string.queue_failed_remove),
+            onConfirm = {
+                confirmRemovePicked = null
+                picked = null
+                scope.launch { FailedDownloadRepository.removeAll(context, ids) }
+            },
+            onDismiss = { confirmRemovePicked = null }
         )
     }
     if (confirmClearFailed) {
@@ -423,44 +525,6 @@ private fun QueueList(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) { content(shrink) }
     }
-}
-
-@Composable
-private fun FailureLogDialog(item: FailedDownload, onCopy: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.history_failed_error_log), fontWeight = FontWeight.Bold) },
-        text = {
-            Column {
-                Text(
-                    item.title.ifBlank { item.url },
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Surface(
-                    modifier = Modifier.fillMaxWidth().height(280.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest
-                ) {
-                    SelectionContainer {
-                        Text(
-                            text = item.errorLog.ifBlank { stringResource(R.string.history_empty_failed) },
-                            fontFamily = FontFamily.Monospace,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier
-                                .verticalScroll(rememberScrollState())
-                                .padding(12.dp)
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = onCopy) { Text(stringResource(R.string.history_failed_copy_log)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.history_clear_dialog_cancel)) } }
-    )
 }
 
 @Composable

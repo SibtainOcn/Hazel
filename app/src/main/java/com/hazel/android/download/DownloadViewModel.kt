@@ -1530,6 +1530,16 @@ class DownloadViewModel : ViewModel() {
                         error = e.message ?: "Download failed"
                     )
                     val queuedPayload = DownloadQueueRepository.encodeItem(next)
+                    // The stage it had reached and how much had arrived, so a failure part way
+                    // through says where, which the engine's own log often leaves unsaid.
+                    val stoppedAt = _state.value.let { s ->
+                        val step = s.processingSteps.getOrNull(s.processingStep) ?: ProcessingStep.FETCH
+                        app.getString(
+                            R.string.failed_stopped_at,
+                            app.getString(step.label),
+                            (s.progress * 100).toInt().coerceIn(0, 100)
+                        )
+                    }
                     downloadScope.launch {
                         com.hazel.android.data.FailedDownloadRepository.record(
                             app,
@@ -1540,7 +1550,8 @@ class DownloadViewModel : ViewModel() {
                                 thumbnail = plan.info.thumbnail,
                                 isVideo = plan.format.hasVideo,
                                 errorLog = e.message ?: "Download failed",
-                                queuedPayload = queuedPayload
+                                queuedPayload = queuedPayload,
+                                stoppedAt = stoppedAt
                             )
                         )
                     }
@@ -1927,16 +1938,20 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
-    /** Retries a failed download, either directly from its queued payload or by fetching anew. */
+    /**
+     * Retries a failed download the way it ran: a download that had started is started
+     * again from what it was given, and a link Instant could not read goes back to Instant.
+     *
+     * The failure stays listed until the retry settles it: a download that finishes clears
+     * it, and one that fails again replaces it. Cleared up front, a retry that failed the
+     * same way left nothing on the list.
+     */
     fun retryFailed(context: Context, failed: com.hazel.android.data.FailedDownload) {
-        downloadScope.launch {
-            com.hazel.android.data.FailedDownloadRepository.remove(context, failed.id)
-        }
         val queued = DownloadQueueRepository.decodeItem(failed.queuedPayload)
         if (queued != null) {
             startBatch(context, listOf(queued.toPlan()), queued.options, queued.treeUri)
         } else {
-            fetchAll(listOf(failed.url))
+            instantDownload(context, failed.url)
         }
     }
 
@@ -2247,10 +2262,8 @@ class DownloadViewModel : ViewModel() {
     /**
      * Writes an edited title or author into the file's tags.
      *
-     * yt-dlp reads `--parse-metadata` as `FROM:TO`, splitting on the first unescaped colon.
-     * Colons inside the user's value are escaped as `\:` so they pass through the split
-     * as literal characters. This fixes the previous approach of skipping values that
-     * contained colons altogether.
+     * yt-dlp reads `--parse-metadata` as `FROM:TO`, splitting on the first unescaped colon,
+     * and FROM as an output template, so the value is written as one: see [asLiteralFrom].
      *
      * The author is also copied into the `artist` metadata slot, which is what
      * `FFmpegMetadataPP` writes as the ID3 / Vorbis / MP4 artist tag. Without this,
@@ -2263,17 +2276,28 @@ class DownloadViewModel : ViewModel() {
         addOption("--embed-metadata")
 
         if (title.isNotBlank()) {
-            val escaped = title.replace(":", """\:""")
-            addOption("--parse-metadata", "$escaped:%(title)s")
+            addOption("--parse-metadata", "${title.asLiteralFrom()}:%(title)s ")
         }
 
         if (author.isNotBlank()) {
-            val escaped = author.replace(":", """\:""")
-            addOption("--parse-metadata", "$escaped:%(uploader)s")
+            addOption("--parse-metadata", "${author.asLiteralFrom()}:%(uploader)s ")
             // Map uploader → artist tag so audio files get a proper artist ID3/Vorbis tag
             addOption("--parse-metadata", "%(uploader)s:%(artist)s")
         }
     }
+
+    /**
+     * [this] as the FROM of a `--parse-metadata` that sets a field to exactly this text.
+     *
+     * Colons are escaped so the FROM:TO split passes them through, and percent signs so a
+     * title holding "%(" is not read as a field. A FROM made only of letters is taken by
+     * yt-dlp as the name of a field rather than as text, so a one-word title such as
+     * "Flickermood" read the missing field "Flickermood" and was saved as "NA". The space
+     * added at the end keeps it text, and the TO it is paired with ends in the same space,
+     * so the space is matched off again rather than kept.
+     */
+    private fun String.asLiteralFrom(): String =
+        replace("%", "%%").replace(":", """\:""") + " "
 
     /**
      * Resolves the output template against the title and author shown in the sheet.

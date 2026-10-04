@@ -97,6 +97,9 @@
     <string name="no_results_sign_in_body">Для доступа требуется аккаунт. Вход сохранит файлы cookie сайта и повторит попытку.</string>
     <string name="no_results_continue_body">Не удалось прочитать сведения, но сама загрузка может сработать. Продолжение загрузит наилучшее доступное качество.</string>
     <string name="no_results_refused_body">Источник отклонил запрос.</string>
+    <string name="no_results_gone_body">Это медиа недоступно. Возможно, его удалили или ссылка неверна.</string>
+    <string name="no_results_unsupported_body">Этот сайт не поддерживается, скачать здесь нечего.</string>
+    <string name="no_results_generic_body">Не удалось прочитать данные этой ссылки.</string>
     <string name="no_results_engine_report">Отчёт движка</string>
     <string name="no_results_copy_log">Копировать журнал</string>
     <string name="no_results_sign_in">Войти</string>
@@ -332,6 +335,19 @@
     <string name="history_failed_copy_log">Копировать журнал</string>
     <string name="history_failed_log_copied">Журнал ошибок скопирован в буфер обмена</string>
     <string name="history_failed_retry">Повторить</string>
+    <string name="queue_failed_choose_again">Скачать иначе</string>
+    <string name="queue_failed_select">Выбрать неудачные</string>
+    <string name="queue_failed_remove">Убрать</string>
+    <string name="queue_failed_remove_body">Они исчезнут из списка вместе с журналами. Скачанные файлы не затрагиваются.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">Убрать %d неудачную загрузку?</item>
+        <item quantity="few">Убрать %d неудачные загрузки?</item>
+        <item quantity="many">Убрать %d неудачных загрузок?</item>
+        <item quantity="other">Убрать %d неудачной загрузки?</item>
+    </plurals>
+    <string name="queue_failed_retrying">Повтор</string>
+    <string name="failed_stopped_at">Остановлено на этапе: %1$s · загружено %2$d%%</string>
+    <string name="failed_copy_url">Копировать URL</string>
     <string name="history_failed_dismiss">Закрыть</string>
     <string name="history_failed_clear_all">Очистить все ошибки</string>
     <string name="history_queue_clear_all">Очистить очередь</string>

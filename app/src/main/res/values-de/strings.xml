@@ -89,6 +89,9 @@
     <string name="no_results_sign_in_body">Die Quelle verlangt ein Konto, bevor sie das herausgibt. Beim Anmelden werden die Cookies der Seite gespeichert und es wird erneut versucht.</string>
     <string name="no_results_continue_body">Die Details ließen sich nicht lesen, der Download selbst kann aber trotzdem klappen. Wer weitermacht, bekommt die beste verfügbare Qualität.</string>
     <string name="no_results_refused_body">Die Quelle hat die Anfrage abgelehnt.</string>
+    <string name="no_results_gone_body">Dieses Medium ist nicht verfügbar. Es wurde vielleicht entfernt oder gelöscht, oder der Link stimmt nicht.</string>
+    <string name="no_results_unsupported_body">Diese Seite wird nicht unterstützt, hier gibt es nichts herunterzuladen.</string>
+    <string name="no_results_generic_body">Die Details dieses Links konnten nicht gelesen werden.</string>
     <string name="no_results_engine_report">Was die Engine gemeldet hat</string>
     <string name="no_results_copy_log">Protokoll kopieren</string>
     <string name="no_results_sign_in">Anmelden</string>
@@ -324,6 +327,17 @@
     <string name="history_failed_copy_log">Protokoll kopieren</string>
     <string name="history_failed_log_copied">Fehlerprotokoll in Zwischenablage kopiert</string>
     <string name="history_failed_retry">Wiederholen</string>
+    <string name="queue_failed_choose_again">Anders herunterladen</string>
+    <string name="queue_failed_select">Fehlgeschlagene auswählen</string>
+    <string name="queue_failed_remove">Entfernen</string>
+    <string name="queue_failed_remove_body">Sie verschwinden mit ihren Protokollen aus der Liste. Deine heruntergeladenen Dateien bleiben unberührt.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">%d fehlgeschlagenen Download entfernen?</item>
+        <item quantity="other">%d fehlgeschlagene Downloads entfernen?</item>
+    </plurals>
+    <string name="queue_failed_retrying">Neuer Versuch</string>
+    <string name="failed_stopped_at">Abgebrochen bei: %1$s · %2$d%% heruntergeladen</string>
+    <string name="failed_copy_url">URL kopieren</string>
     <string name="history_failed_dismiss">Verwerfen</string>
     <string name="history_failed_clear_all">Alle fehlgeschlagenen löschen</string>
     <string name="history_queue_clear_all">Warteschlange leeren</string>

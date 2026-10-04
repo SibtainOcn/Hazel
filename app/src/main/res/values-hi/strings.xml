@@ -89,6 +89,9 @@
     <string name="no_results_sign_in_body">यह स्रोत देने से पहले खाता माँगता है। साइन इन करने पर साइट की कुकीज़ सहेजी जाती हैं और दोबारा कोशिश होती है।</string>
     <string name="no_results_continue_body">जानकारी पढ़ी नहीं जा सकी, पर डाउनलोड फिर भी चल सकता है। आगे बढ़ने पर उपलब्ध सबसे अच्छी क्वालिटी दी जाती है।</string>
     <string name="no_results_refused_body">स्रोत ने अनुरोध ठुकरा दिया।</string>
+    <string name="no_results_gone_body">यह मीडिया उपलब्ध नहीं है। हो सकता है इसे हटा दिया गया हो, या लिंक गलत हो।</string>
+    <string name="no_results_unsupported_body">यह साइट समर्थित नहीं है, इसलिए यहाँ डाउनलोड करने को कुछ नहीं है।</string>
+    <string name="no_results_generic_body">इस लिंक का विवरण पढ़ा नहीं जा सका।</string>
     <string name="no_results_engine_report">इंजन ने क्या बताया</string>
     <string name="no_results_copy_log">लॉग कॉपी करें</string>
     <string name="no_results_sign_in">साइन इन करें</string>
@@ -324,6 +327,17 @@
     <string name="history_failed_copy_log">लॉग कॉपी करें</string>
     <string name="history_failed_log_copied">त्रुटि लॉग क्लिपबोर्ड पर कॉपी किया गया</string>
     <string name="history_failed_retry">पुनः प्रयास करें</string>
+    <string name="queue_failed_choose_again">दूसरे तरीके से डाउनलोड करें</string>
+    <string name="queue_failed_select">विफल चुनें</string>
+    <string name="queue_failed_remove">हटाएँ</string>
+    <string name="queue_failed_remove_body">वे अपने लॉग के साथ सूची से हट जाते हैं। आपकी डाउनलोड की गई फ़ाइलें नहीं छुई जातीं।</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">%d विफल डाउनलोड हटाएँ?</item>
+        <item quantity="other">%d विफल डाउनलोड हटाएँ?</item>
+    </plurals>
+    <string name="queue_failed_retrying">फिर से कोशिश</string>
+    <string name="failed_stopped_at">यहाँ रुका: %1$s · %2$d%% डाउनलोड हुआ</string>
+    <string name="failed_copy_url">URL कॉपी करें</string>
     <string name="history_failed_dismiss">खारिज करें</string>
     <string name="history_failed_clear_all">सभी विफल हटाएँ</string>
     <string name="history_queue_clear_all">कतार साफ़ करें</string>
