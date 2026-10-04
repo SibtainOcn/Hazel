@@ -65,18 +65,18 @@ English
 ## 📲 Screenshots
 
 <div>
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="30%" />
 </div>
 
 ## 💡 Features:
@@ -147,16 +147,6 @@ MD5:        3bcce9e14c616a9087766563875978e6
 ## 🤝 Contributing
 
 Contributions are welcome!
-
-You can help translate Hazel on [Hosted Weblate](https://hosted.weblate.org/engage/hazel/). No coding or Git needed.
-
-<a href="https://hosted.weblate.org/engage/hazel/">
-<img src="https://hosted.weblate.org/widgets/hazel/-/app/open-graph.png" alt="Translation status" />
-</a>
-
-<a href="https://hosted.weblate.org/engage/hazel/">
-<img src="https://hosted.weblate.org/widgets/hazel/-/multi-auto.svg" alt="Translation status by language" />
-</a>
 
 > [!Note]
 >
