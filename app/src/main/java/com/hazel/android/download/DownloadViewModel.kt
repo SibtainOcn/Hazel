@@ -545,6 +545,8 @@ class DownloadViewModel : ViewModel() {
 
         viewModelScope.launch {
             var failure: String? = null
+            // Read before anything can fail, so a failure is filed under the kind it was.
+            val audioOnly = SettingsRepository.getInstantAudioOnly(app).first()
             try {
                 if (!SettingsRepository.getIncognito(app).first()) {
                     withContext(Dispatchers.IO) { SearchHistoryRepository.record(app, url) }
@@ -565,9 +567,17 @@ class DownloadViewModel : ViewModel() {
                         "${MediaProbe.PROBE_PROCESS_ID}_instant_${LinkKey.digest(url)}"
                     )
                 }
+                // Audio only takes the sound alone, in the preferred language and codec where
+                // the source has them. Best audio stands in for a link read without its
+                // formats, and is extracted from a combined file if need be.
+                val language = options.preferredAudioLanguage.ifBlank { null }.takeIf { audioOnly }
                 val plans = items.map { info ->
-                    val format = GenericFormats.applyTo(info, step, null) ?: step
-                    DownloadPlan(info, format, info.title, info.uploader, null)
+                    val format = if (audioOnly) {
+                        info.autoPick(false, 0, language, options.audioCodecPreference) ?: BatchAudioFormats.BEST
+                    } else {
+                        GenericFormats.applyTo(info, step, null) ?: step
+                    }
+                    DownloadPlan(info, format, info.title, info.uploader, language)
                 }
                 dropWaiting()
                 if (plans.isEmpty()) failure = app.getString(R.string.no_results_error_title)
@@ -614,7 +624,7 @@ class DownloadViewModel : ViewModel() {
                             title = url,
                             author = "",
                             thumbnail = null,
-                            isVideo = true,
+                            isVideo = !audioOnly,
                             errorLog = log
                         )
                     )

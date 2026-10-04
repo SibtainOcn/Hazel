@@ -579,6 +579,8 @@
     <string name="processing_video_format">वीडियो फ़ॉर्मैट</string>
     <string name="processing_video_codec">पसंदीदा वीडियो कोडेक</string>
     <string name="processing_video_quality">वीडियो क्वालिटी</string>
+    <string name="processing_instant_save_as">Instant इस रूप में सहेजता है</string>
+    <string name="processing_instant_audio_only">केवल ऑडियो</string>
     <string name="processing_sub_original">मूल भाषा (स्वचालित)</string>
     <string name="processing_reset">सब डिफ़ॉल्ट पर रीसेट करें</string>
     <string name="processing_reset_title">सिंथेसाइज़िंग सेटिंग्स रीसेट करें?</string>

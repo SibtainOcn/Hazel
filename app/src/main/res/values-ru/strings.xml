@@ -592,6 +592,8 @@
     <string name="processing_video_format">Формат видео</string>
     <string name="processing_video_codec">Предпочитаемый видеокодек</string>
     <string name="processing_video_quality">Качество видео</string>
+    <string name="processing_instant_save_as">Instant сохраняет как</string>
+    <string name="processing_instant_audio_only">Только аудио</string>
     <string name="processing_sub_original">Исходный язык (автоматические)</string>
     <string name="processing_reset">Сбросить всё</string>
     <string name="processing_reset_title">Сбросить настройки синтеза?</string>

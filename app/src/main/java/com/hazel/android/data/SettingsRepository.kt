@@ -227,6 +227,21 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs.writeOptions(SHEET_OPTIONS, change(prefs.readOptions(SHEET_OPTIONS))) }
     }
 
+    // ── Hazel Instant ──
+    //
+    // The one choice Instant cannot take from the sheet's settings: a sheet is told audio or
+    // video by the tab it is on, and Instant has no sheet to be told by.
+
+    private val INSTANT_AUDIO_ONLY_KEY = booleanPreferencesKey("instant_audio_only")
+
+    /** Instant saves the sound alone rather than the video. Off unless chosen. */
+    fun getInstantAudioOnly(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[INSTANT_AUDIO_ONLY_KEY] ?: false }
+
+    suspend fun setInstantAudioOnly(context: Context, audioOnly: Boolean) {
+        context.dataStore.edit { prefs -> prefs[INSTANT_AUDIO_ONLY_KEY] = audioOnly }
+    }
+
     // ── Link reading ──
     //
     // Applies to every site: these are plain yt-dlp network settings, not per-extractor

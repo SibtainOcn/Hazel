@@ -2,6 +2,7 @@ package com.hazel.android.ui.screens.more
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Audiotrack
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Crop
@@ -48,7 +49,8 @@ import kotlinx.coroutines.launch
  *
  * These are the same settings the download sheet changes. A change made in the sheet is
  * saved here and a change made here is what the next sheet opens with, so there is one set
- * of settings rather than defaults and overrides that drift apart.
+ * of settings rather than defaults and overrides that drift apart. The one exception is
+ * whether Hazel Instant saves audio or video, which a sheet is told by its tab.
  */
 @Composable
 fun ProcessingScreen(onBack: () -> Unit) {
@@ -56,6 +58,8 @@ fun ProcessingScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val options by SettingsRepository.getDownloadOptions(context)
         .collectAsState(initial = DownloadOptions())
+    val instantAudioOnly by SettingsRepository.getInstantAudioOnly(context)
+        .collectAsState(initial = false)
 
     var dialog by remember { mutableStateOf(ProcessingDialog.NONE) }
     val close = { dialog = ProcessingDialog.NONE }
@@ -71,6 +75,24 @@ fun ProcessingScreen(onBack: () -> Unit) {
         description = stringResource(R.string.processing_description),
         onBack = onBack
     ) {
+        // ── Hazel Instant ──
+        SettingsSection(
+            title = stringResource(R.string.instant_label),
+            rows = listOf<@Composable () -> Unit>(
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.Bolt,
+                        title = stringResource(R.string.processing_instant_save_as),
+                        value = stringResource(
+                            if (instantAudioOnly) R.string.processing_instant_audio_only
+                            else R.string.format_sheet_tab_video
+                        ),
+                        onClick = { dialog = ProcessingDialog.INSTANT_SAVE_AS }
+                    )
+                }
+            )
+        )
+
         // ── General ──
         SettingsSection(
             title = stringResource(R.string.processing_section_general),
@@ -263,6 +285,20 @@ fun ProcessingScreen(onBack: () -> Unit) {
     when (dialog) {
         ProcessingDialog.NONE -> Unit
 
+        ProcessingDialog.INSTANT_SAVE_AS -> SingleChoiceDialog(
+            title = stringResource(R.string.processing_instant_save_as),
+            choices = listOf(
+                false to stringResource(R.string.format_sheet_tab_video),
+                true to stringResource(R.string.processing_instant_audio_only)
+            ),
+            selected = instantAudioOnly,
+            onSelect = { audioOnly ->
+                scope.launch { SettingsRepository.setInstantAudioOnly(context, audioOnly) }
+                close()
+            },
+            onDismiss = close
+        )
+
         ProcessingDialog.SPONSORBLOCK -> SponsorBlockDialog(
             options = options,
             onConfirm = { changed ->
@@ -390,7 +426,7 @@ fun ProcessingScreen(onBack: () -> Unit) {
 }
 
 private enum class ProcessingDialog {
-    NONE, SPONSORBLOCK, SPONSORBLOCK_SERVER, BITRATE, AUDIO_LANGUAGE, AUDIO_CODEC, AUDIO_FORMAT,
+    NONE, INSTANT_SAVE_AS, SPONSORBLOCK, SPONSORBLOCK_SERVER, BITRATE, AUDIO_LANGUAGE, AUDIO_CODEC, AUDIO_FORMAT,
     SUBTITLE_LANGUAGES, VIDEO_FORMAT, VIDEO_CODEC, VIDEO_QUALITY, RESET
 }
 

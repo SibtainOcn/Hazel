@@ -586,6 +586,8 @@
     <string name="processing_video_format">Formato de vídeo</string>
     <string name="processing_video_codec">Codec de vídeo preferido</string>
     <string name="processing_video_quality">Qualidade de vídeo</string>
+    <string name="processing_instant_save_as">O Instant salva como</string>
+    <string name="processing_instant_audio_only">Somente áudio</string>
     <string name="processing_sub_original">Idioma original (automático)</string>
     <string name="processing_reset">Redefinir tudo</string>
     <string name="processing_reset_title">Redefinir as configurações de síntese?</string>

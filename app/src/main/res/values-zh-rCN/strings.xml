@@ -572,6 +572,8 @@
     <string name="processing_video_format">视频格式</string>
     <string name="processing_video_codec">首选视频编码</string>
     <string name="processing_video_quality">视频画质</string>
+    <string name="processing_instant_save_as">Instant 保存为</string>
+    <string name="processing_instant_audio_only">仅音频</string>
     <string name="processing_sub_original">原始语言（自动）</string>
     <string name="processing_reset">全部恢复默认</string>
     <string name="processing_reset_title">重置合成设置？</string>
