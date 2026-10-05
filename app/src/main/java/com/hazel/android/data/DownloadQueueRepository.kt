@@ -1,6 +1,7 @@
 package com.hazel.android.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.hazel.android.download.DownloadOptions
@@ -77,6 +78,7 @@ data class QueuedDownload(
 object DownloadQueueRepository {
 
     private val QUEUE_KEY = stringPreferencesKey("download_queue")
+    private val HELD_KEY = booleanPreferencesKey("download_queue_held")
 
     /** Observe the current queue as a reactive Flow. */
     fun getQueue(context: Context): Flow<List<QueuedDownload>> =
@@ -137,6 +139,21 @@ object DownloadQueueRepository {
             val remaining = decode(prefs[QUEUE_KEY]).filterNot { it.url == url }
             if (remaining.isEmpty()) prefs.remove(QUEUE_KEY)
             else prefs[QUEUE_KEY] = encode(remaining)
+        }
+    }
+
+    /**
+     * Whether the queue was paused as a whole. A queue held by Pause all is still held after
+     * the app is closed and opened again: what is waiting is shown, and nothing starts until
+     * the user resumes it.
+     */
+    suspend fun isHeld(context: Context): Boolean = withContext(Dispatchers.IO) {
+        context.dataStore.data.first()[HELD_KEY] == true
+    }
+
+    suspend fun setHeld(context: Context, held: Boolean) = withContext(Dispatchers.IO) {
+        context.dataStore.edit { prefs ->
+            if (held) prefs[HELD_KEY] = true else prefs.remove(HELD_KEY)
         }
     }
 

@@ -213,10 +213,9 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             text = {
                                 Text(stringResource(if (isMulti) R.string.download_pause_all else R.string.download_pause))
                             },
-                            enabled = !state.isProcessing,
                             onClick = {
                                 menuOpen = false
-                                downloadViewModel.pauseDownload()
+                                downloadViewModel.pauseAll()
                             }
                         )
                     } else if (anythingInHand) {
@@ -467,7 +466,9 @@ private fun runningItems(state: DownloadState, queue: List<QueuedDownload>): Lis
     state.active?.let { active ->
         val batchItem = state.batch.firstOrNull { it.url == active.url }
         if (state.isDownloading || batchItem?.state == BatchState.PAUSED) {
-            items += RunningItem(active, state.isDownloading, batchItem)
+            // A paused link is never drawn as running, even in the moment between its pause
+            // and the run letting go, so its stage track does not go on moving.
+            items += RunningItem(active, state.isDownloading && batchItem?.state != BatchState.PAUSED, batchItem)
         }
     }
     queue.filter { it.paused && items.none { running -> running.info.url == it.url } }.forEach { held ->

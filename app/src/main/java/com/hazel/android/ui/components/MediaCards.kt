@@ -184,10 +184,30 @@ fun MediaCard(
                 )
             }
 
+            // A paused link says so in the middle of its artwork, where the moving stage
+            // track would otherwise be, and nothing on it moves.
+            if (isPaused && !isDownloading) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.55f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.Pause,
+                        contentDescription = stringResource(R.string.download_paused),
+                        modifier = Modifier.size(28.dp),
+                        tint = Color.White
+                    )
+                }
+            }
+
             // The stage track goes under the title and the readouts, so its shade dims the
             // artwork and not the words laid over it. Fetch is the stage until the transfer is
             // over, and its line fills with it.
-            if ((isDownloading || isPaused) && processingSteps.isNotEmpty()) {
+            if (isDownloading && processingSteps.isNotEmpty()) {
                 ProcessingTracker(
                     steps = processingSteps,
                     current = if (isProcessing) processingStep else 0,

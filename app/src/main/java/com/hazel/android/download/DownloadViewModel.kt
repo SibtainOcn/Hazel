@@ -358,6 +358,16 @@ class DownloadViewModel : ViewModel() {
             val owed = pending.filterNot { it.paused }
             if (owed.isEmpty()) return@launch
 
+            // A queue held by Pause all stays held: what is waiting is shown, not started.
+            if (runCatching { DownloadQueueRepository.isHeld(app) }.getOrDefault(false)) {
+                holdRun = true
+                synchronized(queue) {
+                    owed.filter { saved -> queue.none { it.url == saved.url } }
+                        .forEach { queue.addLast(it) }
+                }
+                return@launch
+            }
+
             synchronized(queue) {
                 // Straight into the queue rather than back through the front door: they are
                 // already written down, and enqueuing them again would only rewrite them.
@@ -374,6 +384,14 @@ class DownloadViewModel : ViewModel() {
 
     /** Set while a batch runs, so a cancel stops the whole run rather than one item. */
     @Volatile private var isBatchCancelled = false
+
+    /**
+     * Set by Pause all: the run stops once the download in hand is paused, or saved if it was
+     * already being finished, and nothing waiting starts until Resume. A card's own Pause
+     * leaves this alone, so the rest of the queue goes on without that link. Written down as
+     * well, so a queue held when the app went away is still held when it comes back.
+     */
+    @Volatile private var holdRun = false
 
     /**
      * The folder the download in hand works in: one per link, under the temporary downloads
@@ -1238,6 +1256,9 @@ class DownloadViewModel : ViewModel() {
     ) {
         if (plans.isEmpty()) return
 
+        // Asking for a download is asking for the queue to move again.
+        releaseHold()
+
         com.hazel.android.util.PermissionHelper.ensureNotificationPermission(context)
 
         // Asked here, on the versions that still need it, because this is where a finished
@@ -1375,8 +1396,11 @@ class DownloadViewModel : ViewModel() {
                 throttledRate = SettingsRepository.getThrottledRate(app).first()
             )
 
+            // Whether this run stopped for a pause, which is not the same as finishing.
+            var pausedNow = false
+
             while (true) {
-                if (isBatchCancelled) break
+                if (isBatchCancelled || holdRun) break
                 // A paused link stays where it is and is stepped over: the user stopped it,
                 // and starting something else is not a reason to start it again. The run
                 // is let go only once it has closed, below.
@@ -1432,6 +1456,14 @@ class DownloadViewModel : ViewModel() {
                 try {
                     if (!downloadDir.exists()) downloadDir.mkdirs()
 
+                    // Paused before the engine started, so there is no process to stop yet:
+                    // honoured here rather than after the whole download has run.
+                    if (isPaused || holdRun) {
+                        holdForResume(next)
+                        pausedNow = true
+                        break
+                    }
+
                     try {
                         executeYtDlp(
                             buildRequest(
@@ -1471,6 +1503,7 @@ class DownloadViewModel : ViewModel() {
 
                     if (isPaused) {
                         holdForResume(next)
+                        pausedNow = true
                         break
                     }
 
@@ -1497,6 +1530,7 @@ class DownloadViewModel : ViewModel() {
                 } catch (_: CancellationException) {
                     if (isPaused) {
                         holdForResume(next)
+                        pausedNow = true
                         break
                     }
                     if (isBatchCancelled) {
@@ -1518,6 +1552,7 @@ class DownloadViewModel : ViewModel() {
                 } catch (e: Exception) {
                     if (isPaused) {
                         holdForResume(next)
+                        pausedNow = true
                         break
                     }
 
@@ -1610,10 +1645,11 @@ class DownloadViewModel : ViewModel() {
             // this one then stopped the service and reported the run over under it. A link
             // that arrived while this was closing is handed to a new run instead.
             val more = synchronized(queue) {
-                val more = !isBatchCancelled && queue.any { !it.paused }
+                val more = !isBatchCancelled && queue.any { !it.paused } && !holdRun
                 if (!more) {
                     DownloadService.stop(app)
-                    finishBatch(app)
+                    if (!isBatchCancelled && (pausedNow || holdRun)) settleHeld(app)
+                    else finishBatch(app)
                 }
                 if (runOwner === token) runOwner = null
                 more
@@ -1669,7 +1705,20 @@ class DownloadViewModel : ViewModel() {
         // Nothing is running, so every partial download on disk is one being given up.
         runCatching { com.hazel.android.util.SdCards.workRoots().forEach { root -> root.listFiles()?.forEach { it.deleteRecursively() } } }
         DownloadNotificationHelper.cancelProgress(app)
-        DownloadNotificationHelper.showCancelled(app)
+        DownloadNotificationHelper.cancelPaused(app)
+        // Several links given up together say what each came to, as a finished run does.
+        val counts = RunCounts.of(_state.value.batch)
+        if (counts.wantsSummary) {
+            DownloadNotificationHelper.showRunSummary(
+                app,
+                done = counts.done,
+                failed = counts.failed,
+                cancelled = counts.cancelled,
+                cancelledByUser = true
+            )
+        } else {
+            DownloadNotificationHelper.showCancelled(app)
+        }
 
         synchronized(queue) { queue.clear() }
         _state.update { s -> s.copy(
@@ -1821,6 +1870,7 @@ class DownloadViewModel : ViewModel() {
     fun cancelAllDownloads() {
         isCancelled = true
         isBatchCancelled = true
+        releaseHold()
 
         _state.update { s -> s.copy(
             batch = s.batch.map {
@@ -1868,6 +1918,61 @@ class DownloadViewModel : ViewModel() {
     }
 
     /**
+     * Pauses the queue: the download in hand is paused, and nothing waiting starts until
+     * Resume. This is what Pause all and the notification's Pause mean. A card's own Pause is
+     * [pauseDownload], which pauses that link and lets the rest go on.
+     *
+     * The queue is held even when the download in hand cannot be paused because its file is
+     * already being finished: that one saves, and the queue stops behind it.
+     */
+    fun pauseAll() {
+        if (!_state.value.isDownloading && !isRunning()) return
+        holdRun = true
+        downloadScope.launch {
+            runCatching { DownloadQueueRepository.setHeld(HazelApp.instance, true) }
+        }
+        pauseDownload()
+    }
+
+    /** Lets the queue move again after Pause all, in memory and on disk. */
+    private fun releaseHold() {
+        holdRun = false
+        downloadScope.launch {
+            runCatching { DownloadQueueRepository.setHeld(HazelApp.instance, false) }
+        }
+    }
+
+    /**
+     * Lets go of a run stopped by a pause without calling it finished.
+     *
+     * Nothing is reported: the run is waiting for Resume, and the paused notification says
+     * so. The paused link keeps its card and the figures it stopped at. A queue held with
+     * nothing paused, because the file in hand was already being finished, still gets a
+     * paused notification, so there is something in the shade to resume it from.
+     */
+    private fun settleHeld(context: Context) {
+        _state.update { s -> s.copy(
+            isDownloading = false,
+            isProcessing = false,
+            eta = "",
+            status = "",
+            active = s.active?.takeIf { active ->
+                s.batch.any { it.url == active.url && it.state == BatchState.PAUSED }
+            }
+        ) }
+        val waiting = synchronized(queue) {
+            queue.firstOrNull()?.takeIf { queue.none { it.paused } }
+        } ?: return
+        DownloadNotificationHelper.showPaused(
+            context = context,
+            progress = 0,
+            mediaTitle = waiting.title,
+            doneBytes = 0L,
+            totalBytes = 0L
+        )
+    }
+
+    /**
      * Starts every paused download again, and the queue with them.
      *
      * Works whether or not something is running: a paused link waits in the queue, stepped
@@ -1877,6 +1982,7 @@ class DownloadViewModel : ViewModel() {
      */
     fun resumeDownload() {
         val app = HazelApp.instance
+        releaseHold()
         downloadScope.launch {
             val pending = runCatching { DownloadQueueRepository.load(app) }
                 .getOrDefault(emptyList())

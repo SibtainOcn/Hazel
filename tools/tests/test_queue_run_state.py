@@ -17,6 +17,9 @@ Verifies:
    the saved, failed and cancelled counts, opening the queue; single links and fully saved
    runs keep their own notifications. The strings exist in every language.
 7. Nothing earlier is undone: startBatch still adds without a duplicate check.
+8. Pause all holds the whole run until Resume, kept across a restart; a card's own Pause
+   pauses that link and lets the rest go on. A paused card shows a pause glyph and nothing on
+   it moves. Cancelling a held queue reports every count.
 
 Run:
     python tools/tests/test_queue_run_state.py
@@ -303,6 +306,85 @@ def test_screens():
                "val waiting = queueList.filterNot { it.url in runningUrls || it.paused }" in queue)
 
 
+def replay_pause(new_way, pause_all):
+    """A queue of five, paused on the second item. Returns what started after the pause."""
+    queue = ["a", "b", "c", "d", "e"]
+    started, paused, hold = [], [], False
+    while queue:
+        if new_way and hold:
+            break
+        item = queue.pop(0)
+        started.append(item)
+        if item == "b":
+            paused.append(item)
+            if new_way and pause_all:
+                hold = True
+            # The run goes on while anything unpaused is waiting, unless the queue is held.
+    after = started[started.index("b") + 1:]
+    return after, paused
+
+
+def test_pause():
+    print("\n--- Suite 4: pausing a run ---")
+    after, _ = replay_pause(new_way=False, pause_all=True)
+    check("Old: Pause all paused one item and the run went on, as reported", after, ["c", "d", "e"])
+    after, paused = replay_pause(new_way=True, pause_all=True)
+    check("New: Pause all starts nothing after the item in hand", (after, paused), ([], ["b"]))
+    after, _ = replay_pause(new_way=True, pause_all=False)
+    check("New: a card's own Pause still lets the rest of the queue go on", after, ["c", "d", "e"])
+
+    vm = VM.read_text(encoding="utf-8")
+    pause_all = function(vm, "fun pauseAll()")
+    check_true("Pause all holds the run", "holdRun = true" in pause_all)
+    check_true("Pause all writes the hold down", "DownloadQueueRepository.setHeld(HazelApp.instance, true)" in pause_all)
+    check_true("Pause all pauses the download in hand", "pauseDownload()" in pause_all)
+
+    run = function(vm, "private fun runQueue(")
+    check_true("A held run takes nothing more from the queue", "if (isBatchCancelled || holdRun) break" in run)
+    check_true("A pause asked for before the engine starts is honoured before it starts",
+               run.find("if (isPaused || holdRun) {") < run.find("executeYtDlp(") and run.find("if (isPaused || holdRun) {") > 0)
+    check("Every pause in the run is recorded as one", run.count("holdForResume(next)"), run.count("pausedNow = true"))
+    close = block(run, "val more = synchronized(queue) {", 700)
+    check_true("A held run does not start another", "queue.any { !it.paused } && !holdRun" in close)
+    check_true("A paused run is let go without being reported finished",
+               "if (!isBatchCancelled && (pausedNow || holdRun)) settleHeld(app)" in close
+               and "else finishBatch(app)" in close)
+
+    settle = function(vm, "private fun settleHeld(")
+    check_true("A held run stops showing as running", "isDownloading = false" in settle)
+    check_true("Its paused link keeps its card", "it.state == BatchState.PAUSED" in settle)
+    check_true("A hold with nothing paused still leaves a Resume in the shade", "showPaused(" in settle)
+
+    for name in ("fun startBatch(", "fun resumeDownload()", "fun cancelAllDownloads()"):
+        check_true(f"{name} releases the hold", "releaseHold()" in function(vm, name))
+    check_true("A queue held when the app went away stays held",
+               "DownloadQueueRepository.isHeld(app)" in function(vm, "private fun restoreQueue()"))
+    discard = function(vm, "private fun discardHeldDownload()")
+    check_true("Cancelling a held queue reports every count", "RunCounts.of(_state.value.batch)" in discard
+               and "showRunSummary(" in discard and "showCancelled(app)" in discard)
+
+    repo = (SRC / "data/DownloadQueueRepository.kt").read_text(encoding="utf-8")
+    check_true("The hold is its own key", 'booleanPreferencesKey("download_queue_held")' in repo)
+    check_true("The hold is removed rather than written false", "if (held) prefs[HELD_KEY] = true else prefs.remove(HELD_KEY)" in repo)
+
+    receiver = (SRC / "download/DownloadActionReceiver.kt").read_text(encoding="utf-8")
+    check_true("The notification's Pause pauses the queue", "ACTION_PAUSE -> viewModel?.pauseAll()" in receiver)
+
+    queue = QUEUE.read_text(encoding="utf-8")
+    menu = block(queue, "if (state.isDownloading) {", 900)
+    check_true("The queue menu's Pause pauses the queue", "downloadViewModel.pauseAll()" in menu)
+    check_true("A card's Pause pauses only its link", "onPause = downloadViewModel::pauseDownload" in queue)
+    check_true("A paused link is never drawn as running",
+               "state.isDownloading && batchItem?.state != BatchState.PAUSED" in function(queue, "private fun runningItems("))
+
+    card = (SRC / "ui/components/MediaCards.kt").read_text(encoding="utf-8")
+    glyph = block(card, "if (isPaused && !isDownloading) {", 700)
+    check_true("A paused card shows a pause glyph over its artwork", "Icons.Filled.Pause" in glyph)
+    check_true("The stage track only moves for a running download",
+               "if (isDownloading && processingSteps.isNotEmpty()) {" in card
+               and "if ((isDownloading || isPaused) && processingSteps.isNotEmpty())" not in card)
+
+
 def main():
     print("=" * 70)
     print("  Queue run state & run summary harness")
@@ -311,6 +393,7 @@ def main():
     test_view_model()
     test_summary()
     test_screens()
+    test_pause()
     print(f"\n  Summary: {PASS_COUNT}/{PASS_COUNT + FAIL_COUNT} tests PASSED, {FAIL_COUNT} FAILED")
     return 0 if FAIL_COUNT == 0 else 1
 
