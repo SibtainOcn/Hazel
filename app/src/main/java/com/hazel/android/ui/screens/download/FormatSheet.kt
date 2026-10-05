@@ -658,6 +658,7 @@ fun FormatSheet(
 
             DownloadSheetFooter(
                 link = info.url,
+                onLinkClick = { openDialog = SheetDialog.LINK },
                 onFeedback = { message -> feedback = Feedback(message) }
             )
 
@@ -834,6 +835,12 @@ fun FormatSheet(
             },
             onDismiss = { openDialog = SheetDialog.NONE }
         )
+
+        SheetDialog.LINK -> LinkOptionsDialog(
+            links = listOf(info.url),
+            onFeedback = { message -> feedback = Feedback(message) },
+            onDismiss = { openDialog = SheetDialog.NONE }
+        )
     }
 }
 
@@ -992,7 +999,7 @@ private fun SheetTab(label: String, selected: Boolean, enabled: Boolean, onClick
 }
 
 /** Which of the sheet's dialogs is open. Only one can be at a time. */
-private enum class SheetDialog { NONE, CUT, LIVE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY, CONTAINER, COOKIES }
+private enum class SheetDialog { NONE, CUT, LIVE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY, CONTAINER, COOKIES, LINK }
 
 /** One message from the footer; a new one for every tap, so a repeat starts its time over. */
 private class Feedback(val message: String)
