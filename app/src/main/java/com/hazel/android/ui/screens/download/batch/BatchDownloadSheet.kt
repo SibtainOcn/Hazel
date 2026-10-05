@@ -106,6 +106,7 @@ import com.hazel.android.ui.screens.download.ChaptersDialog
 import com.hazel.android.ui.screens.download.CookiesDialog
 import com.hazel.android.ui.screens.download.rememberUseCookies
 import com.hazel.android.ui.screens.download.IncognitoButton
+import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.ui.screens.download.SheetLinkButton
 import com.hazel.android.ui.screens.download.FEEDBACK_MS
 import com.hazel.android.ui.screens.download.FeedbackToast
@@ -226,6 +227,12 @@ fun BatchDownloadSheet(
         delay(FEEDBACK_MS)
         feedback = null
     }
+
+    // The link dialog, kept out here and composed beside the sheet rather than inside it,
+    // so closing it never leaves the sheet ignoring touches.
+    var linkDialogOpen by remember { mutableStateOf(false) }
+    val links = remember(results) { results.map { it.url } }
+    val linkSource = sourceUrl?.trim()?.takeIf { it.startsWith("http") && it.none(Char::isWhitespace) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -668,9 +675,8 @@ fun BatchDownloadSheet(
                 trailing = {
                     val say: (String) -> Unit = { message -> feedback = BatchFeedback(message) }
                     SheetLinkButton(
-                        links = remember(results) { results.map { it.url } },
-                        onFeedback = say,
-                        sourceUrl = sourceUrl?.trim()?.takeIf { it.startsWith("http") && it.none(Char::isWhitespace) }
+                        enabled = links.isNotEmpty(),
+                        onClick = { linkDialogOpen = true }
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     IncognitoButton(onFeedback = say)
@@ -693,6 +699,16 @@ fun BatchDownloadSheet(
             FeedbackToast(shownFeedback)
         }
         }
+    }
+
+    // Given several links, Copy takes all of them and Open is left out; the one link the
+    // set was read from, such as a playlist, is shown, copied and opened instead.
+    if (linkDialogOpen) {
+        LinkOptionsDialog(
+            links = linkSource?.let { listOf(it) } ?: links,
+            onFeedback = { message -> feedback = BatchFeedback(message) },
+            onDismiss = { linkDialogOpen = false }
+        )
     }
 
     // ── The link's own sheet, which is what tapping a row opens ──
