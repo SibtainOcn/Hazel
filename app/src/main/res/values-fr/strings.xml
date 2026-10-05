@@ -93,6 +93,9 @@
     <string name="no_results_sign_in_body">La source demande un compte avant de livrer ceci. Se connecter enregistre les cookies du site et réessaie.</string>
     <string name="no_results_continue_body">Les détails n\'ont pas pu être lus, mais le téléchargement peut tout de même fonctionner. En continuant, la meilleure qualité disponible est proposée.</string>
     <string name="no_results_refused_body">La source a refusé la demande.</string>
+    <string name="no_results_gone_body">Ce média n’est pas disponible. Il a peut-être été retiré ou supprimé, ou le lien est erroné.</string>
+    <string name="no_results_unsupported_body">Ce site n’est pas pris en charge : il n’y a rien à télécharger ici.</string>
+    <string name="no_results_generic_body">Les détails de ce lien n’ont pas pu être lus.</string>
     <string name="no_results_engine_report">Ce que le moteur a signalé</string>
     <string name="no_results_copy_log">Copier le journal</string>
     <string name="no_results_sign_in">Se connecter</string>
@@ -328,6 +331,18 @@
     <string name="history_failed_copy_log">Copier le journal</string>
     <string name="history_failed_log_copied">Journal d\'erreurs copié dans le presse-papiers</string>
     <string name="history_failed_retry">Réessayer</string>
+    <string name="queue_failed_choose_again">Télécharger autrement</string>
+    <string name="queue_failed_select">Sélectionner les échecs</string>
+    <string name="queue_failed_remove">Retirer</string>
+    <string name="queue_failed_remove_body">Ils quittent la liste avec leurs journaux. Vos fichiers téléchargés ne sont pas touchés.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">Retirer %d téléchargement échoué ?</item>
+        <item quantity="many">Retirer %d de téléchargements échoués ?</item>
+        <item quantity="other">Retirer %d téléchargements échoués ?</item>
+    </plurals>
+    <string name="queue_failed_retrying">Nouvel essai</string>
+    <string name="failed_stopped_at">Arrêté à : %1$s · %2$d%% téléchargé</string>
+    <string name="failed_copy_url">Copier l’URL</string>
     <string name="history_failed_dismiss">Ignorer</string>
     <string name="history_failed_clear_all">Tout effacer</string>
     <string name="history_queue_clear_all">Vider la file d\'attente</string>
@@ -489,6 +504,8 @@
     <string name="format_filter_smallest">Format le plus léger (par résolution)</string>
     <string name="format_filter_generic">Générique</string>
     <string name="format_source_title">Source des formats</string>
+    <string name="format_source_signed_in_title">NewPipe ne peut pas utiliser votre connexion</string>
+    <string name="format_source_signed_in_body">Ce site a une connexion enregistrée et Utiliser les cookies est activé. NewPipe n\'envoie pas de cookies, donc yt-dlp lit les formats. Désactivez Utiliser les cookies dans Cookies pour les lire avec NewPipe.</string>
     <string name="format_sort_title">Trier par</string>
     <string name="format_update">Actualiser</string>
 
@@ -584,6 +601,10 @@
     <string name="processing_video_format">Format vidéo</string>
     <string name="processing_video_codec">Codec vidéo préféré</string>
     <string name="processing_video_quality">Qualité vidéo</string>
+    <string name="processing_instant_save_as">Instant enregistre en</string>
+    <string name="processing_instant_audio_only">Audio seul</string>
+    <string name="processing_section_kind">Audio ou vidéo</string>
+    <string name="processing_sheet_opens_on">La feuille de téléchargement s’ouvre sur</string>
     <string name="processing_sub_original">Langue d\'origine (automatique)</string>
     <string name="processing_reset">Tout réinitialiser</string>
     <string name="processing_reset_title">Réinitialiser les réglages de synthèse ?</string>
@@ -734,7 +755,7 @@
     <string name="home_start_search">Rechercher</string>
     <string name="home_start_downloads">Téléchargements</string>
     <string name="more_getting_started">Prise en main</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">Téléchargement lancé</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Réglages de synthèse</string>

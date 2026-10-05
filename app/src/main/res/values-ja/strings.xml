@@ -85,6 +85,9 @@
     <string name="no_results_sign_in_body">このソースを取得するにはアカウントが必要です。ログインするとCookieが保存され、再試行されます。</string>
     <string name="no_results_continue_body">詳細は読み込めませんでしたが、ダウンロード自体は可能な場合があります。続行すると利用可能な最高画質で取得します。</string>
     <string name="no_results_refused_body">ソースによってリクエストが拒否されました。</string>
+    <string name="no_results_gone_body">このメディアは利用できません。削除されたか、リンクが間違っている可能性があります。</string>
+    <string name="no_results_unsupported_body">このサイトには対応していないため、ダウンロードできるものはありません。</string>
+    <string name="no_results_generic_body">このリンクの詳細を読み込めませんでした。</string>
     <string name="no_results_engine_report">エンジンのレポート</string>
     <string name="no_results_copy_log">ログをコピー</string>
     <string name="no_results_sign_in">ログイン</string>
@@ -320,6 +323,16 @@
     <string name="history_failed_copy_log">ログをコピー</string>
     <string name="history_failed_log_copied">エラーログをクリップボードにコピーしました</string>
     <string name="history_failed_retry">再試行</string>
+    <string name="queue_failed_choose_again">別の方法でダウンロード</string>
+    <string name="queue_failed_select">失敗を選択</string>
+    <string name="queue_failed_remove">削除</string>
+    <string name="queue_failed_remove_body">ログとともにリストから消えます。ダウンロード済みのファイルはそのままです。</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="other">失敗した %d 件を削除しますか？</item>
+    </plurals>
+    <string name="queue_failed_retrying">再試行中</string>
+    <string name="failed_stopped_at">停止した段階: %1$s · %2$d%% ダウンロード済み</string>
+    <string name="failed_copy_url">URLをコピー</string>
     <string name="history_failed_dismiss">閉じる</string>
     <string name="history_failed_clear_all">失敗した項目をすべて消去</string>
     <string name="history_queue_clear_all">キューを消去</string>
@@ -477,6 +490,8 @@
     <string name="format_filter_smallest">最小フォーマット（解像度ごと）</string>
     <string name="format_filter_generic">汎用</string>
     <string name="format_source_title">フォーマットの取得元</string>
+    <string name="format_source_signed_in_title">NewPipe ではサインインを使えません</string>
+    <string name="format_source_signed_in_body">このサイトにはサインインが保存されており、Cookieを使用がオンです。NewPipe は Cookie を送信しないため、形式は yt-dlp が読み込みます。NewPipe で読み込むには、Cookie で Cookieを使用をオフにしてください。</string>
     <string name="format_sort_title">並べ替え</string>
     <string name="format_update">更新</string>
 
@@ -570,6 +585,10 @@
     <string name="processing_video_format">動画フォーマット</string>
     <string name="processing_video_codec">優先する動画コーデック</string>
     <string name="processing_video_quality">動画の画質</string>
+    <string name="processing_instant_save_as">Instant の保存形式</string>
+    <string name="processing_instant_audio_only">音声のみ</string>
+    <string name="processing_section_kind">音声か動画か</string>
+    <string name="processing_sheet_opens_on">ダウンロードシートの初期タブ</string>
     <string name="processing_sub_original">元の言語（自動）</string>
     <string name="processing_reset">すべてデフォルトに戻す</string>
     <string name="processing_reset_title">合成の設定をリセットしますか？</string>
@@ -718,7 +737,7 @@
     <string name="home_start_search">検索</string>
     <string name="home_start_downloads">ダウンロード</string>
     <string name="more_getting_started">はじめに</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">ダウンロードを開始しました</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">合成の設定</string>

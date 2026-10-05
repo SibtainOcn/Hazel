@@ -105,6 +105,7 @@ object SettingsRepository {
         val preferredAudioCodec = stringPreferencesKey("${prefix}preferred_audio_codec")
         val preferredVideoCodec = stringPreferencesKey("${prefix}preferred_video_codec")
         val videoQuality = intPreferencesKey("${prefix}video_quality")
+        val sheetOpensOnAudio = booleanPreferencesKey("${prefix}sheet_opens_on_audio")
     }
 
     private val SHEET_OPTIONS = OptionKeys("")
@@ -132,7 +133,8 @@ object SettingsRepository {
             preferredAudioLanguage = this[keys.preferredAudioLanguage] ?: defaults.preferredAudioLanguage,
             preferredAudioCodec = this[keys.preferredAudioCodec] ?: defaults.preferredAudioCodec,
             preferredVideoCodec = this[keys.preferredVideoCodec] ?: defaults.preferredVideoCodec,
-            videoQuality = this[keys.videoQuality] ?: defaults.videoQuality
+            videoQuality = this[keys.videoQuality] ?: defaults.videoQuality,
+            sheetOpensOnAudio = this[keys.sheetOpensOnAudio] ?: defaults.sheetOpensOnAudio
         )
     }
 
@@ -157,6 +159,7 @@ object SettingsRepository {
         this[keys.preferredAudioCodec] = options.preferredAudioCodec
         this[keys.preferredVideoCodec] = options.preferredVideoCodec
         this[keys.videoQuality] = options.videoQuality
+        this[keys.sheetOpensOnAudio] = options.sheetOpensOnAudio
     }
 
     fun getDownloadOptions(context: Context): Flow<DownloadOptions> =
@@ -225,6 +228,21 @@ object SettingsRepository {
     /** Applies [change] to the saved options in one step, so two quick changes cannot race. */
     suspend fun updateDownloadOptions(context: Context, change: (DownloadOptions) -> DownloadOptions) {
         context.dataStore.edit { prefs -> prefs.writeOptions(SHEET_OPTIONS, change(prefs.readOptions(SHEET_OPTIONS))) }
+    }
+
+    // ── Hazel Instant ──
+    //
+    // The one choice Instant cannot take from the sheet's settings: a sheet is told audio or
+    // video by the tab it is on, and Instant has no sheet to be told by.
+
+    private val INSTANT_AUDIO_ONLY_KEY = booleanPreferencesKey("instant_audio_only")
+
+    /** Instant saves the sound alone rather than the video. Off unless chosen. */
+    fun getInstantAudioOnly(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[INSTANT_AUDIO_ONLY_KEY] ?: false }
+
+    suspend fun setInstantAudioOnly(context: Context, audioOnly: Boolean) {
+        context.dataStore.edit { prefs -> prefs[INSTANT_AUDIO_ONLY_KEY] = audioOnly }
     }
 
     // ── Link reading ──

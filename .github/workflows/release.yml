@@ -21,8 +21,9 @@ on:
         description: "Existing tag to build a release from, for example v1.0.1"
         required: true
 
+# Read-only by default. Only the publish job, which creates the release, may write.
 permissions:
-  contents: write
+  contents: read
 
 env:
   GRADLE_OPTS: -Dorg.gradle.parallel=true -Dorg.gradle.caching=true
@@ -63,6 +64,9 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 45
+
+    permissions:
+      contents: write
 
     env:
       KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -221,7 +225,9 @@ jobs:
           NOTES
 
       - name: Publish the release
-        uses: softprops/action-gh-release@v3
+        # Pinned to a commit, since this job holds the signing secrets. A tag can be moved to
+        # other code; a commit cannot. Dependabot proposes new pins.
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ steps.version.outputs.tag }}
           # The leaf leads the title so a release is recognisable in a list of them at a

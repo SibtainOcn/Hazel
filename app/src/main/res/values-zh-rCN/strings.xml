@@ -85,6 +85,9 @@
     <string name="no_results_sign_in_body">来源要求先有账号才肯交出内容。登录后会保存该站点的 Cookie 并重试。</string>
     <string name="no_results_continue_body">详细信息读取失败，但下载本身仍可能成功。继续的话会使用可得的最佳画质。</string>
     <string name="no_results_refused_body">来源拒绝了这次请求。</string>
+    <string name="no_results_gone_body">此媒体不可用，可能已被移除或删除，或者链接有误。</string>
+    <string name="no_results_unsupported_body">不支持此网站，这里没有可下载的内容。</string>
+    <string name="no_results_generic_body">无法读取此链接的详细信息。</string>
     <string name="no_results_engine_report">引擎的报告</string>
     <string name="no_results_copy_log">复制日志</string>
     <string name="no_results_sign_in">登录</string>
@@ -320,6 +323,16 @@
     <string name="history_failed_copy_log">复制日志</string>
     <string name="history_failed_log_copied">错误日志已复制到剪贴板</string>
     <string name="history_failed_retry">重试</string>
+    <string name="queue_failed_choose_again">换一种方式下载</string>
+    <string name="queue_failed_select">选择失败项</string>
+    <string name="queue_failed_remove">移除</string>
+    <string name="queue_failed_remove_body">它们会连同日志一起从列表中移除。已下载的文件不受影响。</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="other">移除 %d 个失败的下载？</item>
+    </plurals>
+    <string name="queue_failed_retrying">正在重试</string>
+    <string name="failed_stopped_at">停止于：%1$s · 已下载 %2$d%%</string>
+    <string name="failed_copy_url">复制链接</string>
     <string name="history_failed_dismiss">关闭</string>
     <string name="history_failed_clear_all">清除所有失败项</string>
     <string name="history_queue_clear_all">清空队列</string>
@@ -477,6 +490,8 @@
     <string name="format_filter_smallest">最小格式（按分辨率）</string>
     <string name="format_filter_generic">通用</string>
     <string name="format_source_title">格式来源</string>
+    <string name="format_source_signed_in_title">NewPipe 无法使用你的登录信息</string>
+    <string name="format_source_signed_in_body">此网站已保存登录信息，且“使用 Cookie”已开启。NewPipe 不发送 Cookie，因此由 yt-dlp 读取格式。在 Cookie 中关闭“使用 Cookie”即可用 NewPipe 读取。</string>
     <string name="format_sort_title">排序方式</string>
     <string name="format_update">更新</string>
 
@@ -570,6 +585,10 @@
     <string name="processing_video_format">视频格式</string>
     <string name="processing_video_codec">首选视频编码</string>
     <string name="processing_video_quality">视频画质</string>
+    <string name="processing_instant_save_as">Instant 保存为</string>
+    <string name="processing_instant_audio_only">仅音频</string>
+    <string name="processing_section_kind">音频或视频</string>
+    <string name="processing_sheet_opens_on">下载面板默认打开</string>
     <string name="processing_sub_original">原始语言（自动）</string>
     <string name="processing_reset">全部恢复默认</string>
     <string name="processing_reset_title">重置合成设置？</string>
@@ -718,7 +737,7 @@
     <string name="home_start_search">搜索</string>
     <string name="home_start_downloads">下载</string>
     <string name="more_getting_started">入门指南</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">已开始下载</string>
     <string name="instant_ok">确定</string>
     <string name="instant_settings">合成设置</string>

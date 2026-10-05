@@ -93,6 +93,9 @@
     <string name="no_results_sign_in_body">La fuente pide una cuenta antes de entregar esto. Al iniciar sesión se guardan las cookies del sitio y se vuelve a intentar.</string>
     <string name="no_results_continue_body">No se pudieron leer los detalles, pero la descarga aún puede funcionar. Si sigues adelante, se ofrece la mejor calidad disponible.</string>
     <string name="no_results_refused_body">La fuente rechazó la petición.</string>
+    <string name="no_results_gone_body">Este contenido no está disponible. Puede que se haya eliminado o que el enlace esté mal.</string>
+    <string name="no_results_unsupported_body">Este sitio no es compatible, así que aquí no hay nada que descargar.</string>
+    <string name="no_results_generic_body">No se pudieron leer los detalles de este enlace.</string>
     <string name="no_results_engine_report">Lo que informó el motor</string>
     <string name="no_results_copy_log">Copiar el registro</string>
     <string name="no_results_sign_in">Iniciar sesión</string>
@@ -328,6 +331,18 @@
     <string name="history_failed_copy_log">Copiar registro</string>
     <string name="history_failed_log_copied">Registro de errores copiado al portapapeles</string>
     <string name="history_failed_retry">Reintentar</string>
+    <string name="queue_failed_choose_again">Descargar de otra forma</string>
+    <string name="queue_failed_select">Seleccionar fallidas</string>
+    <string name="queue_failed_remove">Quitar</string>
+    <string name="queue_failed_remove_body">Salen de la lista con sus registros. Tus archivos descargados no se tocan.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">¿Quitar %d descarga fallida?</item>
+        <item quantity="many">¿Quitar %d de descargas fallidas?</item>
+        <item quantity="other">¿Quitar %d descargas fallidas?</item>
+    </plurals>
+    <string name="queue_failed_retrying">Reintentando</string>
+    <string name="failed_stopped_at">Se detuvo en: %1$s · %2$d%% descargado</string>
+    <string name="failed_copy_url">Copiar URL</string>
     <string name="history_failed_dismiss">Descartar</string>
     <string name="history_failed_clear_all">Borrar todos los fallidos</string>
     <string name="history_queue_clear_all">Borrar la cola</string>
@@ -489,6 +504,8 @@
     <string name="format_filter_smallest">Formato más pequeño (por resolución)</string>
     <string name="format_filter_generic">Genérico</string>
     <string name="format_source_title">Origen de los formatos</string>
+    <string name="format_source_signed_in_title">NewPipe no puede usar tu inicio de sesión</string>
+    <string name="format_source_signed_in_body">Este sitio tiene un inicio de sesión guardado y Usar cookies está activado. NewPipe no envía cookies, así que yt-dlp lee los formatos. Desactiva Usar cookies en Cookies para leerlos con NewPipe.</string>
     <string name="format_sort_title">Ordenar por</string>
     <string name="format_update">Actualizar</string>
 
@@ -584,6 +601,10 @@
     <string name="processing_video_format">Formato de vídeo</string>
     <string name="processing_video_codec">Códec de vídeo preferido</string>
     <string name="processing_video_quality">Calidad de vídeo</string>
+    <string name="processing_instant_save_as">Instant guarda como</string>
+    <string name="processing_instant_audio_only">Solo audio</string>
+    <string name="processing_section_kind">Audio o video</string>
+    <string name="processing_sheet_opens_on">La hoja de descarga abre en</string>
     <string name="processing_sub_original">Idioma original (automático)</string>
     <string name="processing_reset">Restablecer todo</string>
     <string name="processing_reset_title">¿Restablecer los ajustes de síntesis?</string>
@@ -734,7 +755,7 @@
     <string name="home_start_search">Buscar</string>
     <string name="home_start_downloads">Descargas</string>
     <string name="more_getting_started">Primeros pasos</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">Descarga iniciada</string>
     <string name="instant_ok">Aceptar</string>
     <string name="instant_settings">Ajustes de síntesis</string>

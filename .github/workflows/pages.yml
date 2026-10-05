@@ -47,7 +47,7 @@ jobs:
       # Outside links too, so a moved release page or renamed doc is caught. A busy
       # server (429, 502-504) is not a broken link, so those pass after the retries.
       - name: Check outside links
-        uses: lycheeverse/lychee-action@v2
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           args: --no-progress --max-retries 4 --retry-wait-time 5 --accept 200,429,502,503,504 --exclude 'fonts\.(googleapis|gstatic)\.com' 'pages/hazel-pages/_build/*.html'
           fail: true

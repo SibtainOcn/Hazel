@@ -5,17 +5,28 @@ Every number here is read from the reports the run just produced. Nothing is wri
 down in advance, so adding a test file changes the totals on the next run with no edit
 to this script or to the workflow that calls it.
 
-Usage: test_summary.py [results-dir ...]
+With --check-run, it also writes the body of a GitHub check run to the given file: the
+counts as its title, this summary as its text, and each failing test as an annotation. The
+workflow posts that file, so the counts show on the pull request's checks list.
+
+Usage: test_summary.py [--check-run FILE] [results-dir ...]
 """
 
 from __future__ import annotations
 
+import argparse
+import json
 import os
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 DEFAULT_DIRS = ["app/build/test-results"]
+TEST_SOURCES = Path("app/src/test")
+
+
+# GitHub takes at most 50 annotations in one request.
+MAX_ANNOTATIONS = 50
 
 
 class Suite:
@@ -118,8 +129,79 @@ def render(suites: list[Suite], failures: list[tuple[str, str, str]]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def source_path(classname: str) -> str | None:
+    """Finds the test file a class lives in, for an annotation. None when it cannot."""
+    outer = classname.split("$", 1)[0]
+    relative = outer.replace(".", "/")
+    for ext in (".kt", ".java"):
+        for lang in ("java", "kotlin"):
+            candidate = TEST_SOURCES / lang / (relative + ext)
+            if candidate.exists():
+                return candidate.as_posix()
+    return None
+
+
+def check_run(
+    suites: list[Suite],
+    failures: list[tuple[str, str, str]],
+    summary: str,
+) -> dict:
+    total = sum(s.tests for s in suites)
+    bad = sum(s.bad for s in suites)
+    skipped = sum(s.skipped for s in suites)
+    passed = total - bad - skipped
+    seconds = sum(s.time for s in suites)
+
+    green = bool(suites) and bad == 0
+
+    if suites:
+        title = f"{passed}/{total - skipped} passed"
+        if bad:
+            title += f", {bad} failed"
+        if skipped:
+            title += f" · {skipped} skipped"
+        title += f" · {seconds:.0f}s"
+    else:
+        title = "No test reports were produced"
+
+    text = summary
+
+    annotations = []
+    for classname, name, message in failures[:MAX_ANNOTATIONS]:
+        path = source_path(classname)
+        if path is None:
+            continue
+        annotations.append(
+            {
+                "path": path,
+                "start_line": 1,
+                "end_line": 1,
+                "annotation_level": "failure",
+                "title": f"{short_name(classname)} > {name}"[:255],
+                "message": (message or "no message")[:4000],
+            }
+        )
+
+    output = {"title": title[:255], "summary": text[:65000]}
+    if annotations:
+        output["annotations"] = annotations
+
+    return {
+        "name": "Test results",
+        "head_sha": os.environ.get("HEAD_SHA") or os.environ.get("GITHUB_SHA", ""),
+        "status": "completed",
+        "conclusion": "success" if green else "failure",
+        "output": output,
+    }
+
+
 def main() -> int:
-    roots = sys.argv[1:] or DEFAULT_DIRS
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--check-run", metavar="FILE")
+    parser.add_argument("roots", nargs="*")
+    args = parser.parse_args()
+
+    roots = args.roots or DEFAULT_DIRS
     suites, failures = collect(roots)
     summary = render(suites, failures)
 
@@ -137,6 +219,11 @@ def main() -> int:
         with open(output_file, "a", encoding="utf-8") as handle:
             handle.write(f"total={total}\n")
             handle.write(f"failed={bad}\n")
+
+    if args.check_run:
+        body = check_run(suites, failures, summary)
+        Path(args.check_run).write_text(json.dumps(body), encoding="utf-8")
+        print(f"Check run: {body['output']['title']}")
 
     return 0
 

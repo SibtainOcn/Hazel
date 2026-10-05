@@ -97,6 +97,9 @@
     <string name="no_results_sign_in_body">Для доступа требуется аккаунт. Вход сохранит файлы cookie сайта и повторит попытку.</string>
     <string name="no_results_continue_body">Не удалось прочитать сведения, но сама загрузка может сработать. Продолжение загрузит наилучшее доступное качество.</string>
     <string name="no_results_refused_body">Источник отклонил запрос.</string>
+    <string name="no_results_gone_body">Это медиа недоступно. Возможно, его удалили или ссылка неверна.</string>
+    <string name="no_results_unsupported_body">Этот сайт не поддерживается, скачать здесь нечего.</string>
+    <string name="no_results_generic_body">Не удалось прочитать данные этой ссылки.</string>
     <string name="no_results_engine_report">Отчёт движка</string>
     <string name="no_results_copy_log">Копировать журнал</string>
     <string name="no_results_sign_in">Войти</string>
@@ -332,6 +335,19 @@
     <string name="history_failed_copy_log">Копировать журнал</string>
     <string name="history_failed_log_copied">Журнал ошибок скопирован в буфер обмена</string>
     <string name="history_failed_retry">Повторить</string>
+    <string name="queue_failed_choose_again">Скачать иначе</string>
+    <string name="queue_failed_select">Выбрать неудачные</string>
+    <string name="queue_failed_remove">Убрать</string>
+    <string name="queue_failed_remove_body">Они исчезнут из списка вместе с журналами. Скачанные файлы не затрагиваются.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">Убрать %d неудачную загрузку?</item>
+        <item quantity="few">Убрать %d неудачные загрузки?</item>
+        <item quantity="many">Убрать %d неудачных загрузок?</item>
+        <item quantity="other">Убрать %d неудачной загрузки?</item>
+    </plurals>
+    <string name="queue_failed_retrying">Повтор</string>
+    <string name="failed_stopped_at">Остановлено на этапе: %1$s · загружено %2$d%%</string>
+    <string name="failed_copy_url">Копировать URL</string>
     <string name="history_failed_dismiss">Закрыть</string>
     <string name="history_failed_clear_all">Очистить все ошибки</string>
     <string name="history_queue_clear_all">Очистить очередь</string>
@@ -495,6 +511,8 @@
     <string name="format_filter_smallest">Наименьший формат (для каждого разрешения)</string>
     <string name="format_filter_generic">Общие</string>
     <string name="format_source_title">Источник форматов</string>
+    <string name="format_source_signed_in_title">NewPipe не может использовать ваш вход</string>
+    <string name="format_source_signed_in_body">Для этого сайта сохранён вход, и «Использовать cookie» включено. NewPipe не отправляет cookie, поэтому форматы читает yt-dlp. Выключите «Использовать cookie» в разделе «Файлы cookie», чтобы читать их через NewPipe.</string>
     <string name="format_sort_title">Сортировка</string>
     <string name="format_update">Обновить</string>
 
@@ -590,6 +608,10 @@
     <string name="processing_video_format">Формат видео</string>
     <string name="processing_video_codec">Предпочитаемый видеокодек</string>
     <string name="processing_video_quality">Качество видео</string>
+    <string name="processing_instant_save_as">Instant сохраняет как</string>
+    <string name="processing_instant_audio_only">Только аудио</string>
+    <string name="processing_section_kind">Аудио или видео</string>
+    <string name="processing_sheet_opens_on">Окно загрузки открывается на</string>
     <string name="processing_sub_original">Исходный язык (автоматические)</string>
     <string name="processing_reset">Сбросить всё</string>
     <string name="processing_reset_title">Сбросить настройки синтеза?</string>
@@ -741,7 +763,7 @@
     <string name="home_start_search">Поиск</string>
     <string name="home_start_downloads">Загрузки</string>
     <string name="more_getting_started">Начало работы</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">Загрузка началась</string>
     <string name="instant_ok">ОК</string>
     <string name="instant_settings">Настройки обработки</string>

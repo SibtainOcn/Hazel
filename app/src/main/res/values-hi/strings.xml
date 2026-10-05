@@ -89,6 +89,9 @@
     <string name="no_results_sign_in_body">यह स्रोत देने से पहले खाता माँगता है। साइन इन करने पर साइट की कुकीज़ सहेजी जाती हैं और दोबारा कोशिश होती है।</string>
     <string name="no_results_continue_body">जानकारी पढ़ी नहीं जा सकी, पर डाउनलोड फिर भी चल सकता है। आगे बढ़ने पर उपलब्ध सबसे अच्छी क्वालिटी दी जाती है।</string>
     <string name="no_results_refused_body">स्रोत ने अनुरोध ठुकरा दिया।</string>
+    <string name="no_results_gone_body">यह मीडिया उपलब्ध नहीं है। हो सकता है इसे हटा दिया गया हो, या लिंक गलत हो।</string>
+    <string name="no_results_unsupported_body">यह साइट समर्थित नहीं है, इसलिए यहाँ डाउनलोड करने को कुछ नहीं है।</string>
+    <string name="no_results_generic_body">इस लिंक का विवरण पढ़ा नहीं जा सका।</string>
     <string name="no_results_engine_report">इंजन ने क्या बताया</string>
     <string name="no_results_copy_log">लॉग कॉपी करें</string>
     <string name="no_results_sign_in">साइन इन करें</string>
@@ -324,6 +327,17 @@
     <string name="history_failed_copy_log">लॉग कॉपी करें</string>
     <string name="history_failed_log_copied">त्रुटि लॉग क्लिपबोर्ड पर कॉपी किया गया</string>
     <string name="history_failed_retry">पुनः प्रयास करें</string>
+    <string name="queue_failed_choose_again">दूसरे तरीके से डाउनलोड करें</string>
+    <string name="queue_failed_select">विफल चुनें</string>
+    <string name="queue_failed_remove">हटाएँ</string>
+    <string name="queue_failed_remove_body">वे अपने लॉग के साथ सूची से हट जाते हैं। आपकी डाउनलोड की गई फ़ाइलें नहीं छुई जातीं।</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">%d विफल डाउनलोड हटाएँ?</item>
+        <item quantity="other">%d विफल डाउनलोड हटाएँ?</item>
+    </plurals>
+    <string name="queue_failed_retrying">फिर से कोशिश</string>
+    <string name="failed_stopped_at">यहाँ रुका: %1$s · %2$d%% डाउनलोड हुआ</string>
+    <string name="failed_copy_url">URL कॉपी करें</string>
     <string name="history_failed_dismiss">खारिज करें</string>
     <string name="history_failed_clear_all">सभी विफल हटाएँ</string>
     <string name="history_queue_clear_all">कतार साफ़ करें</string>
@@ -483,6 +497,8 @@
     <string name="format_filter_smallest">सबसे छोटा फ़ॉर्मैट (प्रति रेज़ोल्यूशन)</string>
     <string name="format_filter_generic">सामान्य</string>
     <string name="format_source_title">फ़ॉर्मैट स्रोत</string>
+    <string name="format_source_signed_in_title">NewPipe आपके साइन-इन का उपयोग नहीं कर सकता</string>
+    <string name="format_source_signed_in_body">इस साइट का साइन-इन सहेजा गया है और कुकीज़ इस्तेमाल करें चालू है। NewPipe कुकीज़ नहीं भेजता, इसलिए फ़ॉर्मेट yt-dlp पढ़ता है। NewPipe से पढ़ने के लिए कुकीज़ में कुकीज़ इस्तेमाल करें बंद करें।</string>
     <string name="format_sort_title">क्रमबद्ध करें</string>
     <string name="format_update">अपडेट करें</string>
 
@@ -577,6 +593,10 @@
     <string name="processing_video_format">वीडियो फ़ॉर्मैट</string>
     <string name="processing_video_codec">पसंदीदा वीडियो कोडेक</string>
     <string name="processing_video_quality">वीडियो क्वालिटी</string>
+    <string name="processing_instant_save_as">Instant इस रूप में सहेजता है</string>
+    <string name="processing_instant_audio_only">केवल ऑडियो</string>
+    <string name="processing_section_kind">ऑडियो या वीडियो</string>
+    <string name="processing_sheet_opens_on">डाउनलोड शीट इस पर खुलती है</string>
     <string name="processing_sub_original">मूल भाषा (स्वचालित)</string>
     <string name="processing_reset">सब डिफ़ॉल्ट पर रीसेट करें</string>
     <string name="processing_reset_title">सिंथेसाइज़िंग सेटिंग्स रीसेट करें?</string>
@@ -726,7 +746,7 @@
     <string name="home_start_search">खोजें</string>
     <string name="home_start_downloads">डाउनलोड</string>
     <string name="more_getting_started">शुरुआत करें</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">डाउनलोड शुरू हुआ</string>
     <string name="instant_ok">ठीक है</string>
     <string name="instant_settings">सिंथेसाइज़िंग सेटिंग्स</string>

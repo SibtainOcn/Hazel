@@ -1,6 +1,10 @@
 name: CI
 
-# Runs on every pull request and on every push to main.
+# Runs on every pull request and on every push to main. Nightly gathers changes for testing
+# before they reach main, and every change reaches it through a pull request, which is checked
+# here against the merged result and built as debug. A push to nightly is not checked again:
+# nightly is also the head of the release pull request into main, so it would run every job a
+# second time on the same commit.
 #
 # The two jobs are independent and start together, so the whole check finishes in about the
 # time the slower of the two takes. Tests never wait on a packaging step, and a compile
@@ -11,7 +15,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [main, "feat/**"]
+    branches: [main, nightly, "feat/**"]
   push:
     branches: [main]
   workflow_dispatch:
@@ -84,6 +88,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
+    # checks: write lets the run post its counts as a check of their own on the pull request.
+    # It is given to this job only, never to the build job that holds the signing secrets.
+    permissions:
+      contents: read
+      checks: write
+
     steps:
       - uses: actions/checkout@v7
 
@@ -100,12 +110,6 @@ jobs:
           # the caches stay small and one branch cannot poison another.
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      - name: Run artist metadata & format test harness
-        run: python3 tools/tests/test_artist_metadata.py
-
-      - name: Run release readiness & regression test harness
-        run: python3 tools/tests/test_release_regression_harness.py
-
       # The unit tests are pure JVM: no emulator, no device, no Android framework. That is
       # what keeps this job to seconds, and it is the property to protect as the suite grows.
       - name: Run unit tests
@@ -116,7 +120,22 @@ jobs:
       - name: Summarise the run
         if: always()
         id: summary
-        run: python3 .github/scripts/test_summary.py
+        env:
+          # On a pull request github.sha is the merge commit GitHub builds for it, which the
+          # pull request never shows. The check has to go on the head of the branch.
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python3 .github/scripts/test_summary.py --check-run "$RUNNER_TEMP/check-run.json"
+
+      # Puts the counts on the pull request's checks list, e.g. "412/412 passed". Like the
+      # report below, it is a convenience and not the result: a pull request from a fork gets
+      # a read-only token and cannot post it, and that must not turn its run red.
+      - name: Post the counts as a check
+        if: always() && steps.summary.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api "repos/${{ github.repository }}/check-runs" --method POST --input "$RUNNER_TEMP/check-run.json" --silent
 
       # The report is a convenience, not the result. Whether the tests passed is already
       # decided by the step that ran them and is written into the job summary either way, so

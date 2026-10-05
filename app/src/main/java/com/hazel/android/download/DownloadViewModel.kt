@@ -232,6 +232,13 @@ class DownloadViewModel : ViewModel() {
     private val _formatsReading = MutableStateFlow<Set<String>>(emptySet())
     val formatsReading: StateFlow<Set<String>> = _formatsReading.asStateFlow()
 
+    /**
+     * A read asked for by name while another read of the same link was running: a switch
+     * of reader or an update from the format list. It runs as soon as that read ends, and
+     * the read it follows is not applied, since it answers a question no longer asked.
+     */
+    private val queuedFormatReads = mutableMapOf<String, Pair<Boolean, ListingSource?>>()
+
     /** Caps how many links have their formats read at the same time. */
     private val formatReads = Semaphore(FORMAT_READS_AT_ONCE)
 
@@ -538,6 +545,8 @@ class DownloadViewModel : ViewModel() {
 
         viewModelScope.launch {
             var failure: String? = null
+            // Read before anything can fail, so a failure is filed under the kind it was.
+            val audioOnly = SettingsRepository.getInstantAudioOnly(app).first()
             try {
                 if (!SettingsRepository.getIncognito(app).first()) {
                     withContext(Dispatchers.IO) { SearchHistoryRepository.record(app, url) }
@@ -558,13 +567,35 @@ class DownloadViewModel : ViewModel() {
                         "${MediaProbe.PROBE_PROCESS_ID}_instant_${LinkKey.digest(url)}"
                     )
                 }
+                // Audio only takes the sound alone, in the preferred language and codec where
+                // the source has them. Best audio stands in for a link read without its
+                // formats, and is extracted from a combined file if need be.
+                val language = options.preferredAudioLanguage.ifBlank { null }.takeIf { audioOnly }
                 val plans = items.map { info ->
-                    val format = GenericFormats.applyTo(info, step, null) ?: step
-                    DownloadPlan(info, format, info.title, info.uploader, null)
+                    val format = if (audioOnly) {
+                        info.autoPick(false, 0, language, options.audioCodecPreference) ?: BatchAudioFormats.BEST
+                    } else {
+                        GenericFormats.applyTo(info, step, null) ?: step
+                    }
+                    DownloadPlan(info, format, info.title, info.uploader, language)
                 }
                 dropWaiting()
                 if (plans.isEmpty()) failure = app.getString(R.string.no_results_error_title)
-                else startBatch(app, plans, options, saveDirs = dirs)
+                else {
+                    // On the home screen as well, so opening the app shows the card filling
+                    // rather than an empty screen. It takes the screen as a link read there
+                    // does: the last results, search words and message go, and the shared
+                    // link stands in the bar. A read running on the home screen is left to
+                    // finish; it is what the user is looking at.
+                    _state.update { s -> if (s.isFetching) s else s.copy(
+                        url = url,
+                        searchQuery = "",
+                        error = null,
+                        results = items,
+                        savedAside = false
+                    ) }
+                    startBatch(app, plans, options, saveDirs = dirs)
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -593,7 +624,7 @@ class DownloadViewModel : ViewModel() {
                             title = url,
                             author = "",
                             thumbnail = null,
-                            isVideo = true,
+                            isVideo = !audioOnly,
                             errorLog = log
                         )
                     )
@@ -949,7 +980,7 @@ class DownloadViewModel : ViewModel() {
         infos.forEach { info ->
             // Nothing to do for a link already showing that reader's read, unless asked again.
             if (!fresh && source != null && info.hasResolvedFormats && info.readBy == source) return@forEach
-            readFormatsOf(info, fresh = fresh, source = source)
+            readFormatsOf(info, fresh = fresh, source = source, queueIfRunning = true)
         }
     }
 
@@ -960,10 +991,28 @@ class DownloadViewModel : ViewModel() {
      * own, and a playlist of eighty started at once would starve the device rather than
      * finish any sooner.
      */
-    private fun readFormatsOf(info: MediaInfo, fresh: Boolean, source: ListingSource?) {
-        if (!claimFormatRead(info.url)) return
+    private fun readFormatsOf(
+        info: MediaInfo,
+        fresh: Boolean,
+        source: ListingSource?,
+        queueIfRunning: Boolean = false
+    ) {
+        // Under the queue's lock, so a read ending at this moment either sees this request
+        // queued or has already let its claim go.
+        val claimed = synchronized(queuedFormatReads) {
+            claimFormatRead(info.url).also { claimed ->
+                // The newest request wins: picking NewPipe and then yt-dlp while the first
+                // read runs ends on yt-dlp.
+                if (!claimed && queueIfRunning) queuedFormatReads[info.url] = fresh to source
+            }
+        }
+        if (claimed) startFormatRead(info, fresh, source)
+    }
 
+    /** Runs one read of [info]'s formats; the caller holds its claim in [_formatsReading]. */
+    private fun startFormatRead(info: MediaInfo, fresh: Boolean, source: ListingSource?) {
         viewModelScope.launch(Dispatchers.IO) {
+            var next: Pair<Boolean, ListingSource?>? = null
             val resolved = try {
                 formatReads.withPermit { readFormats(info.url, fresh, source) }
             } catch (e: CancellationException) {
@@ -972,7 +1021,17 @@ class DownloadViewModel : ViewModel() {
                 Log.w("Hazel", "Format read failed for ${info.url}: ${e.message}")
                 null
             } finally {
-                _formatsReading.update { it - info.url }
+                // A queued read takes over the claim rather than letting it go, so the list
+                // stays in its loading state from one read to the next.
+                next = synchronized(queuedFormatReads) {
+                    queuedFormatReads.remove(info.url).also { queued ->
+                        if (queued == null) _formatsReading.update { it - info.url }
+                    }
+                }
+            }
+            next?.let { (queuedFresh, queuedSource) ->
+                startFormatRead(info, queuedFresh, queuedSource)
+                return@launch
             }
             if (resolved == null) return@launch
 
@@ -1312,15 +1371,12 @@ class DownloadViewModel : ViewModel() {
 
             while (true) {
                 if (isBatchCancelled) break
-                // Released in the same step that finds the queue empty, so a link added a
-                // moment later starts a run of its own instead of waiting on this one.
-                //
                 // A paused link stays where it is and is stepped over: the user stopped it,
-                // and starting something else is not a reason to start it again.
+                // and starting something else is not a reason to start it again. The run
+                // is let go only once it has closed, below.
                 val next = synchronized(queue) {
                     val index = queue.indexOfFirst { !it.paused }
-                    (if (index >= 0) queue.removeAt(index) else null)
-                        .also { if (it == null && runOwner === token) runOwner = null }
+                    if (index >= 0) queue.removeAt(index) else null
                 } ?: break
                 val plan = next.toPlan()
                 val options = next.options
@@ -1474,6 +1530,16 @@ class DownloadViewModel : ViewModel() {
                         error = e.message ?: "Download failed"
                     )
                     val queuedPayload = DownloadQueueRepository.encodeItem(next)
+                    // The stage it had reached and how much had arrived, so a failure part way
+                    // through says where, which the engine's own log often leaves unsaid.
+                    val stoppedAt = _state.value.let { s ->
+                        val step = s.processingSteps.getOrNull(s.processingStep) ?: ProcessingStep.FETCH
+                        app.getString(
+                            R.string.failed_stopped_at,
+                            app.getString(step.label),
+                            (s.progress * 100).toInt().coerceIn(0, 100)
+                        )
+                    }
                     downloadScope.launch {
                         com.hazel.android.data.FailedDownloadRepository.record(
                             app,
@@ -1484,7 +1550,8 @@ class DownloadViewModel : ViewModel() {
                                 thumbnail = plan.info.thumbnail,
                                 isVideo = plan.format.hasVideo,
                                 errorLog = e.message ?: "Download failed",
-                                queuedPayload = queuedPayload
+                                queuedPayload = queuedPayload,
+                                stoppedAt = stoppedAt
                             )
                         )
                     }
@@ -1503,10 +1570,14 @@ class DownloadViewModel : ViewModel() {
             // next launch carries on. A run the user cancelled leaves nothing: they stopped
             // it on purpose, and a queue that came back on the next launch would be the app
             // overruling that.
-            val remaining =
+            //
+            // Read as the write happens rather than before it: a link queued meanwhile has
+            // been written down already, and an older copy would write over it. The run
+            // still holds the queue, so nothing is taken out of it in between.
+            DownloadQueueRepository.saveCurrent(app) {
                 if (isBatchCancelled) emptyList()
                 else synchronized(queue) { queue.toList() }
-            DownloadQueueRepository.save(app, remaining)
+            }
             if (isBatchCancelled) {
                 synchronized(queue) { queue.clear() }
                 // Paused downloads are given up with the rest, their partial files and their
@@ -1522,8 +1593,20 @@ class DownloadViewModel : ViewModel() {
                 ) }
             }
 
-            DownloadService.stop(app)
-            finishBatch(app)
+            // Closed and let go in one step, under the lock startBatch takes. Let go any
+            // earlier, a link shared as the last one finished started a run of its own, and
+            // this one then stopped the service and reported the run over under it. A link
+            // that arrived while this was closing is handed to a new run instead.
+            val more = synchronized(queue) {
+                val more = !isBatchCancelled && queue.any { !it.paused }
+                if (!more) {
+                    DownloadService.stop(app)
+                    finishBatch(app)
+                }
+                if (runOwner === token) runOwner = null
+                more
+            }
+            if (more) runQueue(app, resumed = false)
         }
         job.invokeOnCompletion {
             synchronized(queue) { if (runOwner === token) runOwner = null }
@@ -1855,16 +1938,20 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
-    /** Retries a failed download, either directly from its queued payload or by fetching anew. */
+    /**
+     * Retries a failed download the way it ran: a download that had started is started
+     * again from what it was given, and a link Instant could not read goes back to Instant.
+     *
+     * The failure stays listed until the retry settles it: a download that finishes clears
+     * it, and one that fails again replaces it. Cleared up front, a retry that failed the
+     * same way left nothing on the list.
+     */
     fun retryFailed(context: Context, failed: com.hazel.android.data.FailedDownload) {
-        downloadScope.launch {
-            com.hazel.android.data.FailedDownloadRepository.remove(context, failed.id)
-        }
         val queued = DownloadQueueRepository.decodeItem(failed.queuedPayload)
         if (queued != null) {
             startBatch(context, listOf(queued.toPlan()), queued.options, queued.treeUri)
         } else {
-            fetchAll(listOf(failed.url))
+            instantDownload(context, failed.url)
         }
     }
 
@@ -2172,35 +2259,12 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Writes an edited title or author into the file's tags.
-     *
-     * yt-dlp reads `--parse-metadata` as `FROM:TO`, splitting on the first unescaped colon.
-     * Colons inside the user's value are escaped as `\:` so they pass through the split
-     * as literal characters. This fixes the previous approach of skipping values that
-     * contained colons altogether.
-     *
-     * The author is also copied into the `artist` metadata slot, which is what
-     * `FFmpegMetadataPP` writes as the ID3 / Vorbis / MP4 artist tag. Without this,
-     * music platforms that populate `artist` instead of `uploader` (JioSaavn, SoundCloud,
-     * Bandcamp) would leave audio files with no artist tag at all.
-     */
+    /** Writes an edited title or author into the file's tags: see [metadataParseArgs]. */
     private fun YoutubeDLRequest.applyMetadata(title: String, author: String) {
         if (title.isBlank() && author.isBlank()) return
 
         addOption("--embed-metadata")
-
-        if (title.isNotBlank()) {
-            val escaped = title.replace(":", """\:""")
-            addOption("--parse-metadata", "$escaped:%(title)s")
-        }
-
-        if (author.isNotBlank()) {
-            val escaped = author.replace(":", """\:""")
-            addOption("--parse-metadata", "$escaped:%(uploader)s")
-            // Map uploader → artist tag so audio files get a proper artist ID3/Vorbis tag
-            addOption("--parse-metadata", "%(uploader)s:%(artist)s")
-        }
+        metadataParseArgs(title, author).forEach { addOption("--parse-metadata", it) }
     }
 
     /**

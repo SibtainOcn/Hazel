@@ -6,6 +6,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- The home screen, the queue and the downloads list have a scrollbar on the right that can be held and dragged to move through a long list. It rests as a faint thin bar, lights up in a soft shade of the accent while the list moves, and takes the full accent while held.
+- Failed downloads can be picked and removed together: long-press a failed card, or choose Select failed in the queue menu, then remove the picked ones or select all. Picked cards light up with a wash of the accent, and removing them asks first.
+- The error log has a Copy URL button, and a download that failed part way says where it stopped and how much had arrived.
+- Synthesizing has a "Download sheet opens on" setting, Video or Audio, for the tab a link's sheet and a set of links open on. A link with no audio still opens on Video.
+
+### Changed
+- Errors show in a true red across the app, in place of a faded pink. The "Could not read this link" dialog shows the engine's report wrapped in full, in a box seven lines high that scrolls past that.
+- Failed downloads are drawn like the cards on the home screen: the artwork with the title, source, time and reason over it, and Error Log and Retry on the card. Tapping the card opens the link's download sheet over the queue, loading as it reads, to download it another way; a read that fails there updates the card's log. A card being retried says Retrying until it settles. The error log opens on a sheet with wrapped lines, sized to the log.
+- The failed list keeps the last 100 failures.
+- Choice dialogs in the settings are more compact, and a choice is applied with OK instead of the moment it is tapped.
+
+### Fixed
+- The "Could not read this link" dialog offers only what can fix the error. Media that is gone or a site that is not supported now says so with no action to try. A source asking for an account offers Sign in, and one that refused the request or rate-limited offers Add cookies. Anything else offers Try anyway where possible. Before, Add cookies was offered on every failure, and a missing video read as a refused request. A link button at its start copies the link.
+- Retrying a failure, or reading its link again, no longer drops it from the list before the new attempt settles. A retry of a link Instant could not read runs through Instant again, and a link that finishes downloading clears its failure even when it was shared as a short link.
+- In incognito, failed downloads are listed for the session but no longer written to storage, as incognito promises.
+- A download whose title is a single word, such as "Flickermood", is no longer saved as "NA". A one-word author no longer has its artist tag written as "NA" either.
+- Hazel Instant can save audio again. Synthesizing has an "Instant saves as" choice of Video or Audio only. Audio only takes the source's best audio stream, in the preferred language and codec where it has them, and saves it in the chosen audio format with its cover. Since 1.1.10, Instant always saved video.
+- Picking NewPipe as the formats source for a site with a saved sign-in now says why it cannot be used, instead of doing nothing. NewPipe sends no cookies, so such a site is always read by yt-dlp; the notice shows only when the link's own site has a saved sign-in and Use cookies is on.
+- Switching the formats source while the list is still loading is no longer dropped. The switch runs as soon as the current read ends, and the list shows its answer.
+- Once a link is read, its format list always starts with Best quality and ends with Worst quality, for video and audio, whichever source read it. A yt-dlp read showed neither, and a NewPipe read only Best.
+- The second share target is labelled Instant, so share sheets that put the app name above it no longer show "Hazel Hazel Instant".
+- A link shared or downloaded just as the previous download finished no longer has its download service stopped and its card shown as finished under it. The run now closes in one step, and a link that arrives while it closes starts the next run. Its last write of the queue no longer writes over a link added at that moment, which a restart would then have lost.
+- A download shared to Instant now has its card on the home screen too, filling as it downloads, as one started in the app does. It takes the screen as a link read in the app does, replacing the last results or search. Before, opening the app showed nothing until the queue screen was opened.
+- The empty home screen no longer shows a faint band under the search bar. It is the separator for a scrolled list, and the empty screen was counted as scrolled.
+- The sign-in page opens at once with the shape loader, which stays until the site shows something, instead of a black screen. The browser is started after the screen is up rather than before it.
 
 ## [1.1.12] - 2026-10-03
 ### Fixed

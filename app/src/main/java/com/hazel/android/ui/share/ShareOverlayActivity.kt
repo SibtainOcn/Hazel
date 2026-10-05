@@ -84,7 +84,10 @@ private fun overlayColorScheme(accentName: String): androidx.compose.material3.C
         surfaceContainerLow = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
         surfaceContainer = androidx.compose.ui.graphics.Color(0xFF141414),
         surfaceContainerHigh = androidx.compose.ui.graphics.Color(0xFF1E1E1E),
-        surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFF262626)
+        surfaceContainerHighest = androidx.compose.ui.graphics.Color(0xFF262626),
+        // Set as the app sets it; left to Material, an error here was a pale pink.
+        error = com.hazel.android.ui.theme.ErrorRed,
+        onError = androidx.compose.ui.graphics.Color.White
     )
 }
 
@@ -212,6 +215,12 @@ class ShareOverlayActivity : ComponentActivity() {
                         val readHere = state.url == url
                         val results = if (readHere) state.results else emptyList()
                         val failure = state.errorLog?.takeIf { readHere && !state.isFetching }
+                        // A link on the failed list that fails to read again keeps its entry,
+                        // with this attempt's log in place of the last one.
+                        LaunchedEffect(failure) {
+                            val log = failure ?: return@LaunchedEffect
+                            com.hazel.android.data.FailedDownloadRepository.refreshLog(applicationContext, url, log)
+                        }
 
                         when {
                             // A failed read is reported by a notification, as any download
@@ -230,6 +239,7 @@ class ShareOverlayActivity : ComponentActivity() {
 
                             failure != null -> NoResultsDialog(
                                 message = failure,
+                                link = url,
                                 canFetchCookies = com.hazel.android.ui.screens.download.isCookieRelated(failure),
                                 canContinue = false,
                                 canAddCookies = true,

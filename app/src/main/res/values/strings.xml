@@ -100,6 +100,9 @@
     <string name="no_results_sign_in_body">The source wants an account before it will hand this over. Signing in saves cookies for the site and tries again.</string>
     <string name="no_results_continue_body">The details could not be read, but the download itself may still work. Going ahead offers the best available quality.</string>
     <string name="no_results_refused_body">The source refused the request.</string>
+    <string name="no_results_gone_body">This media isn\'t available. It may have been removed or deleted, or the link may be wrong.</string>
+    <string name="no_results_unsupported_body">This site isn\'t supported, so there is nothing here to download.</string>
+    <string name="no_results_generic_body">The details of this link could not be read.</string>
     <string name="no_results_engine_report">What the engine reported</string>
     <string name="no_results_copy_log">Copy log</string>
     <string name="no_results_sign_in">Sign in</string>
@@ -340,6 +343,17 @@
     <string name="history_failed_copy_log">Copy Log</string>
     <string name="history_failed_log_copied">Error log copied to clipboard</string>
     <string name="history_failed_retry">Retry</string>
+    <string name="queue_failed_choose_again">Download another way</string>
+    <string name="queue_failed_select">Select failed</string>
+    <string name="queue_failed_remove">Remove</string>
+    <string name="queue_failed_remove_body">They leave the list with their logs. Your downloaded files are not touched.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="one">Remove %d failed download?</item>
+        <item quantity="other">Remove %d failed downloads?</item>
+    </plurals>
+    <string name="queue_failed_retrying">Retrying</string>
+    <string name="failed_stopped_at">Stopped at: %1$s · %2$d%% downloaded</string>
+    <string name="failed_copy_url">Copy URL</string>
     <string name="history_failed_dismiss">Dismiss</string>
     <string name="history_failed_clear_all">Clear all failed</string>
     <string name="history_queue_clear_all">Clear queue</string>
@@ -553,6 +567,8 @@
     <string name="format_filter_smallest">Smallest format (per resolution)</string>
     <string name="format_filter_generic">Generic</string>
     <string name="format_source_title">Formats source</string>
+    <string name="format_source_signed_in_title">NewPipe can\'t use your sign-in</string>
+    <string name="format_source_signed_in_body">This site has a saved sign-in and Use cookies is on. NewPipe sends no cookies, so its formats are read by yt-dlp. Turn off Use cookies in Cookies to read them with NewPipe.</string>
     <string name="format_sort_title">Sort by</string>
     <string name="format_update">Update</string>
 
@@ -655,6 +671,10 @@
     <string name="processing_video_format">Video format</string>
     <string name="processing_video_codec">Preferred video codec</string>
     <string name="processing_video_quality">Video quality</string>
+    <string name="processing_instant_save_as">Instant saves as</string>
+    <string name="processing_instant_audio_only">Audio only</string>
+    <string name="processing_section_kind">Audio or video</string>
+    <string name="processing_sheet_opens_on">Download sheet opens on</string>
     <string name="processing_sub_original">Original language (automatic)</string>
     <string name="processing_reset">Reset all to defaults</string>
     <string name="processing_reset_title">Reset synthesizing settings?</string>
@@ -813,7 +833,7 @@
     <string name="home_start_search">Search</string>
     <string name="home_start_downloads">Downloads</string>
     <string name="more_getting_started">Getting started</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">Download started</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Synthesizing settings</string>

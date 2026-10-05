@@ -1,9 +1,11 @@
 package com.hazel.android.ui.screens.more
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +30,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
@@ -34,17 +38,23 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.hazel.android.R
 
 /*
@@ -228,7 +238,7 @@ private fun SettingRow(
 
 /**
  * Pick one of [choices], each a stored value and what it is called, with a line under it
- * from [describe] where one helps the choice.
+ * from [describe] where one helps the choice. Nothing is saved until OK.
  */
 @Composable
 internal fun <T> SingleChoiceDialog(
@@ -239,39 +249,25 @@ internal fun <T> SingleChoiceDialog(
     onDismiss: () -> Unit,
     describe: @Composable (T) -> String? = { null }
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title, fontWeight = FontWeight.Bold) },
-        text = {
-            LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
-                items(choices) { (value, label) ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(value) }
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(selected = value == selected, onClick = { onSelect(value) })
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(label)
-                            describe(value)?.let { line ->
-                                Text(
-                                    line,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
+    var picked by remember { mutableStateOf(selected) }
+    ChoiceDialog(
+        title = title,
+        onDismiss = onDismiss,
+        buttons = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.download_cancel)) }
+            TextButton(onClick = { onSelect(picked) }) { Text(stringResource(R.string.format_sheet_ok)) }
         }
-    )
+    ) {
+        items(choices) { (value, label) ->
+            ChoiceRow(
+                label = label,
+                description = describe(value),
+                chosen = value == picked,
+                role = Role.RadioButton,
+                onClick = { picked = value }
+            ) { RadioButton(selected = value == picked, onClick = null) }
+        }
+    }
 }
 
 /** Tick any number of [choices]; nothing is saved until OK. */
@@ -284,35 +280,109 @@ internal fun <T> MultiChoiceDialog(
     onDismiss: () -> Unit
 ) {
     var ticked by remember { mutableStateOf(selected) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title, fontWeight = FontWeight.Bold) },
-        text = {
-            LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
-                items(choices) { (value, label) ->
-                    val isTicked = value in ticked
-                    val toggle = { ticked = if (isTicked) ticked - value else ticked + value }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(onClick = toggle)
-                            .padding(vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(checked = isTicked, onCheckedChange = { toggle() })
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(label)
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(ticked) }) { Text(stringResource(R.string.format_sheet_ok)) }
-        },
-        dismissButton = {
+    ChoiceDialog(
+        title = title,
+        onDismiss = onDismiss,
+        buttons = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.download_cancel)) }
+            TextButton(onClick = { onConfirm(ticked) }) { Text(stringResource(R.string.format_sheet_ok)) }
         }
-    )
+    ) {
+        items(choices) { (value, label) ->
+            val isTicked = value in ticked
+            ChoiceRow(
+                label = label,
+                description = null,
+                chosen = isTicked,
+                role = Role.Checkbox,
+                onClick = { ticked = if (isTicked) ticked - value else ticked + value }
+            ) { Checkbox(checked = isTicked, onCheckedChange = null) }
+        }
+    }
+}
+
+/**
+ * The frame both choice dialogs share: a title, the choices, and the buttons straight under
+ * them. Drawn by hand rather than as an AlertDialog, whose fixed padding and gap above the
+ * buttons left a two-choice dialog mostly empty.
+ */
+@Composable
+private fun ChoiceDialog(
+    title: String,
+    onDismiss: () -> Unit,
+    buttons: @Composable () -> Unit,
+    choices: LazyListScope.() -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh
+        ) {
+            Column(modifier = Modifier.padding(top = 20.dp, bottom = 8.dp)) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 12.dp)
+                )
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 420.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    content = choices
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 12.dp, end = 12.dp, top = 4.dp),
+                    horizontalArrangement = Arrangement.End
+                ) { buttons() }
+            }
+        }
+    }
+}
+
+/**
+ * One choice: the whole row selects it, and the chosen one is tinted so it stands out
+ * without having to find the mark. The mark draws no touch target of its own.
+ */
+@Composable
+private fun ChoiceRow(
+    label: String,
+    description: String?,
+    chosen: Boolean,
+    role: Role,
+    onClick: () -> Unit,
+    mark: @Composable () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(
+                if (chosen) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else Color.Transparent
+            )
+            .clickable(role = role, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) { mark() }
+        Spacer(modifier = Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (chosen) FontWeight.SemiBold else FontWeight.Normal
+            )
+            description?.let { line ->
+                Text(
+                    line,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                )
+            }
+        }
+    }
 }
 
 /** Asks before something that cannot be taken back. */

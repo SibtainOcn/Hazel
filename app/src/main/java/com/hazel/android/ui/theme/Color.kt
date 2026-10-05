@@ -74,8 +74,10 @@ val HazelCyanContainerLight = Color(0xFFB2EBF2)
 
 // Status Colors
 val SuccessGreen = Color(0xFF4CAF50)
-val ErrorRed = Color(0xFFCF6679)
-val ErrorRedLight = Color(0xFFB00020)
+// Errors in a true red. The dark theme's used to be Material's dusty pink, which read
+// as a faded mark rather than as something gone wrong.
+val ErrorRed = Color(0xFFE53935)
+val ErrorRedLight = Color(0xFFD32F2F)
 val WarningAmber = Color(0xFFFFB74D)
 val InfoBlue = Color(0xFF64B5F6)
 

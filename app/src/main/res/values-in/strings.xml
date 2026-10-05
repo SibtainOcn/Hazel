@@ -85,6 +85,9 @@
     <string name="no_results_sign_in_body">Sumber memerlukan akun sebelum dapat diakses. Masuk akan menyimpan cookie untuk situs tersebut dan mencoba lagi.</string>
     <string name="no_results_continue_body">Rincian tidak dapat dibaca, tetapi unduhan mungkin tetap berhasil. Melanjutkan akan menggunakan kualitas terbaik yang tersedia.</string>
     <string name="no_results_refused_body">Sumber menolak permintaan.</string>
+    <string name="no_results_gone_body">Media ini tidak tersedia. Mungkin sudah dihapus, atau tautannya salah.</string>
+    <string name="no_results_unsupported_body">Situs ini tidak didukung, jadi tidak ada yang bisa diunduh di sini.</string>
+    <string name="no_results_generic_body">Detail tautan ini tidak dapat dibaca.</string>
     <string name="no_results_engine_report">Laporan mesin</string>
     <string name="no_results_copy_log">Salin log</string>
     <string name="no_results_sign_in">Masuk</string>
@@ -320,6 +323,16 @@
     <string name="history_failed_copy_log">Salin Catatan</string>
     <string name="history_failed_log_copied">Catatan kesalahan disalin ke papan klip</string>
     <string name="history_failed_retry">Coba lagi</string>
+    <string name="queue_failed_choose_again">Unduh dengan cara lain</string>
+    <string name="queue_failed_select">Pilih yang gagal</string>
+    <string name="queue_failed_remove">Hapus</string>
+    <string name="queue_failed_remove_body">Unduhan ini keluar dari daftar beserta lognya. File yang sudah diunduh tidak tersentuh.</string>
+    <plurals name="queue_failed_remove_title">
+        <item quantity="other">Hapus %d unduhan gagal?</item>
+    </plurals>
+    <string name="queue_failed_retrying">Mencoba lagi</string>
+    <string name="failed_stopped_at">Berhenti di: %1$s · %2$d%% terunduh</string>
+    <string name="failed_copy_url">Salin URL</string>
     <string name="history_failed_dismiss">Tutup</string>
     <string name="history_failed_clear_all">Hapus semua yang gagal</string>
     <string name="history_queue_clear_all">Hapus antrean</string>
@@ -477,6 +490,8 @@
     <string name="format_filter_smallest">Format terkecil (per resolusi)</string>
     <string name="format_filter_generic">Generik</string>
     <string name="format_source_title">Sumber format</string>
+    <string name="format_source_signed_in_title">NewPipe tidak dapat memakai login Anda</string>
+    <string name="format_source_signed_in_body">Situs ini punya login tersimpan dan Gunakan cookie aktif. NewPipe tidak mengirim cookie, jadi formatnya dibaca oleh yt-dlp. Matikan Gunakan cookie di Cookie untuk membacanya dengan NewPipe.</string>
     <string name="format_sort_title">Urutkan menurut</string>
     <string name="format_update">Perbarui</string>
 
@@ -570,6 +585,10 @@
     <string name="processing_video_format">Format video</string>
     <string name="processing_video_codec">Codec video pilihan</string>
     <string name="processing_video_quality">Kualitas video</string>
+    <string name="processing_instant_save_as">Instant menyimpan sebagai</string>
+    <string name="processing_instant_audio_only">Audio saja</string>
+    <string name="processing_section_kind">Audio atau video</string>
+    <string name="processing_sheet_opens_on">Lembar unduhan terbuka di</string>
     <string name="processing_sub_original">Bahasa asli (otomatis)</string>
     <string name="processing_reset">Atur ulang semua ke bawaan</string>
     <string name="processing_reset_title">Atur ulang pengaturan sintesis?</string>
@@ -718,7 +737,7 @@
     <string name="home_start_search">Cari</string>
     <string name="home_start_downloads">Unduhan</string>
     <string name="more_getting_started">Memulai</string>
-    <string name="instant_label">Hazel Instant</string>
+    <string name="instant_label">Instant</string>
     <string name="instant_started">Unduhan dimulai</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Pengaturan sintesis</string>
