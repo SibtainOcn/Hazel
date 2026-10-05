@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The sign-in page opens at once with the shape loader, which stays until the site shows something, instead of a black screen. The browser is started after the screen is up rather than before it.
 - Closing the link dialog in the download sheet, the set-of-links sheet or a download's properties no longer sometimes leaves the sheet ignoring taps until it is closed and opened again.
 - Copying the link from a download's properties shows the same small toast as the download sheet, over the middle of the sheet, instead of a full-width banner under the link.
+- The Running tab no longer goes empty while a playlist or a set of links is still downloading. Clearing the home screen, or sharing a link in mid-run, which is what reopening a failed card does, reset the run's record while the run went on, so the notification kept counting with nothing on the Running tab for the rest of the queue.
+- A search result, or any other link, downloaded while a playlist is running now joins the queue. The open download sheet followed the run to whichever playlist item had just started, and its Download queued that item again instead, so the new link never appeared.
+- A run of several links that is cancelled, or ends with failures, now reports how many were downloaded, how many failed and how many were cancelled, in one notification that opens the queue. Before, cancelling a playlist with one bad link in it read "1 of 83 could not be downloaded".
+- Opening the queue from a notification no longer leaves the Home button doing nothing until the app is restarted.
 
 ## [1.1.12] - 2026-10-03
 ### Fixed
