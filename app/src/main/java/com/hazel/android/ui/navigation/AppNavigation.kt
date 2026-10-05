@@ -118,7 +118,20 @@ fun AppNavigation(
     // Handle deep navigation triggered from shortcuts or share overlay
     LaunchedEffect(pendingRoute) {
         pendingRoute?.let { route ->
-            navController.navigate(route)
+            // A tab is opened the way the bottom bar opens it. Pushed as a plain screen, it
+            // sat on top of Home, and Home's own button then restored that same stack with
+            // the tab still on top of it, so pressing Home seemed to do nothing.
+            if (bottomNavItems.any { it.route == route }) {
+                navController.navigate(route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            } else {
+                navController.navigate(route)
+            }
             onPendingRouteConsumed()
         }
     }
