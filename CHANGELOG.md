@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A search result, or any other link, downloaded while a playlist is running now joins the queue. The open download sheet followed the run to whichever playlist item had just started, and its Download queued that item again instead, so the new link never appeared.
 - A run of several links that is cancelled, or ends with failures, now reports how many were downloaded, how many failed and how many were cancelled, in one notification that opens the queue. Before, cancelling a playlist with one bad link in it read "1 of 83 could not be downloaded".
 - Opening the queue from a notification no longer leaves the Home button doing nothing until the app is restarted.
+- Pause all, in the queue menu or on the notification, now pauses the queue. It used to pause only the download in hand, and the next link started at once. Nothing waiting starts until Resume, even after the app is closed and opened again. A card's own Pause still pauses just that link. A paused card shows a pause sign over its artwork, and its stage track no longer keeps moving.
 
 ## [1.1.12] - 2026-10-03
 ### Fixed
