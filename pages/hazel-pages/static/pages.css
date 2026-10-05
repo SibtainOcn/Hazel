@@ -204,3 +204,4 @@ details.q:hover, details.q[open] { background: var(--surface-2); }
 .md p { margin: 10px 0; color: var(--fg-2); }
 .md code { font: 13px var(--mono, monospace); background: color-mix(in srgb, var(--fg) 10%, transparent); padding: 1px 5px; border-radius: 5px; }
 .md a { color: var(--accent); }
+.md h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }

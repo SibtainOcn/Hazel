@@ -79,7 +79,7 @@ FOOTER = f'''<footer>
       <div><h4>Product</h4><ul>
         <li><a href="index.html#features">Features</a></li>
         <li><a href="index.html#screens">Screenshots</a></li>
-        <li><a href="https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md">Changelog</a></li>
+        <li><a href="changelog.html">Changelog</a></li>
       </ul></div>
       <div><h4>Help</h4><ul>
         <li><a href="guide.html">Guide</a></li>
@@ -181,7 +181,10 @@ def changelog_html():
             out.append('</li></ul>')
             indents.pop()
 
-    for raw in (ROOT / 'CHANGELOG.md').read_text(encoding='utf-8').splitlines():
+    # Start at the first version: the title and the note about the format above it are
+    # for readers of the file, and the page head already says what this is.
+    text = (ROOT / 'CHANGELOG.md').read_text(encoding='utf-8')
+    for raw in text[text.find('\n## ') + 1:].splitlines():
         line = raw.rstrip()
         trimmed = line.lstrip()
         indent = len(line) - len(trimmed)
