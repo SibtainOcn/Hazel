@@ -3,7 +3,7 @@
 .hero { padding: 112px 0 0; text-align: center; }
 .pill {
   --ring: conic-gradient(from var(--angle, 0deg), transparent 0 55%, color-mix(in srgb, var(--accent) 85%, transparent) 70%, transparent 85%);
-  position: relative; display: inline-flex; align-items: center; gap: 12px; padding: 7px 8px 7px 8px;
+  position: relative; display: inline-flex; align-items: center; gap: 12px; max-width: 100%; padding: 7px 8px 7px 8px;
   border-radius: 999px; font-size: 14px; color: var(--fg-2); isolation: isolate;
   background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(var(--line-2), var(--line)) border-box;
   border: 1px solid transparent; box-shadow: 0 0 0 0 transparent, 0 8px 30px -12px color-mix(in srgb, var(--accent) 45%, transparent);
@@ -24,7 +24,7 @@
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); white-space: nowrap;
 }
 .pill .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
-.pill .msg { color: var(--fg); font-weight: 500; }
+.pill .msg { color: var(--fg); font-weight: 500; min-width: 0; flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pill .sep { width: 1px; height: 16px; background: var(--line-2); }
 .pill .more { display: inline-flex; align-items: center; gap: 4px; padding-right: 8px; color: var(--fg-2); white-space: nowrap; }
 .pill .more svg { width: 14px; height: 14px; transition: transform .2s; }
