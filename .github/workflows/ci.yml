@@ -110,17 +110,6 @@ jobs:
           # the caches stay small and one branch cannot poison another.
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      # Each harness keeps its output in a log, so the summary can read its pass count.
-      - name: Run artist metadata & format test harness
-        run: |
-          set -o pipefail
-          python3 tools/tests/test_artist_metadata.py | tee "$RUNNER_TEMP/harness-artist.log"
-
-      - name: Run release readiness & regression test harness
-        run: |
-          set -o pipefail
-          python3 tools/tests/test_release_regression_harness.py | tee "$RUNNER_TEMP/harness-regression.log"
-
       # The unit tests are pure JVM: no emulator, no device, no Android framework. That is
       # what keeps this job to seconds, and it is the property to protect as the suite grows.
       - name: Run unit tests
@@ -136,7 +125,7 @@ jobs:
           # pull request never shows. The check has to go on the head of the branch.
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          python3 .github/scripts/test_summary.py             --harness "Artist harness=$RUNNER_TEMP/harness-artist.log"             --harness "Regression harness=$RUNNER_TEMP/harness-regression.log"             --check-run "$RUNNER_TEMP/check-run.json"
+          python3 .github/scripts/test_summary.py --check-run "$RUNNER_TEMP/check-run.json"
 
       # Puts the counts on the pull request's checks list, e.g. "412/412 passed". Like the
       # report below, it is a convenience and not the result: a pull request from a fork gets

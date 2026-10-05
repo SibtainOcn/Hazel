@@ -19,7 +19,7 @@ feat/xyz  --(PR, squash)-->  nightly  --(PR, merge commit)-->  main  --(tag vX.Y
 
 | File | Runs on | Does |
 |---|---|---|
-| [ci.yml](ci.yml) | Pull requests into `main`, `nightly`, `feat/**`; pushes to `main`; manual | String checks, unit tests with both Python harnesses, APK build |
+| [ci.yml](ci.yml) | Pull requests into `main`, `nightly`, `feat/**`; pushes to `main`; manual | String checks, Kotlin unit tests, APK build |
 | [release.yml](release.yml) | A `v*` tag pushed; manual with an existing tag | Tests, then builds every architecture signed and publishes the GitHub release |
 | [pages.yml](pages.yml) | Pushes to `main` touching the website or its sources; pull requests touching the website | Builds and checks the website, checks outside links, deploys to GitHub Pages |
 
@@ -31,13 +31,17 @@ check the same commit twice.
 
 - **String resources:** `tools/strings/check.py`. Translation coverage is reported in the job
   summary, not enforced.
-- **Unit tests:** `tools/tests/test_artist_metadata.py`,
-  `tools/tests/test_release_regression_harness.py`, then `:app:testDebugUnitTest`.
+- **Unit tests:** `:app:testDebugUnitTest`, the Kotlin tests in `app/src/test`.
   [scripts/test_summary.py](../scripts/test_summary.py) writes the counts to the job summary
-  and posts them as the **Test results** check, e.g. `348/348 passed · Artist 52/52 ·
-  Regression 167/167`, with each failing test flagged on its file.
+  and posts them as the **Test results** check, e.g. `348/348 passed · 4s`, with each failing
+  test flagged on its file.
 - **Build APK:** debug on pull requests (unsigned, universal). Release on a push to `main`
   (signed, arm64-v8a uploaded for 3 days).
+
+CI checks the real code and the resources, nothing else. The Python harnesses in `tools/tests/`
+are local tools (`python tools/tests/test_all.py`) and do not run in CI: many of them read the
+Kotlin source as text or copy its logic into Python, so they fail on harmless refactors and can
+pass while the app is wrong. Behaviour worth guarding in CI gets a Kotlin unit test.
 
 Test results is informational. Do not make it a required check: pull requests from forks
 cannot post it, so it would block them.

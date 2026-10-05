@@ -459,7 +459,7 @@ def test_percent_stays_literal():
 def test_kotlin_matches_simulation():
     """The Kotlin builds the same arguments simulated here."""
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
-                        "app/src/main/java/com/hazel/android/download/DownloadViewModel.kt")
+                        "app/src/main/java/com/hazel/android/download/MetadataArgs.kt")
     with open(path, encoding="utf-8") as f:
         kotlin = f.read()
     check("Kotlin escapes % and : and adds the space",

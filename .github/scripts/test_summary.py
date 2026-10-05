@@ -9,7 +9,7 @@ With --check-run, it also writes the body of a GitHub check run to the given fil
 counts as its title, this summary as its text, and each failing test as an annotation. The
 workflow posts that file, so the counts show on the pull request's checks list.
 
-Usage: test_summary.py [--harness NAME=LOG ...] [--check-run FILE] [results-dir ...]
+Usage: test_summary.py [--check-run FILE] [results-dir ...]
 """
 
 from __future__ import annotations
@@ -17,7 +17,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -25,8 +24,6 @@ from pathlib import Path
 DEFAULT_DIRS = ["app/build/test-results"]
 TEST_SOURCES = Path("app/src/test")
 
-# The harnesses end with a line such as "Results: 52/52 passed, 0 failed".
-HARNESS_COUNT = re.compile(r"(\d+)/(\d+)\s+(?:tests\s+)?passed", re.IGNORECASE)
 
 # GitHub takes at most 50 annotations in one request.
 MAX_ANNOTATIONS = 50
@@ -132,20 +129,6 @@ def render(suites: list[Suite], failures: list[tuple[str, str, str]]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def read_harness(spec: str) -> tuple[str, int, int] | None:
-    """Reads "NAME=LOG" into (name, passed, total), or None when the log has no count."""
-    name, _, log = spec.partition("=")
-    try:
-        text = Path(log).read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return None
-    matches = HARNESS_COUNT.findall(text)
-    if not matches:
-        return None
-    passed, total = matches[-1]
-    return name.strip(), int(passed), int(total)
-
-
 def source_path(classname: str) -> str | None:
     """Finds the test file a class lives in, for an annotation. None when it cannot."""
     outer = classname.split("$", 1)[0]
@@ -161,7 +144,6 @@ def source_path(classname: str) -> str | None:
 def check_run(
     suites: list[Suite],
     failures: list[tuple[str, str, str]],
-    harnesses: list[tuple[str, int, int]],
     summary: str,
 ) -> dict:
     total = sum(s.tests for s in suites)
@@ -170,8 +152,7 @@ def check_run(
     passed = total - bad - skipped
     seconds = sum(s.time for s in suites)
 
-    harness_bad = any(p < t for _, p, t in harnesses)
-    green = bool(suites) and bad == 0 and not harness_bad
+    green = bool(suites) and bad == 0
 
     if suites:
         title = f"{passed}/{total - skipped} passed"
@@ -182,13 +163,8 @@ def check_run(
         title += f" · {seconds:.0f}s"
     else:
         title = "No test reports were produced"
-    for name, p, t in harnesses:
-        title += f" · {name.split()[0]} {p}/{t}"
 
     text = summary
-    if harnesses:
-        text += "\n## Harnesses\n\n| Harness | Passed | Total |\n|---|---:|---:|\n"
-        text += "".join(f"| {n} | {p} | {t} |\n" for n, p, t in harnesses)
 
     annotations = []
     for classname, name, message in failures[:MAX_ANNOTATIONS]:
@@ -221,7 +197,6 @@ def check_run(
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--harness", action="append", default=[], metavar="NAME=LOG")
     parser.add_argument("--check-run", metavar="FILE")
     parser.add_argument("roots", nargs="*")
     args = parser.parse_args()
@@ -229,7 +204,6 @@ def main() -> int:
     roots = args.roots or DEFAULT_DIRS
     suites, failures = collect(roots)
     summary = render(suites, failures)
-    harnesses = [h for h in map(read_harness, args.harness) if h is not None]
 
     print(summary)
 
@@ -247,7 +221,7 @@ def main() -> int:
             handle.write(f"failed={bad}\n")
 
     if args.check_run:
-        body = check_run(suites, failures, harnesses, summary)
+        body = check_run(suites, failures, summary)
         Path(args.check_run).write_text(json.dumps(body), encoding="utf-8")
         print(f"Check run: {body['output']['title']}")
 

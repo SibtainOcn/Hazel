@@ -2259,45 +2259,13 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Writes an edited title or author into the file's tags.
-     *
-     * yt-dlp reads `--parse-metadata` as `FROM:TO`, splitting on the first unescaped colon,
-     * and FROM as an output template, so the value is written as one: see [asLiteralFrom].
-     *
-     * The author is also copied into the `artist` metadata slot, which is what
-     * `FFmpegMetadataPP` writes as the ID3 / Vorbis / MP4 artist tag. Without this,
-     * music platforms that populate `artist` instead of `uploader` (JioSaavn, SoundCloud,
-     * Bandcamp) would leave audio files with no artist tag at all.
-     */
+    /** Writes an edited title or author into the file's tags: see [metadataParseArgs]. */
     private fun YoutubeDLRequest.applyMetadata(title: String, author: String) {
         if (title.isBlank() && author.isBlank()) return
 
         addOption("--embed-metadata")
-
-        if (title.isNotBlank()) {
-            addOption("--parse-metadata", "${title.asLiteralFrom()}:%(title)s ")
-        }
-
-        if (author.isNotBlank()) {
-            addOption("--parse-metadata", "${author.asLiteralFrom()}:%(uploader)s ")
-            // Map uploader → artist tag so audio files get a proper artist ID3/Vorbis tag
-            addOption("--parse-metadata", "%(uploader)s:%(artist)s")
-        }
+        metadataParseArgs(title, author).forEach { addOption("--parse-metadata", it) }
     }
-
-    /**
-     * [this] as the FROM of a `--parse-metadata` that sets a field to exactly this text.
-     *
-     * Colons are escaped so the FROM:TO split passes them through, and percent signs so a
-     * title holding "%(" is not read as a field. A FROM made only of letters is taken by
-     * yt-dlp as the name of a field rather than as text, so a one-word title such as
-     * "Flickermood" read the missing field "Flickermood" and was saved as "NA". The space
-     * added at the end keeps it text, and the TO it is paired with ends in the same space,
-     * so the space is matched off again rather than kept.
-     */
-    private fun String.asLiteralFrom(): String =
-        replace("%", "%%").replace(":", """\:""") + " "
 
     /**
      * Resolves the output template against the title and author shown in the sheet.
