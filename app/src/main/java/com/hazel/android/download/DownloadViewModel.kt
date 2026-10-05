@@ -413,15 +413,21 @@ class DownloadViewModel : ViewModel() {
     fun clearUrl() {
         fetchJob?.cancel()
         MediaProbe.cancel()
-        _state.value = DownloadState()
+        _state.update { it.keepingRun() }
     }
 
     /** Clears the resolved links and the URL field, for the Clear results menu action. */
     fun clearResults() {
         fetchJob?.cancel()
         MediaProbe.cancel()
-        _state.value = DownloadState()
+        _state.update { it.keepingRun() }
     }
+
+    /** A blank screen with the run still on it; see the top-level [keepingRun]. */
+    private fun DownloadState.keepingRun(): DownloadState = keepingRun(isRunning())
+
+    /** Whether a run is working through the queue, whatever the screen's state says. */
+    private fun isRunning(): Boolean = synchronized(queue) { runOwner != null }
 
     /**
      * Resolves a shared URL in complete isolation from previous search/download queries.
@@ -1394,15 +1400,19 @@ class DownloadViewModel : ViewModel() {
                 isCancelled = false
                 isPaused = false
                 downloadIsVideo = plan.format.hasVideo
-                markBatch(plan.info.url, BatchState.DOWNLOADING)
+                markBatch(plan.info.url, BatchState.DOWNLOADING, title = plan.title)
 
                 expectedTotalBytes = expectedTotalFor(plan)
                 lastFloorCheckAt = 0L
                 progressFloor = fractionOnDisk()
 
                 val opening = if (progressFloor > 0f) "Resuming" else "Starting download"
+                // The running flag is said again for every item, so the Running tab holds
+                // whatever is in hand even after something else rewrote the state between
+                // two items.
                 _state.update { s -> s.copy(
                     info = plan.info,
+                    isDownloading = true,
                     active = plan.info,
                     progress = progressFloor,
                     totalBytes = expectedTotalBytes,
@@ -1678,12 +1688,12 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
-    private fun markBatch(url: String, state: BatchState, error: String? = null) {
-        _state.update { s -> s.copy(
-            batch = s.batch.map {
-                if (it.url == url) it.copy(state = state, error = error) else it
-            }
-        ) }
+    /**
+     * Records where one link has got to. Given a [title], a link the list has no entry for
+     * is added to it rather than left off, so whatever the run is working on has a card.
+     */
+    private fun markBatch(url: String, state: BatchState, error: String? = null, title: String? = null) {
+        _state.update { s -> s.copy(batch = s.batch.marking(url, state, error, title)) }
 
         // Taken off the written-down queue once it is settled either way. A link kept there
         // after it finished would download itself again on the next launch. A paused one is
@@ -1748,7 +1758,7 @@ class DownloadViewModel : ViewModel() {
      */
     fun cancelItem(url: String) {
         val activeInfo = _state.value.active
-        if (_state.value.isDownloading && activeInfo?.url == url) {
+        if ((_state.value.isDownloading || isRunning()) && activeInfo?.url == url) {
             // Cancel ONLY this active download item (do NOT set isBatchCancelled)
             isCancelled = true
             viewModelScope.launch(Dispatchers.IO) {
@@ -1779,7 +1789,7 @@ class DownloadViewModel : ViewModel() {
             }
             val hasActiveOrQueued = synchronized(queue) { queue.isNotEmpty() } ||
                     _state.value.batch.any { it.url != url && (it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED || it.state == BatchState.QUEUED) }
-            if (!hasActiveOrQueued && !_state.value.isDownloading) {
+            if (!hasActiveOrQueued && !_state.value.isDownloading && !isRunning()) {
                 _state.update { s -> s.copy(
                     isDownloading = false,
                     isProcessing = false,
@@ -1810,7 +1820,7 @@ class DownloadViewModel : ViewModel() {
         // A paused download has no process left to kill and no run left to tidy up after
         // it, so giving it up has to be done here. Without this the record survived the
         // cancel and the download let itself back in on the next launch.
-        if (!_state.value.isDownloading) {
+        if (!_state.value.isDownloading && !isRunning()) {
             discardHeldDownload()
             return
         }
@@ -1889,7 +1899,7 @@ class DownloadViewModel : ViewModel() {
     }
 
     fun resetState() {
-        _state.value = DownloadState()
+        _state.update { it.keepingRun() }
     }
 
     /** Removes an item from the waiting queue. */
@@ -2949,3 +2959,49 @@ internal data class TransferLimits(
     val concurrentFragments: Int = 8,
     val throttledRate: String = ""
 )
+
+/**
+ * A blank screen with the run still on it.
+ *
+ * Clearing the results, or a link shared in from the queue screen, is about the screen and
+ * not about the downloads. Starting over from a blank state threw the run's own record away
+ * while the run went on: the notification kept counting, and the Running tab, which reads
+ * that record, sat empty for the rest of the queue. With nothing in hand it is a blank state.
+ */
+internal fun DownloadState.keepingRun(running: Boolean): DownloadState {
+    val inHand = running || batch.any {
+        it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED ||
+            it.state == BatchState.QUEUED
+    }
+    if (!inHand) return DownloadState()
+    return DownloadState(
+        isDownloading = isDownloading,
+        active = active,
+        progress = progress,
+        totalBytes = totalBytes,
+        eta = eta,
+        status = status,
+        isProcessing = isProcessing,
+        processingSteps = processingSteps,
+        processingStep = processingStep,
+        waitingForWifi = waitingForWifi,
+        saveFallback = saveFallback,
+        batch = batch
+    )
+}
+
+/**
+ * The list with one link moved to [state]. Given a [title], a link the list has no entry
+ * for is added rather than left off, so whatever the run is working on has a card.
+ */
+internal fun List<BatchItem>.marking(
+    url: String,
+    state: BatchState,
+    error: String? = null,
+    title: String? = null
+): List<BatchItem> =
+    if (title != null && none { it.url == url }) {
+        this + BatchItem(url = url, title = title, state = state, error = error)
+    } else map {
+        if (it.url == url) it.copy(state = state, error = error) else it
+    }
