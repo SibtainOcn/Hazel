@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A download shared to Instant now has its card on the home screen too, filling as it downloads, as one started in the app does. It takes the screen as a link read in the app does, replacing the last results or search. Before, opening the app showed nothing until the queue screen was opened.
 - The empty home screen no longer shows a faint band under the search bar. It is the separator for a scrolled list, and the empty screen was counted as scrolled.
 - The sign-in page opens at once with the shape loader, which stays until the site shows something, instead of a black screen. The browser is started after the screen is up rather than before it.
+- Closing the link dialog in the download sheet, the set-of-links sheet or a download's properties no longer sometimes leaves the sheet ignoring taps until it is closed and opened again.
+- Copying the link from a download's properties shows the same small toast as the download sheet, over the middle of the sheet, instead of a full-width banner under the link.
 
 ## [1.1.12] - 2026-10-03
 ### Fixed

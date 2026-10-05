@@ -1,8 +1,9 @@
 package com.hazel.android.ui.screens.history
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +56,7 @@ import com.hazel.android.data.HistoryEntry
 import com.hazel.android.download.formatDuration
 import com.hazel.android.download.formatFileSize
 import com.hazel.android.ui.screens.download.FEEDBACK_MS
+import com.hazel.android.ui.screens.download.FeedbackToast
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.util.MediaFacts
 import com.hazel.android.util.MediaProbeFacts
@@ -97,14 +99,22 @@ fun DownloadPropertiesSheet(
     }
 
     // What the last tap on the address did. It clears itself, so nothing has to be
-    // dismissed and an old answer does not sit under the details being read.
-    var feedback by remember { mutableStateOf<String?>(null) }
+    // dismissed and an old answer does not sit over the details being read. A new object
+    // for every tap, so the same message twice in a row starts its time over; the text is
+    // kept apart so it stays on screen while the message fades out.
+    var feedback by remember { mutableStateOf<PropertiesFeedback?>(null) }
+    var shownFeedback by remember { mutableStateOf("") }
     LaunchedEffect(feedback) {
-        if (feedback != null) {
-            delay(FEEDBACK_MS)
-            feedback = null
-        }
+        val current = feedback ?: return@LaunchedEffect
+        shownFeedback = current.message
+        delay(FEEDBACK_MS)
+        feedback = null
     }
+
+    // The link dialog is composed beside the sheet rather than inside it: a dialog opened
+    // from within the sheet's own window could leave the sheet ignoring touches once it
+    // closed, until the sheet was closed and opened again.
+    var linkDialogOpen by remember { mutableStateOf(false) }
 
     // The screen's own ground rather than the raised surface a sheet takes by default. A
     // sheet is the whole foreground while it is up, and the raised tone read as a grey
@@ -119,6 +129,7 @@ fun DownloadPropertiesSheet(
         sheetState = sheetState,
         containerColor = sheetColor
     ) {
+      Box {
         Column(
             modifier = Modifier
                 .keepFlingInSheet()
@@ -247,7 +258,6 @@ fun DownloadPropertiesSheet(
 
             // The line that closes the sheet. Tapping it offers Copy and Open, the same
             // dialog as every other link in the app.
-            var linkDialogOpen by remember { mutableStateOf(false) }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     Icons.Filled.Link,
@@ -268,41 +278,35 @@ fun DownloadPropertiesSheet(
                 )
             }
 
-            if (linkDialogOpen) {
-                LinkOptionsDialog(
-                    links = listOf(entry.url),
-                    onFeedback = { feedback = it },
-                    onDismiss = { linkDialogOpen = false }
-                )
-            }
-
-            AnimatedVisibility(
-                visible = feedback != null,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Column {
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(28.dp),
-                        color = MaterialTheme.colorScheme.inverseSurface
-                    ) {
-                        Text(
-                            feedback.orEmpty(),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
-                        )
-                    }
-                }
-            }
-
             Spacer(modifier = Modifier.height(28.dp))
         }
+
+        // The same small toast the download sheets show, over the middle of the sheet, so
+        // it neither pushes the details around nor sits off screen under a long sheet.
+        androidx.compose.animation.AnimatedVisibility(
+            visible = feedback != null,
+            enter = fadeIn() + scaleIn(initialScale = 0.9f),
+            exit = fadeOut() + scaleOut(targetScale = 0.9f),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 20.dp)
+        ) {
+            FeedbackToast(shownFeedback)
+        }
+      }
+    }
+
+    if (linkDialogOpen) {
+        LinkOptionsDialog(
+            links = listOf(entry.url),
+            onFeedback = { message -> feedback = PropertiesFeedback(message) },
+            onDismiss = { linkDialogOpen = false }
+        )
     }
 }
+
+/** One message from a tap on the address. */
+private class PropertiesFeedback(val message: String)
 
 /**
  * A group of facts, hairline separated. Draws nothing at all when the group is empty, which

@@ -26,10 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,49 +42,48 @@ import com.hazel.android.ui.components.FlatChip
 import kotlinx.coroutines.launch
 
 /**
- * The row that closes a download sheet: a link button, which shows the address with Copy and
- * Open, and incognito, which sits here because the sheet is the last moment before a
- * download is recorded. It is the same setting the rest of the app reads. What a tap did is
- * handed to [onFeedback], for the sheet to show over itself.
+ * The row that closes a download sheet: a link button, which asks the sheet to show the
+ * address with Copy and Open, and incognito, which sits here because the sheet is the last
+ * moment before a download is recorded. It is the same setting the rest of the app reads.
+ * What a tap did is handed to [onFeedback], for the sheet to show over itself.
  */
 @Composable
 fun DownloadSheetFooter(
     /** The link the sheet is about; blank for none. */
     link: String,
+    onLinkClick: () -> Unit,
     modifier: Modifier = Modifier,
     onFeedback: (String) -> Unit
 ) {
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        SheetLinkButton(links = listOf(link).filter { it.isNotBlank() }, onFeedback = onFeedback)
+        SheetLinkButton(enabled = link.isNotBlank(), onClick = onLinkClick)
         Spacer(modifier = Modifier.weight(1f))
         IncognitoButton(onFeedback = onFeedback)
     }
 }
 
 /**
- * A round link button. Tapping it shows the address with Copy and Open, so a tap meant to
- * copy does not also send the user to another app.
+ * A round link button. Tapping it asks for [LinkOptionsDialog], so a tap meant to copy does
+ * not also send the user to another app.
  *
- * Given several [links], as a set of links has, Copy takes all of them, one to a line, and
- * Open is left out, since there is no one place to open.
+ * The dialog is not shown from here on purpose. This button sits inside a bottom sheet,
+ * which is a window of its own, and a dialog composed inside that window could leave the
+ * sheet ignoring touches once it closed, until the sheet was closed and opened again. The
+ * sheet keeps the dialog's state and composes it next to itself, the way its other dialogs
+ * are, so the dialog's window is a sibling of the sheet's rather than its child.
  */
 @Composable
 fun SheetLinkButton(
-    links: List<String>,
-    onFeedback: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    /** The one link the set was read from, such as a playlist; shown, copied and opened. */
-    sourceUrl: String? = null
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    var dialogOpen by remember { mutableStateOf(false) }
-
     Box(
         modifier = modifier
             .size(44.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-            .clickable(enabled = links.isNotEmpty()) { dialogOpen = true },
+            .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Icon(
@@ -95,14 +91,6 @@ fun SheetLinkButton(
             contentDescription = stringResource(R.string.sheet_link_options),
             modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.primary
-        )
-    }
-
-    if (dialogOpen) {
-        LinkOptionsDialog(
-            links = sourceUrl?.let { listOf(it) } ?: links,
-            onFeedback = onFeedback,
-            onDismiss = { dialogOpen = false }
         )
     }
 }
