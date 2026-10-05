@@ -67,6 +67,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
+import com.hazel.android.ui.components.FastScrollbar
 import com.hazel.android.data.DownloadQueueRepository
 import com.hazel.android.data.FailedDownload
 import com.hazel.android.data.FailedDownloadRepository
@@ -518,12 +519,15 @@ private fun QueueList(
     } else {
         val listState = rememberLazyListState()
         val shrink = rememberScrollShrink()
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize().nestedScroll(shrink),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) { content(shrink) }
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize().nestedScroll(shrink),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) { content(shrink) }
+            FastScrollbar(listState, Modifier.align(Alignment.TopEnd), PaddingValues(top = 16.dp, bottom = 24.dp))
+        }
     }
 }
 
