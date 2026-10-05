@@ -193,3 +193,14 @@ details.q:hover, details.q[open] { background: var(--surface-2); }
 .help-grid > * { background: var(--surface); border-radius: 18px; }
 .help-grid > *:hover { background: var(--surface-2); }
 .promise { border: 0; background: var(--surface); }
+
+/* Changelog, drawn from CHANGELOG.md the way the app's MarkdownLite draws it */
+.md { max-width: 760px; padding: 8px 0 96px; font-size: 16px; line-height: 1.6; overflow-wrap: anywhere; }
+.md h1 { display: none; }
+.md h2 { margin: 48px 0 8px; padding-top: 24px; border-top: 1px solid var(--line); font: 700 26px/1.2 var(--display); letter-spacing: -.02em; color: var(--accent); }
+.md h3 { margin: 22px 0 6px; font: 600 13px/1.3 var(--body); text-transform: uppercase; letter-spacing: .06em; color: var(--fg-2); }
+.md ul { margin: 4px 0; padding-left: 20px; }
+.md li { margin: 6px 0; }
+.md p { margin: 10px 0; color: var(--fg-2); }
+.md code { font: 13px var(--mono, monospace); background: color-mix(in srgb, var(--fg) 10%, transparent); padding: 1px 5px; border-radius: 5px; }
+.md a { color: var(--accent); }

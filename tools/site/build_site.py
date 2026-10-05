@@ -46,7 +46,7 @@ MENU = ('<button class="icon-btn menu-btn" type="button" aria-label="Menu" aria-
         '<path d="M4 8h16M4 16h16"/></svg></button>')
 
 LINKS = [('index.html#features', 'Features', 'home'), ('guide.html', 'Guide', 'guide'), ('faq.html', 'FAQ', 'faq'),
-         ('https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md', 'Changelog', None), ('support.html', 'Support', 'support')]
+         ('changelog.html', 'Changelog', 'changelog'), ('support.html', 'Support', 'support')]
 
 RELEASES = 'https://github.com/SibtainOcn/Hazel/releases/latest'
 
@@ -148,6 +148,69 @@ def whats_new():
     return 'See the latest changes'
 
 
+def _md_inline(text):
+    # Code first, so nothing inside backticks is read as bold or a link.
+    parts = text.split('`')
+    out = []
+    for i, part in enumerate(parts):
+        if i % 2 == 1 and i < len(parts) - 1:
+            out.append(f'<code>{html_escape(part)}</code>')
+            continue
+        s = html_escape(('`' + part) if i % 2 == 1 else part)
+        s = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', s)
+        s = re.sub(r'\[([^\]]+)]\((https?://[^)\s"]+)\)', r'<a href="\2" rel="noopener">\1</a>', s)
+        out.append(s)
+    return ''.join(out)
+
+
+def changelog_html():
+    """
+    CHANGELOG.md as HTML, by the same rules as the app's MarkdownLite: headings, bullet
+    lists nested by indent, paragraphs, bold, inline code and links. Anything else is
+    shown escaped as its text.
+    """
+    out, indents, para = [], [], []
+
+    def flush():
+        if ''.join(para).strip():
+            out.append(f'<p>{_md_inline(" ".join(para).strip())}</p>')
+        para.clear()
+
+    def close(to=-1):
+        while indents and indents[-1] > to:
+            out.append('</li></ul>')
+            indents.pop()
+
+    for raw in (ROOT / 'CHANGELOG.md').read_text(encoding='utf-8').splitlines():
+        line = raw.rstrip()
+        trimmed = line.lstrip()
+        indent = len(line) - len(trimmed)
+        heading = re.match(r'(#{1,6})\s+(.*)', trimmed)
+        bullet = re.match(r'[-*]\s+(.*)', trimmed)
+        if not line:
+            flush()
+        elif heading and indent == 0:
+            flush(); close()
+            n = len(heading.group(1))
+            out.append(f'<h{n}>{_md_inline(heading.group(2))}</h{n}>')
+        elif bullet:
+            flush()
+            if not indents or indent > indents[-1]:
+                out.append('<ul><li>')
+                indents.append(indent)
+            else:
+                close(indent)
+                out.append('</li><li>')
+            out.append(_md_inline(bullet.group(1)))
+        elif indents and indent > 0:
+            out.append(' ' + _md_inline(trimmed))
+        else:
+            close()
+            para.append(trimmed)
+    flush(); close()
+    return ''.join(out)
+
+
 def page(name, title, description, active, extra_css, facts):
     body = (SRC / f'{name}.html').read_text(encoding='utf-8')
     for key, value in facts.items():
@@ -188,7 +251,8 @@ BANNED = re.compile('[—–→←…·›•]')
 def check(pages):
     problems = []
     for name, html in pages.items():
-        for ch in set(BANNED.findall(html)):
+        # The changelog page carries CHANGELOG.md word for word, so its text is not policed here.
+        for ch in set() if name == 'changelog' else set(BANNED.findall(html)):
             problems.append(f'{name}: plain copy only, found {ch!r} (U+{ord(ch):04X})')
         for left in set(re.findall(r'\{\{[^}]*\}\}', html)):
             problems.append(f'{name}: placeholder never filled: {left}')
@@ -228,6 +292,7 @@ def main():
         'language_words_cap': word.capitalize(),
         'language_chips': ''.join(f'<span>{l}</span>' for l in langs),
         'whats_new': html_escape(whats_new()),
+        'changelog': changelog_html(),
     }
 
     pages = {
@@ -236,6 +301,7 @@ def main():
                       'home', 'home.css', facts),
         'guide': page('guide', 'Guide | Hazel', 'How to use Hazel: your first download, playlists, sharing from other apps, where files go and more.', 'guide', 'pages.css', facts),
         'faq': page('faq', 'FAQ | Hazel', 'Answers to common questions about Hazel.', 'faq', 'pages.css', facts),
+        'changelog': page('changelog', 'Changelog | Hazel', 'Every change to Hazel, newest first.', 'changelog', 'pages.css', facts),
         'support': page('support', 'Support | Hazel', 'Help keep Hazel free: sponsor, buy a coffee, translate, or spread the word.', 'support', 'pages.css', facts),
     }
     for name, html in pages.items():
