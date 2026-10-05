@@ -1407,11 +1407,13 @@ class DownloadViewModel : ViewModel() {
                 progressFloor = fractionOnDisk()
 
                 val opening = if (progressFloor > 0f) "Resuming" else "Starting download"
-                // The running flag is said again for every item, so the Running tab holds
-                // whatever is in hand even after something else rewrote the state between
-                // two items.
+                // Only [DownloadState.active] follows the run. [DownloadState.info] is the
+                // result the sheet is open on: moved here, a sheet opened on a search result
+                // turned into whichever playlist item had just started, and its Download
+                // queued that item a second time instead of the result. The running flag is
+                // said again for every item, so the Running tab holds whatever is in hand
+                // even after something else rewrote the state between two items.
                 _state.update { s -> s.copy(
-                    info = plan.info,
                     isDownloading = true,
                     active = plan.info,
                     progress = progressFloor,

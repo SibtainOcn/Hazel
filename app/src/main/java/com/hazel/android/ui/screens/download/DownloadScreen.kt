@@ -169,8 +169,8 @@ fun DownloadScreen(
     // rather than animated into place: a card sliding around under a moving progress bar
     // is harder to read than one that is simply where it belongs.
     val listState = rememberLazyListState()
-    val orderedResults = remember(state.results, state.info?.url, state.isDownloading) {
-        val active = state.info?.url?.takeIf { state.isDownloading }
+    val orderedResults = remember(state.results, state.active?.url, state.isDownloading) {
+        val active = state.active?.url?.takeIf { state.isDownloading }
         // The list anchors its scroll to the first visible card's key, so when a finished
         // download dropped back from the top to its own place the viewport followed it,
         // often to the end of the list. Pinning the position by index keeps the user where
@@ -258,7 +258,7 @@ fun DownloadScreen(
     // scroll the list so the new active card is visible at the top. Without this the
     // viewport stays anchored on the old completed card and the user has to scroll
     // manually to find the one that is running now.
-    val activeUrl = state.info?.url
+    val activeUrl = state.active?.url
     val isDownloading = state.isDownloading
     LaunchedEffect(activeUrl, isDownloading) {
         if (isDownloading && activeUrl != null && (state.isMultiple || state.batch.size > 1)) {
@@ -997,6 +997,8 @@ fun DownloadScreen(
                             saveDirs = saveDirs
                         )
                     } else {
+                        // The sheet's own link, named rather than left to whatever the
+                        // state points at by the time the button is pressed.
                         downloadViewModel.startDownload(
                             context = context,
                             format = format,
@@ -1004,6 +1006,7 @@ fun DownloadScreen(
                             title = title,
                             author = author,
                             audioLanguage = audioLanguage,
+                            info = info,
                             saveDirs = saveDirs
                         )
                     }
