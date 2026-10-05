@@ -1728,7 +1728,18 @@ class DownloadViewModel : ViewModel() {
             }
         ) }
 
+        val counts = RunCounts.of(current.batch)
         when {
+            // Several links that did not all save: one summary with every count in it,
+            // rather than the failures alone or a bare "cancelled" that hides what was saved.
+            counts.wantsSummary -> DownloadNotificationHelper.showRunSummary(
+                context,
+                done = counts.done,
+                failed = counts.failed,
+                cancelled = counts.cancelled,
+                cancelledByUser = isBatchCancelled
+            )
+
             isBatchCancelled && done == 0 -> DownloadNotificationHelper.showCancelled(context)
 
             trueFailed > 0 && done == 0 -> {
@@ -2962,6 +2973,9 @@ internal data class TransferLimits(
     val throttledRate: String = ""
 )
 
+/** What a cancelled item's entry says, as opposed to a failure's reason. */
+internal const val CANCELLED_REASON = "Cancelled"
+
 /**
  * A blank screen with the run still on it.
  *
@@ -3007,3 +3021,19 @@ internal fun List<BatchItem>.marking(
     } else map {
         if (it.url == url) it.copy(state = state, error = error) else it
     }
+
+/** How a run ended, counted off its list. A cancelled item is not counted as a failure. */
+internal data class RunCounts(val total: Int, val done: Int, val failed: Int, val cancelled: Int) {
+
+    /** Several links, not all saved: reported as one summary with every count. */
+    val wantsSummary: Boolean get() = total > 1 && (failed > 0 || cancelled > 0)
+
+    companion object {
+        fun of(batch: List<BatchItem>) = RunCounts(
+            total = batch.size,
+            done = batch.count { it.state == BatchState.DONE },
+            failed = batch.count { it.state == BatchState.FAILED && it.error != CANCELLED_REASON },
+            cancelled = batch.count { it.state == BatchState.FAILED && it.error == CANCELLED_REASON }
+        )
+    }
+}
