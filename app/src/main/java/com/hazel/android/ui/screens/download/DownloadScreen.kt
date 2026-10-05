@@ -87,6 +87,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.ui.components.FastScrollbar
 import com.hazel.android.ui.components.FillingDownloadIcon
 import com.hazel.android.ui.components.ProcessingTracker
 import com.hazel.android.download.ProcessingStep
@@ -530,234 +531,244 @@ fun DownloadScreen(
                 // images at once and ran the app out of memory on the way back from the compact
                 // layout. This builds only what is on screen, whatever the list is holding.
                 val shrink = rememberScrollShrink()
-                LazyColumn(
-                    state = listState,
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .nestedScroll(shrink),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                        start = 20.dp,
-                        end = 20.dp,
-                        // Room for the action that floats over the list, on the same terms as
-                        // the action itself.
-                        bottom = 96.dp
-                    )
                 ) {
-                    items(orderedResults, key = { it.url }) { info ->
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        // Each card arrives rather than appearing: it fades up from slightly
-                        // below where it belongs, once, the first time it is composed. A long
-                        // playlist scrolls past as a series of cards settling into place
-                        // instead of a wall that redraws itself under the finger.
-                        var shown by remember(info.url) { mutableStateOf(false) }
-                        LaunchedEffect(info.url) { shown = true }
-                        val entrance by animateFloatAsState(
-                            targetValue = if (shown) 1f else 0f,
-                            animationSpec = M3Motion.emphasized(320),
-                            label = "cardEntrance"
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .nestedScroll(shrink),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                            start = 20.dp,
+                            end = 20.dp,
+                            // Room for the action that floats over the list, on the same terms as
+                            // the action itself.
+                            bottom = 96.dp
                         )
+                    ) {
+                        items(orderedResults, key = { it.url }) { info ->
+                            Spacer(modifier = Modifier.height(20.dp))
 
-                        val batchItem = state.batch.firstOrNull { it.url == info.url }
-                        // The item's own state says which card is running; the shared pointer
-                        // only stands in for a link the run has no list entry for.
-                        val isActive = state.isDownloading && when (batchItem) {
-                            null -> state.active?.url == info.url
-                            else -> batchItem.state == BatchState.DOWNLOADING
-                        }
-
-                        // A card that came from a listing carries no formats yet. Reading them
-                        // starts with the sheet, so the wait happens against an open sheet
-                        // rather than against a card that looks unresponsive.
-                        val openSheet = {
-                            downloadViewModel.selectResult(info)
-                            downloadViewModel.resolveFormats(info)
-                            sheetVisible = true
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .scrollShrink(shrink)
-                                .graphicsLayer {
-                                    alpha = entrance
-                                    translationY = (1f - entrance) * 28f
-                                }
-                        ) {
-                            MediaCard(
-                                info = info,
-                                isDownloading = isActive,
-                                isProcessing = isActive && state.isProcessing,
-                                processingSteps = if (isActive) state.processingSteps else emptyList(),
-                                processingStep = state.processingStep,
-                                progress = state.progress,
-                                isComplete = batchItem?.state == BatchState.DONE ||
-                                        (!state.isMultiple && state.isComplete),
-                                batchItem = batchItem,
-                                waitingForWifi = state.waitingForWifi && batchItem?.state == BatchState.QUEUED,
-                                alreadyDownloaded = info.url in savedUrls,
-                                player = playback?.takeIf { playingUrl == info.url },
-                                playerFullscreen = playerFullscreen,
-                                onPlay = { playingUrl = info.url },
-                                onFullscreen = { playerFullscreen = true },
-                                onStopPlaying = {
-                                    // Full screen takes the card off screen; that is no reason to stop.
-                                    if (playingUrl == info.url && !playerFullscreen) stopPlaying()
-                                },
-                                onOpenSheet = openSheet,
-                                onOpenQueue = onOpenQueue
+                            // Each card arrives rather than appearing: it fades up from slightly
+                            // below where it belongs, once, the first time it is composed. A long
+                            // playlist scrolls past as a series of cards settling into place
+                            // instead of a wall that redraws itself under the finger.
+                            var shown by remember(info.url) { mutableStateOf(false) }
+                            LaunchedEffect(info.url) { shown = true }
+                            val entrance by animateFloatAsState(
+                                targetValue = if (shown) 1f else 0f,
+                                animationSpec = M3Motion.emphasized(320),
+                                label = "cardEntrance"
                             )
-                        }
-                    }
 
-                    // While playlist/multi links continue reading remaining items, 2 skeleton cards
-                    // stand in below the loaded results to smoothly indicate incoming entries.
-                    if (state.isFetching && orderedResults.isNotEmpty()) {
-                        item(key = "fetching") {
-                            Column {
-                                if (state.fetchProgress.isNotBlank()) {
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    Text(
-                                        state.fetchProgress,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                ShimmerHost(modifier = Modifier.fillMaxWidth()) {
-                                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        repeat(INCREMENTAL_SKELETON_COUNT) {
-                                            MediaCardShimmer()
+                            val batchItem = state.batch.firstOrNull { it.url == info.url }
+                            // The item's own state says which card is running; the shared pointer
+                            // only stands in for a link the run has no list entry for.
+                            val isActive = state.isDownloading && when (batchItem) {
+                                null -> state.active?.url == info.url
+                                else -> batchItem.state == BatchState.DOWNLOADING
+                            }
+
+                            // A card that came from a listing carries no formats yet. Reading them
+                            // starts with the sheet, so the wait happens against an open sheet
+                            // rather than against a card that looks unresponsive.
+                            val openSheet = {
+                                downloadViewModel.selectResult(info)
+                                downloadViewModel.resolveFormats(info)
+                                sheetVisible = true
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .scrollShrink(shrink)
+                                    .graphicsLayer {
+                                        alpha = entrance
+                                        translationY = (1f - entrance) * 28f
+                                    }
+                            ) {
+                                MediaCard(
+                                    info = info,
+                                    isDownloading = isActive,
+                                    isProcessing = isActive && state.isProcessing,
+                                    processingSteps = if (isActive) state.processingSteps else emptyList(),
+                                    processingStep = state.processingStep,
+                                    progress = state.progress,
+                                    isComplete = batchItem?.state == BatchState.DONE ||
+                                            (!state.isMultiple && state.isComplete),
+                                    batchItem = batchItem,
+                                    waitingForWifi = state.waitingForWifi && batchItem?.state == BatchState.QUEUED,
+                                    alreadyDownloaded = info.url in savedUrls,
+                                    player = playback?.takeIf { playingUrl == info.url },
+                                    playerFullscreen = playerFullscreen,
+                                    onPlay = { playingUrl = info.url },
+                                    onFullscreen = { playerFullscreen = true },
+                                    onStopPlaying = {
+                                        // Full screen takes the card off screen; that is no reason to stop.
+                                        if (playingUrl == info.url && !playerFullscreen) stopPlaying()
+                                    },
+                                    onOpenSheet = openSheet,
+                                    onOpenQueue = onOpenQueue
+                                )
+                            }
+                        }
+
+                        // While playlist/multi links continue reading remaining items, 2 skeleton cards
+                        // stand in below the loaded results to smoothly indicate incoming entries.
+                        if (state.isFetching && orderedResults.isNotEmpty()) {
+                            item(key = "fetching") {
+                                Column {
+                                    if (state.fetchProgress.isNotBlank()) {
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        Text(
+                                            state.fetchProgress,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    ShimmerHost(modifier = Modifier.fillMaxWidth()) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            repeat(INCREMENTAL_SKELETON_COUNT) {
+                                                MediaCardShimmer()
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    // How the run as a whole went, under the list rather than over it. It
-                    // reports on what the cards above say one by one, so it belongs after them:
-                    // above the list it was the first thing read, before there was anything for
-                    // it to be about.
-                    item(key = "error") {
-                        AnimatedVisibility(
-                            visible = state.error != null,
-                            enter = M3Motion.contentEnter(),
-                            exit = M3Motion.contentExit()
-                        ) {
-                            state.error?.let {
-                                Text(
-                                    it,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.padding(top = 16.dp, start = 4.dp)
-                                )
+                        // How the run as a whole went, under the list rather than over it. It
+                        // reports on what the cards above say one by one, so it belongs after them:
+                        // above the list it was the first thing read, before there was anything for
+                        // it to be about.
+                        item(key = "error") {
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = state.error != null,
+                                enter = M3Motion.contentEnter(),
+                                exit = M3Motion.contentExit()
+                            ) {
+                                state.error?.let {
+                                    Text(
+                                        it,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.padding(top = 16.dp, start = 4.dp)
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    // Says where the downloads that used to sit here have gone. Reading a new
-                    // link takes what has finished off the list, so without this the cards a
-                    // user watched arrive would simply be absent the next time they pasted
-                    // something, which reads as the app having lost them.
-                    if (state.savedAside && !state.isFetching) {
-                        item(key = "savedAside") {
-                            Spacer(modifier = Modifier.height(20.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    Icons.Filled.CheckCircle,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    stringResource(R.string.download_saved_aside),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-
-                    // Nothing read yet: three ways to start, as plain chips rather than a
-                    // picture, so the empty screen offers something to do.
-                    if (!incognito && state.results.isEmpty() && !state.isFetching) {
-                        item(key = "starters") {
-                            // Fills the space under the search bar, so the chips sit
-                            // in its middle rather than near the top.
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillParentMaxHeight(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    stringResource(R.string.home_start_with),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                androidx.compose.foundation.layout.FlowRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.padding(horizontal = 24.dp)
+                        // Says where the downloads that used to sit here have gone. Reading a new
+                        // link takes what has finished off the list, so without this the cards a
+                        // user watched arrive would simply be absent the next time they pasted
+                        // something, which reads as the app having lost them.
+                        if (state.savedAside && !state.isFetching) {
+                            item(key = "savedAside") {
+                                Spacer(modifier = Modifier.height(20.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    com.hazel.android.ui.components.FlatChip(
-                                        label = stringResource(R.string.home_start_paste),
-                                        onClick = { pasteRequests++ }
+                                    Icon(
+                                        Icons.Filled.CheckCircle,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
-                                    com.hazel.android.ui.components.FlatChip(
-                                        label = stringResource(R.string.home_start_search),
-                                        onClick = {
-                                            cameFromShare = false
-                                            searchOpen = true
-                                        }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        stringResource(R.string.download_saved_aside),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    com.hazel.android.ui.components.FlatChip(
-                                        label = stringResource(R.string.home_start_downloads),
-                                        onClick = onOpenDownloads
+                                }
+                            }
+                        }
+
+                        // Nothing read yet: three ways to start, as plain chips rather than a
+                        // picture, so the empty screen offers something to do.
+                        if (!incognito && state.results.isEmpty() && !state.isFetching) {
+                            item(key = "starters") {
+                                // Fills the space under the search bar, so the chips sit
+                                // in its middle rather than near the top.
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillParentMaxHeight(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        stringResource(R.string.home_start_with),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    androidx.compose.foundation.layout.FlowRow(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.padding(horizontal = 24.dp)
+                                    ) {
+                                        com.hazel.android.ui.components.FlatChip(
+                                            label = stringResource(R.string.home_start_paste),
+                                            onClick = { pasteRequests++ }
+                                        )
+                                        com.hazel.android.ui.components.FlatChip(
+                                            label = stringResource(R.string.home_start_search),
+                                            onClick = {
+                                                cameFromShare = false
+                                                searchOpen = true
+                                            }
+                                        )
+                                        com.hazel.android.ui.components.FlatChip(
+                                            label = stringResource(R.string.home_start_downloads),
+                                            onClick = onOpenDownloads
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        if (incognito && state.results.isEmpty() && !state.isFetching) {
+                            item(key = "incognito") {
+                                Spacer(modifier = Modifier.height(72.dp))
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.incognito),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(44.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(14.dp))
+                                    Text(
+                                        stringResource(R.string.download_incognito_title),
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        stringResource(R.string.download_incognito_body),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.padding(horizontal = 24.dp)
                                     )
                                 }
                             }
                         }
                     }
-
-                    if (incognito && state.results.isEmpty() && !state.isFetching) {
-                        item(key = "incognito") {
-                            Spacer(modifier = Modifier.height(72.dp))
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.incognito),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(44.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.height(14.dp))
-                                Text(
-                                    stringResource(R.string.download_incognito_title),
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    stringResource(R.string.download_incognito_body),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(horizontal = 24.dp)
-                                )
-                            }
-                        }
-                    }
+                    FastScrollbar(
+                        listState,
+                        Modifier.align(Alignment.TopEnd),
+                        trackPadding = androidx.compose.foundation.layout.PaddingValues(top = 12.dp, bottom = 96.dp)
+                    )
                 }
             }
         }

@@ -95,6 +95,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.ui.components.FastScrollbar
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.HistorySort
@@ -357,39 +358,42 @@ fun HistoryScreen() {
         } else {
             val listState = rememberLazyListState()
             val shrink = rememberScrollShrink()
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize().nestedScroll(shrink),
-                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(if (listLayout) 10.dp else 12.dp)
-            ) {
-                items(visible, key = { it.id }) { entry ->
-                    val present = presence[entry.id] ?: true
-                    val open: () -> Unit = {
-                        scope.launch {
-                            if (MediaPresence.refresh(context, entry.fileUri)) {
-                                MediaOpener.play(context, entry.fileUri, entry.isVideo)
-                            } else {
-                                presence[entry.id] = false
-                                Toast.makeText(
-                                    context,
-                                    resources.getString(R.string.history_toast_file_gone),
-                                    Toast.LENGTH_SHORT
-                                ).show()
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize().nestedScroll(shrink),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(if (listLayout) 10.dp else 12.dp)
+                ) {
+                    items(visible, key = { it.id }) { entry ->
+                        val present = presence[entry.id] ?: true
+                        val open: () -> Unit = {
+                            scope.launch {
+                                if (MediaPresence.refresh(context, entry.fileUri)) {
+                                    MediaOpener.play(context, entry.fileUri, entry.isVideo)
+                                } else {
+                                    presence[entry.id] = false
+                                    Toast.makeText(
+                                        context,
+                                        resources.getString(R.string.history_toast_file_gone),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
                         }
-                    }
-                    val actions = EntryActions(
-                        onOpen = open,
-                        onProperties = { properties = entry },
-                        onRemove = { scope.launch { DownloadHistoryRepository.remove(context, entry.id) } },
-                        onDeleteFile = { pendingDelete = entry }
-                    )
-                    Box(modifier = Modifier.scrollShrink(shrink)) {
-                        if (listLayout) HistoryRow(entry, present, actions)
-                        else HistoryCard(entry, present, actions)
+                        val actions = EntryActions(
+                            onOpen = open,
+                            onProperties = { properties = entry },
+                            onRemove = { scope.launch { DownloadHistoryRepository.remove(context, entry.id) } },
+                            onDeleteFile = { pendingDelete = entry }
+                        )
+                        Box(modifier = Modifier.scrollShrink(shrink)) {
+                            if (listLayout) HistoryRow(entry, present, actions)
+                            else HistoryCard(entry, present, actions)
+                        }
                     }
                 }
+                FastScrollbar(listState, Modifier.align(Alignment.TopEnd), PaddingValues(top = 8.dp, bottom = 24.dp))
             }
         }
         if (searchOpen) {
