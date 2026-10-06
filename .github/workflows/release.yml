@@ -211,14 +211,14 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Write the release notes
-        # Kept short on purpose: what changed lives on the website's changelog page, built
-        # from CHANGELOG.md, so the release page only says which APK to take.
+        # Kept short on purpose: what changed lives on the website's What's new page, built
+        # from RELEASE-NOTES.md, so the release page only says which APK to take.
         run: |
           cat > release-notes.md <<'NOTES'
           Most devices are arm64 - Not sure?
           Download the universal build, it works on everything
 
-          [Full changelog here](https://sibtainocn.github.io/Hazel/hazel/changelog.html)
+          Wondering what's different? Here's [Hazel ${{ steps.version.outputs.version }} release notes.](https://sibtainocn.github.io/Hazel/hazel/whats-new.html)
 
           > 💡 **Note**: GitHub APKs have the in-app updater, so new releases are auto-detected and downloadable without visiting this page. F-Droid APKs don't, since F-Droid handles updates on its own.
           NOTES

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Cuts a Hazel release: bumps the versions, checks the store changelogs and translations, tags, pushes.
+    Cuts a Hazel release: checks the release notes, bumps the versions, checks the store changelogs and translations, tags, pushes.
 
 .DESCRIPTION
     Every release moves the same four things, and every one of them is silent when it goes
@@ -52,6 +52,31 @@ function Die($msg)  { Write-Host "`nSTOPPED: $msg" -ForegroundColor Red; exit 1 
 $tag = "v$Version"
 $buildFile = Join-Path $repo 'app/build.gradle.kts'
 $changelog = Join-Path $repo 'CHANGELOG.md'
+
+# ---------------------------------------------------------------- release notes
+
+Step "Checking RELEASE-NOTES.md"
+
+# The website's What's new page shows this file as it is, so it must be rewritten for every
+# release. Checked before anything else: unchanged since the last tag means it still
+# describes the last release, and nothing here runs until it is updated.
+$notes = Join-Path $repo 'RELEASE-NOTES.md'
+git fetch --tags --quiet 2>$null
+$lastTag = git describe --tags --abbrev=0 --match 'v*' 2>$null
+$notesText = if (Test-Path $notes) { (Get-Content $notes -Raw -Encoding UTF8) } else { '' }
+if (-not "$notesText".Trim()) {
+    Die "Please update RELEASE-NOTES.md for $Version. It is missing or empty."
+}
+if ($lastTag) {
+    git diff --quiet $lastTag -- RELEASE-NOTES.md 2>$null; $changed = $LASTEXITCODE -ne 0
+    $dirtyNotes = git status --porcelain -- RELEASE-NOTES.md
+    if (-not $changed -and -not $dirtyNotes) {
+        Die "Please update RELEASE-NOTES.md for $Version. It has not changed since $lastTag, so it still describes that release."
+    }
+    Info "updated since $lastTag, good to go"
+} else {
+    Info "written, good to go"
+}
 
 # ---------------------------------------------------------------- checks
 
@@ -183,14 +208,14 @@ if ($DryRun) {
 Step "Committing and tagging"
 
 if ($DryRun) {
-    Info "would commit app/build.gradle.kts, CHANGELOG.md and the changelogs"
+    Info "would commit app/build.gradle.kts, CHANGELOG.md, RELEASE-NOTES.md and the changelogs"
     Info "would tag $tag"
     if (-not $NoPush) { Info "would push the branch and the tag to origin" }
     Write-Host "`nDry run only. Nothing was changed." -ForegroundColor Green
     exit 0
 }
 
-git add app/build.gradle.kts CHANGELOG.md fastlane/metadata/android/en-US/changelogs
+git add app/build.gradle.kts CHANGELOG.md RELEASE-NOTES.md fastlane/metadata/android/en-US/changelogs
 $staged = git diff --cached --name-only
 if (-not $staged) { Die "Nothing to commit. Was this release already prepared?" }
 Info ("staged: " + ($staged -join ', '))
