@@ -253,6 +253,13 @@ def test_search_and_history_screen_ux():
     check_true("Rows point their fill arrow up at the field", ".rotate(-90f)" in search_content
                and search_content.count("FillArrow(onFill)") == 2)
 
+    # The single-link sheet keeps its link and incognito buttons beside the Audio/Video tabs.
+    sheet = (search_file.parent / "FormatSheet.kt").read_text(encoding="utf-8")
+    tabs = sheet[sheet.index("// ── Audio / Video tabs ──"):sheet.index("// ── Details: what the file is called ──")]
+    check_true("Format sheet shows link and incognito beside the tabs",
+               "SheetLinkButton(" in tabs and "IncognitoButton(" in tabs and "Modifier.weight(1f)" in tabs)
+    check_true("Format sheet has no footer row of its own", "DownloadSheetFooter(" not in sheet)
+
     # HistoryScreen search bar AnimatedVisibility and dismiss
     check_true("HistoryScreen uses AnimatedVisibility for search bar", "AnimatedVisibility(\n            visible = searchOpen" in history_content or "AnimatedVisibility(visible = searchOpen" in history_content)
     check_true("HistoryScreen uses expandVertically + fadeIn", "expandVertically() + fadeIn()" in history_content)

@@ -410,24 +410,31 @@ fun FormatSheet(
             // Two words at the start of the sheet rather than two halves of its width: the
             // tabs are a choice of what to download, read along with the heading above
             // them, and a short bar under the chosen word says which without ruling a line
-            // across the sheet.
-            Row(
-                // The words, not their touch targets, line up with the heading.
-                modifier = Modifier.offset(x = -SHEET_TAB_PADDING),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                SheetTab(
-                    label = stringResource(R.string.format_sheet_tab_audio),
-                    selected = !videoTab,
-                    enabled = info.audioFormats.isNotEmpty(),
-                    onClick = { videoTab = false }
-                )
-                SheetTab(
-                    label = stringResource(R.string.format_sheet_tab_video),
-                    selected = videoTab,
-                    enabled = info.videoFormats.isNotEmpty(),
-                    onClick = { videoTab = true }
-                )
+            // across the sheet. The link and incognito buttons take the room to their right,
+            // rather than a row of their own at the end of the sheet.
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    // The words, not their touch targets, line up with the heading.
+                    modifier = Modifier.offset(x = -SHEET_TAB_PADDING),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    SheetTab(
+                        label = stringResource(R.string.format_sheet_tab_audio),
+                        selected = !videoTab,
+                        enabled = info.audioFormats.isNotEmpty(),
+                        onClick = { videoTab = false }
+                    )
+                    SheetTab(
+                        label = stringResource(R.string.format_sheet_tab_video),
+                        selected = videoTab,
+                        enabled = info.videoFormats.isNotEmpty(),
+                        onClick = { videoTab = true }
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                SheetLinkButton(enabled = info.url.isNotBlank(), onClick = { openDialog = SheetDialog.LINK })
+                Spacer(modifier = Modifier.width(10.dp))
+                IncognitoButton(onFeedback = { message -> feedback = Feedback(message) })
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -654,20 +661,11 @@ fun FormatSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            DownloadSheetFooter(
-                link = info.url,
-                onLinkClick = { openDialog = SheetDialog.LINK },
-                onFeedback = { message -> feedback = Feedback(message) }
-            )
-
             Spacer(modifier = Modifier.height(28.dp))
         }
 
-        // What the footer's buttons did, shown over the top of the sheet: the footer sits at
-        // the end of a sheet that can run past the screen, and a message under it would be
-        // out of sight exactly when it is needed.
+        // What the link and incognito buttons did, shown over the top of the sheet, where it
+        // stays in sight however far the sheet is scrolled.
         androidx.compose.animation.AnimatedVisibility(
             visible = feedback != null,
             enter = fadeIn() + scaleIn(initialScale = 0.9f),
