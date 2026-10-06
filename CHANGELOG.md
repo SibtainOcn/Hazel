@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Synthesizing has a "Download sheet opens on" setting, Video or Audio, for the tab a link's sheet and a set of links open on. A link with no audio still opens on Video.
 
 ### Changed
+- A link's download sheet has its link and incognito buttons beside the Audio and Video tabs, in place of a row of their own at the end of the sheet. Editing the title or author opens the keyboard over the sheet instead of pushing it up; where the keyboard would cover the field, the sheet rises only by that much.
 - Remembered searches and links on the search screen show just the entry and an arrow that fills the field. Holding an entry asks to remove it, with a Copy button beside Cancel, in place of the cross on every row.
 - Errors show in a true red across the app, in place of a faded pink. The "Could not read this link" dialog shows the engine's report wrapped in full, in a box seven lines high that scrolls past that.
 - Failed downloads are drawn like the cards on the home screen: the artwork with the title, source, time and reason over it, and Error Log and Retry on the card. Tapping the card opens the link's download sheet over the queue, loading as it reads, to download it another way; a read that fails there updates the card's log. A card being retried says Retrying until it settles. The error log opens on a sheet with wrapped lines, sized to the log.
