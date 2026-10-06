@@ -340,7 +340,10 @@ fun MediaCard(
                         if (percent >= 1) add(stringResource(R.string.download_percent_downloaded, percent))
                     }
                     if (totalBytes > 0) {
-                        val done = (totalBytes * animatedProgress).toLong().coerceAtLeast(1L)
+                        // A paused figure stands still, so it is shown as it is rather than
+                        // counted up to each time the card is drawn again.
+                        val shown = if (isPaused) progress else animatedProgress
+                        val done = (totalBytes * shown).toLong().coerceAtLeast(1L)
                         add("${formatFileSize(done)} / ${formatFileSize(totalBytes)}")
                     }
                     if (transferring && eta.isNotBlank()) add(stringResource(R.string.queue_header_eta, eta))

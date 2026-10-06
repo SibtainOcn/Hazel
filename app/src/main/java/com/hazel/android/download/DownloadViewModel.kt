@@ -1471,6 +1471,7 @@ class DownloadViewModel : ViewModel() {
                 isCancelled = false
                 isPaused = false
                 if (restartUrl == plan.info.url) restartUrl = null
+                PausedShares.forget(plan.info.url)
                 downloadIsVideo = plan.format.hasVideo
                 markBatch(plan.info.url, BatchState.DOWNLOADING, title = plan.title)
 
@@ -1696,6 +1697,7 @@ class DownloadViewModel : ViewModel() {
                 // Paused downloads are given up with the rest, their partial files and their
                 // notification with them. Nothing is running any more to be caught by this.
                 runCatching { com.hazel.android.util.SdCards.workRoots().forEach { root -> root.listFiles()?.forEach { it.deleteRecursively() } } }
+                PausedShares.clear()
                 DownloadNotificationHelper.cancelPaused(app)
                 _state.update { s -> s.copy(
                     batch = s.batch.map {
@@ -1779,6 +1781,7 @@ class DownloadViewModel : ViewModel() {
         val app = HazelApp.instance
         // Nothing is running, so every partial download on disk is one being given up.
         runCatching { com.hazel.android.util.SdCards.workRoots().forEach { root -> root.listFiles()?.forEach { it.deleteRecursively() } } }
+        PausedShares.clear()
         DownloadNotificationHelper.cancelProgress(app)
         DownloadNotificationHelper.cancelPaused(app)
         // Several links given up together say what each came to, as a finished run does.
@@ -1912,6 +1915,7 @@ class DownloadViewModel : ViewModel() {
             // Its own folder only: another download may be running beside it, and its
             // partial files are in a folder of their own.
             runCatching { workDirsFor(url).forEach { it.deleteRecursively() } }
+            PausedShares.forget(url)
             synchronized(queue) {
                 queue.removeAll { it.url == url }
             }
@@ -2111,6 +2115,7 @@ class DownloadViewModel : ViewModel() {
             if (startsOver) {
                 withContext(Dispatchers.IO) {
                     runCatching { workDirsFor(url).forEach { it.deleteRecursively() } }
+                    PausedShares.forget(url)
                 }
             }
         }
@@ -3355,6 +3360,39 @@ internal fun pausedFraction(item: QueuedDownload): Float {
     if (expected <= 0L) return 0f
     val onDisk = workDirsFor(item.url).sumOf { bytesIn(it) }
     return (onDisk.toFloat() / expected).coerceIn(0f, 0.99f)
+}
+
+/**
+ * What [pausedFraction] found, kept for as long as the link stays paused.
+ *
+ * A paused link's files do not change until it runs again, but its card is drawn afresh each
+ * time the Running tab comes back into view, and a long queue can hold hundreds of them. Each
+ * is measured once, against the size it was measured for; a new size measures it again, and
+ * a link that starts, or whose files are given up, is forgotten.
+ */
+internal object PausedShares {
+    private const val MAX_KEPT = 1000
+    private val known = java.util.concurrent.ConcurrentHashMap<String, Pair<Long, Float>>()
+
+    private fun expected(item: QueuedDownload) = item.fileSizeBytes + item.mergeAudioSizeBytes
+
+    /** The share already measured for [item], or null when it has to be read from disk. */
+    fun cached(item: QueuedDownload): Float? =
+        known[item.url]?.takeIf { it.first == expected(item) }?.second
+
+    /** The share of [item] on disk, measured at most once while it stays paused. Reads the disk. */
+    fun measure(item: QueuedDownload): Float = cached(item) ?: run {
+        val share = try { pausedFraction(item) } catch (_: Exception) { 0f }
+        if (known.size >= MAX_KEPT) known.clear()
+        known[item.url] = expected(item) to share
+        share
+    }
+
+    fun forget(url: String) {
+        known.remove(url)
+    }
+
+    fun clear() = known.clear()
 }
 
 /**

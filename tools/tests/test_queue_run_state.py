@@ -303,9 +303,9 @@ def test_screens():
     queue = QUEUE.read_text(encoding="utf-8")
     running = function(queue, "private fun runningItems(")
     check_true("The Running tab reads the run's active item",
-               "state.active?.let" in running and "state.isDownloading || batchItem?.state == BatchState.PAUSED" in running)
+               "active?.let" in running and "isDownloading || batchItem?.state == BatchState.PAUSED" in running)
     check_true("The Queued tab reads the written-down queue",
-               "val waiting = queueList.filterNot { it.url in runningUrls || it.paused }" in queue)
+               "queueList.filterNot { it.url in runningUrls || it.paused }" in queue)
 
 
 def replay_pause(new_way, pause_all):
@@ -377,7 +377,7 @@ def test_pause():
     check_true("The queue menu's Pause pauses the queue", "downloadViewModel.pauseAll()" in menu)
     check_true("A card's Pause pauses only its link", "onPause = downloadViewModel::pauseDownload" in queue)
     check_true("A paused link is never drawn as running",
-               "state.isDownloading && batchItem?.state != BatchState.PAUSED" in function(queue, "private fun runningItems("))
+               "isDownloading && batchItem?.state != BatchState.PAUSED" in function(queue, "private fun runningItems("))
 
     card = (SRC / "ui/components/MediaCards.kt").read_text(encoding="utf-8")
     glyph = block(card, "if (isPaused && !isDownloading) {", 700)
@@ -407,13 +407,15 @@ def test_paused_card_and_sheet():
                "onDetails?.let { open ->" in card and "R.string.format_sheet_section_details" in card)
 
     check_true("A card's Resume is its own link's", "onResume = { downloadViewModel.resumeItem(item.info.url) }" in queue)
-    check_true("Running and paused cards open their link's sheet", "onDetails = item.queued?.let" in queue)
+    check_true("Running and paused cards open their link's sheet", "onDetails = queued?.let" in queue)
     check_true("A waiting card opens its link's sheet", "onOpen = { detailsFor = item }" in queue)
     check_true("A waiting card is tappable", ".clickable(" in block(cards, "fun QueuedCard(", 900))
     disk = block(queue, "val onDisk by produceState(", 600)
+    shares = function(VM.read_text(encoding="utf-8"), "fun measure(item: QueuedDownload)")
     check_true("A paused link's progress is read from disk off the main thread",
-               "withContext(Dispatchers.IO)" in disk and "pausedFraction(queued)" in disk
-               and "if (paused && queued != null)" in disk and "runCatching" in disk)
+               "withContext(Dispatchers.IO)" in disk and "PausedShares.measure(queued)" in disk
+               and "if (paused && queued != null)" in disk
+               and "pausedFraction(item)" in shares and "catch (_: Exception)" in shares)
     check_true("A paused card is never measured by the engine's per-stream line",
                "val inRun = !paused &&" in queue)
 
@@ -491,10 +493,10 @@ def test_resuming():
     queue = QUEUE.read_text(encoding="utf-8")
     running = function(queue, "private fun runningItems(")
     check_true("A resuming link stays on the Running tab",
-               "!it.paused && it.url in state.resuming" in running)
+               "!next.paused && next.url in resuming" in running)
     check_true("It comes after the download in hand and before the paused ones",
-               running.find("state.active?.let") < running.find("it.url in state.resuming") < running.find("queue.filter { it.paused"))
-    check_true("A resuming card opens its link's sheet", "onOpenSheet = { item.queued?.let { detailsFor = it } }" in queue)
+               running.find("active?.let") < running.find("next.url in resuming") < running.find("held.paused"))
+    check_true("A resuming card opens its link's sheet", "onOpenSheet = { queued?.let { detailsFor = it } }" in queue)
     receiver = (SRC / "download/DownloadActionReceiver.kt").read_text(encoding="utf-8")
     check_true("The notification's Resume resumes everything, part-way links first",
                "resumeDownload()" in receiver)
@@ -520,6 +522,54 @@ def test_failed_card():
                    'name="history_failed_logs"' in (folder / "strings.xml").read_text(encoding="utf-8"))
 
 
+def test_tab_cost():
+    print("\n--- Suite 8: the tabs stay cheap with hundreds of links ---")
+    queue = QUEUE.read_text(encoding="utf-8")
+    vm = VM.read_text(encoding="utf-8")
+    cards = (SRC / "ui/screens/queue/QueueCards.kt").read_text(encoding="utf-8")
+    media = (SRC / "ui/components/MediaCards.kt").read_text(encoding="utf-8")
+    check_true("The saved queue and failures are collected from one flow each, not a new one per redraw",
+               "remember(context) { DownloadQueueRepository.getQueue(context) }" in queue
+               and "remember(context) { FailedDownloadRepository.getFailed(context) }" in queue
+               and "getQueue(context).collectAsState" not in queue)
+    check_true("The lists are built again only when what they are made of changes",
+               "val running = remember(state.active, state.isDownloading, state.batch, state.resuming, queueList)" in queue
+               and "val failed = remember(failedList)" in queue)
+    check_true("Failures in hand again are found off the main thread, in one pass",
+               "withContext(Dispatchers.Default)" in block(queue, "val retryingIds by produceState", 300)
+               and "sameMedia" not in queue)
+    check_true("The Running tab looks each link up once", "items.none" not in queue
+               and "firstOrNull" not in function(queue, "private fun runningItems("))
+    check_true("The tabs beside the one in view stay laid out", "beyondViewportPageCount = 1" in queue)
+    check_true("A paused card starts from the share already measured",
+               "PausedShares.cached(queued) ?: 0f" in queue and "PausedShares.measure(queued)" in queue)
+    check_true("A paused figure is not counted up again on each draw",
+               "val shown = if (isPaused) progress else animatedProgress" in media)
+    run = function(vm, "private fun runQueue(")
+    check_true("A link that starts forgets what was measured of it", "PausedShares.forget(plan.info.url)" in run)
+    check("Every folder given up whole forgets every share", vm.count("PausedShares.clear()"),
+          vm.count("root.listFiles()?.forEach { it.deleteRecursively() }"))
+    check("Every link folder given up forgets that link's share", vm.count("PausedShares.forget(url)"),
+          vm.count("workDirsFor(url).forEach { it.deleteRecursively() }"))
+    check_true("A failed card's reason does not compile its patterns or copy its log each draw",
+               "Regex(" not in function(cards, "private fun shortReason(") and "lineSequence()" in cards)
+
+    # The failures in hand again, as the screen finds them: by address, or by the media any
+    # spelling of it names. Hundreds of each are one pass over each list.
+    def canonical(url):
+        return url.split("?si=")[0].replace("youtu.be/", "youtube.com/watch?v=").lower()
+
+    def in_hand(failed, links):
+        exact = set(links)
+        media = {canonical(u) for u in links}
+        return {i for i, u in failed if u in exact or canonical(u) in media}
+
+    failed = [(i, f"https://youtu.be/v{i}?si=x") for i in range(300)]
+    links = [f"https://youtube.com/watch?v=v{i}" for i in range(0, 300, 3)]
+    check("A failure is in hand again under another spelling of its link", len(in_hand(failed, links)), 100)
+    check("Nothing is in hand with nothing queued", in_hand(failed, []), set())
+
+
 def main():
     print("=" * 70)
     print("  Queue run state & run summary harness")
@@ -532,6 +582,7 @@ def main():
     test_paused_card_and_sheet()
     test_resuming()
     test_failed_card()
+    test_tab_cost()
     print(f"\n  Summary: {PASS_COUNT}/{PASS_COUNT + FAIL_COUNT} tests PASSED, {FAIL_COUNT} FAILED")
     return 0 if FAIL_COUNT == 0 else 1
 

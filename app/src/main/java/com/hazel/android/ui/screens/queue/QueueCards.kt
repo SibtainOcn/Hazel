@@ -175,8 +175,10 @@ fun FailedCard(
     // else; its site stands in as the author, and a YouTube link still finds its artwork.
     val title = item.title.takeUnless { it.isBlank() || it == item.url } ?: item.url
     // When it failed rides with the source, so the corner keeps room for the actions.
-    val author = listOf(item.author.ifBlank { host }, formatDateTime(item.failedAt))
-        .filter { it.isNotBlank() }.joinToString(" · ")
+    val author = remember(item.author, host, item.failedAt) {
+        listOf(item.author.ifBlank { host }, formatDateTime(item.failedAt))
+            .filter { it.isNotBlank() }.joinToString(" · ")
+    }
     val thumbnail = item.thumbnail ?: remember(item.url) { youtubeThumbnail(item.url) }
 
     Surface(
@@ -452,17 +454,29 @@ fun FailureLogSheet(
     }
 }
 
+// Compiled once: every failed card drawn would otherwise compile both again.
+private val EXTRACTOR_AND_ID = Regex("""^\[[^\]]+]\s*[^\s:]+:\s*""")
+private val EXTRACTOR = Regex("""^\[[^\]]+]\s*""")
+
 /**
  * The line that says why, without the engine's framing: "ERROR: [youtube] abc123: This
  * video is unavailable" reads "This video is unavailable". Warnings print before the error
  * that stopped the run, so the last error is the one.
  */
 private fun shortReason(log: String): String {
-    val lines = log.lines().map { it.trim() }.filter { it.isNotEmpty() }
-    val line = lines.lastOrNull { it.startsWith("ERROR:") } ?: lines.firstOrNull() ?: return ""
+    // Walked line by line without copying the log, which can run to thousands of lines.
+    var first: String? = null
+    var lastError: String? = null
+    log.lineSequence().forEach { raw ->
+        val line = raw.trim()
+        if (line.isEmpty()) return@forEach
+        if (first == null) first = line
+        if (line.startsWith("ERROR:")) lastError = line
+    }
+    val line = lastError ?: first ?: return ""
     return line.removePrefix("ERROR:").trim()
-        .replace(Regex("""^\[[^\]]+]\s*[^\s:]+:\s*"""), "")
-        .replace(Regex("""^\[[^\]]+]\s*"""), "")
+        .replace(EXTRACTOR_AND_ID, "")
+        .replace(EXTRACTOR, "")
         .ifBlank { line }
 }
 
