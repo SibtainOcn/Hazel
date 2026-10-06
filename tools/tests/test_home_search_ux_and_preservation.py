@@ -352,7 +352,7 @@ def test_streamlined_home_and_downloading_queue():
     check_true("Queue running cards pause, resume and cancel per item",
                "onCancel = { downloadViewModel.cancelItem(item.info.url) }" in q_content and
                "onPause = downloadViewModel::pauseDownload" in q_content and
-               "onResume = downloadViewModel::resumeDownload" in q_content)
+               "onResume = { downloadViewModel.resumeItem(item.info.url) }" in q_content)
 
     # 5. The downloads list holds finished files only
     check_true("HistoryFilter enum removed", "enum class HistoryFilter" not in repo_content)

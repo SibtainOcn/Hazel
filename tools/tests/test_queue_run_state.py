@@ -20,6 +20,8 @@ Verifies:
 8. Pause all holds the whole run until Resume, kept across a restart; a card's own Pause
    pauses that link and lets the rest go on. A paused card shows a pause glyph and nothing on
    it moves. Cancelling a held queue reports every count.
+9. A paused card resumes on a tap and says how much is in hand once there is any; a queued
+   link opens its own sheet from the cache, and a change that would start it over asks first.
 
 Run:
     python tools/tests/test_queue_run_state.py
@@ -385,6 +387,73 @@ def test_pause():
                and "if ((isDownloading || isPaused) && processingSteps.isNotEmpty())" not in card)
 
 
+def test_paused_card_and_sheet():
+    print("\n--- Suite 5: a paused card, and a queued link's own sheet ---")
+    vm = VM.read_text(encoding="utf-8")
+    card = (SRC / "ui/components/MediaCards.kt").read_text(encoding="utf-8")
+    queue = QUEUE.read_text(encoding="utf-8")
+    cards = (SRC / "ui/screens/queue/QueueCards.kt").read_text(encoding="utf-8")
+    sheet = (SRC / "ui/screens/queue/QueuedItemSheet.kt").read_text(encoding="utf-8")
+
+    tap = block(card, "                .then(\n                    when {", 500)
+    check_true("A paused card resumes when tapped, its pause sign included",
+               "isPaused -> Modifier.clickable(" in tap and "onClick = onResume" in tap)
+    check_true("A running card still takes no tap", "isDownloading -> Modifier" in tap)
+    pill = block(card, "if (isPaused) {\n                        add(stringResource(R.string.download_paused))", 600)
+    check_true("The paused pill says how much is in hand", "R.string.download_percent_downloaded" in pill)
+    check_true("Nothing is said at 0%", "if (percent >= 1)" in pill)
+    check_true("The percentage is read off the figure, not its animation", "(progress * 100f)" in pill)
+    check_true("Details sits in the card's menu where given",
+               "onDetails?.let { open ->" in card and "R.string.format_sheet_section_details" in card)
+
+    check_true("A card's Resume is its own link's", "onResume = { downloadViewModel.resumeItem(item.info.url) }" in queue)
+    check_true("Running and paused cards open their link's sheet", "onDetails = item.queued?.let" in queue)
+    check_true("A waiting card opens its link's sheet", "onOpen = { detailsFor = item }" in queue)
+    check_true("A waiting card is tappable", ".clickable(" in block(cards, "fun QueuedCard(", 900))
+    disk = block(queue, "val onDisk by produceState(", 600)
+    check_true("A paused link's progress is read from disk off the main thread, once",
+               "withContext(Dispatchers.IO)" in disk and "pausedFraction(queued)" in disk
+               and "paused && !inRun" in disk and "runCatching" in disk)
+
+    resume = function(vm, "fun resumeItem(url: String)")
+    check_true("Resuming one link takes only a paused one",
+               "index >= 0 && queue[index].paused" in resume and "saved?.paused == true" in resume
+               and "else -> null" in resume)
+    check_true("Resuming one link moves the queue again", "releaseHold()" in resume)
+
+    check_true("The sheet stands on the cache and never reads again",
+               "InfoCache.metadataFor(item.url)" in sheet and "onRefreshFormats" not in sheet)
+    check_true("The cache is asked off the main thread", "withContext(Dispatchers.IO)" in sheet)
+    check_true("The sheet hands the choice back", "confirmAsApply = true" in sheet)
+    check_true("The sheet's settings are its own", "onOptionsChange = { options = it }" in sheet)
+    check_true("A change that starts the link over is asked first",
+               "QueueAdjust.NEEDS_CONFIRM -> pending = PendingAdjust(" in sheet and "confirmed = true" in sheet)
+    check_true("The question is asked beside the sheet, not inside it",
+               sheet.find("FormatSheet(") < sheet.find("pending?.let { adjust ->"))
+
+    adjust = function(vm, "suspend fun adjustQueued(")
+    check_true("Nothing is touched before the answer", "if (startsOver && !confirmed) return QueueAdjust.NEEDS_CONFIRM" in adjust
+               and adjust.find("return QueueAdjust.NEEDS_CONFIRM") < adjust.find("queue.addFirst(fresh)"))
+    check_true("A paused link starts over only for a change to its streams",
+               "val startsOver = running || (current.paused && streamsChange)" in adjust)
+    check_true("The download in progress is stopped and taken again first",
+               "restartUrl = url" in adjust and "destroyProcessById(processId)" in adjust and "queue.addFirst(fresh)" in adjust)
+    run = function(vm, "private fun runQueue(")
+    check("Every stop in the run asks about a restart first",
+          run.count("if (restartUrl == plan.info.url && !isBatchCancelled) {"), 3)
+    check_true("A restart request is cleared as its link starts, so it cannot catch a later run",
+               "if (restartUrl == plan.info.url) restartUrl = null" in run)
+    check_true("A restart is not retried as an expired payload", "restartUrl == plan.info.url) throw e" in run)
+
+    for folder in sorted(p for p in RES.iterdir() if p.is_dir() and p.name.startswith("values")
+                         and (p / "strings.xml").exists()):
+        text = (folder / "strings.xml").read_text(encoding="utf-8")
+        found = [k for k in ("download_percent_downloaded", "queue_adjust_restart_title",
+                             "queue_adjust_restart_body", "queue_adjust_restart_confirm")
+                 if f'name="{k}"' in text]
+        check(f"{folder.name} has the paused and restart strings", len(found), 4)
+
+
 def main():
     print("=" * 70)
     print("  Queue run state & run summary harness")
@@ -394,6 +463,7 @@ def main():
     test_summary()
     test_screens()
     test_pause()
+    test_paused_card_and_sheet()
     print(f"\n  Summary: {PASS_COUNT}/{PASS_COUNT + FAIL_COUNT} tests PASSED, {FAIL_COUNT} FAILED")
     return 0 if FAIL_COUNT == 0 else 1
 
