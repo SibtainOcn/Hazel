@@ -50,7 +50,8 @@ cannot post it, so it would block them.
 
 1. Bump `versionName` and `versionCode` in `app/build.gradle.kts`, and move the changelog's
    Unreleased section under the new version.
-2. Run `./gradlew :app:generateFastlaneChangelogs` so the five store changelogs exist.
+2. Write the five store changelogs by hand in `fastlane/metadata/android/en-US/changelogs/`,
+   one per APK version code (`versionCode` + 0 to 4), each under 500 characters.
 3. Merge into `main`, then tag that commit:
    ```bash
    git tag v1.2.0

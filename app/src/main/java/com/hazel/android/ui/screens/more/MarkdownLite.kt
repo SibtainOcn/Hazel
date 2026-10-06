@@ -10,19 +10,39 @@ package com.hazel.android.ui.screens.more
  */
 object MarkdownLite {
 
-    /** The page for [markdown], styled to the given colours (CSS colour strings). */
-    fun page(markdown: String, background: String, text: String, muted: String, accent: String, plain: Boolean = false): String {
-        val body = if (plain) plainText(markdown) else toHtml(markdown)
+    /**
+     * The page for [markdown], styled to the given colours (CSS colour strings). Titles and
+     * links take the site's teal rather than the app's accent, a shade per [dark] tone so
+     * they read on either background. The file's own preface (its title and the note on its
+     * format) is left out, so the page opens on the first section.
+     */
+    fun page(markdown: String, background: String, text: String, muted: String, dark: Boolean, plain: Boolean = false): String {
+        val body = if (plain) plainText(markdown) else toHtml(fromFirstSection(markdown))
+        val accent = if (dark) TEAL_ON_DARK else TEAL_ON_LIGHT
         return """<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-body{margin:0;padding:8px 20px 40px;background:$background;color:$text;font:15px/1.55 -apple-system,Roboto,sans-serif;word-wrap:break-word}
-h1{font-size:22px;margin:18px 0 8px}h2{font-size:19px;margin:26px 0 6px;color:$accent}h3{font-size:15px;margin:16px 0 4px;text-transform:uppercase;letter-spacing:.04em;color:$muted}
-ul{padding-left:18px;margin:4px 0}li{margin:4px 0}p{margin:8px 0}
+body{margin:0;padding:8px 20px 40px;background:$background;color:$text;font:15px/1.6 -apple-system,Roboto,sans-serif;word-wrap:break-word}
+h1{font-size:22px;margin:18px 0 8px}
+h2{font-size:22px;font-weight:800;letter-spacing:-.01em;margin:32px 0 10px;padding-top:28px;border-top:1px solid rgba(127,127,127,.22);color:$accent}
+h2:first-child{margin-top:12px;padding-top:0;border-top:0}
+h3{font-size:12px;font-weight:700;margin:20px 0 6px;text-transform:uppercase;letter-spacing:.08em;color:$muted}
+ul{padding-left:18px;margin:4px 0}li{margin:8px 0}p{margin:8px 0}
 code{font:13px monospace;background:rgba(127,127,127,.18);padding:1px 5px;border-radius:5px}
 a{color:$accent}.c{text-align:center}pre{white-space:pre-wrap;font:13px/1.5 monospace;margin:0}
 </style></head><body>$body</body></html>"""
     }
+
+    /** [markdown] from its first "## " section on; all of it when it has none. */
+    fun fromFirstSection(markdown: String): String {
+        val lines = markdown.lines()
+        val first = lines.indexOfFirst { it.startsWith("## ") }
+        return if (first <= 0) markdown else lines.drop(first).joinToString("\n")
+    }
+
+    /** The site's teal: deep on a light page, bright on a dark one. */
+    private const val TEAL_ON_LIGHT = "#0E7C86"
+    private const val TEAL_ON_DARK = "#5CD0D6"
 
     fun toHtml(markdown: String): String {
         val out = StringBuilder()

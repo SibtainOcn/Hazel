@@ -32,6 +32,7 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -84,11 +85,16 @@ enum class DocPage(
     /** True for a plain text file, kept as it is laid out rather than read as Markdown. */
     val plain: Boolean = false
 ) {
+    /** The site's front page; the pages below each open one part of it. */
+    SITE_HOME(R.string.docs_site, Icons.Filled.Language, "${SITE}index.html"),
     GUIDE(R.string.docs_guide, Icons.AutoMirrored.Filled.MenuBook, "${SITE}guide.html"),
     FEATURES(R.string.docs_features, Icons.Filled.AutoAwesome, "${SITE}index.html#features"),
     FAQ(R.string.docs_faq, Icons.Filled.QuestionAnswer, "${SITE}faq.html"),
     CHANGELOG(R.string.docs_changelog, Icons.Filled.History, "$REPO/blob/main/CHANGELOG.md", "$RAW/CHANGELOG.md"),
     LICENSE(R.string.docs_license, Icons.Filled.Gavel, "$REPO/blob/main/LICENSE", "$RAW/LICENSE", plain = true);
+
+    /** [url], a link to this file on the main branch, pointed at release [tag] instead. */
+    fun atTag(url: String, tag: String): String = url.replace("/main/", "/$tag/")
 
     companion object {
         fun fromName(name: String?): DocPage = entries.firstOrNull { it.name == name } ?: GUIDE
@@ -180,7 +186,13 @@ fun DocumentationScreen(
 @Composable
 fun DocumentationPageScreen(
     page: DocPage,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    /**
+     * A release whose copy of the page to show, such as "1.1.12", for What's new opened from
+     * the update screen. Its tagged copy is read first; one with no release of its own (a
+     * nightly build) falls back to the current page.
+     */
+    version: String? = null
 ) {
     val context = LocalContext.current
     val scheme = MaterialTheme.colorScheme
@@ -190,18 +202,20 @@ fun DocumentationPageScreen(
 
     // A repository file is read directly and drawn here; a site page, or a file that could
     // not be read, is loaded as the page itself.
+    val tag = version?.trim()?.removePrefix("v")?.removePrefix("V")?.takeIf { it.isNotBlank() }?.let { "v$it" }
     fun load(view: WebView) {
         val raw = page.rawUrl ?: return view.loadUrl(page.url)
         scope.launch {
-            val text = fetchText(raw)
+            val tagged = tag?.let { fetchText(page.atTag(raw, it))?.let { text -> text to page.atTag(page.url, it) } }
+            val (text, url) = tagged ?: (fetchText(raw) to page.url)
             if (text == null) {
-                view.loadUrl(page.url)
+                view.loadUrl(url)
             } else {
                 val html = MarkdownLite.page(
-                    text, css(background), css(scheme.onBackground), css(scheme.onSurfaceVariant), css(scheme.primary),
+                    text, css(background), css(scheme.onBackground), css(scheme.onSurfaceVariant), dark,
                     plain = page.plain
                 )
-                view.loadDataWithBaseURL(page.url, html, "text/html", "utf-8", null)
+                view.loadDataWithBaseURL(url, html, "text/html", "utf-8", null)
             }
         }
     }
@@ -210,6 +224,7 @@ fun DocumentationPageScreen(
     var failed by remember { mutableStateOf(false) }
     var currentUrl by remember { mutableStateOf(page.url) }
     var webView by remember { mutableStateOf<WebView?>(null) }
+    val scroll = remember { com.hazel.android.ui.components.WebScrollState() }
 
     fun leave() {
         val view = webView
@@ -250,7 +265,7 @@ fun DocumentationPageScreen(
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { viewContext ->
-                    WebView(viewContext).apply {
+                    com.hazel.android.ui.components.TrackedWebView(viewContext, scroll).apply {
                         setBackgroundColor(background.toArgb())
                         settings.javaScriptEnabled = true
                         settings.domStorageEnabled = true
@@ -294,6 +309,14 @@ fun DocumentationPageScreen(
                     }
                 }
             )
+
+            if (!loading && !failed) {
+                com.hazel.android.ui.components.FastScrollbar(
+                    scroll,
+                    Modifier.align(Alignment.TopEnd),
+                    androidx.compose.foundation.layout.PaddingValues(top = 8.dp, bottom = 24.dp)
+                )
+            }
 
             // Until the page has drawn, the shape loader stands over it, so the screen is
             // never a blank sheet while the page or file is fetched.

@@ -47,7 +47,8 @@
     <string name="search_no_matches">Tidak ada yang cocok</string>
     <string name="search_remove">Hapus</string>
     <string name="search_all">Cari semua</string>
-    <string name="search_forget">Lupakan</string>
+    <string name="search_remove_confirm_body">Hapus dari riwayat penelusuran?</string>
+    <string name="search_entry_copied">Disalin ke papan klip</string>
     <string name="search_edit_before">Edit sebelum mencari</string>
     <string name="search_paste_and_fetch">Tempel dan ambil</string>
     <string name="search_paste">Tempel</string>
@@ -187,6 +188,7 @@
     <string name="more_documentation">Dokumentasi</string>
     <string name="docs_title">Dokumentasi</string>
     <string name="docs_back">Kembali</string>
+    <string name="docs_site">Situs resmi</string>
     <string name="docs_guide">Panduan</string>
     <string name="docs_features">Fitur</string>
     <string name="docs_faq">FAQ</string>
@@ -320,10 +322,12 @@
     <string name="fetch_invalid_url">Tautan tidak valid: harus diawali http:// atau https://</string>
     <string name="history_empty_failed">Tidak ada unduhan yang gagal</string>
     <string name="history_failed_error_log">Catatan Kesalahan</string>
+    <string name="history_failed_logs">Log</string>
     <string name="history_failed_copy_log">Salin Catatan</string>
     <string name="history_failed_log_copied">Catatan kesalahan disalin ke papan klip</string>
     <string name="history_failed_retry">Coba lagi</string>
     <string name="queue_failed_choose_again">Unduh dengan cara lain</string>
+    <string name="queue_failed_retry_all">Coba lagi semua yang gagal</string>
     <string name="queue_failed_select">Pilih yang gagal</string>
     <string name="queue_failed_remove">Hapus</string>
     <string name="queue_failed_remove_body">Unduhan ini keluar dari daftar beserta lognya. File yang sudah diunduh tidak tersentuh.</string>
@@ -451,6 +455,14 @@
     <string name="notification_action_sign_in">Masuk</string>
     <string name="notification_wifi_title">Menunggu Wi-Fi</string>
     <string name="notification_wifi_text">Unduhan diatur hanya untuk Wi-Fi. Unduhan akan dimulai setelah terhubung kembali ke Wi-Fi.</string>
+    <string name="notification_run_cancelled_title">Unduhan dibatalkan</string>
+    <string name="notification_run_failed_title">Beberapa unduhan gagal</string>
+    <string name="notification_run_finished_title">Unduhan selesai</string>
+    <string name="notification_run_summary">Terunduh: %1$d · Gagal: %2$d · Dibatalkan: %3$d</string>
+    <string name="download_percent_downloaded">%1$d%% terunduh</string>
+    <string name="queue_adjust_restart_title">Mulai lagi?</string>
+    <string name="queue_adjust_restart_body">Perubahan ini memulai unduhan lagi dari awal. Yang sudah terunduh akan dibuang.</string>
+    <string name="queue_adjust_restart_confirm">Mulai lagi</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">Tutup</string>

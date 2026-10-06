@@ -239,6 +239,49 @@ def test_search_and_history_screen_ux():
     check_true("SearchScreen has ClearHistoryDialog", "ClearHistoryDialog(" in search_content)
     check_true("SearchScreen shows confirmation dialog on clear history", "showClearHistoryConfirm" in search_content)
 
+    # A remembered entry: icon, text and the fill arrow; holding it asks to remove it.
+    row = search_content[search_content.index("private fun HistoryRow("):search_content.index("private fun FillArrow(")]
+    check_true("History rows have no remove cross", "Icons.Filled.Close" not in row and "IconButton(onClick = onRemove" not in row)
+    check_true("Holding a history row asks to remove it",
+               "combinedClickable(onClick = onUse, onLongClick = onRemove)" in row
+               and "onRemove = { removing = entry }" in search_content
+               and "RemoveEntryDialog(" in search_content)
+    dialog = search_content[search_content.index("private fun RemoveEntryDialog("):search_content.index("private fun HistoryRow(")]
+    check_true("The remove dialog names the entry, removes it and can copy it",
+               "R.string.search_remove_confirm_body" in dialog and "R.string.search_remove" in dialog
+               and "copySheetLink(context, entry)" in dialog)
+    check_true("Rows point their fill arrow up at the field", ".rotate(-90f)" in search_content
+               and search_content.count("FillArrow(onFill)") == 2)
+
+    # The single-link sheet keeps its link and incognito buttons beside the Audio/Video tabs.
+    sheet = (search_file.parent / "FormatSheet.kt").read_text(encoding="utf-8")
+    tabs = sheet[sheet.index("// ── Audio / Video tabs ──"):sheet.index("// ── Details: what the file is called ──")]
+    check_true("Format sheet shows link and incognito beside the tabs",
+               "SheetLinkButton(" in tabs and "IncognitoButton(" in tabs and "Modifier.weight(1f)" in tabs)
+    check_true("Format sheet has no footer row of its own", "DownloadSheetFooter(" not in sheet)
+    over = (search_file.parent.parent.parent / "components" / "KeyboardOverSheet.kt").read_text(encoding="utf-8")
+    check_true("Format sheet opens the keyboard over itself", "KeyboardOverSheet(keyboard)" in sheet)
+    check_true("Only the keyboard is taken out, and the listeners go with the sheet",
+               "WindowInsetsCompat.Type.ime(), Insets.NONE" in over and "onDispose" in over
+               and "setOnApplyWindowInsetsListener(host, null)" in over
+               and "setWindowInsetsAnimationCallback(host, null)" in over)
+    check_true("Android 10 and older stop the window resizing for the keyboard as well",
+               "Build.VERSION.SDK_INT < Build.VERSION_CODES.R" in over and "SOFT_INPUT_ADJUST_NOTHING" in over)
+    check_true("The keyboard's height is read every frame of its slide, and cleared with the sheet",
+               "override fun onProgress(" in over and "note(insets)" in over
+               and "keyboard.keyboardTop = SheetKeyboard.NONE" in over)
+    check_true("The sheet is lifted only by the overlap, as a move",
+               "modifier = Modifier.liftedOverKeyboard(keyboard)" in sheet and "IntOffset(0, -lift)" in over
+               and "coerceIn(0L" in over)
+    check("Title and author are kept above the keyboard together", sheet.count("Modifier.keptAboveKeyboard(keyboard)"), 1)
+    group = sheet[sheet.index("Column(modifier = Modifier.keptAboveKeyboard(keyboard))"):]
+    check_true("The kept group holds both fields",
+               group.index("format_sheet_label_author") < group.index("// ── Quality"))
+    check_true("A field is read back as if the sheet were not lifted, so the lift settles",
+               "boundsInWindow().bottom.toInt() + keyboard.applied" in over)
+    check_true("The lift is tested across devices, keyboards and frames",
+               (REPO_ROOT / "app/src/test/java/com/hazel/android/ui/components/KeyboardLiftTest.kt").is_file())
+
     # HistoryScreen search bar AnimatedVisibility and dismiss
     check_true("HistoryScreen uses AnimatedVisibility for search bar", "AnimatedVisibility(\n            visible = searchOpen" in history_content or "AnimatedVisibility(visible = searchOpen" in history_content)
     check_true("HistoryScreen uses expandVertically + fadeIn", "expandVertically() + fadeIn()" in history_content)
@@ -352,7 +395,7 @@ def test_streamlined_home_and_downloading_queue():
     check_true("Queue running cards pause, resume and cancel per item",
                "onCancel = { downloadViewModel.cancelItem(item.info.url) }" in q_content and
                "onPause = downloadViewModel::pauseDownload" in q_content and
-               "onResume = downloadViewModel::resumeDownload" in q_content)
+               "onResume = { downloadViewModel.resumeItem(item.info.url) }" in q_content)
 
     # 5. The downloads list holds finished files only
     check_true("HistoryFilter enum removed", "enum class HistoryFilter" not in repo_content)

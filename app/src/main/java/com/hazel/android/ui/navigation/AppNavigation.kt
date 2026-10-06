@@ -1,5 +1,7 @@
 package com.hazel.android.ui.navigation
 
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import androidx.compose.foundation.layout.Row
@@ -110,15 +112,28 @@ fun AppNavigation(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
-    val hazelUpdateAvailable by SettingsRepository.getHazelUpdateAvailable(context).collectAsState(initial = false)
+    val incognito by remember(context) { SettingsRepository.getIncognito(context) }.collectAsState(initial = false)
+    val hazelUpdateAvailable by remember(context) { SettingsRepository.getHazelUpdateAvailable(context) }.collectAsState(initial = false)
 
     val navController = rememberNavController()
 
     // Handle deep navigation triggered from shortcuts or share overlay
     LaunchedEffect(pendingRoute) {
         pendingRoute?.let { route ->
-            navController.navigate(route)
+            // A tab is opened the way the bottom bar opens it. Pushed as a plain screen, it
+            // sat on top of Home, and Home's own button then restored that same stack with
+            // the tab still on top of it, so pressing Home seemed to do nothing.
+            if (bottomNavItems.any { it.route == route }) {
+                navController.navigate(route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            } else {
+                navController.navigate(route)
+            }
             onPendingRouteConsumed()
         }
     }
@@ -358,10 +373,14 @@ fun AppNavigation(
                     onOpen = { page -> navController.navigate("docs/${page.name}") }
                 )
             }
-            composable("docs/{page}") { entry ->
+            composable(
+                "docs/{page}?version={version}",
+                arguments = listOf(navArgument("version") { type = NavType.StringType; nullable = true; defaultValue = null })
+            ) { entry ->
                 com.hazel.android.ui.screens.more.DocumentationPageScreen(
                     page = com.hazel.android.ui.screens.more.DocPage.fromName(entry.arguments?.getString("page")),
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    version = entry.arguments?.getString("version")
                 )
             }
             composable("cookies") {
@@ -412,7 +431,14 @@ fun AppNavigation(
                 )
             }
             composable("hazel_update") {
-                HazelUpdateScreen(onBack = { navController.popBackStack() })
+                HazelUpdateScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenWhatsNew = { version ->
+                        navController.navigate(
+                            "docs/${com.hazel.android.ui.screens.more.DocPage.CHANGELOG.name}?version=${android.net.Uri.encode(version)}"
+                        )
+                    }
+                )
             }
             composable("ytdlp_update") {
                 YtDlpUpdateScreen(onBack = { navController.popBackStack() })

@@ -58,7 +58,7 @@ import kotlinx.coroutines.launch
 fun AdvancedScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val settings by SettingsRepository.getAdvancedSettings(context)
+    val settings by remember(context) { SettingsRepository.getAdvancedSettings(context) }
         .collectAsState(initial = AdvancedSettingsStore.current)
 
     var dialog by remember { mutableStateOf(AdvancedDialog.NONE) }

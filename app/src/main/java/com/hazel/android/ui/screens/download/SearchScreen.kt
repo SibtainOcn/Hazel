@@ -2,7 +2,9 @@ package com.hazel.android.ui.screens.download
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.draw.rotate
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -113,13 +116,13 @@ fun SearchScreen(
     val clipboard = LocalClipboard.current
     val focusRequester = remember { FocusRequester() }
 
-    val history by SearchHistoryRepository.getHistory(context).collectAsState(initial = emptyList())
+    val history by remember(context) { SearchHistoryRepository.getHistory(context) }.collectAsState(initial = emptyList())
 
     var text by remember { mutableStateOf(initialQuery) }
     var queued by remember { mutableStateOf(listOf<String>()) }
 
     // Everything already downloaded, so a repeat can be raised before the link is read.
-    val downloaded by DownloadHistoryRepository.getHistory(context)
+    val downloaded by remember(context) { DownloadHistoryRepository.getHistory(context) }
         .collectAsState(initial = emptyList())
 
     // The links waiting on an answer, paired with the copy already on the device.
@@ -129,12 +132,14 @@ fun SearchScreen(
 
     var menuOpen by remember { mutableStateOf(false) }
     var showClearHistoryConfirm by remember { mutableStateOf(false) }
+    // The remembered link a long press asked to remove, until the dialog is answered.
+    var removing by remember { mutableStateOf<String?>(null) }
 
     // Needed only to open the folder a repeat warning refers to.
-    val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
+    val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }.collectAsState(initial = SaveDirs())
 
-    val source by SettingsRepository.getSearchSource(context).collectAsState(initial = SearchSource.DEFAULT)
-    val suggestionsOn by SettingsRepository.getSearchSuggestions(context).collectAsState(initial = false)
+    val source by remember(context) { SettingsRepository.getSearchSource(context) }.collectAsState(initial = SearchSource.DEFAULT)
+    val suggestionsOn by remember(context) { SettingsRepository.getSearchSuggestions(context) }.collectAsState(initial = false)
 
     // Links already queued are hidden from the list, and what is being typed filters it.
     val suggestions = remember(history, text, queued) {
@@ -285,6 +290,19 @@ fun SearchScreen(
                     }
                 },
                 onDismiss = { showClearHistoryConfirm = false }
+            )
+        }
+
+        removing?.let { entry ->
+            RemoveEntryDialog(
+                entry = entry,
+                onConfirm = {
+                    removing = null
+                    HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
+                        SearchHistoryRepository.remove(context.applicationContext, entry)
+                    }
+                },
+                onDismiss = { removing = null }
             )
         }
 
@@ -473,11 +491,7 @@ fun SearchScreen(
                                 submit()
                             },
                             onFill = { text = entry },
-                            onRemove = {
-                                HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
-                                    SearchHistoryRepository.remove(context.applicationContext, entry)
-                                }
-                            }
+                            onRemove = { removing = entry }
                         )
                     }
                     items(remoteShown, key = { "suggestion:$it" }) { hint ->
@@ -548,9 +562,47 @@ private fun ClearHistoryDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
 }
 
 /**
- * One remembered link. The row searches it, the arrow puts it in the field for editing, and
- * the cross forgets it.
+ * Asks before forgetting one remembered link, raised by holding its row. The entry heads the
+ * dialog, so it is plain which one goes.
  */
+@Composable
+private fun RemoveEntryDialog(entry: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                entry,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        text = { Text(stringResource(R.string.search_remove_confirm_body)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text(stringResource(R.string.search_remove)) }
+        },
+        dismissButton = {
+            Row {
+                TextButton(onClick = {
+                    copySheetLink(context, entry)
+                    // Android 13 and later show their own notice of a copy.
+                    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+                        Toast.makeText(context, context.getString(R.string.search_entry_copied), Toast.LENGTH_SHORT).show()
+                    }
+                    onDismiss()
+                }) { Text(stringResource(R.string.sheet_link_copy)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.search_cancel)) }
+            }
+        }
+    )
+}
+
+/**
+ * One remembered link. The row searches it, holding it asks to forget it, and the arrow puts
+ * it in the field for editing.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HistoryRow(
     query: String,
@@ -561,43 +613,41 @@ private fun HistoryRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onUse)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .combinedClickable(onClick = onUse, onLongClick = onRemove)
+            .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             Icons.Filled.History,
             contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(20.dp))
         Text(
             query,
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
-        IconButton(onClick = onRemove, modifier = Modifier.size(36.dp)) {
-            Icon(
-                Icons.Filled.Close,
-                contentDescription = stringResource(R.string.search_forget),
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-            )
-        }
-        IconButton(onClick = onFill, modifier = Modifier.size(36.dp)) {
-            Icon(
-                Icons.AutoMirrored.Filled.CallMade,
-                contentDescription = stringResource(R.string.search_edit_before),
-                modifier = Modifier.size(18.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
-        }
+        FillArrow(onFill)
     }
-    Spacer(modifier = Modifier.height(0.dp))
+}
+
+/** The arrow at a row's end, pointing up at the field it fills. */
+@Composable
+private fun FillArrow(onFill: () -> Unit) {
+    IconButton(onClick = onFill, modifier = Modifier.size(40.dp)) {
+        Icon(
+            Icons.AutoMirrored.Filled.CallMade,
+            contentDescription = stringResource(R.string.search_edit_before),
+            modifier = Modifier
+                .size(22.dp)
+                .rotate(-90f),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
+    }
 }
 
 /** A completion offered while typing. The row searches it; the arrow puts it in the field. */
@@ -624,14 +674,7 @@ private fun SuggestionRow(query: String, onUse: () -> Unit, onFill: () -> Unit) 
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
-        IconButton(onClick = onFill, modifier = Modifier.size(36.dp)) {
-            Icon(
-                Icons.AutoMirrored.Filled.CallMade,
-                contentDescription = stringResource(R.string.search_edit_before),
-                modifier = Modifier.size(18.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
-        }
+        FillArrow(onFill)
     }
 }
 

@@ -27,6 +27,10 @@ import androidx.compose.runtime.getValue
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.util.SdCard
 import com.hazel.android.ui.components.FlatChip
+import com.hazel.android.ui.components.KeyboardOverSheet
+import com.hazel.android.ui.components.keptAboveKeyboard
+import com.hazel.android.ui.components.liftedOverKeyboard
+import com.hazel.android.ui.components.rememberSheetKeyboard
 import com.hazel.android.ui.components.ShimmerLabel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -294,11 +298,17 @@ fun FormatSheet(
     // One step up from the section, so a field reads as a field inside it.
     val fieldColor = MaterialTheme.colorScheme.surfaceContainerHighest
 
+    // Editing the title or author opens the keyboard over the sheet rather than lifting it,
+    // unless the keyboard would cover the field; then the sheet rises by that much only.
+    val keyboard = rememberSheetKeyboard()
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
+        modifier = Modifier.liftedOverKeyboard(keyboard),
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface
     ) {
+      KeyboardOverSheet(keyboard)
       Box {
         Column(
             modifier = Modifier
@@ -410,24 +420,31 @@ fun FormatSheet(
             // Two words at the start of the sheet rather than two halves of its width: the
             // tabs are a choice of what to download, read along with the heading above
             // them, and a short bar under the chosen word says which without ruling a line
-            // across the sheet.
-            Row(
-                // The words, not their touch targets, line up with the heading.
-                modifier = Modifier.offset(x = -SHEET_TAB_PADDING),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                SheetTab(
-                    label = stringResource(R.string.format_sheet_tab_audio),
-                    selected = !videoTab,
-                    enabled = info.audioFormats.isNotEmpty(),
-                    onClick = { videoTab = false }
-                )
-                SheetTab(
-                    label = stringResource(R.string.format_sheet_tab_video),
-                    selected = videoTab,
-                    enabled = info.videoFormats.isNotEmpty(),
-                    onClick = { videoTab = true }
-                )
+            // across the sheet. The link and incognito buttons take the room to their right,
+            // rather than a row of their own at the end of the sheet.
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    // The words, not their touch targets, line up with the heading.
+                    modifier = Modifier.offset(x = -SHEET_TAB_PADDING),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    SheetTab(
+                        label = stringResource(R.string.format_sheet_tab_audio),
+                        selected = !videoTab,
+                        enabled = info.audioFormats.isNotEmpty(),
+                        onClick = { videoTab = false }
+                    )
+                    SheetTab(
+                        label = stringResource(R.string.format_sheet_tab_video),
+                        selected = videoTab,
+                        enabled = info.videoFormats.isNotEmpty(),
+                        onClick = { videoTab = true }
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                SheetLinkButton(enabled = info.url.isNotBlank(), onClick = { openDialog = SheetDialog.LINK })
+                Spacer(modifier = Modifier.width(10.dp))
+                IncognitoButton(onFeedback = { message -> feedback = Feedback(message) })
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -440,19 +457,22 @@ fun FormatSheet(
                 expanded = detailsOpen,
                 onToggle = { toggle(SECTION_DETAILS) }
             ) {
-                EditableField(
-                    label = stringResource(R.string.format_sheet_label_title),
-                    value = title,
-                    onValueChange = { title = it },
-                    color = fieldColor
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                EditableField(
-                    label = stringResource(R.string.format_sheet_label_author),
-                    value = author,
-                    onValueChange = { author = it },
-                    color = fieldColor
-                )
+                // Kept above the keyboard as one, so typing in either leaves both in view.
+                Column(modifier = Modifier.keptAboveKeyboard(keyboard)) {
+                    EditableField(
+                        label = stringResource(R.string.format_sheet_label_title),
+                        value = title,
+                        onValueChange = { title = it },
+                        color = fieldColor
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    EditableField(
+                        label = stringResource(R.string.format_sheet_label_author),
+                        value = author,
+                        onValueChange = { author = it },
+                        color = fieldColor
+                    )
+                }
             }
 
             // ── Quality: the stream, and its soundtrack where there is a choice ──
@@ -654,20 +674,11 @@ fun FormatSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            DownloadSheetFooter(
-                link = info.url,
-                onLinkClick = { openDialog = SheetDialog.LINK },
-                onFeedback = { message -> feedback = Feedback(message) }
-            )
-
             Spacer(modifier = Modifier.height(28.dp))
         }
 
-        // What the footer's buttons did, shown over the top of the sheet: the footer sits at
-        // the end of a sheet that can run past the screen, and a message under it would be
-        // out of sight exactly when it is needed.
+        // What the link and incognito buttons did, shown over the top of the sheet, where it
+        // stays in sight however far the sheet is scrolled.
         androidx.compose.animation.AnimatedVisibility(
             visible = feedback != null,
             enter = fadeIn() + scaleIn(initialScale = 0.9f),

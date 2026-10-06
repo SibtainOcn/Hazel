@@ -149,19 +149,19 @@ fun DownloadScreen(
     val state by downloadViewModel.state.collectAsState()
     val formatsReading by downloadViewModel.formatsReading.collectAsState()
 
-    val options by SettingsRepository.getDownloadOptions(context)
+    val options by remember(context) { SettingsRepository.getDownloadOptions(context) }
         .collectAsState(initial = DownloadOptions())
-    val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
+    val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }.collectAsState(initial = SaveDirs())
 
     // The kind whose folder the picker is choosing, set as it opens.
 
 
     // Collected as null until the stored value arrives, so the dialog cannot flash up for
     // a frame on every launch before the real answer loads and dismisses it again.
-    val guideSeen by SettingsRepository.getGuideSeen(context)
+    val guideSeen by remember(context) { SettingsRepository.getGuideSeen(context) }
         .collectAsState(initial = null as Boolean?)
 
-    val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
+    val incognito by remember(context) { SettingsRepository.getIncognito(context) }.collectAsState(initial = false)
 
     // The link being downloaded is shown first, and the rest keep the order they arrived
     // in. What is being worked on now is what the user opened the app to see, and hunting
@@ -169,8 +169,8 @@ fun DownloadScreen(
     // rather than animated into place: a card sliding around under a moving progress bar
     // is harder to read than one that is simply where it belongs.
     val listState = rememberLazyListState()
-    val orderedResults = remember(state.results, state.info?.url, state.isDownloading) {
-        val active = state.info?.url?.takeIf { state.isDownloading }
+    val orderedResults = remember(state.results, state.active?.url, state.isDownloading) {
+        val active = state.active?.url?.takeIf { state.isDownloading }
         // The list anchors its scroll to the first visible card's key, so when a finished
         // download dropped back from the top to its own place the viewport followed it,
         // often to the end of the list. Pinning the position by index keeps the user where
@@ -258,7 +258,7 @@ fun DownloadScreen(
     // scroll the list so the new active card is visible at the top. Without this the
     // viewport stays anchored on the old completed card and the user has to scroll
     // manually to find the one that is running now.
-    val activeUrl = state.info?.url
+    val activeUrl = state.active?.url
     val isDownloading = state.isDownloading
     LaunchedEffect(activeUrl, isDownloading) {
         if (isDownloading && activeUrl != null && (state.isMultiple || state.batch.size > 1)) {
@@ -271,7 +271,7 @@ fun DownloadScreen(
     }
 
     // Links already downloaded, so a repeat can be pointed out before it is started again.
-    val history by DownloadHistoryRepository.getHistory(context)
+    val history by remember(context) { DownloadHistoryRepository.getHistory(context) }
         .collectAsState(initial = emptyList())
 
     // The records behind the links on screen, so each one can be asked whether the file it
@@ -997,6 +997,8 @@ fun DownloadScreen(
                             saveDirs = saveDirs
                         )
                     } else {
+                        // The sheet's own link, named rather than left to whatever the
+                        // state points at by the time the button is pressed.
                         downloadViewModel.startDownload(
                             context = context,
                             format = format,
@@ -1004,6 +1006,7 @@ fun DownloadScreen(
                             title = title,
                             author = author,
                             audioLanguage = audioLanguage,
+                            info = info,
                             saveDirs = saveDirs
                         )
                     }

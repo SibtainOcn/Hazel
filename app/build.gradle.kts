@@ -86,16 +86,8 @@ gradle.taskGraph.whenReady {
 
 // The name of the release, taken from defaultConfig so there is one copy of it. Nothing on
 // the release path overrides it: CI and the F-Droid server both build with the version as
-// it stands in this file, which is what keeps their two APKs in agreement. -PVERSION_NAME
-// stays only for regenerating the store changelogs of a version other than the current one.
-val hazelVersionName: String by lazy {
-    (project.findProperty("VERSION_NAME") as String?)
-        ?.trim()
-        ?.removePrefix("v")
-        ?.takeIf { it.isNotBlank() }
-        ?: android.defaultConfig.versionName
-        ?: "1.0.0"
-}
+// it stands in this file, which is what keeps their two APKs in agreement.
+val hazelVersionName: String by lazy { android.defaultConfig.versionName ?: "1.0.0" }
 
 // The release's own code, without the architecture digits. Read back from defaultConfig for
 // the same reason the name is: one copy of the number, and that copy is the literal F-Droid
@@ -278,131 +270,6 @@ androidComponents {
                 ?.outputFileName
                 ?.set(apkName)
         }
-    }
-}
-
-// ── Fastlane changelogs ──
-//
-// F-Droid looks for a changelog named after the version code of the exact APK it is showing,
-// so a release that publishes five APKs needs the same text under five different names. That
-// is five files nobody can keep in step by hand, and a missing one is silent: the listing
-// just shows no changelog for that architecture.
-//
-// So they are generated. The text is written once in the release's own section of
-// CHANGELOG.md and this fans it out, which also means the changelog a person reads on
-// F-Droid and the one in the repository cannot drift apart.
-//
-//   ./gradlew :app:generateFastlaneChangelogs -PVERSION_NAME=1.0.4
-//
-// A release section may carry a '### Store' subsection, and when it does that subsection is
-// what gets published in place of the rest. The two audiences are not the same one: a
-// release can be entirely build plumbing, which is worth recording here and says nothing to
-// somebody reading a store listing, and the first listing has no earlier version to
-// describe itself against at all. Everything outside '### Store' stays for readers of the
-// repository.
-//
-// The markdown is flattened rather than rendered: F-Droid shows this as plain text, so bold
-// markers and wrapped lines would arrive as literal asterisks and mid-sentence breaks.
-// What the store listings will actually show before they cut it off.
-val FASTLANE_CHANGELOG_LIMIT = 500
-
-val fastlaneChangelogDir =
-    rootProject.layout.projectDirectory.dir("fastlane/metadata/android/en-US/changelogs")
-val rootChangelog = rootProject.layout.projectDirectory.file("CHANGELOG.md")
-
-tasks.register("generateFastlaneChangelogs") {
-    description = "Writes the current release's CHANGELOG.md section to one file per ABI."
-    group = "publishing"
-
-    val versionName = hazelVersionName
-    val baseCode = hazelBaseVersionCode
-    // Every code the release publishes, the universal APK's included.
-    val codes = listOf(0) + abiVersionCodes.values.sorted()
-    val source = rootChangelog
-    val outDir = fastlaneChangelogDir
-
-    inputs.file(source)
-    outputs.dir(outDir)
-
-    doLast {
-        val text = source.asFile.readText()
-
-        // The section runs from this version's heading to the next heading of any version.
-        val heading = Regex("""^##\s*\[${Regex.escape(versionName)}]""", RegexOption.MULTILINE)
-        val start = heading.find(text)
-            ?: throw GradleException(
-                "CHANGELOG.md has no section for $versionName. Add a '## [$versionName] - <date>' " +
-                    "heading before cutting the release."
-            )
-        // From the line after the heading, so the date trailing the version does not
-        // survive as a stray first bullet.
-        val headingEnd = text.indexOf('\n', start.range.last + 1)
-        val rest = if (headingEnd == -1) "" else text.substring(headingEnd + 1)
-        val end = Regex("""^##\s*\[""", RegexOption.MULTILINE).find(rest)
-        val body = if (end == null) rest else rest.substring(0, end.range.first)
-
-        // '### Store', when the release has one, replaces the section rather than adding to
-        // it: what a store listing shows and what the repository records are written for
-        // different readers. It runs to the next '###' or to the end of the section.
-        val storeStart = Regex("""^###\s+Store\s*$""", RegexOption.MULTILINE).find(body)
-        val published = if (storeStart == null) body else {
-            val lineEnd = body.indexOf('\n', storeStart.range.last)
-            val after = if (lineEnd == -1) "" else body.substring(lineEnd + 1)
-            val next = Regex("""^###\s""", RegexOption.MULTILINE).find(after)
-            if (next == null) after else after.substring(0, next.range.first)
-        }
-
-        // Markdown to plain text, one bullet per line however the source wrapped it.
-        val lines = mutableListOf<String>()
-        published.trim().lines().forEach { raw ->
-            val line = raw.trim()
-            when {
-                line.isEmpty() -> if (lines.isNotEmpty() && lines.last().isNotEmpty()) lines.add("")
-                line.startsWith("###") -> {
-                    if (lines.isNotEmpty() && lines.last().isNotEmpty()) lines.add("")
-                    lines.add(line.removePrefix("###").trim())
-                }
-                line.startsWith("- ") || line.startsWith("* ") ->
-                    lines.add("* " + line.drop(2).trim())
-                // A continuation of the bullet above, rejoined onto it.
-                lines.isNotEmpty() && lines.last().startsWith("* ") ->
-                    lines[lines.lastIndex] = lines.last().trimEnd() + " " + line
-                else -> lines.add(line)
-            }
-        }
-        val plain = lines.joinToString("\n")
-            .replace(Regex("""\*\*(.+?)\*\*"""), "$1")
-            .replace(Regex("""`(.+?)`"""), "$1")
-            .replace(Regex("""\[(.+?)]\((.+?)\)"""), "$1")
-            .replace(Regex("\n{3,}"), "\n\n")
-            .trim()
-
-        if (plain.isBlank()) {
-            throw GradleException("The $versionName section of CHANGELOG.md is empty.")
-        }
-
-        // F-Droid and IzzyOnDroid both truncate a long changelog in the listing, so a
-        // release whose section reads as prose gets cut mid-sentence rather than rejected.
-        // Warned about rather than enforced, because only a person can decide what to cut.
-        if (plain.length > FASTLANE_CHANGELOG_LIMIT) {
-            logger.warn(
-                "The $versionName changelog is ${plain.length} characters, over the " +
-                    "$FASTLANE_CHANGELOG_LIMIT the listings show. It will be truncated there. " +
-                    "Shorten the $versionName section of CHANGELOG.md if that matters."
-            )
-        }
-
-        val dir = outDir.asFile
-        dir.mkdirs()
-        // Codes from earlier releases are left alone: F-Droid still serves the versions
-        // they belong to, and deleting them would blank the changelog on old builds.
-        codes.forEach { abi ->
-            dir.resolve("${baseCode + abi}.txt").writeText(plain + "\n")
-        }
-        logger.lifecycle(
-            "Wrote $versionName to ${codes.size} changelogs: " +
-                codes.joinToString(", ") { "${baseCode + it}.txt" }
-        )
     }
 }
 

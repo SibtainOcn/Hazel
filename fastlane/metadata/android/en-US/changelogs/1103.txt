@@ -1,0 +1,9 @@
+* Pause all now holds the whole queue until Resume, even after a restart
+* Tap a paused card to resume it; it shows the real downloaded size
+* Change a queued link's format from its card
+* Failed downloads redesigned, with Retry, Logs and Retry all failed
+* Fixed: Running tab going empty mid-playlist and links added mid-run getting lost
+* One summary when a run stops
+* Instant can save audio only again
+* Fixed: one-word titles saved as NA
+* Draggable scrollbar on long lists

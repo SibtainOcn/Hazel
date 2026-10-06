@@ -336,7 +336,8 @@ object DownloadNotificationHelper {
 
         val detail = buildList {
             add("Paused")
-            if (progress in 0..100) add("$progress%")
+            // Nothing in hand says nothing, so the figure only shows once there is some.
+            if (progress in 1..100) add("$progress%")
             if (totalBytes > 0) add("${formatSize(doneBytes)} / ${formatSize(totalBytes)}")
         }.joinToString("  ·  ")
 
@@ -345,7 +346,7 @@ object DownloadNotificationHelper {
             .setContentTitle(shortTitle(mediaTitle).ifBlank { "Hazel" })
             .setContentText(detail)
             .setStyle(NotificationCompat.BigTextStyle().bigText(detail))
-            .setSubText(if (progress in 0..100) "$progress%" else null)
+            .setSubText(if (progress in 1..100) "$progress%" else null)
             .setProgress(100, progress.coerceIn(0, 100), false)
             // Held in the shade rather than swept away with the run that stopped. A paused
             // download is still owed, and this is the only thing that says so once the app
@@ -438,6 +439,73 @@ object DownloadNotificationHelper {
         val mgr = context.getSystemService(NotificationManager::class.java)
         mgr.notify(COMPLETE_NOTIFICATION_ID, builder.build())
     }
+
+    /**
+     * Reports how a run of several links ended: how many were saved, how many failed and how
+     * many were cancelled.
+     *
+     * A run stopped part way used to be reported by its failures alone, so cancelling a
+     * playlist of eighty with one bad link in it read "1 of 83 could not be downloaded", which
+     * says nothing of the eighty-odd that were cancelled or of the ones already saved. Tapping
+     * it opens the queue, where the failures are listed with their logs.
+     *
+     * A run the user cancelled is reported quietly, since they were there for it. One that
+     * ended with failures follows the failure rule: quiet in the app, audible outside it.
+     */
+    fun showRunSummary(
+        context: Context,
+        done: Int,
+        failed: Int,
+        cancelled: Int,
+        cancelledByUser: Boolean
+    ) {
+        createChannels(context)
+        cancelProgress(context)
+
+        val heading = context.getString(
+            when {
+                cancelledByUser -> R.string.notification_run_cancelled_title
+                failed > 0 -> R.string.notification_run_failed_title
+                else -> R.string.notification_run_finished_title
+            }
+        )
+        val summary = context.getString(R.string.notification_run_summary, done, failed, cancelled)
+        val loud = failed > 0 && !cancelledByUser && !isAppInForeground()
+
+        val open = PendingIntent.getActivity(
+            context, 4,
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra(MainActivity.EXTRA_NAVIGATE_TO, QUEUE_ROUTE)
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val builder = NotificationCompat.Builder(context, if (loud) CHANNEL_COMPLETE else CHANNEL_PROGRESS)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(heading)
+            .setContentText(summary)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(summary))
+            .setAutoCancel(true)
+            .setColorized(true)
+            .setColor(0xFF000000.toInt())
+            .setContentIntent(open)
+            .setCategory(if (failed > 0) NotificationCompat.CATEGORY_ERROR else NotificationCompat.CATEGORY_STATUS)
+
+        if (loud) {
+            builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
+        } else {
+            builder.setSilent(true).setPriority(NotificationCompat.PRIORITY_LOW)
+        }
+
+        context.getSystemService(NotificationManager::class.java)
+            .notify(COMPLETE_NOTIFICATION_ID, builder.build())
+    }
+
+    /** The queue screen's route, which a run's summary opens on. */
+    private const val QUEUE_ROUTE = "queue"
 
     /**
      * Says a run is waiting for Wi-Fi, and only when there is nobody looking at the screen.
