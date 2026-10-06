@@ -126,7 +126,7 @@ jobs:
             [ -s "$FILE" ] || MISSING="$MISSING $FILE"
           done
           if [ -n "$MISSING" ]; then
-            echo "::error::Store changelogs missing:$MISSING. Run ./gradlew :app:generateFastlaneChangelogs."
+            echo "::error::Store changelogs missing:$MISSING. Write them by hand, one per APK version code."
             exit 1
           fi
 
