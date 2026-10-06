@@ -325,6 +325,7 @@
     <string name="history_failed_log_copied">Catatan kesalahan disalin ke papan klip</string>
     <string name="history_failed_retry">Coba lagi</string>
     <string name="queue_failed_choose_again">Unduh dengan cara lain</string>
+    <string name="queue_failed_retry_all">Coba lagi semua yang gagal</string>
     <string name="queue_failed_select">Pilih yang gagal</string>
     <string name="queue_failed_remove">Hapus</string>
     <string name="queue_failed_remove_body">Unduhan ini keluar dari daftar beserta lognya. File yang sudah diunduh tidak tersentuh.</string>

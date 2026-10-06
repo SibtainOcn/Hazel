@@ -345,6 +345,7 @@
     <string name="history_failed_log_copied">Error log copied to clipboard</string>
     <string name="history_failed_retry">Retry</string>
     <string name="queue_failed_choose_again">Download another way</string>
+    <string name="queue_failed_retry_all">Retry all failed</string>
     <string name="queue_failed_select">Select failed</string>
     <string name="queue_failed_remove">Remove</string>
     <string name="queue_failed_remove_body">They leave the list with their logs. Your downloaded files are not touched.</string>

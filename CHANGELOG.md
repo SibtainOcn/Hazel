@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - The home screen, the queue and the downloads list have a scrollbar on the right that can be held and dragged to move through a long list. It rests as a faint thin bar, lights up in a soft shade of the accent while the list moves, and takes the full accent while held.
-- Failed downloads can be picked and removed together: long-press a failed card, or choose Select failed in the queue menu, then remove the picked ones or select all. Picked cards light up with a wash of the accent, and removing them asks first.
+- Failed downloads can be picked and removed together: long-press a failed card, or choose Select failed in the queue menu, then remove the picked ones or select all. Picked cards light up with a wash of the accent, and removing them asks first. Retry all failed in the same menu retries every failure not already back in the queue.
 - The error log has a Copy URL button, and a download that failed part way says where it stopped and how much had arrived.
 - Synthesizing has a "Download sheet opens on" setting, Video or Audio, for the tab a link's sheet and a set of links open on. A link with no audio still opens on Video.
 

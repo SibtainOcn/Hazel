@@ -325,6 +325,7 @@
     <string name="history_failed_log_copied">エラーログをクリップボードにコピーしました</string>
     <string name="history_failed_retry">再試行</string>
     <string name="queue_failed_choose_again">別の方法でダウンロード</string>
+    <string name="queue_failed_retry_all">失敗したものをすべて再試行</string>
     <string name="queue_failed_select">失敗を選択</string>
     <string name="queue_failed_remove">削除</string>
     <string name="queue_failed_remove_body">ログとともにリストから消えます。ダウンロード済みのファイルはそのままです。</string>

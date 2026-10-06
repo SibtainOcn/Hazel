@@ -325,6 +325,7 @@
     <string name="history_failed_log_copied">错误日志已复制到剪贴板</string>
     <string name="history_failed_retry">重试</string>
     <string name="queue_failed_choose_again">换一种方式下载</string>
+    <string name="queue_failed_retry_all">重试所有失败项</string>
     <string name="queue_failed_select">选择失败项</string>
     <string name="queue_failed_remove">移除</string>
     <string name="queue_failed_remove_body">它们会连同日志一起从列表中移除。已下载的文件不受影响。</string>

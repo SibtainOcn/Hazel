@@ -333,6 +333,7 @@
     <string name="history_failed_log_copied">Journal d\'erreurs copié dans le presse-papiers</string>
     <string name="history_failed_retry">Réessayer</string>
     <string name="queue_failed_choose_again">Télécharger autrement</string>
+    <string name="queue_failed_retry_all">Réessayer tous les échecs</string>
     <string name="queue_failed_select">Sélectionner les échecs</string>
     <string name="queue_failed_remove">Retirer</string>
     <string name="queue_failed_remove_body">Ils quittent la liste avec leurs journaux. Vos fichiers téléchargés ne sont pas touchés.</string>

@@ -333,6 +333,7 @@
     <string name="history_failed_log_copied">Registro de errores copiado al portapapeles</string>
     <string name="history_failed_retry">Reintentar</string>
     <string name="queue_failed_choose_again">Descargar de otra forma</string>
+    <string name="queue_failed_retry_all">Reintentar todas las fallidas</string>
     <string name="queue_failed_select">Seleccionar fallidas</string>
     <string name="queue_failed_remove">Quitar</string>
     <string name="queue_failed_remove_body">Salen de la lista con sus registros. Tus archivos descargados no se tocan.</string>

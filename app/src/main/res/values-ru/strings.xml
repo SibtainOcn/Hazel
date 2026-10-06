@@ -337,6 +337,7 @@
     <string name="history_failed_log_copied">Журнал ошибок скопирован в буфер обмена</string>
     <string name="history_failed_retry">Повторить</string>
     <string name="queue_failed_choose_again">Скачать иначе</string>
+    <string name="queue_failed_retry_all">Повторить все неудачные</string>
     <string name="queue_failed_select">Выбрать неудачные</string>
     <string name="queue_failed_remove">Убрать</string>
     <string name="queue_failed_remove_body">Они исчезнут из списка вместе с журналами. Скачанные файлы не затрагиваются.</string>

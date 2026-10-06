@@ -329,6 +329,7 @@
     <string name="history_failed_log_copied">त्रुटि लॉग क्लिपबोर्ड पर कॉपी किया गया</string>
     <string name="history_failed_retry">पुनः प्रयास करें</string>
     <string name="queue_failed_choose_again">दूसरे तरीके से डाउनलोड करें</string>
+    <string name="queue_failed_retry_all">सभी विफल फिर से आज़माएँ</string>
     <string name="queue_failed_select">विफल चुनें</string>
     <string name="queue_failed_remove">हटाएँ</string>
     <string name="queue_failed_remove_body">वे अपने लॉग के साथ सूची से हट जाते हैं। आपकी डाउनलोड की गई फ़ाइलें नहीं छुई जातीं।</string>

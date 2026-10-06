@@ -158,6 +158,14 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
         }
     }
 
+    // Every failure not already back in the queue, in one go.
+    fun retryAll() {
+        val due = failed.filterNot { it.id in retryingIds }
+        if (due.isEmpty()) return
+        Toast.makeText(context, resources.getString(R.string.history_retrying_toast), Toast.LENGTH_SHORT).show()
+        downloadViewModel.retryAllFailed(context, due)
+    }
+
     val pagerState = rememberPagerState(pageCount = { QueueTab.entries.size })
     var menuOpen by remember { mutableStateOf(false) }
     var confirmCancelAll by remember { mutableStateOf(false) }
@@ -270,6 +278,14 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                         onClick = {
                             menuOpen = false
                             confirmClearQueue = true
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.queue_failed_retry_all)) },
+                        enabled = failed.any { it.id !in retryingIds },
+                        onClick = {
+                            menuOpen = false
+                            retryAll()
                         }
                     )
                     DropdownMenuItem(

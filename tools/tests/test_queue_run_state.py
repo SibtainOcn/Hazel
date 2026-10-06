@@ -570,6 +570,28 @@ def test_tab_cost():
     check("Nothing is in hand with nothing queued", in_hand(failed, []), set())
 
 
+def test_retry_all():
+    print("\n--- Suite 9: Retry all failed ---")
+    queue = QUEUE.read_text(encoding="utf-8")
+    vm = VM.read_text(encoding="utf-8")
+    retry_all = function(vm, "fun retryAllFailed(")
+    check_true("The queue menu offers to retry every failure",
+               "R.string.queue_failed_retry_all" in queue and "retryAll()" in queue)
+    check_true("Failures already back in the queue are not retried twice",
+               "failed.filterNot { it.id in retryingIds }" in queue
+               and "enabled = failed.any { it.id !in retryingIds }" in queue)
+    check_true("Failures with their choice go back as one batch per choice and folder",
+               "groupBy { it.options to it.treeUri }" in retry_all and "startBatch(" in retry_all
+               and ".distinctBy { it.url }" in retry_all)
+    check_true("Failures without a choice are read again", "instantDownload(context, it.url)" in retry_all)
+    check_true("Reads for links shared or retried at once wait their turn",
+               "formatReads.withPermit" in function(vm, "fun instantDownload("))
+    for strings in sorted(RES.glob("values*/strings.xml")):
+        text = strings.read_text(encoding="utf-8")
+        if 'name="queue_failed_select"' in text:
+            check_true(f"{strings.parent.name} names Retry all failed", 'name="queue_failed_retry_all"' in text)
+
+
 def main():
     print("=" * 70)
     print("  Queue run state & run summary harness")
@@ -583,6 +605,7 @@ def main():
     test_resuming()
     test_failed_card()
     test_tab_cost()
+    test_retry_all()
     print(f"\n  Summary: {PASS_COUNT}/{PASS_COUNT + FAIL_COUNT} tests PASSED, {FAIL_COUNT} FAILED")
     return 0 if FAIL_COUNT == 0 else 1
 

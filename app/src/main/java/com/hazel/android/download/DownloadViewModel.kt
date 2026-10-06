@@ -399,7 +399,7 @@ class DownloadViewModel : ViewModel() {
             }
 
             // A queue held by Pause all stays held: what is waiting is shown, not started.
-            if (runCatching { DownloadQueueRepository.isHeld(app) }.getOrDefault(false)) {
+            if (held) {
                 holdRun = true
                 synchronized(queue) {
                     owed.filter { saved -> queue.none { it.url == saved.url } }
@@ -628,15 +628,19 @@ class DownloadViewModel : ViewModel() {
                     ?.let { GenericFormats.heightCeiling(it) }
                     ?: MediaProbe.BEST_VIDEO
 
-                val items = withContext(Dispatchers.IO) {
-                    expand(
-                        url,
-                        CookieRepository.accessFor(app, url),
-                        SettingsRepository.getFetchMode(app).first(),
-                        SettingsRepository.getForceIpv4(app).first(),
-                        SettingsRepository.getListingSource(app).first(),
-                        "${MediaProbe.PROBE_PROCESS_ID}_instant_${LinkKey.digest(url)}"
-                    )
+                // A few at a time, as format reads are: retrying every failure at once would
+                // otherwise start a read for each of them together.
+                val items = formatReads.withPermit {
+                    withContext(Dispatchers.IO) {
+                        expand(
+                            url,
+                            CookieRepository.accessFor(app, url),
+                            SettingsRepository.getFetchMode(app).first(),
+                            SettingsRepository.getForceIpv4(app).first(),
+                            SettingsRepository.getListingSource(app).first(),
+                            "${MediaProbe.PROBE_PROCESS_ID}_instant_${LinkKey.digest(url)}"
+                        )
+                    }
                 }
                 // Audio only takes the sound alone, in the preferred language and codec where
                 // the source has them. Best audio stands in for a link read without its
@@ -1555,7 +1559,6 @@ class DownloadViewModel : ViewModel() {
                         restartUrl = null
                         discardWorkDir()
                         continue
-
                     }
 
                     if (isPaused) {
@@ -2280,6 +2283,25 @@ class DownloadViewModel : ViewModel() {
         } else {
             instantDownload(context, failed.url)
         }
+    }
+
+    /**
+     * Retries every failure in [failed] at once, from the Failed tab's menu.
+     *
+     * Failures that kept their queued choice go back into the queue together, one batch per
+     * choice and folder, so each is downloaded as it was asked for and the queue is written
+     * once per batch rather than once per link. The rest are read again, a few at a time.
+     */
+    fun retryAllFailed(context: Context, failed: List<com.hazel.android.data.FailedDownload>) {
+        val queued = failed.mapNotNull { DownloadQueueRepository.decodeItem(it.queuedPayload) }
+            .distinctBy { it.url }
+        queued.groupBy { it.options to it.treeUri }.forEach { (key, items) ->
+            startBatch(context, items.map { it.toPlan() }, key.first, key.second)
+        }
+        val withChoice = queued.mapTo(HashSet()) { it.url }
+        failed.filter { it.queuedPayload == null || it.url !in withChoice }
+            .distinctBy { it.url }
+            .forEach { instantDownload(context, it.url) }
     }
 
     // ── Internals ──

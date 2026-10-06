@@ -329,6 +329,7 @@
     <string name="history_failed_log_copied">Fehlerprotokoll in Zwischenablage kopiert</string>
     <string name="history_failed_retry">Wiederholen</string>
     <string name="queue_failed_choose_again">Anders herunterladen</string>
+    <string name="queue_failed_retry_all">Alle fehlgeschlagenen wiederholen</string>
     <string name="queue_failed_select">Fehlgeschlagene auswählen</string>
     <string name="queue_failed_remove">Entfernen</string>
     <string name="queue_failed_remove_body">Sie verschwinden mit ihren Protokollen aus der Liste. Deine heruntergeladenen Dateien bleiben unberührt.</string>
