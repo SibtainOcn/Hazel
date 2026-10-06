@@ -47,7 +47,8 @@
     <string name="search_no_matches">没有匹配项</string>
     <string name="search_remove">移除</string>
     <string name="search_all">全部搜索</string>
-    <string name="search_forget">忘记</string>
+    <string name="search_remove_confirm_body">要从搜索记录中移除吗？</string>
+    <string name="search_entry_copied">已复制到剪贴板</string>
     <string name="search_edit_before">搜索前先编辑</string>
     <string name="search_paste_and_fetch">粘贴并读取</string>
     <string name="search_paste">粘贴</string>

@@ -47,7 +47,8 @@
     <string name="search_no_matches">Sin coincidencias</string>
     <string name="search_remove">Quitar</string>
     <string name="search_all">Buscar todo</string>
-    <string name="search_forget">Olvidar</string>
+    <string name="search_remove_confirm_body">¿Quitar del historial de búsqueda?</string>
+    <string name="search_entry_copied">Copiado al portapapeles</string>
     <string name="search_edit_before">Editar antes de buscar</string>
     <string name="search_paste_and_fetch">Pegar y buscar</string>
     <string name="search_paste">Pegar</string>

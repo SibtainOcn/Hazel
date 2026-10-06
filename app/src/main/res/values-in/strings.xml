@@ -47,7 +47,8 @@
     <string name="search_no_matches">Tidak ada yang cocok</string>
     <string name="search_remove">Hapus</string>
     <string name="search_all">Cari semua</string>
-    <string name="search_forget">Lupakan</string>
+    <string name="search_remove_confirm_body">Hapus dari riwayat penelusuran?</string>
+    <string name="search_entry_copied">Disalin ke papan klip</string>
     <string name="search_edit_before">Edit sebelum mencari</string>
     <string name="search_paste_and_fetch">Tempel dan ambil</string>
     <string name="search_paste">Tempel</string>

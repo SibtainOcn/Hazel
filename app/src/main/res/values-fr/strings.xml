@@ -47,7 +47,8 @@
     <string name="search_no_matches">Aucune correspondance</string>
     <string name="search_remove">Retirer</string>
     <string name="search_all">Tout chercher</string>
-    <string name="search_forget">Oublier</string>
+    <string name="search_remove_confirm_body">Supprimer de l\'historique de recherche ?</string>
+    <string name="search_entry_copied">Copié dans le presse-papiers</string>
     <string name="search_edit_before">Modifier avant de chercher</string>
     <string name="search_paste_and_fetch">Coller et chercher</string>
     <string name="search_paste">Coller</string>
