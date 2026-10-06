@@ -259,6 +259,28 @@ def test_search_and_history_screen_ux():
     check_true("Format sheet shows link and incognito beside the tabs",
                "SheetLinkButton(" in tabs and "IncognitoButton(" in tabs and "Modifier.weight(1f)" in tabs)
     check_true("Format sheet has no footer row of its own", "DownloadSheetFooter(" not in sheet)
+    over = (search_file.parent.parent.parent / "components" / "KeyboardOverSheet.kt").read_text(encoding="utf-8")
+    check_true("Format sheet opens the keyboard over itself", "KeyboardOverSheet(keyboard)" in sheet)
+    check_true("Only the keyboard is taken out, and the listeners go with the sheet",
+               "WindowInsetsCompat.Type.ime(), Insets.NONE" in over and "onDispose" in over
+               and "setOnApplyWindowInsetsListener(host, null)" in over
+               and "setWindowInsetsAnimationCallback(host, null)" in over)
+    check_true("Android 10 and older stop the window resizing for the keyboard as well",
+               "Build.VERSION.SDK_INT < Build.VERSION_CODES.R" in over and "SOFT_INPUT_ADJUST_NOTHING" in over)
+    check_true("The keyboard's height is read every frame of its slide, and cleared with the sheet",
+               "override fun onProgress(" in over and "note(insets)" in over
+               and "keyboard.keyboardTop = SheetKeyboard.NONE" in over)
+    check_true("The sheet is lifted only by the overlap, as a move",
+               "modifier = Modifier.liftedOverKeyboard(keyboard)" in sheet and "IntOffset(0, -lift)" in over
+               and "coerceIn(0L" in over)
+    check("Title and author are kept above the keyboard together", sheet.count("Modifier.keptAboveKeyboard(keyboard)"), 1)
+    group = sheet[sheet.index("Column(modifier = Modifier.keptAboveKeyboard(keyboard))"):]
+    check_true("The kept group holds both fields",
+               group.index("format_sheet_label_author") < group.index("// ── Quality"))
+    check_true("A field is read back as if the sheet were not lifted, so the lift settles",
+               "boundsInWindow().bottom.toInt() + keyboard.applied" in over)
+    check_true("The lift is tested across devices, keyboards and frames",
+               (REPO_ROOT / "app/src/test/java/com/hazel/android/ui/components/KeyboardLiftTest.kt").is_file())
 
     # HistoryScreen search bar AnimatedVisibility and dismiss
     check_true("HistoryScreen uses AnimatedVisibility for search bar", "AnimatedVisibility(\n            visible = searchOpen" in history_content or "AnimatedVisibility(visible = searchOpen" in history_content)

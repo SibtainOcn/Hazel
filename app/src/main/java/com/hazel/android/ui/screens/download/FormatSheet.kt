@@ -27,6 +27,10 @@ import androidx.compose.runtime.getValue
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.util.SdCard
 import com.hazel.android.ui.components.FlatChip
+import com.hazel.android.ui.components.KeyboardOverSheet
+import com.hazel.android.ui.components.keptAboveKeyboard
+import com.hazel.android.ui.components.liftedOverKeyboard
+import com.hazel.android.ui.components.rememberSheetKeyboard
 import com.hazel.android.ui.components.ShimmerLabel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -294,11 +298,17 @@ fun FormatSheet(
     // One step up from the section, so a field reads as a field inside it.
     val fieldColor = MaterialTheme.colorScheme.surfaceContainerHighest
 
+    // Editing the title or author opens the keyboard over the sheet rather than lifting it,
+    // unless the keyboard would cover the field; then the sheet rises by that much only.
+    val keyboard = rememberSheetKeyboard()
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
+        modifier = Modifier.liftedOverKeyboard(keyboard),
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface
     ) {
+      KeyboardOverSheet(keyboard)
       Box {
         Column(
             modifier = Modifier
@@ -447,19 +457,22 @@ fun FormatSheet(
                 expanded = detailsOpen,
                 onToggle = { toggle(SECTION_DETAILS) }
             ) {
-                EditableField(
-                    label = stringResource(R.string.format_sheet_label_title),
-                    value = title,
-                    onValueChange = { title = it },
-                    color = fieldColor
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                EditableField(
-                    label = stringResource(R.string.format_sheet_label_author),
-                    value = author,
-                    onValueChange = { author = it },
-                    color = fieldColor
-                )
+                // Kept above the keyboard as one, so typing in either leaves both in view.
+                Column(modifier = Modifier.keptAboveKeyboard(keyboard)) {
+                    EditableField(
+                        label = stringResource(R.string.format_sheet_label_title),
+                        value = title,
+                        onValueChange = { title = it },
+                        color = fieldColor
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    EditableField(
+                        label = stringResource(R.string.format_sheet_label_author),
+                        value = author,
+                        onValueChange = { author = it },
+                        color = fieldColor
+                    )
+                }
             }
 
             // ── Quality: the stream, and its soundtrack where there is a choice ──
