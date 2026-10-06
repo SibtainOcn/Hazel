@@ -212,7 +212,7 @@ fun DocumentationPageScreen(
                 view.loadUrl(url)
             } else {
                 val html = MarkdownLite.page(
-                    text, css(background), css(scheme.onBackground), css(scheme.onSurfaceVariant), css(scheme.primary),
+                    text, css(background), css(scheme.onBackground), css(scheme.onSurfaceVariant), dark,
                     plain = page.plain
                 )
                 view.loadDataWithBaseURL(url, html, "text/html", "utf-8", null)
