@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.more
 
+import androidx.compose.ui.text.style.TextOverflow
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -82,8 +83,8 @@ import java.util.Locale
 @Composable
 fun HazelUpdateScreen(
     onBack: () -> Unit,
-    /** Opens What's new, the same page as under Documentation. */
-    onOpenWhatsNew: () -> Unit = {},
+    /** Opens What's new, the same page as under Documentation, as of the given version. */
+    onOpenWhatsNew: (version: String) -> Unit = {},
     viewModel: HazelUpdateViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -241,7 +242,7 @@ fun HazelUpdateScreen(
                         openInAppBrowser(context, HazelUpdater.FDROID_PACKAGE_URL)
                     }
                 },
-                onViewChangelog = { _, _ -> onOpenWhatsNew() }
+                onViewChangelog = { version, _ -> onOpenWhatsNew(version) }
             )
 
             // ── Update Channel (GitHub release builds only; F-Droid relies strictly on F-Droid repo releases) ──
@@ -594,6 +595,25 @@ private fun HazelStatusCard(
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = UpdateTokens.AccentOn
+                            )
+                        }
+                        // What's new in the version running now.
+                        Box(
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .height(40.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable { onViewChangelog(installedVersion, "") }
+                                .padding(horizontal = 14.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Changelog $installedVersion",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = UpdateTokens.AccentStrong,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }

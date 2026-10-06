@@ -93,6 +93,9 @@ enum class DocPage(
     CHANGELOG(R.string.docs_changelog, Icons.Filled.History, "$REPO/blob/main/CHANGELOG.md", "$RAW/CHANGELOG.md"),
     LICENSE(R.string.docs_license, Icons.Filled.Gavel, "$REPO/blob/main/LICENSE", "$RAW/LICENSE", plain = true);
 
+    /** [url], a link to this file on the main branch, pointed at release [tag] instead. */
+    fun atTag(url: String, tag: String): String = url.replace("/main/", "/$tag/")
+
     companion object {
         fun fromName(name: String?): DocPage = entries.firstOrNull { it.name == name } ?: GUIDE
     }
@@ -183,7 +186,13 @@ fun DocumentationScreen(
 @Composable
 fun DocumentationPageScreen(
     page: DocPage,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    /**
+     * A release whose copy of the page to show, such as "1.1.12", for What's new opened from
+     * the update screen. Its tagged copy is read first; one with no release of its own (a
+     * nightly build) falls back to the current page.
+     */
+    version: String? = null
 ) {
     val context = LocalContext.current
     val scheme = MaterialTheme.colorScheme
@@ -193,18 +202,20 @@ fun DocumentationPageScreen(
 
     // A repository file is read directly and drawn here; a site page, or a file that could
     // not be read, is loaded as the page itself.
+    val tag = version?.trim()?.removePrefix("v")?.removePrefix("V")?.takeIf { it.isNotBlank() }?.let { "v$it" }
     fun load(view: WebView) {
         val raw = page.rawUrl ?: return view.loadUrl(page.url)
         scope.launch {
-            val text = fetchText(raw)
+            val tagged = tag?.let { fetchText(page.atTag(raw, it))?.let { text -> text to page.atTag(page.url, it) } }
+            val (text, url) = tagged ?: (fetchText(raw) to page.url)
             if (text == null) {
-                view.loadUrl(page.url)
+                view.loadUrl(url)
             } else {
                 val html = MarkdownLite.page(
                     text, css(background), css(scheme.onBackground), css(scheme.onSurfaceVariant), css(scheme.primary),
                     plain = page.plain
                 )
-                view.loadDataWithBaseURL(page.url, html, "text/html", "utf-8", null)
+                view.loadDataWithBaseURL(url, html, "text/html", "utf-8", null)
             }
         }
     }
