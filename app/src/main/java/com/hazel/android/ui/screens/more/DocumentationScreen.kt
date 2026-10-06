@@ -224,6 +224,7 @@ fun DocumentationPageScreen(
     var failed by remember { mutableStateOf(false) }
     var currentUrl by remember { mutableStateOf(page.url) }
     var webView by remember { mutableStateOf<WebView?>(null) }
+    val scroll = remember { com.hazel.android.ui.components.WebScrollState() }
 
     fun leave() {
         val view = webView
@@ -264,7 +265,7 @@ fun DocumentationPageScreen(
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { viewContext ->
-                    WebView(viewContext).apply {
+                    com.hazel.android.ui.components.TrackedWebView(viewContext, scroll).apply {
                         setBackgroundColor(background.toArgb())
                         settings.javaScriptEnabled = true
                         settings.domStorageEnabled = true
@@ -308,6 +309,14 @@ fun DocumentationPageScreen(
                     }
                 }
             )
+
+            if (!loading && !failed) {
+                com.hazel.android.ui.components.FastScrollbar(
+                    scroll,
+                    Modifier.align(Alignment.TopEnd),
+                    androidx.compose.foundation.layout.PaddingValues(top = 8.dp, bottom = 24.dp)
+                )
+            }
 
             // Until the page has drawn, the shape loader stands over it, so the screen is
             // never a blank sheet while the page or file is fetched.
