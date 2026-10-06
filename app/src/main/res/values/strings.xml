@@ -531,6 +531,10 @@
     <string name="notification_run_failed_title">Some downloads failed</string>
     <string name="notification_run_finished_title">Downloads finished</string>
     <string name="notification_run_summary">Downloaded: %1$d · Failed: %2$d · Cancelled: %3$d</string>
+    <string name="download_percent_downloaded">%1$d%% downloaded</string>
+    <string name="queue_adjust_restart_title">Start again?</string>
+    <string name="queue_adjust_restart_body">This change starts the download again from the beginning. What it has fetched so far is discarded.</string>
+    <string name="queue_adjust_restart_confirm">Start again</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">Close</string>

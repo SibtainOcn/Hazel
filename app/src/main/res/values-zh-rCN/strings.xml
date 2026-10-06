@@ -455,6 +455,10 @@
     <string name="notification_run_failed_title">部分下载失败</string>
     <string name="notification_run_finished_title">下载已结束</string>
     <string name="notification_run_summary">已下载：%1$d · 失败：%2$d · 已取消：%3$d</string>
+    <string name="download_percent_downloaded">已下载 %1$d%%</string>
+    <string name="queue_adjust_restart_title">重新开始？</string>
+    <string name="queue_adjust_restart_body">此更改会让下载从头重新开始，已下载的部分将被丢弃。</string>
+    <string name="queue_adjust_restart_confirm">重新开始</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">关闭</string>

@@ -92,11 +92,12 @@ private val LogButtonPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp
 /** A true red, bright enough to read on dark artwork in either theme. */
 private val ErrorOnArtwork = Color(0xFFFF5A52)
 
-/** A link waiting its turn, with the choice it will download as. */
+/** A link waiting its turn, with the choice it will download as. Tapping it shows its details. */
 @Composable
 fun QueuedCard(
     item: QueuedDownload,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    onOpen: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -107,6 +108,10 @@ fun QueuedCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
+                .clickable(
+                    onClickLabel = stringResource(R.string.format_sheet_section_details),
+                    onClick = onOpen
+                )
         ) {
             Artwork(item.thumbnail, item.hasVideo)
             Box(modifier = Modifier.fillMaxSize().background(ArtworkScrim))

@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
@@ -96,6 +97,9 @@ fun CornerTag(
  * streams are fetched, the line from Fetch fills with the transfer, the percentage sits beside
  * Fetch, and how much of how much has arrived and how long is left sit under the
  * track; after that the track moves through the stages yt-dlp runs. Pausing, resuming and cancelling are in the corner menu.
+ *
+ * A paused card resumes when tapped, its pause sign included, and its pill says how much is
+ * already in hand. [onDetails], where given, adds Details to the corner menu.
  */
 @Composable
 fun MediaCard(
@@ -114,7 +118,8 @@ fun MediaCard(
     onOpenSheet: () -> Unit = {},
     onCancel: () -> Unit = {},
     onPause: () -> Unit = {},
-    onResume: () -> Unit = {}
+    onResume: () -> Unit = {},
+    onDetails: (() -> Unit)? = null
 ) {
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -139,8 +144,14 @@ fun MediaCard(
                 .aspectRatio(16f / 9f)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .then(
-                    if (isDownloading) Modifier
-                    else Modifier.clickable(onClick = onOpenSheet)
+                    when {
+                        isDownloading -> Modifier
+                        isPaused -> Modifier.clickable(
+                            onClickLabel = stringResource(R.string.download_resume),
+                            onClick = onResume
+                        )
+                        else -> Modifier.clickable(onClick = onOpenSheet)
+                    }
                 )
         ) {
             // Sources without artwork simply show the placeholder glyph.
@@ -295,6 +306,16 @@ fun MediaCard(
                                 }
                             )
                         }
+                        onDetails?.let { open ->
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.format_sheet_section_details)) },
+                                leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
+                                onClick = {
+                                    menuOpen = false
+                                    open()
+                                }
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.download_cancel)) },
                             leadingIcon = { Icon(Icons.Filled.Close, contentDescription = null) },
@@ -311,7 +332,13 @@ fun MediaCard(
             // are moving, or held there while paused. How far along is on the track itself.
             if (transferring || isPaused) {
                 val figures = buildList {
-                    if (isPaused) add(stringResource(R.string.download_paused))
+                    if (isPaused) {
+                        add(stringResource(R.string.download_paused))
+                        // From the figure itself rather than the animation towards it, and
+                        // only once something has arrived: "0% downloaded" says nothing.
+                        val percent = (progress * 100f).toInt().coerceIn(0, 99)
+                        if (percent >= 1) add(stringResource(R.string.download_percent_downloaded, percent))
+                    }
                     if (totalBytes > 0) {
                         val done = (totalBytes * animatedProgress).toLong().coerceAtLeast(1L)
                         add("${formatFileSize(done)} / ${formatFileSize(totalBytes)}")

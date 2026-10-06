@@ -49,6 +49,9 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.flow.update
 import java.io.File
 
+/** What adjusting a queued link from its sheet came to. */
+enum class QueueAdjust { APPLIED, UNCHANGED, NEEDS_CONFIRM, GONE }
+
 /** Where one link has got to while a batch is running. */
 enum class BatchState { QUEUED, DOWNLOADING, PAUSED, DONE, FAILED }
 
@@ -392,6 +395,13 @@ class DownloadViewModel : ViewModel() {
      * well, so a queue held when the app went away is still held when it comes back.
      */
     @Volatile private var holdRun = false
+
+    /**
+     * The link whose download is being stopped to start over with a new choice, from its own
+     * sheet. The run throws away what that download fetched, and does not count it settled,
+     * and takes it again from the head of the queue, where the new choice is waiting.
+     */
+    @Volatile private var restartUrl: String? = null
 
     /**
      * The folder the download in hand works in: one per link, under the temporary downloads
@@ -1423,6 +1433,7 @@ class DownloadViewModel : ViewModel() {
 
                 isCancelled = false
                 isPaused = false
+                if (restartUrl == plan.info.url) restartUrl = null
                 downloadIsVideo = plan.format.hasVideo
                 markBatch(plan.info.url, BatchState.DOWNLOADING, title = plan.title)
 
@@ -1482,7 +1493,8 @@ class DownloadViewModel : ViewModel() {
                         // payload, threw away the part file and started the download again,
                         // which is the one thing a pause must not do.
                         val replayed = InfoCache.infoJsonFor(plan.info.url) != null
-                        if (!replayed || isCancelled || isBatchCancelled || isPaused) throw e
+                        if (!replayed || isCancelled || isBatchCancelled || isPaused ||
+                            restartUrl == plan.info.url) throw e
 
                         InfoCache.invalidate(plan.info.url)
                         purgeFragments()
@@ -1499,6 +1511,13 @@ class DownloadViewModel : ViewModel() {
                                 plan.audioLanguage
                             )
                         )
+                    }
+
+                    if (restartUrl == plan.info.url && !isBatchCancelled) {
+                        restartUrl = null
+                        discardWorkDir()
+                        continue
+
                     }
 
                     if (isPaused) {
@@ -1528,6 +1547,11 @@ class DownloadViewModel : ViewModel() {
                         com.hazel.android.data.FailedDownloadRepository.removeByUrl(app, plan.info.url)
                     }
                 } catch (_: CancellationException) {
+                    if (restartUrl == plan.info.url && !isBatchCancelled) {
+                        restartUrl = null
+                        discardWorkDir()
+                        continue
+                    }
                     if (isPaused) {
                         holdForResume(next)
                         pausedNow = true
@@ -1550,6 +1574,11 @@ class DownloadViewModel : ViewModel() {
                     markBatch(plan.info.url, BatchState.FAILED, "Cancelled")
                     break
                 } catch (e: Exception) {
+                    if (restartUrl == plan.info.url && !isBatchCancelled) {
+                        restartUrl = null
+                        discardWorkDir()
+                        continue
+                    }
                     if (isPaused) {
                         holdForResume(next)
                         pausedNow = true
@@ -1970,6 +1999,112 @@ class DownloadViewModel : ViewModel() {
             doneBytes = 0L,
             totalBytes = 0L
         )
+    }
+
+    /**
+     * Changes what a link still in the queue will download as, from its own sheet.
+     *
+     * A link still waiting takes the new choice as it is; nothing of it is on disk yet. One
+     * that has fetched something starts over for a change to its streams, since what it
+     * fetched belongs to the old choice: a paused link loses its part file, and the download
+     * in progress is stopped and taken again from the head of the queue. Neither happens
+     * unless [confirmed]: without it, such a change answers [QueueAdjust.NEEDS_CONFIRM] and
+     * nothing is touched, so the sheet can ask first. The download in progress starts over
+     * for any change, as what it is saving was fixed when it started.
+     */
+    suspend fun adjustQueued(
+        url: String,
+        plan: DownloadPlan,
+        options: DownloadOptions,
+        treeUri: String,
+        confirmed: Boolean = false
+    ): QueueAdjust {
+        val app = HazelApp.instance
+        val running = _state.value.isDownloading && _state.value.active?.url == url &&
+            _state.value.batch.none { it.url == url && it.state == BatchState.PAUSED }
+
+        val saved = runCatching { DownloadQueueRepository.load(app) }
+            .getOrDefault(emptyList())
+            .firstOrNull { it.url == url }
+        val current = synchronized(queue) { queue.firstOrNull { it.url == url } } ?: saved
+            ?: return QueueAdjust.GONE
+        val wanted = plan.toQueued(options, treeUri).copy(paused = current.paused)
+        if (wanted == current) return QueueAdjust.UNCHANGED
+
+        val streamsChange = wanted.selector != current.selector || wanted.sort != current.sort ||
+            wanted.mergeAudioSelector != current.mergeAudioSelector ||
+            wanted.options.sectionStart != current.options.sectionStart ||
+            wanted.options.sectionEnd != current.options.sectionEnd
+        val startsOver = running || (current.paused && streamsChange)
+        if (startsOver && !confirmed) return QueueAdjust.NEEDS_CONFIRM
+
+        if (running) {
+            // At the head of the queue with the new choice, then the engine is stopped; the
+            // run sees the request, drops what was fetched and takes this next.
+            val fresh = wanted.copy(paused = false)
+            synchronized(queue) {
+                queue.removeAll { it.url == url }
+                queue.addFirst(fresh)
+            }
+            runCatching { DownloadQueueRepository.replace(app, fresh) }
+            restartUrl = url
+            withContext(Dispatchers.IO) {
+                try {
+                    YoutubeDL.getInstance().destroyProcessById(processId)
+                } catch (_: Exception) { /* finished meanwhile: it is taken again all the same */ }
+            }
+        } else {
+            synchronized(queue) {
+                val index = queue.indexOfFirst { it.url == url }
+                if (index >= 0) queue[index] = wanted
+            }
+            runCatching { DownloadQueueRepository.replace(app, wanted) }
+            if (startsOver) {
+                withContext(Dispatchers.IO) {
+                    runCatching { workDirsFor(url).forEach { it.deleteRecursively() } }
+                }
+            }
+        }
+        _state.update { s -> s.copy(
+            batch = s.batch.map { if (it.url == url) it.copy(title = wanted.title) else it }
+        ) }
+        return QueueAdjust.APPLIED
+    }
+
+    /**
+     * Starts one paused link again, from the part file it left.
+     *
+     * A card's Resume, as its Pause is a card's own: the link goes to the head of the queue
+     * and the run picks it up, joining one in flight or starting one. Other links paused one
+     * by one stay paused. A queue held by Pause all moves again, since asking for a download
+     * is asking for the queue to move.
+     */
+    fun resumeItem(url: String) {
+        val app = HazelApp.instance
+        releaseHold()
+        downloadScope.launch {
+            val saved = runCatching { DownloadQueueRepository.load(app) }
+                .getOrDefault(emptyList())
+                .firstOrNull { it.url == url }
+            // Only a link that is paused: one downloading or waiting is already on its way,
+            // and putting it at the head again would download it twice.
+            val item = synchronized(queue) {
+                val index = queue.indexOfFirst { it.url == url }
+                when {
+                    index >= 0 && queue[index].paused ->
+                        queue.removeAt(index).copy(paused = false).also { queue.addFirst(it) }
+                    index < 0 && saved?.paused == true ->
+                        saved.copy(paused = false).also { queue.addFirst(it) }
+                    else -> null
+                }
+            } ?: return@launch
+
+            runCatching { DownloadQueueRepository.setPaused(app, url, false) }
+            markBatch(url, BatchState.QUEUED, title = item.title)
+            val stillPaused = synchronized(queue) { queue.any { it.paused } }
+            if (!stillPaused) DownloadNotificationHelper.cancelPaused(app)
+            runQueue(app, resumed = !_state.value.isDownloading)
+        }
     }
 
     /**
@@ -2704,14 +2839,7 @@ class DownloadViewModel : ViewModel() {
      */
     private fun fractionOnDisk(): Float {
         if (expectedTotalBytes <= 0L) return 0f
-        val onDisk = try {
-            downloadDir.listFiles()
-                ?.filter { it.isFile && !it.name.endsWith(".ytdl") }
-                ?.sumOf { it.length() }
-                ?: 0L
-        } catch (_: Exception) {
-            0L
-        }
+        val onDisk = bytesIn(downloadDir)
         if (onDisk <= 0L) return 0f
 
         // Capped short of the end: a floor of one would leave the bar full for the whole of
@@ -3142,4 +3270,30 @@ internal data class RunCounts(val total: Int, val done: Int, val failed: Int, va
             cancelled = batch.count { it.state == BatchState.FAILED && it.error == CANCELLED_REASON }
         )
     }
+}
+
+/**
+ * The bytes a download's work folder holds, its engine bookkeeping aside. Zero for a folder
+ * that is missing or cannot be read: a figure for a progress readout, never a reason to fail.
+ */
+internal fun bytesIn(dir: File): Long = try {
+    dir.listFiles()
+        ?.filter { it.isFile && !it.name.endsWith(".ytdl") }
+        ?.sumOf { it.length() }
+        ?: 0L
+} catch (_: Exception) {
+    0L
+}
+
+/**
+ * How much of a paused link is already on disk, from its part files, for a card that has no
+ * run behind it to say: one paused by an earlier session, or paused while another runs.
+ * Capped short of whole, as the run's own floor is. Zero when the size is not known. Reads
+ * the disk, so it is called off the main thread.
+ */
+internal fun pausedFraction(item: QueuedDownload): Float {
+    val expected = item.fileSizeBytes + item.mergeAudioSizeBytes
+    if (expected <= 0L) return 0f
+    val onDisk = workDirsFor(item.url).sumOf { bytesIn(it) }
+    return (onDisk.toFloat() / expected).coerceIn(0f, 0.99f)
 }

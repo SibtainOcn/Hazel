@@ -455,6 +455,10 @@
     <string name="notification_run_failed_title">一部のダウンロードに失敗しました</string>
     <string name="notification_run_finished_title">ダウンロードが終了しました</string>
     <string name="notification_run_summary">完了: %1$d · 失敗: %2$d · キャンセル: %3$d</string>
+    <string name="download_percent_downloaded">%1$d%% ダウンロード済み</string>
+    <string name="queue_adjust_restart_title">最初からやり直しますか？</string>
+    <string name="queue_adjust_restart_body">この変更でダウンロードは最初からやり直しになります。これまでに取得した分は破棄されます。</string>
+    <string name="queue_adjust_restart_confirm">やり直す</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">閉じる</string>

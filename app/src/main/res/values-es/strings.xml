@@ -469,6 +469,10 @@
     <string name="notification_run_failed_title">Algunas descargas fallaron</string>
     <string name="notification_run_finished_title">Descargas terminadas</string>
     <string name="notification_run_summary">Descargadas: %1$d · Fallidas: %2$d · Canceladas: %3$d</string>
+    <string name="download_percent_downloaded">%1$d%% descargado</string>
+    <string name="queue_adjust_restart_title">¿Empezar de nuevo?</string>
+    <string name="queue_adjust_restart_body">Este cambio vuelve a empezar la descarga desde el principio. Lo descargado hasta ahora se descarta.</string>
+    <string name="queue_adjust_restart_confirm">Empezar de nuevo</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">Cerrar</string>

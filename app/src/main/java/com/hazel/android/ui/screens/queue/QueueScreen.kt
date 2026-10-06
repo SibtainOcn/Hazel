@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -79,7 +80,10 @@ import com.hazel.android.download.DownloadViewModel
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.ui.components.MediaCard
 import com.hazel.android.util.copyToClipboard
+import com.hazel.android.download.pausedFraction
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** The queue screen's tabs, in the order a download passes through them. */
 private enum class QueueTab(val labelRes: Int) {
@@ -144,6 +148,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
     var confirmClearFailed by remember { mutableStateOf(false) }
     var confirmRemovePicked by remember { mutableStateOf<Set<Long>?>(null) }
     var viewLog by remember { mutableStateOf<FailedDownload?>(null) }
+    // The queued link whose own sheet is open, from a card's Details or a tap on a waiting card.
+    var detailsFor by remember { mutableStateOf<QueuedDownload?>(null) }
 
     // Failures picked for removal; null while not picking. Picking ends on leaving the
     // Failed tab or with Back, and drops failures that have gone from the list meanwhile.
@@ -313,6 +319,19 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     emptyText = stringResource(R.string.queue_empty_running)
                 ) { shrink ->
                     items(running, key = { "running_${it.info.url}" }) { item ->
+                        val inRun = item.isDownloading || item.info.url == state.active?.url
+                        val paused = item.batchItem?.state == BatchState.PAUSED
+                        // A paused link with no run behind it, paused by an earlier session or
+                        // while another runs: its part files say how far it got. Measured once,
+                        // off the main thread, and only for such a link.
+                        val onDisk by produceState(0f, item.info.url, paused, inRun) {
+                            val queued = item.queued
+                            if (paused && !inRun && queued != null) {
+                                value = withContext(Dispatchers.IO) {
+                                    runCatching { pausedFraction(queued) }.getOrDefault(0f)
+                                }
+                            }
+                        }
                         Box(modifier = Modifier.scrollShrink(shrink)) {
                         MediaCard(
                             info = item.info,
@@ -322,14 +341,17 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             processingStep = state.processingStep,
                             // A paused item keeps the figures it stopped at, so its card
                             // says how much is already in hand.
-                            progress = if (item.isDownloading || item.info.url == state.active?.url) state.progress else 0f,
-                            totalBytes = if (item.isDownloading || item.info.url == state.active?.url) state.totalBytes else 0L,
+                            progress = if (inRun) state.progress else onDisk,
+                            totalBytes = if (inRun) state.totalBytes
+                            else item.queued?.let { it.fileSizeBytes + it.mergeAudioSizeBytes } ?: 0L,
                             eta = if (item.isDownloading) state.eta else "",
                             batchItem = item.batchItem,
                             waitingForWifi = state.waitingForWifi,
                             onCancel = { downloadViewModel.cancelItem(item.info.url) },
                             onPause = downloadViewModel::pauseDownload,
-                            onResume = downloadViewModel::resumeDownload
+                            // A card's Resume is its own link's, as its Pause is.
+                            onResume = { downloadViewModel.resumeItem(item.info.url) },
+                            onDetails = item.queued?.let { queued -> { detailsFor = queued } }
                         )
                         }
                     }
@@ -344,7 +366,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                         Box(modifier = Modifier.scrollShrink(shrink)) {
                             QueuedCard(
                                 item = item,
-                                onRemove = { downloadViewModel.removeQueued(context, item.url) }
+                                onRemove = { downloadViewModel.removeQueued(context, item.url) },
+                                onOpen = { detailsFor = item }
                             )
                         }
                     }
@@ -372,6 +395,14 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                 }
             }
         }
+    }
+
+    detailsFor?.let { item ->
+        QueuedItemSheet(
+            item = item,
+            downloadViewModel = downloadViewModel,
+            onDismiss = { detailsFor = null }
+        )
     }
 
     viewLog?.let { item ->
@@ -451,7 +482,9 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
 private data class RunningItem(
     val info: MediaInfo,
     val isDownloading: Boolean,
-    val batchItem: BatchItem?
+    val batchItem: BatchItem?,
+    /** Its record in the queue, for its sheet and its size; null for a link with none. */
+    val queued: QueuedDownload? = null
 )
 
 /**
@@ -468,7 +501,12 @@ private fun runningItems(state: DownloadState, queue: List<QueuedDownload>): Lis
         if (state.isDownloading || batchItem?.state == BatchState.PAUSED) {
             // A paused link is never drawn as running, even in the moment between its pause
             // and the run letting go, so its stage track does not go on moving.
-            items += RunningItem(active, state.isDownloading && batchItem?.state != BatchState.PAUSED, batchItem)
+            items += RunningItem(
+                active,
+                state.isDownloading && batchItem?.state != BatchState.PAUSED,
+                batchItem,
+                queue.firstOrNull { it.url == active.url }
+            )
         }
     }
     queue.filter { it.paused && items.none { running -> running.info.url == it.url } }.forEach { held ->
@@ -483,7 +521,8 @@ private fun runningItems(state: DownloadState, queue: List<QueuedDownload>): Lis
                 audioFormats = emptyList()
             ),
             isDownloading = false,
-            batchItem = BatchItem(held.url, held.title, BatchState.PAUSED)
+            batchItem = BatchItem(held.url, held.title, BatchState.PAUSED),
+            queued = held
         )
     }
     return items

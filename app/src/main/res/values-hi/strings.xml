@@ -462,6 +462,10 @@
     <string name="notification_run_failed_title">कुछ डाउनलोड विफल रहे</string>
     <string name="notification_run_finished_title">डाउनलोड पूरे हुए</string>
     <string name="notification_run_summary">डाउनलोड हुए: %1$d · विफल: %2$d · रद्द: %3$d</string>
+    <string name="download_percent_downloaded">%1$d%% डाउनलोड हुआ</string>
+    <string name="queue_adjust_restart_title">फिर से शुरू करें?</string>
+    <string name="queue_adjust_restart_body">इस बदलाव से डाउनलोड शुरू से फिर शुरू होगा। अब तक जो डाउनलोड हुआ है, वह हटा दिया जाएगा।</string>
+    <string name="queue_adjust_restart_confirm">फिर से शुरू करें</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">बंद करें</string>

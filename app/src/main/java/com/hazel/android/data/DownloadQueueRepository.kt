@@ -161,6 +161,15 @@ object DownloadQueueRepository {
         context.dataStore.edit { prefs -> prefs.remove(QUEUE_KEY) }
     }
 
+    /** Puts [item] in place of the record with its address, if one is still there. */
+    suspend fun replace(context: Context, item: QueuedDownload) = withContext(Dispatchers.IO) {
+        context.dataStore.edit { prefs ->
+            val existing = decode(prefs[QUEUE_KEY])
+            if (existing.none { it.url == item.url }) return@edit
+            prefs[QUEUE_KEY] = encode(existing.map { if (it.url == item.url) item else it })
+        }
+    }
+
     /** Marks one link as stopped on purpose, or as owed again. */
     suspend fun setPaused(context: Context, url: String, paused: Boolean) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
