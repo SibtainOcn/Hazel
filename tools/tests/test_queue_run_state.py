@@ -411,9 +411,11 @@ def test_paused_card_and_sheet():
     check_true("A waiting card opens its link's sheet", "onOpen = { detailsFor = item }" in queue)
     check_true("A waiting card is tappable", ".clickable(" in block(cards, "fun QueuedCard(", 900))
     disk = block(queue, "val onDisk by produceState(", 600)
-    check_true("A paused link's progress is read from disk off the main thread, once",
+    check_true("A paused link's progress is read from disk off the main thread",
                "withContext(Dispatchers.IO)" in disk and "pausedFraction(queued)" in disk
-               and "paused && !inRun" in disk and "runCatching" in disk)
+               and "if (paused && queued != null)" in disk and "runCatching" in disk)
+    check_true("A paused card is never measured by the engine's per-stream line",
+               "val inRun = !paused &&" in queue)
 
     resume = function(vm, "fun resumeItem(url: String)")
     check_true("Resuming one link takes only a paused one",
@@ -454,6 +456,70 @@ def test_paused_card_and_sheet():
         check(f"{folder.name} has the paused and restart strings", len(found), 4)
 
 
+def test_resuming():
+    print("\n--- Suite 6: links resumed part way through ---")
+    # A model of Resume all over a queue: what is part way goes first, the rest keep order.
+    memory = [("p1", True), ("w1", False), ("w2", False)]
+    disk = [("p0", True), ("w3", False)]
+    part_way = [u for u, paused in memory + disk if paused]
+    waiting = [u for u, paused in memory + disk if not paused]
+    check("Resume all puts every part-way link first, then the rest in order",
+          part_way + waiting, ["p1", "p0", "w1", "w2", "w3"])
+
+    vm = VM.read_text(encoding="utf-8")
+    resume_all = function(vm, "fun resumeDownload()")
+    check_true("Resume all orders part-way links first",
+               "queue.addAll(partWay + waiting)" in resume_all
+               and "fromDisk.filter { it.paused }" in resume_all)
+    check_true("Resume all marks them as resuming", "resuming = s.resuming + resumed" in resume_all)
+    check_true("A card's Resume marks its link as resuming",
+               "resuming = s.resuming + url" in function(vm, "fun resumeItem(url: String)"))
+    restore = function(vm, "private fun restoreQueue()")
+    check_true("After a restart, a link with parts on disk goes first",
+               "val owed = partWay + (unsorted - partWay.toSet())" in restore)
+    check_true("The storage roots are asked for once on restore",
+               "SdCards.workRoots()" in restore and "workDirsFor(" not in restore)
+    check_true("A link leaves the resuming set once it is anything but waiting",
+               "resuming = if (state == BatchState.QUEUED) s.resuming else s.resuming - url" in function(vm, "private fun markBatch("))
+    check_true("Clearing the screen keeps the resuming set",
+               "resuming = resuming" in function(vm, "internal fun DownloadState.keepingRun(running: Boolean)"))
+    hold = function(vm, "private fun holdForResume(")
+    check_true("A pause keeps the whole size: finished streams plus the one it was on",
+               "pausedTotal(downloadDir, reported)" in hold and "reported > 0L" in hold)
+    check_true("A pause writes the size down with the record", "DownloadQueueRepository.replace(app, held)" in hold)
+
+    queue = QUEUE.read_text(encoding="utf-8")
+    running = function(queue, "private fun runningItems(")
+    check_true("A resuming link stays on the Running tab",
+               "!it.paused && it.url in state.resuming" in running)
+    check_true("It comes after the download in hand and before the paused ones",
+               running.find("state.active?.let") < running.find("it.url in state.resuming") < running.find("queue.filter { it.paused"))
+    check_true("A resuming card opens its link's sheet", "onOpenSheet = { item.queued?.let { detailsFor = it } }" in queue)
+    receiver = (SRC / "download/DownloadActionReceiver.kt").read_text(encoding="utf-8")
+    check_true("The notification's Resume resumes everything, part-way links first",
+               "resumeDownload()" in receiver)
+
+
+def test_failed_card():
+    print("\n--- Suite 7: a failed card's actions ---")
+    cards = (SRC / "ui/screens/queue/QueueCards.kt").read_text(encoding="utf-8")
+    queue = QUEUE.read_text(encoding="utf-8")
+    actions = block(cards, "if (!picking) Row(", 900)
+    check_true("The log button says Logs", "R.string.history_failed_logs" in actions
+               and "R.string.history_failed_error_log" not in actions)
+    check_true("The log sheet keeps its own title", "stringResource(R.string.history_failed_error_log)" in cards)
+    check_true("The link button comes before Logs, named as the sheets name theirs",
+               0 <= actions.find("Icons.Filled.Link") < actions.find("R.string.history_failed_logs")
+               and "R.string.sheet_link_options" in actions)
+    check_true("It offers the failed link through the app's one link dialog",
+               "onLink = { linkFor = item.url }" in queue
+               and "LinkOptionsDialog(\n            links = listOf(url)" in queue)
+    for folder in sorted(p for p in RES.iterdir() if p.is_dir() and p.name.startswith("values")
+                         and (p / "strings.xml").exists()):
+        check_true(f"{folder.name} has Logs",
+                   'name="history_failed_logs"' in (folder / "strings.xml").read_text(encoding="utf-8"))
+
+
 def main():
     print("=" * 70)
     print("  Queue run state & run summary harness")
@@ -464,6 +530,8 @@ def main():
     test_screens()
     test_pause()
     test_paused_card_and_sheet()
+    test_resuming()
+    test_failed_card()
     print(f"\n  Summary: {PASS_COUNT}/{PASS_COUNT + FAIL_COUNT} tests PASSED, {FAIL_COUNT} FAILED")
     return 0 if FAIL_COUNT == 0 else 1
 

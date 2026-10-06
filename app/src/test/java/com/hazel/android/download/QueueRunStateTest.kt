@@ -225,4 +225,44 @@ class QueueRunStateTest {
         val gone = java.io.File(System.getProperty("java.io.tmpdir"), "hazel_missing_${System.nanoTime()}")
         assertEquals(0L, bytesIn(gone))
     }
+
+    // ── pausedTotal ──
+
+    @Test
+    fun `a pause during the audio adds the finished video to the audio's total`() {
+        val dir = kotlin.io.path.createTempDirectory("hazel_paused").toFile()
+        try {
+            // The video stream is finished; the audio is part way, and the engine's last
+            // line reported only the audio's total.
+            java.io.File(dir, "song.f616.mp4").writeBytes(ByteArray(5_000))
+            java.io.File(dir, "song.f251.webm.part").writeBytes(ByteArray(100))
+            java.io.File(dir, "song.f251.webm.ytdl").writeBytes(ByteArray(10))
+            assertEquals(5_000L + 400L, pausedTotal(dir, reported = 400L))
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `a pause during the first stream is its reported total`() {
+        val dir = kotlin.io.path.createTempDirectory("hazel_paused").toFile()
+        try {
+            java.io.File(dir, "song.f616.mp4.part").writeBytes(ByteArray(1_000))
+            java.io.File(dir, "song.f616.mp4.part-Frag3.part").writeBytes(ByteArray(200))
+            assertEquals(4_000L, pausedTotal(dir, reported = 4_000L))
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `a total is never less than what is on disk`() {
+        val dir = kotlin.io.path.createTempDirectory("hazel_paused").toFile()
+        try {
+            java.io.File(dir, "song.f616.mp4.part").writeBytes(ByteArray(3_000))
+            assertEquals(3_000L, pausedTotal(dir, reported = 1_000L))
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
 }
