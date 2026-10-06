@@ -63,7 +63,7 @@ fun QueuedItemSheet(
 
     var options by remember(item) { mutableStateOf(item.options) }
     var pending by remember { mutableStateOf<PendingAdjust?>(null) }
-    val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
+    val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }.collectAsState(initial = SaveDirs())
     val pickSaveDir = rememberSaveDirPicker(saveDirs)
     // The folders as the sheet opened, so a folder picked here can be told from one that
     // was already the default.
