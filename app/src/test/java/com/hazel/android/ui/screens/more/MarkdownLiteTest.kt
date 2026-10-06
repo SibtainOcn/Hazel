@@ -44,4 +44,13 @@ class MarkdownLiteTest {
             MarkdownLite.plainText(text)
         )
     }
+
+    @Test
+    fun `the changelog opens on its first section`() {
+        val md = "# Changelog\n\nAll notable changes.\n\n## [Unreleased]\n### Added\n- one"
+        val html = MarkdownLite.toHtml(MarkdownLite.fromFirstSection(md))
+        assertTrue(html.startsWith("<h2>[Unreleased]</h2>"))
+        assertTrue("notable" !in html)
+        assertEquals("no sections", MarkdownLite.fromFirstSection("no sections"))
+    }
 }

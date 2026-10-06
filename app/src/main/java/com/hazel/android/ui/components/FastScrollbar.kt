@@ -1,5 +1,10 @@
 package com.hazel.android.ui.components
 
+import androidx.compose.runtime.Stable
+import android.webkit.WebView
+import android.graphics.Canvas
+import android.content.Context
+import android.annotation.SuppressLint
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -80,8 +85,52 @@ fun FastScrollbar(
 ) {
     val scrollable by remember(state) { derivedStateOf { state.canScrollBackward || state.canScrollForward } }
     if (!scrollable) return
-
     val scope = rememberCoroutineScope()
+    val listFraction by remember(state) { derivedStateOf { state.scrollFraction() } }
+    ScrollThumb(
+        fraction = { listFraction },
+        moving = state.isScrollInProgress,
+        gestureKey = state,
+        onGrab = { scope.launch { state.stopScroll() } },
+        onDrag = { state.scrollToFraction(it) },
+        modifier = modifier,
+        trackPadding = trackPadding
+    )
+}
+
+/**
+ * The same scrollbar for a page in a [TrackedWebView], in place of the web view's own bar,
+ * which is only drawn and cannot be held.
+ */
+@Composable
+fun FastScrollbar(
+    state: WebScrollState,
+    modifier: Modifier = Modifier,
+    trackPadding: PaddingValues = PaddingValues(vertical = 8.dp)
+) {
+    if (state.max <= 0) return
+    ScrollThumb(
+        fraction = { (state.offset.toFloat() / state.max).coerceIn(0f, 1f) },
+        moving = state.moving,
+        gestureKey = state,
+        onGrab = { state.stop() },
+        onDrag = { state.scrollToFraction(it) },
+        modifier = modifier,
+        trackPadding = trackPadding
+    )
+}
+
+/** The thumb and its gesture, for any scrolling content. */
+@Composable
+private fun ScrollThumb(
+    fraction: () -> Float,
+    moving: Boolean,
+    gestureKey: Any,
+    onGrab: () -> Unit,
+    onDrag: (Float) -> Unit,
+    modifier: Modifier,
+    trackPadding: PaddingValues
+) {
     val density = LocalDensity.current
     val thumbPx = with(density) { THUMB_HEIGHT.toPx() }
 
@@ -89,13 +138,11 @@ fun FastScrollbar(
     var held by remember { mutableStateOf(false) }
     // Where the finger has the thumb while it is held; the list's own position otherwise.
     var heldFraction by remember { mutableFloatStateOf(0f) }
-    val listFraction by remember(state) { derivedStateOf { state.scrollFraction() } }
-    val fraction = if (held) heldFraction else listFraction
 
     var active by remember { mutableStateOf(false) }
-    val moving = state.isScrollInProgress || held
-    LaunchedEffect(moving) {
-        if (moving) {
+    val lit = moving || held
+    LaunchedEffect(lit) {
+        if (lit) {
             active = true
         } else {
             delay(REST_DELAY_MS)
@@ -138,26 +185,26 @@ fun FastScrollbar(
         Box(
             modifier = Modifier
                 .offset {
-                    val top = fraction * travel
+                    val top = (if (held) heldFraction else fraction()) * travel
                     placedTop[0] = top
                     IntOffset(0, top.roundToInt())
                 }
                 .size(TOUCH_WIDTH, THUMB_HEIGHT)
                 .then(
                     if (travel <= 0f) Modifier
-                    else Modifier.pointerInput(state, travel) {
+                    else Modifier.pointerInput(gestureKey, travel) {
                         awaitEachGesture {
                             val down = awaitFirstDown()
                             down.consume()
                             val grab = down.position.y
-                            heldFraction = listFraction
+                            heldFraction = fraction()
                             held = true
-                            scope.launch { state.stopScroll() }
+                            onGrab()
                             drag(down.id) { change ->
                                 change.consume()
                                 val y = placedTop[0] + change.position.y - grab
                                 heldFraction = (y / travel).coerceIn(0f, 1f)
-                                state.scrollToFraction(heldFraction)
+                                onDrag(heldFraction)
                             }
                             held = false
                         }
@@ -213,4 +260,71 @@ private fun LazyListState.scrollToFraction(fraction: Float) {
     val target = fraction * estimatedMaxScroll(average)
     val index = (target / average).toInt().coerceIn(0, count - 1)
     requestScrollToItem(index, (target - index * average).roundToInt())
+}
+
+/** Where a [TrackedWebView] is scrolled to, for its [FastScrollbar]. */
+@Stable
+class WebScrollState {
+    /** How far down the page is, in pixels. */
+    var offset by mutableIntStateOf(0)
+        internal set
+
+    /** How far the page can scroll in all; zero for a page that fits. */
+    var max by mutableIntStateOf(0)
+        internal set
+
+    /** True while the page moves, and for a moment after. */
+    var moving by mutableStateOf(false)
+        internal set
+
+    internal var view: TrackedWebView? = null
+
+    internal fun stop() {
+        view?.flingScroll(0, 0)
+    }
+
+    internal fun scrollToFraction(fraction: Float) {
+        view?.let { it.scrollTo(it.scrollX, (fraction * max).roundToInt()) }
+    }
+}
+
+/** A web view that reports its scroll to [scroll], and draws no bar of its own. */
+@SuppressLint("ViewConstructor")
+class TrackedWebView(context: Context, private val scroll: WebScrollState) : WebView(context) {
+    private val settle = Runnable { scroll.moving = false }
+
+    init {
+        isVerticalScrollBarEnabled = false
+        scroll.view = this
+    }
+
+    private fun note() {
+        val max = (computeVerticalScrollRange() - computeVerticalScrollExtent()).coerceAtLeast(0)
+        if (scroll.max != max) scroll.max = max
+        if (scroll.offset != scrollY) scroll.offset = scrollY
+    }
+
+    override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
+        super.onScrollChanged(l, t, oldl, oldt)
+        note()
+        scroll.moving = true
+        removeCallbacks(settle)
+        postDelayed(settle, SETTLE_MS)
+    }
+
+    // The page's length changes as it loads and lays out, with no scroll to report it.
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        note()
+    }
+
+    override fun destroy() {
+        removeCallbacks(settle)
+        if (scroll.view === this) scroll.view = null
+        super.destroy()
+    }
+
+    private companion object {
+        const val SETTLE_MS = 150L
+    }
 }

@@ -1,5 +1,7 @@
 package com.hazel.android.ui.navigation
 
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import androidx.compose.foundation.layout.Row
@@ -371,10 +373,14 @@ fun AppNavigation(
                     onOpen = { page -> navController.navigate("docs/${page.name}") }
                 )
             }
-            composable("docs/{page}") { entry ->
+            composable(
+                "docs/{page}?version={version}",
+                arguments = listOf(navArgument("version") { type = NavType.StringType; nullable = true; defaultValue = null })
+            ) { entry ->
                 com.hazel.android.ui.screens.more.DocumentationPageScreen(
                     page = com.hazel.android.ui.screens.more.DocPage.fromName(entry.arguments?.getString("page")),
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    version = entry.arguments?.getString("version")
                 )
             }
             composable("cookies") {
@@ -425,7 +431,14 @@ fun AppNavigation(
                 )
             }
             composable("hazel_update") {
-                HazelUpdateScreen(onBack = { navController.popBackStack() })
+                HazelUpdateScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenWhatsNew = { version ->
+                        navController.navigate(
+                            "docs/${com.hazel.android.ui.screens.more.DocPage.CHANGELOG.name}?version=${android.net.Uri.encode(version)}"
+                        )
+                    }
+                )
             }
             composable("ytdlp_update") {
                 YtDlpUpdateScreen(onBack = { navController.popBackStack() })
