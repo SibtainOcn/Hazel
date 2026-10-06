@@ -320,6 +320,7 @@
     <string name="fetch_invalid_url">链接无效：必须以 http:// 或 https:// 开头</string>
     <string name="history_empty_failed">没有失败的下载</string>
     <string name="history_failed_error_log">错误日志</string>
+    <string name="history_failed_logs">日志</string>
     <string name="history_failed_copy_log">复制日志</string>
     <string name="history_failed_log_copied">错误日志已复制到剪贴板</string>
     <string name="history_failed_retry">重试</string>

@@ -340,6 +340,7 @@
     <string name="fetch_invalid_url">Invalid link: it must start with http:// or https://</string>
     <string name="history_empty_failed">No failed downloads</string>
     <string name="history_failed_error_log">Error Log</string>
+    <string name="history_failed_logs">Logs</string>
     <string name="history_failed_copy_log">Copy Log</string>
     <string name="history_failed_log_copied">Error log copied to clipboard</string>
     <string name="history_failed_retry">Retry</string>

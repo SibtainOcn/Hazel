@@ -332,6 +332,7 @@
     <string name="fetch_invalid_url">Недопустимая ссылка: она должна начинаться с http:// или https://</string>
     <string name="history_empty_failed">Нет загрузок с ошибками</string>
     <string name="history_failed_error_log">Журнал ошибок</string>
+    <string name="history_failed_logs">Журналы</string>
     <string name="history_failed_copy_log">Копировать журнал</string>
     <string name="history_failed_log_copied">Журнал ошибок скопирован в буфер обмена</string>
     <string name="history_failed_retry">Повторить</string>

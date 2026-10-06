@@ -320,6 +320,7 @@
     <string name="fetch_invalid_url">Tautan tidak valid: harus diawali http:// atau https://</string>
     <string name="history_empty_failed">Tidak ada unduhan yang gagal</string>
     <string name="history_failed_error_log">Catatan Kesalahan</string>
+    <string name="history_failed_logs">Log</string>
     <string name="history_failed_copy_log">Salin Catatan</string>
     <string name="history_failed_log_copied">Catatan kesalahan disalin ke papan klip</string>
     <string name="history_failed_retry">Coba lagi</string>

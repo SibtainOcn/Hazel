@@ -328,6 +328,7 @@
     <string name="fetch_invalid_url">Link inválido: deve começar com http:// ou https://</string>
     <string name="history_empty_failed">Nenhum download com falha</string>
     <string name="history_failed_error_log">Registro de erros</string>
+    <string name="history_failed_logs">Registros</string>
     <string name="history_failed_copy_log">Copiar registro</string>
     <string name="history_failed_log_copied">Registro de erros copiado para a área de transferência</string>
     <string name="history_failed_retry">Tentar novamente</string>

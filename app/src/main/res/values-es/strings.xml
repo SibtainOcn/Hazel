@@ -328,6 +328,7 @@
     <string name="fetch_invalid_url">Enlace no válido: debe empezar por http:// o https://</string>
     <string name="history_empty_failed">No hay descargas fallidas</string>
     <string name="history_failed_error_log">Registro de errores</string>
+    <string name="history_failed_logs">Registros</string>
     <string name="history_failed_copy_log">Copiar registro</string>
     <string name="history_failed_log_copied">Registro de errores copiado al portapapeles</string>
     <string name="history_failed_retry">Reintentar</string>

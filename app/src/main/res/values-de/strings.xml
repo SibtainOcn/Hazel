@@ -324,6 +324,7 @@
     <string name="fetch_invalid_url">Ungültiger Link: Er muss mit http:// oder https:// beginnen</string>
     <string name="history_empty_failed">Keine fehlgeschlagenen Downloads</string>
     <string name="history_failed_error_log">Fehlerprotokoll</string>
+    <string name="history_failed_logs">Protokolle</string>
     <string name="history_failed_copy_log">Protokoll kopieren</string>
     <string name="history_failed_log_copied">Fehlerprotokoll in Zwischenablage kopiert</string>
     <string name="history_failed_retry">Wiederholen</string>

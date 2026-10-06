@@ -148,6 +148,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
     var confirmClearFailed by remember { mutableStateOf(false) }
     var confirmRemovePicked by remember { mutableStateOf<Set<Long>?>(null) }
     var viewLog by remember { mutableStateOf<FailedDownload?>(null) }
+    // The failed link whose address is offered to copy or open.
+    var linkFor by remember { mutableStateOf<String?>(null) }
     // The queued link whose own sheet is open, from a card's Details or a tap on a waiting card.
     var detailsFor by remember { mutableStateOf<QueuedDownload?>(null) }
 
@@ -391,6 +393,7 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             onOpen = { if (picked != null) toggle(item.id) else reopen(item) },
                             onViewLog = { viewLog = item },
                             onRetry = { retry(item) },
+                            onLink = { linkFor = item.url },
                             onDismiss = { scope.launch { FailedDownloadRepository.remove(context, item.id) } }
                         )
                         }
@@ -405,6 +408,14 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
             item = item,
             downloadViewModel = downloadViewModel,
             onDismiss = { detailsFor = null }
+        )
+    }
+
+    linkFor?.let { url ->
+        com.hazel.android.ui.screens.download.LinkOptionsDialog(
+            links = listOf(url),
+            onFeedback = { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() },
+            onDismiss = { linkFor = null }
         )
     }
 

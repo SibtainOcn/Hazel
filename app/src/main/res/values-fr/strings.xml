@@ -328,6 +328,7 @@
     <string name="fetch_invalid_url">Lien non valide : il doit commencer par http:// ou https://</string>
     <string name="history_empty_failed">Aucun téléchargement échoué</string>
     <string name="history_failed_error_log">Journal d\'erreurs</string>
+    <string name="history_failed_logs">Journaux</string>
     <string name="history_failed_copy_log">Copier le journal</string>
     <string name="history_failed_log_copied">Journal d\'erreurs copié dans le presse-papiers</string>
     <string name="history_failed_retry">Réessayer</string>

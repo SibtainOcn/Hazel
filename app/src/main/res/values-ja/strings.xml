@@ -320,6 +320,7 @@
     <string name="fetch_invalid_url">無効なリンクです。http:// または https:// で始まる必要があります</string>
     <string name="history_empty_failed">失敗したダウンロードはありません</string>
     <string name="history_failed_error_log">エラーログ</string>
+    <string name="history_failed_logs">ログ</string>
     <string name="history_failed_copy_log">ログをコピー</string>
     <string name="history_failed_log_copied">エラーログをクリップボードにコピーしました</string>
     <string name="history_failed_retry">再試行</string>

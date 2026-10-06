@@ -324,6 +324,7 @@
     <string name="fetch_invalid_url">अमान्य लिंक: यह http:// या https:// से शुरू होना चाहिए</string>
     <string name="history_empty_failed">कोई विफल डाउनलोड नहीं है</string>
     <string name="history_failed_error_log">त्रुटि लॉग</string>
+    <string name="history_failed_logs">लॉग</string>
     <string name="history_failed_copy_log">लॉग कॉपी करें</string>
     <string name="history_failed_log_copied">त्रुटि लॉग क्लिपबोर्ड पर कॉपी किया गया</string>
     <string name="history_failed_retry">पुनः प्रयास करें</string>

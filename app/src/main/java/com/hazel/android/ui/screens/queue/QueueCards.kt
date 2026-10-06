@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
@@ -159,6 +160,8 @@ fun FailedCard(
     onOpen: () -> Unit,
     onViewLog: () -> Unit,
     onRetry: () -> Unit,
+    /** Offers the failed link's address to copy or open, as every link in the app does. */
+    onLink: () -> Unit = {},
     onDismiss: () -> Unit,
     onLongPress: () -> Unit = {},
     selected: Boolean? = null,
@@ -301,8 +304,14 @@ fun FailedCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     CardPill(
+                        icon = Icons.Filled.Link,
+                        label = null,
+                        description = stringResource(R.string.sheet_link_options),
+                        onClick = onLink
+                    )
+                    CardPill(
                         icon = Icons.Filled.Description,
-                        label = stringResource(R.string.history_failed_error_log),
+                        label = stringResource(R.string.history_failed_logs),
                         onClick = onViewLog
                     )
                     if (!retrying) CardPill(
@@ -463,12 +472,16 @@ private fun hostOf(url: String): String =
 private fun youtubeThumbnail(url: String): String? =
     UrlExtractor.extractYouTubeId(url)?.let { "https://i.ytimg.com/vi/$it/hqdefault.jpg" }
 
-/** A small action on the artwork, in the shape of the tags beside it. */
+/**
+ * A small action on the artwork, in the shape of the tags beside it. Without a [label] it is
+ * the icon alone, named for screen readers by [description].
+ */
 @Composable
 private fun CardPill(
     icon: ImageVector,
-    label: String,
+    label: String?,
     onClick: () -> Unit,
+    description: String? = null,
     background: Color = Color.Black.copy(alpha = 0.6f),
     foreground: Color = Color.White
 ) {
@@ -480,15 +493,17 @@ private fun CardPill(
             .padding(horizontal = 12.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(15.dp), tint = foreground)
-        Spacer(modifier = Modifier.width(5.dp))
-        Text(
-            label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = foreground,
-            maxLines = 1
-        )
+        Icon(icon, contentDescription = description, modifier = Modifier.size(15.dp), tint = foreground)
+        if (label != null) {
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = foreground,
+                maxLines = 1
+            )
+        }
     }
 }
 
