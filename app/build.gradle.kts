@@ -144,8 +144,8 @@ android {
         // The release's own code, with the architecture digits left at zero. This is what
         // the universal APK keeps and what a build with the splits turned off reports;
         // every per-architecture output replaces it further down.
-        versionCode = 1000
-        versionName = "1.1.12"
+        versionCode = 1100
+        versionName = "1.1.13"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {

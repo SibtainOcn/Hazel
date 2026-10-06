@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.13] - 2026-10-06
 ### Added
 - The home screen, the queue and the downloads list have a scrollbar on the right that can be held and dragged to move through a long list. It rests as a faint thin bar, lights up in a soft shade of the accent while the list moves, and takes the full accent while held.
 - Failed downloads can be picked and removed together: long-press a failed card, or choose Select failed in the queue menu, then remove the picked ones or select all. Picked cards light up with a wash of the accent, and removing them asks first. Retry all failed in the same menu retries every failure not already back in the queue.
