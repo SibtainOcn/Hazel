@@ -319,14 +319,15 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     emptyText = stringResource(R.string.queue_empty_running)
                 ) { shrink ->
                     items(running, key = { "running_${it.info.url}" }) { item ->
-                        val inRun = item.isDownloading || item.info.url == state.active?.url
                         val paused = item.batchItem?.state == BatchState.PAUSED
-                        // A paused link with no run behind it, paused by an earlier session or
-                        // while another runs: its part files say how far it got. Measured once,
-                        // off the main thread, and only for such a link.
-                        val onDisk by produceState(0f, item.info.url, paused, inRun) {
+                        val inRun = !paused && (item.isDownloading || item.info.url == state.active?.url)
+                        // A paused link is measured by its folder, whole, rather than by the
+                        // engine's last line, which counts only the stream it was on. Measured
+                        // off the main thread, once per pause and again when its size is kept.
+                        val heldSize = item.queued?.let { it.fileSizeBytes + it.mergeAudioSizeBytes } ?: 0L
+                        val onDisk by produceState(0f, item.info.url, paused, heldSize) {
                             val queued = item.queued
-                            if (paused && !inRun && queued != null) {
+                            if (paused && queued != null) {
                                 value = withContext(Dispatchers.IO) {
                                     runCatching { pausedFraction(queued) }.getOrDefault(0f)
                                 }
@@ -351,7 +352,9 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             onPause = downloadViewModel::pauseDownload,
                             // A card's Resume is its own link's, as its Pause is.
                             onResume = { downloadViewModel.resumeItem(item.info.url) },
-                            onDetails = item.queued?.let { queued -> { detailsFor = queued } }
+                            onDetails = item.queued?.let { queued -> { detailsFor = queued } },
+                            // A link waiting to resume opens its sheet like any waiting link.
+                            onOpenSheet = { item.queued?.let { detailsFor = it } }
                         )
                         }
                     }
@@ -509,6 +512,25 @@ private fun runningItems(state: DownloadState, queue: List<QueuedDownload>): Lis
             )
         }
     }
+    // Links resumed part way through, next in line: still on this tab, as they are not new.
+    queue.filter { !it.paused && it.url in state.resuming && items.none { running -> running.info.url == it.url } }
+        .forEach { next ->
+            items += RunningItem(
+                info = MediaInfo(
+                    url = next.url,
+                    title = next.title,
+                    uploader = next.author,
+                    thumbnail = next.thumbnail,
+                    durationSeconds = next.durationSeconds,
+                    videoFormats = emptyList(),
+                    audioFormats = emptyList()
+                ),
+                isDownloading = false,
+                batchItem = state.batch.firstOrNull { it.url == next.url }
+                    ?: BatchItem(next.url, next.title, BatchState.QUEUED),
+                queued = next
+            )
+        }
     queue.filter { it.paused && items.none { running -> running.info.url == it.url } }.forEach { held ->
         items += RunningItem(
             info = MediaInfo(

@@ -154,7 +154,15 @@ data class DownloadState(
      * the rest of the session rather than only for the read that did it, since the cards
      * stay absent for that long; clearing the results is what puts it back to false.
      */
-    val savedAside: Boolean = false
+    val savedAside: Boolean = false,
+    /**
+     * Links resumed with parts already on disk that have not started again yet.
+     *
+     * They are part way through, so they stay on the Running tab beside the download in hand
+     * rather than going back among the links that have not started; they are also first in
+     * line, so what is half done is finished before anything new begins.
+     */
+    val resuming: Set<String> = emptySet()
 ) {
     /** True once more than one link resolved, which is what turns the screen into a list. */
     val isMultiple: Boolean get() = results.size > 1
@@ -358,8 +366,37 @@ class DownloadViewModel : ViewModel() {
                 }
             ) }
 
-            val owed = pending.filterNot { it.paused }
-            if (owed.isEmpty()) return@launch
+            // A paused or held queue says so in the shade again. The paused notice did not
+            // outlive the app going away, an update in particular clears it, and without it
+            // nothing outside the app offers to resume.
+            val held = runCatching { DownloadQueueRepository.isHeld(app) }.getOrDefault(false)
+            val pausedFirst = pending.firstOrNull { it.paused }
+            if (pausedFirst != null || (held && pending.isNotEmpty())) {
+                val shown = pausedFirst ?: pending.first()
+                val expected = shown.fileSizeBytes + shown.mergeAudioSizeBytes
+                val fraction = if (shown.paused) runCatching { pausedFraction(shown) }.getOrDefault(0f) else 0f
+                DownloadNotificationHelper.showPaused(
+                    context = app,
+                    progress = (fraction * 100f).toInt(),
+                    mediaTitle = shown.title,
+                    doneBytes = (expected * fraction).toLong(),
+                    totalBytes = if (fraction > 0f) expected else 0L
+                )
+            }
+
+            val unsorted = pending.filterNot { it.paused }
+            if (unsorted.isEmpty()) return@launch
+            // A link the app was in the middle of when it went away has parts on disk: it goes
+            // first, and is shown on the Running tab until it starts again.
+            // The storage roots are asked for once, not once per link.
+            val roots = runCatching { com.hazel.android.util.SdCards.workRoots() }.getOrDefault(emptyList())
+            val partWay = unsorted.filter { item ->
+                roots.any { root -> bytesIn(File(root, workDirName(item.url))) > 0L }
+            }
+            val owed = partWay + (unsorted - partWay.toSet())
+            if (partWay.isNotEmpty()) {
+                _state.update { s -> s.copy(resuming = s.resuming + partWay.map { it.url }) }
+            }
 
             // A queue held by Pause all stays held: what is waiting is shown, not started.
             if (runCatching { DownloadQueueRepository.isHeld(app) }.getOrDefault(false)) {
@@ -1699,7 +1736,16 @@ class DownloadViewModel : ViewModel() {
      * Downloads folder and write it into the history as though it had finished.
      */
     private fun holdForResume(item: QueuedDownload) {
-        synchronized(queue) { queue.addFirst(item.copy(paused = true)) }
+        // A link queued as a generic "best" has no size on its record. The engine reported
+        // one while it ran, and it is kept with the pause, so the card can say how much is
+        // in hand once another download is running, and the resume measures against it.
+        // The engine reports its total one stream at a time, the video's and then the
+        // audio's, so the streams already finished on disk are added to it.
+        val reported = _state.value.totalBytes
+        val held = if (item.fileSizeBytes <= 0L && item.mergeAudioSizeBytes <= 0L && reported > 0L) {
+            item.copy(paused = true, fileSizeBytes = pausedTotal(downloadDir, reported))
+        } else item.copy(paused = true)
+        synchronized(queue) { queue.addFirst(held) }
         markBatch(item.url, BatchState.PAUSED)
         _state.update { s -> s.copy(status = "Paused", isProcessing = false, eta = "") }
 
@@ -1718,7 +1764,7 @@ class DownloadViewModel : ViewModel() {
         )
 
         downloadScope.launch {
-            DownloadQueueRepository.setPaused(app, item.url, true)
+            runCatching { DownloadQueueRepository.replace(app, held) }
         }
     }
 
@@ -1773,7 +1819,10 @@ class DownloadViewModel : ViewModel() {
      * is added to it rather than left off, so whatever the run is working on has a card.
      */
     private fun markBatch(url: String, state: BatchState, error: String? = null, title: String? = null) {
-        _state.update { s -> s.copy(batch = s.batch.marking(url, state, error, title)) }
+        _state.update { s -> s.copy(
+            batch = s.batch.marking(url, state, error, title),
+            resuming = if (state == BatchState.QUEUED) s.resuming else s.resuming - url
+        ) }
 
         // Taken off the written-down queue once it is settled either way. A link kept there
         // after it finished would download itself again on the next launch. A paused one is
@@ -2101,6 +2150,7 @@ class DownloadViewModel : ViewModel() {
 
             runCatching { DownloadQueueRepository.setPaused(app, url, false) }
             markBatch(url, BatchState.QUEUED, title = item.title)
+            _state.update { s -> s.copy(resuming = s.resuming + url) }
             val stillPaused = synchronized(queue) { queue.any { it.paused } }
             if (!stillPaused) DownloadNotificationHelper.cancelPaused(app)
             runQueue(app, resumed = !_state.value.isDownloading)
@@ -2129,13 +2179,20 @@ class DownloadViewModel : ViewModel() {
                 .mapTo(mutableSetOf()) { it.url }
             _state.value.active?.url?.takeIf { _state.value.isDownloading }?.let { inHand += it }
 
+            val resumed = mutableSetOf<String>()
             val anything = synchronized(queue) {
-                val held = queue.map { it.copy(paused = false) }
+                val fromDisk = pending.filter { saved ->
+                    saved.url !in inHand && queue.none { it.url == saved.url }
+                }
+                // Links part way through, paused here or in an earlier session, go first,
+                // so what is half done is finished before anything new begins. The rest
+                // keep the order they were asked for in.
+                val partWay = (queue.filter { it.paused } + fromDisk.filter { it.paused })
+                    .map { it.copy(paused = false) }
+                val waiting = queue.filterNot { it.paused } + fromDisk.filterNot { it.paused }
+                partWay.mapTo(resumed) { it.url }
                 queue.clear()
-                queue.addAll(held)
-                pending
-                    .filter { saved -> saved.url !in inHand && queue.none { it.url == saved.url } }
-                    .forEach { queue.addLast(it.copy(paused = false)) }
+                queue.addAll(partWay + waiting)
                 queue.isNotEmpty()
             }
             if (!anything) return@launch
@@ -2145,7 +2202,8 @@ class DownloadViewModel : ViewModel() {
             _state.update { s -> s.copy(
                 batch = s.batch.map {
                     if (it.state == BatchState.PAUSED) it.copy(state = BatchState.QUEUED) else it
-                }
+                },
+                resuming = s.resuming + resumed
             ) }
             // Joins the run in flight if there is one, and starts one if there is not.
             runQueue(app, resumed = !_state.value.isDownloading)
@@ -3236,7 +3294,8 @@ internal fun DownloadState.keepingRun(running: Boolean): DownloadState {
         processingStep = processingStep,
         waitingForWifi = waitingForWifi,
         saveFallback = saveFallback,
-        batch = batch
+        batch = batch,
+        resuming = resuming
     )
 }
 
@@ -3296,4 +3355,23 @@ internal fun pausedFraction(item: QueuedDownload): Float {
     if (expected <= 0L) return 0f
     val onDisk = workDirsFor(item.url).sumOf { bytesIn(it) }
     return (onDisk.toFloat() / expected).coerceIn(0f, 0.99f)
+}
+
+/**
+ * The whole size of a download paused part way, for a link queued without one: the streams
+ * already finished in its folder, plus the total the engine reported for the stream it was
+ * on. The engine reports one stream at a time, so its figure alone is the audio's size for a
+ * download paused while fetching its audio, after the whole video. Never less than what is
+ * on disk.
+ */
+internal fun pausedTotal(dir: File, reported: Long): Long {
+    val finished = try {
+        dir.listFiles()
+            ?.filter { it.isFile && ".part" !in it.name && !it.name.endsWith(".ytdl") }
+            ?.sumOf { it.length() }
+            ?: 0L
+    } catch (_: Exception) {
+        0L
+    }
+    return maxOf(finished + reported, bytesIn(dir))
 }
