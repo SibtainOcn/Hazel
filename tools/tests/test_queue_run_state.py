@@ -585,7 +585,7 @@ def test_retry_all():
                and ".distinctBy { it.url }" in retry_all)
     check_true("Failures without a choice are read again", "instantDownload(context, it.url)" in retry_all)
     check_true("Reads for links shared or retried at once wait their turn",
-               "formatReads.withPermit" in function(vm, "fun instantDownload("))
+               "instantReadSlots.withPermit" in function(vm, "fun instantDownload("))
     for strings in sorted(RES.glob("values*/strings.xml")):
         text = strings.read_text(encoding="utf-8")
         if 'name="queue_failed_select"' in text:

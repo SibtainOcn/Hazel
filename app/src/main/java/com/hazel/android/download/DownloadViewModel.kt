@@ -589,6 +589,7 @@ class DownloadViewModel : ViewModel() {
 
     /** Links Hazel Instant is reading right now, so the same share twice is one download. */
     private val instantReads = mutableSetOf<String>()
+    private val instantReadSlots = Semaphore(FORMAT_READS_AT_ONCE)
 
     /**
      * Hazel Instant: reads [url] and downloads it with the saved settings, without a sheet.
@@ -628,9 +629,10 @@ class DownloadViewModel : ViewModel() {
                     ?.let { GenericFormats.heightCeiling(it) }
                     ?: MediaProbe.BEST_VIDEO
 
-                // A few at a time, as format reads are: retrying every failure at once would
-                // otherwise start a read for each of them together.
-                val items = formatReads.withPermit {
+                // A few at a time: retrying every failure at once would otherwise start a
+                // read for each of them together. Apart from the sheets' format reads, so a
+                // shared link never waits behind a long list being read.
+                val items = instantReadSlots.withPermit {
                     withContext(Dispatchers.IO) {
                         expand(
                             url,
