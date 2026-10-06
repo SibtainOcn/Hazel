@@ -45,7 +45,7 @@ MENU = ('<button class="icon-btn menu-btn" type="button" aria-label="Menu" aria-
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">'
         '<path d="M4 8h16M4 16h16"/></svg></button>')
 
-LINKS = [('index.html#features', 'Features', 'home'), ('guide.html', 'Guide', 'guide'), ('faq.html', 'FAQ', 'faq'),
+LINKS = [('whats-new.html', "What's new", 'whats-new'), ('index.html#features', 'Features', 'home'), ('guide.html', 'Guide', 'guide'), ('faq.html', 'FAQ', 'faq'),
          ('changelog.html', 'Changelog', 'changelog'), ('support.html', 'Support', 'support')]
 
 RELEASES = 'https://github.com/SibtainOcn/Hazel/releases/latest'
@@ -163,9 +163,9 @@ def _md_inline(text):
     return ''.join(out)
 
 
-def changelog_html():
+def md_html(name):
     """
-    CHANGELOG.md as HTML, by the same rules as the app's MarkdownLite: headings, bullet
+    A Markdown file at the repository root as HTML, by the same rules as the app's MarkdownLite: headings, bullet
     lists nested by indent, paragraphs, bold, inline code and links. Anything else is
     shown escaped as its text.
     """
@@ -181,9 +181,10 @@ def changelog_html():
             out.append('</li></ul>')
             indents.pop()
 
-    # Start at the first version: the title and the note about the format above it are
-    # for readers of the file, and the page head already says what this is.
-    text = (ROOT / 'CHANGELOG.md').read_text(encoding='utf-8')
+    # Start at the first version: a title and notes above it are for readers of the file,
+    # and the page head already says what this is. A file with no version heading is
+    # read from the top.
+    text = (ROOT / name).read_text(encoding='utf-8')
     for raw in text[text.find('\n## ') + 1:].splitlines():
         line = raw.rstrip()
         trimmed = line.lstrip()
@@ -254,8 +255,9 @@ BANNED = re.compile('[—–→←…·›•]')
 def check(pages):
     problems = []
     for name, html in pages.items():
-        # The changelog page carries CHANGELOG.md word for word, so its text is not policed here.
-        for ch in set() if name == 'changelog' else set(BANNED.findall(html)):
+        # These pages carry CHANGELOG.md and RELEASE-NOTES.md word for word, so their text
+        # is not policed here.
+        for ch in set() if name in ('changelog', 'whats-new') else set(BANNED.findall(html)):
             problems.append(f'{name}: plain copy only, found {ch!r} (U+{ord(ch):04X})')
         for left in set(re.findall(r'\{\{[^}]*\}\}', html)):
             problems.append(f'{name}: placeholder never filled: {left}')
@@ -295,7 +297,8 @@ def main():
         'language_words_cap': word.capitalize(),
         'language_chips': ''.join(f'<span>{l}</span>' for l in langs),
         'whats_new': html_escape(whats_new()),
-        'changelog': changelog_html(),
+        'changelog': md_html('CHANGELOG.md'),
+        'release_notes': md_html('RELEASE-NOTES.md'),
     }
 
     pages = {
@@ -304,6 +307,7 @@ def main():
                       'home', 'home.css', facts),
         'guide': page('guide', 'Guide | Hazel', 'How to use Hazel: your first download, playlists, sharing from other apps, where files go and more.', 'guide', 'pages.css', facts),
         'faq': page('faq', 'FAQ | Hazel', 'Answers to common questions about Hazel.', 'faq', 'pages.css', facts),
+        'whats-new': page('whats-new', "What's new | Hazel", 'The highlights of the latest Hazel release.', 'whats-new', 'pages.css', facts),
         'changelog': page('changelog', 'Changelog | Hazel', 'Every change to Hazel, newest first.', 'changelog', 'pages.css', facts),
         'support': page('support', 'Support | Hazel', 'Help keep Hazel free: sponsor, buy a coffee, translate, or spread the word.', 'support', 'pages.css', facts),
     }

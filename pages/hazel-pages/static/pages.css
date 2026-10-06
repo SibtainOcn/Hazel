@@ -205,3 +205,9 @@ details.q:hover, details.q[open] { background: var(--surface-2); }
 .md code { font: 13px var(--mono, monospace); background: color-mix(in srgb, var(--fg) 10%, transparent); padding: 1px 5px; border-radius: 5px; }
 .md a { color: var(--accent); }
 .md h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+
+/* What's new, drawn from RELEASE-NOTES.md: one release, so it sits close under its head */
+.page-head.notes-head { padding-bottom: 20px; }
+.md.notes { padding-bottom: 64px; }
+.md.notes > h3:first-child { margin-top: 8px; }
+.md.notes .notes-more { margin-top: 32px; color: var(--fg); text-decoration: none; }
