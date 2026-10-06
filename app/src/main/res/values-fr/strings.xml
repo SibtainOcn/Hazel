@@ -465,6 +465,10 @@
     <string name="notification_action_sign_in">Se connecter</string>
     <string name="notification_wifi_title">En attente du Wi-Fi</string>
     <string name="notification_wifi_text">Les téléchargements sont limités au Wi-Fi. Ils démarrent dès que vous y êtes de nouveau.</string>
+    <string name="notification_run_cancelled_title">Téléchargements annulés</string>
+    <string name="notification_run_failed_title">Certains téléchargements ont échoué</string>
+    <string name="notification_run_finished_title">Téléchargements terminés</string>
+    <string name="notification_run_summary">Téléchargés : %1$d · Échoués : %2$d · Annulés : %3$d</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">Fermer</string>

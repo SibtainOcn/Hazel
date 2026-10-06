@@ -458,6 +458,10 @@
     <string name="notification_action_sign_in">साइन इन करें</string>
     <string name="notification_wifi_title">वाई-फ़ाई का इंतज़ार</string>
     <string name="notification_wifi_text">डाउनलोड सिर्फ़ वाई-फ़ाई पर सेट हैं। वाई-फ़ाई पर लौटते ही वे शुरू हो जाएँगे।</string>
+    <string name="notification_run_cancelled_title">डाउनलोड रद्द किए गए</string>
+    <string name="notification_run_failed_title">कुछ डाउनलोड विफल रहे</string>
+    <string name="notification_run_finished_title">डाउनलोड पूरे हुए</string>
+    <string name="notification_run_summary">डाउनलोड हुए: %1$d · विफल: %2$d · रद्द: %3$d</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">बंद करें</string>

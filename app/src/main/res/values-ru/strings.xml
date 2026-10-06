@@ -472,6 +472,10 @@
     <string name="notification_action_sign_in">Войти</string>
     <string name="notification_wifi_title">Ожидание Wi-Fi</string>
     <string name="notification_wifi_text">Загрузки настроены только по Wi-Fi. Они начнутся при подключении к Wi-Fi.</string>
+    <string name="notification_run_cancelled_title">Загрузки отменены</string>
+    <string name="notification_run_failed_title">Некоторые загрузки не удались</string>
+    <string name="notification_run_finished_title">Загрузки завершены</string>
+    <string name="notification_run_summary">Загружено: %1$d · Ошибки: %2$d · Отменено: %3$d</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">Закрыть</string>

@@ -451,6 +451,10 @@
     <string name="notification_action_sign_in">ログイン</string>
     <string name="notification_wifi_title">Wi-Fi待機中</string>
     <string name="notification_wifi_text">ダウンロードはWi-Fi接続時のみに設定されています。Wi-Fi接続時に開始されます。</string>
+    <string name="notification_run_cancelled_title">ダウンロードをキャンセルしました</string>
+    <string name="notification_run_failed_title">一部のダウンロードに失敗しました</string>
+    <string name="notification_run_finished_title">ダウンロードが終了しました</string>
+    <string name="notification_run_summary">完了: %1$d · 失敗: %2$d · キャンセル: %3$d</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">閉じる</string>

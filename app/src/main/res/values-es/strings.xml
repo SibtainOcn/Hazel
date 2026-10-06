@@ -465,6 +465,10 @@
     <string name="notification_action_sign_in">Iniciar sesión</string>
     <string name="notification_wifi_title">Esperando al Wi-Fi</string>
     <string name="notification_wifi_text">Las descargas están limitadas al Wi-Fi. Empiezan cuando vuelvas a estar en Wi-Fi.</string>
+    <string name="notification_run_cancelled_title">Descargas canceladas</string>
+    <string name="notification_run_failed_title">Algunas descargas fallaron</string>
+    <string name="notification_run_finished_title">Descargas terminadas</string>
+    <string name="notification_run_summary">Descargadas: %1$d · Fallidas: %2$d · Canceladas: %3$d</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">Cerrar</string>

@@ -451,6 +451,10 @@
     <string name="notification_action_sign_in">Masuk</string>
     <string name="notification_wifi_title">Menunggu Wi-Fi</string>
     <string name="notification_wifi_text">Unduhan diatur hanya untuk Wi-Fi. Unduhan akan dimulai setelah terhubung kembali ke Wi-Fi.</string>
+    <string name="notification_run_cancelled_title">Unduhan dibatalkan</string>
+    <string name="notification_run_failed_title">Beberapa unduhan gagal</string>
+    <string name="notification_run_finished_title">Unduhan selesai</string>
+    <string name="notification_run_summary">Terunduh: %1$d · Gagal: %2$d · Dibatalkan: %3$d</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">Tutup</string>
