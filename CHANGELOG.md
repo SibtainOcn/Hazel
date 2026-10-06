@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Choice dialogs in the settings are more compact, and a choice is applied with OK instead of the moment it is tapped.
 
 ### Fixed
+- The home, search, history and settings screens no longer read their stored settings and lists again on every redraw. Each screen asked storage afresh each time it was drawn, which on screens that follow a download was several times a second, decoding the whole download history each time. Each is now read once and updated when it changes.
 - The "Could not read this link" dialog offers only what can fix the error. Media that is gone or a site that is not supported now says so with no action to try. A source asking for an account offers Sign in, and one that refused the request or rate-limited offers Add cookies. Anything else offers Try anyway where possible. Before, Add cookies was offered on every failure, and a missing video read as a refused request. A link button at its start copies the link.
 - Retrying a failure, or reading its link again, no longer drops it from the list before the new attempt settles. A retry of a link Instant could not read runs through Instant again, and a link that finishes downloading clears its failure even when it was shared as a short link.
 - In incognito, failed downloads are listed for the session but no longer written to storage, as incognito promises.

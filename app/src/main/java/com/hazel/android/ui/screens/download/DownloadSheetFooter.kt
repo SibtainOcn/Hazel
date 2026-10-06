@@ -25,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -106,7 +107,7 @@ fun IncognitoButton(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
+    val incognito by remember(context) { SettingsRepository.getIncognito(context) }.collectAsState(initial = false)
 
     Box(
         modifier = modifier

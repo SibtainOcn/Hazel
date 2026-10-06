@@ -110,8 +110,8 @@ fun AppNavigation(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
-    val hazelUpdateAvailable by SettingsRepository.getHazelUpdateAvailable(context).collectAsState(initial = false)
+    val incognito by remember(context) { SettingsRepository.getIncognito(context) }.collectAsState(initial = false)
+    val hazelUpdateAvailable by remember(context) { SettingsRepository.getHazelUpdateAvailable(context) }.collectAsState(initial = false)
 
     val navController = rememberNavController()
 

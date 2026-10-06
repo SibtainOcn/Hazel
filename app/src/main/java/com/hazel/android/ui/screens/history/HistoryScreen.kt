@@ -126,7 +126,7 @@ fun HistoryScreen() {
     val scope = rememberCoroutineScope()
     val keyboard = LocalSoftwareKeyboardController.current
 
-    val history by DownloadHistoryRepository.getHistory(context).collectAsState(initial = emptyList())
+    val history by remember(context) { DownloadHistoryRepository.getHistory(context) }.collectAsState(initial = emptyList())
     val listLayout by remember(context) { SettingsRepository.getHistoryListLayout(context) }
         .collectAsState(initial = false)
     val sortSetting by remember(context) { SettingsRepository.getHistorySort(context) }

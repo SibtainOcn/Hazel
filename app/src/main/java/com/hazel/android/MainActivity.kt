@@ -95,10 +95,10 @@ class MainActivity : ComponentActivity() {
                 com.hazel.android.update.HazelUpdater.checkUpdatesSilently(applicationContext)
             }
 
-            val savedTheme by SettingsRepository.isDarkTheme(this).collectAsState(initial = null)
+            val savedTheme by remember(this) { SettingsRepository.isDarkTheme(this) }.collectAsState(initial = null)
             val isDark = savedTheme ?: true // Default to dark on first install
 
-            val accentName by SettingsRepository.getAccentColor(this).collectAsState(initial = null)
+            val accentName by remember(this) { SettingsRepository.getAccentColor(this) }.collectAsState(initial = null)
 
             // The preferences decide the whole palette, so the app waits for them rather
             // than painting once in the wrong colours and correcting itself.

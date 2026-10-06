@@ -93,8 +93,8 @@ class CookieWebViewActivity : ComponentActivity() {
         val clearFirst = savedInstanceState == null
 
         setContent {
-            val savedTheme by SettingsRepository.isDarkTheme(this).collectAsState(initial = null)
-            val accentName by SettingsRepository.getAccentColor(this).collectAsState(initial = null)
+            val savedTheme by remember(this) { SettingsRepository.isDarkTheme(this) }.collectAsState(initial = null)
+            val accentName by remember(this) { SettingsRepository.getAccentColor(this) }.collectAsState(initial = null)
 
             HazelTheme(
                 darkTheme = savedTheme ?: true,

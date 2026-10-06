@@ -33,8 +33,8 @@ fun BackupScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
-    val autoBackup by BackupRepository.getAutoBackup(context).collectAsState(initial = true)
-    val folderLabel by BackupRepository.getFolderLabel(context).collectAsState(initial = "")
+    val autoBackup by remember(context) { BackupRepository.getAutoBackup(context) }.collectAsState(initial = true)
+    val folderLabel by remember(context) { BackupRepository.getFolderLabel(context) }.collectAsState(initial = "")
 
     var choosingBackup by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }

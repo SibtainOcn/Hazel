@@ -113,13 +113,13 @@ fun SearchScreen(
     val clipboard = LocalClipboard.current
     val focusRequester = remember { FocusRequester() }
 
-    val history by SearchHistoryRepository.getHistory(context).collectAsState(initial = emptyList())
+    val history by remember(context) { SearchHistoryRepository.getHistory(context) }.collectAsState(initial = emptyList())
 
     var text by remember { mutableStateOf(initialQuery) }
     var queued by remember { mutableStateOf(listOf<String>()) }
 
     // Everything already downloaded, so a repeat can be raised before the link is read.
-    val downloaded by DownloadHistoryRepository.getHistory(context)
+    val downloaded by remember(context) { DownloadHistoryRepository.getHistory(context) }
         .collectAsState(initial = emptyList())
 
     // The links waiting on an answer, paired with the copy already on the device.
@@ -131,10 +131,10 @@ fun SearchScreen(
     var showClearHistoryConfirm by remember { mutableStateOf(false) }
 
     // Needed only to open the folder a repeat warning refers to.
-    val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
+    val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }.collectAsState(initial = SaveDirs())
 
-    val source by SettingsRepository.getSearchSource(context).collectAsState(initial = SearchSource.DEFAULT)
-    val suggestionsOn by SettingsRepository.getSearchSuggestions(context).collectAsState(initial = false)
+    val source by remember(context) { SettingsRepository.getSearchSource(context) }.collectAsState(initial = SearchSource.DEFAULT)
+    val suggestionsOn by remember(context) { SettingsRepository.getSearchSuggestions(context) }.collectAsState(initial = false)
 
     // Links already queued are hidden from the list, and what is being typed filters it.
     val suggestions = remember(history, text, queued) {

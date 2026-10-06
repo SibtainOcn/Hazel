@@ -149,19 +149,19 @@ fun DownloadScreen(
     val state by downloadViewModel.state.collectAsState()
     val formatsReading by downloadViewModel.formatsReading.collectAsState()
 
-    val options by SettingsRepository.getDownloadOptions(context)
+    val options by remember(context) { SettingsRepository.getDownloadOptions(context) }
         .collectAsState(initial = DownloadOptions())
-    val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
+    val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }.collectAsState(initial = SaveDirs())
 
     // The kind whose folder the picker is choosing, set as it opens.
 
 
     // Collected as null until the stored value arrives, so the dialog cannot flash up for
     // a frame on every launch before the real answer loads and dismisses it again.
-    val guideSeen by SettingsRepository.getGuideSeen(context)
+    val guideSeen by remember(context) { SettingsRepository.getGuideSeen(context) }
         .collectAsState(initial = null as Boolean?)
 
-    val incognito by SettingsRepository.getIncognito(context).collectAsState(initial = false)
+    val incognito by remember(context) { SettingsRepository.getIncognito(context) }.collectAsState(initial = false)
 
     // The link being downloaded is shown first, and the rest keep the order they arrived
     // in. What is being worked on now is what the user opened the app to see, and hunting
@@ -271,7 +271,7 @@ fun DownloadScreen(
     }
 
     // Links already downloaded, so a repeat can be pointed out before it is started again.
-    val history by DownloadHistoryRepository.getHistory(context)
+    val history by remember(context) { DownloadHistoryRepository.getHistory(context) }
         .collectAsState(initial = emptyList())
 
     // The records behind the links on screen, so each one can be asked whether the file it
