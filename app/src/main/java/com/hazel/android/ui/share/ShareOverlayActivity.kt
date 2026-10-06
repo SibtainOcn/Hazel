@@ -166,11 +166,11 @@ class ShareOverlayActivity : ComponentActivity() {
                 val state by downloadViewModel.state.collectAsState()
                 val formatsReading by downloadViewModel.formatsReading.collectAsState()
 
-                val options by SettingsRepository.getDownloadOptions(this)
+                val options by remember(this) { SettingsRepository.getDownloadOptions(this) }
                     .collectAsState(initial = DownloadOptions())
-                val saveDirs by SettingsRepository.getSaveDirs(this).collectAsState(initial = SaveDirs())
+                val saveDirs by remember(this) { SettingsRepository.getSaveDirs(this) }.collectAsState(initial = SaveDirs())
                 // The kind whose folder the picker is choosing, set as it opens.
-                val accentName by SettingsRepository.getAccentColor(this).collectAsState(initial = "Cyan")
+                val accentName by remember(this) { SettingsRepository.getAccentColor(this) }.collectAsState(initial = "Cyan")
 
                 LaunchedEffect(url) {
                     // Instant was handed its link in onCreate or onNewIntent, outside the

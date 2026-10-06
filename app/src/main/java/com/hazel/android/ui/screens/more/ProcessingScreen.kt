@@ -58,9 +58,9 @@ import kotlinx.coroutines.launch
 fun ProcessingScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val options by SettingsRepository.getDownloadOptions(context)
+    val options by remember(context) { SettingsRepository.getDownloadOptions(context) }
         .collectAsState(initial = DownloadOptions())
-    val instantAudioOnly by SettingsRepository.getInstantAudioOnly(context)
+    val instantAudioOnly by remember(context) { SettingsRepository.getInstantAudioOnly(context) }
         .collectAsState(initial = false)
 
     var dialog by remember { mutableStateOf(ProcessingDialog.NONE) }

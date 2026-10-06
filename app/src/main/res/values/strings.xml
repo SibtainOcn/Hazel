@@ -58,7 +58,8 @@
     <string name="search_no_matches">No matches</string>
     <string name="search_remove">Remove</string>
     <string name="search_all">Search all</string>
-    <string name="search_forget">Forget</string>
+    <string name="search_remove_confirm_body">Remove from search history?</string>
+    <string name="search_entry_copied">Copied to clipboard</string>
     <string name="search_edit_before">Edit before searching</string>
     <string name="search_paste_and_fetch">Paste and fetch</string>
     <string name="search_paste">Paste</string>

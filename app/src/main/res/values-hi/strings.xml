@@ -47,7 +47,8 @@
     <string name="search_no_matches">कोई मेल नहीं</string>
     <string name="search_remove">हटाएँ</string>
     <string name="search_all">सब खोजें</string>
-    <string name="search_forget">भूल जाएँ</string>
+    <string name="search_remove_confirm_body">खोज इतिहास से हटाएँ?</string>
+    <string name="search_entry_copied">क्लिपबोर्ड पर कॉपी किया गया</string>
     <string name="search_edit_before">खोजने से पहले बदलें</string>
     <string name="search_paste_and_fetch">चिपकाएँ और खोजें</string>
     <string name="search_paste">चिपकाएँ</string>

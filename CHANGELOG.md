@@ -13,12 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Synthesizing has a "Download sheet opens on" setting, Video or Audio, for the tab a link's sheet and a set of links open on. A link with no audio still opens on Video.
 
 ### Changed
+- Remembered searches and links on the search screen show just the entry and an arrow that fills the field. Holding an entry asks to remove it, with a Copy button beside Cancel, in place of the cross on every row.
 - Errors show in a true red across the app, in place of a faded pink. The "Could not read this link" dialog shows the engine's report wrapped in full, in a box seven lines high that scrolls past that.
 - Failed downloads are drawn like the cards on the home screen: the artwork with the title, source, time and reason over it, and Error Log and Retry on the card. Tapping the card opens the link's download sheet over the queue, loading as it reads, to download it another way; a read that fails there updates the card's log. A card being retried says Retrying until it settles. The error log opens on a sheet with wrapped lines, sized to the log.
 - The failed list keeps the last 100 failures.
 - Choice dialogs in the settings are more compact, and a choice is applied with OK instead of the moment it is tapped.
 
 ### Fixed
+- The home, search, history and settings screens no longer read their stored settings and lists again on every redraw. Each screen asked storage afresh each time it was drawn, which on screens that follow a download was several times a second, decoding the whole download history each time. Each is now read once and updated when it changes.
 - The "Could not read this link" dialog offers only what can fix the error. Media that is gone or a site that is not supported now says so with no action to try. A source asking for an account offers Sign in, and one that refused the request or rate-limited offers Add cookies. Anything else offers Try anyway where possible. Before, Add cookies was offered on every failure, and a missing video read as a refused request. A link button at its start copies the link.
 - Retrying a failure, or reading its link again, no longer drops it from the list before the new attempt settles. A retry of a link Instant could not read runs through Instant again, and a link that finishes downloading clears its failure even when it was shared as a short link.
 - In incognito, failed downloads are listed for the session but no longer written to storage, as incognito promises.

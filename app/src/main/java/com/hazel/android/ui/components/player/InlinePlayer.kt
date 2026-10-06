@@ -511,7 +511,7 @@ private fun SeekBar(
 private fun QualityButton(controller: PlaybackController, onMenuChange: (Boolean) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val cap by SettingsRepository.getPlayQuality(context)
+    val cap by remember(context) { SettingsRepository.getPlayQuality(context) }
         .collectAsState(initial = SettingsRepository.DEFAULT_PLAY_QUALITY)
     var open by remember { mutableStateOf(false) }
     val setOpen = { value: Boolean ->

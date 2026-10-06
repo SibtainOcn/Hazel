@@ -47,7 +47,8 @@
     <string name="search_no_matches">Совпадений нет</string>
     <string name="search_remove">Удалить</string>
     <string name="search_all">Искать везде</string>
-    <string name="search_forget">Забыть</string>
+    <string name="search_remove_confirm_body">Удалить из истории поиска?</string>
+    <string name="search_entry_copied">Скопировано в буфер обмена</string>
     <string name="search_edit_before">Изменить перед поиском</string>
     <string name="search_paste_and_fetch">Вставить и загрузить</string>
     <string name="search_paste">Вставить</string>

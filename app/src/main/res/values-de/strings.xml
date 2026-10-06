@@ -47,7 +47,8 @@
     <string name="search_no_matches">Keine Treffer</string>
     <string name="search_remove">Entfernen</string>
     <string name="search_all">Alle suchen</string>
-    <string name="search_forget">Vergessen</string>
+    <string name="search_remove_confirm_body">Aus dem Suchverlauf entfernen?</string>
+    <string name="search_entry_copied">In die Zwischenablage kopiert</string>
     <string name="search_edit_before">Vor dem Suchen bearbeiten</string>
     <string name="search_paste_and_fetch">Einfügen und laden</string>
     <string name="search_paste">Einfügen</string>

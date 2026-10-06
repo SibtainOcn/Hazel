@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,8 +62,8 @@ fun SoftwareUpdateScreen(
     val hazelVersion = HazelUpdater.installedVersion()
     val ytdlpVersion = YtDlpUpdater.cachedVersion(context) ?: "Default"
 
-    val hazelUpdateAvailable by SettingsRepository.getHazelUpdateAvailable(context).collectAsState(initial = false)
-    val ytDlpUpdateAvailable by SettingsRepository.getYtDlpUpdateAvailable(context).collectAsState(initial = false)
+    val hazelUpdateAvailable by remember(context) { SettingsRepository.getHazelUpdateAvailable(context) }.collectAsState(initial = false)
+    val ytDlpUpdateAvailable by remember(context) { SettingsRepository.getYtDlpUpdateAvailable(context) }.collectAsState(initial = false)
 
     Scaffold(
         topBar = {
