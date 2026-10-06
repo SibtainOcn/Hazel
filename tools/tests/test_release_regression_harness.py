@@ -822,6 +822,35 @@ def run_tests():
             check_true(f"values{loc} has download_cancel_all", cancel_all is not None and bool(cancel_all.text))
 
     # -----------------------------------------------------------------------
+    # Suite 10: Stored settings are collected from one flow per screen
+    # -----------------------------------------------------------------------
+    # A repository getter called inside a composable hands back a new flow on every redraw,
+    # and collectAsState starts collecting it afresh, so the stored value is read and decoded
+    # again. Screens that watch the download redraw several times a second while it runs.
+    print("\n--- Suite 10: Stored settings collected from one flow per screen ---")
+    src = REPO_ROOT / "app/src/main/java/com/hazel/android"
+    fresh = re.compile(r"(?<!\{ )\b[A-Z]\w*(?:Repository|Store)\.\w+\((?:context|this)\)\s*\.collectAsState\(")
+    kept = re.compile(r"remember\((?:context|this)\) \{ [A-Z]\w*(?:Repository|Store)\.\w+\((?:context|this)\) \}\s*\.collectAsState\(")
+    # The queue screen's flows are kept, and checked, with the queue's own work.
+    exempt = {"ui/screens/queue/QueueScreen.kt"}
+    offenders = []
+    kept_count = 0
+    for path in sorted(src.rglob("*.kt")):
+        rel = path.relative_to(src).as_posix()
+        text = path.read_text(encoding="utf-8")
+        kept_count += len(kept.findall(text))
+        if rel not in exempt and fresh.search(text):
+            offenders.append(rel)
+    check("No screen builds a stored-setting flow on every redraw", offenders, [])
+    check_true("Screens keep their stored-setting flows across redraws", kept_count >= 40,
+               f"only {kept_count} kept")
+    for rel in ("ui/screens/download/DownloadScreen.kt", "ui/screens/download/SearchScreen.kt",
+                "ui/screens/history/HistoryScreen.kt"):
+        text = (src / rel).read_text(encoding="utf-8")
+        check_true(f"{rel} keeps its download history flow",
+                   "remember(context) { DownloadHistoryRepository.getHistory(context) }" in text)
+
+    # -----------------------------------------------------------------------
     print("\n" + "=" * 70)
     total = PASS_COUNT + FAIL_COUNT
     print(f"  Summary: {PASS_COUNT}/{total} tests PASSED, {FAIL_COUNT} FAILED")

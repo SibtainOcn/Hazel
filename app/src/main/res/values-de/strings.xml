@@ -47,7 +47,8 @@
     <string name="search_no_matches">Keine Treffer</string>
     <string name="search_remove">Entfernen</string>
     <string name="search_all">Alle suchen</string>
-    <string name="search_forget">Vergessen</string>
+    <string name="search_remove_confirm_body">Aus dem Suchverlauf entfernen?</string>
+    <string name="search_entry_copied">In die Zwischenablage kopiert</string>
     <string name="search_edit_before">Vor dem Suchen bearbeiten</string>
     <string name="search_paste_and_fetch">Einfügen und laden</string>
     <string name="search_paste">Einfügen</string>
@@ -324,10 +325,12 @@
     <string name="fetch_invalid_url">Ungültiger Link: Er muss mit http:// oder https:// beginnen</string>
     <string name="history_empty_failed">Keine fehlgeschlagenen Downloads</string>
     <string name="history_failed_error_log">Fehlerprotokoll</string>
+    <string name="history_failed_logs">Protokolle</string>
     <string name="history_failed_copy_log">Protokoll kopieren</string>
     <string name="history_failed_log_copied">Fehlerprotokoll in Zwischenablage kopiert</string>
     <string name="history_failed_retry">Wiederholen</string>
     <string name="queue_failed_choose_again">Anders herunterladen</string>
+    <string name="queue_failed_retry_all">Alle fehlgeschlagenen wiederholen</string>
     <string name="queue_failed_select">Fehlgeschlagene auswählen</string>
     <string name="queue_failed_remove">Entfernen</string>
     <string name="queue_failed_remove_body">Sie verschwinden mit ihren Protokollen aus der Liste. Deine heruntergeladenen Dateien bleiben unberührt.</string>
@@ -458,6 +461,14 @@
     <string name="notification_action_sign_in">Anmelden</string>
     <string name="notification_wifi_title">Wartet auf WLAN</string>
     <string name="notification_wifi_text">Downloads sind auf WLAN beschränkt. Sie starten, sobald du wieder im WLAN bist.</string>
+    <string name="notification_run_cancelled_title">Downloads abgebrochen</string>
+    <string name="notification_run_failed_title">Einige Downloads sind fehlgeschlagen</string>
+    <string name="notification_run_finished_title">Downloads beendet</string>
+    <string name="notification_run_summary">Heruntergeladen: %1$d · Fehlgeschlagen: %2$d · Abgebrochen: %3$d</string>
+    <string name="download_percent_downloaded">%1$d%% heruntergeladen</string>
+    <string name="queue_adjust_restart_title">Neu starten?</string>
+    <string name="queue_adjust_restart_body">Diese Änderung startet den Download von vorn. Was bisher geladen wurde, wird verworfen.</string>
+    <string name="queue_adjust_restart_confirm">Neu starten</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">Schließen</string>

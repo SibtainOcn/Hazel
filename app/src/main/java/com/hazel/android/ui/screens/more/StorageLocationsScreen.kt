@@ -76,17 +76,17 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val wifiOnly by SettingsRepository.getWifiOnly(context).collectAsState(initial = false)
-    val saveDirs by SettingsRepository.getSaveDirs(context).collectAsState(initial = SaveDirs())
+    val wifiOnly by remember(context) { SettingsRepository.getWifiOnly(context) }.collectAsState(initial = false)
+    val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }.collectAsState(initial = SaveDirs())
     // The kind whose folder is being looked at or chosen, or null when neither is.
     var dirDialogFor by remember { mutableStateOf<Boolean?>(null) }
 
     // The same picker the download sheet uses: any folder or an SD card, saved for the
     // kind it was made for until it is changed or reset.
     val pickSaveDir = rememberSaveDirPicker(saveDirs)
-    val speedLimit by SettingsRepository.getSpeedLimit(context).collectAsState(initial = "")
-    val concurrentFragments by SettingsRepository.getConcurrentFragments(context).collectAsState(initial = SettingsRepository.CONCURRENT_FRAGMENTS.last())
-    val throttledRate by SettingsRepository.getThrottledRate(context).collectAsState(initial = "")
+    val speedLimit by remember(context) { SettingsRepository.getSpeedLimit(context) }.collectAsState(initial = "")
+    val concurrentFragments by remember(context) { SettingsRepository.getConcurrentFragments(context) }.collectAsState(initial = SettingsRepository.CONCURRENT_FRAGMENTS.last())
+    val throttledRate by remember(context) { SettingsRepository.getThrottledRate(context) }.collectAsState(initial = "")
 
     Column(
         modifier = Modifier

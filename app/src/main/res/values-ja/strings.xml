@@ -47,7 +47,8 @@
     <string name="search_no_matches">一致するものはありません</string>
     <string name="search_remove">削除</string>
     <string name="search_all">すべて検索</string>
-    <string name="search_forget">履歴から削除</string>
+    <string name="search_remove_confirm_body">検索履歴から削除しますか？</string>
+    <string name="search_entry_copied">クリップボードにコピーしました</string>
     <string name="search_edit_before">検索前に編集</string>
     <string name="search_paste_and_fetch">貼り付けて取得</string>
     <string name="search_paste">貼り付け</string>
@@ -320,10 +321,12 @@
     <string name="fetch_invalid_url">無効なリンクです。http:// または https:// で始まる必要があります</string>
     <string name="history_empty_failed">失敗したダウンロードはありません</string>
     <string name="history_failed_error_log">エラーログ</string>
+    <string name="history_failed_logs">ログ</string>
     <string name="history_failed_copy_log">ログをコピー</string>
     <string name="history_failed_log_copied">エラーログをクリップボードにコピーしました</string>
     <string name="history_failed_retry">再試行</string>
     <string name="queue_failed_choose_again">別の方法でダウンロード</string>
+    <string name="queue_failed_retry_all">失敗したものをすべて再試行</string>
     <string name="queue_failed_select">失敗を選択</string>
     <string name="queue_failed_remove">削除</string>
     <string name="queue_failed_remove_body">ログとともにリストから消えます。ダウンロード済みのファイルはそのままです。</string>
@@ -451,6 +454,14 @@
     <string name="notification_action_sign_in">ログイン</string>
     <string name="notification_wifi_title">Wi-Fi待機中</string>
     <string name="notification_wifi_text">ダウンロードはWi-Fi接続時のみに設定されています。Wi-Fi接続時に開始されます。</string>
+    <string name="notification_run_cancelled_title">ダウンロードをキャンセルしました</string>
+    <string name="notification_run_failed_title">一部のダウンロードに失敗しました</string>
+    <string name="notification_run_finished_title">ダウンロードが終了しました</string>
+    <string name="notification_run_summary">完了: %1$d · 失敗: %2$d · キャンセル: %3$d</string>
+    <string name="download_percent_downloaded">%1$d%% ダウンロード済み</string>
+    <string name="queue_adjust_restart_title">最初からやり直しますか？</string>
+    <string name="queue_adjust_restart_body">この変更でダウンロードは最初からやり直しになります。これまでに取得した分は破棄されます。</string>
+    <string name="queue_adjust_restart_confirm">やり直す</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">閉じる</string>

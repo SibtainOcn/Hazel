@@ -239,6 +239,20 @@ def test_search_and_history_screen_ux():
     check_true("SearchScreen has ClearHistoryDialog", "ClearHistoryDialog(" in search_content)
     check_true("SearchScreen shows confirmation dialog on clear history", "showClearHistoryConfirm" in search_content)
 
+    # A remembered entry: icon, text and the fill arrow; holding it asks to remove it.
+    row = search_content[search_content.index("private fun HistoryRow("):search_content.index("private fun FillArrow(")]
+    check_true("History rows have no remove cross", "Icons.Filled.Close" not in row and "IconButton(onClick = onRemove" not in row)
+    check_true("Holding a history row asks to remove it",
+               "combinedClickable(onClick = onUse, onLongClick = onRemove)" in row
+               and "onRemove = { removing = entry }" in search_content
+               and "RemoveEntryDialog(" in search_content)
+    dialog = search_content[search_content.index("private fun RemoveEntryDialog("):search_content.index("private fun HistoryRow(")]
+    check_true("The remove dialog names the entry, removes it and can copy it",
+               "R.string.search_remove_confirm_body" in dialog and "R.string.search_remove" in dialog
+               and "copySheetLink(context, entry)" in dialog)
+    check_true("Rows point their fill arrow up at the field", ".rotate(-90f)" in search_content
+               and search_content.count("FillArrow(onFill)") == 2)
+
     # HistoryScreen search bar AnimatedVisibility and dismiss
     check_true("HistoryScreen uses AnimatedVisibility for search bar", "AnimatedVisibility(\n            visible = searchOpen" in history_content or "AnimatedVisibility(visible = searchOpen" in history_content)
     check_true("HistoryScreen uses expandVertically + fadeIn", "expandVertically() + fadeIn()" in history_content)
@@ -352,7 +366,7 @@ def test_streamlined_home_and_downloading_queue():
     check_true("Queue running cards pause, resume and cancel per item",
                "onCancel = { downloadViewModel.cancelItem(item.info.url) }" in q_content and
                "onPause = downloadViewModel::pauseDownload" in q_content and
-               "onResume = downloadViewModel::resumeDownload" in q_content)
+               "onResume = { downloadViewModel.resumeItem(item.info.url) }" in q_content)
 
     # 5. The downloads list holds finished files only
     check_true("HistoryFilter enum removed", "enum class HistoryFilter" not in repo_content)

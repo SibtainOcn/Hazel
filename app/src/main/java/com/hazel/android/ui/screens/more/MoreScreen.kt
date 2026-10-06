@@ -91,8 +91,8 @@ fun MoreScreen(
     onNavigateToDocumentation: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val listingSource by SettingsRepository.getListingSource(context).collectAsState(initial = ListingSource.DEFAULT)
-    val hasUpdateAvailable by SettingsRepository.getHasUpdateAvailable(context).collectAsState(initial = false)
+    val listingSource by remember(context) { SettingsRepository.getListingSource(context) }.collectAsState(initial = ListingSource.DEFAULT)
+    val hasUpdateAvailable by remember(context) { SettingsRepository.getHasUpdateAvailable(context) }.collectAsState(initial = false)
 
     // Read when the screen appears so the row can show what clearing would free.
     var tempBytes by remember { mutableStateOf(0L) }

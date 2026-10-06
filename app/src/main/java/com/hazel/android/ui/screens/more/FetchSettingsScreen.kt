@@ -39,16 +39,16 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val mode by SettingsRepository.getFetchMode(context).collectAsState(initial = FetchMode.DEFAULT)
-    val listingSource by SettingsRepository.getListingSource(context).collectAsState(initial = ListingSource.DEFAULT)
-    val forceIpv4 by SettingsRepository.getForceIpv4(context).collectAsState(initial = false)
-    val searchSource by SettingsRepository.getSearchSource(context).collectAsState(initial = SearchSource.DEFAULT)
-    val searchEngine by SettingsRepository.getSearchEngine(context).collectAsState(initial = ListingSource.NEWPIPE)
-    val searchResults by SettingsRepository.getSearchResults(context)
+    val mode by remember(context) { SettingsRepository.getFetchMode(context) }.collectAsState(initial = FetchMode.DEFAULT)
+    val listingSource by remember(context) { SettingsRepository.getListingSource(context) }.collectAsState(initial = ListingSource.DEFAULT)
+    val forceIpv4 by remember(context) { SettingsRepository.getForceIpv4(context) }.collectAsState(initial = false)
+    val searchSource by remember(context) { SettingsRepository.getSearchSource(context) }.collectAsState(initial = SearchSource.DEFAULT)
+    val searchEngine by remember(context) { SettingsRepository.getSearchEngine(context) }.collectAsState(initial = ListingSource.NEWPIPE)
+    val searchResults by remember(context) { SettingsRepository.getSearchResults(context) }
         .collectAsState(initial = SettingsRepository.DEFAULT_SEARCH_RESULTS)
-    val suggestions by SettingsRepository.getSearchSuggestions(context).collectAsState(initial = false)
-    val playEngine by SettingsRepository.getPlayEngine(context).collectAsState(initial = ListingSource.NEWPIPE)
-    val playQuality by SettingsRepository.getPlayQuality(context)
+    val suggestions by remember(context) { SettingsRepository.getSearchSuggestions(context) }.collectAsState(initial = false)
+    val playEngine by remember(context) { SettingsRepository.getPlayEngine(context) }.collectAsState(initial = ListingSource.NEWPIPE)
+    val playQuality by remember(context) { SettingsRepository.getPlayQuality(context) }
         .collectAsState(initial = SettingsRepository.DEFAULT_PLAY_QUALITY)
 
     var open by remember { mutableStateOf(Choice.NONE) }

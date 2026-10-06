@@ -1,6 +1,7 @@
 package com.hazel.android.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.hazel.android.download.DownloadOptions
@@ -77,6 +78,7 @@ data class QueuedDownload(
 object DownloadQueueRepository {
 
     private val QUEUE_KEY = stringPreferencesKey("download_queue")
+    private val HELD_KEY = booleanPreferencesKey("download_queue_held")
 
     /** Observe the current queue as a reactive Flow. */
     fun getQueue(context: Context): Flow<List<QueuedDownload>> =
@@ -140,8 +142,32 @@ object DownloadQueueRepository {
         }
     }
 
+    /**
+     * Whether the queue was paused as a whole. A queue held by Pause all is still held after
+     * the app is closed and opened again: what is waiting is shown, and nothing starts until
+     * the user resumes it.
+     */
+    suspend fun isHeld(context: Context): Boolean = withContext(Dispatchers.IO) {
+        context.dataStore.data.first()[HELD_KEY] == true
+    }
+
+    suspend fun setHeld(context: Context, held: Boolean) = withContext(Dispatchers.IO) {
+        context.dataStore.edit { prefs ->
+            if (held) prefs[HELD_KEY] = true else prefs.remove(HELD_KEY)
+        }
+    }
+
     suspend fun clear(context: Context) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs -> prefs.remove(QUEUE_KEY) }
+    }
+
+    /** Puts [item] in place of the record with its address, if one is still there. */
+    suspend fun replace(context: Context, item: QueuedDownload) = withContext(Dispatchers.IO) {
+        context.dataStore.edit { prefs ->
+            val existing = decode(prefs[QUEUE_KEY])
+            if (existing.none { it.url == item.url }) return@edit
+            prefs[QUEUE_KEY] = encode(existing.map { if (it.url == item.url) item else it })
+        }
     }
 
     /** Marks one link as stopped on purpose, or as owed again. */

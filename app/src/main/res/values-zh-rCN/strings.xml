@@ -47,7 +47,8 @@
     <string name="search_no_matches">没有匹配项</string>
     <string name="search_remove">移除</string>
     <string name="search_all">全部搜索</string>
-    <string name="search_forget">忘记</string>
+    <string name="search_remove_confirm_body">要从搜索记录中移除吗？</string>
+    <string name="search_entry_copied">已复制到剪贴板</string>
     <string name="search_edit_before">搜索前先编辑</string>
     <string name="search_paste_and_fetch">粘贴并读取</string>
     <string name="search_paste">粘贴</string>
@@ -320,10 +321,12 @@
     <string name="fetch_invalid_url">链接无效：必须以 http:// 或 https:// 开头</string>
     <string name="history_empty_failed">没有失败的下载</string>
     <string name="history_failed_error_log">错误日志</string>
+    <string name="history_failed_logs">日志</string>
     <string name="history_failed_copy_log">复制日志</string>
     <string name="history_failed_log_copied">错误日志已复制到剪贴板</string>
     <string name="history_failed_retry">重试</string>
     <string name="queue_failed_choose_again">换一种方式下载</string>
+    <string name="queue_failed_retry_all">重试所有失败项</string>
     <string name="queue_failed_select">选择失败项</string>
     <string name="queue_failed_remove">移除</string>
     <string name="queue_failed_remove_body">它们会连同日志一起从列表中移除。已下载的文件不受影响。</string>
@@ -451,6 +454,14 @@
     <string name="notification_action_sign_in">登录</string>
     <string name="notification_wifi_title">等待 Wi-Fi</string>
     <string name="notification_wifi_text">下载被限制为仅使用 Wi-Fi。回到 Wi-Fi 后就会开始。</string>
+    <string name="notification_run_cancelled_title">下载已取消</string>
+    <string name="notification_run_failed_title">部分下载失败</string>
+    <string name="notification_run_finished_title">下载已结束</string>
+    <string name="notification_run_summary">已下载：%1$d · 失败：%2$d · 已取消：%3$d</string>
+    <string name="download_percent_downloaded">已下载 %1$d%%</string>
+    <string name="queue_adjust_restart_title">重新开始？</string>
+    <string name="queue_adjust_restart_body">此更改会让下载从头重新开始，已下载的部分将被丢弃。</string>
+    <string name="queue_adjust_restart_confirm">重新开始</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">关闭</string>

@@ -47,7 +47,8 @@
     <string name="search_no_matches">Sin coincidencias</string>
     <string name="search_remove">Quitar</string>
     <string name="search_all">Buscar todo</string>
-    <string name="search_forget">Olvidar</string>
+    <string name="search_remove_confirm_body">¿Quitar del historial de búsqueda?</string>
+    <string name="search_entry_copied">Copiado al portapapeles</string>
     <string name="search_edit_before">Editar antes de buscar</string>
     <string name="search_paste_and_fetch">Pegar y buscar</string>
     <string name="search_paste">Pegar</string>
@@ -328,10 +329,12 @@
     <string name="fetch_invalid_url">Enlace no válido: debe empezar por http:// o https://</string>
     <string name="history_empty_failed">No hay descargas fallidas</string>
     <string name="history_failed_error_log">Registro de errores</string>
+    <string name="history_failed_logs">Registros</string>
     <string name="history_failed_copy_log">Copiar registro</string>
     <string name="history_failed_log_copied">Registro de errores copiado al portapapeles</string>
     <string name="history_failed_retry">Reintentar</string>
     <string name="queue_failed_choose_again">Descargar de otra forma</string>
+    <string name="queue_failed_retry_all">Reintentar todas las fallidas</string>
     <string name="queue_failed_select">Seleccionar fallidas</string>
     <string name="queue_failed_remove">Quitar</string>
     <string name="queue_failed_remove_body">Salen de la lista con sus registros. Tus archivos descargados no se tocan.</string>
@@ -465,6 +468,14 @@
     <string name="notification_action_sign_in">Iniciar sesión</string>
     <string name="notification_wifi_title">Esperando al Wi-Fi</string>
     <string name="notification_wifi_text">Las descargas están limitadas al Wi-Fi. Empiezan cuando vuelvas a estar en Wi-Fi.</string>
+    <string name="notification_run_cancelled_title">Descargas canceladas</string>
+    <string name="notification_run_failed_title">Algunas descargas fallaron</string>
+    <string name="notification_run_finished_title">Descargas terminadas</string>
+    <string name="notification_run_summary">Descargadas: %1$d · Fallidas: %2$d · Canceladas: %3$d</string>
+    <string name="download_percent_downloaded">%1$d%% descargado</string>
+    <string name="queue_adjust_restart_title">¿Empezar de nuevo?</string>
+    <string name="queue_adjust_restart_body">Este cambio vuelve a empezar la descarga desde el principio. Lo descargado hasta ahora se descarta.</string>
+    <string name="queue_adjust_restart_confirm">Empezar de nuevo</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">Cerrar</string>

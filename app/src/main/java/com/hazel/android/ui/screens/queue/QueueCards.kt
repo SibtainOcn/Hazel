@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
@@ -92,11 +93,12 @@ private val LogButtonPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp
 /** A true red, bright enough to read on dark artwork in either theme. */
 private val ErrorOnArtwork = Color(0xFFFF5A52)
 
-/** A link waiting its turn, with the choice it will download as. */
+/** A link waiting its turn, with the choice it will download as. Tapping it shows its details. */
 @Composable
 fun QueuedCard(
     item: QueuedDownload,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    onOpen: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -107,6 +109,10 @@ fun QueuedCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
+                .clickable(
+                    onClickLabel = stringResource(R.string.format_sheet_section_details),
+                    onClick = onOpen
+                )
         ) {
             Artwork(item.thumbnail, item.hasVideo)
             Box(modifier = Modifier.fillMaxSize().background(ArtworkScrim))
@@ -154,6 +160,8 @@ fun FailedCard(
     onOpen: () -> Unit,
     onViewLog: () -> Unit,
     onRetry: () -> Unit,
+    /** Offers the failed link's address to copy or open, as every link in the app does. */
+    onLink: () -> Unit = {},
     onDismiss: () -> Unit,
     onLongPress: () -> Unit = {},
     selected: Boolean? = null,
@@ -167,8 +175,10 @@ fun FailedCard(
     // else; its site stands in as the author, and a YouTube link still finds its artwork.
     val title = item.title.takeUnless { it.isBlank() || it == item.url } ?: item.url
     // When it failed rides with the source, so the corner keeps room for the actions.
-    val author = listOf(item.author.ifBlank { host }, formatDateTime(item.failedAt))
-        .filter { it.isNotBlank() }.joinToString(" · ")
+    val author = remember(item.author, host, item.failedAt) {
+        listOf(item.author.ifBlank { host }, formatDateTime(item.failedAt))
+            .filter { it.isNotBlank() }.joinToString(" · ")
+    }
     val thumbnail = item.thumbnail ?: remember(item.url) { youtubeThumbnail(item.url) }
 
     Surface(
@@ -296,8 +306,14 @@ fun FailedCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     CardPill(
+                        icon = Icons.Filled.Link,
+                        label = null,
+                        description = stringResource(R.string.sheet_link_options),
+                        onClick = onLink
+                    )
+                    CardPill(
                         icon = Icons.Filled.Description,
-                        label = stringResource(R.string.history_failed_error_log),
+                        label = stringResource(R.string.history_failed_logs),
                         onClick = onViewLog
                     )
                     if (!retrying) CardPill(
@@ -438,17 +454,29 @@ fun FailureLogSheet(
     }
 }
 
+// Compiled once: every failed card drawn would otherwise compile both again.
+private val EXTRACTOR_AND_ID = Regex("""^\[[^\]]+]\s*[^\s:]+:\s*""")
+private val EXTRACTOR = Regex("""^\[[^\]]+]\s*""")
+
 /**
  * The line that says why, without the engine's framing: "ERROR: [youtube] abc123: This
  * video is unavailable" reads "This video is unavailable". Warnings print before the error
  * that stopped the run, so the last error is the one.
  */
 private fun shortReason(log: String): String {
-    val lines = log.lines().map { it.trim() }.filter { it.isNotEmpty() }
-    val line = lines.lastOrNull { it.startsWith("ERROR:") } ?: lines.firstOrNull() ?: return ""
+    // Walked line by line without copying the log, which can run to thousands of lines.
+    var first: String? = null
+    var lastError: String? = null
+    log.lineSequence().forEach { raw ->
+        val line = raw.trim()
+        if (line.isEmpty()) return@forEach
+        if (first == null) first = line
+        if (line.startsWith("ERROR:")) lastError = line
+    }
+    val line = lastError ?: first ?: return ""
     return line.removePrefix("ERROR:").trim()
-        .replace(Regex("""^\[[^\]]+]\s*[^\s:]+:\s*"""), "")
-        .replace(Regex("""^\[[^\]]+]\s*"""), "")
+        .replace(EXTRACTOR_AND_ID, "")
+        .replace(EXTRACTOR, "")
         .ifBlank { line }
 }
 
@@ -458,12 +486,16 @@ private fun hostOf(url: String): String =
 private fun youtubeThumbnail(url: String): String? =
     UrlExtractor.extractYouTubeId(url)?.let { "https://i.ytimg.com/vi/$it/hqdefault.jpg" }
 
-/** A small action on the artwork, in the shape of the tags beside it. */
+/**
+ * A small action on the artwork, in the shape of the tags beside it. Without a [label] it is
+ * the icon alone, named for screen readers by [description].
+ */
 @Composable
 private fun CardPill(
     icon: ImageVector,
-    label: String,
+    label: String?,
     onClick: () -> Unit,
+    description: String? = null,
     background: Color = Color.Black.copy(alpha = 0.6f),
     foreground: Color = Color.White
 ) {
@@ -475,15 +507,17 @@ private fun CardPill(
             .padding(horizontal = 12.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(15.dp), tint = foreground)
-        Spacer(modifier = Modifier.width(5.dp))
-        Text(
-            label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = foreground,
-            maxLines = 1
-        )
+        Icon(icon, contentDescription = description, modifier = Modifier.size(15.dp), tint = foreground)
+        if (label != null) {
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = foreground,
+                maxLines = 1
+            )
+        }
     }
 }
 

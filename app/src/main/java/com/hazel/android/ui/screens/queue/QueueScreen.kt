@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -74,12 +75,15 @@ import com.hazel.android.data.FailedDownloadRepository
 import com.hazel.android.data.QueuedDownload
 import com.hazel.android.download.BatchItem
 import com.hazel.android.download.BatchState
-import com.hazel.android.download.DownloadState
 import com.hazel.android.download.DownloadViewModel
 import com.hazel.android.download.MediaInfo
+import com.hazel.android.download.PausedShares
 import com.hazel.android.ui.components.MediaCard
+import com.hazel.android.util.LinkKey
 import com.hazel.android.util.copyToClipboard
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** The queue screen's tabs, in the order a download passes through them. */
 private enum class QueueTab(val labelRes: Int) {
@@ -103,13 +107,24 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
     val scope = rememberCoroutineScope()
 
     val state by downloadViewModel.state.collectAsState()
-    val queueList by DownloadQueueRepository.getQueue(context).collectAsState(initial = emptyList())
-    val failedList by FailedDownloadRepository.getFailed(context).collectAsState(initial = emptyList())
+    // Each flow is made once: a new one on every redraw would be collected afresh, and the
+    // saved queue and failures decoded again, several times a second while bytes arrive.
+    val queueList by remember(context) { DownloadQueueRepository.getQueue(context) }
+        .collectAsState(initial = emptyList())
+    val failedList by remember(context) { FailedDownloadRepository.getFailed(context) }
+        .collectAsState(initial = emptyList())
 
-    val running = runningItems(state, queueList)
-    val runningUrls = running.mapTo(mutableSetOf()) { it.info.url }
-    val waiting = queueList.filterNot { it.url in runningUrls || it.paused }
-    val failed = failedList.sortedByDescending { it.failedAt }
+    // The state changes many times a second while bytes arrive, but the lists only when a link
+    // moves along, so each is built again only when what it is made of changes. A queue of
+    // hundreds would otherwise be sorted and searched on every progress tick.
+    val running = remember(state.active, state.isDownloading, state.batch, state.resuming, queueList) {
+        runningItems(state.active, state.isDownloading, state.batch, state.resuming, queueList)
+    }
+    val waiting = remember(queueList, running) {
+        val runningUrls = running.mapTo(HashSet()) { it.info.url }
+        queueList.filterNot { it.url in runningUrls || it.paused }
+    }
+    val failed = remember(failedList) { failedList.sortedByDescending { it.failedAt } }
 
     fun retry(item: FailedDownload) {
         Toast.makeText(context, resources.getString(R.string.history_retrying_toast), Toast.LENGTH_SHORT).show()
@@ -129,13 +144,27 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
 
     // Failures whose link is being read, waiting or downloading again: shown as retrying
     // until that settles, when a finished download clears them and a failure replaces them.
-    val inHandUrls = buildList {
-        addAll(runningUrls)
-        addAll(waiting.map { it.url })
-        state.batch.filter { it.state != BatchState.DONE && it.state != BatchState.FAILED }.forEach { add(it.url) }
+    // Each link is reduced to its media once, off the main thread, rather than once per pair.
+    val inHandUrls = remember(running, waiting, state.batch) {
+        buildSet {
+            running.forEach { add(it.info.url) }
+            waiting.forEach { add(it.url) }
+            state.batch.forEach { if (it.state != BatchState.DONE && it.state != BatchState.FAILED) add(it.url) }
+        }
     }
-    fun retrying(item: FailedDownload) =
-        inHandUrls.any { it == item.url || com.hazel.android.util.LinkKey.sameMedia(it, item.url) }
+    val retryingIds by produceState(emptySet<Long>(), failed, inHandUrls) {
+        value = withContext(Dispatchers.Default) {
+            runCatching { failuresInHand(failed, inHandUrls) }.getOrDefault(emptySet())
+        }
+    }
+
+    // Every failure not already back in the queue, in one go.
+    fun retryAll() {
+        val due = failed.filterNot { it.id in retryingIds }
+        if (due.isEmpty()) return
+        Toast.makeText(context, resources.getString(R.string.history_retrying_toast), Toast.LENGTH_SHORT).show()
+        downloadViewModel.retryAllFailed(context, due)
+    }
 
     val pagerState = rememberPagerState(pageCount = { QueueTab.entries.size })
     var menuOpen by remember { mutableStateOf(false) }
@@ -144,6 +173,10 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
     var confirmClearFailed by remember { mutableStateOf(false) }
     var confirmRemovePicked by remember { mutableStateOf<Set<Long>?>(null) }
     var viewLog by remember { mutableStateOf<FailedDownload?>(null) }
+    // The failed link whose address is offered to copy or open.
+    var linkFor by remember { mutableStateOf<String?>(null) }
+    // The queued link whose own sheet is open, from a card's Details or a tap on a waiting card.
+    var detailsFor by remember { mutableStateOf<QueuedDownload?>(null) }
 
     // Failures picked for removal; null while not picking. Picking ends on leaving the
     // Failed tab or with Back, and drops failures that have gone from the list meanwhile.
@@ -213,10 +246,9 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             text = {
                                 Text(stringResource(if (isMulti) R.string.download_pause_all else R.string.download_pause))
                             },
-                            enabled = !state.isProcessing,
                             onClick = {
                                 menuOpen = false
-                                downloadViewModel.pauseDownload()
+                                downloadViewModel.pauseAll()
                             }
                         )
                     } else if (anythingInHand) {
@@ -246,6 +278,14 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                         onClick = {
                             menuOpen = false
                             confirmClearQueue = true
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.queue_failed_retry_all)) },
+                        enabled = failed.any { it.id !in retryingIds },
+                        onClick = {
+                            menuOpen = false
+                            retryAll()
                         }
                     )
                     DropdownMenuItem(
@@ -305,6 +345,9 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
 
         HorizontalPager(
             state = pagerState,
+            // The tabs beside the one in view stay composed, so moving between them shows a
+            // list already laid out rather than building it in the middle of the swipe.
+            beyondViewportPageCount = 1,
             modifier = Modifier.fillMaxSize()
         ) { page ->
             when (QueueTab.entries[page]) {
@@ -314,6 +357,23 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     emptyText = stringResource(R.string.queue_empty_running)
                 ) { shrink ->
                     items(running, key = { "running_${it.info.url}" }) { item ->
+                        val paused = item.batchItem?.state == BatchState.PAUSED
+                        val inRun = !paused && (item.isDownloading || item.info.url == state.active?.url)
+                        // A paused link is measured by its folder, whole, rather than by the
+                        // engine's last line, which counts only the stream it was on. Measured
+                        // off the main thread, once while it stays paused: drawn again, the
+                        // card starts from the figure already known.
+                        val queued = item.queued
+                        val onDisk by produceState(
+                            if (paused && queued != null) PausedShares.cached(queued) ?: 0f else 0f,
+                            queued,
+                            paused
+                        ) {
+                            if (paused && queued != null) {
+                                value = PausedShares.cached(queued)
+                                    ?: withContext(Dispatchers.IO) { PausedShares.measure(queued) }
+                            }
+                        }
                         Box(modifier = Modifier.scrollShrink(shrink)) {
                         MediaCard(
                             info = item.info,
@@ -323,14 +383,19 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             processingStep = state.processingStep,
                             // A paused item keeps the figures it stopped at, so its card
                             // says how much is already in hand.
-                            progress = if (item.isDownloading || item.info.url == state.active?.url) state.progress else 0f,
-                            totalBytes = if (item.isDownloading || item.info.url == state.active?.url) state.totalBytes else 0L,
+                            progress = if (inRun) state.progress else onDisk,
+                            totalBytes = if (inRun) state.totalBytes
+                            else queued?.let { it.fileSizeBytes + it.mergeAudioSizeBytes } ?: 0L,
                             eta = if (item.isDownloading) state.eta else "",
                             batchItem = item.batchItem,
                             waitingForWifi = state.waitingForWifi,
                             onCancel = { downloadViewModel.cancelItem(item.info.url) },
                             onPause = downloadViewModel::pauseDownload,
-                            onResume = downloadViewModel::resumeDownload
+                            // A card's Resume is its own link's, as its Pause is.
+                            onResume = { downloadViewModel.resumeItem(item.info.url) },
+                            onDetails = queued?.let { { detailsFor = it } },
+                            // A link waiting to resume opens its sheet like any waiting link.
+                            onOpenSheet = { queued?.let { detailsFor = it } }
                         )
                         }
                     }
@@ -345,7 +410,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                         Box(modifier = Modifier.scrollShrink(shrink)) {
                             QueuedCard(
                                 item = item,
-                                onRemove = { downloadViewModel.removeQueued(context, item.url) }
+                                onRemove = { downloadViewModel.removeQueued(context, item.url) },
+                                onOpen = { detailsFor = item }
                             )
                         }
                     }
@@ -361,11 +427,12 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                         FailedCard(
                             item = item,
                             selected = picked?.let { item.id in it },
-                            retrying = retrying(item),
+                            retrying = item.id in retryingIds,
                             onLongPress = { toggle(item.id) },
                             onOpen = { if (picked != null) toggle(item.id) else reopen(item) },
                             onViewLog = { viewLog = item },
                             onRetry = { retry(item) },
+                            onLink = { linkFor = item.url },
                             onDismiss = { scope.launch { FailedDownloadRepository.remove(context, item.id) } }
                         )
                         }
@@ -373,6 +440,22 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                 }
             }
         }
+    }
+
+    detailsFor?.let { item ->
+        QueuedItemSheet(
+            item = item,
+            downloadViewModel = downloadViewModel,
+            onDismiss = { detailsFor = null }
+        )
+    }
+
+    linkFor?.let { url ->
+        com.hazel.android.ui.screens.download.LinkOptionsDialog(
+            links = listOf(url),
+            onFeedback = { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() },
+            onDismiss = { linkFor = null }
+        )
     }
 
     viewLog?.let { item ->
@@ -452,7 +535,9 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
 private data class RunningItem(
     val info: MediaInfo,
     val isDownloading: Boolean,
-    val batchItem: BatchItem?
+    val batchItem: BatchItem?,
+    /** Its record in the queue, for its sheet and its size; null for a link with none. */
+    val queued: QueuedDownload? = null
 )
 
 /**
@@ -460,32 +545,83 @@ private data class RunningItem(
  *
  * The download in progress comes from the run itself. A paused one is still in hand, and so
  * is a pause written down by an earlier session, which lives only on the saved queue until
- * it is resumed.
+ * it is resumed. Each link is looked up by address once, so a long queue costs one pass.
  */
-private fun runningItems(state: DownloadState, queue: List<QueuedDownload>): List<RunningItem> {
+private fun runningItems(
+    active: MediaInfo?,
+    isDownloading: Boolean,
+    batch: List<BatchItem>,
+    resuming: Set<String>,
+    queue: List<QueuedDownload>
+): List<RunningItem> {
+    // The first entry for an address wins, as a search from the top would find it.
+    val batchByUrl = HashMap<String, BatchItem>(batch.size)
+    batch.forEach { batchByUrl.putIfAbsent(it.url, it) }
+    val queuedByUrl = HashMap<String, QueuedDownload>(queue.size)
+    queue.forEach { queuedByUrl.putIfAbsent(it.url, it) }
+
     val items = mutableListOf<RunningItem>()
-    state.active?.let { active ->
-        val batchItem = state.batch.firstOrNull { it.url == active.url }
-        if (state.isDownloading || batchItem?.state == BatchState.PAUSED) {
-            items += RunningItem(active, state.isDownloading, batchItem)
+    val shown = HashSet<String>()
+    active?.let {
+        val batchItem = batchByUrl[active.url]
+        if (isDownloading || batchItem?.state == BatchState.PAUSED) {
+            // A paused link is never drawn as running, even in the moment between its pause
+            // and the run letting go, so its stage track does not go on moving.
+            items += RunningItem(
+                active,
+                isDownloading && batchItem?.state != BatchState.PAUSED,
+                batchItem,
+                queuedByUrl[active.url]
+            )
+            shown += active.url
         }
     }
-    queue.filter { it.paused && items.none { running -> running.info.url == it.url } }.forEach { held ->
-        items += RunningItem(
-            info = MediaInfo(
-                url = held.url,
-                title = held.title,
-                uploader = held.author,
-                thumbnail = held.thumbnail,
-                durationSeconds = held.durationSeconds,
-                videoFormats = emptyList(),
-                audioFormats = emptyList()
-            ),
-            isDownloading = false,
-            batchItem = BatchItem(held.url, held.title, BatchState.PAUSED)
-        )
+    // Links resumed part way through, next in line: still on this tab, as they are not new.
+    if (resuming.isNotEmpty()) queue.forEach { next ->
+        if (!next.paused && next.url in resuming && shown.add(next.url)) {
+            items += RunningItem(
+                info = next.asInfo(),
+                isDownloading = false,
+                batchItem = batchByUrl[next.url] ?: BatchItem(next.url, next.title, BatchState.QUEUED),
+                queued = next
+            )
+        }
+    }
+    queue.forEach { held ->
+        if (held.paused && shown.add(held.url)) {
+            items += RunningItem(
+                info = held.asInfo(),
+                isDownloading = false,
+                batchItem = BatchItem(held.url, held.title, BatchState.PAUSED),
+                queued = held
+            )
+        }
     }
     return items
+}
+
+/** A queued link drawn as a card, from its record alone: nothing is read for it. */
+private fun QueuedDownload.asInfo() = MediaInfo(
+    url = url,
+    title = title,
+    uploader = author,
+    thumbnail = thumbnail,
+    durationSeconds = durationSeconds,
+    videoFormats = emptyList(),
+    audioFormats = emptyList()
+)
+
+/**
+ * The failures whose link is in hand again under any spelling. Every link is reduced to its
+ * media once, so this is one pass over each list rather than a comparison of every pair.
+ */
+internal fun failuresInHand(failed: List<FailedDownload>, inHand: Collection<String>): Set<Long> {
+    if (failed.isEmpty() || inHand.isEmpty()) return emptySet()
+    val exact = inHand.toHashSet()
+    val media = inHand.mapNotNullTo(HashSet()) { url -> LinkKey.canonical(url).takeIf { it.isNotBlank() } }
+    return failed.mapNotNullTo(HashSet()) { item ->
+        item.id.takeIf { item.url in exact || LinkKey.canonical(item.url).let { it.isNotBlank() && it in media } }
+    }
 }
 
 @Composable
