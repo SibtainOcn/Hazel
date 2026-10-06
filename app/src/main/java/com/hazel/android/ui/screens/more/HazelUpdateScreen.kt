@@ -82,6 +82,8 @@ import java.util.Locale
 @Composable
 fun HazelUpdateScreen(
     onBack: () -> Unit,
+    /** Opens What's new, the same page as under Documentation. */
+    onOpenWhatsNew: () -> Unit = {},
     viewModel: HazelUpdateViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -239,15 +241,7 @@ fun HazelUpdateScreen(
                         openInAppBrowser(context, HazelUpdater.FDROID_PACKAGE_URL)
                     }
                 },
-                onViewChangelog = { ver, _ ->
-                    val cleanVer = ver.removePrefix("v").removePrefix("V").trim()
-                    val url = if (cleanVer.isNotBlank()) {
-                        "https://github.com/${HazelUpdater.REPO_NAME}/blob/v$cleanVer/CHANGELOG.md"
-                    } else {
-                        "https://github.com/${HazelUpdater.REPO_NAME}/blob/HEAD/CHANGELOG.md"
-                    }
-                    openInAppBrowser(context, url)
-                }
+                onViewChangelog = { _, _ -> onOpenWhatsNew() }
             )
 
             // ── Update Channel (GitHub release builds only; F-Droid relies strictly on F-Droid repo releases) ──

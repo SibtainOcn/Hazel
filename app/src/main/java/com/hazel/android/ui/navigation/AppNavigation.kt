@@ -425,7 +425,12 @@ fun AppNavigation(
                 )
             }
             composable("hazel_update") {
-                HazelUpdateScreen(onBack = { navController.popBackStack() })
+                HazelUpdateScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenWhatsNew = {
+                        navController.navigate("docs/${com.hazel.android.ui.screens.more.DocPage.CHANGELOG.name}")
+                    }
+                )
             }
             composable("ytdlp_update") {
                 YtDlpUpdateScreen(onBack = { navController.popBackStack() })

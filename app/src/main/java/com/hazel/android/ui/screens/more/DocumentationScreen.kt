@@ -32,6 +32,7 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -84,6 +85,8 @@ enum class DocPage(
     /** True for a plain text file, kept as it is laid out rather than read as Markdown. */
     val plain: Boolean = false
 ) {
+    /** The site's front page; the pages below each open one part of it. */
+    SITE_HOME(R.string.docs_site, Icons.Filled.Language, "${SITE}index.html"),
     GUIDE(R.string.docs_guide, Icons.AutoMirrored.Filled.MenuBook, "${SITE}guide.html"),
     FEATURES(R.string.docs_features, Icons.Filled.AutoAwesome, "${SITE}index.html#features"),
     FAQ(R.string.docs_faq, Icons.Filled.QuestionAnswer, "${SITE}faq.html"),
