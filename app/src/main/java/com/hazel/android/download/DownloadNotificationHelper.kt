@@ -336,7 +336,8 @@ object DownloadNotificationHelper {
 
         val detail = buildList {
             add("Paused")
-            if (progress in 0..100) add("$progress%")
+            // Nothing in hand says nothing, so the figure only shows once there is some.
+            if (progress in 1..100) add("$progress%")
             if (totalBytes > 0) add("${formatSize(doneBytes)} / ${formatSize(totalBytes)}")
         }.joinToString("  ·  ")
 
@@ -345,7 +346,7 @@ object DownloadNotificationHelper {
             .setContentTitle(shortTitle(mediaTitle).ifBlank { "Hazel" })
             .setContentText(detail)
             .setStyle(NotificationCompat.BigTextStyle().bigText(detail))
-            .setSubText(if (progress in 0..100) "$progress%" else null)
+            .setSubText(if (progress in 1..100) "$progress%" else null)
             .setProgress(100, progress.coerceIn(0, 100), false)
             // Held in the shade rather than swept away with the run that stopped. A paused
             // download is still owed, and this is the only thing that says so once the app

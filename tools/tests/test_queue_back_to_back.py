@@ -191,7 +191,10 @@ def test_code():
     check_true("startBatch adds no duplicate check (intended)",
                "queue.none" not in start and "distinctBy" not in start)
 
-    run = block(vm, "    private fun runQueue(", 16000)
+    # The whole of runQueue, up to the function after it, rather than a fixed length that a
+    # longer run loop outgrows.
+    run_at = vm.find("    private fun runQueue(")
+    run = vm[run_at:vm.find("    private fun holdForResume(", run_at)] if run_at >= 0 else ""
     take = block(run, "val next = synchronized(queue) {", 220)
     check_true("Taking the next link does not let the run go", take and "runOwner" not in take)
     close = block(run, "val more = synchronized(queue) {", 500)

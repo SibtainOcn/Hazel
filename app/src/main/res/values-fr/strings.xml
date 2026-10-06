@@ -328,10 +328,12 @@
     <string name="fetch_invalid_url">Lien non valide : il doit commencer par http:// ou https://</string>
     <string name="history_empty_failed">Aucun téléchargement échoué</string>
     <string name="history_failed_error_log">Journal d\'erreurs</string>
+    <string name="history_failed_logs">Journaux</string>
     <string name="history_failed_copy_log">Copier le journal</string>
     <string name="history_failed_log_copied">Journal d\'erreurs copié dans le presse-papiers</string>
     <string name="history_failed_retry">Réessayer</string>
     <string name="queue_failed_choose_again">Télécharger autrement</string>
+    <string name="queue_failed_retry_all">Réessayer tous les échecs</string>
     <string name="queue_failed_select">Sélectionner les échecs</string>
     <string name="queue_failed_remove">Retirer</string>
     <string name="queue_failed_remove_body">Ils quittent la liste avec leurs journaux. Vos fichiers téléchargés ne sont pas touchés.</string>
@@ -469,6 +471,10 @@
     <string name="notification_run_failed_title">Certains téléchargements ont échoué</string>
     <string name="notification_run_finished_title">Téléchargements terminés</string>
     <string name="notification_run_summary">Téléchargés : %1$d · Échoués : %2$d · Annulés : %3$d</string>
+    <string name="download_percent_downloaded">%1$d%% téléchargé</string>
+    <string name="queue_adjust_restart_title">Recommencer ?</string>
+    <string name="queue_adjust_restart_body">Ce changement relance le téléchargement depuis le début. Ce qui a déjà été récupéré est supprimé.</string>
+    <string name="queue_adjust_restart_confirm">Recommencer</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">Fermer</string>

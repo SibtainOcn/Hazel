@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - The home screen, the queue and the downloads list have a scrollbar on the right that can be held and dragged to move through a long list. It rests as a faint thin bar, lights up in a soft shade of the accent while the list moves, and takes the full accent while held.
-- Failed downloads can be picked and removed together: long-press a failed card, or choose Select failed in the queue menu, then remove the picked ones or select all. Picked cards light up with a wash of the accent, and removing them asks first.
+- Failed downloads can be picked and removed together: long-press a failed card, or choose Select failed in the queue menu, then remove the picked ones or select all. Picked cards light up with a wash of the accent, and removing them asks first. Retry all failed in the same menu retries every failure not already back in the queue.
 - The error log has a Copy URL button, and a download that failed part way says where it stopped and how much had arrived.
 - Synthesizing has a "Download sheet opens on" setting, Video or Audio, for the tab a link's sheet and a set of links open on. A link with no audio still opens on Video.
 
@@ -38,6 +38,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A search result, or any other link, downloaded while a playlist is running now joins the queue. The open download sheet followed the run to whichever playlist item had just started, and its Download queued that item again instead, so the new link never appeared.
 - A run of several links that is cancelled, or ends with failures, now reports how many were downloaded, how many failed and how many were cancelled, in one notification that opens the queue. Before, cancelling a playlist with one bad link in it read "1 of 83 could not be downloaded".
 - Opening the queue from a notification no longer leaves the Home button doing nothing until the app is restarted.
+- A paused download resumes with a tap on its card, the pause sign included, and its card says how much is already downloaded once there is any. A card's Resume now resumes that link alone, as its Pause pauses it alone; Resume all in the menu and on the notification still resumes everything.
+- A link in the queue opens its own download sheet, from Details in a running or paused card's menu or with a tap on a waiting card. It shows what the link was read as, with its current choice selected, and reads nothing again. Apply changes that link only. A change that would start the link over, because a paused download loses what it fetched or the download in progress is stopped and fetched again, asks first.
+- A download resumed part way through stays on the Running tab, marked Queued, until it picks up again, instead of moving to In queue. It goes first in line: Resume all, and a queue picked up after the app was closed, finish what is half downloaded before starting anything new.
+- A paused card's size and percentage are measured from what is on disk, once while it stays paused, so a download paused while fetching its audio no longer shows the audio stream's own figures, such as "6% · 255 KB / 3.8 MB", for a video that was nearly done.
+- A paused or held queue shows its paused notification again after the app restarts or updates, so it can always be resumed from the shade. The paused notification no longer says "0%" before anything has arrived.
+- Failed downloads have a link button before the log button, opening the same Copy and Open dialog as the sheets, and the log button is called Logs.
+- Moving between the Running, In queue and Failed tabs no longer lags with a long queue. The screen read the saved queue and failures again on every progress update, several times a second, and rebuilt and searched every list each time. Each is now read once and rebuilt only when a link moves along.
+- Pause all, in the queue menu or on the notification, now pauses the queue. It used to pause only the download in hand, and the next link started at once. Nothing waiting starts until Resume, even after the app is closed and opened again. A card's own Pause still pauses just that link. A paused card shows a pause sign over its artwork, and its stage track no longer keeps moving.
 
 ## [1.1.12] - 2026-10-03
 ### Fixed

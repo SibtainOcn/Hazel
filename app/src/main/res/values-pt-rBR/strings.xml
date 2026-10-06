@@ -328,10 +328,12 @@
     <string name="fetch_invalid_url">Link inválido: deve começar com http:// ou https://</string>
     <string name="history_empty_failed">Nenhum download com falha</string>
     <string name="history_failed_error_log">Registro de erros</string>
+    <string name="history_failed_logs">Registros</string>
     <string name="history_failed_copy_log">Copiar registro</string>
     <string name="history_failed_log_copied">Registro de erros copiado para a área de transferência</string>
     <string name="history_failed_retry">Tentar novamente</string>
     <string name="queue_failed_choose_again">Baixar de outro jeito</string>
+    <string name="queue_failed_retry_all">Tentar novamente todas as falhas</string>
     <string name="queue_failed_select">Selecionar falhas</string>
     <string name="queue_failed_remove">Remover</string>
     <string name="queue_failed_remove_body">Eles saem da lista com seus registros. Seus arquivos baixados não são afetados.</string>
@@ -469,6 +471,10 @@
     <string name="notification_run_failed_title">Alguns downloads falharam</string>
     <string name="notification_run_finished_title">Downloads concluídos</string>
     <string name="notification_run_summary">Baixados: %1$d · Com falha: %2$d · Cancelados: %3$d</string>
+    <string name="download_percent_downloaded">%1$d%% baixado</string>
+    <string name="queue_adjust_restart_title">Começar de novo?</string>
+    <string name="queue_adjust_restart_body">Esta mudança recomeça o download do início. O que já foi baixado é descartado.</string>
+    <string name="queue_adjust_restart_confirm">Começar de novo</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">Fechar</string>

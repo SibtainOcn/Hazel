@@ -324,10 +324,12 @@
     <string name="fetch_invalid_url">अमान्य लिंक: यह http:// या https:// से शुरू होना चाहिए</string>
     <string name="history_empty_failed">कोई विफल डाउनलोड नहीं है</string>
     <string name="history_failed_error_log">त्रुटि लॉग</string>
+    <string name="history_failed_logs">लॉग</string>
     <string name="history_failed_copy_log">लॉग कॉपी करें</string>
     <string name="history_failed_log_copied">त्रुटि लॉग क्लिपबोर्ड पर कॉपी किया गया</string>
     <string name="history_failed_retry">पुनः प्रयास करें</string>
     <string name="queue_failed_choose_again">दूसरे तरीके से डाउनलोड करें</string>
+    <string name="queue_failed_retry_all">सभी विफल फिर से आज़माएँ</string>
     <string name="queue_failed_select">विफल चुनें</string>
     <string name="queue_failed_remove">हटाएँ</string>
     <string name="queue_failed_remove_body">वे अपने लॉग के साथ सूची से हट जाते हैं। आपकी डाउनलोड की गई फ़ाइलें नहीं छुई जातीं।</string>
@@ -462,6 +464,10 @@
     <string name="notification_run_failed_title">कुछ डाउनलोड विफल रहे</string>
     <string name="notification_run_finished_title">डाउनलोड पूरे हुए</string>
     <string name="notification_run_summary">डाउनलोड हुए: %1$d · विफल: %2$d · रद्द: %3$d</string>
+    <string name="download_percent_downloaded">%1$d%% डाउनलोड हुआ</string>
+    <string name="queue_adjust_restart_title">फिर से शुरू करें?</string>
+    <string name="queue_adjust_restart_body">इस बदलाव से डाउनलोड शुरू से फिर शुरू होगा। अब तक जो डाउनलोड हुआ है, वह हटा दिया जाएगा।</string>
+    <string name="queue_adjust_restart_confirm">फिर से शुरू करें</string>
 
     <!-- Sign-in web view -->
     <string name="cookie_webview_close">बंद करें</string>

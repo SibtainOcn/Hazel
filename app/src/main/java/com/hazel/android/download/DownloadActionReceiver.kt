@@ -48,7 +48,7 @@ class DownloadActionReceiver : BroadcastReceiver() {
         val viewModel = DownloadCommands.current()
 
         when (intent.action) {
-            ACTION_PAUSE -> viewModel?.pauseDownload()
+            ACTION_PAUSE -> viewModel?.pauseAll()
 
             // With the app closed since the pause there is no view model yet, and one is made
             // for the resume: it reads the queue from disk and runs it in the background.
