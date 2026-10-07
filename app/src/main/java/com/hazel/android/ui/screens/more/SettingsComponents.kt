@@ -31,6 +31,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
@@ -51,6 +52,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -216,15 +218,18 @@ private fun SettingRow(
             Text(
                 title,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
+                style = LocalTextStyle.current.copy(hyphens = Hyphens.Auto)
             )
             if (!summary.isNullOrBlank()) {
+                // A value is cut short, a description never is: a longer translation or a
+                // large font must still be able to say the whole thing.
                 Text(
                     summary,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(hyphens = Hyphens.Auto),
                     color = if (valueStyle) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f * alpha)
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f * alpha),
-                    maxLines = 2,
+                    maxLines = if (valueStyle) 2 else Int.MAX_VALUE,
                     overflow = TextOverflow.Ellipsis
                 )
             }

@@ -114,10 +114,10 @@
     <string name="guide_step3_title">Hazel Мгновенно</string>
     <string name="guide_step4_title">Оптимизация батареи</string>
     <string name="guide_step5_title">Уведомления</string>
-    <string name="guide_step_paste_link">Вставьте ссылку в поле поиска, чтобы скачать её. Можно добавлять несколько ссылок и плейлисты</string>
-    <string name="guide_step_pick_format">Нажмите на карточку для выбора точного формата. Все доступные варианты перечислены с размером и кодеком.</string>
-    <string name="guide_step_share_instant">Поделитесь в Hazel Instant, чтобы пропустить окно. Ссылка будет прочитана, и загрузка начнётся с предпочтительными настройками; кнопка настройки открывает обработку, чтобы их изменить.</string>
-    <string name="guide_step_battery_unrestricted">Установите работу от батареи без ограничений, иначе Android может остановить загрузку при выходе из приложения.</string>
+    <string name="guide_step_paste_link">Вставьте одну или несколько ссылок либо целый плейлист в поле поиска.</string>
+    <string name="guide_step_pick_format">Нажмите на карточку, чтобы выбрать точный формат, с размером и кодеком для каждого качества.</string>
+    <string name="guide_step_share_instant">Поделитесь в Hazel Instant, чтобы сразу начать с вашими настройками. Кнопка настройки открывает Синтез.</string>
+    <string name="guide_step_battery_unrestricted">Снимите ограничения батареи, чтобы Android не останавливал фоновые загрузки.</string>
     <string name="guide_step_notifications">Получайте уведомления о ходе и завершении загрузок в фоновом режиме.</string>
     <string name="guide_allow">Разрешить</string>
     <string name="guide_deny">Отклонить</string>
@@ -187,7 +187,7 @@
     <!-- MoreScreen -->
     <string name="more_title">Ещё</string>
     <string name="more_battery_title">Фоновые загрузки</string>
-    <string name="more_battery_body">Загрузки продолжаются в фоновом режиме. Некоторые устройства могут прерывать их для экономии батареи. Разрешите работу без ограничений, чтобы избежать этого.</string>
+    <string name="more_battery_body">Некоторые телефоны останавливают фоновые загрузки ради батареи. Режим без ограничений это исключает.</string>
     <string name="more_downloads">Загрузки</string>
     <string name="more_appearance">Внешний вид</string>
     <string name="more_language">Язык</string>
@@ -250,7 +250,7 @@
     <string name="options_subtitles_languages_label">Языки субтитров</string>
     <string name="options_subtitles_dismiss">Закрыть</string>
     <string name="options_subtitles_languages_title">Языки субтитров</string>
-    <string name="options_subtitles_languages_hint">Селектор языков yt-dlp, например en,.*-orig для английского и оригинальной дорожки. Используйте all для всех доступных языков.</string>
+    <string name="options_subtitles_languages_hint">Выбор языков yt-dlp, напр. en,.*-orig. all — все языки.</string>
     <string name="options_filename_title">Шаблон имени файла</string>
     <string name="options_filename_hint" formatted="false">Шаблон вывода yt-dlp. Используйте %(title)s, %(uploader)s, %(id)s и %(ext)s.</string>
     <string name="options_text_input_save">Сохранить</string>
@@ -259,20 +259,20 @@
     <!-- StorageCleanupScreen -->
     <string name="cleanup_back">Назад</string>
     <string name="cleanup_title">Временные файлы</string>
-    <string name="cleanup_header_description">Рабочие файлы приложения. Ваши загрузки не входят сюда и никогда отсюда не удаляются.</string>
+    <string name="cleanup_header_description">Рабочие файлы приложения. Ваши загрузки отсюда никогда не удаляются.</string>
     <string name="cleanup_action_clear_everything">Очистить всё</string>
     <string name="cleanup_category_link_data_label">Кэш данных о ссылках</string>
     <string name="cleanup_category_link_data_description">Данные плеера yt-dlp для ускорения повторного чтения ссылок. Можно безопасно очистить.</string>
     <string name="cleanup_category_partial_downloads_label">Незавершённые загрузки</string>
-    <string name="cleanup_category_partial_downloads_description">Фрагменты отменённых или прерванных загрузок до сохранения файла.</string>
+    <string name="cleanup_category_partial_downloads_description">Остатки отменённых или неудачных загрузок.</string>
     <string name="cleanup_category_conversions_label">Незавершённые конвертации</string>
-    <string name="cleanup_category_conversions_description">Рабочие файлы конвертера аудио, которые не были перенесены в папку музыки.</string>
+    <string name="cleanup_category_conversions_description">Оставшиеся рабочие файлы аудиоконвертера.</string>
     <string name="cleanup_category_engine_label">Файлы движка yt-dlp</string>
-    <string name="cleanup_category_engine_description">Загрузчик и среда его выполнения. Очистка освобождает больше всего места, но при следующей загрузке потребуется их распаковка.</string>
+    <string name="cleanup_category_engine_description">Загрузчик и его среда. Освобождает больше всего, но следующая загрузка распакует их снова.</string>
     <string name="cleanup_category_other_cache_label">Прочий кэш</string>
     <string name="cleanup_category_other_cache_description">Обложки и другие файлы, кэшированные при просмотре ссылок.</string>
     <string name="cleanup_category_link_reads_label">Сохранённые данные ссылок</string>
-    <string name="cleanup_category_link_reads_description">Форматы последних 50 прочитанных ссылок, чтобы ссылка открывалась снова сразу. Хранятся до 6 часов; в режиме инкогнито не сохраняются.</string>
+    <string name="cleanup_category_link_reads_description">Форматы последних 50 ссылок для мгновенного открытия. Хранятся 6 ч, не в инкогнито.</string>
     <string name="cleanup_confirm_category_title">Очистить эти файлы?</string>
     <string name="cleanup_confirm_category_safe">Будет освобождено %1$s. Сохранённые файлы не будут затронуты.</string>
     <string name="cleanup_confirm_category_unsafe">Будет освобождено %1$s; следующая загрузка займёт больше времени из-за повторной распаковки.</string>
@@ -533,7 +533,6 @@
     <string name="audio_language_subtitle">Выберите звуковую дорожку</string>
 
     <!-- AppearanceScreen -->
-    <string name="appearance_back">Назад</string>
     <string name="appearance_title">Внешний вид</string>
 
     <!-- Language picker -->
@@ -548,6 +547,8 @@
     <string name="language_changed_body">Язык Hazel изменён. Всё, что ещё не переведено, останется на английском.</string>
     <string name="language_changed_ok">ОК</string>
     <string name="appearance_dark_theme">Тёмная тема</string>
+    <string name="appearance_on">Вкл.</string>
+    <string name="appearance_off">Выкл.</string>
     <string name="appearance_accent_color">Цветовой акцент</string>
 
     <!-- AccentPickerDialog -->
@@ -563,32 +564,31 @@
         <item quantity="other">тайм-аут %1$d с, %2$d попыток</item>
     </plurals>
     <string name="fetch_settings_reading_links">Чтение ссылок</string>
-    <string name="fetch_settings_force_ipv4_description">Включайте только при зависании ссылок в вашей сети. Обходит некорректный маршрут IPv6 и замедляет работу во всех остальных сетях.</string>
+    <string name="fetch_settings_force_ipv4_description">Только если ссылки зависают в вашей сети. Обходит сломанный IPv6, но в остальном медленнее.</string>
     <string name="fetch_settings_force_ipv4">Принудительно IPv4</string>
     <string name="fetch_mode_fast_label">Быстрый</string>
-    <string name="fetch_mode_fast_description">Быстро завершает попытку. Быстрее всего в стабильной сети, но чаще требует повторной попытки.</string>
+    <string name="fetch_mode_fast_description">Быстро сдаётся. Быстрее всего в хорошей сети, но может понадобиться повтор.</string>
     <string name="fetch_mode_balanced_label">Сбалансированный</string>
     <string name="fetch_mode_balanced_description">Баланс между скоростью и стабильностью при неидеальном соединении.</string>
     <string name="fetch_mode_thorough_label">Тщательный</string>
     <string name="fetch_mode_thorough_description">Дольше ожидает и делает больше попыток. Самый медленный, но справляется со слабым сигналом.</string>
-    <string name="listing_source_ytdlp_description">Тот же движок, что выполняет загрузку. Работает со всеми поддерживаемыми сайтами и обновляется сам, адаптируясь к изменениям сайтов.</string>
-    <string name="listing_source_newpipe_description">Получает плейлисты и каналы за один запрос без запуска движка, что быстрее на поддерживаемых сайтах. Для остального и при ошибках переключается на yt-dlp.</string>
+    <string name="listing_source_ytdlp_description">Сам движок загрузки. Работает на всех поддерживаемых сайтах и обновляется сам.</string>
+    <string name="listing_source_newpipe_description">Быстрее для плейлистов и каналов. Если ссылка не читается, работает yt-dlp.</string>
 
     <!-- ToolsScreen -->
-    <string name="tools_back">Назад</string>
     <string name="tools_title">Инструменты</string>
     <string name="tools_empty">Здесь пока ничего нет.</string>
 
     <string name="direct_share_audio_language_default">Как в источнике</string>
 
     <!-- StorageLocationsScreen -->
-    <string name="storage_locations_back">Назад</string>
     <string name="storage_locations_title">Загрузки</string>
     <string name="storage_locations_subtitle">Где сохраняются загрузки и действующие ограничения</string>
     <string name="storage_locations_limits">Ограничения</string>
     <string name="storage_locations_wifi_only_description">Загрузки приостанавливаются, чтобы не расходовать мобильные данные</string>
     <string name="storage_locations_speed_limit_description">Максимально допустимая скорость загрузки</string>
-    <string name="storage_locations_internal_note">Загрузки сохраняются во внутреннюю память, если не выбрана SD-карта или другая папка. Загрузки на SD-карту хранят и рабочие файлы на карте, не занимая память телефона.</string>
+    <string name="storage_locations_no_limit">Без лимита</string>
+    <string name="storage_locations_internal_note">Загрузки сохраняются во внутреннюю память, если не выбрана другая папка или SD-карта.</string>
     <string name="storage_locations_wifi_only">Только по Wi-Fi</string>
     <string name="storage_locations_speed_limit">Ограничение скорости</string>
 
@@ -603,7 +603,7 @@
     <string name="settings_back">Назад</string>
     <string name="more_processing">Синтез</string>
     <string name="processing_title">Синтез</string>
-    <string name="processing_description">С этого начинается каждая загрузка. Изменения в окне загрузки тоже сохраняются здесь.</string>
+    <string name="processing_description">Настройки для каждой загрузки. Изменения в окне загрузки тоже сохраняются здесь.</string>
     <string name="processing_section_general">Общие</string>
     <string name="processing_default">По умолчанию</string>
     <string name="processing_none">Нет</string>
@@ -630,14 +630,14 @@
     <string name="processing_reset_body">Все настройки на этом экране вернутся к исходным.</string>
     <string name="more_advanced">Расширенные</string>
     <string name="advanced_title">Расширенные</string>
-    <string name="advanced_description">Настройки движка для источников, до которых не доходят стандартные. Не меняйте их, пока они не нужны для загрузки.</string>
+    <string name="advanced_description">Параметры движка для сложных источников. Меняйте, только если это нужно загрузке.</string>
     <string name="advanced_section_youtube">YouTube</string>
     <string name="advanced_section_engine">Движок</string>
     <string name="advanced_player_clients">Клиенты плеера</string>
     <string name="advanced_automatic">Автоматически</string>
     <string name="advanced_not_set">Не задано</string>
     <string name="advanced_po_tokens">PO-токены</string>
-    <string name="advanced_po_tokens_hint">В виде CLIENT.CONTEXT+TOKEN, например web.gvs+TOKEN, через запятую. Используйте вместе с данными посетителя, для которых они созданы.</string>
+    <string name="advanced_po_tokens_hint">CLIENT.CONTEXT+TOKEN через запятую, напр. web.gvs+TOKEN. Нужны их visitor data.</string>
     <string name="advanced_po_tokens_set">Задано: %1$d</string>
     <string name="advanced_po_tokens_invalid">Неверный формат: %1$d</string>
     <string name="advanced_visitor_data">Данные посетителя</string>
@@ -650,9 +650,9 @@
     <string name="advanced_sleep_off">Выкл.</string>
     <string name="advanced_sleep_seconds">%1$d с</string>
     <string name="advanced_no_check_certificates">Пропускать проверку сертификатов</string>
-    <string name="advanced_no_check_certificates_summary">Только для сайта, сертификату которого устройство не доверяет. Соединения становятся менее безопасными.</string>
+    <string name="advanced_no_check_certificates_summary">Только для сайтов, которым это устройство не доверяет. Соединение становится менее безопасным.</string>
     <string name="advanced_extra_args">Дополнительные аргументы загрузки</string>
-    <string name="advanced_extra_args_hint">Аргументы yt-dlp для каждой загрузки, в том виде, как вы их ввели бы. Параметры, которые приложение задаёт само, например место сохранения, пропускаются.</string>
+    <string name="advanced_extra_args_hint">Аргументы yt-dlp для каждой загрузки. Параметры, которые задаёт Hazel, пропускаются.</string>
     <string name="advanced_reset">Сбросить расширенные настройки</string>
     <string name="advanced_reset_title">Сбросить расширенные настройки?</string>
     <string name="advanced_reset_body">Все параметры на этом экране снова станут выключенными или пустыми.</string>
@@ -670,7 +670,7 @@
     <string name="options_cut_start">Начало</string>
     <string name="options_cut_end">Конец</string>
     <string name="options_cut_precise">Точная обрезка</string>
-    <string name="options_cut_precise_summary">Режет ровно в выбранных местах, перекодируя края. Медленнее. Если выключено, каждый срез сдвигается к ближайшему ключевому кадру.</string>
+    <string name="options_cut_precise_summary">Точная обрезка с перекодированием краёв. Медленнее. Выкл.: обрезка по ближайшему ключевому кадру.</string>
     <string name="options_cut_invalid">Конец должен быть после начала и в пределах длительности</string>
     <string name="options_cut_apply">Обрезать</string>
     <string name="options_cut_clear">Очистить</string>
@@ -687,10 +687,10 @@
     <string name="advanced_impersonate">Имитировать браузер</string>
     <string name="advanced_impersonate_unavailable_value">%1$s, здесь недоступно</string>
     <string name="advanced_impersonate_checking">Спрашиваем движок, какие браузеры он может имитировать</string>
-    <string name="advanced_impersonate_none">Движок на этом устройстве не умеет имитировать браузер, поэтому запросы отправляются как есть.</string>
+    <string name="advanced_impersonate_none">Движок на этом устройстве не умеет имитировать браузер, запросы отправляются как есть.</string>
     <string name="advanced_impersonate_check_failed">Сейчас не удалось спросить движок. Попробуйте чуть позже.</string>
     <string name="advanced_auto_po_tokens">Создавать PO-токены на устройстве</string>
-    <string name="advanced_auto_po_tokens_summary">Запускает проверку YouTube в скрытом браузере для каждого читаемого или скачиваемого видео, если токены не вставлены. Экспериментально.</string>
+    <string name="advanced_auto_po_tokens_summary">Запускает проверку YouTube в скрытом браузере, если токены не вставлены. Экспериментально.</string>
     <string name="advanced_po_token_test">Проверить создание токенов</string>
     <string name="advanced_po_token_testing">Создаём токен…</string>
     <string name="advanced_po_token_test_hint">Нажмите, чтобы создать токен сейчас и проверить, работает ли он</string>
@@ -698,7 +698,7 @@
     <string name="advanced_po_token_test_failed">Не сработало: %1$s</string>
     <string name="more_backup">Резервная копия</string>
     <string name="backup_title">Резервное копирование и восстановление</string>
-    <string name="backup_description">Сохраните настройки, список загрузок, очередь, cookies и поиски в файл и восстановите их на этом или другом телефоне.</string>
+    <string name="backup_description">Сохраните настройки, историю, очередь, куки и поиски в файл и восстановите где угодно.</string>
     <string name="backup_section_now">Сейчас</string>
     <string name="backup_backup">Создать копию</string>
     <string name="backup_backup_summary">Выберите, что сохранить</string>
@@ -735,7 +735,7 @@
     <string name="options_cut_end_here">Закончить здесь</string>
     <string name="options_cut_jump_start">К началу</string>
     <string name="options_cut_jump_end">К концу</string>
-    <string name="fetch_settings_screen_description">Как читаются ссылки, как выполняется поиск и как воспроизводятся медиа. Загрузки всегда идут через yt-dlp.</string>
+    <string name="fetch_settings_screen_description">Как читаются ссылки, работает поиск и воспроизведение. Загрузки всегда через yt-dlp.</string>
     <string name="fetch_settings_read_with">Читать ссылки через</string>
     <string name="fetch_settings_patience">Медленные соединения</string>
     <string name="fetch_settings_search">Поиск</string>
@@ -748,7 +748,7 @@
     <string name="fetch_settings_play_with">Воспроизводить через</string>
     <string name="fetch_settings_play_quality">Качество воспроизведения</string>
     <string name="fetch_settings_play_quality_value">До %1$dp</string>
-    <string name="fetch_settings_engine_newpipe_summary">Быстрее всего на YouTube, SoundCloud и Bandcamp. Везде ещё и когда он не справляется, работает yt-dlp.</string>
+    <string name="fetch_settings_engine_newpipe_summary">Быстрее всего на YouTube, SoundCloud и Bandcamp. Остальное делает yt-dlp.</string>
     <string name="fetch_settings_engine_ytdlp_summary">Запускается медленнее и работает на всех сайтах, которые поддерживает yt-dlp.</string>
     <plurals name="player_skip_seconds">
         <item quantity="one">%d секунда</item>
@@ -780,7 +780,7 @@
     <string name="instant_ok">ОК</string>
     <string name="instant_settings">Настройки обработки</string>
     <string name="guide_step_share_title">Поделиться в Hazel</string>
-    <string name="guide_step_share_sheet">Поделитесь ссылкой в Hazel из любого приложения. Скачайте сразу с предпочтительными настройками или подождите детали и выберите каждый параметр.</string>
+    <string name="guide_step_share_sheet">Поделитесь ссылкой в Hazel из любого приложения и скачайте сразу или выберите все параметры.</string>
     <string name="instant_closing">Закроется через %1$d с</string>
     <string name="ytdlp_update_channel_name">Обновления движка</string>
     <string name="ytdlp_update_channel_description">Уведомления об обновлениях движка yt-dlp</string>
@@ -790,7 +790,7 @@
     <string name="ytdlp_update_installed_text">Движок загрузки обновлён</string>
     <string name="ytdlp_update_failed_title">Не удалось установить yt-dlp %1$s</string>
     <string name="ytdlp_update_failed_text">Hazel оставил текущий движок и попробует позже</string>
-    <string name="cookies_description">Войдите на сайт один раз, и Hazel будет использовать вход для загрузок с возрастными ограничениями, приватных и только для участников.</string>
+    <string name="cookies_description">Войдите один раз для загрузок с возрастным ограничением, приватных и для участников.</string>
     <string name="cookies_section_general">Общие</string>
     <string name="cookies_section_add">Добавить</string>
     <string name="cookies_section_saved">Сохранённые входы</string>

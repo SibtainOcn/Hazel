@@ -1,5 +1,10 @@
 package com.hazel.android.ui.screens.queue
 
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.MultiContentMeasurePolicy
+import androidx.compose.ui.unit.Constraints
+import com.hazel.android.ui.components.ActionsRow
+import com.hazel.android.ui.components.EqualWidthActions
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -189,7 +194,6 @@ fun FailedCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(16f / 9f)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .combinedClickable(
                     onClickLabel = if (picking) null else stringResource(R.string.queue_failed_choose_again),
@@ -202,7 +206,7 @@ fun FailedCard(
                     model = thumbnail,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.matchParentSize()
                 )
             } else {
                 Icon(
@@ -212,7 +216,7 @@ fun FailedCard(
                     tint = MaterialTheme.colorScheme.error.copy(alpha = 0.45f)
                 )
             }
-            Box(modifier = Modifier.fillMaxSize().background(FailedScrim))
+            Box(modifier = Modifier.matchParentSize().background(FailedScrim))
 
             // Picked: a frosted wash of the accent over the whole card, rather than a frame
             // around it, so the card reads as lit up and stays the same size.
@@ -220,7 +224,7 @@ fun FailedCard(
                 val accent = MaterialTheme.colorScheme.primary
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .matchParentSize()
                         .background(Color.White.copy(alpha = 0.06f))
                         .background(
                             Brush.verticalGradient(
@@ -231,41 +235,96 @@ fun FailedCard(
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(start = 14.dp, top = 12.dp, end = 50.dp)
-            ) {
-                Text(
-                    title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (author.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        author,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.82f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+            // The title block at the top and the bar at the bottom of a frame that is 16:9 at
+            // least, and grows where a large font or a long translation needs more room,
+            // rather than drawing one over the other.
+            CardFrame(
+                top = {
+                    Column(
+                        modifier = Modifier.padding(start = 14.dp, top = 12.dp, end = 50.dp)
+                    ) {
+                        Text(
+                            title,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (author.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                author,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.82f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        if (reason.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                reason,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium,
+                                color = ErrorOnArtwork,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                },
+                bottom = {
+                    // The state, left; what can be done about it, right.
+                    // Kind and status at the start, the card's actions at the end. Where they do not
+                    // all fit one line (a long translation, a large font) the actions move to a line
+                    // under the status rather than squeezing it to nothing.
+                    ActionsRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        spacing = 6.dp,
+                        start = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                KindIcon(item.isVideo)
+                                if (retrying) CardTag(
+                                    text = stringResource(R.string.queue_failed_retrying),
+                                    background = MaterialTheme.colorScheme.primary,
+                                    foreground = MaterialTheme.colorScheme.onPrimary
+                                ) else CardTag(
+                                    text = stringResource(R.string.download_failed),
+                                    background = MaterialTheme.colorScheme.error,
+                                    foreground = MaterialTheme.colorScheme.onError
+                                )
+                            }
+                        }
+                    ) {
+                        if (!picking) {
+                            CardPill(
+                                icon = Icons.Filled.Link,
+                                label = null,
+                                description = stringResource(R.string.sheet_link_options),
+                                onClick = onLink
+                            )
+                            CardPill(
+                                icon = Icons.Filled.Description,
+                                label = stringResource(R.string.history_failed_logs),
+                                onClick = onViewLog
+                            )
+                            if (!retrying) CardPill(
+                                icon = Icons.Filled.Refresh,
+                                label = stringResource(R.string.history_failed_retry),
+                                onClick = onRetry,
+                                background = MaterialTheme.colorScheme.primary,
+                                foreground = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
                 }
-                if (reason.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        reason,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium,
-                        color = ErrorOnArtwork,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
+            )
 
             if (selected != null) {
                 SelectMark(selected, modifier = Modifier.align(Alignment.TopEnd))
@@ -275,55 +334,6 @@ fun FailedCard(
                     onClick = onDismiss,
                     modifier = Modifier.align(Alignment.TopEnd)
                 )
-            }
-
-            // The state, left; what can be done about it, right.
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    KindIcon(item.isVideo)
-                    if (retrying) CardTag(
-                        text = stringResource(R.string.queue_failed_retrying),
-                        background = MaterialTheme.colorScheme.primary,
-                        foreground = MaterialTheme.colorScheme.onPrimary
-                    ) else CardTag(
-                        text = stringResource(R.string.download_failed),
-                        background = MaterialTheme.colorScheme.error,
-                        foreground = MaterialTheme.colorScheme.onError
-                    )
-                }
-                if (!picking) Row(
-                    modifier = Modifier.padding(start = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    CardPill(
-                        icon = Icons.Filled.Link,
-                        label = null,
-                        description = stringResource(R.string.sheet_link_options),
-                        onClick = onLink
-                    )
-                    CardPill(
-                        icon = Icons.Filled.Description,
-                        label = stringResource(R.string.history_failed_logs),
-                        onClick = onViewLog
-                    )
-                    if (!retrying) CardPill(
-                        icon = Icons.Filled.Refresh,
-                        label = stringResource(R.string.history_failed_retry),
-                        onClick = onRetry,
-                        background = MaterialTheme.colorScheme.primary,
-                        foreground = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
             }
         }
     }
@@ -436,17 +446,18 @@ fun FailureLogSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            Row(
+            // A third of the width each while every label fits; one per line when not.
+            EqualWidthActions(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                spacing = 10.dp
             ) {
-                FilledTonalButton(onClick = onCopy, modifier = Modifier.weight(1f), contentPadding = LogButtonPadding) {
+                FilledTonalButton(onClick = onCopy, contentPadding = LogButtonPadding) {
                     Text(stringResource(R.string.history_failed_copy_log), maxLines = 1)
                 }
-                FilledTonalButton(onClick = onCopyUrl, modifier = Modifier.weight(1f), contentPadding = LogButtonPadding) {
+                FilledTonalButton(onClick = onCopyUrl, contentPadding = LogButtonPadding) {
                     Text(stringResource(R.string.failed_copy_url), maxLines = 1)
                 }
-                Button(onClick = onRetry, modifier = Modifier.weight(1f), contentPadding = LogButtonPadding) {
+                Button(onClick = onRetry, contentPadding = LogButtonPadding) {
                     Text(stringResource(R.string.history_failed_retry), maxLines = 1)
                 }
             }
@@ -621,4 +632,29 @@ private fun KindIcon(hasVideo: Boolean) {
         modifier = Modifier.size(16.dp),
         tint = Color.White
     )
+}
+
+/**
+ * [top] at the top and [bottom] at the bottom of a frame as wide as the card and 16:9 at
+ * least. Where the two need more height than that between them, the frame grows to hold
+ * both, so they never overlap.
+ */
+@Composable
+private fun CardFrame(top: @Composable () -> Unit, bottom: @Composable () -> Unit) {
+    Layout(contents = listOf(top, bottom), measurePolicy = CardFramePolicy)
+}
+
+/** Made once; reads no state. Each child is measured once. */
+private val CardFramePolicy = MultiContentMeasurePolicy { (tops, bottoms), constraints ->
+    val width = constraints.maxWidth
+    val loose = Constraints(maxWidth = width)
+    val top = tops.map { it.measure(loose) }
+    val bottom = bottoms.map { it.measure(loose) }
+    val topHeight = top.maxOfOrNull { it.height } ?: 0
+    val bottomHeight = bottom.maxOfOrNull { it.height } ?: 0
+    val height = maxOf(width * 9 / 16, topHeight + bottomHeight)
+    layout(width, height) {
+        top.forEach { it.placeRelative(0, 0) }
+        bottom.forEach { it.placeRelative(0, height - it.height) }
+    }
 }

@@ -506,7 +506,7 @@ def test_failed_card():
     print("\n--- Suite 7: a failed card's actions ---")
     cards = (SRC / "ui/screens/queue/QueueCards.kt").read_text(encoding="utf-8")
     queue = QUEUE.read_text(encoding="utf-8")
-    actions = block(cards, "if (!picking) Row(", 900)
+    actions = block(cards, "if (!picking) {", 900)
     check_true("The log button says Logs", "R.string.history_failed_logs" in actions
                and "R.string.history_failed_error_log" not in actions)
     check_true("The log sheet keeps its own title", "stringResource(R.string.history_failed_error_log)" in cards)

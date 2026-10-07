@@ -110,10 +110,30 @@ jobs:
           # the caches stay small and one branch cannot poison another.
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      # The unit tests are pure JVM: no emulator, no device, no Android framework. That is
-      # what keeps this job to seconds, and it is the property to protect as the suite grows.
+      # Seconds, and first: fails a change that adds a plain Row of labelled buttons, which
+      # squeezes a label into a column of letters in a long translation or at a large font,
+      # and checks every screen scrolls and every language has its strings. The message
+      # names the line and the building block to use instead.
+      - name: Check layouts give way to long text
+        run: python3 tools/tests/test_settings_layout_and_text.py
+
+      # The unit tests run on the JVM: no emulator, no device. The layout tests among them
+      # use Robolectric to draw the screens and dialogs in every language at font sizes up to
+      # 2.0, failing on a word broken to fit, and write a screenshot of each.
       - name: Run unit tests
         run: ./gradlew :app:testDebugUnitTest --stacktrace
+
+      # Every screen and dialog in every language and font size, to look at on a pull
+      # request that changes a layout. Like the report below, a convenience, not the result.
+      - name: Upload the layout screenshots
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: layout-screenshots
+          path: app/build/outputs/roborazzi/layout/
+          retention-days: 7
+          if-no-files-found: ignore
 
       # Runs whether the tests passed or failed, because a failed run is when the numbers
       # are actually worth reading. Every figure comes from the XML the run just wrote.

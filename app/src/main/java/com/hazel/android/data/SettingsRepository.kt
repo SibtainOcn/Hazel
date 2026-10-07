@@ -462,10 +462,9 @@ object SettingsRepository {
      * in it is only discovered when a download runs slower than a modem, and nobody has a
      * particular number in mind anyway. These cover the reasons for setting one at all,
      * which are sparing a metered connection and leaving room for everything else on the
-     * network.
+     * network. No limit is the empty value, named by the screen in the app's language.
      */
     val SPEED_LIMITS: List<Pair<String, String>> = listOf(
-        "" to "No limit",
         "256K" to "256 KB/s",
         "512K" to "512 KB/s",
         "1M" to "1 MB/s",
@@ -473,11 +472,6 @@ object SettingsRepository {
         "5M" to "5 MB/s",
         "10M" to "10 MB/s"
     )
-
-    /** What to call the stored ceiling, falling back to its own text if it is not a preset. */
-    fun speedLimitLabel(limit: String): String =
-        SPEED_LIMITS.firstOrNull { it.first == limit }?.second
-            ?: limit.ifBlank { "No limit" }
 
     /**
      * How many pieces of a stream split into fragments (DASH and HLS, which is most of
