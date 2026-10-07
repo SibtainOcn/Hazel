@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Settings descriptions are shorter, one plain sentence each, in every language. Twenty-nine descriptions, hints and getting-started steps that ran to two or three sentences now say the same in about one line.
+- Download settings, Appearance and Tools have the same header and back arrow as the other settings screens.
+- On Download settings, a limit's chip moves under its title when a word of the title or its description would not fit beside it, as with a long translation or a large font on a narrow phone, in place of breaking the word in two. The chip's label wraps to a second line rather than being cut short.
+
+### Fixed
+- Download settings, Appearance and Tools scroll. With a large font, a long translation or a short screen, the last rows of Download settings, and its storage note, were cut off below the navigation buttons and could not be reached (#87).
+- Settings descriptions show in full. A description longer than two lines ended in "…", which with a large font or a longer translation hid part of what a setting does.
+- "No limit" on Download settings and On/Off for the dark theme are translated; they showed in English in every language.
+- The download sheet's heading no longer breaks into single letters when Play is shown beside Download in a longer language or with a large font. Where the heading would not fit whole beside the two buttons, Play now stacks above Download, and on the narrowest screens both move under the heading. Everywhere it fits, the header looks as before.
+- A tap anywhere in the Title or Author box on the download sheet puts the cursor in that field and brings the keyboard back, not only a tap on the line of text. Closing Details while typing lets go of the field first, which could otherwise be left unable to take the keyboard again until the sheet was reopened.
 
 ## [1.1.13] - 2026-10-06
 ### Added
