@@ -59,6 +59,8 @@ Fork the repository, clone your fork, and open it in the latest Android Studio. 
 
 ### Rules for the change
 
+- **Open the pull request against `nightly`**, not `main`. Changes are tested there first,
+  and `main` only receives releases.
 - **One change per pull request.** A fix and an unrelated cleanup are two pull requests.
 - **Branch names:** `<type>/<short-description>`, for example `fix/queue-retry-crash`.
   Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`.
