@@ -110,10 +110,10 @@
     <string name="guide_step3_title">Hazel Instantâneo</string>
     <string name="guide_step4_title">Otimização de bateria</string>
     <string name="guide_step5_title">Notificações</string>
-    <string name="guide_step_paste_link">Cole um link no campo de pesquisa para baixá-lo. Você pode adicionar vários links e playlists</string>
-    <string name="guide_step_pick_format">Toque em um cartão para escolher o formato exato. Todas as qualidades disponíveis são listadas com o tamanho e o codec.</string>
-    <string name="guide_step_share_instant">Compartilhe com o Hazel Instant para pular a folha. Ele lê o link e inicia o download com suas configurações preferidas; o botão de ajuste abre Síntese para alterá-las.</string>
-    <string name="guide_step_battery_unrestricted">Defina o uso da bateria como irrestrito, senão o Android pode interromper os downloads quando você sair do aplicativo.</string>
+    <string name="guide_step_paste_link">Cole um ou mais links, ou uma playlist inteira, no campo de busca.</string>
+    <string name="guide_step_pick_format">Toque num cartão para escolher o formato exato, com tamanho e codec de cada qualidade.</string>
+    <string name="guide_step_share_instant">Compartilhe com o Hazel Instant para começar já com seus ajustes. O botão de ajuste abre Síntese.</string>
+    <string name="guide_step_battery_unrestricted">Deixe o uso de bateria irrestrito para o Android não parar downloads em segundo plano.</string>
     <string name="guide_step_notifications">Receba avisos sobre o progresso dos downloads e arquivos concluídos em segundo plano.</string>
     <string name="guide_allow">Permitir</string>
     <string name="guide_deny">Negar</string>
@@ -183,7 +183,7 @@
     <!-- MoreScreen -->
     <string name="more_title">Mais</string>
     <string name="more_battery_title">Downloads em segundo plano</string>
-    <string name="more_battery_body">Os downloads continuam sozinhos em segundo plano. Ainda assim, alguns telefones os interrompem para economizar bateria. Permita o uso irrestrito para descartar isso.</string>
+    <string name="more_battery_body">Alguns celulares param downloads em segundo plano para poupar bateria. Uso irrestrito evita isso.</string>
     <string name="more_downloads">Downloads</string>
     <string name="more_appearance">Aparência</string>
     <string name="more_language">Idioma</string>
@@ -246,7 +246,7 @@
     <string name="options_subtitles_languages_label">Idiomas das legendas</string>
     <string name="options_subtitles_dismiss">Dispensar</string>
     <string name="options_subtitles_languages_title">Idiomas das legendas</string>
-    <string name="options_subtitles_languages_hint">Um seletor de idioma do yt-dlp, por exemplo en,.*-orig para o inglês mais a faixa original. Use all para todos os idiomas que a fonte oferecer.</string>
+    <string name="options_subtitles_languages_hint">Um seletor de idioma do yt-dlp, ex. en,.*-orig. Use all para todos os idiomas.</string>
     <string name="options_filename_title">Modelo do nome do arquivo</string>
     <string name="options_filename_hint" formatted="false">Modelo de saída do yt-dlp. Use %(title)s, %(uploader)s, %(id)s e %(ext)s.</string>
     <string name="options_text_input_save">Salvar</string>
@@ -255,20 +255,20 @@
     <!-- StorageCleanupScreen -->
     <string name="cleanup_back">Voltar</string>
     <string name="cleanup_title">Arquivos temporários</string>
-    <string name="cleanup_header_description">Arquivos de trabalho guardados pelo aplicativo. Seus downloads não estão incluídos e nunca são removidos daqui.</string>
+    <string name="cleanup_header_description">Arquivos de trabalho do app. Seus downloads nunca são removidos daqui.</string>
     <string name="cleanup_action_clear_everything">Limpar tudo</string>
     <string name="cleanup_category_link_data_label">Cache de dados de links</string>
     <string name="cleanup_category_link_data_description">Dados do reprodutor que o yt-dlp guarda para que um link lido uma segunda vez seja mais rápido. Pode limpar sem risco.</string>
     <string name="cleanup_category_partial_downloads_label">Downloads incompletos</string>
-    <string name="cleanup_category_partial_downloads_description">Fragmentos deixados por um download cancelado ou que falhou antes de salvar o arquivo.</string>
+    <string name="cleanup_category_partial_downloads_description">Sobras de downloads cancelados ou que falharam.</string>
     <string name="cleanup_category_conversions_label">Conversões incompletas</string>
-    <string name="cleanup_category_conversions_description">Arquivos de trabalho do conversor de áudio que nunca chegaram à sua pasta de música.</string>
+    <string name="cleanup_category_conversions_description">Arquivos de trabalho que sobraram do conversor de áudio.</string>
     <string name="cleanup_category_engine_label">Arquivos do motor yt-dlp</string>
-    <string name="cleanup_category_engine_description">O baixador e o ambiente dele. Limpar libera mais espaço, mas o próximo download terá que descompactá-los de novo.</string>
+    <string name="cleanup_category_engine_description">O downloader e seu runtime. Libera mais espaço, mas o próximo download o descompacta de novo.</string>
     <string name="cleanup_category_other_cache_label">Outros arquivos em cache</string>
     <string name="cleanup_category_other_cache_description">Miniaturas e tudo o mais guardado em cache enquanto você navega pelos links.</string>
     <string name="cleanup_category_link_reads_label">Leituras de links salvas</string>
-    <string name="cleanup_category_link_reads_description">Formatos dos últimos 50 links lidos, para que abrir um de novo seja instantâneo. Guardados por até 6 horas; nunca salvos no modo anônimo.</string>
+    <string name="cleanup_category_link_reads_description">Formatos dos últimos 50 links, para reabrir na hora. Guardados por 6 h, nunca no anônimo.</string>
     <string name="cleanup_confirm_category_title">Limpar estes arquivos?</string>
     <string name="cleanup_confirm_category_safe">%1$s serão liberados. Nada do que você salvou é afetado.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s serão liberados, e o próximo download vai demorar mais enquanto eles são descompactados de novo.</string>
@@ -556,16 +556,16 @@
         <item quantity="other">%1$ds de espera, %2$d tentativas</item>
     </plurals>
     <string name="fetch_settings_reading_links">Leitura de links</string>
-    <string name="fetch_settings_force_ipv4_description">Ative isto só se os links travarem na sua rede. Serve para contornar uma rota IPv6 quebrada, e é mais lento em todo o resto.</string>
+    <string name="fetch_settings_force_ipv4_description">Só se os links travarem na sua rede. Contorna um IPv6 quebrado, mas é mais lento no resto.</string>
     <string name="fetch_settings_force_ipv4">Forçar IPv4</string>
     <string name="fetch_mode_fast_label">Rápido</string>
-    <string name="fetch_mode_fast_description">Desiste logo. O mais rápido em uma boa rede, mas é mais provável precisar de uma segunda tentativa.</string>
+    <string name="fetch_mode_fast_description">Desiste rápido. Mais veloz numa boa rede, mas pode precisar de nova tentativa.</string>
     <string name="fetch_mode_balanced_label">Equilibrado</string>
     <string name="fetch_mode_balanced_description">Um meio-termo entre velocidade e aguentar uma conexão ruim.</string>
     <string name="fetch_mode_thorough_label">Minucioso</string>
     <string name="fetch_mode_thorough_description">Espera mais e tenta mais vezes. O mais lento, mas sobrevive a uma rede fraca.</string>
-    <string name="listing_source_ytdlp_description">O mesmo motor que faz o download. Funciona em todos os sites que ele suporta, e se atualiza sozinho, então continua funcionando conforme os sites mudam.</string>
-    <string name="listing_source_newpipe_description">Lista playlists e canais em um único pedido em vez de iniciar o motor, o que é mais rápido nos sites que ele conhece. Recorre ao yt-dlp para todo o resto, e sempre que não conseguir ler um link.</string>
+    <string name="listing_source_ytdlp_description">O próprio motor de download. Funciona em todos os sites compatíveis e se atualiza sozinho.</string>
+    <string name="listing_source_newpipe_description">Mais rápido para playlists e canais. Usa o yt-dlp quando não consegue ler um link.</string>
 
     <!-- ToolsScreen -->
     <string name="tools_title">Ferramentas</string>
@@ -580,7 +580,7 @@
     <string name="storage_locations_wifi_only_description">Os downloads esperam em vez de usar os dados móveis</string>
     <string name="storage_locations_speed_limit_description">A que velocidade um download pode ir</string>
     <string name="storage_locations_no_limit">Sem limite</string>
-    <string name="storage_locations_internal_note">Os downloads são salvos no armazenamento interno, a menos que você escolha um cartão SD ou outra pasta. Downloads para um cartão SD também mantêm os arquivos temporários no cartão, sem ocupar espaço do celular.</string>
+    <string name="storage_locations_internal_note">Salvo no armazenamento interno, a menos que você escolha outra pasta ou um cartão SD.</string>
     <string name="storage_locations_wifi_only">Só no Wi-Fi</string>
     <string name="storage_locations_speed_limit">Limite de velocidade</string>
 
@@ -596,7 +596,7 @@
     <string name="settings_back">Voltar</string>
     <string name="more_processing">Síntese</string>
     <string name="processing_title">Síntese</string>
-    <string name="processing_description">O ponto de partida de cada download. Mudanças feitas na folha de download também são salvas aqui.</string>
+    <string name="processing_description">Padrões de todo download. Mudanças na folha de download também são salvas aqui.</string>
     <string name="processing_section_general">Geral</string>
     <string name="processing_default">Padrão</string>
     <string name="processing_none">Nenhuma</string>
@@ -623,14 +623,14 @@
     <string name="processing_reset_body">Cada configuração desta tela volta ao padrão do app.</string>
     <string name="more_advanced">Avançado</string>
     <string name="advanced_title">Avançado</string>
-    <string name="advanced_description">Opções do mecanismo para fontes que o padrão não alcança. Deixe como estão, a menos que um download precise delas.</string>
+    <string name="advanced_description">Opções do motor para fontes difíceis. Não mexa a menos que um download precise.</string>
     <string name="advanced_section_youtube">YouTube</string>
     <string name="advanced_section_engine">Mecanismo</string>
     <string name="advanced_player_clients">Clientes do player</string>
     <string name="advanced_automatic">Automático</string>
     <string name="advanced_not_set">Não definido</string>
     <string name="advanced_po_tokens">Tokens PO</string>
-    <string name="advanced_po_tokens_hint">No formato CLIENT.CONTEXT+TOKEN, por exemplo web.gvs+TOKEN, separados por vírgulas. Use com os dados de visitante para os quais foram criados.</string>
+    <string name="advanced_po_tokens_hint">CLIENT.CONTEXT+TOKEN, separados por vírgula, ex. web.gvs+TOKEN. Use com os visitor data deles.</string>
     <string name="advanced_po_tokens_set">%1$d definidos</string>
     <string name="advanced_po_tokens_invalid">%1$d fora do formato esperado</string>
     <string name="advanced_visitor_data">Dados de visitante</string>
@@ -643,9 +643,9 @@
     <string name="advanced_sleep_off">Desligada</string>
     <string name="advanced_sleep_seconds">%1$d s</string>
     <string name="advanced_no_check_certificates">Ignorar verificação de certificados</string>
-    <string name="advanced_no_check_certificates_summary">Só para um site cujo certificado este aparelho não reconhece. As conexões ficam menos seguras.</string>
+    <string name="advanced_no_check_certificates_summary">Só para sites em que este aparelho não confia. As conexões ficam menos seguras.</string>
     <string name="advanced_extra_args">Argumentos extras de download</string>
-    <string name="advanced_extra_args_hint">Argumentos do yt-dlp adicionados a cada download, como você os digitaria. Opções que o app define sozinho, como onde os arquivos são salvos, são ignoradas.</string>
+    <string name="advanced_extra_args_hint">Argumentos do yt-dlp para todo download. Opções que o Hazel define são ignoradas.</string>
     <string name="advanced_reset">Redefinir configurações avançadas</string>
     <string name="advanced_reset_title">Redefinir as configurações avançadas?</string>
     <string name="advanced_reset_body">Cada opção desta tela volta a ficar desligada ou vazia.</string>
@@ -663,7 +663,7 @@
     <string name="options_cut_start">Início</string>
     <string name="options_cut_end">Fim</string>
     <string name="options_cut_precise">Cortes precisos</string>
-    <string name="options_cut_precise_summary">Corta exatamente onde você marcar, codificando as pontas de novo. Mais lento. Desligado, cada corte vai para o quadro-chave mais próximo.</string>
+    <string name="options_cut_precise_summary">Corta no ponto exato recodificando as pontas. Mais lento. Desligado, corta no quadro-chave mais próximo.</string>
     <string name="options_cut_invalid">O fim deve vir depois do início, dentro da duração</string>
     <string name="options_cut_apply">Cortar</string>
     <string name="options_cut_clear">Limpar</string>
@@ -680,10 +680,10 @@
     <string name="advanced_impersonate">Imitar um navegador</string>
     <string name="advanced_impersonate_unavailable_value">%1$s, indisponível aqui</string>
     <string name="advanced_impersonate_checking">Perguntando ao mecanismo quais navegadores ele pode imitar</string>
-    <string name="advanced_impersonate_none">O mecanismo deste aparelho não consegue imitar um navegador, então as solicitações são enviadas como estão.</string>
+    <string name="advanced_impersonate_none">O motor deste aparelho não imita navegadores, então as requisições vão como estão.</string>
     <string name="advanced_impersonate_check_failed">Não foi possível consultar o mecanismo agora. Tente de novo em instantes.</string>
     <string name="advanced_auto_po_tokens">Criar tokens PO neste aparelho</string>
-    <string name="advanced_auto_po_tokens_summary">Executa a verificação do próprio YouTube em um navegador oculto para cada vídeo lido ou baixado, quando nenhum token foi colado. Experimental.</string>
+    <string name="advanced_auto_po_tokens_summary">Roda a verificação do YouTube num navegador oculto quando não há tokens. Experimental.</string>
     <string name="advanced_po_token_test">Testar criação de tokens</string>
     <string name="advanced_po_token_testing">Criando um token…</string>
     <string name="advanced_po_token_test_hint">Toque para criar um token agora e ver se funciona</string>
@@ -691,7 +691,7 @@
     <string name="advanced_po_token_test_failed">Não funcionou: %1$s</string>
     <string name="more_backup">Backup</string>
     <string name="backup_title">Backup e restauração</string>
-    <string name="backup_description">Salve suas configurações, lista de downloads, fila, cookies e pesquisas em um arquivo e recupere-os neste ou em outro aparelho.</string>
+    <string name="backup_description">Salve ajustes, histórico, fila, cookies e buscas num arquivo e restaure onde quiser.</string>
     <string name="backup_section_now">Agora</string>
     <string name="backup_backup">Fazer backup</string>
     <string name="backup_backup_summary">Escolha o que salvar</string>
@@ -728,7 +728,7 @@
     <string name="options_cut_end_here">Terminar aqui</string>
     <string name="options_cut_jump_start">Ir para o início</string>
     <string name="options_cut_jump_end">Ir para o fim</string>
-    <string name="fetch_settings_screen_description">Como os links são lidos, como as buscas são feitas e como a mídia é reproduzida. Os downloads sempre usam o yt-dlp.</string>
+    <string name="fetch_settings_screen_description">Como links são lidos, buscas feitas e mídia tocada. Downloads sempre usam o yt-dlp.</string>
     <string name="fetch_settings_read_with">Ler links com</string>
     <string name="fetch_settings_patience">Conexões lentas</string>
     <string name="fetch_settings_search">Busca</string>
@@ -741,7 +741,7 @@
     <string name="fetch_settings_play_with">Reproduzir com</string>
     <string name="fetch_settings_play_quality">Qualidade de reprodução</string>
     <string name="fetch_settings_play_quality_value">Até %1$dp</string>
-    <string name="fetch_settings_engine_newpipe_summary">O mais rápido no YouTube, SoundCloud e Bandcamp. O yt-dlp assume em todos os outros sites e sempre que ele não conseguir responder.</string>
+    <string name="fetch_settings_engine_newpipe_summary">Mais rápido no YouTube, SoundCloud e Bandcamp. O yt-dlp cuida do resto.</string>
     <string name="fetch_settings_engine_ytdlp_summary">Demora mais para começar e funciona em todos os sites compatíveis com o yt-dlp.</string>
     <plurals name="player_skip_seconds">
         <item quantity="one">%d segundo</item>
@@ -772,7 +772,7 @@
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Configurações de síntese</string>
     <string name="guide_step_share_title">Compartilhar com o Hazel</string>
-    <string name="guide_step_share_sheet">Compartilhe um link com o Hazel de qualquer app. Baixe na hora com suas configurações preferidas, ou espere um instante pelos detalhes e escolha cada opção.</string>
+    <string name="guide_step_share_sheet">Compartilhe um link com o Hazel de qualquer app e baixe na hora ou escolha cada opção.</string>
     <string name="instant_closing">Fecha em %1$d s</string>
     <string name="ytdlp_update_channel_name">Atualizações do mecanismo</string>
     <string name="ytdlp_update_channel_description">Alertas de atualização do mecanismo yt-dlp</string>
@@ -782,7 +782,7 @@
     <string name="ytdlp_update_installed_text">O mecanismo de download está atualizado</string>
     <string name="ytdlp_update_failed_title">Não foi possível instalar o yt-dlp %1$s</string>
     <string name="ytdlp_update_failed_text">O Hazel manteve o mecanismo atual e tentará novamente mais tarde</string>
-    <string name="cookies_description">Entre em um site uma vez e o Hazel usa isso em downloads com restrição de idade, privados e exclusivos para membros.</string>
+    <string name="cookies_description">Entre uma vez para baixar conteúdo com restrição de idade, privado e para membros.</string>
     <string name="cookies_section_general">Geral</string>
     <string name="cookies_section_add">Adicionar</string>
     <string name="cookies_section_saved">Logins salvos</string>

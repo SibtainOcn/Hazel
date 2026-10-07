@@ -117,10 +117,10 @@
     <string name="guide_step3_title">Hazel Instant</string>
     <string name="guide_step4_title">Battery Optimization</string>
     <string name="guide_step5_title">Notifications</string>
-    <string name="guide_step_paste_link">Paste a link into the search field to download it. You can add multiple links or entire playlists at once.</string>
-    <string name="guide_step_pick_format">Tap a card to pick the exact format. All available qualities are listed with size and codec options.</string>
-    <string name="guide_step_share_instant">Share to Hazel Instant to skip the sheet. It reads the link and starts the download with your preferred settings; the tune button opens Synthesizing to change them.</string>
-    <string name="guide_step_battery_unrestricted">Set battery use to unrestricted, otherwise Android may stop background downloads when you leave the app.</string>
+    <string name="guide_step_paste_link">Paste one or more links, or a whole playlist, into the search field.</string>
+    <string name="guide_step_pick_format">Tap a card to pick an exact format, with size and codec for each quality.</string>
+    <string name="guide_step_share_instant">Share to Hazel Instant to start right away with your settings. Tune opens Synthesizing.</string>
+    <string name="guide_step_battery_unrestricted">Set battery use to unrestricted so Android won\'t stop background downloads.</string>
     <string name="guide_step_notifications">Get notified about download progress and completions in the background.</string>
     <string name="guide_allow">Allow</string>
     <string name="guide_deny">Deny</string>
@@ -190,7 +190,7 @@
     <!-- MoreScreen -->
     <string name="more_title">More</string>
     <string name="more_battery_title">Background downloads</string>
-    <string name="more_battery_body">Downloads keep running in the background on their own. Some phones still cut them short to save battery. Allow unrestricted use to rule that out.</string>
+    <string name="more_battery_body">Some phones stop background downloads to save battery. Unrestricted use prevents it.</string>
     <string name="more_downloads">Downloads</string>
     <string name="more_appearance">Appearance</string>
     <string name="more_language">Language</string>
@@ -253,7 +253,7 @@
     <string name="options_subtitles_languages_label">Subtitle languages</string>
     <string name="options_subtitles_dismiss">Dismiss</string>
     <string name="options_subtitles_languages_title">Subtitle languages</string>
-    <string name="options_subtitles_languages_hint">A yt-dlp language selector, e.g. en,.*-orig for English plus the original track. Use all for every language the source offers.</string>
+    <string name="options_subtitles_languages_hint">A yt-dlp language selector, e.g. en,.*-orig. Use all for every language.</string>
     <string name="options_filename_title">Filename template</string>
     <string name="options_filename_hint" formatted="false">yt-dlp output template. Use %(title)s, %(uploader)s, %(id)s and %(ext)s.</string>
     <string name="options_text_input_save">Save</string>
@@ -262,20 +262,20 @@
     <!-- StorageCleanupScreen -->
     <string name="cleanup_back">Back</string>
     <string name="cleanup_title">Temporary Files</string>
-    <string name="cleanup_header_description">Working files held by the app. Your downloads are not included and are never removed from here.</string>
+    <string name="cleanup_header_description">Working files used by the app. Your downloads are never removed here.</string>
     <string name="cleanup_action_clear_everything">Clear everything</string>
     <string name="cleanup_category_link_data_label">Link data cache</string>
     <string name="cleanup_category_link_data_description">Player data yt-dlp keeps so a link read a second time is faster. Safe to clear.</string>
     <string name="cleanup_category_partial_downloads_label">Unfinished downloads</string>
-    <string name="cleanup_category_partial_downloads_description">Fragments left by a download that was cancelled or failed before its file was saved.</string>
+    <string name="cleanup_category_partial_downloads_description">Pieces left by downloads that were cancelled or failed.</string>
     <string name="cleanup_category_conversions_label">Unfinished conversions</string>
-    <string name="cleanup_category_conversions_description">Working files from the audio converter that were never moved into your music folder.</string>
+    <string name="cleanup_category_conversions_description">Leftover working files from the audio converter.</string>
     <string name="cleanup_category_engine_label">yt-dlp engine files</string>
-    <string name="cleanup_category_engine_description">The downloader and its runtime. Clearing frees the most space, but the next download has to unpack them again.</string>
+    <string name="cleanup_category_engine_description">The downloader and its runtime. Frees the most, but the next download unpacks it again.</string>
     <string name="cleanup_category_other_cache_label">Other cached files</string>
     <string name="cleanup_category_other_cache_description">Thumbnails and anything else cached while browsing links.</string>
     <string name="cleanup_category_link_reads_label">Saved link reads</string>
-    <string name="cleanup_category_link_reads_description">Formats of the last 50 links read, so opening one again is instant. Kept for up to 6 hours; never written in incognito.</string>
+    <string name="cleanup_category_link_reads_description">Formats of the last 50 links, so reopening is instant. Kept 6 hours, never in incognito.</string>
     <!--
          Deliberately does not name the category. The row the user just tapped is still on
          screen behind the dialog, and dropping a translated noun into a sentence slot
@@ -416,7 +416,7 @@
     <string name="cookies_field_title">Title</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">Save</string>
-    <string name="cookies_description">Sign in to a site once and Hazel uses it for age-restricted, private and members-only downloads.</string>
+    <string name="cookies_description">Sign in once for age-restricted, private and members-only downloads.</string>
     <string name="cookies_section_general">General</string>
     <string name="cookies_section_add">Add</string>
     <string name="cookies_section_saved">Saved sign-ins</string>
@@ -621,19 +621,19 @@
         <item quantity="other">%1$ds timeout, %2$d tries</item>
     </plurals>
     <string name="fetch_settings_reading_links">Reading links</string>
-    <string name="fetch_settings_force_ipv4_description">Only turn this on if links hang on your network. It works around a broken IPv6 route, and is slower everywhere else.</string>
+    <string name="fetch_settings_force_ipv4_description">Only if links hang on your network. Works around broken IPv6 but is slower elsewhere.</string>
     <string name="fetch_settings_force_ipv4">Force IPv4</string>
     <string name="fetch_mode_fast_label">Fast</string>
-    <string name="fetch_mode_fast_description">Give up quickly. Fastest on a good network, but more likely to need a second attempt.</string>
+    <string name="fetch_mode_fast_description">Gives up quickly. Fastest on a good network, but may need a retry.</string>
     <string name="fetch_mode_balanced_label">Balanced</string>
     <string name="fetch_mode_balanced_description">A middle ground between speed and tolerating a poor connection.</string>
     <string name="fetch_mode_thorough_label">Thorough</string>
     <string name="fetch_mode_thorough_description">Wait longer and retry more. Slowest, but survives a weak network.</string>
     <!-- The names of the extractors, untranslated across languages. -->
     <string name="listing_source_ytdlp_label" translatable="false">yt-dlp</string>
-    <string name="listing_source_ytdlp_description">The same engine that does the downloading. Works on every site it supports, and updates itself, so it keeps working as sites change.</string>
+    <string name="listing_source_ytdlp_description">The download engine itself. Works on every supported site and keeps itself updated.</string>
     <string name="listing_source_newpipe_label" translatable="false">NewPipe</string>
-    <string name="listing_source_newpipe_description">Lists playlists and channels in one request instead of starting the engine, which is quicker on the sites it knows. Falls back to yt-dlp for everything else, and whenever it cannot read a link.</string>
+    <string name="listing_source_newpipe_description">Quicker for playlists and channels. Falls back to yt-dlp when it can\'t read a link.</string>
 
     <!-- ToolsScreen -->
     <string name="tools_title">Tools</string>
@@ -650,7 +650,7 @@
     <string name="storage_locations_wifi_only_description">Downloads wait rather than run on mobile data</string>
     <string name="storage_locations_speed_limit_description">How fast a download is allowed to go</string>
     <string name="storage_locations_no_limit">No limit</string>
-    <string name="storage_locations_internal_note">Downloads are saved to internal storage unless you pick an SD card or another folder. Downloads going to an SD card keep their working files on the card too, so they don\'t use phone space while they run.</string>
+    <string name="storage_locations_internal_note">Saved to internal storage unless you pick another folder or an SD card.</string>
     <string name="storage_locations_wifi_only">Wi-Fi only</string>
     <string name="storage_locations_speed_limit">Speed limit</string>
 
@@ -666,7 +666,7 @@
     <string name="settings_back">Back</string>
     <string name="more_processing">Synthesizing</string>
     <string name="processing_title">Synthesizing</string>
-    <string name="processing_description">What every download starts from. Changes made in the download sheet are saved here too.</string>
+    <string name="processing_description">Defaults for every download. Changes in the download sheet are saved here too.</string>
     <string name="processing_section_general">General</string>
     <string name="processing_default">Default</string>
     <string name="processing_none">None</string>
@@ -693,14 +693,14 @@
     <string name="processing_reset_body">Every setting on this screen goes back to how the app ships.</string>
     <string name="more_advanced">Advanced</string>
     <string name="advanced_title">Advanced</string>
-    <string name="advanced_description">Engine options for sources the defaults do not reach. Leave them as they are unless a download needs them.</string>
+    <string name="advanced_description">Engine options for tricky sources. Leave them alone unless a download needs them.</string>
     <string name="advanced_section_youtube">YouTube</string>
     <string name="advanced_section_engine">Engine</string>
     <string name="advanced_player_clients">Player clients</string>
     <string name="advanced_automatic">Automatic</string>
     <string name="advanced_not_set">Not set</string>
     <string name="advanced_po_tokens">PO tokens</string>
-    <string name="advanced_po_tokens_hint">As CLIENT.CONTEXT+TOKEN, for example web.gvs+TOKEN, separated by commas. Use them with the visitor data they were made for.</string>
+    <string name="advanced_po_tokens_hint">CLIENT.CONTEXT+TOKEN, comma-separated, e.g. web.gvs+TOKEN. Needs matching visitor data.</string>
     <string name="advanced_po_tokens_set">%1$d set</string>
     <string name="advanced_po_tokens_invalid">%1$d not in the expected form</string>
     <string name="advanced_visitor_data">Visitor data</string>
@@ -713,9 +713,9 @@
     <string name="advanced_sleep_off">Off</string>
     <string name="advanced_sleep_seconds">%1$d s</string>
     <string name="advanced_no_check_certificates">Skip certificate checks</string>
-    <string name="advanced_no_check_certificates_summary">Only for a site whose certificate this device does not trust. Connections become less safe.</string>
+    <string name="advanced_no_check_certificates_summary">Only for sites this device doesn\'t trust. Connections become less safe.</string>
     <string name="advanced_extra_args">Extra download arguments</string>
-    <string name="advanced_extra_args_hint">yt-dlp arguments added to every download, as you would type them. Options the app sets itself, such as where files are saved, are left out.</string>
+    <string name="advanced_extra_args_hint">yt-dlp arguments added to every download. Options Hazel sets itself are skipped.</string>
     <string name="advanced_reset">Reset advanced settings</string>
     <string name="advanced_reset_title">Reset advanced settings?</string>
     <string name="advanced_reset_body">Every option on this screen goes back to off or empty.</string>
@@ -733,7 +733,7 @@
     <string name="options_cut_start">Start</string>
     <string name="options_cut_end">End</string>
     <string name="options_cut_precise">Precise cuts</string>
-    <string name="options_cut_precise_summary">Cuts exactly where you set them by encoding the ends again. Slower. Off, each cut moves to the nearest keyframe, a moment away.</string>
+    <string name="options_cut_precise_summary">Cuts exactly by re-encoding the ends. Slower. Off, cuts snap to the nearest keyframe.</string>
     <string name="options_cut_invalid">The end must come after the start, within the length</string>
     <string name="options_cut_apply">Cut</string>
     <string name="options_cut_clear">Clear</string>
@@ -750,10 +750,10 @@
     <string name="advanced_impersonate">Imitate a browser</string>
     <string name="advanced_impersonate_unavailable_value">%1$s, not available here</string>
     <string name="advanced_impersonate_checking">Asking the engine which browsers it can imitate</string>
-    <string name="advanced_impersonate_none">The engine on this device cannot imitate a browser, so requests are sent as they are.</string>
+    <string name="advanced_impersonate_none">This device\'s engine can\'t imitate a browser, so requests are sent as-is.</string>
     <string name="advanced_impersonate_check_failed">The engine could not be asked right now. Try again in a moment.</string>
     <string name="advanced_auto_po_tokens">Make PO tokens on this device</string>
-    <string name="advanced_auto_po_tokens_summary">Runs YouTube\'s own check in a hidden browser for each video read or downloaded, when no tokens are pasted in. Experimental.</string>
+    <string name="advanced_auto_po_tokens_summary">Runs YouTube\'s check in a hidden browser when no tokens are pasted. Experimental.</string>
     <string name="advanced_po_token_test">Test token making</string>
     <string name="advanced_po_token_testing">Making a token…</string>
     <string name="advanced_po_token_test_hint">Tap to make a token now and see whether it works</string>
@@ -761,7 +761,7 @@
     <string name="advanced_po_token_test_failed">Did not work: %1$s</string>
     <string name="more_backup">Backup</string>
     <string name="backup_title">Backup and restore</string>
-    <string name="backup_description">Save your settings, downloads list, queue, cookies and searches to a file, and bring them back on this phone or another.</string>
+    <string name="backup_description">Save settings, history, queue, cookies and searches to a file, then restore anywhere.</string>
     <string name="backup_section_now">Now</string>
     <string name="backup_backup">Back up</string>
     <string name="backup_backup_summary">Choose what to save</string>
@@ -798,7 +798,7 @@
     <string name="options_cut_end_here">End here</string>
     <string name="options_cut_jump_start">Go to start</string>
     <string name="options_cut_jump_end">Go to end</string>
-    <string name="fetch_settings_screen_description">How links are read, how searches run, and how media plays. Downloads always use yt-dlp.</string>
+    <string name="fetch_settings_screen_description">How links are read, searches run and media plays. Downloads always use yt-dlp.</string>
     <string name="fetch_settings_read_with">Read links with</string>
     <string name="fetch_settings_patience">Slow connections</string>
     <string name="fetch_settings_search">Search</string>
@@ -811,7 +811,7 @@
     <string name="fetch_settings_play_with">Play with</string>
     <string name="fetch_settings_play_quality">Playback quality</string>
     <string name="fetch_settings_play_quality_value">Up to %1$dp</string>
-    <string name="fetch_settings_engine_newpipe_summary">Fastest on YouTube, SoundCloud and Bandcamp. yt-dlp takes over everywhere else, and whenever it cannot answer.</string>
+    <string name="fetch_settings_engine_newpipe_summary">Fastest on YouTube, SoundCloud and Bandcamp. yt-dlp handles everything else.</string>
     <string name="fetch_settings_engine_ytdlp_summary">Slower to start, and works on every site yt-dlp supports.</string>
     <string name="search_source_youtube" translatable="false">YouTube</string>
     <string name="search_source_youtube_music" translatable="false">YouTube Music</string>
@@ -850,6 +850,6 @@
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Synthesizing settings</string>
     <string name="guide_step_share_title">Share to Hazel</string>
-    <string name="guide_step_share_sheet">Share a link to Hazel from any app. Download right away with your preferred settings, or wait a moment for the details and choose every option.</string>
+    <string name="guide_step_share_sheet">Share a link to Hazel from any app, then download now or choose every option.</string>
     <string name="instant_closing">Closing in %1$d s</string>
 </resources>

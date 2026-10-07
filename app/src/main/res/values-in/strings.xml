@@ -102,10 +102,10 @@
     <string name="guide_step3_title">Hazel Instan</string>
     <string name="guide_step4_title">Optimalisasi Baterai</string>
     <string name="guide_step5_title">Notifikasi</string>
-    <string name="guide_step_paste_link">Tempel tautan ke bidang pencarian untuk mengunduhnya. Anda dapat menambahkan beberapa tautan dan daftar putar</string>
-    <string name="guide_step_pick_format">Ketuk kartu untuk memilih format yang tepat. Semua kualitas yang tersedia tercantum beserta ukuran dan codec.</string>
-    <string name="guide_step_share_instant">Bagikan ke Hazel Instant untuk melewati lembar. Tautan dibaca dan unduhan dimulai dengan pengaturan pilihan Anda; tombol atur membuka Sintesis untuk mengubahnya.</string>
-    <string name="guide_step_battery_unrestricted">Atur penggunaan baterai ke tanpa batas, jika tidak Android dapat menghentikan unduhan saat Anda keluar dari aplikasi.</string>
+    <string name="guide_step_paste_link">Tempel satu atau beberapa tautan, atau seluruh playlist, ke kolom pencarian.</string>
+    <string name="guide_step_pick_format">Ketuk kartu untuk memilih format tepat, dengan ukuran dan codec tiap kualitas.</string>
+    <string name="guide_step_share_instant">Bagikan ke Hazel Instant untuk langsung mulai dengan pengaturanmu. Tombol setel membuka Sintesis.</string>
+    <string name="guide_step_battery_unrestricted">Atur penggunaan baterai ke tanpa batasan agar Android tidak menghentikan unduhan latar.</string>
     <string name="guide_step_notifications">Dapatkan pemberitahuan tentang kemajuan unduhan dan file yang selesai di latar belakang.</string>
     <string name="guide_allow">Izinkan</string>
     <string name="guide_deny">Tolak</string>
@@ -175,7 +175,7 @@
     <!-- MoreScreen -->
     <string name="more_title">Lainnya</string>
     <string name="more_battery_title">Unduhan latar belakang</string>
-    <string name="more_battery_body">Unduhan tetap berjalan di latar belakang secara mandiri. Beberapa ponsel membatasinya untuk menghemat baterai. Izinkan penggunaan tanpa batas untuk menghindarinya.</string>
+    <string name="more_battery_body">Beberapa ponsel menghentikan unduhan latar untuk hemat baterai. Tanpa batasan mencegahnya.</string>
     <string name="more_downloads">Unduhan</string>
     <string name="more_appearance">Tampilan</string>
     <string name="more_language">Bahasa</string>
@@ -238,7 +238,7 @@
     <string name="options_subtitles_languages_label">Bahasa subtitel</string>
     <string name="options_subtitles_dismiss">Tutup</string>
     <string name="options_subtitles_languages_title">Bahasa subtitel</string>
-    <string name="options_subtitles_languages_hint">Pemilih bahasa yt-dlp, mis. en,.*-orig untuk bahasa Inggris ditambah trek asli. Gunakan all untuk semua bahasa yang ditawarkan sumber.</string>
+    <string name="options_subtitles_languages_hint">Pemilih bahasa yt-dlp, mis. en,.*-orig. Gunakan all untuk semua bahasa.</string>
     <string name="options_filename_title">Templat nama file</string>
     <string name="options_filename_hint" formatted="false">Templat keluaran yt-dlp. Gunakan %(title)s, %(uploader)s, %(id)s, dan %(ext)s.</string>
     <string name="options_text_input_save">Simpan</string>
@@ -247,20 +247,20 @@
     <!-- StorageCleanupScreen -->
     <string name="cleanup_back">Kembali</string>
     <string name="cleanup_title">File Sementara</string>
-    <string name="cleanup_header_description">File kerja yang disimpan oleh aplikasi. Unduhan Anda tidak termasuk dan tidak akan pernah dihapus dari sini.</string>
+    <string name="cleanup_header_description">File kerja aplikasi. Unduhanmu tidak pernah dihapus dari sini.</string>
     <string name="cleanup_action_clear_everything">Hapus semua</string>
     <string name="cleanup_category_link_data_label">Cache data tautan</string>
     <string name="cleanup_category_link_data_description">Data pemutar yang disimpan yt-dlp agar pembacaan tautan untuk kedua kalinya lebih cepat. Aman untuk dihapus.</string>
     <string name="cleanup_category_partial_downloads_label">Unduhan belum selesai</string>
-    <string name="cleanup_category_partial_downloads_description">Fragmen tersisa dari unduhan yang dibatalkan atau gagal sebelum file disimpan.</string>
+    <string name="cleanup_category_partial_downloads_description">Sisa unduhan yang dibatalkan atau gagal.</string>
     <string name="cleanup_category_conversions_label">Konversi belum selesai</string>
-    <string name="cleanup_category_conversions_description">File kerja dari pengonversi audio yang belum dipindahkan ke folder musik Anda.</string>
+    <string name="cleanup_category_conversions_description">Sisa file kerja dari konverter audio.</string>
     <string name="cleanup_category_engine_label">File mesin yt-dlp</string>
-    <string name="cleanup_category_engine_description">Pengunduh dan lingkungan eksekusinya. Menghapusnya membebaskan paling banyak ruang, tetapi unduhan berikutnya harus mengekstraknya kembali.</string>
+    <string name="cleanup_category_engine_description">Pengunduh dan runtime-nya. Paling banyak menghemat ruang, tapi unduhan berikutnya membongkarnya lagi.</string>
     <string name="cleanup_category_other_cache_label">File cache lainnya</string>
     <string name="cleanup_category_other_cache_description">Gambar mini dan file lain yang di-cache saat menjelajahi tautan.</string>
     <string name="cleanup_category_link_reads_label">Bacaan tautan tersimpan</string>
-    <string name="cleanup_category_link_reads_description">Format dari 50 tautan terakhir yang dibaca, agar membukanya lagi langsung tampil. Disimpan hingga 6 jam; tidak pernah disimpan saat penyamaran.</string>
+    <string name="cleanup_category_link_reads_description">Format 50 tautan terakhir agar langsung terbuka lagi. Disimpan 6 jam, tidak di mode penyamaran.</string>
     <string name="cleanup_confirm_category_title">Hapus file-file ini?</string>
     <string name="cleanup_confirm_category_safe">%1$s ruang akan dikosongkan. File yang telah disimpan tidak akan terpengaruh.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s ruang akan dikosongkan, dan unduhan berikutnya akan membutuhkan waktu lebih lama karena komponen harus diekstrak ulang.</string>
@@ -540,16 +540,16 @@
         <item quantity="other">Batas waktu %1$d dtk, %2$d percobaan</item>
     </plurals>
     <string name="fetch_settings_reading_links">Membaca tautan</string>
-    <string name="fetch_settings_force_ipv4_description">Hanya aktifkan jika tautan terhenti di jaringan Anda. Ini mengatasi rute IPv6 yang bermasalah, dan lebih lambat di tempat lain.</string>
+    <string name="fetch_settings_force_ipv4_description">Hanya jika tautan macet di jaringanmu. Mengatasi IPv6 rusak, tapi lebih lambat di tempat lain.</string>
     <string name="fetch_settings_force_ipv4">Paksa IPv4</string>
     <string name="fetch_mode_fast_label">Cepat</string>
-    <string name="fetch_mode_fast_description">Cepat menyerah. Paling cepat di jaringan yang baik, tetapi lebih mungkin memerlukan percobaan kedua.</string>
+    <string name="fetch_mode_fast_description">Cepat menyerah. Tercepat di jaringan bagus, tapi mungkin perlu dicoba lagi.</string>
     <string name="fetch_mode_balanced_label">Seimbang</string>
     <string name="fetch_mode_balanced_description">Jalan tengah antara kecepatan dan toleransi koneksi yang kurang baik.</string>
     <string name="fetch_mode_thorough_label">Menyeluruh</string>
     <string name="fetch_mode_thorough_description">Menunggu lebih lama dan mencoba lebih banyak. Paling lambat, tetapi tahan di jaringan yang lemah.</string>
-    <string name="listing_source_ytdlp_description">Mesin yang sama dengan yang melakukan pengunduhan. Bekerja di setiap situs yang didukungnya, dan memperbarui diri sendiri, sehingga tetap berfungsi saat situs berubah.</string>
-    <string name="listing_source_newpipe_description">Mendaftar daftar putar dan saluran dalam satu permintaan tanpa memulai mesin, yang lebih cepat di situs yang dikenalnya. Beralih kembali ke yt-dlp untuk hal lain dan setiap kali tidak dapat membaca tautan.</string>
+    <string name="listing_source_ytdlp_description">Mesin unduhan itu sendiri. Bekerja di semua situs yang didukung dan memperbarui diri.</string>
+    <string name="listing_source_newpipe_description">Lebih cepat untuk playlist dan channel. Beralih ke yt-dlp jika tautan tak terbaca.</string>
 
     <!-- ToolsScreen -->
     <string name="tools_title">Alat</string>
@@ -564,7 +564,7 @@
     <string name="storage_locations_wifi_only_description">Unduhan menunggu alih-alih menggunakan data seluler</string>
     <string name="storage_locations_speed_limit_description">Batas kecepatan unduhan yang diizinkan</string>
     <string name="storage_locations_no_limit">Tanpa batas</string>
-    <string name="storage_locations_internal_note">Unduhan disimpan di penyimpanan internal kecuali Anda memilih kartu SD atau folder lain. Unduhan ke kartu SD juga menyimpan file kerjanya di kartu, sehingga tidak memakai ruang ponsel.</string>
+    <string name="storage_locations_internal_note">Disimpan di penyimpanan internal kecuali kamu memilih folder lain atau kartu SD.</string>
     <string name="storage_locations_wifi_only">Hanya Wi-Fi</string>
     <string name="storage_locations_speed_limit">Batas kecepatan</string>
 
@@ -580,7 +580,7 @@
     <string name="settings_back">Kembali</string>
     <string name="more_processing">Sintesis</string>
     <string name="processing_title">Sintesis</string>
-    <string name="processing_description">Titik awal setiap unduhan. Perubahan di lembar unduhan juga disimpan di sini.</string>
+    <string name="processing_description">Bawaan setiap unduhan. Perubahan di lembar unduhan juga disimpan di sini.</string>
     <string name="processing_section_general">Umum</string>
     <string name="processing_default">Bawaan</string>
     <string name="processing_none">Tidak ada</string>
@@ -607,14 +607,14 @@
     <string name="processing_reset_body">Setiap pengaturan di layar ini kembali seperti bawaan aplikasi.</string>
     <string name="more_advanced">Lanjutan</string>
     <string name="advanced_title">Lanjutan</string>
-    <string name="advanced_description">Opsi mesin untuk sumber yang tidak terjangkau pengaturan bawaan. Biarkan apa adanya kecuali ada unduhan yang memerlukannya.</string>
+    <string name="advanced_description">Opsi mesin untuk sumber yang sulit. Biarkan kecuali unduhan membutuhkannya.</string>
     <string name="advanced_section_youtube">YouTube</string>
     <string name="advanced_section_engine">Mesin</string>
     <string name="advanced_player_clients">Klien pemutar</string>
     <string name="advanced_automatic">Otomatis</string>
     <string name="advanced_not_set">Belum diatur</string>
     <string name="advanced_po_tokens">Token PO</string>
-    <string name="advanced_po_tokens_hint">Dalam bentuk CLIENT.CONTEXT+TOKEN, misalnya web.gvs+TOKEN, dipisahkan koma. Gunakan bersama data pengunjung yang dipakai untuk membuatnya.</string>
+    <string name="advanced_po_tokens_hint">CLIENT.CONTEXT+TOKEN, dipisah koma, mis. web.gvs+TOKEN. Perlu visitor data yang cocok.</string>
     <string name="advanced_po_tokens_set">%1$d diatur</string>
     <string name="advanced_po_tokens_invalid">%1$d tidak sesuai format</string>
     <string name="advanced_visitor_data">Data pengunjung</string>
@@ -627,9 +627,9 @@
     <string name="advanced_sleep_off">Mati</string>
     <string name="advanced_sleep_seconds">%1$d dtk</string>
     <string name="advanced_no_check_certificates">Lewati pemeriksaan sertifikat</string>
-    <string name="advanced_no_check_certificates_summary">Hanya untuk situs yang sertifikatnya tidak dipercaya perangkat ini. Koneksi menjadi kurang aman.</string>
+    <string name="advanced_no_check_certificates_summary">Hanya untuk situs yang tidak dipercaya perangkat ini. Koneksi jadi kurang aman.</string>
     <string name="advanced_extra_args">Argumen unduhan tambahan</string>
-    <string name="advanced_extra_args_hint">Argumen yt-dlp yang ditambahkan ke setiap unduhan, seperti yang Anda ketik. Opsi yang diatur aplikasi sendiri, seperti lokasi penyimpanan, dilewati.</string>
+    <string name="advanced_extra_args_hint">Argumen yt-dlp untuk setiap unduhan. Opsi yang diatur Hazel sendiri dilewati.</string>
     <string name="advanced_reset">Atur ulang pengaturan lanjutan</string>
     <string name="advanced_reset_title">Atur ulang pengaturan lanjutan?</string>
     <string name="advanced_reset_body">Setiap opsi di layar ini kembali mati atau kosong.</string>
@@ -647,7 +647,7 @@
     <string name="options_cut_start">Mulai</string>
     <string name="options_cut_end">Selesai</string>
     <string name="options_cut_precise">Potongan presisi</string>
-    <string name="options_cut_precise_summary">Memotong tepat di titik yang Anda pilih dengan mengode ulang ujungnya. Lebih lambat. Jika mati, setiap potongan bergeser ke keyframe terdekat.</string>
+    <string name="options_cut_precise_summary">Memotong tepat dengan mengenkode ulang ujungnya. Lebih lambat. Mati: potong di keyframe terdekat.</string>
     <string name="options_cut_invalid">Akhir harus setelah awal, dalam durasi</string>
     <string name="options_cut_apply">Potong</string>
     <string name="options_cut_clear">Hapus</string>
@@ -667,7 +667,7 @@
     <string name="advanced_impersonate_none">Mesin di perangkat ini tidak bisa meniru browser, jadi permintaan dikirim apa adanya.</string>
     <string name="advanced_impersonate_check_failed">Mesin tidak bisa ditanya sekarang. Coba lagi sebentar lagi.</string>
     <string name="advanced_auto_po_tokens">Buat token PO di perangkat ini</string>
-    <string name="advanced_auto_po_tokens_summary">Menjalankan pemeriksaan YouTube di browser tersembunyi untuk setiap video yang dibaca atau diunduh, jika tidak ada token yang ditempel. Eksperimental.</string>
+    <string name="advanced_auto_po_tokens_summary">Menjalankan pemeriksaan YouTube di browser tersembunyi jika tidak ada token. Eksperimental.</string>
     <string name="advanced_po_token_test">Uji pembuatan token</string>
     <string name="advanced_po_token_testing">Membuat token…</string>
     <string name="advanced_po_token_test_hint">Ketuk untuk membuat token sekarang dan melihat apakah berhasil</string>
@@ -675,7 +675,7 @@
     <string name="advanced_po_token_test_failed">Tidak berhasil: %1$s</string>
     <string name="more_backup">Cadangan</string>
     <string name="backup_title">Cadangkan dan pulihkan</string>
-    <string name="backup_description">Simpan setelan, daftar unduhan, antrean, cookie, dan pencarian ke file, lalu pulihkan di ponsel ini atau ponsel lain.</string>
+    <string name="backup_description">Simpan pengaturan, riwayat, antrean, cookie, dan pencarian ke file, lalu pulihkan di mana saja.</string>
     <string name="backup_section_now">Sekarang</string>
     <string name="backup_backup">Cadangkan</string>
     <string name="backup_backup_summary">Pilih yang disimpan</string>
@@ -712,7 +712,7 @@
     <string name="options_cut_end_here">Selesai di sini</string>
     <string name="options_cut_jump_start">Ke awal</string>
     <string name="options_cut_jump_end">Ke akhir</string>
-    <string name="fetch_settings_screen_description">Cara tautan dibaca, cara pencarian berjalan, dan cara media diputar. Unduhan selalu memakai yt-dlp.</string>
+    <string name="fetch_settings_screen_description">Cara tautan dibaca, pencarian, dan pemutaran media. Unduhan selalu memakai yt-dlp.</string>
     <string name="fetch_settings_read_with">Baca tautan dengan</string>
     <string name="fetch_settings_patience">Koneksi lambat</string>
     <string name="fetch_settings_search">Pencarian</string>
@@ -725,7 +725,7 @@
     <string name="fetch_settings_play_with">Putar dengan</string>
     <string name="fetch_settings_play_quality">Kualitas pemutaran</string>
     <string name="fetch_settings_play_quality_value">Hingga %1$dp</string>
-    <string name="fetch_settings_engine_newpipe_summary">Tercepat di YouTube, SoundCloud, dan Bandcamp. yt-dlp mengambil alih di tempat lain dan setiap kali tidak bisa menjawab.</string>
+    <string name="fetch_settings_engine_newpipe_summary">Tercepat di YouTube, SoundCloud, dan Bandcamp. yt-dlp menangani sisanya.</string>
     <string name="fetch_settings_engine_ytdlp_summary">Lebih lambat untuk mulai, dan berfungsi di semua situs yang didukung yt-dlp.</string>
     <plurals name="player_skip_seconds">
         <item quantity="other">%d detik</item>
@@ -754,7 +754,7 @@
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Pengaturan sintesis</string>
     <string name="guide_step_share_title">Bagikan ke Hazel</string>
-    <string name="guide_step_share_sheet">Bagikan tautan ke Hazel dari aplikasi apa pun. Unduh langsung dengan pengaturan pilihan Anda, atau tunggu sebentar untuk detailnya dan pilih setiap opsi.</string>
+    <string name="guide_step_share_sheet">Bagikan tautan ke Hazel dari aplikasi mana pun, lalu unduh langsung atau pilih setiap opsi.</string>
     <string name="instant_closing">Ditutup dalam %1$d dtk</string>
     <string name="ytdlp_update_channel_name">Pembaruan mesin</string>
     <string name="ytdlp_update_channel_description">Pemberitahuan pembaruan mesin yt-dlp</string>
@@ -764,7 +764,7 @@
     <string name="ytdlp_update_installed_text">Mesin unduhan sudah terbaru</string>
     <string name="ytdlp_update_failed_title">yt-dlp %1$s tidak dapat dipasang</string>
     <string name="ytdlp_update_failed_text">Hazel mempertahankan mesin saat ini dan akan mencoba lagi nanti</string>
-    <string name="cookies_description">Masuk ke situs sekali, lalu Hazel memakainya untuk unduhan yang dibatasi usia, privat, dan khusus anggota.</string>
+    <string name="cookies_description">Masuk sekali untuk unduhan dengan batasan usia, pribadi, dan khusus anggota.</string>
     <string name="cookies_section_general">Umum</string>
     <string name="cookies_section_add">Tambah</string>
     <string name="cookies_section_saved">Login tersimpan</string>

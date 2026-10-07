@@ -106,10 +106,10 @@
     <string name="guide_step3_title">Hazel इंस्टेंट</string>
     <string name="guide_step4_title">बैटरी ऑप्टिमाइज़ेशन</string>
     <string name="guide_step5_title">सूचनाएं</string>
-    <string name="guide_step_paste_link">डाउनलोड करने के लिए खोज बॉक्स में लिंक चिपकाएँ। आप कई लिंक और प्लेलिस्ट भी जोड़ सकते हैं</string>
-    <string name="guide_step_pick_format">सही फ़ॉर्मैट चुनने के लिए किसी कार्ड पर टैप करें। हर उपलब्ध क्वालिटी उसके आकार और कोडेक के साथ दिखाई जाती है।</string>
-    <string name="guide_step_share_instant">शीट छोड़ने के लिए Hazel Instant पर शेयर करें। यह लिंक पढ़कर आपकी पसंदीदा सेटिंग्स से डाउनलोड शुरू करता है; ट्यून बटन उन्हें बदलने के लिए सिंथेसाइज़िंग खोलता है।</string>
-    <string name="guide_step_battery_unrestricted">बैटरी उपयोग को अप्रतिबंधित पर रखें, वरना ऐप से बाहर जाते ही Android डाउनलोड रोक सकता है।</string>
+    <string name="guide_step_paste_link">खोज फ़ील्ड में एक या कई लिंक, या पूरी प्लेलिस्ट पेस्ट करें।</string>
+    <string name="guide_step_pick_format">सटीक फ़ॉर्मेट चुनने के लिए कार्ड टैप करें, हर क्वालिटी के साइज़ और कोडेक के साथ।</string>
+    <string name="guide_step_share_instant">अपनी सेटिंग से तुरंत शुरू करने के लिए Hazel Instant पर शेयर करें। ट्यून बटन सिंथेसाइज़िंग खोलता है।</string>
+    <string name="guide_step_battery_unrestricted">बैटरी उपयोग अप्रतिबंधित करें ताकि Android बैकग्राउंड डाउनलोड न रोके।</string>
     <string name="guide_step_notifications">पृष्ठभूमि में डाउनलोड प्रगति और पूरी हुई फ़ाइलों के बारे में सूचनाएं प्राप्त करें।</string>
     <string name="guide_allow">अनुमति दें</string>
     <string name="guide_deny">अस्वीकार करें</string>
@@ -179,7 +179,7 @@
     <!-- MoreScreen -->
     <string name="more_title">और</string>
     <string name="more_battery_title">पृष्ठभूमि में डाउनलोड</string>
-    <string name="more_battery_body">डाउनलोड पृष्ठभूमि में अपने आप चलते रहते हैं। फिर भी कुछ फ़ोन बैटरी बचाने के लिए उन्हें बीच में रोक देते हैं। इसे टालने के लिए अप्रतिबंधित उपयोग की अनुमति दें।</string>
+    <string name="more_battery_body">कुछ फ़ोन बैटरी बचाने के लिए बैकग्राउंड डाउनलोड रोक देते हैं। अप्रतिबंधित उपयोग इसे रोकता है।</string>
     <string name="more_downloads">डाउनलोड</string>
     <string name="more_appearance">दिखावट</string>
     <string name="more_language">भाषा</string>
@@ -242,7 +242,7 @@
     <string name="options_subtitles_languages_label">उपशीर्षक की भाषाएँ</string>
     <string name="options_subtitles_dismiss">हटाएँ</string>
     <string name="options_subtitles_languages_title">उपशीर्षक की भाषाएँ</string>
-    <string name="options_subtitles_languages_hint">yt-dlp का भाषा चयनकर्ता, जैसे en,.*-orig अंग्रेज़ी और मूल ट्रैक के लिए। स्रोत की हर भाषा के लिए all इस्तेमाल करें।</string>
+    <string name="options_subtitles_languages_hint">yt-dlp भाषा चयनकर्ता, जैसे en,.*-orig। हर भाषा के लिए all लिखें।</string>
     <string name="options_filename_title">फ़ाइल नाम टेम्पलेट</string>
     <string name="options_filename_hint" formatted="false">yt-dlp का आउटपुट टेम्पलेट। %(title)s, %(uploader)s, %(id)s और %(ext)s इस्तेमाल करें।</string>
     <string name="options_text_input_save">सहेजें</string>
@@ -251,20 +251,20 @@
     <!-- StorageCleanupScreen -->
     <string name="cleanup_back">वापस</string>
     <string name="cleanup_title">अस्थायी फ़ाइलें</string>
-    <string name="cleanup_header_description">ऐप के काम की फ़ाइलें। आपके डाउनलोड इसमें शामिल नहीं हैं और यहाँ से कभी नहीं हटते।</string>
+    <string name="cleanup_header_description">ऐप की कार्य फ़ाइलें। आपके डाउनलोड यहाँ से कभी नहीं हटते।</string>
     <string name="cleanup_action_clear_everything">सब कुछ मिटाएँ</string>
     <string name="cleanup_category_link_data_label">लिंक डेटा कैश</string>
     <string name="cleanup_category_link_data_description">प्लेयर का वह डेटा जो yt-dlp रखता है ताकि दोबारा पढ़ा गया लिंक जल्दी खुले। मिटाना सुरक्षित है।</string>
     <string name="cleanup_category_partial_downloads_label">अधूरे डाउनलोड</string>
-    <string name="cleanup_category_partial_downloads_description">फ़ाइल सहेजे जाने से पहले रद्द या विफल हुए डाउनलोड के बचे हुए टुकड़े।</string>
+    <string name="cleanup_category_partial_downloads_description">रद्द या विफल डाउनलोड के बचे हिस्से।</string>
     <string name="cleanup_category_conversions_label">अधूरे रूपांतरण</string>
-    <string name="cleanup_category_conversions_description">ऑडियो कन्वर्टर की वे फ़ाइलें जो कभी आपके संगीत फ़ोल्डर तक नहीं पहुँचीं।</string>
+    <string name="cleanup_category_conversions_description">ऑडियो कन्वर्टर की बची हुई कार्य फ़ाइलें।</string>
     <string name="cleanup_category_engine_label">yt-dlp इंजन की फ़ाइलें</string>
-    <string name="cleanup_category_engine_description">डाउनलोडर और उसका रनटाइम। मिटाने से सबसे ज़्यादा जगह खाली होती है, पर अगले डाउनलोड में उन्हें फिर से खोलना पड़ता है।</string>
+    <string name="cleanup_category_engine_description">डाउनलोडर और उसका रनटाइम। सबसे ज़्यादा जगह खाली होती है, पर अगला डाउनलोड इसे फिर खोलेगा।</string>
     <string name="cleanup_category_other_cache_label">अन्य कैश की गई फ़ाइलें</string>
     <string name="cleanup_category_other_cache_description">थंबनेल और लिंक देखते समय कैश हुआ बाकी सब कुछ।</string>
     <string name="cleanup_category_link_reads_label">सहेजी गई लिंक जानकारी</string>
-    <string name="cleanup_category_link_reads_description">पिछले 50 पढ़े गए लिंक के फ़ॉर्मेट, ताकि किसी को दोबारा खोलना तुरंत हो। 6 घंटे तक रखे जाते हैं; इनकॉग्निटो में कभी सहेजे नहीं जाते।</string>
+    <string name="cleanup_category_link_reads_description">पिछले 50 लिंक के फ़ॉर्मेट, ताकि दोबारा तुरंत खुलें। 6 घंटे तक, इनकॉग्निटो में कभी नहीं।</string>
     <string name="cleanup_confirm_category_title">ये फ़ाइलें मिटाएँ?</string>
     <string name="cleanup_confirm_category_safe">%1$s खाली हो जाएगा। आपकी सहेजी हुई किसी चीज़ पर असर नहीं पड़ेगा।</string>
     <string name="cleanup_confirm_category_unsafe">%1$s खाली हो जाएगा, और अगला डाउनलोड इन्हें फिर से खोलने में ज़्यादा समय लेगा।</string>
@@ -548,16 +548,16 @@
         <item quantity="other">%1$ds इंतज़ार, %2$d कोशिशें</item>
     </plurals>
     <string name="fetch_settings_reading_links">लिंक पढ़ना</string>
-    <string name="fetch_settings_force_ipv4_description">इसे तभी चालू करें जब आपके नेटवर्क पर लिंक अटक जाते हों। यह टूटे हुए IPv6 रास्ते से बचाता है, और बाकी हर जगह धीमा है।</string>
+    <string name="fetch_settings_force_ipv4_description">सिर्फ़ तब जब आपके नेटवर्क पर लिंक अटकें। खराब IPv6 से बचाता है, पर बाकी जगह धीमा है।</string>
     <string name="fetch_settings_force_ipv4">IPv4 ज़रूरी करें</string>
     <string name="fetch_mode_fast_label">तेज़</string>
-    <string name="fetch_mode_fast_description">जल्दी हार मान लेता है। अच्छे नेटवर्क पर सबसे तेज़, पर दूसरी कोशिश की ज़रूरत ज़्यादा पड़ती है।</string>
+    <string name="fetch_mode_fast_description">जल्दी हार मानता है। अच्छे नेटवर्क पर सबसे तेज़, पर दोबारा कोशिश लग सकती है।</string>
     <string name="fetch_mode_balanced_label">संतुलित</string>
     <string name="fetch_mode_balanced_description">रफ़्तार और कमज़ोर कनेक्शन झेलने के बीच का रास्ता।</string>
     <string name="fetch_mode_thorough_label">पूरी तरह</string>
     <string name="fetch_mode_thorough_description">ज़्यादा इंतज़ार और ज़्यादा कोशिशें। सबसे धीमा, पर कमज़ोर नेटवर्क पर टिक जाता है।</string>
-    <string name="listing_source_ytdlp_description">वही इंजन जो डाउनलोड करता है। जिन साइटों को यह समझता है उन सब पर काम करता है, और खुद को अपडेट करता रहता है, इसलिए साइटें बदलने पर भी चलता रहता है।</string>
-    <string name="listing_source_newpipe_description">इंजन चलाने के बजाय एक ही अनुरोध में प्लेलिस्ट और चैनल की सूची बनाता है, जो जानी-पहचानी साइटों पर तेज़ है। बाकी सब के लिए, और जब भी कोई लिंक न पढ़ पाए, yt-dlp पर लौट आता है।</string>
+    <string name="listing_source_ytdlp_description">डाउनलोड करने वाला इंजन ही। हर समर्थित साइट पर चलता है और खुद अपडेट होता है।</string>
+    <string name="listing_source_newpipe_description">प्लेलिस्ट और चैनलों के लिए तेज़। लिंक न पढ़ पाने पर yt-dlp का उपयोग करता है।</string>
 
     <!-- ToolsScreen -->
     <string name="tools_title">उपकरण</string>
@@ -572,7 +572,7 @@
     <string name="storage_locations_wifi_only_description">डाउनलोड मोबाइल डेटा पर चलने के बजाय इंतज़ार करते हैं</string>
     <string name="storage_locations_speed_limit_description">डाउनलोड कितनी तेज़ी से चल सकता है</string>
     <string name="storage_locations_no_limit">कोई सीमा नहीं</string>
-    <string name="storage_locations_internal_note">जब तक आप SD कार्ड या कोई दूसरा फ़ोल्डर नहीं चुनते, डाउनलोड आंतरिक स्टोरेज में सहेजे जाते हैं। SD कार्ड पर जाने वाले डाउनलोड अपनी अस्थायी फ़ाइलें भी कार्ड पर ही रखते हैं, ताकि फ़ोन की जगह न भरे।</string>
+    <string name="storage_locations_internal_note">जब तक आप कोई दूसरा फ़ोल्डर या SD कार्ड न चुनें, डाउनलोड आंतरिक स्टोरेज में सहेजे जाते हैं।</string>
     <string name="storage_locations_wifi_only">सिर्फ़ वाई-फ़ाई</string>
     <string name="storage_locations_speed_limit">गति सीमा</string>
 
@@ -588,7 +588,7 @@
     <string name="settings_back">वापस</string>
     <string name="more_processing">सिंथेसाइज़िंग</string>
     <string name="processing_title">सिंथेसाइज़िंग</string>
-    <string name="processing_description">हर डाउनलोड इन्हीं सेटिंग्स से शुरू होता है। डाउनलोड शीट में किए बदलाव भी यहीं सहेजे जाते हैं।</string>
+    <string name="processing_description">हर डाउनलोड की शुरुआती सेटिंग। डाउनलोड शीट में किए बदलाव भी यहाँ सहेजे जाते हैं।</string>
     <string name="processing_section_general">सामान्य</string>
     <string name="processing_default">डिफ़ॉल्ट</string>
     <string name="processing_none">कोई नहीं</string>
@@ -615,14 +615,14 @@
     <string name="processing_reset_body">इस स्क्रीन की हर सेटिंग ऐप की मूल सेटिंग पर लौट जाएगी।</string>
     <string name="more_advanced">एडवांस्ड</string>
     <string name="advanced_title">एडवांस्ड</string>
-    <string name="advanced_description">उन स्रोतों के लिए इंजन विकल्प जिन तक डिफ़ॉल्ट नहीं पहुँचते। जब तक किसी डाउनलोड को ज़रूरत न हो, इन्हें न बदलें।</string>
+    <string name="advanced_description">मुश्किल स्रोतों के लिए इंजन विकल्प। ज़रूरत न हो तो इन्हें न बदलें।</string>
     <string name="advanced_section_youtube">YouTube</string>
     <string name="advanced_section_engine">इंजन</string>
     <string name="advanced_player_clients">प्लेयर क्लाइंट</string>
     <string name="advanced_automatic">स्वचालित</string>
     <string name="advanced_not_set">सेट नहीं</string>
     <string name="advanced_po_tokens">PO टोकन</string>
-    <string name="advanced_po_tokens_hint">CLIENT.CONTEXT+TOKEN के रूप में, जैसे web.gvs+TOKEN, कॉमा से अलग। इन्हें उसी विज़िटर डेटा के साथ इस्तेमाल करें जिसके लिए ये बने थे।</string>
+    <string name="advanced_po_tokens_hint">CLIENT.CONTEXT+TOKEN, कॉमा से अलग, जैसे web.gvs+TOKEN। मिलते visitor data के साथ इस्तेमाल करें।</string>
     <string name="advanced_po_tokens_set">%1$d सेट</string>
     <string name="advanced_po_tokens_invalid">%1$d सही रूप में नहीं</string>
     <string name="advanced_visitor_data">विज़िटर डेटा</string>
@@ -635,9 +635,9 @@
     <string name="advanced_sleep_off">बंद</string>
     <string name="advanced_sleep_seconds">%1$d से.</string>
     <string name="advanced_no_check_certificates">सर्टिफ़िकेट जाँच छोड़ें</string>
-    <string name="advanced_no_check_certificates_summary">सिर्फ़ उस साइट के लिए जिसका सर्टिफ़िकेट यह डिवाइस नहीं मानता। कनेक्शन कम सुरक्षित होते हैं।</string>
+    <string name="advanced_no_check_certificates_summary">सिर्फ़ उन साइटों के लिए जिन पर यह डिवाइस भरोसा नहीं करता। कनेक्शन कम सुरक्षित होते हैं।</string>
     <string name="advanced_extra_args">अतिरिक्त डाउनलोड आर्ग्युमेंट</string>
-    <string name="advanced_extra_args_hint">हर डाउनलोड में जोड़े जाने वाले yt-dlp आर्ग्युमेंट, जैसे आप टाइप करते। ऐप खुद जो विकल्प सेट करता है, जैसे फ़ाइल कहाँ सहेजनी है, वे छोड़ दिए जाते हैं।</string>
+    <string name="advanced_extra_args_hint">हर डाउनलोड में जोड़े जाने वाले yt-dlp आर्ग्युमेंट। Hazel के अपने विकल्प छोड़ दिए जाते हैं।</string>
     <string name="advanced_reset">एडवांस्ड सेटिंग्स रीसेट करें</string>
     <string name="advanced_reset_title">एडवांस्ड सेटिंग्स रीसेट करें?</string>
     <string name="advanced_reset_body">इस स्क्रीन का हर विकल्प फिर से बंद या खाली हो जाएगा।</string>
@@ -655,7 +655,7 @@
     <string name="options_cut_start">शुरुआत</string>
     <string name="options_cut_end">अंत</string>
     <string name="options_cut_precise">सटीक कट</string>
-    <string name="options_cut_precise_summary">सिरों को दोबारा एन्कोड करके ठीक वहीं काटता है जहाँ आप तय करते हैं। धीमा। बंद होने पर हर कट पास के कीफ़्रेम पर खिसक जाता है।</string>
+    <string name="options_cut_precise_summary">सिरों को फिर से एन्कोड करके सटीक काटता है। धीमा। बंद होने पर कट नज़दीकी कीफ़्रेम पर जाता है।</string>
     <string name="options_cut_invalid">अंत शुरुआत के बाद और लंबाई के भीतर होना चाहिए</string>
     <string name="options_cut_apply">काटें</string>
     <string name="options_cut_clear">साफ़ करें</string>
@@ -672,10 +672,10 @@
     <string name="advanced_impersonate">ब्राउज़र की नकल करें</string>
     <string name="advanced_impersonate_unavailable_value">%1$s, यहाँ उपलब्ध नहीं</string>
     <string name="advanced_impersonate_checking">इंजन से पूछा जा रहा है कि वह किन ब्राउज़रों की नकल कर सकता है</string>
-    <string name="advanced_impersonate_none">इस डिवाइस का इंजन किसी ब्राउज़र की नकल नहीं कर सकता, इसलिए अनुरोध वैसे ही भेजे जाते हैं।</string>
+    <string name="advanced_impersonate_none">इस डिवाइस का इंजन ब्राउज़र की नकल नहीं कर सकता, इसलिए अनुरोध जैसे हैं वैसे भेजे जाते हैं।</string>
     <string name="advanced_impersonate_check_failed">अभी इंजन से पूछा नहीं जा सका। थोड़ी देर में फिर कोशिश करें।</string>
     <string name="advanced_auto_po_tokens">इसी डिवाइस पर PO टोकन बनाएँ</string>
-    <string name="advanced_auto_po_tokens_summary">टोकन पेस्ट न होने पर, पढ़े या डाउनलोड किए गए हर वीडियो के लिए YouTube की अपनी जाँच एक छिपे ब्राउज़र में चलाता है। प्रायोगिक।</string>
+    <string name="advanced_auto_po_tokens_summary">टोकन न होने पर YouTube की जाँच छिपे ब्राउज़र में चलाता है। प्रायोगिक।</string>
     <string name="advanced_po_token_test">टोकन बनाना जाँचें</string>
     <string name="advanced_po_token_testing">टोकन बन रहा है…</string>
     <string name="advanced_po_token_test_hint">अभी टोकन बनाकर देखने के लिए टैप करें कि यह काम करता है या नहीं</string>
@@ -683,7 +683,7 @@
     <string name="advanced_po_token_test_failed">काम नहीं किया: %1$s</string>
     <string name="more_backup">बैकअप</string>
     <string name="backup_title">बैकअप और रीस्टोर</string>
-    <string name="backup_description">अपनी सेटिंग्स, डाउनलोड सूची, कतार, कुकीज़ और खोजें एक फ़ाइल में सहेजें, और इसी या किसी दूसरे फ़ोन पर वापस लाएँ।</string>
+    <string name="backup_description">सेटिंग, इतिहास, कतार, कुकी और खोजें एक फ़ाइल में सहेजें और कहीं भी वापस लाएँ।</string>
     <string name="backup_section_now">अभी</string>
     <string name="backup_backup">बैकअप लें</string>
     <string name="backup_backup_summary">चुनें कि क्या सहेजना है</string>
@@ -720,7 +720,7 @@
     <string name="options_cut_end_here">यहां तक</string>
     <string name="options_cut_jump_start">शुरुआत पर जाएं</string>
     <string name="options_cut_jump_end">अंत पर जाएं</string>
-    <string name="fetch_settings_screen_description">लिंक कैसे पढ़े जाते हैं, खोज कैसे होती है और मीडिया कैसे चलता है। डाउनलोड हमेशा yt-dlp से होते हैं।</string>
+    <string name="fetch_settings_screen_description">लिंक कैसे पढ़े जाएँ, खोज और मीडिया प्लेबैक। डाउनलोड हमेशा yt-dlp से होते हैं।</string>
     <string name="fetch_settings_read_with">लिंक इससे पढ़ें</string>
     <string name="fetch_settings_patience">धीमे कनेक्शन</string>
     <string name="fetch_settings_search">खोज</string>
@@ -733,7 +733,7 @@
     <string name="fetch_settings_play_with">इससे चलाएं</string>
     <string name="fetch_settings_play_quality">प्लेबैक गुणवत्ता</string>
     <string name="fetch_settings_play_quality_value">%1$dp तक</string>
-    <string name="fetch_settings_engine_newpipe_summary">YouTube, SoundCloud और Bandcamp पर सबसे तेज़। बाकी हर जगह और जब यह जवाब न दे पाए, yt-dlp संभालता है।</string>
+    <string name="fetch_settings_engine_newpipe_summary">YouTube, SoundCloud और Bandcamp पर सबसे तेज़। बाकी सब yt-dlp संभालता है।</string>
     <string name="fetch_settings_engine_ytdlp_summary">शुरू होने में धीमा, और yt-dlp की हर समर्थित साइट पर काम करता है।</string>
     <plurals name="player_skip_seconds">
         <item quantity="one">%d सेकंड</item>
@@ -763,7 +763,7 @@
     <string name="instant_ok">ठीक है</string>
     <string name="instant_settings">सिंथेसाइज़िंग सेटिंग्स</string>
     <string name="guide_step_share_title">Hazel पर शेयर करें</string>
-    <string name="guide_step_share_sheet">किसी भी ऐप से Hazel पर लिंक शेयर करें। अपनी पसंदीदा सेटिंग्स के साथ तुरंत डाउनलोड करें, या विवरण आने तक थोड़ा रुककर हर विकल्प चुनें।</string>
+    <string name="guide_step_share_sheet">किसी भी ऐप से Hazel पर लिंक शेयर करें, फिर तुरंत डाउनलोड करें या हर विकल्प चुनें।</string>
     <string name="instant_closing">%1$d से. में बंद होगा</string>
     <string name="ytdlp_update_channel_name">इंजन अपडेट</string>
     <string name="ytdlp_update_channel_description">yt-dlp इंजन अपडेट की सूचनाएं</string>
@@ -773,7 +773,7 @@
     <string name="ytdlp_update_installed_text">डाउनलोड इंजन अपडेटेड है</string>
     <string name="ytdlp_update_failed_title">yt-dlp %1$s इंस्टॉल नहीं हो सका</string>
     <string name="ytdlp_update_failed_text">Hazel ने मौजूदा इंजन रखा है और बाद में फिर कोशिश करेगा</string>
-    <string name="cookies_description">किसी साइट में एक बार साइन इन करें, फिर Hazel उम्र-प्रतिबंधित, निजी और सदस्यों के लिए डाउनलोड में इसका उपयोग करेगा।</string>
+    <string name="cookies_description">उम्र-प्रतिबंधित, निजी और सदस्य-केवल डाउनलोड के लिए एक बार साइन इन करें।</string>
     <string name="cookies_section_general">सामान्य</string>
     <string name="cookies_section_add">जोड़ें</string>
     <string name="cookies_section_saved">सहेजे गए साइन-इन</string>

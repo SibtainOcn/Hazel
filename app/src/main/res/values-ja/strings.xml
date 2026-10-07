@@ -102,10 +102,10 @@
     <string name="guide_step3_title">Hazel インスタント</string>
     <string name="guide_step4_title">バッテリー最適化</string>
     <string name="guide_step5_title">通知</string>
-    <string name="guide_step_paste_link">検索バーにリンクを貼り付けてダウンロードします。複数のリンクやプレイリストの追加も可能です</string>
-    <string name="guide_step_pick_format">カードをタップして詳細な形式を選択します。利用可能なすべての画質がサイズとコーデック付きで表示されます。</string>
-    <string name="guide_step_share_instant">Hazel Instant に共有するとシートを省略できます。リンクを読み取り、好みの設定でダウンロードを開始します。調整ボタンで合成を開いて設定を変更できます。</string>
-    <string name="guide_step_battery_unrestricted">バッテリー使用を「無制限」に設定してください。制限されている場合、アプリを離れた際にAndroidがダウンロードを停止することがあります。</string>
+    <string name="guide_step_paste_link">検索欄にリンクを貼り付けます。複数のリンクや再生リストもまとめて追加できます。</string>
+    <string name="guide_step_pick_format">カードをタップして形式を選択。各画質のサイズとコーデックを表示します。</string>
+    <string name="guide_step_share_instant">Hazel Instant に共有すると設定どおりすぐ開始。調整ボタンで合成を開けます。</string>
+    <string name="guide_step_battery_unrestricted">電池の使用を「制限なし」にすると、Android がバックグラウンドのダウンロードを止めません。</string>
     <string name="guide_step_notifications">バックグラウンドでのダウンロード進捗や完了の通知を受け取ります。</string>
     <string name="guide_allow">許可</string>
     <string name="guide_deny">許可しない</string>
@@ -175,7 +175,7 @@
     <!-- MoreScreen -->
     <string name="more_title">その他</string>
     <string name="more_battery_title">バックグラウンドダウンロード</string>
-    <string name="more_battery_body">ダウンロードはバックグラウンドで自律して継続します。一部の端末では節電のために中断されることがあるため、「無制限」に設定してください。</string>
+    <string name="more_battery_body">一部の端末は電池節約のためバックグラウンドのダウンロードを止めます。制限なしで防げます。</string>
     <string name="more_downloads">ダウンロード</string>
     <string name="more_appearance">外観</string>
     <string name="more_language">言語</string>
@@ -238,7 +238,7 @@
     <string name="options_subtitles_languages_label">字幕の言語</string>
     <string name="options_subtitles_dismiss">閉じる</string>
     <string name="options_subtitles_languages_title">字幕の言語</string>
-    <string name="options_subtitles_languages_hint">yt-dlp の言語指定（例: 英語と元言語なら en,.*-orig）。すべての言語なら all を使用します。</string>
+    <string name="options_subtitles_languages_hint">yt-dlp の言語指定。例：en,.*-orig。all ですべての言語。</string>
     <string name="options_filename_title">ファイル名テンプレート</string>
     <string name="options_filename_hint" formatted="false">yt-dlp の出力テンプレート。%(title)s、%(uploader)s、%(id)s、%(ext)s が使用できます。</string>
     <string name="options_text_input_save">保存</string>
@@ -247,20 +247,20 @@
     <!-- StorageCleanupScreen -->
     <string name="cleanup_back">戻る</string>
     <string name="cleanup_title">一時ファイル</string>
-    <string name="cleanup_header_description">アプリが保持している作業用ファイルです。ダウンロードしたファイルは含まれず、ここから削除されることはありません。</string>
+    <string name="cleanup_header_description">アプリの作業ファイル。ダウンロードしたファイルはここから削除されません。</string>
     <string name="cleanup_action_clear_everything">すべて削除</string>
     <string name="cleanup_category_link_data_label">リンクデータキャッシュ</string>
     <string name="cleanup_category_link_data_description">同じリンクを再度開く際の高速化のために保持されているデータです。安全に消去できます。</string>
     <string name="cleanup_category_partial_downloads_label">未完了のダウンロード</string>
-    <string name="cleanup_category_partial_downloads_description">保存前にキャンセルまたは失敗したダウンロードの残骸ファイルです。</string>
+    <string name="cleanup_category_partial_downloads_description">キャンセルまたは失敗したダウンロードの残り。</string>
     <string name="cleanup_category_conversions_label">未完了の変換</string>
-    <string name="cleanup_category_conversions_description">音声変換機能で音楽フォルダに移動されなかった作業ファイルです。</string>
+    <string name="cleanup_category_conversions_description">オーディオ変換で残った作業ファイル。</string>
     <string name="cleanup_category_engine_label">yt-dlp エンジンファイル</string>
-    <string name="cleanup_category_engine_description">ダウンローダーとその実行環境です。消去すると最大の容量が解放されますが、次回ダウンロード時に再展開が必要になります。</string>
+    <string name="cleanup_category_engine_description">ダウンローダーとランタイム。最も容量が空きますが、次のダウンロードで再展開されます。</string>
     <string name="cleanup_category_other_cache_label">その他のキャッシュファイル</string>
     <string name="cleanup_category_other_cache_description">リンク閲覧時にキャッシュされたサムネイルなどです。</string>
     <string name="cleanup_category_link_reads_label">保存済みのリンク情報</string>
-    <string name="cleanup_category_link_reads_description">最近読み込んだ 50 件のリンクの形式です。もう一度開くとすぐに表示されます。最大 6 時間保持し、シークレットでは保存しません。</string>
+    <string name="cleanup_category_link_reads_description">直近 50 件のリンクの形式。すぐ開き直せます。6 時間保持、シークレットでは保存しません。</string>
     <string name="cleanup_confirm_category_title">これらの一時ファイルを削除しますか？</string>
     <string name="cleanup_confirm_category_safe">%1$s が解放されます。保存済みのファイルには影響ありません。</string>
     <string name="cleanup_confirm_category_unsafe">%1$s が解放されます。次回ダウンロード時に再展開するため時間がかかります。</string>
@@ -540,16 +540,16 @@
         <item quantity="other">タイムアウト %1$d 秒、試行 %2$d 回</item>
     </plurals>
     <string name="fetch_settings_reading_links">リンクの解析</string>
-    <string name="fetch_settings_force_ipv4_description">お使いのネットワークでリンクが応答しなくなる場合のみオンにしてください。不安定なIPv6ルーティングを回避しますが、それ以外の環境では遅くなります。</string>
+    <string name="fetch_settings_force_ipv4_description">ネットワークでリンクが止まる場合のみ。壊れた IPv6 を回避しますが、他では遅くなります。</string>
     <string name="fetch_settings_force_ipv4">IPv4 を強制</string>
     <string name="fetch_mode_fast_label">高速</string>
-    <string name="fetch_mode_fast_description">すぐに諦めます。良好なネットワークでは最速ですが、再試行が必要になる可能性が高くなります。</string>
+    <string name="fetch_mode_fast_description">早めに諦めます。良い回線では最速ですが、再試行が必要になることも。</string>
     <string name="fetch_mode_balanced_label">標準</string>
     <string name="fetch_mode_balanced_description">速度と接続の安定性とのバランスをとった設定です。</string>
     <string name="fetch_mode_thorough_label">慎重</string>
     <string name="fetch_mode_thorough_description">長く待機し、再試行回数を増やします。時間はかかりますが、不安定な通信環境でも成功しやすくなります。</string>
-    <string name="listing_source_ytdlp_description">ダウンロードを行うエンジンと同じものです。サポートされているすべてのサイトで動作し、自動更新されるため、サイトの変更にも継続して対応できます。</string>
-    <string name="listing_source_newpipe_description">エンジンを起動せずに1回のリクエストでプレイリストやチャンネルを取得するため、対応サイトでは高速です。その他のサイトや読み込めない場合は yt-dlp にフォールバックします。</string>
+    <string name="listing_source_ytdlp_description">ダウンロードを行うエンジンそのもの。対応する全サイトで動き、自動で更新されます。</string>
+    <string name="listing_source_newpipe_description">再生リストとチャンネルが速く読めます。読めないリンクは yt-dlp に任せます。</string>
 
     <!-- ToolsScreen -->
     <string name="tools_title">ツール</string>
@@ -564,7 +564,7 @@
     <string name="storage_locations_wifi_only_description">モバイルデータ通信を使用せず待機します</string>
     <string name="storage_locations_speed_limit_description">ダウンロードの最大許容速度</string>
     <string name="storage_locations_no_limit">制限なし</string>
-    <string name="storage_locations_internal_note">SDカードや別のフォルダを選ばない限り、ダウンロードは内部ストレージに保存されます。SDカードへのダウンロードは作業ファイルもカード上に置くため、端末の容量を使いません。</string>
+    <string name="storage_locations_internal_note">別のフォルダや SD カードを選ばない限り、内部ストレージに保存されます。</string>
     <string name="storage_locations_wifi_only">Wi-Fi のみ</string>
     <string name="storage_locations_speed_limit">速度制限</string>
 
@@ -580,7 +580,7 @@
     <string name="settings_back">戻る</string>
     <string name="more_processing">合成</string>
     <string name="processing_title">合成</string>
-    <string name="processing_description">すべてのダウンロードの初期設定です。ダウンロードシートでの変更もここに保存されます。</string>
+    <string name="processing_description">すべてのダウンロードの既定値。ダウンロードシートでの変更もここに保存されます。</string>
     <string name="processing_section_general">全般</string>
     <string name="processing_default">デフォルト</string>
     <string name="processing_none">なし</string>
@@ -607,14 +607,14 @@
     <string name="processing_reset_body">この画面のすべての設定が初期状態に戻ります。</string>
     <string name="more_advanced">詳細設定</string>
     <string name="advanced_title">詳細設定</string>
-    <string name="advanced_description">デフォルトでは届かないソース向けのエンジン設定です。必要なダウンロードがない限り、そのままにしてください。</string>
+    <string name="advanced_description">難しいソース向けのエンジン設定。必要なとき以外は変更しないでください。</string>
     <string name="advanced_section_youtube">YouTube</string>
     <string name="advanced_section_engine">エンジン</string>
     <string name="advanced_player_clients">プレーヤークライアント</string>
     <string name="advanced_automatic">自動</string>
     <string name="advanced_not_set">未設定</string>
     <string name="advanced_po_tokens">POトークン</string>
-    <string name="advanced_po_tokens_hint">CLIENT.CONTEXT+TOKEN の形式で、例: web.gvs+TOKEN。カンマで区切ります。作成に使った訪問者データと一緒に使ってください。</string>
+    <string name="advanced_po_tokens_hint">CLIENT.CONTEXT+TOKEN をカンマ区切りで。例：web.gvs+TOKEN。対応する visitor data が必要。</string>
     <string name="advanced_po_tokens_set">%1$d 件設定済み</string>
     <string name="advanced_po_tokens_invalid">%1$d 件が形式に合っていません</string>
     <string name="advanced_visitor_data">訪問者データ</string>
@@ -627,9 +627,9 @@
     <string name="advanced_sleep_off">オフ</string>
     <string name="advanced_sleep_seconds">%1$d 秒</string>
     <string name="advanced_no_check_certificates">証明書の確認をスキップ</string>
-    <string name="advanced_no_check_certificates_summary">この端末が信頼しない証明書のサイト専用です。接続の安全性が下がります。</string>
+    <string name="advanced_no_check_certificates_summary">この端末が証明書を信頼しないサイト専用。接続の安全性が下がります。</string>
     <string name="advanced_extra_args">追加のダウンロード引数</string>
-    <string name="advanced_extra_args_hint">すべてのダウンロードに加える yt-dlp 引数を、入力する形のまま指定します。保存先など、アプリが自分で設定するオプションは除外されます。</string>
+    <string name="advanced_extra_args_hint">すべてのダウンロードに追加する yt-dlp 引数。Hazel が設定するオプションは除外されます。</string>
     <string name="advanced_reset">詳細設定をリセット</string>
     <string name="advanced_reset_title">詳細設定をリセットしますか？</string>
     <string name="advanced_reset_body">この画面のすべての項目がオフまたは空に戻ります。</string>
@@ -647,7 +647,7 @@
     <string name="options_cut_start">開始</string>
     <string name="options_cut_end">終了</string>
     <string name="options_cut_precise">正確なカット</string>
-    <string name="options_cut_precise_summary">端を再エンコードして、指定した位置で正確にカットします。時間がかかります。オフにすると、各カット位置は最寄りのキーフレームにずれます。</string>
+    <string name="options_cut_precise_summary">端を再エンコードして正確にカット。遅め。オフでは最寄りのキーフレームでカット。</string>
     <string name="options_cut_invalid">終了は開始より後で、長さの範囲内にしてください</string>
     <string name="options_cut_apply">カット</string>
     <string name="options_cut_clear">クリア</string>
@@ -664,10 +664,10 @@
     <string name="advanced_impersonate">ブラウザを模倣</string>
     <string name="advanced_impersonate_unavailable_value">%1$s、この端末では利用不可</string>
     <string name="advanced_impersonate_checking">エンジンに模倣できるブラウザを確認しています</string>
-    <string name="advanced_impersonate_none">この端末のエンジンはブラウザを模倣できないため、リクエストはそのまま送信されます。</string>
+    <string name="advanced_impersonate_none">この端末のエンジンはブラウザを装えないため、リクエストはそのまま送られます。</string>
     <string name="advanced_impersonate_check_failed">今はエンジンに確認できませんでした。少し後でもう一度お試しください。</string>
     <string name="advanced_auto_po_tokens">この端末でPOトークンを作成</string>
-    <string name="advanced_auto_po_tokens_summary">トークンが貼り付けられていないとき、読み込み・ダウンロードする動画ごとにYouTube自身のチェックを非表示のブラウザで実行します。試験的。</string>
+    <string name="advanced_auto_po_tokens_summary">トークンがないとき、隠しブラウザで YouTube の確認を実行します。実験的。</string>
     <string name="advanced_po_token_test">トークン作成をテスト</string>
     <string name="advanced_po_token_testing">トークンを作成中…</string>
     <string name="advanced_po_token_test_hint">タップして今すぐトークンを作成し、動作するか確認します</string>
@@ -675,7 +675,7 @@
     <string name="advanced_po_token_test_failed">動作しませんでした: %1$s</string>
     <string name="more_backup">バックアップ</string>
     <string name="backup_title">バックアップと復元</string>
-    <string name="backup_description">設定、ダウンロード一覧、キュー、Cookie、検索履歴をファイルに保存し、この端末や別の端末で復元できます。</string>
+    <string name="backup_description">設定、履歴、キュー、Cookie、検索をファイルに保存し、どこでも復元できます。</string>
     <string name="backup_section_now">今すぐ</string>
     <string name="backup_backup">バックアップ</string>
     <string name="backup_backup_summary">保存する項目を選択</string>
@@ -712,7 +712,7 @@
     <string name="options_cut_end_here">ここで終了</string>
     <string name="options_cut_jump_start">開始位置へ</string>
     <string name="options_cut_jump_end">終了位置へ</string>
-    <string name="fetch_settings_screen_description">リンクの読み取り方、検索の方法、メディアの再生方法を設定します。ダウンロードには常に yt-dlp を使います。</string>
+    <string name="fetch_settings_screen_description">リンクの読み取り、検索、メディア再生の設定。ダウンロードは常に yt-dlp。</string>
     <string name="fetch_settings_read_with">リンクの読み取り</string>
     <string name="fetch_settings_patience">遅い接続</string>
     <string name="fetch_settings_search">検索</string>
@@ -725,7 +725,7 @@
     <string name="fetch_settings_play_with">再生エンジン</string>
     <string name="fetch_settings_play_quality">再生画質</string>
     <string name="fetch_settings_play_quality_value">最大 %1$dp</string>
-    <string name="fetch_settings_engine_newpipe_summary">YouTube、SoundCloud、Bandcamp で最速です。それ以外のサイトや、答えられないときは yt-dlp が引き継ぎます。</string>
+    <string name="fetch_settings_engine_newpipe_summary">YouTube、SoundCloud、Bandcamp で最速。それ以外は yt-dlp が担当します。</string>
     <string name="fetch_settings_engine_ytdlp_summary">起動は遅めですが、yt-dlp が対応するすべてのサイトで使えます。</string>
     <plurals name="player_skip_seconds">
         <item quantity="other">%d 秒</item>
@@ -754,7 +754,7 @@
     <string name="instant_ok">OK</string>
     <string name="instant_settings">合成の設定</string>
     <string name="guide_step_share_title">Hazel に共有</string>
-    <string name="guide_step_share_sheet">どのアプリからでもリンクを Hazel に共有できます。好みの設定ですぐにダウンロードするか、詳細が届くのを少し待ってすべてのオプションを選べます。</string>
+    <string name="guide_step_share_sheet">どのアプリからでも Hazel にリンクを共有し、すぐダウンロードするか全オプションを選べます。</string>
     <string name="instant_closing">%1$d 秒後に閉じます</string>
     <string name="ytdlp_update_channel_name">エンジンの更新</string>
     <string name="ytdlp_update_channel_description">yt-dlp エンジンの更新通知</string>
@@ -764,7 +764,7 @@
     <string name="ytdlp_update_installed_text">ダウンロードエンジンは最新です</string>
     <string name="ytdlp_update_failed_title">yt-dlp %1$s をインストールできませんでした</string>
     <string name="ytdlp_update_failed_text">Hazel は現在のエンジンを維持し、後でもう一度試します</string>
-    <string name="cookies_description">サイトに一度サインインすると、Hazel は年齢制限付き・非公開・メンバー限定のダウンロードにそれを使います。</string>
+    <string name="cookies_description">一度ログインすれば、年齢制限・非公開・メンバー限定の動画もダウンロードできます。</string>
     <string name="cookies_section_general">全般</string>
     <string name="cookies_section_add">追加</string>
     <string name="cookies_section_saved">保存済みのサインイン</string>
