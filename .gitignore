@@ -37,7 +37,7 @@ hazel-dlp-release
 *.b64
 /signing/
 google-services.json
-
+.claude
 # ── Environment files ──
 .env
 .env.*

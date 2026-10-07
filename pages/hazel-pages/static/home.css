@@ -2,37 +2,26 @@
 
 .hero { padding: 112px 0 0; text-align: center; }
 .pill {
-  --ring: conic-gradient(from var(--angle, 0deg), transparent 0 55%, color-mix(in srgb, var(--accent) 85%, transparent) 70%, transparent 85%);
-  position: relative; display: inline-flex; align-items: center; gap: 12px; max-width: 100%; padding: 7px 8px 7px 8px;
-  border-radius: 999px; font-size: 14px; color: var(--fg-2); isolation: isolate;
-  background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(var(--line-2), var(--line)) border-box;
-  border: 1px solid transparent; box-shadow: 0 0 0 0 transparent, 0 8px 30px -12px color-mix(in srgb, var(--accent) 45%, transparent);
-  transition: color .2s, box-shadow .3s;
+  display: inline-flex; align-items: stretch; width: min(100%, 760px); height: 44px; font-size: 14px; color: var(--fg-2);
+  border: 1px solid var(--line-2); border-radius: 999px; overflow: hidden; background: var(--surface);
+  transition: border-color .2s, color .2s;
 }
-.pill::before {
-  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; z-index: -1;
-  background: var(--ring);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: pill-spin 5s linear infinite;
+.pill .ver {
+  display: inline-flex; align-items: center; padding: 0 14px 0 18px; flex: none;
+  font: 600 12px/1 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--accent);
+  background: var(--bg-2); border-right: 1px solid var(--line);
 }
-@property --angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
-@keyframes pill-spin { to { --angle: 360deg; } }
-.pill .tag {
-  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 10px; border-radius: 999px;
-  font: 600 12px/1 var(--body); color: var(--accent); background: var(--accent-soft);
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); white-space: nowrap;
-}
-.pill .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
-.pill .msg { color: var(--fg); font-weight: 500; min-width: 0; flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pill .sep { width: 1px; height: 16px; background: var(--line-2); }
-.pill .more { display: inline-flex; align-items: center; gap: 4px; padding-right: 8px; color: var(--fg-2); white-space: nowrap; }
+/* The lines flip upward one at a time (site.js); without it, or with reduced motion, the first one stays. */
+.pill .ticker { position: relative; flex: 1 1 auto; min-width: 0; overflow: hidden; text-align: left; }
+.pill .reel { display: block; transition: transform .6s cubic-bezier(.7,0,.2,1); }
+.pill .reel.snap { transition: none; }
+.pill .line { display: block; height: 42px; line-height: 42px; padding: 0 16px; color: var(--fg); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pill .more { display: inline-flex; align-items: center; gap: 4px; padding: 0 18px 0 14px; flex: none; border-left: 1px solid var(--line); white-space: nowrap; }
 .pill .more svg { width: 14px; height: 14px; transition: transform .2s; }
-.pill:hover { color: var(--fg); box-shadow: 0 0 0 4px var(--accent-soft), 0 10px 34px -12px color-mix(in srgb, var(--accent) 60%, transparent); }
-.pill:hover .more { color: var(--fg); }
+.pill:hover { border-color: var(--fg-3); color: var(--fg); }
 .pill:hover .more svg { transform: translateX(3px); }
-@media (prefers-reduced-motion: reduce) { .pill::before { animation: none; } }
-@media (max-width: 640px) { .pill .sep, .pill .more { display: none; } .pill { padding-right: 14px; } .pill .msg { font-size: 13px; } }
+@media (max-width: 640px) { .pill .more { display: none; } .pill .line { font-size: 13px; padding: 0 12px; } .pill .ver { padding: 0 10px; } }
+
 .hero h1 { font: 700 clamp(52px, 6.6vw, 108px)/.98 var(--display); letter-spacing: -.048em; margin: 32px auto 0; text-wrap: balance; }
 .hero h1 .soft { color: var(--fg-3); }
 .lede { text-wrap: pretty; max-width: 680px; margin: 28px auto 0; font-size: 20px; color: var(--fg-2); line-height: 1.55; }
