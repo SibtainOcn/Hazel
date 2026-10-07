@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -429,6 +430,7 @@ fun FormatSheet(
             // them, and a short bar under the chosen word says which without ruling a line
             // across the sheet. The link and incognito buttons take the room to their right,
             // rather than a row of their own at the end of the sheet.
+            // layout-safe: the tabs and two icon buttons; nothing here holds a long label
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Row(
                     // The words, not their touch targets, line up with the heading.

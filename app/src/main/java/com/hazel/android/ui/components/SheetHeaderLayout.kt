@@ -1,4 +1,4 @@
-package com.hazel.android.ui.screens.download
+package com.hazel.android.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -15,8 +15,8 @@ private val ActionGap = 10.dp
 private val StackGap = 8.dp
 
 /**
- * The download sheet's header: the heading first, then its actions (Play, when the media is
- * already on the device, and the download action), always at the end.
+ * A sheet's header: the heading first, then its actions, always at the end. On the download
+ * sheet those are Play, when the media is already on the device, and the download action.
  *
  * The actions sit in a row beside the heading while every word of the heading still fits
  * whole beside them, exactly as the header has always looked. When a word would not, as with
@@ -25,7 +25,7 @@ private val StackGap = 8.dp
  * the heading is ever broken to make room for a button.
  */
 @Composable
-internal fun SheetHeaderLayout(
+fun SheetHeaderLayout(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
