@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "No limit" on Download settings and On/Off for the dark theme are translated; they showed in English in every language.
 - The download sheet's heading no longer breaks into single letters when Play is shown beside Download in a longer language or with a large font. Where the heading would not fit whole beside the two buttons, Play now stacks above Download, and on the narrowest screens both move under the heading. Everywhere it fits, the header looks as before.
 - A tap anywhere in the Title or Author box on the download sheet puts the cursor in that field and brings the keyboard back, not only a tap on the line of text. Closing Details while typing lets go of the field first, which could otherwise be left unable to take the keyboard again until the sheet was reopened.
+- Buttons in dialogs and sheets no longer squeeze a label into a column of letters in a longer language or with a large font. Where they do not fit one line they wrap onto the next, at the end, and equal-width buttons stack one above the other. This covers Already downloaded, Could not read this link, the link dialog, Remove from search history, the cut sheet, a saved sign-in, the error log, and Deny and Allow in the getting started guide. The format list and language headers move their buttons under the title where the title would otherwise break. Everywhere the buttons fit, they look as before.
+- A failed download's card grows taller at a large font instead of drawing its status and buttons over its title and reason, and its buttons move under the status rather than squeezing it to nothing.
+- The getting started guide shows each step's description in full at a large font, where it was cut off after two lines, and Skip moves under the step count rather than breaking in two.
 
 ## [1.1.13] - 2026-10-06
 ### Added
