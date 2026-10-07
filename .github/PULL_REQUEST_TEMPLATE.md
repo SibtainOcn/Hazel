@@ -38,6 +38,7 @@ one thing it cannot check. -->
 
 - [ ] Installed and tried the change on a device or emulator
 - [ ] `./gradlew :app:testDebugUnitTest` passes locally
+- [ ] Changed a screen, dialog or buttons: checked the `layout-screenshots` CI artifact in long languages and large fonts
 
 - Device / Android version:
 - Steps:
