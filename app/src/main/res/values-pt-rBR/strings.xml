@@ -526,7 +526,6 @@
     <string name="audio_language_subtitle">Escolha a trilha sonora</string>
 
     <!-- AppearanceScreen -->
-    <string name="appearance_back">Voltar</string>
     <string name="appearance_title">Aparência</string>
 
     <!-- Language picker -->
@@ -541,6 +540,8 @@
     <string name="language_changed_body">O Hazel agora está neste idioma. O que ainda não foi traduzido continua em inglês.</string>
     <string name="language_changed_ok">OK</string>
     <string name="appearance_dark_theme">Tema escuro</string>
+    <string name="appearance_on">Ligado</string>
+    <string name="appearance_off">Desligado</string>
     <string name="appearance_accent_color">Cor de destaque</string>
 
     <!-- AccentPickerDialog -->
@@ -567,19 +568,18 @@
     <string name="listing_source_newpipe_description">Lista playlists e canais em um único pedido em vez de iniciar o motor, o que é mais rápido nos sites que ele conhece. Recorre ao yt-dlp para todo o resto, e sempre que não conseguir ler um link.</string>
 
     <!-- ToolsScreen -->
-    <string name="tools_back">Voltar</string>
     <string name="tools_title">Ferramentas</string>
     <string name="tools_empty">Ainda não há nada aqui.</string>
 
     <string name="direct_share_audio_language_default">Padrão da fonte</string>
 
     <!-- StorageLocationsScreen -->
-    <string name="storage_locations_back">Voltar</string>
     <string name="storage_locations_title">Downloads</string>
     <string name="storage_locations_subtitle">Onde os downloads são salvos, e os limites sob os quais eles rodam</string>
     <string name="storage_locations_limits">Limites</string>
     <string name="storage_locations_wifi_only_description">Os downloads esperam em vez de usar os dados móveis</string>
     <string name="storage_locations_speed_limit_description">A que velocidade um download pode ir</string>
+    <string name="storage_locations_no_limit">Sem limite</string>
     <string name="storage_locations_internal_note">Os downloads são salvos no armazenamento interno, a menos que você escolha um cartão SD ou outra pasta. Downloads para um cartão SD também mantêm os arquivos temporários no cartão, sem ocupar espaço do celular.</string>
     <string name="storage_locations_wifi_only">Só no Wi-Fi</string>
     <string name="storage_locations_speed_limit">Limite de velocidade</string>

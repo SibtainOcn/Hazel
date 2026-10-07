@@ -519,7 +519,6 @@
     <string name="audio_language_subtitle">Tonspur wählen</string>
 
     <!-- AppearanceScreen -->
-    <string name="appearance_back">Zurück</string>
     <string name="appearance_title">Erscheinungsbild</string>
 
     <!-- Language picker -->
@@ -534,6 +533,8 @@
     <string name="language_changed_body">Hazel ist jetzt in dieser Sprache. Was noch nicht übersetzt ist, bleibt auf Englisch.</string>
     <string name="language_changed_ok">OK</string>
     <string name="appearance_dark_theme">Dunkles Design</string>
+    <string name="appearance_on">An</string>
+    <string name="appearance_off">Aus</string>
     <string name="appearance_accent_color">Akzentfarbe</string>
 
     <!-- AccentPickerDialog -->
@@ -559,19 +560,18 @@
     <string name="listing_source_newpipe_description">Listet Playlists und Kanäle in einer einzigen Anfrage, statt die Engine zu starten, was auf den ihm bekannten Seiten schneller ist. Für alles andere und immer dann, wenn er einen Link nicht lesen kann, greift er auf yt-dlp zurück.</string>
 
     <!-- ToolsScreen -->
-    <string name="tools_back">Zurück</string>
     <string name="tools_title">Werkzeuge</string>
     <string name="tools_empty">Hier ist noch nichts.</string>
 
     <string name="direct_share_audio_language_default">Die der Quelle</string>
 
     <!-- StorageLocationsScreen -->
-    <string name="storage_locations_back">Zurück</string>
     <string name="storage_locations_title">Downloads</string>
     <string name="storage_locations_subtitle">Wo Downloads gespeichert werden, und unter welchen Grenzen sie laufen</string>
     <string name="storage_locations_limits">Grenzen</string>
     <string name="storage_locations_wifi_only_description">Downloads warten, statt über mobile Daten zu laufen</string>
     <string name="storage_locations_speed_limit_description">Wie schnell ein Download laufen darf</string>
+    <string name="storage_locations_no_limit">Unbegrenzt</string>
     <string name="storage_locations_internal_note">Downloads werden im internen Speicher gespeichert, sofern du keine SD-Karte oder keinen anderen Ordner wählst. Downloads auf eine SD-Karte legen auch ihre Arbeitsdateien auf der Karte ab und belegen so keinen Telefonspeicher.</string>
     <string name="storage_locations_wifi_only">Nur WLAN</string>
     <string name="storage_locations_speed_limit">Geschwindigkeitsgrenze</string>

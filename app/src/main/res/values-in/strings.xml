@@ -512,7 +512,6 @@
     <string name="audio_language_subtitle">Pilih trek suara</string>
 
     <!-- AppearanceScreen -->
-    <string name="appearance_back">Kembali</string>
     <string name="appearance_title">Tampilan</string>
 
     <!-- Language picker -->
@@ -527,6 +526,8 @@
     <string name="language_changed_body">Hazel sekarang menggunakan bahasa ini. Bagian yang belum diterjemahkan akan tetap menggunakan bahasa Inggris.</string>
     <string name="language_changed_ok">OK</string>
     <string name="appearance_dark_theme">Tema Gelap</string>
+    <string name="appearance_on">Aktif</string>
+    <string name="appearance_off">Mati</string>
     <string name="appearance_accent_color">Warna Aksen</string>
 
     <!-- AccentPickerDialog -->
@@ -551,19 +552,18 @@
     <string name="listing_source_newpipe_description">Mendaftar daftar putar dan saluran dalam satu permintaan tanpa memulai mesin, yang lebih cepat di situs yang dikenalnya. Beralih kembali ke yt-dlp untuk hal lain dan setiap kali tidak dapat membaca tautan.</string>
 
     <!-- ToolsScreen -->
-    <string name="tools_back">Kembali</string>
     <string name="tools_title">Alat</string>
     <string name="tools_empty">Belum ada apa-apa di sini.</string>
 
     <string name="direct_share_audio_language_default">Default sumber</string>
 
     <!-- StorageLocationsScreen -->
-    <string name="storage_locations_back">Kembali</string>
     <string name="storage_locations_title">Unduhan</string>
     <string name="storage_locations_subtitle">Tempat unduhan disimpan, dan batas operasionalnya</string>
     <string name="storage_locations_limits">Batas</string>
     <string name="storage_locations_wifi_only_description">Unduhan menunggu alih-alih menggunakan data seluler</string>
     <string name="storage_locations_speed_limit_description">Batas kecepatan unduhan yang diizinkan</string>
+    <string name="storage_locations_no_limit">Tanpa batas</string>
     <string name="storage_locations_internal_note">Unduhan disimpan di penyimpanan internal kecuali Anda memilih kartu SD atau folder lain. Unduhan ke kartu SD juga menyimpan file kerjanya di kartu, sehingga tidak memakai ruang ponsel.</string>
     <string name="storage_locations_wifi_only">Hanya Wi-Fi</string>
     <string name="storage_locations_speed_limit">Batas kecepatan</string>

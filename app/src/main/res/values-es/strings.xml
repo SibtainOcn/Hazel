@@ -526,7 +526,6 @@
     <string name="audio_language_subtitle">Elige la pista de sonido</string>
 
     <!-- AppearanceScreen -->
-    <string name="appearance_back">Atrás</string>
     <string name="appearance_title">Apariencia</string>
 
     <!-- Language picker -->
@@ -541,6 +540,8 @@
     <string name="language_changed_body">Hazel ya está en este idioma. Todo lo que la aplicación no tenga traducido se queda en inglés.</string>
     <string name="language_changed_ok">Aceptar</string>
     <string name="appearance_dark_theme">Tema oscuro</string>
+    <string name="appearance_on">Activado</string>
+    <string name="appearance_off">Desactivado</string>
     <string name="appearance_accent_color">Color de acento</string>
 
     <!-- AccentPickerDialog -->
@@ -567,19 +568,18 @@
     <string name="listing_source_newpipe_description">Lista las listas de reproducción y los canales en una sola petición en vez de arrancar el motor, lo que es más rápido en los sitios que conoce. Recurre a yt-dlp para todo lo demás, y siempre que no pueda leer un enlace.</string>
 
     <!-- ToolsScreen -->
-    <string name="tools_back">Atrás</string>
     <string name="tools_title">Herramientas</string>
     <string name="tools_empty">Aquí todavía no hay nada.</string>
 
     <string name="direct_share_audio_language_default">El de la fuente</string>
 
     <!-- StorageLocationsScreen -->
-    <string name="storage_locations_back">Atrás</string>
     <string name="storage_locations_title">Descargas</string>
     <string name="storage_locations_subtitle">Dónde se guardan las descargas, y los límites con los que funcionan</string>
     <string name="storage_locations_limits">Límites</string>
     <string name="storage_locations_wifi_only_description">Las descargas esperan en vez de tirar de los datos móviles</string>
     <string name="storage_locations_speed_limit_description">A qué velocidad se le permite ir a una descarga</string>
+    <string name="storage_locations_no_limit">Sin límite</string>
     <string name="storage_locations_internal_note">Las descargas se guardan en el almacenamiento interno salvo que elijas una tarjeta SD u otra carpeta. Las descargas a una tarjeta SD también guardan allí sus archivos temporales, así no ocupan espacio del teléfono.</string>
     <string name="storage_locations_wifi_only">Solo con Wi-Fi</string>
     <string name="storage_locations_speed_limit">Límite de velocidad</string>

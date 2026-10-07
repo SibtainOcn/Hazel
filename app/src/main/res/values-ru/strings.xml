@@ -533,7 +533,6 @@
     <string name="audio_language_subtitle">Выберите звуковую дорожку</string>
 
     <!-- AppearanceScreen -->
-    <string name="appearance_back">Назад</string>
     <string name="appearance_title">Внешний вид</string>
 
     <!-- Language picker -->
@@ -548,6 +547,8 @@
     <string name="language_changed_body">Язык Hazel изменён. Всё, что ещё не переведено, останется на английском.</string>
     <string name="language_changed_ok">ОК</string>
     <string name="appearance_dark_theme">Тёмная тема</string>
+    <string name="appearance_on">Вкл.</string>
+    <string name="appearance_off">Выкл.</string>
     <string name="appearance_accent_color">Цветовой акцент</string>
 
     <!-- AccentPickerDialog -->
@@ -575,19 +576,18 @@
     <string name="listing_source_newpipe_description">Получает плейлисты и каналы за один запрос без запуска движка, что быстрее на поддерживаемых сайтах. Для остального и при ошибках переключается на yt-dlp.</string>
 
     <!-- ToolsScreen -->
-    <string name="tools_back">Назад</string>
     <string name="tools_title">Инструменты</string>
     <string name="tools_empty">Здесь пока ничего нет.</string>
 
     <string name="direct_share_audio_language_default">Как в источнике</string>
 
     <!-- StorageLocationsScreen -->
-    <string name="storage_locations_back">Назад</string>
     <string name="storage_locations_title">Загрузки</string>
     <string name="storage_locations_subtitle">Где сохраняются загрузки и действующие ограничения</string>
     <string name="storage_locations_limits">Ограничения</string>
     <string name="storage_locations_wifi_only_description">Загрузки приостанавливаются, чтобы не расходовать мобильные данные</string>
     <string name="storage_locations_speed_limit_description">Максимально допустимая скорость загрузки</string>
+    <string name="storage_locations_no_limit">Без лимита</string>
     <string name="storage_locations_internal_note">Загрузки сохраняются во внутреннюю память, если не выбрана SD-карта или другая папка. Загрузки на SD-карту хранят и рабочие файлы на карте, не занимая память телефона.</string>
     <string name="storage_locations_wifi_only">Только по Wi-Fi</string>
     <string name="storage_locations_speed_limit">Ограничение скорости</string>

@@ -512,7 +512,6 @@
     <string name="audio_language_subtitle">选择音轨</string>
 
     <!-- AppearanceScreen -->
-    <string name="appearance_back">返回</string>
     <string name="appearance_title">外观</string>
 
     <!-- Language picker -->
@@ -527,6 +526,8 @@
     <string name="language_changed_body">Hazel 现在使用这种语言。应用中尚未翻译的部分仍会显示英文。</string>
     <string name="language_changed_ok">确定</string>
     <string name="appearance_dark_theme">深色主题</string>
+    <string name="appearance_on">开启</string>
+    <string name="appearance_off">关闭</string>
     <string name="appearance_accent_color">强调色</string>
 
     <!-- AccentPickerDialog -->
@@ -551,19 +552,18 @@
     <string name="listing_source_newpipe_description">用一次请求就列出播放列表和频道，而不必启动引擎，在它认识的站点上更快。其余情况，以及任何读不出链接的时候，都会回退到 yt-dlp。</string>
 
     <!-- ToolsScreen -->
-    <string name="tools_back">返回</string>
     <string name="tools_title">工具</string>
     <string name="tools_empty">这里暂时还没有内容。</string>
 
     <string name="direct_share_audio_language_default">来源默认</string>
 
     <!-- StorageLocationsScreen -->
-    <string name="storage_locations_back">返回</string>
     <string name="storage_locations_title">下载</string>
     <string name="storage_locations_subtitle">下载保存在哪里，以及它们受哪些限制</string>
     <string name="storage_locations_limits">限制</string>
     <string name="storage_locations_wifi_only_description">下载会等待，而不使用移动数据</string>
     <string name="storage_locations_speed_limit_description">允许下载达到多快</string>
+    <string name="storage_locations_no_limit">不限速</string>
     <string name="storage_locations_internal_note">除非你选择 SD 卡或其他文件夹，下载内容都会保存到内部存储。保存到 SD 卡的下载，其临时文件也会放在卡上，不占用手机空间。</string>
     <string name="storage_locations_wifi_only">仅 Wi-Fi</string>
     <string name="storage_locations_speed_limit">速度限制</string>

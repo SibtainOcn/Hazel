@@ -512,7 +512,6 @@
     <string name="audio_language_subtitle">音声トラックを選択</string>
 
     <!-- AppearanceScreen -->
-    <string name="appearance_back">戻る</string>
     <string name="appearance_title">外観</string>
 
     <!-- Language picker -->
@@ -527,6 +526,8 @@
     <string name="language_changed_body">Hazel の言語が変更されました。まだ翻訳されていない部分は英語のまま表示されます。</string>
     <string name="language_changed_ok">OK</string>
     <string name="appearance_dark_theme">ダークテーマ</string>
+    <string name="appearance_on">オン</string>
+    <string name="appearance_off">オフ</string>
     <string name="appearance_accent_color">アクセントカラー</string>
 
     <!-- AccentPickerDialog -->
@@ -551,19 +552,18 @@
     <string name="listing_source_newpipe_description">エンジンを起動せずに1回のリクエストでプレイリストやチャンネルを取得するため、対応サイトでは高速です。その他のサイトや読み込めない場合は yt-dlp にフォールバックします。</string>
 
     <!-- ToolsScreen -->
-    <string name="tools_back">戻る</string>
     <string name="tools_title">ツール</string>
     <string name="tools_empty">ここにはまだ何もありません。</string>
 
     <string name="direct_share_audio_language_default">ソースのデフォルト</string>
 
     <!-- StorageLocationsScreen -->
-    <string name="storage_locations_back">戻る</string>
     <string name="storage_locations_title">ダウンロード</string>
     <string name="storage_locations_subtitle">ダウンロードの保存場所と動作制限</string>
     <string name="storage_locations_limits">制限</string>
     <string name="storage_locations_wifi_only_description">モバイルデータ通信を使用せず待機します</string>
     <string name="storage_locations_speed_limit_description">ダウンロードの最大許容速度</string>
+    <string name="storage_locations_no_limit">制限なし</string>
     <string name="storage_locations_internal_note">SDカードや別のフォルダを選ばない限り、ダウンロードは内部ストレージに保存されます。SDカードへのダウンロードは作業ファイルもカード上に置くため、端末の容量を使いません。</string>
     <string name="storage_locations_wifi_only">Wi-Fi のみ</string>
     <string name="storage_locations_speed_limit">速度制限</string>

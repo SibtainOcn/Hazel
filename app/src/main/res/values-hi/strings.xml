@@ -519,7 +519,6 @@
     <string name="audio_language_subtitle">साउंडट्रैक चुनें</string>
 
     <!-- AppearanceScreen -->
-    <string name="appearance_back">वापस</string>
     <string name="appearance_title">दिखावट</string>
 
     <!-- Language picker -->
@@ -534,6 +533,8 @@
     <string name="language_changed_body">Hazel अब इस भाषा में है। ऐप का जो हिस्सा अनूदित नहीं है, वह अंग्रेज़ी में ही रहेगा।</string>
     <string name="language_changed_ok">ठीक है</string>
     <string name="appearance_dark_theme">गहरी थीम</string>
+    <string name="appearance_on">चालू</string>
+    <string name="appearance_off">बंद</string>
     <string name="appearance_accent_color">एक्सेंट रंग</string>
 
     <!-- AccentPickerDialog -->
@@ -559,19 +560,18 @@
     <string name="listing_source_newpipe_description">इंजन चलाने के बजाय एक ही अनुरोध में प्लेलिस्ट और चैनल की सूची बनाता है, जो जानी-पहचानी साइटों पर तेज़ है। बाकी सब के लिए, और जब भी कोई लिंक न पढ़ पाए, yt-dlp पर लौट आता है।</string>
 
     <!-- ToolsScreen -->
-    <string name="tools_back">वापस</string>
     <string name="tools_title">उपकरण</string>
     <string name="tools_empty">यहाँ अभी कुछ नहीं है।</string>
 
     <string name="direct_share_audio_language_default">स्रोत की अपनी</string>
 
     <!-- StorageLocationsScreen -->
-    <string name="storage_locations_back">वापस</string>
     <string name="storage_locations_title">डाउनलोड</string>
     <string name="storage_locations_subtitle">डाउनलोड कहाँ सहेजे जाते हैं, और किन सीमाओं में चलते हैं</string>
     <string name="storage_locations_limits">सीमाएँ</string>
     <string name="storage_locations_wifi_only_description">डाउनलोड मोबाइल डेटा पर चलने के बजाय इंतज़ार करते हैं</string>
     <string name="storage_locations_speed_limit_description">डाउनलोड कितनी तेज़ी से चल सकता है</string>
+    <string name="storage_locations_no_limit">कोई सीमा नहीं</string>
     <string name="storage_locations_internal_note">जब तक आप SD कार्ड या कोई दूसरा फ़ोल्डर नहीं चुनते, डाउनलोड आंतरिक स्टोरेज में सहेजे जाते हैं। SD कार्ड पर जाने वाले डाउनलोड अपनी अस्थायी फ़ाइलें भी कार्ड पर ही रखते हैं, ताकि फ़ोन की जगह न भरे।</string>
     <string name="storage_locations_wifi_only">सिर्फ़ वाई-फ़ाई</string>
     <string name="storage_locations_speed_limit">गति सीमा</string>
