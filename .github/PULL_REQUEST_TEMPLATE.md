@@ -1,6 +1,7 @@
 <!--
 Thanks for contributing! Before you submit:
 
+- Base branch: `nightly`, not `main`. If it says main, change it at the top of this page.
 - Small fix (typo, one-line change)? Fill in "What this changes" and delete the rest.
 - Translating? Please use Weblate instead of a pull request:
   https://hosted.weblate.org/engage/hazel/
