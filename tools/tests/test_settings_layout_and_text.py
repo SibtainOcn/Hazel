@@ -470,7 +470,7 @@ def test_strings():
 # ===========================================================================
 
 SHEET = SCREENS / "download/FormatSheet.kt"
-HEADER = SCREENS / "download/SheetHeaderLayout.kt"
+HEADER = SRC / "ui/components/SheetHeaderLayout.kt"
 KEYBOARD = SRC / "ui/components/KeyboardOverSheet.kt"
 HEADING_TEXT = (24, 0.0)      # headlineSmall, bold
 HEADING_BOLD = 1.06           # bold runs a little wider than the medium metrics
@@ -583,6 +583,112 @@ def test_sheet_header_and_fields():
                and "onDispose" not in block(keyboard, "fun Modifier.keptAboveKeyboard(", 1200))
 
 
+# ===========================================================================
+# 9. Guard: no new row of buttons that squeezes its labels
+# ===========================================================================
+
+# A call that draws a button, chip or pill with a label; icon buttons are fixed size.
+BUTTON_CALL = re.compile(
+    r"(?<![\w.])(?!IconButton\b)(?:[A-Z]\w*(?:Button|Chip|Pill)|Surface(?=\s*\(\s*onClick))\s*\(")
+SAFE_MARK = "layout-safe:"
+ADAPTIVE = ("ActionsRow", "EqualWidthActions", "SheetHeaderLayout")
+
+
+def call_body(text: str, open_paren: int) -> tuple:
+    """(arguments, trailing lambda body) of the call whose '(' or '{' is at [open_paren]."""
+    if text[open_paren] == "{":
+        open_paren -= 1    # `Row { ... }`: no arguments, the lambda starts right here
+        return "", call_body_lambda(text, open_paren + 1)
+    depth, i = 0, open_paren
+    while i < len(text):
+        if text[i] == "(":
+            depth += 1
+        elif text[i] == ")":
+            depth -= 1
+            if depth == 0:
+                break
+        i += 1
+    args = text[open_paren:i + 1]
+    j = text.find("{", i)
+    if j < 0 or text[i + 1:j].strip():
+        return args, ""
+    return args, call_body_lambda(text, j)
+
+
+def call_body_lambda(text: str, j: int) -> str:
+    """The body of the lambda whose '{' is at [j]."""
+    depth, k = 0, j
+    while k < len(text):
+        if text[k] == "{":
+            depth += 1
+        elif text[k] == "}":
+            depth -= 1
+            if depth == 0:
+                return text[j + 1:k]
+        k += 1
+    return ""
+
+
+def buttons_at_row_level(body: str) -> int:
+    count, depth = 0, 0
+    for m in re.finditer(r"[{}]|" + BUTTON_CALL.pattern, body):
+        tok = m.group(0)
+        if tok == "{":
+            depth += 1
+        elif tok == "}":
+            depth -= 1
+        elif depth <= 1:   # inside an if/else at the row's own level still counts
+            count += 1
+    return count
+
+
+def squeezing_rows() -> list:
+    """Every plain Row holding two or more labelled buttons, not scrolling, not marked safe."""
+    found = []
+    for path in sorted((SRC / "ui").rglob("*.kt")):
+        text = read(path)
+        for m in re.finditer(r"(?<![A-Za-z])Row\s*[({]", text):
+            args, body = call_body(text, m.end() - 1)
+            if "horizontalScroll" in args or buttons_at_row_level(body) < 2:
+                continue
+            line = text.count("\n", 0, m.start()) + 1
+            above = "\n".join(text.split("\n")[max(0, line - 4):line - 1])
+            if SAFE_MARK in above:
+                continue
+            found.append(f"{path.relative_to(SRC)}:{line}")
+    return found
+
+
+def test_no_squeezing_rows():
+    print("\n[9] Guard: no new row of buttons that squeezes its labels")
+    check("No plain Row of 2+ labelled buttons (use ActionsRow / EqualWidthActions / "
+          f"SheetHeaderLayout, or mark it '// {SAFE_MARK} <reason>')", squeezing_rows(), [])
+    components = SRC / "ui/components"
+    check_true("The adaptive building blocks exist",
+               all(f"fun {name}(" in read(components / f) for name, f in [
+                   ("ActionsRow", "AdaptiveActions.kt"), ("EqualWidthActions", "AdaptiveActions.kt"),
+                   ("SheetHeaderLayout", "SheetHeaderLayout.kt")]))
+    for name, f in [("ActionsRowPolicy", "AdaptiveActions.kt"), ("SheetHeaderPolicy", "SheetHeaderLayout.kt")]:
+        check_true(f"{name} is made once", f"private val {name} = MeasurePolicy" in read(components / f))
+    check_true("Equal-width policy is remembered per spacing",
+               "remember(spacing) { EqualWidthPolicy(spacing) }" in read(components / "AdaptiveActions.kt"))
+    used = "\n".join(read(p) for p in (SRC / "ui/screens").rglob("*.kt"))
+    for name in ADAPTIVE:
+        check_true(f"{name} is in use", f"{name}(" in used)
+    queue = read(SRC / "ui/screens/queue/QueueCards.kt")
+    check_true("The failed card grows rather than overlap at large fonts",
+               "CardFrame(" in queue and ".aspectRatio(16f / 9f)" not in block(queue, "fun FailedCard(", 3000)
+               and "maxOf(width * 9 / 16, topHeight + bottomHeight)" in queue)
+    guide = read(SRC / "ui/screens/download/GettingStartedDialog.kt")
+    check_true("The guide's description grows rather than being cut",
+               ".heightIn(min = 50.dp)" in guide and ".height(50.dp)" not in guide)
+    test = read(REPO_ROOT / "app/src/test/java/com/hazel/android/ui/layout/AdaptiveLayoutTest.kt")
+    check_true("The Robolectric layout test covers every language", all(
+        f'"{d[7:] or "en"}" to' in test for d in LOCALE_DIRS))
+    check_true("The layout test sets language and font on the device",
+               "RuntimeEnvironment.setQualifiers(" in test and "RuntimeEnvironment.setFontScale(" in test)
+
+
 def main():
     print("=" * 70)
     print("  Hazel Settings Layout & Text Test Harness")
@@ -596,6 +702,7 @@ def main():
     test_no_literals()
     test_strings()
     test_sheet_header_and_fields()
+    test_no_squeezing_rows()
 
     print("\n" + "=" * 70)
     print(f"  TOTAL CHECKS: {PASS_COUNT + FAIL_COUNT}")

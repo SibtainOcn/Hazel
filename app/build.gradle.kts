@@ -183,6 +183,19 @@ android {
         }
     }
 
+    testOptions {
+        unitTests {
+            // The layout tests draw real text with the app's resources: the native graphics
+            // mode measures glyphs as a device would, and each test writes its screenshot.
+            isIncludeAndroidResources = true
+            all {
+                it.systemProperty("robolectric.graphicsMode", "NATIVE")
+                it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
+                it.systemProperty("roborazzi.test.record", "true")
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -329,6 +342,15 @@ dependencies {
     // on every call rather than parsing anything.
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.json)
+
+    // Layout tests: the screens and dialogs drawn on the JVM in every language, at font
+    // sizes up to the largest, checked for words broken to fit and saved as screenshots.
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.ui.test.junit4)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
