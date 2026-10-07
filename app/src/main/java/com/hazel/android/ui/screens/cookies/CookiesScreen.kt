@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.cookies
 
+import com.hazel.android.ui.components.ActionsRow
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -733,22 +734,23 @@ private fun CookieDetailSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
+            // Delete at the start, Save at the end; Save moves under Delete only when the two
+            // do not fit one line.
+            ActionsRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Filled.Delete,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(stringResource(R.string.cookies_sheet_delete), color = MaterialTheme.colorScheme.error)
+                start = {
+                    TextButton(onClick = onDelete) {
+                        Icon(
+                            Icons.Filled.Delete,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(stringResource(R.string.cookies_sheet_delete), color = MaterialTheme.colorScheme.error)
+                    }
                 }
-                Spacer(modifier = Modifier.weight(1f))
+            ) {
                 FilledTonalButton(
                     onClick = {
                         onSave(entry.copy(url = url.trim().let { if (it.isBlank()) it else withScheme(it) }, title = title.trim()))

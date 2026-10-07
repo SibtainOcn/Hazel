@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.ui.graphics.graphicsLayer
@@ -249,14 +250,14 @@ fun FormatSelectionSheet(
         Column(modifier = Modifier.fillMaxWidth()) {
 
             // ── Header: stays put while the list scrolls under it ──
-            Row(
+            // The actions stay beside the heading wherever it fits whole beside them, and move
+            // under it only where a word of it would otherwise be broken.
+            SheetHeaderLayout(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = 20.dp)
-                    .padding(bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(bottom = 12.dp)
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column {
                     Text(
                         stringResource(R.string.format_selection_title),
                         style = MaterialTheme.typography.headlineSmall,
@@ -269,42 +270,45 @@ fun FormatSelectionSheet(
                     )
                 }
 
-                HeaderIconButton(
-                    icon = Icons.Outlined.Tune,
-                    description = stringResource(R.string.format_filter_title),
-                    onClick = { filterSheetOpen = true }
-                )
-
-                if (onRefresh != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                // layout-safe: the actions as one group; SheetHeaderLayout moves it under the heading
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     HeaderIconButton(
-                        icon = Icons.Filled.Refresh,
-                        description = stringResource(R.string.format_update),
-                        enabled = !isLoadingFormats,
-                        onClick = { refresh(readSource, true) }
+                        icon = Icons.Outlined.Tune,
+                        description = stringResource(R.string.format_filter_title),
+                        onClick = { filterSheetOpen = true }
                     )
-                }
 
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Surface(
-                    onClick = { draft?.let(onConfirm) },
-                    enabled = draft != null,
-                    shape = RoundedCornerShape(22.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
-                    modifier = Modifier.height(44.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Filled.Check, null, modifier = Modifier.size(18.dp))
+                    if (onRefresh != null) {
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            stringResource(R.string.format_selection_confirm),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold
+                        HeaderIconButton(
+                            icon = Icons.Filled.Refresh,
+                            description = stringResource(R.string.format_update),
+                            enabled = !isLoadingFormats,
+                            onClick = { refresh(readSource, true) }
                         )
+                    }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Surface(
+                        onClick = { draft?.let(onConfirm) },
+                        enabled = draft != null,
+                        shape = RoundedCornerShape(22.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                        modifier = Modifier.height(44.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Filled.Check, null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.format_selection_confirm),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
                     }
                 }
             }
@@ -1062,6 +1066,7 @@ private fun FillingBadges() {
         label = "fillingBadgesFill"
     )
     val accent = MaterialTheme.colorScheme.primary
+    // layout-safe: placeholder pills of fixed width, no text
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         FillingPill(
             width = 44.dp,

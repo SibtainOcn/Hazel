@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.ActionsRow
+import com.hazel.android.ui.components.EqualWidthActions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -213,16 +215,15 @@ fun CutSheet(
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Half the width each while both labels fit; one above the other when not.
+            EqualWidthActions(spacing = 8.dp) {
                 FlatChip(
                     label = stringResource(R.string.options_cut_start_here),
-                    onClick = { startText = formatTimestamp(controller.positionMs / 1000.0) },
-                    modifier = Modifier.weight(1f)
+                    onClick = { startText = formatTimestamp(controller.positionMs / 1000.0) }
                 )
                 FlatChip(
                     label = stringResource(R.string.options_cut_end_here),
-                    onClick = { endText = formatTimestamp(controller.positionMs / 1000.0) },
-                    modifier = Modifier.weight(1f)
+                    onClick = { endText = formatTimestamp(controller.positionMs / 1000.0) }
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
@@ -262,16 +263,16 @@ fun CutSheet(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Row(
+            // Clear at the start, Cancel and Apply at the end; they move under Clear, and Apply
+            // under Cancel, only when they do not fit one line.
+            ActionsRow(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                spacing = 8.dp,
+                start = if (current.hasSection) {
+                    { TextButton(onClick = onClear) { Text(stringResource(R.string.options_cut_clear)) } }
+                } else null
             ) {
-                if (current.hasSection) {
-                    TextButton(onClick = onClear) { Text(stringResource(R.string.options_cut_clear)) }
-                }
-                Spacer(modifier = Modifier.weight(1f))
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.download_cancel)) }
-                Spacer(modifier = Modifier.width(8.dp))
                 Surface(
                     onClick = {
                         if (start != null && end != null) {

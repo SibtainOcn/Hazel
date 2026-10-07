@@ -59,6 +59,7 @@ fun BatchActionBar(
     // Ranged along the start rather than spread across the width: spreading them put wide
     // gaps between buttons that belong together and left the row reading as a set of
     // unrelated controls.
+    // layout-safe: icon buttons and a two-letter quality label, all fixed width
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
