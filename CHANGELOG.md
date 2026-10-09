@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Settings descriptions are shorter, one plain sentence each, in every language. Twenty-nine descriptions, hints and getting-started steps that ran to two or three sentences now say the same in about one line.
 - Download settings, Appearance and Tools have the same header and back arrow as the other settings screens.
+- On a phone held sideways, a foldable or a tablet, the home screen's results, the queue and the downloads list lay their cards out two, three or four across, in place of one card stretched across the screen, which stood half the screen tall and showed three at a time. A phone held upright shows one column as before. On a tablet, the Download all sheet's list of links grows with the screen's height rather than showing only a few.
+- With a phone held sideways, the Download all sheet takes the screen's width and splits in two: the links down one side at the sheet's full height, and the heading, Adjust, the buttons and Download down the other. Stacked on a screen that short, the list had room for one link. Held upright, and on a tablet, the sheet is as before.
 - On Download settings, a limit's chip moves under its title when a word of the title or its description would not fit beside it, as with a long translation or a large font on a narrow phone, in place of breaking the word in two. The chip's label wraps to a second line rather than being cut short.
 
 ### Fixed

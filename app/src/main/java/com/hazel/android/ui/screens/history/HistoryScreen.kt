@@ -21,6 +21,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -96,6 +97,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.ui.components.FastScrollbar
+import com.hazel.android.ui.components.gridColumns
+import com.hazel.android.ui.components.gridItems
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.data.HistorySort
@@ -358,14 +361,17 @@ fun HistoryScreen() {
         } else {
             val listState = rememberLazyListState()
             val shrink = rememberScrollShrink()
-            Box(modifier = Modifier.fillMaxSize()) {
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val spacing = if (listLayout) 10.dp else 12.dp
+                // A wide screen lays the entries out side by side, inside the list's padding.
+                val columns = gridColumns(maxWidth - 40.dp)
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize().nestedScroll(shrink),
                     contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(if (listLayout) 10.dp else 12.dp)
+                    verticalArrangement = Arrangement.spacedBy(spacing)
                 ) {
-                    items(visible, key = { it.id }) { entry ->
+                    gridItems(visible, columns, spacing, key = { it.id }) { entry ->
                         val present = presence[entry.id] ?: true
                         val open: () -> Unit = {
                             scope.launch {

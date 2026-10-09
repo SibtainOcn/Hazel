@@ -135,17 +135,21 @@ def languages():
     return [NATIVE.get(c, c) for c in codes]
 
 
-def whats_new():
-    """The newest changelog section's headline: its first store line, or its first added item."""
-    text = (ROOT / 'CHANGELOG.md').read_text(encoding='utf-8')
-    for section in re.split(r'\n## ', text)[1:]:
-        for heading in ('Store', 'Added'):
-            block = re.search(rf'### {heading}\n(.*?)(?:\n### |\Z)', section, re.S)
-            item = block and re.search(r'^- (.+)$', block.group(1), re.M)
-            if item:
-                line = re.sub(r'[*`]|\[([^\]]+)\]\([^)]*\)', r'\1', item.group(1))
-                return re.split(r'(?<=[a-z0-9])\.\s', line)[0].rstrip('.')
-    return 'See the latest changes'
+def whats_new(limit=6):
+    """
+    The lines the home page ticker flips through: RELEASE-NOTES.md bullets that open with a
+    bold lead of three words or more, that lead alone. Shorter leads ("New setting") say
+    nothing on their own, and a lead with a character the copy check bans is skipped.
+    """
+    text = (ROOT / 'RELEASE-NOTES.md').read_text(encoding='utf-8')
+    items = []
+    for lead in re.findall(r'^- \*\*(.+?)\*\*', text, re.M):
+        lead = re.sub(r'[*`]', '', lead).strip().rstrip('.:')
+        if len(lead.split()) >= 3 and not BANNED.search(lead) and lead not in items:
+            items.append(lead)
+        if len(items) == limit:
+            break
+    return items or ['See the latest changes']
 
 
 def _md_inline(text):
@@ -296,7 +300,7 @@ def main():
         'language_words': word,
         'language_words_cap': word.capitalize(),
         'language_chips': ''.join(f'<span>{l}</span>' for l in langs),
-        'whats_new': html_escape(whats_new()),
+        'whats_new': ''.join(f'<span class="line">{html_escape(t)}</span>' for t in whats_new()),
         'changelog': md_html('CHANGELOG.md'),
         'release_notes': md_html('RELEASE-NOTES.md'),
     }
@@ -318,7 +322,7 @@ def main():
     for p in problems:
         print('FAIL:', p)
     print(f'Built {len(pages)} pages into {OUT.relative_to(ROOT)} (version {facts["version"]}, '
-          f'{count} languages, what\'s new: "{whats_new()}")')
+          f'{count} languages, {len(whats_new())} what\'s new lines)')
     if problems:
         sys.exit(1)
 
