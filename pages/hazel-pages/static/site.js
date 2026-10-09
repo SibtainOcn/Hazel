@@ -65,6 +65,27 @@
   }
   revealTarget(); window.addEventListener('hashchange', revealTarget);
 
+  // ── Home ticker: flip the release-note lines upward every few seconds. A copy of the
+  // first line sits at the end so the loop wraps without a jump; hovering holds it still. ──
+  var reel = document.querySelector('.pill .reel');
+  var lines = reel ? reel.querySelectorAll('.line') : [];
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (lines.length > 1 && !still) {
+    reel.appendChild(lines[0].cloneNode(true)).setAttribute('aria-hidden', 'true');
+    var at = 0, held = false, pill = reel.closest('.pill');
+    pill.addEventListener('mouseenter', function () { held = true; });
+    pill.addEventListener('mouseleave', function () { held = false; });
+    setInterval(function () {
+      if (held || document.hidden) return;
+      at++;
+      reel.style.transform = 'translateY(' + (-at * lines[0].offsetHeight) + 'px)';
+      if (at === lines.length) setTimeout(function () {
+        reel.classList.add('snap'); reel.style.transform = ''; at = 0;
+        reel.offsetHeight; reel.classList.remove('snap');
+      }, 650);
+    }, 3200);
+  }
+
   // ── Copy buttons: data-copy holds the id of the element whose text is copied. ──
   document.querySelectorAll('[data-copy]').forEach(function (b) {
     b.addEventListener('click', function () {

@@ -48,7 +48,6 @@ English
 [![Download](https://img.shields.io/badge/Download-0A0A0A?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/packages/com.hazel.android/)
 <a href="https://www.buymeacoffee.com/sibtainocean"><img src="https://img.shields.io/badge/-Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" /></a>
-<a href="https://t.me/hazelandroid"><img src="https://img.shields.io/badge/-Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" /></a>
 
 ![API](https://img.shields.io/badge/API-24%2B-brightgreen?style=flat-square)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
@@ -144,7 +143,7 @@ SHA-256:    0377e9c8352c017e42583cea1715c40c400a51c4045c268825ffc9bae1305c86
 SHA-1:      d5c4a6a86d3cde1c1c722564f1efaf8893ea85a2
 MD5:        3bcce9e14c616a9087766563875978e6
 ```
-
+[![Star History Chart](https://api.star-history.com/svg?repos=SibtainOcn/Hazel&type=Date)](https://www.star-history.com/#SibtainOcn/Hazel&Date)
 ## 🤝 Contributing
 
 Contributions are welcome!
