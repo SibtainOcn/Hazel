@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -27,10 +28,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
@@ -47,6 +50,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -62,6 +66,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextOverflow
 import android.view.View
@@ -88,6 +93,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.download.DownloadOptions
@@ -134,6 +140,10 @@ import kotlin.math.roundToInt
  * often changed by (kind, quality ceiling, folder); the adjust-download options and the
  * container sit in the Adjust section, which opens and closes the way the single download
  * sheet's sections do, so the list keeps the height while it is closed.
+ *
+ * On a phone held sideways the same parts sit in two panes: the list down one side at the
+ * sheet's full height, and the heading, the Adjust section, the buttons and Download down
+ * the other. Stacked, a screen that short left the list a single row.
  *
  * A search button beside the count opens a field in the same row that narrows the list to
  * the links whose title, channel or address match, for a playlist too long to scroll.
@@ -234,10 +244,18 @@ fun BatchDownloadSheet(
     val links = remember(results) { results.map { it.url } }
     val linkSource = sourceUrl?.trim()?.takeIf { it.startsWith("http") && it.none(Char::isWhitespace) }
 
+    // A phone on its side is wide and short. Stacked there, the heading, the Adjust section
+    // and the buttons took the height and left the list one row, so the sheet takes the
+    // screen's width and splits into two panes. Upright, and on a tablet, it is stacked.
+    val configuration = LocalConfiguration.current
+    val twoPane = configuration.screenWidthDp >= TWO_PANE_MIN_WIDTH_DP &&
+        configuration.screenHeightDp < TWO_PANE_MAX_HEIGHT_DP
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = batchSheetColor
+        containerColor = batchSheetColor,
+        sheetMaxWidth = if (twoPane) Dp.Unspecified else BottomSheetDefaults.SheetMaxWidth
     ) {
         Box(
             modifier = Modifier
@@ -260,60 +278,60 @@ fun BatchDownloadSheet(
                 }
         ) {
         KeyboardOverSheet()
-        Column(modifier = Modifier.fillMaxWidth()) {
 
-            // ── Header ──
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = SIDE),
-                verticalAlignment = Alignment.CenterVertically
+        // The sheet's parts, each written once and placed by the layout below: stacked, or
+        // side by side on a phone held sideways.
+
+        // ── Header ──
+        val titleBlock: @Composable (Modifier) -> Unit = { modifier ->
+            Column(modifier = modifier) {
+                Text(
+                    stringResource(R.string.batch_header_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    stringResource(R.string.batch_header_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        val downloadButton: @Composable (Modifier) -> Unit = { modifier ->
+            Surface(
+                onClick = { onDownload(plans) },
+                enabled = plans.isNotEmpty(),
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.primary.copy(
+                    alpha = if (plans.isNotEmpty()) 0.15f else 0.06f
+                ),
+                modifier = modifier
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        stringResource(R.string.batch_header_title),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        stringResource(R.string.batch_header_subtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Surface(
-                    onClick = { onDownload(plans) },
-                    enabled = plans.isNotEmpty(),
-                    shape = RoundedCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(
-                        alpha = if (plans.isNotEmpty()) 0.15f else 0.06f
-                    ),
-                    modifier = Modifier.height(44.dp)
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    // Centred when the button is given a width of its own, beside the list.
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Filled.Download, null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            stringResource(R.string.batch_download_action),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    Icon(
+                        Icons.Filled.Download, null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        stringResource(R.string.batch_download_action),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // ── What the list holds, and the controls that act on the list itself ──
+        // ── What the list holds, and the controls that act on the list itself ──
+        val listBar: @Composable () -> Unit = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -443,9 +461,14 @@ fun BatchDownloadSheet(
                     }
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
+        // ── The links ──
+        val linkListState = rememberLazyListState()
+        val shrink = rememberScrollShrink()
+        // A new query starts at the top of what it found.
+        LaunchedEffect(query) { if (query.isNotEmpty()) linkListState.scrollToItem(0) }
+        val linkList: @Composable (Modifier) -> Unit = { modifier ->
             if (searchOpen && shown.isEmpty()) {
                 Text(
                     stringResource(R.string.batch_search_none),
@@ -455,25 +478,10 @@ fun BatchDownloadSheet(
                 )
             }
 
-            val linkListState = rememberLazyListState()
-            // A phone shows a few links and leaves the rest of the sheet to the options; a
-            // tablet has the height for many more, and holding it to the phone's few left a
-            // tall sheet scrolling a short strip.
-            val configuration = androidx.compose.ui.platform.LocalConfiguration.current
-            val listMaxHeight = if (configuration.smallestScreenWidthDp >= 600) {
-                maxOf((configuration.screenHeightDp * 0.45f).dp, 280.dp)
-            } else {
-                280.dp
-            }
-            val shrink = rememberScrollShrink()
-            // A new query starts at the top of what it found.
-            LaunchedEffect(query) { if (query.isNotEmpty()) linkListState.scrollToItem(0) }
             LazyColumn(
                 state = linkListState,
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
-                    .weight(1f, fill = false)
-                    .heightIn(max = listMaxHeight)
                     .keepFlingInSheet()
                     .nestedScroll(shrink),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
@@ -516,14 +524,14 @@ fun BatchDownloadSheet(
                     }
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // ── Adjust: the options and the container, for the whole set ──
-            //
-            // Each opens the dialog the single download sheet uses, so there is one place
-            // where each of them is explained. Subtitles are left out of an audio download,
-            // which has nothing to attach them to, and the bitrate only applies to one.
+        // ── Adjust: the options and the container, for the whole set ──
+        //
+        // Each opens the dialog the single download sheet uses, so there is one place
+        // where each of them is explained. Subtitles are left out of an audio download,
+        // which has nothing to attach them to, and the bitrate only applies to one.
+        val adjustSection: @Composable () -> Unit = {
             val isVideo = state.videoTab
             val thumbnailLabel = stringResource(R.string.batch_bar_thumbnail)
             val chaptersLabel = stringResource(R.string.batch_bar_chapters)
@@ -648,7 +656,10 @@ fun BatchDownloadSheet(
                     }
                 }
             }
+        }
 
+        // ── Kind, quality and folder, with the link and incognito at the end ──
+        val actionBar: @Composable () -> Unit = {
             val audioChoice = state.audioChoice
             val hqLabel = when {
                 state.videoTab && state.maxHeight == WORST_HEIGHT -> stringResource(R.string.batch_bar_hq_value, "MIN")
@@ -663,8 +674,6 @@ fun BatchDownloadSheet(
                 audioChoice == null -> stringResource(R.string.audio_quality_best)
                 else -> audioChoice.label
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
 
             BatchActionBar(
                 isVideo = state.videoTab,
@@ -691,8 +700,95 @@ fun BatchDownloadSheet(
                     IncognitoButton(onFeedback = say)
                 }
             )
+        }
 
-            Spacer(modifier = Modifier.navigationBarsPadding().height(12.dp))
+        if (twoPane) {
+            // The list down one side, as tall as the sheet; the heading, the settings and
+            // the buttons down the other, scrolling if a large font makes them taller than
+            // the screen, with Download kept in view under them.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
+                    listBar()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    linkList(Modifier.weight(1f))
+                    Spacer(modifier = Modifier.navigationBarsPadding().height(12.dp))
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        titleBlock(Modifier.padding(horizontal = SIDE))
+                        Spacer(modifier = Modifier.height(12.dp))
+                        adjustSection()
+                        Spacer(modifier = Modifier.height(12.dp))
+                        actionBar()
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    downloadButton(
+                        Modifier
+                            .padding(horizontal = SIDE)
+                            .fillMaxWidth()
+                            .height(48.dp)
+                    )
+                    Spacer(modifier = Modifier.navigationBarsPadding().height(12.dp))
+                }
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = SIDE),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    titleBlock(Modifier.weight(1f))
+                    downloadButton(Modifier.height(44.dp))
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                listBar()
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // A phone shows a few links and leaves the rest of the sheet to the options; a
+                // tablet has the height for many more, and holding it to the phone's few left a
+                // tall sheet scrolling a short strip.
+                val listMaxHeight = if (configuration.smallestScreenWidthDp >= 600) {
+                    maxOf((configuration.screenHeightDp * 0.45f).dp, 280.dp)
+                } else {
+                    280.dp
+                }
+                linkList(
+                    Modifier
+                        .weight(1f, fill = false)
+                        .heightIn(max = listMaxHeight)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                adjustSection()
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                actionBar()
+
+                Spacer(modifier = Modifier.navigationBarsPadding().height(12.dp))
+            }
         }
 
         // What the footer's buttons did, shown over the top of the sheet, where it is in
@@ -1044,6 +1140,14 @@ private class SearchBounds {
 
 /** How far the sheet's content sits from its sides: close to the edge, so the list gets the width. */
 private val SIDE = 12.dp
+
+/**
+ * A window at least this wide and under [TWO_PANE_MAX_HEIGHT_DP] tall is a phone on its
+ * side, where the sheet splits into two panes. Each pane is then about as wide as an
+ * upright phone, so its rows lay out as they do there.
+ */
+private const val TWO_PANE_MIN_WIDTH_DP = 600
+private const val TWO_PANE_MAX_HEIGHT_DP = 480
 
 /** One message from the footer; a new one for every tap, so a repeat starts its time over. */
 private class BatchFeedback(val message: String)
