@@ -456,6 +456,15 @@ fun BatchDownloadSheet(
             }
 
             val linkListState = rememberLazyListState()
+            // A phone shows a few links and leaves the rest of the sheet to the options; a
+            // tablet has the height for many more, and holding it to the phone's few left a
+            // tall sheet scrolling a short strip.
+            val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+            val listMaxHeight = if (configuration.smallestScreenWidthDp >= 600) {
+                maxOf((configuration.screenHeightDp * 0.45f).dp, 280.dp)
+            } else {
+                280.dp
+            }
             val shrink = rememberScrollShrink()
             // A new query starts at the top of what it found.
             LaunchedEffect(query) { if (query.isNotEmpty()) linkListState.scrollToItem(0) }
@@ -464,7 +473,7 @@ fun BatchDownloadSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f, fill = false)
-                    .heightIn(max = 280.dp)
+                    .heightIn(max = listMaxHeight)
                     .keepFlingInSheet()
                     .nestedScroll(shrink),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(

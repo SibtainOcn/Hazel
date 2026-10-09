@@ -88,6 +88,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.ui.components.FastScrollbar
+import com.hazel.android.ui.components.gridColumns
+import com.hazel.android.ui.components.gridItems
 import com.hazel.android.ui.components.FillingDownloadIcon
 import com.hazel.android.ui.components.ProcessingTracker
 import com.hazel.android.download.ProcessingStep
@@ -510,7 +512,9 @@ fun DownloadScreen(
                         // the last one runs off the bottom rather than being squeezed. A tall
                         // screen shows more of them and a short one fewer.
                         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                            val cardHeight = maxWidth * 9f / 16f + SKELETON_SPACING
+                            val columns = gridColumns(maxWidth)
+                            val cardWidth = (maxWidth - SKELETON_SPACING * (columns - 1)) / columns
+                            val cardHeight = cardWidth * 9f / 16f + SKELETON_SPACING
                             val count = (maxHeight / cardHeight).toInt().plus(1)
                                 .coerceIn(1, MAX_VIEWPORT_SKELETONS)
                             ShimmerHost(
@@ -519,7 +523,7 @@ fun DownloadScreen(
                                     .wrapContentHeight(align = Alignment.Top, unbounded = true)
                             ) {
                                 Column(verticalArrangement = Arrangement.spacedBy(SKELETON_SPACING)) {
-                                    repeat(count) { MediaCardShimmer() }
+                                    repeat(count) { ShimmerRow(columns) }
                                 }
                             }
                         }
@@ -531,11 +535,13 @@ fun DownloadScreen(
                 // images at once and ran the app out of memory on the way back from the compact
                 // layout. This builds only what is on screen, whatever the list is holding.
                 val shrink = rememberScrollShrink()
-                Box(
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
                 ) {
+                    // A wide screen lays the cards out side by side, inside the list's padding.
+                    val columns = gridColumns(maxWidth - 40.dp)
                     LazyColumn(
                         state = listState,
                         modifier = Modifier
@@ -549,7 +555,7 @@ fun DownloadScreen(
                             bottom = 96.dp
                         )
                     ) {
-                        items(orderedResults, key = { it.url }) { info ->
+                        gridItems(orderedResults, columns, SKELETON_SPACING, key = { it.url }) { info ->
                             Spacer(modifier = Modifier.height(20.dp))
 
                             // Each card arrives rather than appearing: it fades up from slightly
@@ -631,8 +637,10 @@ fun DownloadScreen(
                                     ShimmerHost(modifier = Modifier.fillMaxWidth()) {
                                         Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                                             Spacer(modifier = Modifier.height(4.dp))
-                                            repeat(INCREMENTAL_SKELETON_COUNT) {
-                                                MediaCardShimmer()
+                                            // One row of them on a wide screen: two would
+                                            // stand in for more cards than are coming.
+                                            repeat(if (columns > 1) 1 else INCREMENTAL_SKELETON_COUNT) {
+                                                ShimmerRow(columns)
                                             }
                                         }
                                     }
@@ -1477,6 +1485,14 @@ private fun MediaCard(
 
 /** Gap between skeleton cards, the same as between the cards they stand in for. */
 private val SKELETON_SPACING = 20.dp
+
+/** A row of [columns] skeleton cards, the width the real ones will take. */
+@Composable
+private fun ShimmerRow(columns: Int) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SKELETON_SPACING)) {
+        repeat(columns) { MediaCardShimmer(modifier = Modifier.weight(1f)) }
+    }
+}
 
 /** An upper bound on skeleton cards, for a screen taller than any phone's. */
 private const val MAX_VIEWPORT_SKELETONS = 8
