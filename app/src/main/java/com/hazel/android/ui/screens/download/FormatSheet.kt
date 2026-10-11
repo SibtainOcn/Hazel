@@ -54,6 +54,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -93,6 +94,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
@@ -472,14 +474,16 @@ fun FormatSheet(
                         label = stringResource(R.string.format_sheet_label_title),
                         value = title,
                         onValueChange = { title = it },
-                        color = fieldColor
+                        color = fieldColor,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     EditableField(
                         label = stringResource(R.string.format_sheet_label_author),
                         value = author,
                         onValueChange = { author = it },
-                        color = fieldColor
+                        color = fieldColor,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
                     )
                 }
             }
@@ -1041,7 +1045,8 @@ internal fun EditableField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    color: Color = defaultFieldColor()
+    color: Color = defaultFieldColor(),
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -1071,6 +1076,7 @@ internal fun EditableField(
                 value = value,
                 onValueChange = onValueChange,
                 singleLine = true,
+                keyboardOptions = keyboardOptions,
                 textStyle = LocalTextStyle.current
                     .merge(MaterialTheme.typography.bodyMedium)
                     .copy(color = MaterialTheme.colorScheme.onSurface),
