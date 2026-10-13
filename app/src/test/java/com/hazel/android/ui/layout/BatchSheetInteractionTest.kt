@@ -26,8 +26,6 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
-import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
-import com.github.takahirom.roborazzi.captureScreenRoboImage
 import com.hazel.android.R
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.download.DownloadOptions
@@ -80,8 +78,10 @@ class BatchSheetInteractionTest(private val size: String, private val qualifiers
 
     private val compose = createComposeRule()
 
+    private val shots = LayoutShots()
+
     @get:Rule
-    val rules: RuleChain = RuleChain.outerRule(device).around(compose)
+    val rules: RuleChain = RuleChain.outerRule(device).around(compose).around(shots)
 
     private fun string(id: Int, vararg args: Any) =
         ApplicationProvider.getApplicationContext<android.content.Context>().getString(id, *args)
@@ -149,11 +149,9 @@ class BatchSheetInteractionTest(private val size: String, private val qualifiers
     private fun openAdjust() {
         tap(compose.onNodeWithText(string(R.string.format_sheet_adjust_video)))
     }
-
-    @OptIn(ExperimentalRoborazziApi::class)
     @Test
     fun everyControlWorks() {
-        captureScreenRoboImage("build/outputs/roborazzi/batch/sheet_$size.png")
+        shots.take("build/outputs/roborazzi/batch/sheet_$size.png")
 
         // The buttons along the bottom, and the link button beside them.
         opensWindow("download type") { byDescription(string(R.string.batch_bar_download_type)) }
@@ -164,7 +162,7 @@ class BatchSheetInteractionTest(private val size: String, private val qualifiers
 
         // Every chip in the Adjust section opens its own dialog or sheet.
         openAdjust()
-        captureScreenRoboImage("build/outputs/roborazzi/batch/sheet_adjust_$size.png")
+        shots.take("build/outputs/roborazzi/batch/sheet_adjust_$size.png")
         reset()
         val chips = listOf(
             R.string.batch_bar_thumbnail, R.string.batch_bar_chapters, R.string.batch_bar_subtitles,
@@ -228,6 +226,6 @@ class BatchSheetInteractionTest(private val size: String, private val qualifiers
         compose.waitForIdle()
         compose.onNode(hasSetTextAction() and hasText("Zoo, renamed")).assertExists()
         compose.onNode(hasSetTextAction() and hasText("Someone else")).assertExists()
-        captureScreenRoboImage("build/outputs/roborazzi/batch/link_sheet_$size.png")
+        shots.take("build/outputs/roborazzi/batch/link_sheet_$size.png")
     }
 }

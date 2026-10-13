@@ -23,8 +23,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
-import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
-import com.github.takahirom.roborazzi.captureScreenRoboImage
 import com.hazel.android.R
 import com.hazel.android.data.FailedDownload
 import com.hazel.android.data.HistoryEntry
@@ -103,8 +101,10 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
 
     private val compose = createComposeRule()
 
+    private val shots = LayoutShots()
+
     @get:Rule
-    val rules: RuleChain = RuleChain.outerRule(device).around(compose)
+    val rules: RuleChain = RuleChain.outerRule(device).around(compose).around(shots)
 
     private fun string(id: Int) =
         ApplicationProvider.getApplicationContext<android.content.Context>().getString(id)
@@ -141,11 +141,9 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
         val config = ApplicationProvider.getApplicationContext<android.content.Context>().resources.configuration
         return config.locales[0].language == Locale.forLanguageTag(tag).language && config.fontScale == fontScale
     }
-
-    @OptIn(ExperimentalRoborazziApi::class)
     private fun checkAndCapture(name: String) {
         compose.waitForIdle()
-        captureScreenRoboImage("build/outputs/roborazzi/layout/${name}_${language}_x$fontScale.png")
+        shots.take("build/outputs/roborazzi/layout/${name}_${language}_x$fontScale.png")
         val broken = brokenWords()
         assert(broken.isEmpty()) {
             "$name in $language at font x$fontScale broke words to fit: ${broken.joinToString("; ")}"

@@ -119,21 +119,11 @@ jobs:
 
       # The unit tests run on the JVM: no emulator, no device. The layout tests among them
       # use Robolectric to draw the screens and dialogs in every language at font sizes up to
-      # 2.0, failing on a word broken to fit, and write a screenshot of each.
+      # 2.0, failing on a word broken to fit. Here a test writes a screenshot only when it
+      # fails, of the screen as it stood then (see LayoutShots in the tests).
       - name: Run unit tests
+        id: tests
         run: ./gradlew :app:testDebugUnitTest --stacktrace
-
-      # Every screen and dialog in every language and font size, to look at on a pull
-      # request that changes a layout. Like the report below, a convenience, not the result.
-      - name: Upload the layout screenshots
-        if: always()
-        continue-on-error: true
-        uses: actions/upload-artifact@v7
-        with:
-          name: layout-screenshots
-          path: app/build/outputs/roborazzi/layout/
-          retention-days: 7
-          if-no-files-found: ignore
 
       # Runs whether the tests passed or failed, because a failed run is when the numbers
       # are actually worth reading. Every figure comes from the XML the run just wrote.
@@ -171,6 +161,18 @@ jobs:
           path: |
             app/build/reports/tests/
             app/build/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      # The failed layout tests' screens, so a red run can be seen as well as read. Like the
+      # report above, a convenience: the run is already red, and this cannot change that.
+      - name: Upload the layout screenshots
+        if: failure() && steps.tests.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: layout-screenshots
+          path: app/build/outputs/roborazzi/
           retention-days: 7
           if-no-files-found: ignore
 

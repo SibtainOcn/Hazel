@@ -12,8 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
-import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
-import com.github.takahirom.roborazzi.captureScreenRoboImage
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.FailedDownload
 import com.hazel.android.data.HistoryEntry
@@ -78,8 +76,10 @@ class ScreenSizeLayoutTest(private val size: String, private val qualifiers: Str
 
     private val compose = createComposeRule()
 
+    private val shots = LayoutShots()
+
     @get:Rule
-    val rules: RuleChain = RuleChain.outerRule(device).around(compose)
+    val rules: RuleChain = RuleChain.outerRule(device).around(compose).around(shots)
 
     private val context get() = ApplicationProvider.getApplicationContext<android.content.Context>()
 
@@ -97,11 +97,9 @@ class ScreenSizeLayoutTest(private val size: String, private val qualifiers: Str
         }
         compose.waitForIdle()
     }
-
-    @OptIn(ExperimentalRoborazziApi::class)
     private fun capture(name: String) {
         compose.waitForIdle()
-        captureScreenRoboImage("build/outputs/roborazzi/screens/${name}_$size.png")
+        shots.take("build/outputs/roborazzi/screens/${name}_$size.png")
     }
 
     /** The list the home screen and the queue lay their cards out in, on the screen's width. */

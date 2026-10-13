@@ -187,12 +187,21 @@ android {
     testOptions {
         unitTests {
             // The layout tests draw real text with the app's resources: the native graphics
-            // mode measures glyphs as a device would, and each test writes its screenshot.
+            // mode measures glyphs as a device would. A test writes a screenshot only when it
+            // fails, of the screen as it stood then, so a run spends no time on hundreds of
+            // images nobody looks at (see LayoutShots in the tests). To look through every
+            // screen in every language and font size, as after changing a layout, run them
+            // with -PlayoutScreenshots=all.
             isIncludeAndroidResources = true
+            val screenshots = providers.gradleProperty("layoutScreenshots").getOrElse("failures")
             all {
                 it.systemProperty("robolectric.graphicsMode", "NATIVE")
                 it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
                 it.systemProperty("roborazzi.test.record", "true")
+                it.systemProperty("hazel.layout.screenshots", screenshots)
+                // Declared, so a run restored from the build cache brings its screenshots
+                // back with it rather than leaving the folder empty.
+                it.outputs.dir(project.layout.buildDirectory.dir("outputs/roborazzi"))
             }
         }
     }
