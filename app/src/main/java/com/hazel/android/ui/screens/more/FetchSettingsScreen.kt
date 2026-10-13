@@ -216,8 +216,9 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
     }
 }
 
+/** One line on what an engine is good at, shown under it wherever search or play engines are picked. */
 @Composable
-private fun engineSummary(engine: ListingSource): String = stringResource(
+internal fun engineSummary(engine: ListingSource): String = stringResource(
     if (engine == ListingSource.NEWPIPE) R.string.fetch_settings_engine_newpipe_summary
     else R.string.fetch_settings_engine_ytdlp_summary
 )
