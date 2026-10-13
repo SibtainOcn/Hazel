@@ -1,11 +1,21 @@
 package com.hazel.android.ui.screens.more
 
-import com.hazel.android.ui.components.SheetHeaderLayout
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,17 +27,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,14 +53,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
-import com.hazel.android.util.AppLocale
+import com.hazel.android.ui.components.EqualWidthActions
 import com.hazel.android.ui.components.keepFlingInSheet
+import com.hazel.android.util.AppLocale
 
 /**
  * The language picker.
@@ -57,9 +76,10 @@ import com.hazel.android.ui.components.keepFlingInSheet
  * Choosing a card does not change anything. The heading says what the app is in now, and
  * switches to what has been picked, and only Confirm applies it. A language is the one
  * setting where a mis-tap leaves you unable to read the screen you would use to undo it, so
- * it is worth the extra tap.
+ * it is worth the extra tap. Confirm sits at the bottom, full size, under the thumb, and is
+ * only enabled once something other than the current language is picked.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LanguageSheet(
     current: String,
@@ -71,77 +91,69 @@ fun LanguageSheet(
     // What is picked but not yet applied. It starts on whatever is in force, so opening the
     // sheet and confirming without touching anything changes nothing.
     var draft by remember(current) { mutableStateOf(current) }
+    val changed = !draft.equals(current, ignoreCase = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Column {
-            // ── Heading, with the actions on the right ──
-            // The actions move under the heading only where a word of it would otherwise be
-            // broken to make room for them.
-            SheetHeaderLayout(
-                modifier = Modifier
-                    .padding(start = 20.dp, end = 8.dp, top = 2.dp, bottom = 12.dp)
+            // ── Heading: the icon, the title, and what is in force or picked ──
+            Row(
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 2.dp, bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(
-                        stringResource(R.string.language_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        if (draft == current) {
-                            stringResource(R.string.language_current, labelFor(current))
-                        } else {
-                            stringResource(R.string.language_selected, labelFor(draft))
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(MaterialShapes.Cookie9Sided.toShape())
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Outlined.Translate,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
-
-                // layout-safe: the actions as one group; SheetHeaderLayout moves it under the heading
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(onClick = onDismiss) {
+                Spacer(modifier = Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.language_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    AnimatedContent(
+                        targetState = changed,
+                        transitionSpec = { fadeIn() togetherWith fadeOut() },
+                        label = "languageSubtitle"
+                    ) { isChanged ->
                         Text(
-                            stringResource(R.string.language_cancel),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(2.dp))
-
-                    Surface(
-                        onClick = { onConfirm(draft) },
-                        shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.primary
-                    ) {
-                        Text(
-                            stringResource(R.string.language_confirm),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp)
+                            if (isChanged) {
+                                stringResource(R.string.language_selected, labelFor(draft))
+                            } else {
+                                stringResource(R.string.language_current, labelFor(current))
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (isChanged) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
             }
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-
             // ── The languages, two to a row ──
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.heightIn(max = 460.dp).keepFlingInSheet(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                    start = 18.dp, end = 18.dp, top = 16.dp, bottom = 28.dp
-                ),
+                // One column once the font is large enough that two would cut most names short.
+                columns = GridCells.Fixed(if (LocalDensity.current.fontScale >= 1.7f) 1 else 2),
+                modifier = Modifier
+                    .heightIn(max = 440.dp)
+                    .keepFlingInSheet(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -162,6 +174,40 @@ fun LanguageSheet(
                     )
                 }
             }
+
+            // ── Actions, full width under the thumb ──
+            // Half the width each while both labels fit; one above the other when not.
+            EqualWidthActions(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
+                spacing = 10.dp
+            ) {
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.heightIn(min = 52.dp),
+                    shapes = ButtonDefaults.shapes(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    )
+                ) {
+                    Text(
+                        stringResource(R.string.language_cancel),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+                Button(
+                    onClick = { onConfirm(draft) },
+                    enabled = changed,
+                    modifier = Modifier.heightIn(min = 52.dp),
+                    shapes = ButtonDefaults.shapes()
+                ) {
+                    Text(
+                        stringResource(R.string.language_confirm),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }
@@ -169,10 +215,11 @@ fun LanguageSheet(
 /**
  * One language.
  *
- * The mark for the chosen one is a dot in the corner rather than a tick across the card: at
- * this size a tick competes with the two lines of text, and the border and fill are already
- * carrying the state. The dot is there for the case where a card is read on its own.
+ * Flat and borderless. The chosen card fills with the accent, rounds its corners out and
+ * shows a tick on a scalloped badge beside the English name; the others are quiet tonal
+ * tiles. The corner change is sprung, so moving the choice reads as one card letting go and another taking it.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun LanguageCard(
     native: String,
@@ -180,45 +227,65 @@ private fun LanguageCard(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val corner by animateDpAsState(
+        if (selected) 28.dp else 16.dp,
+        spring<Dp>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+        label = "languageCorner"
+    )
+    val container by animateColorAsState(
+        if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
+        else MaterialTheme.colorScheme.surfaceContainerHigh,
+        label = "languageContainer"
+    )
+
     Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = if (selected) MaterialTheme.colorScheme.surfaceContainerHighest
-        else Color.Transparent,
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.outlineVariant
-        ),
-        onClick = onClick
+        selected = selected,
+        onClick = onClick,
+        shape = RoundedCornerShape(corner),
+        color = container,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text(
-                    native,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(2.dp))
+        Column(modifier = Modifier.padding(start = 16.dp, end = 12.dp, top = 14.dp, bottom = 14.dp)) {
+            Text(
+                native,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                color = if (selected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     english,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
-            }
-
-            if (selected) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(10.dp)
-                        .size(7.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                )
+                AnimatedVisibility(
+                    visible = selected,
+                    enter = scaleIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) + fadeIn(),
+                    exit = scaleOut() + fadeOut()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 6.dp)
+                            .size(22.dp)
+                            .clip(MaterialShapes.Cookie9Sided.toShape())
+                            .background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Filled.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
             }
         }
     }
@@ -244,6 +311,7 @@ private fun labelFor(tag: String): String {
 fun LanguageChangedDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Outlined.Translate, contentDescription = null) },
         title = {
             Text(
                 stringResource(R.string.language_changed_title),
