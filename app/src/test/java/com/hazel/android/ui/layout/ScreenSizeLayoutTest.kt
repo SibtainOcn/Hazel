@@ -84,7 +84,7 @@ class ScreenSizeLayoutTest(private val size: String, private val qualifiers: Str
     private val shots = LayoutShots()
 
     @get:Rule
-    val rules: RuleChain = RuleChain.outerRule(device).around(compose).around(shots)
+    val rules: RuleChain = RuleChain.outerRule(SettleGuard()).around(device).around(compose).around(shots)
 
     private val context get() = ApplicationProvider.getApplicationContext<android.content.Context>()
 

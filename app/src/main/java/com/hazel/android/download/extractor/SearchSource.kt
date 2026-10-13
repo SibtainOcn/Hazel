@@ -28,7 +28,13 @@ enum class SearchSource(
     BILIBILI(R.string.search_source_bilibili, ytDlpPrefix = "bilisearch"),
     NICONICO(R.string.search_source_niconico, ytDlpPrefix = "nicosearch"),
     PRX(R.string.search_source_prx, ytDlpPrefix = "prxstories"),
-    ROKFIN(R.string.search_source_rokfin, ytDlpPrefix = "rkfnsearch");
+    ROKFIN(R.string.search_source_rokfin, ytDlpPrefix = "rkfnsearch"),
+
+    /** The whole Web, through [WebSearch]: no site of its own, so neither engine runs it. */
+    WEB(R.string.search_source_web);
+
+    /** One of the sites, rather than the Web as a whole. */
+    val isSite: Boolean get() = this != WEB
 
     val readableByYtDlp: Boolean get() = ytDlpPrefix != null || ytDlpSearchUrl != null
 

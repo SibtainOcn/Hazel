@@ -8,6 +8,8 @@ import androidx.compose.material.icons.filled.Lan
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Public
+import com.hazel.android.ui.screens.download.SearchSourceSheet
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.runtime.Composable
@@ -50,6 +52,7 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
     val playEngine by remember(context) { SettingsRepository.getPlayEngine(context) }.collectAsState(initial = ListingSource.NEWPIPE)
     val playQuality by remember(context) { SettingsRepository.getPlayQuality(context) }
         .collectAsState(initial = SettingsRepository.DEFAULT_PLAY_QUALITY)
+    val webServer by remember(context) { SettingsRepository.getWebSearchServer(context) }.collectAsState(initial = "")
 
     var open by remember { mutableStateOf(Choice.NONE) }
 
@@ -102,6 +105,14 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
                         title = stringResource(R.string.fetch_settings_search_on),
                         value = stringResource(searchSource.labelRes),
                         onClick = { open = Choice.SEARCH_SOURCE }
+                    )
+                },
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.Public,
+                        title = stringResource(R.string.fetch_settings_web_search),
+                        value = webSearchLabel(webServer),
+                        onClick = { open = Choice.WEB_SEARCH }
                     )
                 },
                 {
@@ -174,11 +185,11 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
             onDismiss = close,
             describe = { stringResource(it.descriptionRes) }
         )
-        Choice.SEARCH_SOURCE -> SingleChoiceDialog(
-            title = stringResource(R.string.fetch_settings_search_on),
-            choices = SearchSource.entries.map { it to stringResource(it.labelRes) },
-            selected = searchSource,
-            onSelect = { scope.launch { SettingsRepository.setSearchSource(context, it) }; close() },
+        // The same picker the search screen's options open, Web's first-time note included.
+        Choice.SEARCH_SOURCE -> SearchSourceSheet(selected = searchSource, onDismiss = close)
+        Choice.WEB_SEARCH -> WebSearchDialog(
+            server = webServer,
+            onSave = { scope.launch { SettingsRepository.setWebSearchServer(context, it) }; close() },
             onDismiss = close
         )
         Choice.SEARCH_ENGINE -> SingleChoiceDialog(
@@ -223,5 +234,5 @@ private fun engineSummary(engine: ListingSource): String = stringResource(
 )
 
 private enum class Choice {
-    NONE, READ_ENGINE, PATIENCE, SEARCH_SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, PLAY_QUALITY
+    NONE, READ_ENGINE, PATIENCE, SEARCH_SOURCE, WEB_SEARCH, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, PLAY_QUALITY
 }

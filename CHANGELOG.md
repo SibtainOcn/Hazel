@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - The 3-dot on the home search bar and on the search screen opens a Search options sheet in place of a menu: where to search, the search and play engines, the number of results, suggestions, and clearing results or search history. It changes the same settings as Fetch settings.
-- Search on in Search options opens a list of the sites search can use. Search the Web sits under the list; the first time it is tapped, a short note marked Beta says what it does. Searching the Web itself is not available yet.
+- Search on in Search options opens a list of the sites search can use. Search the Web sits under the list; the first time it is tapped, a short note marked Beta says what it does.
 - Choices across the app are picked from rounded blocks, the chosen one marked with a check, in place of radio buttons and checkboxes. Picking one of a single choice saves it and closes the dialog. This covers every settings dialog, SponsorBlock, audio bitrate, the downloads status filter and the storage cleanup confirmation.
 - The home search bar has no outline.
 - Settings descriptions are shorter, one plain sentence each, in every language. Twenty-nine descriptions, hints and getting-started steps that ran to two or three sentences now say the same in about one line.

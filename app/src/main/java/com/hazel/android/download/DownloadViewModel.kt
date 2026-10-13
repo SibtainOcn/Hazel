@@ -967,7 +967,8 @@ class DownloadViewModel : ViewModel() {
                     count = SettingsRepository.getSearchResults(app).first(),
                     cacheDir = ytDlpCacheDir,
                     fetchMode = SettingsRepository.getFetchMode(app).first(),
-                    forceIpv4 = SettingsRepository.getForceIpv4(app).first()
+                    forceIpv4 = SettingsRepository.getForceIpv4(app).first(),
+                    webServer = SettingsRepository.getWebSearchServer(app).first()
                 )
             } catch (_: CancellationException) {
                 _state.update { it.copy(isFetching = false) }

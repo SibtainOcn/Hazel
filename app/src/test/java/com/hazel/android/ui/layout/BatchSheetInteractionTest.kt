@@ -81,7 +81,7 @@ class BatchSheetInteractionTest(private val size: String, private val qualifiers
     private val shots = LayoutShots()
 
     @get:Rule
-    val rules: RuleChain = RuleChain.outerRule(device).around(compose).around(shots)
+    val rules: RuleChain = RuleChain.outerRule(SettleGuard()).around(device).around(compose).around(shots)
 
     private fun string(id: Int, vararg args: Any) =
         ApplicationProvider.getApplicationContext<android.content.Context>().getString(id, *args)
