@@ -89,7 +89,7 @@ Azərbaycanca
 - Müxtəlif yükləmə formatları və konteynerlər seçin
 
 ### Axtarış və oxutma
-- **Axtarış** - keçid əvəzinə söz yazaraq YouTube, YouTube Music, SoundCloud, Bandcamp və ya Bilibili-də axtarın, istəyə bağlı axtarış təklifləri ilə
+- **Axtarış** - keçid əvəzinə söz yazaraq YouTube, YouTube Music, SoundCloud və ya Bandcamp-da axtarın, istəyə bağlı axtarış təklifləri ilə
 - **Yükləməzdən əvvəl oxudun** - istənilən nəticəni və ya keçidi birbaşa kartında oxudun; irəliləmə zolağı, ikiqat toxunuşla keçid, tam ekran və keyfiyyət seçimi ilə, Hazel-in oxuya bildiyi istənilən saytda
 - **Kəsmə** - videonun və ya trekin yalnız bir hissəsini yükləyin, aralığı canlı önizləmədə seçərək
 - **Canlı yayımlar** - canlı yayımı əvvəldən yazın və ya premyeranı gözləyib sonra yükləyin
