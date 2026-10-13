@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.14] - 2026-10-14
 ### Added
 - Search settings, from the search button at the top of More. A plain field with clear, and under it every setting whose name, line or screen holds all the words typed, best match first, each word marked in yellow that reads the same on every theme and accent. A match opens the screen it is on; Language and Getting started open where they are, as on More. Case and accents are ignored, and words are searched in the language the app is shown in.
 
