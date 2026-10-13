@@ -51,6 +51,7 @@
     <string name="search_back">Back</string>
     <string name="search_more">More</string>
     <string name="search_add_link">Add another link</string>
+    <string name="search_link_already_added">Already in the list</string>
     <string name="search_clear">Clear</string>
     <string name="search_clear_results">Clear results</string>
     <string name="search_clear_history">Clear search history</string>
@@ -65,6 +66,7 @@
     <string name="search_remove">Remove</string>
     <string name="search_all">Search all</string>
     <string name="search_remove_confirm_body">Remove from search history?</string>
+    <string name="search_remove_from_list_body">Remove this link from the list?</string>
     <string name="search_entry_copied">Copied to clipboard</string>
     <string name="search_edit_before">Edit before searching</string>
     <string name="search_paste_and_fetch">Paste and fetch</string>
