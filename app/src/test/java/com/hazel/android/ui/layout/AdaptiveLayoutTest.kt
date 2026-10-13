@@ -113,7 +113,7 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
     private val shots = LayoutShots()
 
     @get:Rule
-    val rules: RuleChain = RuleChain.outerRule(device).around(compose).around(shots)
+    val rules: RuleChain = RuleChain.outerRule(SettleGuard()).around(device).around(compose).around(shots)
 
     private fun string(id: Int) =
         ApplicationProvider.getApplicationContext<android.content.Context>().getString(id)
