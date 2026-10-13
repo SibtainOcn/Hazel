@@ -60,7 +60,9 @@
     var id = decodeURIComponent(location.hash.slice(1));
     var el = id && document.getElementById(id);
     if (!el) return;
-    if (el.classList.contains('reveal')) el.classList.add('in');
+    var holder = el.closest('.reveal');
+    if (holder) holder.classList.add('in');
+    if (el.tagName === 'DETAILS') el.open = true;
     el.querySelectorAll('.reveal').forEach(function (r) { r.classList.add('in'); });
   }
   revealTarget(); window.addEventListener('hashchange', revealTarget);
@@ -370,5 +372,199 @@
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) show(index + (dx < 0 ? 1 : -1));
     else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) close();
     sx = sy = null;
+  });
+})();
+
+// ── Site search: the box in the header, or "/" and Ctrl+K anywhere. It looks through the
+//    guide, the FAQ, the home page and the release notes, in search.json, which the build
+//    writes from the pages. The file is fetched the first time search opens. ──
+(function () {
+  var openers = document.querySelectorAll('[data-search]');
+  if (!openers.length) return;
+
+  var icon = function (d) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">' + d + '</svg>';
+  };
+  var box = document.createElement('div');
+  box.className = 'finder';
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+  box.setAttribute('aria-label', 'Search the site');
+  box.hidden = true;
+  box.innerHTML =
+    '<div class="f-panel">' +
+      '<div class="f-field">' + icon('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>') +
+        '<input type="search" placeholder="Search the guide, FAQ and more" autocomplete="off" spellcheck="false" enterkeyhint="go"' +
+        ' role="combobox" aria-label="Search the site" aria-expanded="false" aria-controls="f-results" aria-autocomplete="list">' +
+        '<button class="f-close icon-btn" type="button" aria-label="Close">' + icon('<path d="M6 6l12 12M18 6 6 18"/>') + '</button>' +
+      '</div>' +
+      '<ul class="f-results" id="f-results" role="listbox" aria-label="Results"></ul>' +
+      '<p class="f-note" aria-live="polite"></p>' +
+    '</div>';
+  document.body.appendChild(box);
+
+  var input = box.querySelector('input');
+  var closeBtn = box.querySelector('.f-close');
+  var list = box.querySelector('.f-results');
+  var note = box.querySelector('.f-note');
+  var entries = null, loading = null, active = -1, lastFocus = null;
+
+  // Fetched once. A failed fetch is not kept, so opening search again tries again.
+  function load() {
+    if (entries) return Promise.resolve(entries);
+    if (!loading) {
+      loading = fetch('search.json').then(function (r) {
+        if (!r.ok) throw new Error('search.json ' + r.status);
+        return r.json();
+      }).then(function (data) {
+        entries = data.map(function (e) { return { e: e, t: e.t.toLowerCase(), x: e.x.toLowerCase() }; });
+        return entries;
+      }, function (err) { loading = null; throw err; });
+    }
+    return loading;
+  }
+
+  function wordStart(text, at) { return at === 0 || /[^a-z0-9]/.test(text.charAt(at - 1)); }
+
+  // Every word typed must appear. Words in the title, and the start of words, count for more.
+  function find(terms, phrase) {
+    var hits = [];
+    entries.forEach(function (item, order) {
+      var score = 0;
+      for (var i = 0; i < terms.length; i++) {
+        var term = terms[i], at = item.t.indexOf(term);
+        if (at !== -1) { score += wordStart(item.t, at) ? 12 : 6; continue; }
+        at = item.x.indexOf(term);
+        if (at === -1) return;
+        score += wordStart(item.x, at) ? 3 : 1;
+      }
+      if (terms.length > 1 && item.t.indexOf(phrase) !== -1) score += 20;
+      hits.push({ item: item, score: score, order: order });
+    });
+    hits.sort(function (a, b) { return b.score - a.score || a.order - b.order; });
+    return hits.slice(0, 8);
+  }
+
+  // Text with each typed word marked, built as nodes so nothing in it is read as markup.
+  function marked(className, text, terms) {
+    var el = document.createElement('span');
+    el.className = className;
+    var pattern = new RegExp('(' + terms.map(function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|') + ')', 'gi');
+    text.split(pattern).forEach(function (part, i) {
+      if (!part) return;
+      if (i % 2) { var m = document.createElement('mark'); m.textContent = part; el.appendChild(m); }
+      else el.appendChild(document.createTextNode(part));
+    });
+    return el;
+  }
+
+  // The text around the first word found in it.
+  function snippet(item, terms) {
+    var at = -1;
+    terms.forEach(function (t) { var i = item.x.indexOf(t); if (i !== -1 && (at === -1 || i < at)) at = i; });
+    var text = item.e.x;
+    if (at < 70) return text.slice(0, 170);
+    var start = text.lastIndexOf(' ', at - 50);
+    return '...' + text.slice(start + 1, start + 171);
+  }
+
+  function select(i) {
+    var items = list.children;
+    if (!items.length) { active = -1; input.removeAttribute('aria-activedescendant'); return; }
+    active = (i + items.length) % items.length;
+    Array.prototype.forEach.call(items, function (li, n) { li.setAttribute('aria-selected', n === active ? 'true' : 'false'); });
+    input.setAttribute('aria-activedescendant', items[active].id);
+    items[active].scrollIntoView({ block: 'nearest' });
+  }
+
+  function render() {
+    var phrase = input.value.trim().toLowerCase().replace(/\s+/g, ' ');
+    list.textContent = '';
+    if (!entries) return;
+    var terms = phrase ? phrase.split(' ').filter(function (t, i, all) { return all.indexOf(t) === i; }) : [];
+    var hits = terms.length ? find(terms, phrase) : [];
+    hits.forEach(function (hit, n) {
+      var e = hit.item.e;
+      var li = document.createElement('li');
+      li.id = 'f-opt-' + n;
+      li.setAttribute('role', 'option');
+      var a = document.createElement('a');
+      a.href = e.u;
+      a.tabIndex = -1;
+      var where = document.createElement('span');
+      where.className = 'f-where';
+      where.textContent = e.s;
+      a.appendChild(where);
+      a.appendChild(marked('f-title', e.t, terms));
+      if (e.x) a.appendChild(marked('f-snip', snippet(hit.item, terms), terms));
+      li.appendChild(a);
+      li.addEventListener('mousemove', function () { if (active !== n) select(n); });
+      list.appendChild(li);
+    });
+    input.setAttribute('aria-expanded', hits.length ? 'true' : 'false');
+    note.textContent = !terms.length ? 'Search the guide, the FAQ and the home page.'
+      : hits.length ? '' : 'Nothing found. Try another word, or ask on GitHub.';
+    select(0);
+  }
+
+  function open() {
+    if (!box.hidden) return;
+    lastFocus = document.activeElement;
+    box.hidden = false;
+    document.documentElement.classList.add('finder-open');
+    requestAnimationFrame(function () { box.classList.add('on'); });
+    input.focus();
+    input.select();
+    if (!entries) note.textContent = 'Loading...';
+    load().then(render, function () {
+      note.textContent = 'Search could not load. Check your connection and try again.';
+    });
+  }
+  function close() {
+    if (box.hidden) return;
+    box.classList.remove('on');
+    document.documentElement.classList.remove('finder-open');
+    box.hidden = true;
+    if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+  }
+
+  // A part of the page already open: only the hash changes, and the same hash again
+  // still opens and shows its part.
+  function page(path) { return path.replace(/index\.html$/, ''); }
+  function go(a) {
+    close();
+    if (!a.hash || page(a.pathname) !== page(location.pathname)) { location.href = a.href; return; }
+    if (location.hash !== a.hash) { location.hash = a.hash; return; }
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    var el = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+    if (el) el.scrollIntoView();
+  }
+
+  openers.forEach(function (b) { b.addEventListener('click', open); });
+  closeBtn.addEventListener('click', close);
+  box.addEventListener('click', function (e) { if (e.target === box) close(); });
+  input.addEventListener('input', render);
+  list.addEventListener('click', function (e) {
+    var a = e.target.closest('a');
+    // A new tab or window is the browser's to open.
+    if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;
+    e.preventDefault();
+    go(a);
+  });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); select(active + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); select(active - 1); }
+    else if (e.key === 'Enter' && active >= 0) { e.preventDefault(); go(list.children[active].querySelector('a')); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!box.hidden) {
+      if (e.key === 'Escape') { e.preventDefault(); close(); }
+      // Focus moves between the field and the close button while search is open.
+      else if (e.key === 'Tab') { e.preventDefault(); (document.activeElement === input ? closeBtn : input).focus(); }
+      return;
+    }
+    var t = e.target, typing = t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+    if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey) && !e.altKey) { e.preventDefault(); open(); }
+    else if (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); open(); }
   });
 })();
