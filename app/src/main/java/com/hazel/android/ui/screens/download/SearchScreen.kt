@@ -416,6 +416,12 @@ fun SearchScreen(
                             InputChip(
                                 selected = false,
                                 onClick = { queued = queued - entry },
+                                // A tonal chip, with no outline.
+                                border = null,
+                                colors = InputChipDefaults.inputChipColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                ),
+                                shape = CircleShape,
                                 label = {
                                     Text(
                                         entry,
