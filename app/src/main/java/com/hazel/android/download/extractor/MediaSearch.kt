@@ -13,6 +13,9 @@ import java.io.File
  *
  * NewPipe answers in-process for the sites it knows; yt-dlp answers everywhere else, and
  * stands in whenever NewPipe fails or finds nothing.
+ *
+ * Every search runs fresh, so it always follows the current engine and settings. Links read
+ * from a result, a paste or a share are cached separately, by InfoCache.
  */
 object MediaSearch {
 
@@ -27,11 +30,7 @@ object MediaSearch {
     ): List<LinkEntry> = withContext(Dispatchers.IO) {
         val text = query.trim()
         if (text.isEmpty()) return@withContext emptyList()
-        val key = "${source.name}:$count:${text.lowercase()}"
-        recent(key)?.let { return@withContext it }
-        find(text, source, engine, count, cacheDir, fetchMode, forceIpv4).also { found ->
-            if (found.isNotEmpty()) remember(key, found)
-        }
+        find(text, source, engine, count, cacheDir, fetchMode, forceIpv4)
     }
 
     private suspend fun find(
@@ -68,23 +67,5 @@ object MediaSearch {
         }
     }
 
-    private class Stored(val entries: List<LinkEntry>, val at: Long)
-
-    /** Recent searches, so going back to one does not run it again. */
-    private val cache = object : LinkedHashMap<String, Stored>(16, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Stored>) = size > MAX_CACHED
-    }
-
-    @Synchronized
-    private fun recent(key: String): List<LinkEntry>? =
-        cache[key]?.takeIf { System.currentTimeMillis() - it.at < CACHE_TTL_MS }?.entries
-
-    @Synchronized
-    private fun remember(key: String, entries: List<LinkEntry>) {
-        cache[key] = Stored(entries, System.currentTimeMillis())
-    }
-
-    private const val MAX_CACHED = 20
-    private const val CACHE_TTL_MS = 30 * 60 * 1000L
     const val SEARCH_PROCESS_ID = "hazel_search"
 }
