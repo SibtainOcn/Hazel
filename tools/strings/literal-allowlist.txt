@@ -46,3 +46,5 @@ app/src/main/java/com/hazel/android/ui/components/ProcessingTracker.kt:91: Compo
 app/src/main/java/com/hazel/android/ui/screens/more/BackupScreen.kt:43: Toast.makeText shows resource strings passed in, no literal string
 app/src/main/java/com/hazel/android/ui/components/player/InlinePlayer.kt:447: two formatted clock times joined by a slash, no words to translate
 app/src/main/java/com/hazel/android/ui/components/player/InlinePlayer.kt:442: Compose animation label, used by the tooling inspector only
+app/src/main/java/com/hazel/android/ui/screens/more/ProxyScreen.kt:127: supportingText is a resource string shown only on an error, no literal
+app/src/main/java/com/hazel/android/ui/screens/more/ProxyScreen.kt:141: supportingText is a resource string shown only on an error, no literal

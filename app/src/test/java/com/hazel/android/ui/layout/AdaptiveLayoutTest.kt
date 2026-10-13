@@ -38,7 +38,9 @@ import com.hazel.android.ui.screens.download.GettingStartedDialog
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.ui.screens.download.NoResultsDialog
 import com.hazel.android.ui.screens.download.RemoveEntryDialog
+import com.hazel.android.ui.screens.more.AdvancedScreen
 import com.hazel.android.ui.screens.more.AppearanceScreen
+import com.hazel.android.ui.screens.more.ProxyScreen
 import com.hazel.android.ui.screens.more.LanguageSheet
 import com.hazel.android.ui.screens.more.StorageLocationsScreen
 import com.hazel.android.ui.screens.queue.FailedCard
@@ -262,6 +264,18 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
     fun linkOptionsDialog() {
         show { LinkOptionsDialog(links = listOf(URL), onFeedback = {}, onDismiss = {}) }
         checkAndCapture("link_options")
+    }
+
+    @Test
+    fun advancedScreen() {
+        show { AdvancedScreen(onBack = {}) }
+        checkAndCapture("advanced")
+    }
+
+    @Test
+    fun proxyScreen() {
+        show { ProxyScreen(onBack = {}) }
+        checkAndCapture("proxy")
     }
 
     private val failed = FailedDownload(

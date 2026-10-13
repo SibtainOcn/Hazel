@@ -31,6 +31,8 @@ import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.VpnLock
+import com.hazel.android.download.NetworkProxy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,7 +57,7 @@ import kotlinx.coroutines.launch
  * who does not need it.
  */
 @Composable
-fun AdvancedScreen(onBack: () -> Unit) {
+fun AdvancedScreen(onBack: () -> Unit, onOpenProxy: () -> Unit = {}) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val settings by remember(context) { SettingsRepository.getAdvancedSettings(context) }
@@ -76,6 +78,27 @@ fun AdvancedScreen(onBack: () -> Unit) {
         description = stringResource(R.string.advanced_description),
         onBack = onBack
     ) {
+        SettingsSection(
+            title = stringResource(R.string.advanced_section_network),
+            rows = listOf<@Composable () -> Unit>(
+                {
+                    val saved = NetworkProxy.parse(settings.proxy)
+                    SplitSwitchSettingRow(
+                        icon = Icons.Filled.VpnLock,
+                        title = stringResource(R.string.advanced_proxy),
+                        summary = saved?.display ?: notSet,
+                        checked = settings.proxyEnabled && saved != null,
+                        // With nothing saved yet there is nothing to turn on, so the switch
+                        // opens the screen where one is set.
+                        onCheckedChange = { on ->
+                            if (saved == null) onOpenProxy() else save { it.copy(proxyEnabled = on) }
+                        },
+                        onOpen = onOpenProxy
+                    )
+                }
+            )
+        )
+
         SettingsSection(
             title = stringResource(R.string.advanced_section_youtube),
             rows = listOf<@Composable () -> Unit>(

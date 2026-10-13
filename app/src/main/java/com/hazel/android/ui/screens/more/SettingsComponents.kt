@@ -3,6 +3,9 @@ package com.hazel.android.ui.screens.more
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,6 +41,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -187,6 +191,35 @@ internal fun ActionSettingRow(
     trailing: (@Composable () -> Unit)? = null
 ) {
     SettingRow(icon = icon, title = title, summary = summary, enabled = enabled, onClick = onClick, trailing = trailing)
+}
+
+/**
+ * A setting with a screen of its own and a quick on or off. The text opens the screen; the
+ * switch, set apart by a thin rule, only turns it on or off.
+ */
+@Composable
+internal fun SplitSwitchSettingRow(
+    icon: ImageVector,
+    title: String,
+    summary: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    onOpen: () -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.weight(1f)) {
+            SettingRow(icon = icon, title = title, summary = summary, enabled = true, onClick = onOpen, valueStyle = true)
+        }
+        VerticalDivider(
+            modifier = Modifier.padding(vertical = 14.dp).fillMaxHeight(),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+    }
 }
 
 @Composable
