@@ -187,11 +187,16 @@ object NetworkProxy {
         "errno 111", "network is unreachable"
     )
 
-    /** Hosts on this device itself, which no proxy could reach. */
+    /**
+     * Hosts on this device itself, which no proxy could reach. Only the addresses written out:
+     * a name that merely starts with "127." is any site's to choose, and would go around the proxy.
+     */
     private fun isLoopback(host: String?): Boolean {
         val name = host?.removeSurrounding("[", "]")?.lowercase() ?: return false
-        return name == "localhost" || name == "::1" || name.startsWith("127.")
+        return name == "localhost" || name == "::1" || LOOPBACK_V4.matches(name)
     }
+
+    private val LOOPBACK_V4 = Regex("""127(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}""")
 
     private class Selector(private val system: ProxySelector?) : ProxySelector() {
         override fun select(uri: URI?): List<Proxy> {

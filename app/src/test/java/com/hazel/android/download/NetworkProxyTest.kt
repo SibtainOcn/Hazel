@@ -235,6 +235,18 @@ class NetworkProxyTest {
     }
 
     @Test
+    fun aSiteNamedLikeALoopbackAddressStillGoesThroughTheProxy() {
+        useProxy("http://10.0.0.2:3128")
+        for (host in listOf("127.example.com", "127.0.0.1.example.com", "127.0.0.256")) {
+            val route = ProxySelector.getDefault().select(URI("https://$host/thumb.jpg"))
+            assertEquals(listOf(Proxy.Type.HTTP), route.map { it.type() }, host)
+        }
+        assertEquals(listOf(Proxy.NO_PROXY), ProxySelector.getDefault().select(URI("http://127.10.20.30/")))
+        assertEquals(listOf(Proxy.NO_PROXY), ProxySelector.getDefault().select(URI("http://[::1]:8080/")))
+        assertEquals(listOf(Proxy.NO_PROXY), ProxySelector.getDefault().select(URI("http://localhost/")))
+    }
+
+    @Test
     fun withNoProxyTheSystemsChoiceStands() {
         val route = ProxySelector.getDefault().select(URI("https://www.youtube.com/"))
         assertFalse(route.any { it.type() != Proxy.Type.DIRECT }, "nothing set here, so nothing changes")
