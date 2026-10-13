@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Niconico is no longer offered as a place to search. A search set to Niconico goes to YouTube.
 - With Search with set to yt-dlp, a search on YouTube, YouTube Music or SoundCloud that yt-dlp cannot answer, or that finds nothing, is put to NewPipe, as NewPipe searches already fall back to yt-dlp. If neither finds anything, yt-dlp's error is shown as before.
 - Every search runs fresh, so it always uses the engine picked in Search with. Searching the same words again no longer shows the list from up to 30 minutes before. Pasted, shared and Instant links are still remembered as before.
 - An empty home screen shows a faint download mark and one line, "Paste a link or search to get started", in place of the Start with row of Paste link, Search and Downloads. The search bar, the paste button and the bottom bar already do each of those.

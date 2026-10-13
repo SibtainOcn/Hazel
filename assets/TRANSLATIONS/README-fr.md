@@ -89,7 +89,7 @@ Français
 - Sélectionnez différents formats et conteneurs de téléchargement
 
 ### Rechercher et lire
-- **Recherche** - tapez des mots au lieu d'un lien pour chercher sur YouTube, YouTube Music, SoundCloud, Bandcamp, Bilibili, Niconico, PRX ou Rokfin, avec suggestions de recherche facultatives
+- **Recherche** - tapez des mots au lieu d'un lien pour chercher sur YouTube, YouTube Music, SoundCloud, Bandcamp, Bilibili, PRX ou Rokfin, avec suggestions de recherche facultatives
 - **Lire avant de télécharger** - lisez n'importe quel résultat ou lien directement sur sa carte, avec barre de progression, double appui pour avancer, plein écran et choix de la qualité, sur tout site que Hazel sait lire
 - **Découpe** - téléchargez seulement une partie d'une vidéo ou d'une piste, en choisissant la plage sur un aperçu en direct
 - **Directs** - enregistrez depuis le début d'un direct, ou attendez une première puis téléchargez-la

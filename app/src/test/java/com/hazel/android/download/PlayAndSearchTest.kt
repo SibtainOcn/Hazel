@@ -190,7 +190,7 @@ class PlayAndSearchTest {
             assertFalse(MediaSearch.newPipeAfter(SearchSource.BANDCAMP, engine))
         }
         // Only yt-dlp can search these: NewPipe is never asked.
-        listOf(SearchSource.BILIBILI, SearchSource.NICONICO, SearchSource.PRX, SearchSource.ROKFIN).forEach { site ->
+        listOf(SearchSource.BILIBILI, SearchSource.PRX, SearchSource.ROKFIN).forEach { site ->
             listOf(newPipe, ytDlp).forEach { engine ->
                 assertFalse(MediaSearch.newPipeFirst(site, engine), "$site, $engine")
                 assertFalse(MediaSearch.newPipeAfter(site, engine), "$site, $engine")

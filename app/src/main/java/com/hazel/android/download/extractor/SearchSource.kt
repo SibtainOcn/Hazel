@@ -26,7 +26,6 @@ enum class SearchSource(
     SOUNDCLOUD(R.string.search_source_soundcloud, "SoundCloud", "tracks", ytDlpPrefix = "scsearch"),
     BANDCAMP(R.string.search_source_bandcamp, "Bandcamp"),
     BILIBILI(R.string.search_source_bilibili, ytDlpPrefix = "bilisearch"),
-    NICONICO(R.string.search_source_niconico, ytDlpPrefix = "nicosearch"),
     PRX(R.string.search_source_prx, ytDlpPrefix = "prxstories"),
     ROKFIN(R.string.search_source_rokfin, ytDlpPrefix = "rkfnsearch");
 
