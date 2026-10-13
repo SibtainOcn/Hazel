@@ -53,6 +53,7 @@ import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -312,18 +313,21 @@ private fun UsageBar(categories: List<TempCategory>, total: Long) {
         horizontalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         held.forEach { category ->
-            val share by animateFloatAsState(
-                targetValue = (category.bytes.toFloat() / total).coerceAtLeast(0.03f),
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                label = "share_${category.id}"
-            )
-            Box(
-                modifier = Modifier
-                    .weight(share)
-                    .fillMaxHeight()
-                    .clip(CircleShape)
-                    .background(categoryColor(category.id))
-            )
+            // Keyed by category, so clearing one does not hand its animation to the next.
+            key(category.id) {
+                val share by animateFloatAsState(
+                    targetValue = (category.bytes.toFloat() / total).coerceAtLeast(0.03f),
+                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                    label = "share_${category.id}"
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(share)
+                        .fillMaxHeight()
+                        .clip(CircleShape)
+                        .background(categoryColor(category.id))
+                )
+            }
         }
     }
 }
