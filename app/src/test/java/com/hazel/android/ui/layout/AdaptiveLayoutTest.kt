@@ -18,11 +18,8 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
@@ -411,24 +408,6 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
     fun searchSourceSheet() {
         show { SearchSourceSheet(selected = SearchSource.YOUTUBE, onDismiss = {}) }
         checkAndCapture("search_source")
-    }
-
-    @Test
-    fun searchSourceSheetSearching() {
-        show { SearchSourceSheet(selected = SearchSource.YOUTUBE, onDismiss = {}) }
-        compose.onNodeWithContentDescription(string(R.string.search_source_find)).performClick()
-        compose.waitForIdle()
-        compose.onNode(hasSetTextAction()).performTextInput("so")
-        checkAndCapture("search_source_searching")
-    }
-
-    @Test
-    fun searchSourceSheetNoMatch() {
-        show { SearchSourceSheet(selected = SearchSource.YOUTUBE, onDismiss = {}) }
-        compose.onNodeWithContentDescription(string(R.string.search_source_find)).performClick()
-        compose.waitForIdle()
-        compose.onNode(hasSetTextAction()).performTextInput("vimeo")
-        checkAndCapture("search_source_no_match")
     }
 
     @Test

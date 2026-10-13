@@ -45,8 +45,6 @@
     <string name="search_clear_history">Borrar el historial de búsqueda</string>
     <string name="search_under_maintenance">En mantenimiento</string>
     <string name="search_options_title">Opciones de búsqueda</string>
-    <string name="search_source_find">Buscar un sitio</string>
-    <string name="search_source_no_match">Ningún sitio coincide</string>
     <string name="search_web_title">Buscar en la web</string>
     <string name="search_web_beta">Beta</string>
     <string name="search_web_notice">Encuentra vídeos en cualquier sitio que Hazel pueda descargar. Es posible que la reproducción y las descargas no funcionen en todos los sitios.</string>

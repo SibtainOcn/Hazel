@@ -45,8 +45,6 @@
     <string name="search_clear_history">清除搜索记录</string>
     <string name="search_under_maintenance">维护中</string>
     <string name="search_options_title">搜索选项</string>
-    <string name="search_source_find">查找网站</string>
-    <string name="search_source_no_match">没有匹配的网站</string>
     <string name="search_web_title">搜索网络</string>
     <string name="search_web_beta">测试版</string>
     <string name="search_web_notice">在 Hazel 可下载的任意网站上查找视频。部分网站可能无法播放或下载。</string>

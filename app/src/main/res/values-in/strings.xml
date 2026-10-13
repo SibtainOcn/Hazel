@@ -45,8 +45,6 @@
     <string name="search_clear_history">Hapus riwayat pencarian</string>
     <string name="search_under_maintenance">Sedang dalam pemeliharaan</string>
     <string name="search_options_title">Opsi pencarian</string>
-    <string name="search_source_find">Cari situs</string>
-    <string name="search_source_no_match">Tidak ada situs yang cocok</string>
     <string name="search_web_title">Cari di web</string>
     <string name="search_web_beta">Beta</string>
     <string name="search_web_notice">Menemukan video di situs mana pun yang bisa diunduh Hazel. Pemutaran dan unduhan mungkin tidak berfungsi di semua situs.</string>
