@@ -226,8 +226,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">SponsorBlock フィルタの選択</string>
-    <string name="options_sponsorblock_ok">OK</string>
-    <string name="options_sponsorblock_cancel">キャンセル</string>
     <string name="options_chapters_title">チャプター</string>
     <string name="options_chapters_in_videos">動画内にチャプターを含める</string>
     <string name="options_chapters_split">チャプターごとに分割</string>

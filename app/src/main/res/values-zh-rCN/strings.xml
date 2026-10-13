@@ -226,8 +226,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">选择 SponsorBlock 过滤</string>
-    <string name="options_sponsorblock_ok">确定</string>
-    <string name="options_sponsorblock_cancel">取消</string>
     <string name="options_chapters_title">章节</string>
     <string name="options_chapters_in_videos">视频中的章节</string>
     <string name="options_chapters_split">按章节分割</string>

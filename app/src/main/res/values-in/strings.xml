@@ -226,8 +226,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Pilih penyaringan SponsorBlock</string>
-    <string name="options_sponsorblock_ok">OK</string>
-    <string name="options_sponsorblock_cancel">Batal</string>
     <string name="options_chapters_title">Bab</string>
     <string name="options_chapters_in_videos">Bab dalam video</string>
     <string name="options_chapters_split">Bagi berdasarkan bab</string>

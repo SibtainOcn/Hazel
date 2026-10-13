@@ -230,8 +230,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">SponsorBlock फ़िल्टर चुनें</string>
-    <string name="options_sponsorblock_ok">ठीक है</string>
-    <string name="options_sponsorblock_cancel">रद्द करें</string>
     <string name="options_chapters_title">अध्याय</string>
     <string name="options_chapters_in_videos">वीडियो में अध्याय</string>
     <string name="options_chapters_split">अध्यायों में बाँटें</string>

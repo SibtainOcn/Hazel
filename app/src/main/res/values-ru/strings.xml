@@ -238,8 +238,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Фильтрация SponsorBlock</string>
-    <string name="options_sponsorblock_ok">ОК</string>
-    <string name="options_sponsorblock_cancel">Отмена</string>
     <string name="options_chapters_title">Разделы</string>
     <string name="options_chapters_in_videos">Разделы в видео</string>
     <string name="options_chapters_split">Разделить по разделам</string>

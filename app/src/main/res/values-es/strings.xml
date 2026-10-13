@@ -234,8 +234,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Elige el filtrado de SponsorBlock</string>
-    <string name="options_sponsorblock_ok">Aceptar</string>
-    <string name="options_sponsorblock_cancel">Cancelar</string>
     <string name="options_chapters_title">Capítulos</string>
     <string name="options_chapters_in_videos">Capítulos en los vídeos</string>
     <string name="options_chapters_split">Dividir por capítulos</string>
