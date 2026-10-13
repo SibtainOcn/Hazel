@@ -519,7 +519,7 @@ fun DownloadScreen(
                             end = 20.dp,
                             // Room for the action that floats over the list, on the same terms as
                             // the action itself.
-                            bottom = 96.dp
+                            bottom = LIST_BOTTOM_ROOM
                         )
                     ) {
                         gridItems(orderedResults, columns, SKELETON_SPACING, key = { it.url }) { info ->
@@ -669,12 +669,15 @@ fun DownloadScreen(
                         if (!incognito && state.results.isEmpty() && !state.isFetching) {
                             item(key = "empty") {
                                 // Fills the space under the search bar, so the line sits in
-                                // its middle rather than near the top.
+                                // its middle rather than near the top. The list keeps room at
+                                // its foot for the floating action, which this height leaves
+                                // out; the same room above puts the line in the middle of the
+                                // whole space between the search bar and the bottom bar.
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .fillParentMaxHeight()
-                                        .padding(horizontal = 32.dp),
+                                        .padding(top = LIST_BOTTOM_ROOM, start = 32.dp, end = 32.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
@@ -1371,6 +1374,9 @@ private fun MediaCard(
 
 /** Gap between skeleton cards, the same as between the cards they stand in for. */
 private val SKELETON_SPACING = 20.dp
+
+/** Room at the foot of the results list for the action that floats over it. */
+private val LIST_BOTTOM_ROOM = 96.dp
 
 /** A row of [columns] skeleton cards, the width the real ones will take. */
 @Composable
