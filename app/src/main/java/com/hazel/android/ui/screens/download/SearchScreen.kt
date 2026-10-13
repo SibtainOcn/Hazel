@@ -29,7 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -43,6 +43,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,6 +51,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -321,7 +323,7 @@ fun SearchScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.search_back))
+                    Icon(Icons.AutoMirrored.Filled.ArrowBackIos, contentDescription = stringResource(R.string.search_back))
                 }
 
                 TextField(
@@ -342,29 +344,28 @@ fun SearchScreen(
                     keyboardActions = KeyboardActions(onSearch = { submit() })
                 )
 
-                // With nothing typed there is nothing to add or clear, so the space those
-                // controls occupy carries the search options instead. Someone half way
-                // through typing a link is not after them.
-                if (text.isBlank()) {
-                    IconButton(onClick = { menuOpen = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.search_more))
-                    }
-                }
-
-                // Parks the typed link so another can be entered.
-                if (text.isNotBlank() && !typingWords) {
-                    IconButton(onClick = { queueCurrent() }) {
-                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.search_add_link))
-                    }
-                }
-                if (text.isNotBlank() || queued.isNotEmpty()) {
-                    IconButton(
-                        onClick = {
-                            text = ""
-                            queued = emptyList()
+                // The field's actions, packed close: add and clear appear as they apply,
+                // each just before the 3-dot, which keeps its place at the end throughout.
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides FIELD_ACTION_SIZE) {
+                    // Parks the typed link so another can be entered.
+                    if (text.isNotBlank() && !typingWords) {
+                        IconButton(onClick = { queueCurrent() }, modifier = Modifier.size(FIELD_ACTION_SIZE)) {
+                            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.search_add_link))
                         }
-                    ) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_clear))
+                    }
+                    if (text.isNotBlank() || queued.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                text = ""
+                                queued = emptyList()
+                            },
+                            modifier = Modifier.size(FIELD_ACTION_SIZE)
+                        ) {
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_clear))
+                        }
+                    }
+                    IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(FIELD_ACTION_SIZE)) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.search_more))
                     }
                 }
             }
@@ -647,6 +648,9 @@ internal fun isLinks(text: String): Boolean {
 private val BARE_ADDRESS = Regex("""^[\p{L}\p{N}-]+(\.[\p{L}\p{N}-]+)*\.[\p{L}]{2,}(:\d+)?([/?#]\S*)?$""")
 
 private const val SUGGESTION_DELAY_MS = 250L
+
+/** The field's add, clear and 3-dot buttons: closer together than the usual 48 dp. */
+private val FIELD_ACTION_SIZE = 40.dp
 
 /** Any run of whitespace, which is what separates one pasted link from the next. */
 private val WHITESPACE = Regex("""\s+""")
