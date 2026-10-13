@@ -48,7 +48,6 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Videocam
@@ -88,6 +87,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -216,7 +216,7 @@ fun HistoryScreen() {
             }
             Box {
                 IconButton(onClick = { menuOpen = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.history_menu_action))
+                    Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.history_menu_action))
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
@@ -671,7 +671,7 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, actions: EntryAct
             Box(modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
                 IconButton(onClick = { menuOpen = true }) {
                     Icon(
-                        Icons.Filled.MoreVert,
+                        painterResource(R.drawable.ic_more_vert),
                         contentDescription = stringResource(R.string.history_card_options),
                         tint = Color.White
                     )
