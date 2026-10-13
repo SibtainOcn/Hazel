@@ -22,6 +22,7 @@
           <li><a href="#signin">Sites that need a sign-in</a></li>
           <li><a href="#updates">Keeping Hazel working</a></li>
           <li><a href="#privacy">Incognito</a></li>
+          <li><a href="#proxy">Use a proxy</a></li>
           <li><a href="#convert">Convert to audio</a></li>
           <li><a href="#backup">Backup and tidying up</a></li>
         </ol>
@@ -42,6 +43,7 @@
             <option value="signin">Sites that need a sign-in</option>
             <option value="updates">Keeping Hazel working</option>
             <option value="privacy">Incognito</option>
+            <option value="proxy">Use a proxy</option>
             <option value="convert">Convert to audio</option>
             <option value="backup">Backup and tidying up</option>
           </select>
@@ -201,14 +203,30 @@
           <p>Tap the ghost at the top right of the home screen. While it's on, downloads aren't added to your library and links and searches aren't remembered. The files themselves still save as usual.</p>
         </section>
 
-        <section id="convert" class="reveal">
+        <section id="proxy" class="reveal">
           <div class="eyebrow num">12</div>
+          <h2>Use a proxy</h2>
+          <p>A proxy sends Hazel's connections through another server first. It helps when a network blocks a site, when a site limits your address, or when you want sites to see the proxy's address instead of yours. Most people never need one.</p>
+          <ol class="steps-list">
+            <li><div>Open <span class="path"><span>More</span><span>Advanced</span></span> and tap <b>Proxy</b>.</div></li>
+            <li><div>Pick the type your proxy uses, then enter its host and port. Add a user name and password only if the proxy asks for them.</div></li>
+            <li><div>Tap <b>Save</b>. The proxy is on straight away, with no restart.</div></li>
+          </ol>
+          <p>Use the switch beside <b>Proxy</b> to turn it off and on again without typing it again. Everything goes through it: reading links, downloads, search, playing, thumbnails, sign-in pages and update checks. If the proxy can't be reached, Hazel says so instead of connecting without it.</p>
+          <div class="tip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+            <p><b>Which type?</b> The one your proxy provider gives you. For SOCKS, choose SOCKS5h, which also keeps the names of the sites you visit away from your network. Cutting part of a video and some live streams can't go through SOCKS; use an HTTP proxy for those.</p>
+          </div>
+        </section>
+
+        <section id="convert" class="reveal">
+          <div class="eyebrow num">13</div>
           <h2>Convert to audio</h2>
           <p>Already have a video on your phone and only want the sound? Open <span class="path"><span>More</span><span>Offline convert video to audio</span></span>, pick the video, choose a format, and save. It works without a connection, and nothing leaves your phone.</p>
         </section>
 
         <section id="backup" class="reveal">
-          <div class="eyebrow num">13</div>
+          <div class="eyebrow num">14</div>
           <h2>Backup and tidying up</h2>
           <h3>Backup</h3>
           <p><span class="path"><span>More</span><span>Backup</span></span> saves your settings, download history, queue, sign-ins and searches to a file. Restore it on a new phone and everything merges in, with queued downloads waiting paused.</p>

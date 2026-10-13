@@ -6,7 +6,8 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.okhttp.OkHttpDataSource
+import com.hazel.android.download.NetworkProxy.throughProxy
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.dash.DashMediaSource
@@ -38,6 +39,13 @@ object PlayerFactory {
             .build()
     }
 
+    /**
+     * One client for every stream, so connections are reused between the video and its
+     * audio. It goes through the proxy like the rest of the app, and answers the proxy's
+     * request for a password, which Android's own HTTP stack does not pass on.
+     */
+    private val http by lazy { okhttp3.OkHttpClient.Builder().throughProxy().build() }
+
     fun sourceFor(stream: PlayableStream): MediaSource {
         val main = source(stream.url, stream.headers, stream.isHls, stream.isDash)
         val audio = stream.audioUrl?.let { source(it, stream.audioHeaders, isHls = false, isDash = false) }
@@ -46,8 +54,7 @@ object PlayerFactory {
 
     private fun source(url: String, headers: Map<String, String>, isHls: Boolean, isDash: Boolean): MediaSource {
         val agent = headers.entries.firstOrNull { it.key.equals("User-Agent", ignoreCase = true) }?.value
-        val http = DefaultHttpDataSource.Factory()
-            .setAllowCrossProtocolRedirects(true)
+        val http = OkHttpDataSource.Factory(http)
             .setUserAgent(agent ?: BROWSER_USER_AGENT)
             .setDefaultRequestProperties(headers.filterKeys { !it.equals("User-Agent", ignoreCase = true) })
         val item = MediaItem.fromUri(url)

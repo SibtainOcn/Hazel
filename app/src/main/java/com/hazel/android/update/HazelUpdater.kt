@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import okhttp3.Call
+import com.hazel.android.download.NetworkProxy.throughProxy
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -67,6 +68,7 @@ object HazelUpdater {
     }
 
     private val client = OkHttpClient.Builder()
+        .throughProxy()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .build()

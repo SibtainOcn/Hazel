@@ -142,7 +142,7 @@ fun AppNavigation(
     val currentRoute = navBackStackEntry?.destination?.route
     val isSubScreen = currentRoute in listOf(
         "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "sponsor", "software_update", "hazel_update", "ytdlp_update",
-        "processing", "advanced"
+        "processing", "advanced", "proxy"
     )
 
     val downloadViewModel: com.hazel.android.download.DownloadViewModel =
@@ -400,7 +400,13 @@ fun AppNavigation(
                 ProcessingScreen(onBack = { navController.popBackStack() })
             }
             composable("advanced") {
-                AdvancedScreen(onBack = { navController.popBackStack() })
+                AdvancedScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenProxy = { navController.navigate("proxy") }
+                )
+            }
+            composable("proxy") {
+                com.hazel.android.ui.screens.more.ProxyScreen(onBack = { navController.popBackStack() })
             }
             composable("backup") {
                 BackupScreen(onBack = { navController.popBackStack() })

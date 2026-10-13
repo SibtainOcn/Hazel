@@ -185,6 +185,8 @@ object SettingsRepository {
     private val ADV_SLEEP_REQUESTS = intPreferencesKey("adv_sleep_requests")
     private val ADV_IMPERSONATE = stringPreferencesKey("adv_impersonate")
     private val ADV_IMPERSONATE_AVAILABLE = stringPreferencesKey("adv_impersonate_available")
+    private val ADV_PROXY = stringPreferencesKey("adv_proxy")
+    private val ADV_PROXY_ENABLED = booleanPreferencesKey("adv_proxy_enabled")
 
     fun getAdvancedSettings(context: Context): Flow<com.hazel.android.download.AdvancedSettings> =
         context.dataStore.data.map { prefs ->
@@ -200,7 +202,9 @@ object SettingsRepository {
                 sleepRequestsSeconds = prefs[ADV_SLEEP_REQUESTS] ?: 0,
                 impersonate = prefs[ADV_IMPERSONATE].orEmpty(),
                 impersonateAvailable = prefs[ADV_IMPERSONATE_AVAILABLE].orEmpty().split(',')
-                    .map { it.trim() }.filter { it.isNotBlank() }
+                    .map { it.trim() }.filter { it.isNotBlank() },
+                proxy = prefs[ADV_PROXY].orEmpty(),
+                proxyEnabled = prefs[ADV_PROXY_ENABLED] ?: false
             )
         }
 
@@ -217,6 +221,8 @@ object SettingsRepository {
             prefs[ADV_SLEEP_REQUESTS] = settings.sleepRequestsSeconds
             prefs[ADV_IMPERSONATE] = settings.impersonate
             prefs[ADV_IMPERSONATE_AVAILABLE] = settings.impersonateAvailable.joinToString(",")
+            prefs[ADV_PROXY] = settings.proxy
+            prefs[ADV_PROXY_ENABLED] = settings.proxyEnabled
         }
         // In force at once, rather than when the stored value next comes round.
         com.hazel.android.download.AdvancedSettingsStore.current = settings

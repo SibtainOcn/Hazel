@@ -1,5 +1,6 @@
 package com.hazel.android.download.extractor
 
+import com.hazel.android.download.NetworkProxy.throughProxy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -18,6 +19,7 @@ object SearchSuggestions {
 
     private val client by lazy {
         OkHttpClient.Builder()
+            .throughProxy()
             .connectTimeout(4, TimeUnit.SECONDS)
             .readTimeout(4, TimeUnit.SECONDS)
             .build()

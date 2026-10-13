@@ -783,4 +783,21 @@
     <plurals name="cookies_count">
         <item quantity="other">%d cookie</item>
     </plurals>
+    <string name="advanced_section_network">Jaringan</string>
+    <string name="advanced_proxy">Proxy</string>
+    <string name="proxy_error_unreachable">Tidak dapat terhubung melalui proxy yang diatur di Lanjutan. Pastikan proxy berjalan dan alamatnya benar.</string>
+    <string name="proxy_error_ffmpeg_socks">Memotong bagian video dan beberapa siaran langsung tidak bisa melalui proxy SOCKS. Gunakan proxy HTTP untuk ini.</string>
+    <string name="cookies_proxy_unavailable">WebView perangkat ini tidak dapat memakai proxy, jadi halaman masuk tidak bisa dibuka selama proxy diatur.</string>
+    <string name="advanced_proxy_hint">Semua koneksi melewati proxy ini.</string>
+    <string name="proxy_section_server">Server</string>
+    <string name="proxy_section_login">Login (opsional)</string>
+    <string name="proxy_host">Host</string>
+    <string name="proxy_port">Port</string>
+    <string name="proxy_user">Nama pengguna</string>
+    <string name="proxy_password">Sandi</string>
+    <string name="proxy_show_password">Tampilkan sandi</string>
+    <string name="proxy_hide_password">Sembunyikan sandi</string>
+    <string name="proxy_remove">Hapus proxy</string>
+    <string name="proxy_host_invalid">Masukkan nama host atau alamat IP</string>
+    <string name="proxy_port_invalid">Masukkan port 1 sampai 65535</string>
 </resources>

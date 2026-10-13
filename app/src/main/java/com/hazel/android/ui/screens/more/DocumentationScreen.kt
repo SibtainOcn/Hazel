@@ -105,6 +105,17 @@ private const val SITE = "https://sibtainocn.github.io/Hazel/hazel/"
 private const val REPO = "https://github.com/SibtainOcn/Hazel"
 private const val RAW = "https://raw.githubusercontent.com/SibtainOcn/Hazel/main"
 
+/** Through the proxy like every other connection, made the first time a page is opened. */
+private val docsClient by lazy {
+    with(com.hazel.android.download.NetworkProxy) {
+        okhttp3.OkHttpClient.Builder()
+            .throughProxy()
+            .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
+    }
+}
+
 /** Files read this session, so opening one again draws at once. */
 private val fetched = java.util.concurrent.ConcurrentHashMap<String, String>()
 
@@ -112,14 +123,8 @@ private val fetched = java.util.concurrent.ConcurrentHashMap<String, String>()
 private suspend fun fetchText(url: String): String? = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
     fetched[url]?.let { return@withContext it }
     runCatching {
-        val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
-        connection.connectTimeout = 10_000
-        connection.readTimeout = 15_000
-        try {
-            if (connection.responseCode != 200) null
-            else connection.inputStream.bufferedReader().use { it.readText() }
-        } finally {
-            connection.disconnect()
+        docsClient.newCall(okhttp3.Request.Builder().url(url).build()).execute().use { response ->
+            if (response.code != 200) null else response.body.string()
         }
     }.getOrNull()?.also { fetched[url] = it }
 }
@@ -271,6 +276,8 @@ fun DocumentationPageScreen(
                         settings.domStorageEnabled = true
                         settings.allowFileAccess = false
                         settings.allowContentAccess = false
+                        // Pages load only through the proxy when one is set.
+                        settings.blockNetworkLoads = !com.hazel.android.download.WebViewProxy.inStep()
                         webViewClient = object : WebViewClient() {
                             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                                 val url = request.url.toString()

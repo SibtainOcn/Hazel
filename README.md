@@ -109,6 +109,7 @@ English
 
 ### Privacy
 - **Incognito** - downloads are not added to your library and links are not remembered
+- **Proxy** - send every connection through an HTTP, HTTPS, SOCKS5 or SOCKS5h proxy, with a switch to turn it off
 - No accounts, no analytics, nothing sent anywhere (search suggestions, off by default, send what you type to Google)
 
 ### Settings & Customisation

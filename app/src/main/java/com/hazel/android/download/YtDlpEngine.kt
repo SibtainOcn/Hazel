@@ -4,6 +4,7 @@ import android.util.Log
 import com.hazel.android.HazelApp
 import com.hazel.android.update.YtDlpUpdater
 import com.yausername.youtubedl_android.YoutubeDL
+import com.yausername.youtubedl_android.YoutubeDLException
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import com.yausername.youtubedl_android.YoutubeDLResponse
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -36,6 +37,19 @@ object YtDlpEngine {
         request: YoutubeDLRequest,
         processId: String? = null,
         callback: ((Float, Long, String) -> Unit)? = null
+    ): YoutubeDLResponse = try {
+        executeOnce(request, processId, callback)
+    } catch (e: YoutubeDLException) {
+        // A proxy that is down, or one ffmpeg cannot use, is said in the user's words as the
+        // last error line, which is the one a failed download's card shows.
+        val hint = NetworkProxy.hintFor(e.message) ?: throw e
+        throw YoutubeDLException("${e.message}\nERROR: ${HazelApp.instance.getString(hint)}", e)
+    }
+
+    private fun executeOnce(
+        request: YoutubeDLRequest,
+        processId: String?,
+        callback: ((Float, Long, String) -> Unit)?
     ): YoutubeDLResponse = try {
         shared { YoutubeDL.getInstance().execute(request, processId, callback) }
     } catch (e: YoutubeDL.CanceledException) {

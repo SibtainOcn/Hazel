@@ -793,4 +793,21 @@
         <item quantity="one">%d कुकी</item>
         <item quantity="other">%d कुकीज़</item>
     </plurals>
+    <string name="advanced_section_network">नेटवर्क</string>
+    <string name="advanced_proxy">प्रॉक्सी</string>
+    <string name="proxy_error_unreachable">Advanced में सेट किए प्रॉक्सी से कनेक्ट नहीं हो सका। देखें कि वह चल रहा है और पता सही है।</string>
+    <string name="proxy_error_ffmpeg_socks">किसी हिस्से को काटना और कुछ लाइव स्ट्रीम SOCKS प्रॉक्सी से नहीं चल सकते। इनके लिए HTTP प्रॉक्सी इस्तेमाल करें।</string>
+    <string name="cookies_proxy_unavailable">इस डिवाइस का वेब व्यू प्रॉक्सी इस्तेमाल नहीं कर सकता, इसलिए प्रॉक्सी सेट रहने तक साइन-इन पेज नहीं खुलेगा।</string>
+    <string name="advanced_proxy_hint">सभी कनेक्शन इसी प्रॉक्सी से जाते हैं।</string>
+    <string name="proxy_section_server">सर्वर</string>
+    <string name="proxy_section_login">लॉगिन (वैकल्पिक)</string>
+    <string name="proxy_host">होस्ट</string>
+    <string name="proxy_port">पोर्ट</string>
+    <string name="proxy_user">यूज़र नेम</string>
+    <string name="proxy_password">पासवर्ड</string>
+    <string name="proxy_show_password">पासवर्ड दिखाएं</string>
+    <string name="proxy_hide_password">पासवर्ड छिपाएं</string>
+    <string name="proxy_remove">प्रॉक्सी हटाएं</string>
+    <string name="proxy_host_invalid">होस्ट नेम या IP पता डालें</string>
+    <string name="proxy_port_invalid">1 से 65535 के बीच पोर्ट डालें</string>
 </resources>

@@ -13,6 +13,9 @@ import java.util.Locale
  * Nothing has to remember to clear the cache when one of these changes, and changing a
  * setting back finds the earlier reads valid again for as long as they are kept.
  *
+ * The proxy goes in too: reads made from another address can differ, and YouTube's stream
+ * addresses only work from the address that read them.
+ *
  * Only what changes the answer goes in. Timeouts, retries, request pacing and certificate
  * checks change how long a read takes, not what it finds, so they leave reads standing. The
  * sign-in is not here either: every change to the saved sign-ins clears the cache outright,
@@ -28,8 +31,11 @@ object ReadProfile {
     var incognito: Boolean = false
 
     /** The stamp a read of [url] made now would carry. */
-    fun stampFor(url: String, settings: AdvancedSettings = AdvancedSettingsStore.current): String {
+    fun stampFor(url: String, settings: AdvancedSettings = AdvancedSettingsStore.ready()): String {
         val parts = buildList {
+            // Another exit address can mean other formats, another region's catalogue, and
+            // YouTube binds its stream addresses to the address that read them.
+            NetworkProxy.parse(settings.activeProxy)?.let { add("proxy=${it.scheme}://${it.host}:${it.port}") }
             settings.impersonateTarget()?.let { add("imp=$it") }
             // The YouTube arguments go only to YouTube, so changing them leaves every other
             // site's reads alone.

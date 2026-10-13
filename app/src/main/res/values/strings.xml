@@ -852,4 +852,21 @@
     <string name="guide_step_share_title">Share to Hazel</string>
     <string name="guide_step_share_sheet">Share a link to Hazel from any app, then download now or choose every option.</string>
     <string name="instant_closing">Closing in %1$d s</string>
+    <string name="advanced_section_network">Network</string>
+    <string name="advanced_proxy">Proxy</string>
+    <string name="proxy_error_unreachable">Could not connect through the proxy set in Advanced. Check that it is running and its address is right.</string>
+    <string name="proxy_error_ffmpeg_socks">Cutting a part, and some live streams, can\'t go through a SOCKS proxy. Use an HTTP proxy for these.</string>
+    <string name="cookies_proxy_unavailable">This device\'s web view can\'t use the proxy, so the sign-in page can\'t open while one is set.</string>
+    <string name="advanced_proxy_hint">All connections go through this proxy.</string>
+    <string name="proxy_section_server">Server</string>
+    <string name="proxy_section_login">Login (optional)</string>
+    <string name="proxy_host">Host</string>
+    <string name="proxy_port">Port</string>
+    <string name="proxy_user">User name</string>
+    <string name="proxy_password">Password</string>
+    <string name="proxy_show_password">Show password</string>
+    <string name="proxy_hide_password">Hide password</string>
+    <string name="proxy_remove">Remove proxy</string>
+    <string name="proxy_host_invalid">Enter a host name or IP address</string>
+    <string name="proxy_port_invalid">Enter a port from 1 to 65535</string>
 </resources>

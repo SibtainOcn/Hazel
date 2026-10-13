@@ -45,8 +45,18 @@ data class AdvancedSettings(
      * was asked. yt-dlp stops with an error when asked for one it cannot, so [impersonate]
      * is only passed when it is in this list.
      */
-    val impersonateAvailable: List<String> = emptyList()
+    val impersonateAvailable: List<String> = emptyList(),
+    /**
+     * The saved proxy, as `scheme://[user:password@]host:port`. Kept while the proxy is
+     * switched off, so turning it back on needs nothing typed again. See [NetworkProxy].
+     */
+    val proxy: String = "",
+    /** Whether connections go through [proxy]. */
+    val proxyEnabled: Boolean = false
 ) {
+    /** The proxy in force: the saved one while it is switched on, otherwise blank. */
+    val activeProxy: String get() = if (proxyEnabled) proxy else ""
+
     /** The `--impersonate` value to pass, or null when none is set or it cannot be used. */
     fun impersonateTarget(): String? =
         impersonate.trim().lowercase().takeIf { it.isNotEmpty() && it in impersonateAvailable }
@@ -234,8 +244,9 @@ data class AdvancedSettings(
 fun YoutubeDLRequest.applyAdvanced(
     url: String,
     signedIn: Boolean = false,
-    settings: AdvancedSettings = AdvancedSettingsStore.current
+    settings: AdvancedSettings = AdvancedSettingsStore.ready()
 ) {
+    NetworkProxy.forEngine(settings)?.let { addOption("--proxy", it) }
     if (settings.noCheckCertificates) addOption("--no-check-certificates")
     if (settings.sleepRequestsSeconds > 0) {
         addOption("--sleep-requests", settings.sleepRequestsSeconds.toString())
@@ -279,5 +290,31 @@ fun YoutubeDLRequest.applyExtraDownloadArguments(settings: AdvancedSettings = Ad
 object AdvancedSettingsStore {
     @Volatile
     var current: AdvancedSettings = AdvancedSettings()
-        internal set
+        internal set(value) {
+            field = value
+            loaded = true
+        }
+
+    @Volatile
+    private var loaded = false
+
+    /** Reads the stored settings. Set by the app as it starts. */
+    @Volatile
+    internal var loader: (() -> AdvancedSettings)? = null
+
+    /**
+     * The settings in force, read from storage first if that has not happened yet. For a
+     * caller that must not act on the defaults, such as a connection that has to know
+     * whether to go through the proxy. Waits on storage only until it has been read once.
+     */
+    fun ready(): AdvancedSettings {
+        val load = loader
+        // The main thread is never held up for it: nothing connects from there, and a read
+        // from there only misses the cache once.
+        if (!loaded && load != null && android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
+            val stored = runCatching(load).getOrNull()
+            if (stored != null && !loaded) current = stored
+        }
+        return current
+    }
 }
