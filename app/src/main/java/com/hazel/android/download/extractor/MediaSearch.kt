@@ -1,5 +1,6 @@
 package com.hazel.android.download.extractor
 
+import android.util.Log
 import com.hazel.android.download.FetchMode
 import com.hazel.android.download.MediaProbe
 import com.hazel.android.download.SiteAccess
@@ -47,10 +48,10 @@ object MediaSearch {
         val service = source.newPipeService
         if (service != null && newPipeFirst(source, engine)) {
             val found = NewPipeEngine.search(service, source.newPipeFilter, text, count)
-            if (found.isNotEmpty()) return found
+            if (found.isNotEmpty()) return answered(source, ListingSource.NEWPIPE, found)
         }
 
-        val target = source.ytDlpTarget(text, count) ?: return emptyList()
+        val target = source.ytDlpTarget(text, count) ?: return answered(source, ListingSource.NEWPIPE, emptyList())
         val after = service != null && newPipeAfter(source, engine)
 
         // With NewPipe still to ask, a yt-dlp failure is held rather than shown, and shown
@@ -65,11 +66,17 @@ object MediaSearch {
             failure = e
             emptyList()
         }
-        if (found.isNotEmpty() || service == null || !after) return found
+        if (found.isNotEmpty() || service == null || !after) return answered(source, ListingSource.YT_DLP, found)
 
         val rescued = NewPipeEngine.search(service, source.newPipeFilter, text, count)
         if (rescued.isEmpty()) failure?.let { throw it }
-        return rescued
+        return answered(source, ListingSource.NEWPIPE, rescued)
+    }
+
+    /** Notes which engine answered a search, and with how many cards; never the words. */
+    private fun answered(source: SearchSource, by: ListingSource, found: List<LinkEntry>): List<LinkEntry> {
+        Log.i("Hazel", "Search on ${source.name}: ${by.name} found ${found.size}")
+        return found
     }
 
     /** What yt-dlp finds for [target], cut to [count] cards. */
@@ -80,7 +87,7 @@ object MediaSearch {
         fetchMode: FetchMode,
         forceIpv4: Boolean
     ): List<LinkEntry> = when (val contents = MediaProbe.listContents(
-        target, cacheDir, SiteAccess.NONE, fetchMode, forceIpv4, SEARCH_PROCESS_ID
+        target, cacheDir, SiteAccess.NONE, fetchMode, forceIpv4, SEARCH_PROCESS_ID, maxItems = count
     )) {
         is LinkContents.Many -> contents.entries.take(count)
         is LinkContents.Single -> listOf(
