@@ -9,9 +9,13 @@ the version from app/build.gradle.kts, the languages from locales_config.xml, th
 Then every page is checked: plain punctuation only, no unfilled placeholder, and every
 local link, image and #anchor resolves. Any failure exits non-zero, which fails CI.
 
+The site search reads search.json, written here from the built pages: one entry for each
+guide section, FAQ question, home page section and card, support heading and the latest
+release notes. Every entry's link is checked like any other link.
+
     python tools/site/build_site.py
 """
-import html as _html, pathlib, re, shutil, sys
+import html as _html, json, pathlib, re, shutil, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 SITE = ROOT / 'pages' / 'hazel-pages'
@@ -50,6 +54,11 @@ LINKS = [('whats-new.html', "What's new", 'whats-new'), ('index.html#features', 
 
 RELEASES = 'https://github.com/SibtainOcn/Hazel/releases/latest'
 
+SEARCH = ('<button class="search-btn" type="button" data-search aria-label="Search the site" aria-keyshortcuts="/ Control+K">'
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">'
+          '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'
+          '<span class="label">Search</span><kbd>/</kbd></button>')
+
 
 def nav(active):
     links = ''.join(
@@ -59,6 +68,7 @@ def nav(active):
     <a class="brand" href="index.html" aria-label="Hazel home">{MARK}Hazel</a>
     <nav class="nav-links" aria-label="Primary">{links}</nav>
     <div class="nav-end">
+      {SEARCH}
       {THEME}
       <a class="icon-btn gh-link" href="https://github.com/SibtainOcn/Hazel" aria-label="Hazel on GitHub">{GITHUB}</a>
       <a class="btn btn-primary" href="{RELEASES}">Download</a>
@@ -219,8 +229,83 @@ def md_html(name):
     return ''.join(out)
 
 
+def text_of(fragment):
+    """The words a reader sees in a piece of a page, on one line."""
+    fragment = re.sub(r'<(svg|script|style)\b.*?</\1>', ' ', fragment, flags=re.S)
+    # Steps of a path ("More", "Advanced") and chips read as a list.
+    fragment = re.sub(r'</span>\s*<span>', ', ', fragment)
+    text = _html.unescape(re.sub(r'<[^>]+>', ' ', fragment))
+    return re.sub(r'\s+([.,;:!?)])', r'\1', re.sub(r'\s+', ' ', text)).strip()
+
+
+def slug(text):
+    return re.sub(r'[^a-z0-9]+', '-', text.lower()).strip('-')[:60].strip('-')
+
+
+def faq_ids(body):
+    """Gives every FAQ question an id made from its words, so a search result can open it."""
+    seen = set()
+
+    def named(m):
+        base = 'q-' + slug(text_of(m.group(1)))
+        name, n = base, 2
+        while name in seen:
+            name, n = f'{base}-{n}', n + 1
+        seen.add(name)
+        return f'<details class="q" id="{name}"><summary>{m.group(1)}'
+    return re.sub(r'<details class="q"><summary>(.*?)(?=<span class="plus">)', named, body, flags=re.S)
+
+
+def search_index(pages, version):
+    """
+    What the site search looks through. Built from the finished pages, so it can never
+    describe something a page no longer says.
+    """
+    entries = []
+
+    def add(title, where, url, body):
+        title = text_of(title)
+        if title:
+            entries.append({'t': title, 's': where, 'u': url, 'x': text_of(body)[:2000]})
+
+    for m in re.finditer(r'<section id="([\w-]+)"[^>]*>(.*?)</section>', pages['guide'], re.S):
+        h2 = re.search(r'<h2>(.*?)</h2>', m.group(2), re.S)
+        if h2:
+            add(h2.group(1), 'Guide', f'guide.html#{m.group(1)}', m.group(2)[h2.end():])
+
+    faq = pages['faq']
+    groups = [(g.start(), text_of(g.group(1))) for g in
+              re.finditer(r'<div class="faq-group" id="[\w-]+">\s*<h2>(.*?)</h2>', faq, re.S)]
+    for m in re.finditer(r'<details class="q" id="([\w-]+)"><summary>(.*?)</summary>(.*?)</details>', faq, re.S):
+        group = next((name for at, name in reversed(groups) if at < m.start()), '')
+        add(m.group(2), f'FAQ / {group}' if group else 'FAQ', f'faq.html#{m.group(1)}', m.group(3))
+
+    for m in re.finditer(r'<section class="section" id="([\w-]+)">(.*?)</section>', pages['index'], re.S):
+        parts = re.split(r'(?=<h3)', m.group(2))
+        h2 = re.search(r'<h2>(.*?)</h2>', parts[0], re.S)
+        url = f'index.html#{m.group(1)}'
+        if h2:
+            add(h2.group(1), 'Home', url, parts[0][h2.end():])
+        for part in parts[1:]:
+            h3 = re.match(r'<h3[^>]*>(.*?)</h3>', part, re.S)
+            if h3:
+                add(h3.group(1), 'Home', url, part[h3.end():])
+
+    support = re.search(r'<main>(.*?)</main>', pages['support'], re.S).group(1)
+    for part in re.split(r'(?=<h2)', support)[1:]:
+        h2 = re.match(r'<h2[^>]*>(.*?)</h2>', part, re.S)
+        if h2:
+            add(h2.group(1), 'Support', 'support.html', part[h2.end():])
+
+    notes = re.search(r'<main>(.*?)</main>', pages['whats-new'], re.S).group(1)
+    add(f"What's new in {version}", "What's new", 'whats-new.html', notes)
+    return entries
+
+
 def page(name, title, description, active, extra_css, facts):
     body = (SRC / f'{name}.html').read_text(encoding='utf-8')
+    if name == 'faq':
+        body = faq_ids(body)
     for key, value in facts.items():
         body = body.replace('{{' + key + '}}', value)
     css = '<link rel="stylesheet" href="styles.css">' + (f'\n<link rel="stylesheet" href="{extra_css}">' if extra_css else '')
@@ -256,8 +341,10 @@ def page(name, title, description, active, extra_css, facts):
 BANNED = re.compile('[—–→←…·›•]')
 
 
-def check(pages):
+def check(pages, index=()):
     problems = []
+    # A search result is a link like any other.
+    pages = dict(pages, search=' '.join(f'href="{e["u"]}"' for e in index))
     for name, html in pages.items():
         # These pages carry CHANGELOG.md and RELEASE-NOTES.md word for word, so their text
         # is not policed here.
@@ -318,11 +405,14 @@ def main():
     for name, html in pages.items():
         (OUT / f'{name}.html').write_text(html, encoding='utf-8')
 
-    problems = check(pages)
+    index = search_index(pages, facts['version'])
+    (OUT / 'search.json').write_text(json.dumps(index, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+
+    problems = check(pages, index)
     for p in problems:
         print('FAIL:', p)
     print(f'Built {len(pages)} pages into {OUT.relative_to(ROOT)} (version {facts["version"]}, '
-          f'{count} languages, {len(whats_new())} what\'s new lines)')
+          f'{count} languages, {len(whats_new())} what\'s new lines, {len(index)} search entries)')
     if problems:
         sys.exit(1)
 
