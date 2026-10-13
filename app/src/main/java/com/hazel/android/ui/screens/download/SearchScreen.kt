@@ -353,7 +353,8 @@ fun SearchScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 12.dp, end = 4.dp, bottom = 12.dp),
+                    // The same margin both sides, unless add stands in the right one.
+                    .padding(start = 12.dp, end = if (text.isNotBlank() && !typingWords) 4.dp else 12.dp, bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
             Surface(
