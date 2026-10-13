@@ -190,6 +190,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">Plus</string>
+    <string name="settings_search">Rechercher dans les réglages</string>
+    <string name="settings_search_hint">Trouvez un réglage par son nom ou par ce qu\'il fait</string>
+    <string name="settings_search_none">Aucun réglage trouvé pour %1$s</string>
     <string name="more_battery_title">Téléchargements en arrière-plan</string>
     <string name="more_battery_body">Certains téléphones coupent les téléchargements en arrière-plan. L’usage illimité l’évite.</string>
     <string name="more_downloads">Téléchargements</string>

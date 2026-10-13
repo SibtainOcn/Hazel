@@ -20,6 +20,10 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.performTextInput
+import com.hazel.android.ui.screens.more.MoreScreen
+import com.hazel.android.ui.screens.more.SettingsSearchScreen
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
@@ -131,10 +135,10 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
     }
 
     /** Shows [content] in the app's dark theme. */
-    private fun show(content: @Composable () -> Unit) {
+    private fun show(dark: Boolean = true, accent: String = "Cyan", content: @Composable () -> Unit) {
         compose.setContent {
             CompositionLocalProvider(LocalActivityResultRegistryOwner provides pickerHost) {
-                HazelTheme(darkTheme = true) {
+                HazelTheme(darkTheme = dark, accentName = accent) {
                     Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
                         content()
                     }
@@ -408,6 +412,30 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
     fun searchSourceSheet() {
         show { SearchSourceSheet(selected = SearchSource.YOUTUBE, onDismiss = {}) }
         checkAndCapture("search_source")
+    }
+
+    @Test
+    fun moreScreen() {
+        show { MoreScreen() }
+        awaitText(string(R.string.more_documentation))
+        checkAndCapture("more")
+    }
+
+    @Test
+    fun settingsSearch() = settingsSearchIn("settings_search", dark = true, accent = "Cyan")
+
+    // The marker is its own yellow, so it must read the same on a light page and a grey accent.
+    @Test
+    fun settingsSearchLight() = settingsSearchIn("settings_search_light", dark = false, accent = "White")
+
+    @Test
+    fun settingsSearchGold() = settingsSearchIn("settings_search_gold", dark = true, accent = "Gold")
+
+    private fun settingsSearchIn(name: String, dark: Boolean, accent: String) {
+        show(dark, accent) { SettingsSearchScreen(onBack = {}, onOpen = {}, onOpenBatterySettings = {}) }
+        compose.onNode(hasSetTextAction()).performTextInput(string(R.string.processing_video_format).split(' ').first())
+        awaitText(string(R.string.processing_title))
+        checkAndCapture(name)
     }
 
     @Test

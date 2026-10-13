@@ -190,6 +190,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">Más</string>
+    <string name="settings_search">Buscar ajustes</string>
+    <string name="settings_search_hint">Encuentra un ajuste por su nombre o por lo que hace</string>
+    <string name="settings_search_none">No hay ajustes para %1$s</string>
     <string name="more_battery_title">Descargas en segundo plano</string>
     <string name="more_battery_body">Algunos teléfonos detienen las descargas en segundo plano para ahorrar batería. Sin restricciones se evita.</string>
     <string name="more_downloads">Descargas</string>

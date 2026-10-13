@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Search settings, from the search button at the top of More. A plain field with clear, and under it every setting whose name, line or screen holds all the words typed, best match first, each word marked in yellow that reads the same on every theme and accent. A match opens the screen it is on; Language and Getting started open where they are, as on More. Case and accents are ignored, and words are searched in the language the app is shown in.
+
 ### Changed
 - The search screen has a title row with back and the 3-dot, and the field below it across the screen, with clear inside it and add just after. Adding a link already in the list says so and keeps it in the field, in place of clearing it as if it were added. Links queued with add show as a numbered list, each as its site with the rest of the address under it, with Search all in the title row; holding one asks before removing it, and a tap no longer removes it. Back is a chevron on every screen.
 - Every search runs fresh, so it always uses the engine picked in Search with. Searching the same words again no longer shows the list from up to 30 minutes before. Pasted, shared and Instant links are still remembered as before.
@@ -26,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - On Download settings, a limit's chip moves under its title when a word of the title or its description would not fit beside it, as with a long translation or a large font on a narrow phone, in place of breaking the word in two. The chip's label wraps to a second line rather than being cut short.
 
 ### Fixed
+- More no longer breaks a row's name apart at a large font. Language shows the current language and Temporary files its size under the name, rather than beside it; the arrows at the end of the rows are left out from 1.5x font up, and a name still too long breaks at a syllable.
 - Download settings, Appearance and Tools scroll. With a large font, a long translation or a short screen, the last rows of Download settings, and its storage note, were cut off below the navigation buttons and could not be reached (#87).
 - Settings descriptions show in full. A description longer than two lines ended in "…", which with a large font or a longer translation hid part of what a setting does.
 - "No limit" on Download settings and On/Off for the dark theme are translated; they showed in English in every language.

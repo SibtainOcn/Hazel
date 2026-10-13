@@ -190,6 +190,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">Mais</string>
+    <string name="settings_search">Pesquisar configurações</string>
+    <string name="settings_search_hint">Encontre uma configuração pelo nome ou pelo que ela faz</string>
+    <string name="settings_search_none">Nenhuma configuração encontrada para %1$s</string>
     <string name="more_battery_title">Downloads em segundo plano</string>
     <string name="more_battery_body">Alguns celulares param downloads em segundo plano para poupar bateria. Uso irrestrito evita isso.</string>
     <string name="more_downloads">Downloads</string>

@@ -186,6 +186,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">और</string>
+    <string name="settings_search">सेटिंग खोजें</string>
+    <string name="settings_search_hint">किसी सेटिंग को उसके नाम या उसके काम से खोजें</string>
+    <string name="settings_search_none">%1$s के लिए कोई सेटिंग नहीं मिली</string>
     <string name="more_battery_title">पृष्ठभूमि में डाउनलोड</string>
     <string name="more_battery_body">कुछ फ़ोन बैटरी बचाने के लिए बैकग्राउंड डाउनलोड रोक देते हैं। अप्रतिबंधित उपयोग इसे रोकता है।</string>
     <string name="more_downloads">डाउनलोड</string>
