@@ -50,7 +50,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -392,6 +396,9 @@ private fun ChoiceDialog(
  * takes the accent tint and a filled check at its end; the rest carry nothing there, so the
  * eye goes straight to what is set. Shared by every place the app offers a choice, so a
  * pick looks the same in a dialog, a sheet, or a confirmation.
+ *
+ * [leading] sits before the label, such as a site's mark. [highlight] is a run of the label
+ * drawn in the accent, the part a filter matched.
  */
 @Composable
 internal fun ChoiceRow(
@@ -400,8 +407,12 @@ internal fun ChoiceRow(
     chosen: Boolean,
     role: Role,
     onClick: () -> Unit,
-    shape: RoundedCornerShape = RoundedCornerShape(GroupOuter)
+    shape: RoundedCornerShape = RoundedCornerShape(GroupOuter),
+    leading: (@Composable () -> Unit)? = null,
+    highlight: String = ""
 ) {
+    val accent = MaterialTheme.colorScheme.primary
+    val shown = remember(label, highlight, accent) { highlighted(label, highlight, accent) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -415,9 +426,13 @@ internal fun ChoiceRow(
             .padding(horizontal = 18.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (leading != null) {
+            leading()
+            Spacer(modifier = Modifier.width(14.dp))
+        }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                label,
+                shown,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = if (chosen) FontWeight.SemiBold else FontWeight.Medium,
                 color = if (chosen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
@@ -450,9 +465,19 @@ internal fun ChoiceRow(
     }
 }
 
+/** [label] with its first case-blind match of [match], if any, in [accent] and bold. */
+private fun highlighted(label: String, match: String, accent: Color): AnnotatedString {
+    val start = if (match.isBlank()) -1 else label.indexOf(match, ignoreCase = true)
+    if (start < 0) return AnnotatedString(label)
+    return buildAnnotatedString {
+        append(label)
+        addStyle(SpanStyle(color = accent, fontWeight = FontWeight.Bold), start, start + match.length)
+    }
+}
+
 /** A full pill button for the foot of a dialog: the accent for the action, a tone for Cancel. */
 @Composable
-private fun DialogButton(text: String, filled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun DialogButton(text: String, filled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         onClick = onClick,
         shape = CircleShape,

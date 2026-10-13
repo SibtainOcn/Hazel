@@ -45,6 +45,12 @@
     <string name="search_clear_history">खोज इतिहास मिटाएँ</string>
     <string name="search_under_maintenance">रखरखाव जारी है</string>
     <string name="search_options_title">खोज विकल्प</string>
+    <string name="search_source_find">साइट खोजें</string>
+    <string name="search_source_no_match">कोई साइट मेल नहीं खाती</string>
+    <string name="search_web_title">वेब पर खोजें</string>
+    <string name="search_web_beta">बीटा</string>
+    <string name="search_web_notice">उन सभी साइटों पर वीडियो खोजता है जिनसे Hazel डाउनलोड कर सकता है। प्लेबैक और डाउनलोड हर साइट पर काम न करें, ऐसा हो सकता है।</string>
+    <string name="search_web_continue">जारी रखें</string>
     <string name="search_empty_history">आपकी खोजें और लिंक यहां दिखेंगे</string>
     <string name="search_no_matches">कोई मेल नहीं</string>
     <string name="search_remove">हटाएँ</string>
