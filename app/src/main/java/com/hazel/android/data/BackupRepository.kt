@@ -63,6 +63,8 @@ object BackupRepository {
     private val AUTO_DONE_FOR_KEY = stringPreferencesKey("backup_auto_done_for")
 
     /** Keys that describe this device or this install, not the user's choices. */
+    private const val PROXY_KEY = "adv_proxy"
+
     private fun isDeviceOnly(key: String) =
         key.startsWith("backup_") || key.startsWith("download_tree_") ||
             key.endsWith("_update_available") || key == "adv_impersonate_available"
@@ -147,7 +149,11 @@ object BackupRepository {
         prefs.asMap().forEach { (key, value) ->
             val name = key.name
             if (isDeviceOnly(name) || BackupCategory.of(name) !in categories) return@forEach
-            typed(value)?.let { values.put(name, it) }
+            // A proxy's password stays on the device; the address and user name are kept.
+            val kept = if (name == PROXY_KEY && value is String) {
+                com.hazel.android.download.NetworkProxy.withoutPassword(value)
+            } else value
+            typed(kept)?.let { values.put(name, it) }
         }
         return JSONObject().apply {
             put("format", FORMAT)

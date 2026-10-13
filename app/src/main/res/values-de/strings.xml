@@ -793,4 +793,21 @@
         <item quantity="one">%d Cookie</item>
         <item quantity="other">%d Cookies</item>
     </plurals>
+    <string name="advanced_section_network">Netzwerk</string>
+    <string name="advanced_proxy">Proxy</string>
+    <string name="proxy_error_unreachable">Keine Verbindung über den unter Erweitert eingestellten Proxy. Prüfe, ob er läuft und die Adresse stimmt.</string>
+    <string name="proxy_error_ffmpeg_socks">Das Ausschneiden eines Teils und manche Livestreams funktionieren nicht über einen SOCKS-Proxy. Nutze dafür einen HTTP-Proxy.</string>
+    <string name="cookies_proxy_unavailable">Die WebView dieses Geräts kann den Proxy nicht nutzen, daher öffnet sich die Anmeldeseite nicht, solange einer eingestellt ist.</string>
+    <string name="advanced_proxy_hint">Alle Verbindungen laufen über diesen Proxy.</string>
+    <string name="proxy_section_server">Server</string>
+    <string name="proxy_section_login">Anmeldung (optional)</string>
+    <string name="proxy_host">Host</string>
+    <string name="proxy_port">Port</string>
+    <string name="proxy_user">Benutzername</string>
+    <string name="proxy_password">Passwort</string>
+    <string name="proxy_show_password">Passwort anzeigen</string>
+    <string name="proxy_hide_password">Passwort verbergen</string>
+    <string name="proxy_remove">Proxy entfernen</string>
+    <string name="proxy_host_invalid">Hostname oder IP-Adresse eingeben</string>
+    <string name="proxy_port_invalid">Port von 1 bis 65535 eingeben</string>
 </resources>

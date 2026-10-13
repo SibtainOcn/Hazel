@@ -803,4 +803,21 @@
         <item quantity="many">%d cookies</item>
         <item quantity="other">%d cookies</item>
     </plurals>
+    <string name="advanced_section_network">Rede</string>
+    <string name="advanced_proxy">Proxy</string>
+    <string name="proxy_error_unreachable">Não foi possível conectar pelo proxy definido em Avançado. Verifique se ele está ativo e se o endereço está certo.</string>
+    <string name="proxy_error_ffmpeg_socks">Cortar um trecho e algumas transmissões ao vivo não funcionam por um proxy SOCKS. Use um proxy HTTP para isso.</string>
+    <string name="cookies_proxy_unavailable">O WebView deste aparelho não pode usar o proxy, então a página de login não abre enquanto houver um definido.</string>
+    <string name="advanced_proxy_hint">Todas as conexões passam por este proxy.</string>
+    <string name="proxy_section_server">Servidor</string>
+    <string name="proxy_section_login">Login (opcional)</string>
+    <string name="proxy_host">Host</string>
+    <string name="proxy_port">Porta</string>
+    <string name="proxy_user">Usuário</string>
+    <string name="proxy_password">Senha</string>
+    <string name="proxy_show_password">Mostrar senha</string>
+    <string name="proxy_hide_password">Ocultar senha</string>
+    <string name="proxy_remove">Remover proxy</string>
+    <string name="proxy_host_invalid">Digite um nome de host ou IP</string>
+    <string name="proxy_port_invalid">Digite uma porta de 1 a 65535</string>
 </resources>

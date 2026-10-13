@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import com.hazel.android.download.NetworkProxy.throughProxy
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -80,6 +81,7 @@ object YtDlpUpdater {
     private var knownVersion: Pair<String, String>? = null
 
     private val client = OkHttpClient.Builder()
+        .throughProxy()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
         .build()

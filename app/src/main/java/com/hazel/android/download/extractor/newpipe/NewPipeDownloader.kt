@@ -1,5 +1,6 @@
 package com.hazel.android.download.extractor.newpipe
 
+import com.hazel.android.download.NetworkProxy.throughProxy
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.schabi.newpipe.extractor.downloader.Downloader
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit
 class NewPipeDownloader(builder: OkHttpClient.Builder = OkHttpClient.Builder()) : Downloader() {
 
     private val client: OkHttpClient = builder
+        .throughProxy()
         .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .build()

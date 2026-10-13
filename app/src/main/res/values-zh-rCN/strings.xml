@@ -783,4 +783,21 @@
     <plurals name="cookies_count">
         <item quantity="other">%d 个 Cookie</item>
     </plurals>
+    <string name="advanced_section_network">网络</string>
+    <string name="advanced_proxy">代理</string>
+    <string name="proxy_error_unreachable">无法通过“高级”中设置的代理连接。请检查代理是否在运行，地址是否正确。</string>
+    <string name="proxy_error_ffmpeg_socks">截取片段和部分直播无法通过 SOCKS 代理。请为这些内容使用 HTTP 代理。</string>
+    <string name="cookies_proxy_unavailable">此设备的 WebView 无法使用代理，因此设置代理期间无法打开登录页面。</string>
+    <string name="advanced_proxy_hint">所有连接都通过此代理。</string>
+    <string name="proxy_section_server">服务器</string>
+    <string name="proxy_section_login">登录（可选）</string>
+    <string name="proxy_host">主机</string>
+    <string name="proxy_port">端口</string>
+    <string name="proxy_user">用户名</string>
+    <string name="proxy_password">密码</string>
+    <string name="proxy_show_password">显示密码</string>
+    <string name="proxy_hide_password">隐藏密码</string>
+    <string name="proxy_remove">移除代理</string>
+    <string name="proxy_host_invalid">请输入主机名或 IP 地址</string>
+    <string name="proxy_port_invalid">请输入 1 到 65535 之间的端口</string>
 </resources>
