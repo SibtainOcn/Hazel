@@ -1,6 +1,5 @@
 package com.hazel.android.download.extractor
 
-import com.hazel.android.HazelApp
 import com.hazel.android.download.FetchMode
 import com.hazel.android.download.MediaProbe
 import com.hazel.android.download.SiteAccess
@@ -13,8 +12,7 @@ import java.io.File
  * Runs a search on one [SearchSource] and returns what it found as cards to show.
  *
  * NewPipe answers in-process for the sites it knows; yt-dlp answers everywhere else, and
- * stands in whenever NewPipe fails or finds nothing. The Web as a whole goes to
- * [WebSearch], which keeps only the links yt-dlp has a site for.
+ * stands in whenever NewPipe fails or finds nothing.
  */
 object MediaSearch {
 
@@ -25,19 +23,13 @@ object MediaSearch {
         count: Int,
         cacheDir: File,
         fetchMode: FetchMode,
-        forceIpv4: Boolean,
-        webServer: String = ""
+        forceIpv4: Boolean
     ): List<LinkEntry> = withContext(Dispatchers.IO) {
         val text = query.trim()
         if (text.isEmpty()) return@withContext emptyList()
-        val key = "${source.name}:$webServer:$count:${text.lowercase()}"
+        val key = "${source.name}:$count:${text.lowercase()}"
         recent(key)?.let { return@withContext it }
-        val found = if (source == SearchSource.WEB) {
-            WebSearch.search(HazelApp.instance, text, count, webServer)
-        } else {
-            find(text, source, engine, count, cacheDir, fetchMode, forceIpv4)
-        }
-        found.also { found ->
+        find(text, source, engine, count, cacheDir, fetchMode, forceIpv4).also { found ->
             if (found.isNotEmpty()) remember(key, found)
         }
     }

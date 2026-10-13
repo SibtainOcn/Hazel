@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +23,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -64,7 +64,8 @@ import kotlinx.coroutines.launch
  * Picking a site saves it and closes the sheet.
  *
  * Search the Web is a row like the sites, set apart by a gap. The first tap explains what
- * it does and that it is in beta; after that it is chosen like any site.
+ * it does and that it is in beta; after that it goes straight through. Searching the Web
+ * itself is not built yet, so it says so.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,15 +80,11 @@ fun SearchSourceSheet(
     val noticeSeen by remember(context) { SettingsRepository.getWebSearchNoticeSeen(context) }
         .collectAsState(initial = null)
     var showNotice by rememberSaveable { mutableStateOf(false) }
-    val choose = { source: SearchSource ->
-        // On the app's scope: the sheet closes at once, and the choice must still be written.
-        HazelApp.instance.applicationScope.launch {
-            SettingsRepository.setSearchSource(context.applicationContext, source)
-        }
-        onDismiss()
+    val searchWeb = {
+        Toast.makeText(context, R.string.search_under_maintenance, Toast.LENGTH_SHORT).show()
     }
 
-    val sites = SearchSource.entries.filter { it.isSite }.map { it to stringResource(it.labelRes) }
+    val sites = SearchSource.entries.map { it to stringResource(it.labelRes) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -119,15 +116,19 @@ fun SearchSourceSheet(
                         role = Role.RadioButton,
                         shape = groupShape(index, sites.size),
                         leading = { SiteMark(label) },
-                        onClick = { choose(source) }
+                        onClick = {
+                            // On the app's scope: the sheet closes at once, and the choice
+                            // must still be written.
+                            HazelApp.instance.applicationScope.launch {
+                                SettingsRepository.setSearchSource(context.applicationContext, source)
+                            }
+                            onDismiss()
+                        }
                     )
                 }
             }
 
-            WebRow(
-                chosen = selected == SearchSource.WEB,
-                onClick = { if (noticeSeen == true) choose(SearchSource.WEB) else showNotice = true }
-            )
+            WebRow(onClick = { if (noticeSeen == true) searchWeb() else showNotice = true })
         }
     }
 
@@ -138,7 +139,7 @@ fun SearchSourceSheet(
                 HazelApp.instance.applicationScope.launch {
                     SettingsRepository.setWebSearchNoticeSeen(context.applicationContext)
                 }
-                choose(SearchSource.WEB)
+                searchWeb()
             },
             onDismiss = { showNotice = false }
         )
@@ -169,12 +170,12 @@ private fun SiteMark(label: String) {
  * by a gap rather than drawn differently.
  */
 @Composable
-private fun WebRow(chosen: Boolean, onClick: () -> Unit) {
+private fun WebRow(onClick: () -> Unit) {
     val accent = MaterialTheme.colorScheme.primary
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
-        color = if (chosen) accent.copy(alpha = 0.16f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp)
@@ -203,32 +204,15 @@ private fun WebRow(chosen: Boolean, onClick: () -> Unit) {
             Text(
                 stringResource(R.string.search_web_title),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = if (chosen) FontWeight.SemiBold else FontWeight.Medium,
-                color = if (chosen) accent else MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
-            if (chosen) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape)
-                        .background(accent),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Filled.Check,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            } else {
-                Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

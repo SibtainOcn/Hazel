@@ -42,7 +42,6 @@ import com.hazel.android.ui.screens.download.SponsorBlockDialog
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.ui.screens.more.SingleChoiceDialog
-import com.hazel.android.ui.screens.more.WebSearchDialog
 import com.hazel.android.ui.screens.more.AdvancedScreen
 import com.hazel.android.ui.screens.more.AppearanceScreen
 import com.hazel.android.ui.screens.more.ProxyScreen
@@ -417,12 +416,6 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
         compose.onAllNodesWithText(string(R.string.search_web_title), useUnmergedTree = true)[0].performClick()
         awaitText(string(R.string.search_web_notice))
         checkAndCapture("web_search_notice")
-    }
-
-    @Test
-    fun webSearchDialogDuckDuckGo() {
-        show { WebSearchDialog(server = "", onSave = {}, onDismiss = {}) }
-        checkAndCapture("web_search_duckduckgo")
     }
 
     @Test

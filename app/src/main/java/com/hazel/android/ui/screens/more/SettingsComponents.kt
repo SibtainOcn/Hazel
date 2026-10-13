@@ -459,28 +459,12 @@ internal fun ChoiceRow(
 
 /** A full pill button for the foot of a dialog: the accent for the action, a tone for Cancel. */
 @Composable
-internal fun DialogButton(
-    text: String,
-    filled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true
-) {
-    val onSurface = MaterialTheme.colorScheme.onSurface
+internal fun DialogButton(text: String, filled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         onClick = onClick,
-        enabled = enabled,
         shape = CircleShape,
-        color = when {
-            !enabled -> onSurface.copy(alpha = 0.06f)
-            filled -> MaterialTheme.colorScheme.primary
-            else -> onSurface.copy(alpha = 0.08f)
-        },
-        contentColor = when {
-            !enabled -> onSurface.copy(alpha = 0.38f)
-            filled -> MaterialTheme.colorScheme.onPrimary
-            else -> onSurface
-        },
+        color = if (filled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+        contentColor = if (filled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
         modifier = modifier.heightIn(min = 52.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {

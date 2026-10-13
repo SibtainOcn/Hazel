@@ -54,22 +54,12 @@
     <string name="search_clear">Clear</string>
     <string name="search_clear_results">Clear results</string>
     <string name="search_clear_history">Clear search history</string>
+    <string name="search_under_maintenance">Under maintenance</string>
     <string name="search_options_title">Search options</string>
     <string name="search_web_title">Search the Web</string>
     <string name="search_web_beta">Beta</string>
     <string name="search_web_notice">Finds videos on any site Hazel can download. Playback and downloads may not work on every site.</string>
     <string name="search_web_continue">Continue</string>
-    <string name="search_source_web">Web</string>
-    <string name="fetch_settings_web_search">Web search</string>
-    <string name="web_search_duckduckgo" translatable="false">DuckDuckGo</string>
-    <string name="web_search_searxng" translatable="false">SearXNG</string>
-    <string name="web_search_duckduckgo_summary">Works with no setup</string>
-    <string name="web_search_searxng_summary">Your own server, or one you trust</string>
-    <string name="web_search_server_hint">Server address, like searx.example.org</string>
-    <string name="web_search_server_invalid">Enter a web address, like https://searx.example.org</string>
-    <string name="search_web_failed_duckduckgo">Web search could not reach DuckDuckGo. Try again in a moment.</string>
-    <string name="search_web_failed_server">Web search could not reach your SearXNG server.</string>
-    <string name="search_web_server_refused">This SearXNG server does not answer apps. Turn on its JSON format, or choose another server.</string>
     <string name="search_empty_history">Your searches and links will appear here</string>
     <string name="search_no_matches">No matches</string>
     <string name="search_remove">Remove</string>

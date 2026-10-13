@@ -356,16 +356,6 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[SEARCH_SUGGESTIONS_KEY] = enabled }
     }
 
-    private val WEB_SEARCH_SERVER_KEY = stringPreferencesKey("web_search_server")
-
-    /** The SearXNG server Web search asks, or blank for DuckDuckGo, the default. */
-    fun getWebSearchServer(context: Context): Flow<String> =
-        context.dataStore.data.map { prefs -> prefs[WEB_SEARCH_SERVER_KEY].orEmpty() }
-
-    suspend fun setWebSearchServer(context: Context, server: String) {
-        context.dataStore.edit { prefs -> prefs[WEB_SEARCH_SERVER_KEY] = server }
-    }
-
     private val WEB_SEARCH_NOTICE_KEY = booleanPreferencesKey("web_search_notice_seen")
 
     /** Whether the note on searching the Web has been read, so it shows only the first time. */
