@@ -762,10 +762,7 @@
     <string name="save_location_error_card_folder">Impossible de créer %1$s sur la carte, les téléchargements iront donc dans le dossier choisi.</string>
     <string name="save_fallback_title">Enregistré ailleurs</string>
     <string name="save_fallback_body">Impossible d\'écrire ces fichiers dans %1$s. La carte a peut-être été retirée, est pleine ou n\'autorise plus l\'accès. Ils ont été enregistrés dans %2$s.</string>
-    <string name="home_start_with">Commencer par</string>
-    <string name="home_start_paste">Coller un lien</string>
-    <string name="home_start_search">Rechercher</string>
-    <string name="home_start_downloads">Téléchargements</string>
+    <string name="home_empty_hint">Collez un lien ou lancez une recherche pour commencer</string>
     <string name="more_getting_started">Prise en main</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">Téléchargement lancé</string>

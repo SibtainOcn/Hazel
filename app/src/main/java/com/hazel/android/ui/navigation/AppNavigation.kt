@@ -334,13 +334,6 @@ fun AppNavigation(
                             launchSingleTop = true
                             restoreState = true
                         }
-                    },
-                    onOpenDownloads = {
-                        navController.navigate(Screen.History.route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
                     }
                 )
             }

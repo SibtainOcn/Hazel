@@ -762,10 +762,7 @@
     <string name="save_location_error_card_folder">Não foi possível criar %1$s no cartão, então os downloads serão salvos na pasta escolhida.</string>
     <string name="save_fallback_title">Salvo em outro lugar</string>
     <string name="save_fallback_body">Não foi possível gravar em %1$s. O cartão pode ter sido removido, estar cheio ou não permitir mais o acesso. Os arquivos foram salvos em %2$s.</string>
-    <string name="home_start_with">Comece por</string>
-    <string name="home_start_paste">Colar link</string>
-    <string name="home_start_search">Pesquisar</string>
-    <string name="home_start_downloads">Downloads</string>
+    <string name="home_empty_hint">Cole um link ou pesquise para começar</string>
     <string name="more_getting_started">Primeiros passos</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">Download iniciado</string>

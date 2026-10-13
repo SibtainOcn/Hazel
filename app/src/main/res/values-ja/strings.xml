@@ -744,10 +744,7 @@
     <string name="save_location_error_card_folder">カードに %1$s を作成できなかったため、選択したフォルダに保存します。</string>
     <string name="save_fallback_title">別の場所に保存しました</string>
     <string name="save_fallback_body">%1$s に書き込めませんでした。カードが取り外されたか、容量不足か、アクセスが許可されていない可能性があります。代わりに %2$s に保存しました。</string>
-    <string name="home_start_with">はじめる</string>
-    <string name="home_start_paste">リンクを貼り付け</string>
-    <string name="home_start_search">検索</string>
-    <string name="home_start_downloads">ダウンロード</string>
+    <string name="home_empty_hint">リンクを貼り付けるか検索して始めましょう</string>
     <string name="more_getting_started">はじめに</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">ダウンロードを開始しました</string>

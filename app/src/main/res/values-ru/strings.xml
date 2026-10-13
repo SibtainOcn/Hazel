@@ -770,10 +770,7 @@
     <string name="save_location_error_card_folder">Не удалось создать %1$s на карте, поэтому загрузки будут сохраняться в выбранную папку.</string>
     <string name="save_fallback_title">Сохранено в другом месте</string>
     <string name="save_fallback_body">Не удалось записать в %1$s. Возможно, карту извлекли, она заполнена или больше не даёт доступа. Файлы сохранены в %2$s.</string>
-    <string name="home_start_with">Начните с</string>
-    <string name="home_start_paste">Вставить ссылку</string>
-    <string name="home_start_search">Поиск</string>
-    <string name="home_start_downloads">Загрузки</string>
+    <string name="home_empty_hint">Вставьте ссылку или начните поиск</string>
     <string name="more_getting_started">Начало работы</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">Загрузка началась</string>

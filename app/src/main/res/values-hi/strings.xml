@@ -753,10 +753,7 @@
     <string name="save_location_error_card_folder">कार्ड पर %1$s नहीं बन सका, इसलिए डाउनलोड आपके चुने फ़ोल्डर में सहेजे जाएँगे।</string>
     <string name="save_fallback_title">दूसरी जगह सहेजा गया</string>
     <string name="save_fallback_body">ये %1$s में नहीं लिखे जा सके। हो सकता है कार्ड निकाल दिया गया हो, भर गया हो या अब पहुँच न देता हो। इन्हें %2$s में सहेजा गया।</string>
-    <string name="home_start_with">यहाँ से शुरू करें</string>
-    <string name="home_start_paste">लिंक पेस्ट करें</string>
-    <string name="home_start_search">खोजें</string>
-    <string name="home_start_downloads">डाउनलोड</string>
+    <string name="home_empty_hint">शुरू करने के लिए कोई लिंक पेस्ट करें या खोजें</string>
     <string name="more_getting_started">शुरुआत करें</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">डाउनलोड शुरू हुआ</string>

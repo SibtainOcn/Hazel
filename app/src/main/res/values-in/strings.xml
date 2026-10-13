@@ -744,10 +744,7 @@
     <string name="save_location_error_card_folder">Tidak bisa membuat %1$s di kartu, jadi unduhan akan disimpan di folder yang Anda pilih.</string>
     <string name="save_fallback_title">Disimpan di tempat lain</string>
     <string name="save_fallback_body">File ini tidak bisa ditulis ke %1$s. Kartu mungkin dilepas, penuh, atau tidak lagi mengizinkan akses. File disimpan ke %2$s.</string>
-    <string name="home_start_with">Mulai dengan</string>
-    <string name="home_start_paste">Tempel tautan</string>
-    <string name="home_start_search">Cari</string>
-    <string name="home_start_downloads">Unduhan</string>
+    <string name="home_empty_hint">Tempel tautan atau cari untuk memulai</string>
     <string name="more_getting_started">Memulai</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">Unduhan dimulai</string>
