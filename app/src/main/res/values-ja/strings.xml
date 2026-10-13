@@ -55,6 +55,7 @@
     <string name="search_remove">削除</string>
     <string name="search_all">すべて検索</string>
     <string name="search_remove_confirm_body">検索履歴から削除しますか？</string>
+    <string name="search_remove_from_list_body">このリンクをリストから削除しますか？</string>
     <string name="search_entry_copied">クリップボードにコピーしました</string>
     <string name="search_edit_before">検索前に編集</string>
     <string name="search_paste_and_fetch">貼り付けて取得</string>

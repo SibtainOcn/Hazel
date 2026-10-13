@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
-- The search screen has a title row with back and the 3-dot, and the field below it across the screen, with clear inside it and add just after. Adding a link already in the list says so and keeps it in the field, in place of clearing it as if it were added. Queued links have no outline. Back is a chevron on every screen.
+- The search screen has a title row with back and the 3-dot, and the field below it across the screen, with clear inside it and add just after. Adding a link already in the list says so and keeps it in the field, in place of clearing it as if it were added. Links queued with add show as a numbered list, each as its site with the rest of the address under it, below a count and a Search all button; holding one asks before removing it, and a tap no longer removes it. Back is a chevron on every screen.
 - An empty home screen shows a faint download mark and one line, "Paste a link or search to get started", in place of the Start with row of Paste link, Search and Downloads. The search bar, the paste button and the bottom bar already do each of those.
 
 ### Added

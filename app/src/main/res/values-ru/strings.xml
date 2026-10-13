@@ -55,6 +55,7 @@
     <string name="search_remove">Удалить</string>
     <string name="search_all">Искать везде</string>
     <string name="search_remove_confirm_body">Удалить из истории поиска?</string>
+    <string name="search_remove_from_list_body">Убрать эту ссылку из списка?</string>
     <string name="search_entry_copied">Скопировано в буфер обмена</string>
     <string name="search_edit_before">Изменить перед поиском</string>
     <string name="search_paste_and_fetch">Вставить и загрузить</string>

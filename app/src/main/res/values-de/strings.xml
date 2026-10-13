@@ -55,6 +55,7 @@
     <string name="search_remove">Entfernen</string>
     <string name="search_all">Alle suchen</string>
     <string name="search_remove_confirm_body">Aus dem Suchverlauf entfernen?</string>
+    <string name="search_remove_from_list_body">Diesen Link aus der Liste entfernen?</string>
     <string name="search_entry_copied">In die Zwischenablage kopiert</string>
     <string name="search_edit_before">Vor dem Suchen bearbeiten</string>
     <string name="search_paste_and_fetch">Einfügen und laden</string>

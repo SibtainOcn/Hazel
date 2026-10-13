@@ -4,6 +4,7 @@ import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.download.extractor.SearchSuggestions
 import com.hazel.android.download.playback.StreamResolver
 import com.hazel.android.ui.screens.download.isLinks
+import com.hazel.android.ui.screens.download.linkParts
 import org.json.JSONObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -169,5 +170,15 @@ class PlayAndSearchTest {
             SearchSuggestions.parse("""["oggy",["oggy and the cockroaches","oggy"],[],{}]""")
         )
         assertEquals(emptyList(), SearchSuggestions.parse("not json"))
+    }
+
+    @Test
+    fun splitsQueuedLinkIntoSiteAndRest() {
+        assertEquals("youtu.be" to "/ftkic7Tdpcg?si=NP7e", linkParts("https://youtu.be/ftkic7Tdpcg?si=NP7e"))
+        assertEquals("youtube.com" to "/watch?v=abc", linkParts("https://www.youtube.com/watch?v=abc"))
+        assertEquals("youtu.be" to "/abc", linkParts("youtu.be/abc"))
+        assertEquals("example.com" to "", linkParts("https://example.com"))
+        // Not an address: shown whole rather than lost.
+        assertEquals("not a link" to "", linkParts("not a link"))
     }
 }
