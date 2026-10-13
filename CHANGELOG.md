@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- A proxy for every connection Hazel makes (#92). Under More, Advanced, Proxy opens a screen to pick HTTP, HTTPS, SOCKS5 or SOCKS5h and enter the host, port and, if the proxy needs one, a user name and password; the switch beside it turns the proxy off and on without forgetting it, and takes effect without a restart. Reading links, downloads, search and its suggestions, playing in the app, NewPipe, thumbnails, PO tokens, the sign-in page, the guide and update checks all go through it. With a proxy on, a connection that cannot reach it fails with a message saying so, rather than going out directly, and the sign-in page does not open on a device whose web view cannot use the proxy. Cutting part of a video, and some live streams, cannot go through a SOCKS proxy, which ffmpeg does not support, and say so when they fail. A backup keeps the proxy but not its password.
+
 ### Changed
 - Settings descriptions are shorter, one plain sentence each, in every language. Twenty-nine descriptions, hints and getting-started steps that ran to two or three sentences now say the same in about one line.
 - Download settings, Appearance and Tools have the same header and back arrow as the other settings screens.
