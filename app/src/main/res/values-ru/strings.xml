@@ -194,6 +194,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">Ещё</string>
+    <string name="settings_search">Поиск настроек</string>
+    <string name="settings_search_hint">Найдите настройку по названию или по тому, что она делает</string>
+    <string name="settings_search_none">Нет настроек по запросу %1$s</string>
     <string name="more_battery_title">Фоновые загрузки</string>
     <string name="more_battery_body">Некоторые телефоны останавливают фоновые загрузки ради батареи. Режим без ограничений это исключает.</string>
     <string name="more_downloads">Загрузки</string>

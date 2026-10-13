@@ -197,6 +197,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">More</string>
+    <string name="settings_search">Search settings</string>
+    <string name="settings_search_hint">Find a setting by its name or by what it does</string>
+    <string name="settings_search_none">No settings found for %1$s</string>
     <string name="more_battery_title">Background downloads</string>
     <string name="more_battery_body">Some phones stop background downloads to save battery. Unrestricted use prevents it.</string>
     <string name="more_downloads">Downloads</string>

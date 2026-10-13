@@ -357,7 +357,15 @@ fun AppNavigation(
                     onOpenBatterySettings = { openBatterySettings(context) },
                     onNavigateToStorageCleanup = { navController.navigate("storage_cleanup") },
                     onNavigateToUpdate = { navController.navigate("software_update") },
-                    onNavigateToDocumentation = { navController.navigate("docs") }
+                    onNavigateToDocumentation = { navController.navigate("docs") },
+                    onNavigateToSettingsSearch = { navController.navigate("settings_search") }
+                )
+            }
+            composable("settings_search") {
+                com.hazel.android.ui.screens.more.SettingsSearchScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpen = { route -> navController.navigate(route) },
+                    onOpenBatterySettings = { openBatterySettings(context) }
                 )
             }
             composable("docs") {

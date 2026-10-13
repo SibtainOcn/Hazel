@@ -182,6 +182,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">Lainnya</string>
+    <string name="settings_search">Cari pengaturan</string>
+    <string name="settings_search_hint">Temukan pengaturan dari namanya atau dari fungsinya</string>
+    <string name="settings_search_none">Tidak ada pengaturan untuk %1$s</string>
     <string name="more_battery_title">Unduhan latar belakang</string>
     <string name="more_battery_body">Beberapa ponsel menghentikan unduhan latar untuk hemat baterai. Tanpa batasan mencegahnya.</string>
     <string name="more_downloads">Unduhan</string>

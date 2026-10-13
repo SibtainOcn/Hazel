@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Search settings, from the search button at the top of More. A plain field with clear, and under it every setting whose name, line or screen holds all the words typed, best match first, each word marked in yellow that reads the same on every theme and accent. A match opens the screen it is on; Language and Getting started open where they are, as on More. Case and accents are ignored, and words are searched in the language the app is shown in.
+
 ### Changed
 - Search on no longer offers Niconico, PRX or Rokfin. PRX and Rokfin search fail on current yt-dlp, and a search set to any of the three goes to YouTube. Search on YouTube Music through yt-dlp lists songs, rather than the albums, artists and playlists the page leads with, and stops at the number of results set rather than reading hundreds (about 10 seconds in place of 40 on a phone).
 - With Search with set to yt-dlp, a search on YouTube, YouTube Music or SoundCloud that yt-dlp cannot answer, or that finds nothing, is put to NewPipe, as NewPipe searches already fall back to yt-dlp. If neither finds anything, yt-dlp's error is shown as before.
@@ -28,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - On Download settings, a limit's chip moves under its title when a word of the title or its description would not fit beside it, as with a long translation or a large font on a narrow phone, in place of breaking the word in two. The chip's label wraps to a second line rather than being cut short.
 
 ### Fixed
+- More no longer breaks a row's name apart at a large font. Language shows the current language and Temporary files its size under the name, rather than beside it; the arrows at the end of the rows are left out from 1.5x font up, and a name still too long breaks at a syllable.
 - Search on the site, opened from the header of a page read in the app (More, Documentation), shows its field and results. In the app's page view the screen height read as zero, so the panel had no room and only the blurred page showed. The page view now takes the full screen height, and the panel is sized by the screen it covers, so it fits on phones, tablets and desktops in either orientation.
 - Download settings, Appearance and Tools scroll. With a large font, a long translation or a short screen, the last rows of Download settings, and its storage note, were cut off below the navigation buttons and could not be reached (#87).
 - Settings descriptions show in full. A description longer than two lines ended in "…", which with a large font or a longer translation hid part of what a setting does.

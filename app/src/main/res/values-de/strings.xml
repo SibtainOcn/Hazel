@@ -186,6 +186,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">Mehr</string>
+    <string name="settings_search">Einstellungen durchsuchen</string>
+    <string name="settings_search_hint">Finde eine Einstellung über ihren Namen oder das, was sie tut</string>
+    <string name="settings_search_none">Keine Einstellungen für %1$s gefunden</string>
     <string name="more_battery_title">Downloads im Hintergrund</string>
     <string name="more_battery_body">Manche Telefone stoppen Hintergrund-Downloads zum Akkusparen. Uneingeschränkt verhindert das.</string>
     <string name="more_downloads">Downloads</string>
