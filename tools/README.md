@@ -15,6 +15,7 @@ thing before writing anything, and read [`BLOCKED.md`](strings/BLOCKED.md) as we
 | Know what the checker is telling me | [The checker](#the-checker) |
 | Know why some literal is allowed to stay | [The allowlist](#the-allowlist) |
 | Validate Fastlane or F-Droid recipe YAML | [Fastlane & F-Droid YAML Checker](#fastlane--f-droid-yaml-checker) |
+| Update the sites Web search keeps | [Supported site rules](#supported-site-rules) |
 
 ---
 
@@ -39,6 +40,8 @@ tools/
     fastlane_yaml_checker/             Fastlane store metadata & F-Droid recipe strict validator & formatter
   site/
     build_site.py                      builds the Hazel website for Pages
+  sites/
+    generate.py                        writes the yt-dlp link rules Web search filters with
 app/src/main/res/
   values/strings.xml                   the English source. Every key starts life here.
   values-<lang>/strings.xml            one per language, added in Job 2
@@ -337,5 +340,38 @@ python tools/release/fastlane_yaml_checker/checker.py
 To auto-format or fix formatting discrepancies:
 ```bash
 python tools/release/fastlane_yaml_checker/checker.py --yaml path/to/com.hazel.android.yml --fix
+```
+
+---
+
+## Supported site rules
+
+Web search keeps only results whose link yt-dlp can read. It decides that from
+`app/src/main/assets/ytdlp_sites.txt`, one rule per line, taken from each yt-dlp
+extractor's link pattern. The file is generated, never edited by hand.
+
+**Run it again whenever the bundled yt-dlp is updated**, and commit the new file with the
+update. Until then, Web search drops results from sites the new yt-dlp added.
+
+```bash
+python tools/sites/generate.py <path to a yt-dlp source tree>
+```
+
+With no path it reads the installed `yt_dlp` package. It prints the yt-dlp version, how many
+rules it wrote, and how many it left out and why. A pattern it cannot convert to Java is
+skipped, never guessed, and shows up in the `unsupported` count.
+
+Left out on purpose:
+
+- the generic extractor, and any rule that would take an arbitrary page (each rule is tried
+  against a few made-up links, and one that matches them is dropped);
+- extractors yt-dlp marks as not working.
+
+After regenerating, run `SupportedSitesTest`. It fails if a rule does not compile in Java,
+a well-known site stops matching, an ordinary page starts matching, or checking a page of
+results gets slow.
+
+```bash
+./gradlew :app:testGithubDebugUnitTest --tests "*SupportedSitesTest"
 ```
 

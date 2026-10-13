@@ -15,6 +15,9 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Public
+import com.hazel.android.ui.screens.more.WebSearchDialog
+import com.hazel.android.ui.screens.more.webSearchLabel
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -81,6 +84,8 @@ fun SearchOptionsSheet(
             ::SearchPrefs
         )
     }.collectAsState(initial = null)
+    val webServer by remember(context) { SettingsRepository.getWebSearchServer(context) }
+        .collectAsState(initial = null)
 
     var open by remember { mutableStateOf(SearchChoice.NONE) }
     val engineChoices = ListingSource.entries.map { it to stringResource(it.labelRes) }
@@ -91,6 +96,7 @@ fun SearchOptionsSheet(
         containerColor = batchSheetColor
     ) {
         val current = prefs ?: return@ModalBottomSheet
+        val server = webServer ?: return@ModalBottomSheet
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -114,6 +120,14 @@ fun SearchOptionsSheet(
                             title = stringResource(R.string.fetch_settings_search_on),
                             value = stringResource(current.source.labelRes),
                             onClick = { open = SearchChoice.SOURCE }
+                        )
+                    },
+                    {
+                        ValueSettingRow(
+                            icon = Icons.Filled.Public,
+                            title = stringResource(R.string.fetch_settings_web_search),
+                            value = webSearchLabel(server),
+                            onClick = { open = SearchChoice.WEB_SEARCH }
                         )
                     },
                     {
@@ -186,6 +200,11 @@ fun SearchOptionsSheet(
     when (open) {
         SearchChoice.NONE -> Unit
         SearchChoice.SOURCE -> SearchSourceSheet(selected = current.source, onDismiss = close)
+        SearchChoice.WEB_SEARCH -> WebSearchDialog(
+            server = webServer.orEmpty(),
+            onSave = { scope.launch { SettingsRepository.setWebSearchServer(context, it) }; close() },
+            onDismiss = close
+        )
         SearchChoice.SEARCH_ENGINE -> SingleChoiceDialog(
             title = stringResource(R.string.fetch_settings_search_with),
             choices = engineChoices,
@@ -238,4 +257,4 @@ private data class SearchPrefs(
     val playEngine: ListingSource
 )
 
-private enum class SearchChoice { NONE, SOURCE,SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, CLEAR_RESULTS, CLEAR_HISTORY }
+private enum class SearchChoice { NONE, SOURCE, WEB_SEARCH, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, CLEAR_RESULTS, CLEAR_HISTORY }
