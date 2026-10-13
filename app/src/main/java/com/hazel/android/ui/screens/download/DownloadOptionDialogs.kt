@@ -15,15 +15,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ClosedCaption
-import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -39,6 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.download.OneOffOptions
+import com.hazel.android.ui.screens.more.MultiChoiceDialog
+import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import androidx.compose.material.icons.filled.LiveTv
 import com.hazel.android.download.AUDIO_QUALITY_STEPS
 import com.hazel.android.download.DownloadOptions
@@ -64,42 +62,12 @@ fun SponsorBlockDialog(
     onConfirm: (DownloadOptions) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var checked by remember { mutableStateOf(options.sponsorBlockFilters) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Filled.Paid, null) },
-        title = { Text(stringResource(R.string.options_sponsorblock_title), fontWeight = FontWeight.Bold) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                SponsorBlock.CATEGORIES.forEach { (id, label) ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                checked = if (id in checked) checked - id else checked + id
-                            }
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = id in checked,
-                            onCheckedChange = {
-                                checked = if (it) checked + id else checked - id
-                            }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(label, style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                onConfirm(options.copy(sponsorBlockFilters = checked))
-            }) { Text(stringResource(R.string.options_sponsorblock_ok)) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.options_sponsorblock_cancel)) } }
+    MultiChoiceDialog(
+        title = stringResource(R.string.options_sponsorblock_title),
+        choices = SponsorBlock.CATEGORIES,
+        selected = options.sponsorBlockFilters,
+        onConfirm = { onConfirm(options.copy(sponsorBlockFilters = it)) },
+        onDismiss = onDismiss
     )
 }
 
@@ -394,47 +362,12 @@ fun AudioQualityDialog(
     onConfirm: (DownloadOptions) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var selected by remember { mutableStateOf(options.audioQuality) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Filled.HighQuality, null) },
-        title = { Text(stringResource(R.string.properties_bitrate), fontWeight = FontWeight.Bold) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                AUDIO_QUALITY_STEPS.forEach { (quality, labelRes) ->
-                    val isChecked = selected == quality
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { selected = quality }
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = isChecked,
-                            onClick = { selected = quality }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            stringResource(labelRes),
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = if (isChecked) FontWeight.SemiBold else FontWeight.Normal
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(options.copy(audioQuality = selected)) }) {
-                Text(stringResource(R.string.options_text_input_save))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.options_text_input_cancel))
-            }
-        }
+    SingleChoiceDialog(
+        title = stringResource(R.string.properties_bitrate),
+        choices = AUDIO_QUALITY_STEPS.map { (quality, labelRes) -> quality to stringResource(labelRes) },
+        selected = options.audioQuality,
+        onSelect = { onConfirm(options.copy(audioQuality = it)) },
+        onDismiss = onDismiss
     )
 }
 

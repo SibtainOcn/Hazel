@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -42,7 +41,6 @@ import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -232,30 +230,16 @@ fun StorageCleanupScreen(onBack: () -> Unit, sample: List<TempCategory>? = null)
                     )
                     if (optional.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(12.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                .toggleable(
-                                    value = includeOptional,
-                                    role = Role.Checkbox,
-                                    onValueChange = { includeOptional = it }
-                                )
-                                .padding(vertical = 4.dp, horizontal = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(checked = includeOptional, onCheckedChange = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                stringResource(
-                                    R.string.cleanup_confirm_all_include_link_reads,
-                                    formatFileSize(optional.sumOf { it.bytes }).ifBlank { "0 KB" }
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
-                        }
+                        ChoiceRow(
+                            label = stringResource(
+                                R.string.cleanup_confirm_all_include_link_reads,
+                                formatFileSize(optional.sumOf { it.bytes }).ifBlank { "0 KB" }
+                            ),
+                            description = null,
+                            chosen = includeOptional,
+                            role = Role.Checkbox,
+                            onClick = { includeOptional = !includeOptional }
+                        )
                     }
                 }
             },

@@ -38,8 +38,6 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -132,7 +130,6 @@ fun SearchScreen(
     }
 
     var menuOpen by remember { mutableStateOf(false) }
-    var showClearHistoryConfirm by remember { mutableStateOf(false) }
     // The remembered link a long press asked to remove, until the dialog is answered.
     var removing by remember { mutableStateOf<String?>(null) }
 
@@ -282,18 +279,6 @@ fun SearchScreen(
             )
         }
 
-        if (showClearHistoryConfirm) {
-            ClearHistoryDialog(
-                onConfirm = {
-                    showClearHistoryConfirm = false
-                    scope.launch {
-                        SearchHistoryRepository.clear(context)
-                    }
-                },
-                onDismiss = { showClearHistoryConfirm = false }
-            )
-        }
-
         removing?.let { entry ->
             RemoveEntryDialog(
                 entry = entry,
@@ -304,6 +289,13 @@ fun SearchScreen(
                     }
                 },
                 onDismiss = { removing = null }
+            )
+        }
+
+        if (menuOpen) {
+            SearchOptionsSheet(
+                onClearResults = onClearResults,
+                onDismiss = { menuOpen = false }
             )
         }
 
@@ -350,34 +342,12 @@ fun SearchScreen(
                     keyboardActions = KeyboardActions(onSearch = { submit() })
                 )
 
-                // With nothing typed there is nothing to add or clear, so the space the
-                // those controls occupy carries the menu instead. It is also the only
-                // moment the menu is worth offering: its actions clear things, and clearing
-                // is not what someone half way through typing a link is after.
+                // With nothing typed there is nothing to add or clear, so the space those
+                // controls occupy carries the search options instead. Someone half way
+                // through typing a link is not after them.
                 if (text.isBlank()) {
-                    Box {
-                        IconButton(onClick = { menuOpen = true }) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.search_more))
-                        }
-                        DropdownMenu(
-                            expanded = menuOpen,
-                            onDismissRequest = { menuOpen = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.search_clear_results)) },
-                                onClick = {
-                                    menuOpen = false
-                                    onClearResults()
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.search_clear_history)) },
-                                onClick = {
-                                    menuOpen = false
-                                    showClearHistoryConfirm = true
-                                }
-                            )
-                        }
+                    IconButton(onClick = { menuOpen = true }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.search_more))
                     }
                 }
 
@@ -540,26 +510,6 @@ fun SearchScreen(
         }
         }
     }
-}
-
-// Clear search history confirmation dialog raised outside the Dialog so it sits on top.
-// Called from within SearchScreen after the user picks "Clear search history" from the
-// 3-dot menu, matching the same guard used on the home screen bar.
-@Composable
-private fun ClearHistoryDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.search_clear_history_confirm_title), style = MaterialTheme.typography.titleMedium) },
-        text = { Text(stringResource(R.string.search_clear_history_confirm_body)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.search_clear_history), color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.search_cancel)) }
-        }
-    )
 }
 
 /**

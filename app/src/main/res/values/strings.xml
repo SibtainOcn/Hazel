@@ -54,6 +54,8 @@
     <string name="search_clear">Clear</string>
     <string name="search_clear_results">Clear results</string>
     <string name="search_clear_history">Clear search history</string>
+    <string name="search_under_maintenance">Under maintenance</string>
+    <string name="search_options_title">Search options</string>
     <string name="search_empty_history">Your searches and links will appear here</string>
     <string name="search_no_matches">No matches</string>
     <string name="search_remove">Remove</string>

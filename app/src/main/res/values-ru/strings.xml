@@ -43,6 +43,8 @@
     <string name="search_clear">Очистить</string>
     <string name="search_clear_results">Очистить результаты</string>
     <string name="search_clear_history">Очистить историю поиска</string>
+    <string name="search_under_maintenance">На обслуживании</string>
+    <string name="search_options_title">Параметры поиска</string>
     <string name="search_empty_history">Здесь появятся ваши запросы и ссылки</string>
     <string name="search_no_matches">Совпадений нет</string>
     <string name="search_remove">Удалить</string>

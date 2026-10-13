@@ -43,6 +43,8 @@
     <string name="search_clear">Hapus</string>
     <string name="search_clear_results">Hapus hasil</string>
     <string name="search_clear_history">Hapus riwayat pencarian</string>
+    <string name="search_under_maintenance">Sedang dalam pemeliharaan</string>
+    <string name="search_options_title">Opsi pencarian</string>
     <string name="search_empty_history">Pencarian dan tautan Anda akan muncul di sini</string>
     <string name="search_no_matches">Tidak ada yang cocok</string>
     <string name="search_remove">Hapus</string>
