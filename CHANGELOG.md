@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - On Download settings, a limit's chip moves under its title when a word of the title or its description would not fit beside it, as with a long translation or a large font on a narrow phone, in place of breaking the word in two. The chip's label wraps to a second line rather than being cut short.
 
 ### Fixed
+- Search on the site, opened from the header of a page read in the app (More, Documentation), shows its field and results. In the app's page view the screen height read as zero, so the panel had no room and only the blurred page showed. The page view now takes the full screen height, and the panel is sized by the screen it covers, so it fits on phones, tablets and desktops in either orientation.
 - Download settings, Appearance and Tools scroll. With a large font, a long translation or a short screen, the last rows of Download settings, and its storage note, were cut off below the navigation buttons and could not be reached (#87).
 - Settings descriptions show in full. A description longer than two lines ended in "…", which with a large font or a longer translation hid part of what a setting does.
 - "No limit" on Download settings and On/Off for the dark theme are translated; they showed in English in every language.

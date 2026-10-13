@@ -248,7 +248,7 @@ html.finder-open { overflow: hidden; }
 .finder[hidden] { display: none; }
 .finder.on { opacity: 1; }
 .f-panel {
-  width: 100%; max-width: 640px; max-height: 76vh; display: flex; flex-direction: column; overflow: hidden;
+  width: 100%; max-width: 640px; max-height: 100%; display: flex; flex-direction: column; overflow: hidden;
   background: var(--surface); border-radius: 22px; box-shadow: 0 30px 80px -24px rgba(0, 0, 0, .45);
   transform: translateY(-6px); transition: transform .15s ease;
 }
@@ -273,7 +273,7 @@ html.finder-open { overflow: hidden; }
 .f-note:empty { display: none; }
 @media (max-width: 640px) {
   .finder { padding: 8px; }
-  .f-panel { max-height: calc(100dvh - 16px); border-radius: 18px; }
+  .f-panel { border-radius: 18px; }
   .f-field { height: 58px; padding-left: 16px; }
   .f-field input { font-size: 16px; }
 }
