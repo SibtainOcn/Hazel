@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Search the Web (Beta), from Search on or the Web chip on the search screen. It finds videos on any site and shows only the links yt-dlp has a site for, checked on the phone against yt-dlp's own link rules, so every result opens and downloads like a pasted link. DuckDuckGo answers by default with nothing to set up; Web search in Fetch settings or Search options can point it at a SearXNG server instead.
 - A proxy for every connection Hazel makes (#92). Under More, Advanced, Proxy opens a screen to pick HTTP, HTTPS, SOCKS5 or SOCKS5h and enter the host, port and, if the proxy needs one, a user name and password; the switch beside it turns the proxy off and on without forgetting it, and takes effect without a restart. Reading links, downloads, search and its suggestions, playing in the app, NewPipe, thumbnails, PO tokens, the sign-in page, the guide and update checks all go through it. With a proxy on, a connection that cannot reach it fails with a message saying so, rather than going out directly, and the sign-in page does not open on a device whose web view cannot use the proxy. Cutting part of a video, and some live streams, cannot go through a SOCKS proxy, which ffmpeg does not support, and say so when they fail. A backup keeps the proxy but not its password.
 
 ### Changed
