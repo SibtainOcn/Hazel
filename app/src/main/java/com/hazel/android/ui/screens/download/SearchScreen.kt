@@ -63,6 +63,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -323,7 +324,7 @@ fun SearchScreen(
         ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            // ── Input row ──
+            // ── Title row: back, the screen's name, and the search options ──
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -333,49 +334,80 @@ fun SearchScreen(
                 IconButton(onClick = onDismiss) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBackIos, contentDescription = stringResource(R.string.search_back))
                 }
-
-                TextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    placeholder = { Text(stringResource(R.string.search_hint)) },
-                    singleLine = true,
-                    modifier = Modifier
-                        .weight(1f)
-                        .focusRequester(focusRequester),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.background,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                        focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-                        unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent
-                    ),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = { submit() })
+                Text(
+                    stringResource(R.string.fetch_settings_search),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
+                IconButton(onClick = { menuOpen = true }) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.search_more))
+                }
+            }
 
-                // The field's actions, packed close: add and clear appear as they apply,
-                // each just before the 3-dot, which keeps its place at the end throughout.
-                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides FIELD_ACTION_SIZE) {
-                    // Parks the typed link so another can be entered.
-                    if (text.isNotBlank() && !typingWords) {
-                        IconButton(onClick = { queueCurrent() }, modifier = Modifier.size(FIELD_ACTION_SIZE)) {
-                            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.search_add_link))
+            // ── The field, with clear inside it and add just after it ──
+            // A long link gets nearly the whole row, and the actions on what is typed sit
+            // beside it rather than crowding the title row.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 4.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+            Surface(
+                modifier = Modifier.weight(1f),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Row(
+                    modifier = Modifier.padding(end = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextField(
+                        value = text,
+                        onValueChange = { text = it },
+                        placeholder = { Text(stringResource(R.string.search_hint)) },
+                        singleLine = true,
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { submit() })
+                    )
+
+                    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides FIELD_ACTION_SIZE) {
+                        if (text.isNotBlank() || queued.isNotEmpty()) {
+                            IconButton(
+                                onClick = {
+                                    text = ""
+                                    queued = emptyList()
+                                },
+                                modifier = Modifier.size(FIELD_ACTION_SIZE)
+                            ) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = stringResource(R.string.search_clear),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
-                    }
-                    if (text.isNotBlank() || queued.isNotEmpty()) {
-                        IconButton(
-                            onClick = {
-                                text = ""
-                                queued = emptyList()
-                            },
-                            modifier = Modifier.size(FIELD_ACTION_SIZE)
-                        ) {
-                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_clear))
-                        }
-                    }
-                    IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(FIELD_ACTION_SIZE)) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.search_more))
                     }
                 }
+            }
+            // Parks the typed link so another can be entered.
+            if (text.isNotBlank() && !typingWords) {
+                IconButton(onClick = { queueCurrent() }) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.search_add_link))
+                }
+            }
             }
 
             // ── Where to search ──
@@ -663,8 +695,8 @@ private val BARE_ADDRESS = Regex("""^[\p{L}\p{N}-]+(\.[\p{L}\p{N}-]+)*\.[\p{L}]{
 
 private const val SUGGESTION_DELAY_MS = 250L
 
-/** The field's add, clear and 3-dot buttons: closer together than the usual 48 dp. */
-private val FIELD_ACTION_SIZE = 40.dp
+/** The clear and add buttons inside the field: smaller than the usual 48 dp, so they sit close. */
+private val FIELD_ACTION_SIZE = 36.dp
 
 /** Any run of whitespace, which is what separates one pasted link from the next. */
 private val WHITESPACE = Regex("""\s+""")
