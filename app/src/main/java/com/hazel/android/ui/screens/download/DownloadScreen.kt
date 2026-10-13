@@ -471,14 +471,6 @@ fun DownloadScreen(
                         .clipToBounds()
                 ) {
                     Column {
-                        if (state.fetchProgress.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                state.fetchProgress,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
                         Spacer(modifier = Modifier.height(16.dp))
                         // As many cards as the screen has room for, each at its real size, so
                         // the last one runs off the bottom rather than being squeezed. A tall
@@ -601,14 +593,6 @@ fun DownloadScreen(
                         if (state.isFetching && orderedResults.isNotEmpty()) {
                             item(key = "fetching") {
                                 Column {
-                                    if (state.fetchProgress.isNotBlank()) {
-                                        Spacer(modifier = Modifier.height(12.dp))
-                                        Text(
-                                            state.fetchProgress,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
                                     ShimmerHost(modifier = Modifier.fillMaxWidth()) {
                                         Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                                             Spacer(modifier = Modifier.height(4.dp))
