@@ -40,6 +40,7 @@
     <string name="search_back">返回</string>
     <string name="search_more">更多</string>
     <string name="search_add_link">再添加一个链接</string>
+    <string name="search_link_already_added">已在列表中</string>
     <string name="search_clear">清除</string>
     <string name="search_clear_results">清空结果</string>
     <string name="search_clear_history">清除搜索记录</string>
@@ -54,6 +55,7 @@
     <string name="search_remove">移除</string>
     <string name="search_all">全部搜索</string>
     <string name="search_remove_confirm_body">要从搜索记录中移除吗？</string>
+    <string name="search_remove_from_list_body">要从列表中移除此链接吗？</string>
     <string name="search_entry_copied">已复制到剪贴板</string>
     <string name="search_edit_before">搜索前先编辑</string>
     <string name="search_paste_and_fetch">粘贴并读取</string>

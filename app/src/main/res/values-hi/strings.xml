@@ -40,6 +40,7 @@
     <string name="search_back">वापस</string>
     <string name="search_more">और</string>
     <string name="search_add_link">एक और लिंक जोड़ें</string>
+    <string name="search_link_already_added">पहले से सूची में है</string>
     <string name="search_clear">मिटाएँ</string>
     <string name="search_clear_results">परिणाम हटाएँ</string>
     <string name="search_clear_history">खोज इतिहास मिटाएँ</string>
@@ -54,6 +55,7 @@
     <string name="search_remove">हटाएँ</string>
     <string name="search_all">सब खोजें</string>
     <string name="search_remove_confirm_body">खोज इतिहास से हटाएँ?</string>
+    <string name="search_remove_from_list_body">इस लिंक को सूची से हटाएँ?</string>
     <string name="search_entry_copied">क्लिपबोर्ड पर कॉपी किया गया</string>
     <string name="search_edit_before">खोजने से पहले बदलें</string>
     <string name="search_paste_and_fetch">चिपकाएँ और खोजें</string>

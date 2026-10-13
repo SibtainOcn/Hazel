@@ -40,6 +40,7 @@
     <string name="search_back">Kembali</string>
     <string name="search_more">Lainnya</string>
     <string name="search_add_link">Tambah tautan lain</string>
+    <string name="search_link_already_added">Sudah ada di daftar</string>
     <string name="search_clear">Hapus</string>
     <string name="search_clear_results">Hapus hasil</string>
     <string name="search_clear_history">Hapus riwayat pencarian</string>
@@ -54,6 +55,7 @@
     <string name="search_remove">Hapus</string>
     <string name="search_all">Cari semua</string>
     <string name="search_remove_confirm_body">Hapus dari riwayat penelusuran?</string>
+    <string name="search_remove_from_list_body">Hapus tautan ini dari daftar?</string>
     <string name="search_entry_copied">Disalin ke papan klip</string>
     <string name="search_edit_before">Edit sebelum mencari</string>
     <string name="search_paste_and_fetch">Tempel dan ambil</string>
