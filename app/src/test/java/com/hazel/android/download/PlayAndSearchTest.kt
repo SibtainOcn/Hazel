@@ -157,7 +157,7 @@ class PlayAndSearchTest {
         assertEquals("ytsearch25:lofi beats", SearchSource.YOUTUBE.ytDlpTarget("lofi beats", 25))
         assertEquals("scsearch10:rain", SearchSource.SOUNDCLOUD.ytDlpTarget("rain", 10))
         assertEquals(
-            "https://music.youtube.com/search?q=lofi+beats",
+            "https://music.youtube.com/search?q=lofi+beats#songs",
             SearchSource.YOUTUBE_MUSIC.ytDlpTarget("lofi beats", 25)
         )
         assertNull(SearchSource.BANDCAMP.ytDlpTarget("anything", 25))
@@ -190,7 +190,7 @@ class PlayAndSearchTest {
             assertFalse(MediaSearch.newPipeAfter(SearchSource.BANDCAMP, engine))
         }
         // Only yt-dlp can search these: NewPipe is never asked.
-        listOf(SearchSource.BILIBILI, SearchSource.PRX, SearchSource.ROKFIN).forEach { site ->
+        listOf(SearchSource.BILIBILI).forEach { site ->
             listOf(newPipe, ytDlp).forEach { engine ->
                 assertFalse(MediaSearch.newPipeFirst(site, engine), "$site, $engine")
                 assertFalse(MediaSearch.newPipeAfter(site, engine), "$site, $engine")

@@ -89,7 +89,7 @@
 - 選擇不同的下載格式與容器
 
 ### 搜尋與播放
-- **搜尋** - 輸入關鍵字而非連結，即可搜尋 YouTube、YouTube Music、SoundCloud、Bandcamp、Bilibili、PRX 或 Rokfin，可選擇開啟搜尋建議
+- **搜尋** - 輸入關鍵字而非連結，即可搜尋 YouTube、YouTube Music、SoundCloud、Bandcamp 或 Bilibili，可選擇開啟搜尋建議
 - **先播放再下載** - 直接在卡片上播放任何結果或連結，支援進度列、輕點兩下跳轉、全螢幕與畫質選擇，適用於 Hazel 能讀取的任何網站
 - **剪輯** - 只下載影片或音軌的一部分，在即時預覽中選擇範圍
 - **直播** - 從直播開頭開始錄製，或等待首播後再下載
