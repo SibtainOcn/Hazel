@@ -45,6 +45,7 @@ import com.hazel.android.ui.screens.more.ConfirmSettingDialog
 import com.hazel.android.ui.screens.more.SettingsSection
 import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import com.hazel.android.ui.screens.more.SwitchSettingRow
+import com.hazel.android.ui.screens.more.engineSummary
 import com.hazel.android.ui.screens.more.ValueSettingRow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
@@ -191,7 +192,8 @@ fun SearchOptionsSheet(
             choices = engineChoices,
             selected = current.searchEngine,
             onSelect = { scope.launch { SettingsRepository.setSearchEngine(context, it) }; close() },
-            onDismiss = close
+            onDismiss = close,
+            describe = { engineSummary(it) }
         )
         SearchChoice.SEARCH_RESULTS -> SingleChoiceDialog(
             title = stringResource(R.string.fetch_settings_search_results),
@@ -205,7 +207,8 @@ fun SearchOptionsSheet(
             choices = engineChoices,
             selected = current.playEngine,
             onSelect = { scope.launch { SettingsRepository.setPlayEngine(context, it) }; close() },
-            onDismiss = close
+            onDismiss = close,
+            describe = { engineSummary(it) }
         )
         SearchChoice.CLEAR_RESULTS -> ConfirmSettingDialog(
             title = stringResource(R.string.download_clear_confirm_title),
@@ -238,4 +241,4 @@ private data class SearchPrefs(
     val playEngine: ListingSource
 )
 
-private enum class SearchChoice { NONE, SOURCE,SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, CLEAR_RESULTS, CLEAR_HISTORY }
+private enum class SearchChoice { NONE, SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, CLEAR_RESULTS, CLEAR_HISTORY }
