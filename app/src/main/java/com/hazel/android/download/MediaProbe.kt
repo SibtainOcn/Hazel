@@ -147,7 +147,9 @@ object MediaProbe {
         access: SiteAccess = SiteAccess.NONE,
         fetchMode: FetchMode = FetchMode.DEFAULT,
         forceIpv4: Boolean = false,
-        processId: String = PROBE_PROCESS_ID
+        processId: String = PROBE_PROCESS_ID,
+        /** The most entries to list, for a search page that would otherwise page on; 0 for all. */
+        maxItems: Int = 0
     ): LinkContents = withContext(Dispatchers.IO) {
         // The same two-step as a single read, and for the same reason: a public list is
         // read anonymously, and the sign-in is kept for the one that will not open
@@ -158,7 +160,7 @@ object MediaProbe {
             try {
                 return@withContext listOne(
                     url, cacheDir, attempt, fetchMode, forceIpv4, processId,
-                    signedIn = attempt.hasCookies
+                    signedIn = attempt.hasCookies, maxItems = maxItems
                 )
             } catch (e: Exception) {
                 val last = index == attempts.lastIndex
@@ -178,11 +180,13 @@ object MediaProbe {
         fetchMode: FetchMode,
         forceIpv4: Boolean,
         processId: String,
-        signedIn: Boolean
+        signedIn: Boolean,
+        maxItems: Int
     ): LinkContents {
         val request = YoutubeDLRequest(url).apply {
             applySharedOptions(url, cacheDir, access, fetchMode, forceIpv4, singleItem = false)
             addOption("--flat-playlist")
+            if (maxItems > 0) addOption("--playlist-items", "1:$maxItems")
             // Entries are emitted as they are found rather than after the whole collection
             // has been walked, which is what stops a long playlist stalling on its own tail.
             addOption("--lazy-playlist")
@@ -232,8 +236,9 @@ object MediaProbe {
             entries = listed
         )
         // Kept so the same collection pasted again opens as the set of cards it opened as
-        // last time, without walking it a second time.
-        InfoCache.putListing(url, many)
+        // last time, without walking it a second time. A listing cut short is not the whole
+        // collection, so it is not kept for a paste of the same link.
+        if (maxItems <= 0) InfoCache.putListing(url, many)
         return many
     }
 

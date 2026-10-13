@@ -90,7 +90,7 @@ English
 - Select different download formats and containers
 
 ### Search & Play
-- **Search** - type words instead of a link to search YouTube, YouTube Music, SoundCloud, Bandcamp, Bilibili, Niconico, PRX or Rokfin, with optional search suggestions
+- **Search** - type words instead of a link to search YouTube, YouTube Music, SoundCloud, Bandcamp or Bilibili, with optional search suggestions
 - **Play before you download** - play any result or link right on its card, with a seek bar, double tap to skip, full screen and a quality picker, on any site Hazel can read
 - **Cut** - download only part of a video or track, choosing the range on a live preview
 - **Live streams** - record from the start of a live stream, or wait for a premiere and then download it

@@ -1,5 +1,7 @@
 package com.hazel.android.download
 
+import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.MediaSearch
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.download.extractor.SearchSuggestions
 import com.hazel.android.download.playback.StreamResolver
@@ -156,7 +158,7 @@ class PlayAndSearchTest {
         assertEquals("ytsearch25:lofi beats", SearchSource.YOUTUBE.ytDlpTarget("lofi beats", 25))
         assertEquals("scsearch10:rain", SearchSource.SOUNDCLOUD.ytDlpTarget("rain", 10))
         assertEquals(
-            "https://music.youtube.com/search?q=lofi+beats",
+            "https://music.youtube.com/search?q=lofi+beats#songs",
             SearchSource.YOUTUBE_MUSIC.ytDlpTarget("lofi beats", 25)
         )
         assertNull(SearchSource.BANDCAMP.ytDlpTarget("anything", 25))
@@ -170,6 +172,31 @@ class PlayAndSearchTest {
             SearchSuggestions.parse("""["oggy",["oggy and the cockroaches","oggy"],[],{}]""")
         )
         assertEquals(emptyList(), SearchSuggestions.parse("not json"))
+    }
+
+    @Test
+    fun eachSearchEngineHasTheOtherBehindItWhereBothCanSearch() {
+        val newPipe = ListingSource.NEWPIPE
+        val ytDlp = ListingSource.YT_DLP
+        // Both can search these: the picked one first, the other behind it.
+        listOf(SearchSource.YOUTUBE, SearchSource.YOUTUBE_MUSIC, SearchSource.SOUNDCLOUD).forEach { site ->
+            assertTrue(MediaSearch.newPipeFirst(site, newPipe), "$site, NewPipe picked")
+            assertFalse(MediaSearch.newPipeAfter(site, newPipe), "$site, NewPipe picked")
+            assertFalse(MediaSearch.newPipeFirst(site, ytDlp), "$site, yt-dlp picked")
+            assertTrue(MediaSearch.newPipeAfter(site, ytDlp), "$site, yt-dlp picked")
+        }
+        // Only NewPipe can search Bandcamp, whatever is picked.
+        listOf(newPipe, ytDlp).forEach { engine ->
+            assertTrue(MediaSearch.newPipeFirst(SearchSource.BANDCAMP, engine))
+            assertFalse(MediaSearch.newPipeAfter(SearchSource.BANDCAMP, engine))
+        }
+        // Only yt-dlp can search these: NewPipe is never asked.
+        listOf(SearchSource.BILIBILI).forEach { site ->
+            listOf(newPipe, ytDlp).forEach { engine ->
+                assertFalse(MediaSearch.newPipeFirst(site, engine), "$site, $engine")
+                assertFalse(MediaSearch.newPipeAfter(site, engine), "$site, $engine")
+            }
+        }
     }
 
     @Test
