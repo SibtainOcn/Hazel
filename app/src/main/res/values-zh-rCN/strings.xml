@@ -748,10 +748,7 @@
     <string name="save_location_error_card_folder">无法在存储卡上创建 %1$s，下载内容将保存到你选择的文件夹。</string>
     <string name="save_fallback_title">已保存到其他位置</string>
     <string name="save_fallback_body">无法写入 %1$s。存储卡可能已被移除、已满或不再允许访问。文件已改为保存到 %2$s。</string>
-    <string name="home_start_with">从这里开始</string>
-    <string name="home_start_paste">粘贴链接</string>
-    <string name="home_start_search">搜索</string>
-    <string name="home_start_downloads">下载</string>
+    <string name="home_empty_hint">粘贴链接或搜索以开始</string>
     <string name="more_getting_started">入门指南</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">已开始下载</string>

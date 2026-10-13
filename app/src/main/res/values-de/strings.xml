@@ -757,10 +757,7 @@
     <string name="save_location_error_card_folder">%1$s konnte auf der Karte nicht erstellt werden, daher wird im gewählten Ordner gespeichert.</string>
     <string name="save_fallback_title">An anderem Ort gespeichert</string>
     <string name="save_fallback_body">Diese Dateien konnten nicht in %1$s geschrieben werden. Die Karte wurde vielleicht entfernt, ist voll oder erlaubt keinen Zugriff mehr. Sie wurden stattdessen in %2$s gespeichert.</string>
-    <string name="home_start_with">Beginne mit</string>
-    <string name="home_start_paste">Link einfügen</string>
-    <string name="home_start_search">Suchen</string>
-    <string name="home_start_downloads">Downloads</string>
+    <string name="home_empty_hint">Füge einen Link ein oder suche, um loszulegen</string>
     <string name="more_getting_started">Erste Schritte</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">Download gestartet</string>

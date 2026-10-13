@@ -136,9 +136,7 @@ fun DownloadScreen(
     onSharesConsumed: () -> Unit = {},
     downloadViewModel: DownloadViewModel = viewModel(),
     /** Opens the queue screen, where a download in hand is paused, resumed or cancelled. */
-    onOpenQueue: () -> Unit = {},
-    /** Opens the downloads list, from the starters on an empty home screen. */
-    onOpenDownloads: () -> Unit = {}
+    onOpenQueue: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -196,13 +194,16 @@ fun DownloadScreen(
     // the screen is for; it separates itself from the list instead, so the two stop reading
     // as one surface the moment they start overlapping. Asked of the scroll itself rather
     // than of the first visible row: the empty screen leads with a row of no height, which
-    // made its starters the first visible row and drew the separator over a blank screen.
-    val listScrolled by remember { derivedStateOf { listState.canScrollBackward } }
+    // made its empty-screen hint the first visible row and drew the separator over a blank screen.
+    //
+    // Only with cards in the list. With none, the error row that leads it has no height, so
+    // the list reports itself as past that row, and able to scroll back to it, without
+    // anything having moved; that drew the separator and the scrollbar over an empty screen.
+    val listScrolled by remember {
+        derivedStateOf { listState.canScrollBackward && state.results.isNotEmpty() }
+    }
 
     var searchOpen by remember { mutableStateOf(false) }
-    // Counts taps on the empty screen's Paste starter; the paste itself is set up further
-    // down, beside the paste button it shares its work with.
-    var pasteRequests by remember { mutableStateOf(0) }
     // The one card playing, if any. Starting another stops it. The player itself is held
     // here rather than in the card, so full screen cannot drop it along with the card when
     // the list lays itself out again.
@@ -524,7 +525,10 @@ fun DownloadScreen(
                             end = 20.dp,
                             // Room for the action that floats over the list, on the same terms as
                             // the action itself.
-                            bottom = 96.dp
+                            // Kept only while there are cards: on an empty screen it made the
+                            // list taller than its space, and the hint sat that much above the
+                            // middle.
+                            bottom = if (orderedResults.isEmpty()) 0.dp else LIST_BOTTOM_ROOM
                         )
                     ) {
                         gridItems(orderedResults, columns, SKELETON_SPACING, key = { it.url }) { info ->
@@ -668,46 +672,34 @@ fun DownloadScreen(
                             }
                         }
 
-                        // Nothing read yet: three ways to start, as plain chips rather than a
-                        // picture, so the empty screen offers something to do.
+                        // Nothing read yet: a faint mark and one line, and nothing to tap. The
+                        // search bar above and the paste button already offer every way to
+                        // start, so the middle of the screen stays quiet.
                         if (!incognito && state.results.isEmpty() && !state.isFetching) {
-                            item(key = "starters") {
-                                // Fills the space under the search bar, so the chips sit
-                                // in its middle rather than near the top.
+                            item(key = "empty") {
+                                // Fills the space between the search bar and the bottom bar,
+                                // so the line sits in its middle.
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .fillParentMaxHeight(),
+                                        .fillParentMaxHeight()
+                                        .padding(horizontal = 32.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
-                                    Text(
-                                        stringResource(R.string.home_start_with),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_download_minimal),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(40.dp),
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
                                     )
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    androidx.compose.foundation.layout.FlowRow(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                                        modifier = Modifier.padding(horizontal = 24.dp)
-                                    ) {
-                                        com.hazel.android.ui.components.FlatChip(
-                                            label = stringResource(R.string.home_start_paste),
-                                            onClick = { pasteRequests++ }
-                                        )
-                                        com.hazel.android.ui.components.FlatChip(
-                                            label = stringResource(R.string.home_start_search),
-                                            onClick = {
-                                                cameFromShare = false
-                                                searchOpen = true
-                                            }
-                                        )
-                                        com.hazel.android.ui.components.FlatChip(
-                                            label = stringResource(R.string.home_start_downloads),
-                                            onClick = onOpenDownloads
-                                        )
-                                    }
+                                    Spacer(modifier = Modifier.height(14.dp))
+                                    Text(
+                                        stringResource(R.string.home_empty_hint),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                                        textAlign = TextAlign.Center
+                                    )
                                 }
                             }
                         }
@@ -744,11 +736,14 @@ fun DownloadScreen(
                             }
                         }
                     }
-                    FastScrollbar(
-                        listState,
-                        Modifier.align(Alignment.TopEnd),
-                        trackPadding = androidx.compose.foundation.layout.PaddingValues(top = 12.dp, bottom = 96.dp)
-                    )
+                    // Nothing to move through on an empty screen, so no bar over it.
+                    if (orderedResults.isNotEmpty()) {
+                        FastScrollbar(
+                            listState,
+                            Modifier.align(Alignment.TopEnd),
+                            trackPadding = androidx.compose.foundation.layout.PaddingValues(top = 12.dp, bottom = LIST_BOTTOM_ROOM)
+                        )
+                    }
                 }
             }
         }
@@ -804,8 +799,6 @@ fun DownloadScreen(
                         }
                     }
         }
-
-        LaunchedEffect(pasteRequests) { if (pasteRequests > 0) pasteFromClipboard() }
 
         // The paste button shows while the clipboard holds something to paste, the way a
         // copied link is nearly always what brings someone here. Its label shows for a
@@ -1390,6 +1383,9 @@ private fun MediaCard(
 
 /** Gap between skeleton cards, the same as between the cards they stand in for. */
 private val SKELETON_SPACING = 20.dp
+
+/** Room at the foot of the results list for the action that floats over it. */
+private val LIST_BOTTOM_ROOM = 96.dp
 
 /** A row of [columns] skeleton cards, the width the real ones will take. */
 @Composable
