@@ -430,6 +430,7 @@ internal fun ChoiceRow(
                 color = if (chosen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
             description?.let { line ->
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     line,
                     style = MaterialTheme.typography.bodySmall,
