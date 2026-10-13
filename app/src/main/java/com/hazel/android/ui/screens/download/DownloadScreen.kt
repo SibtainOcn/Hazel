@@ -195,7 +195,13 @@ fun DownloadScreen(
     // as one surface the moment they start overlapping. Asked of the scroll itself rather
     // than of the first visible row: the empty screen leads with a row of no height, which
     // made its empty-screen hint the first visible row and drew the separator over a blank screen.
-    val listScrolled by remember { derivedStateOf { listState.canScrollBackward } }
+    //
+    // Only with cards in the list. With none, the error row that leads it has no height, so
+    // the list reports itself as past that row, and able to scroll back to it, without
+    // anything having moved; that drew the separator and the scrollbar over an empty screen.
+    val listScrolled by remember {
+        derivedStateOf { listState.canScrollBackward && state.results.isNotEmpty() }
+    }
 
     var searchOpen by remember { mutableStateOf(false) }
     // The one card playing, if any. Starting another stops it. The player itself is held
@@ -519,7 +525,10 @@ fun DownloadScreen(
                             end = 20.dp,
                             // Room for the action that floats over the list, on the same terms as
                             // the action itself.
-                            bottom = LIST_BOTTOM_ROOM
+                            // Kept only while there are cards: on an empty screen it made the
+                            // list taller than its space, and the hint sat that much above the
+                            // middle.
+                            bottom = if (orderedResults.isEmpty()) 0.dp else LIST_BOTTOM_ROOM
                         )
                     ) {
                         gridItems(orderedResults, columns, SKELETON_SPACING, key = { it.url }) { info ->
@@ -668,16 +677,13 @@ fun DownloadScreen(
                         // start, so the middle of the screen stays quiet.
                         if (!incognito && state.results.isEmpty() && !state.isFetching) {
                             item(key = "empty") {
-                                // Fills the space under the search bar, so the line sits in
-                                // its middle rather than near the top. The list keeps room at
-                                // its foot for the floating action, which this height leaves
-                                // out; the same room above puts the line in the middle of the
-                                // whole space between the search bar and the bottom bar.
+                                // Fills the space between the search bar and the bottom bar,
+                                // so the line sits in its middle.
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .fillParentMaxHeight()
-                                        .padding(top = LIST_BOTTOM_ROOM, start = 32.dp, end = 32.dp),
+                                        .padding(horizontal = 32.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
@@ -730,11 +736,14 @@ fun DownloadScreen(
                             }
                         }
                     }
-                    FastScrollbar(
-                        listState,
-                        Modifier.align(Alignment.TopEnd),
-                        trackPadding = androidx.compose.foundation.layout.PaddingValues(top = 12.dp, bottom = 96.dp)
-                    )
+                    // Nothing to move through on an empty screen, so no bar over it.
+                    if (orderedResults.isNotEmpty()) {
+                        FastScrollbar(
+                            listState,
+                            Modifier.align(Alignment.TopEnd),
+                            trackPadding = androidx.compose.foundation.layout.PaddingValues(top = 12.dp, bottom = LIST_BOTTOM_ROOM)
+                        )
+                    }
                 }
             }
         }
