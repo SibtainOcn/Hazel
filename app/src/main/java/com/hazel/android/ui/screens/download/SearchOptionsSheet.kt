@@ -1,6 +1,5 @@
 package com.hazel.android.ui.screens.download
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,8 +55,7 @@ import kotlinx.coroutines.launch
  * entry points show the same thing. Its rows are the search and playback rows of Fetch
  * settings, written to the same preferences, so a change here shows there and back.
  *
- * Choosing where to search is getting a picker of its own; until it lands, that row says so
- * rather than opening the old list.
+ * Choosing where to search opens [SearchSourceSheet] over this one.
  *
  * Every dialog a row raises, the two clear confirmations included, opens over the sheet and
  * leaves it in place underneath, so backing out of one lands back on the sheet.
@@ -115,9 +113,7 @@ fun SearchOptionsSheet(
                             icon = Icons.Filled.TravelExplore,
                             title = stringResource(R.string.fetch_settings_search_on),
                             value = stringResource(current.source.labelRes),
-                            onClick = {
-                                Toast.makeText(context, R.string.search_under_maintenance, Toast.LENGTH_SHORT).show()
-                            }
+                            onClick = { open = SearchChoice.SOURCE }
                         )
                     },
                     {
@@ -189,6 +185,7 @@ fun SearchOptionsSheet(
     val close = { open = SearchChoice.NONE }
     when (open) {
         SearchChoice.NONE -> Unit
+        SearchChoice.SOURCE -> SearchSourceSheet(selected = current.source, onDismiss = close)
         SearchChoice.SEARCH_ENGINE -> SingleChoiceDialog(
             title = stringResource(R.string.fetch_settings_search_with),
             choices = engineChoices,
@@ -241,4 +238,4 @@ private data class SearchPrefs(
     val playEngine: ListingSource
 )
 
-private enum class SearchChoice { NONE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, CLEAR_RESULTS, CLEAR_HISTORY }
+private enum class SearchChoice { NONE, SOURCE,SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, CLEAR_RESULTS, CLEAR_HISTORY }

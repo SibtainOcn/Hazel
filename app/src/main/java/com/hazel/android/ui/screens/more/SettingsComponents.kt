@@ -392,6 +392,8 @@ private fun ChoiceDialog(
  * takes the accent tint and a filled check at its end; the rest carry nothing there, so the
  * eye goes straight to what is set. Shared by every place the app offers a choice, so a
  * pick looks the same in a dialog, a sheet, or a confirmation.
+ *
+ * [leading] sits before the label, such as a site's mark.
  */
 @Composable
 internal fun ChoiceRow(
@@ -400,7 +402,8 @@ internal fun ChoiceRow(
     chosen: Boolean,
     role: Role,
     onClick: () -> Unit,
-    shape: RoundedCornerShape = RoundedCornerShape(GroupOuter)
+    shape: RoundedCornerShape = RoundedCornerShape(GroupOuter),
+    leading: (@Composable () -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
@@ -415,6 +418,10 @@ internal fun ChoiceRow(
             .padding(horizontal = 18.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (leading != null) {
+            leading()
+            Spacer(modifier = Modifier.width(14.dp))
+        }
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 label,
@@ -452,7 +459,7 @@ internal fun ChoiceRow(
 
 /** A full pill button for the foot of a dialog: the accent for the action, a tone for Cancel. */
 @Composable
-private fun DialogButton(text: String, filled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun DialogButton(text: String, filled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         onClick = onClick,
         shape = CircleShape,

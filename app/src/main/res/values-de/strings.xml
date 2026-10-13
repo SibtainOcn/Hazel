@@ -45,6 +45,10 @@
     <string name="search_clear_history">Suchverlauf löschen</string>
     <string name="search_under_maintenance">Wird gerade überarbeitet</string>
     <string name="search_options_title">Suchoptionen</string>
+    <string name="search_web_title">Im Web suchen</string>
+    <string name="search_web_beta">Beta</string>
+    <string name="search_web_notice">Findet Videos auf jeder Website, von der Hazel laden kann. Wiedergabe und Downloads funktionieren möglicherweise nicht auf jeder Website.</string>
+    <string name="search_web_continue">Weiter</string>
     <string name="search_empty_history">Deine Suchen und Links erscheinen hier</string>
     <string name="search_no_matches">Keine Treffer</string>
     <string name="search_remove">Entfernen</string>

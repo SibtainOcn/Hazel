@@ -36,6 +36,12 @@ import com.hazel.android.ui.screens.download.GettingStartedDialog
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.ui.screens.download.NoResultsDialog
 import com.hazel.android.ui.screens.download.RemoveEntryDialog
+import com.hazel.android.ui.screens.download.SearchOptionsSheet
+import com.hazel.android.ui.screens.download.SearchSourceSheet
+import com.hazel.android.ui.screens.download.SponsorBlockDialog
+import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.SearchSource
+import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import com.hazel.android.ui.screens.more.AdvancedScreen
 import com.hazel.android.ui.screens.more.AppearanceScreen
 import com.hazel.android.ui.screens.more.ProxyScreen
@@ -381,5 +387,55 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
     fun languageSheet() {
         show { LanguageSheet(current = tag, onConfirm = {}, onDismiss = {}) }
         checkAndCapture("language")
+    }
+
+    /** Waits for [text] to be drawn, for screens that read their settings before showing. */
+    private fun awaitText(text: String) {
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText(text, useUnmergedTree = true)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun searchOptionsSheet() {
+        show { SearchOptionsSheet(onClearResults = {}, onDismiss = {}) }
+        awaitText(string(R.string.search_clear_history))
+        checkAndCapture("search_options")
+    }
+
+    @Test
+    fun searchSourceSheet() {
+        show { SearchSourceSheet(selected = SearchSource.YOUTUBE, onDismiss = {}) }
+        checkAndCapture("search_source")
+    }
+
+    @Test
+    fun webSearchNotice() {
+        show { SearchSourceSheet(selected = SearchSource.YOUTUBE, onDismiss = {}) }
+        compose.onAllNodesWithText(string(R.string.search_web_title), useUnmergedTree = true)[0].performClick()
+        awaitText(string(R.string.search_web_notice))
+        checkAndCapture("web_search_notice")
+    }
+
+    @Test
+    fun singleChoiceDialog() {
+        show {
+            SingleChoiceDialog(
+                title = string(R.string.fetch_settings_search_with),
+                choices = ListingSource.entries.map { it to string(it.labelRes) },
+                selected = ListingSource.NEWPIPE,
+                onSelect = {},
+                onDismiss = {},
+                describe = { string(it.descriptionRes) }
+            )
+        }
+        checkAndCapture("single_choice")
+    }
+
+    @Test
+    fun multiChoiceDialog() {
+        show { SponsorBlockDialog(options = DownloadOptions(sponsorBlockFilters = setOf("sponsor")), onConfirm = {}, onDismiss = {}) }
+        checkAndCapture("multi_choice")
     }
 }
