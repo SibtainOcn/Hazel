@@ -16,6 +16,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -69,6 +70,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.ui.components.FastScrollbar
+import com.hazel.android.ui.components.gridColumns
+import com.hazel.android.ui.components.gridItems
 import com.hazel.android.data.DownloadQueueRepository
 import com.hazel.android.data.FailedDownload
 import com.hazel.android.data.FailedDownloadRepository
@@ -355,8 +358,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     isEmpty = running.isEmpty(),
                     emptyIcon = Icons.Filled.Download,
                     emptyText = stringResource(R.string.queue_empty_running)
-                ) { shrink ->
-                    items(running, key = { "running_${it.info.url}" }) { item ->
+                ) { shrink, columns ->
+                    gridItems(running, columns, CARD_SPACING, key = { "running_${it.info.url}" }) { item ->
                         val paused = item.batchItem?.state == BatchState.PAUSED
                         val inRun = !paused && (item.isDownloading || item.info.url == state.active?.url)
                         // A paused link is measured by its folder, whole, rather than by the
@@ -405,8 +408,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     isEmpty = waiting.isEmpty(),
                     emptyIcon = Icons.Filled.HourglassEmpty,
                     emptyText = stringResource(R.string.queue_empty_queued)
-                ) { shrink ->
-                    items(waiting, key = { "queued_${it.url}" }) { item ->
+                ) { shrink, columns ->
+                    gridItems(waiting, columns, CARD_SPACING, key = { "queued_${it.url}" }) { item ->
                         Box(modifier = Modifier.scrollShrink(shrink)) {
                             QueuedCard(
                                 item = item,
@@ -421,8 +424,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     isEmpty = failed.isEmpty(),
                     emptyIcon = Icons.Filled.ErrorOutline,
                     emptyText = stringResource(R.string.history_empty_failed)
-                ) { shrink ->
-                    items(failed, key = { "failed_${it.id}" }) { item ->
+                ) { shrink, columns ->
+                    gridItems(failed, columns, CARD_SPACING, key = { "failed_${it.id}" }) { item ->
                         Box(modifier = Modifier.scrollShrink(shrink)) {
                         FailedCard(
                             item = item,
@@ -629,7 +632,7 @@ private fun QueueList(
     isEmpty: Boolean,
     emptyIcon: ImageVector,
     emptyText: String,
-    content: androidx.compose.foundation.lazy.LazyListScope.(shrink: ScrollShrink) -> Unit
+    content: androidx.compose.foundation.lazy.LazyListScope.(shrink: ScrollShrink, columns: Int) -> Unit
 ) {
     if (isEmpty) {
         Column(
@@ -655,17 +658,22 @@ private fun QueueList(
     } else {
         val listState = rememberLazyListState()
         val shrink = rememberScrollShrink()
-        Box(modifier = Modifier.fillMaxSize()) {
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            // A wide screen lays the cards out side by side, inside the list's padding.
+            val columns = gridColumns(maxWidth - 40.dp)
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize().nestedScroll(shrink),
                 contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) { content(shrink) }
+                verticalArrangement = Arrangement.spacedBy(CARD_SPACING)
+            ) { content(shrink, columns) }
             FastScrollbar(listState, Modifier.align(Alignment.TopEnd), PaddingValues(top = 16.dp, bottom = 24.dp))
         }
     }
 }
+
+/** The gap between cards, down the list and across it. */
+private val CARD_SPACING = 12.dp
 
 @Composable
 private fun ConfirmDialog(

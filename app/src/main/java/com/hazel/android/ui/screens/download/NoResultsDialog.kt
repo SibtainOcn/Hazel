@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.ActionsRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -160,9 +161,12 @@ fun NoResultsDialog(
             }
         },
         confirmButton = {
-            // The link on its own at the start, the answers to the failure at the end.
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                if (!link.isNullOrBlank()) {
+            // The link on its own at the start, the answers to the failure at the end. The
+            // answers move to a line of their own when they do not fit beside the link.
+            ActionsRow(
+                modifier = Modifier.fillMaxWidth(),
+                spacing = 4.dp,
+                start = if (link.isNullOrBlank()) null else { {
                     IconButton(onClick = {
                         com.hazel.android.util.copyToClipboard(context, link)
                         android.widget.Toast.makeText(
@@ -175,12 +179,11 @@ fun NoResultsDialog(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                }
-                Spacer(modifier = Modifier.weight(1f))
+                } }
+            ) {
                 TextButton(onClick = onCopyLog) {
                     Text(stringResource(R.string.no_results_copy_log), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Spacer(modifier = Modifier.width(4.dp))
                 when {
                     signIn -> TextButton(onClick = onGetCookies) {
                         Text(stringResource(R.string.no_results_sign_in), fontWeight = FontWeight.SemiBold)

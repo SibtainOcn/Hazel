@@ -53,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.lifecycleScope
 import com.hazel.android.R
+import com.hazel.android.download.NetworkProxy
+import com.hazel.android.download.WebViewProxy
 import com.hazel.android.data.CookieEntry
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SettingsRepository
@@ -116,6 +118,14 @@ class CookieWebViewActivity : ComponentActivity() {
         var firstPaint by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) {
             withFrameNanos { }
+            // With a proxy set, the sign-in page goes through it or does not open: signing in
+            // from the device's own address would show the site an address the downloads
+            // never come from, and give away the one the proxy is there to hide.
+            if (!webViewOnProxy()) {
+                Toast.makeText(this@CookieWebViewActivity, R.string.cookies_proxy_unavailable, Toast.LENGTH_LONG).show()
+                finish()
+                return@LaunchedEffect
+            }
             if (clearFirst) CookieExtractor.clearAll()
             browserReady = true
         }
@@ -228,6 +238,17 @@ class CookieWebViewActivity : ComponentActivity() {
                                 // The screen's own tone until the page paints, not a black box.
                                 setBackgroundColor(background)
                                 webViewClient = object : WebViewClient() {
+                                    override fun onReceivedHttpAuthRequest(
+                                        view: WebView?,
+                                        handler: android.webkit.HttpAuthHandler,
+                                        host: String?,
+                                        realm: String?
+                                    ) {
+                                        if (!WebViewProxy.answerAuth(handler, host)) {
+                                            super.onReceivedHttpAuthRequest(view, handler, host, realm)
+                                        }
+                                    }
+
                                     override fun onPageCommitVisible(view: WebView?, committedUrl: String?) {
                                         super.onPageCommitVisible(view, committedUrl)
                                         firstPaint = true
@@ -256,6 +277,20 @@ class CookieWebViewActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * Whether web views go through the proxy, or there is none. The setting is read off the
+     * main thread first, in case storage has not been read yet; a proxy set a moment ago is
+     * given a short while to take effect.
+     */
+    private suspend fun webViewOnProxy(): Boolean {
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { NetworkProxy.current() }
+        repeat(PROXY_WAIT_STEPS) {
+            if (WebViewProxy.inStep()) return true
+            kotlinx.coroutines.delay(PROXY_WAIT_STEP_MS)
+        }
+        return WebViewProxy.inStep()
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -339,6 +374,10 @@ class CookieWebViewActivity : ComponentActivity() {
     companion object {
         const val EXTRA_URL = "url"
         const val EXTRA_TITLE = "title"
+
+        /** How long a proxy set a moment ago is given to reach web views: 20 x 100 ms. */
+        private const val PROXY_WAIT_STEPS = 20
+        private const val PROXY_WAIT_STEP_MS = 100L
 
         private const val DESKTOP_USER_AGENT =
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " +

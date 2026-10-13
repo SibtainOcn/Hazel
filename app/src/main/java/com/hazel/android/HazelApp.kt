@@ -7,6 +7,9 @@ import coil3.SingletonImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
 import android.util.Log
+import com.hazel.android.download.NetworkProxy
+import com.hazel.android.download.NetworkProxy.throughProxy
+import com.hazel.android.download.WebViewProxy
 import com.hazel.android.update.YtDlpUpdater
 import com.hazel.android.utils.CrashLogger
 import com.yausername.ffmpeg.FFmpeg
@@ -15,18 +18,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
 import java.util.concurrent.atomic.AtomicBoolean
 
 class HazelApp : Application(), SingletonImageLoader.Factory {
 
     /**
      * Thumbnails come from arbitrary media hosts, so the shared loader is given an explicit
-     * network fetcher rather than relying on whatever Coil can auto-detect.
+     * network fetcher rather than relying on whatever Coil can auto-detect. Its client goes
+     * through the proxy like every other connection.
      */
     override fun newImageLoader(context: PlatformContext): ImageLoader =
         ImageLoader.Builder(context)
-            .components { add(OkHttpNetworkFetcherFactory()) }
+            .components { add(OkHttpNetworkFetcherFactory(callFactory = { OkHttpClient.Builder().throughProxy().build() })) }
             .crossfade(true)
             .build()
 
@@ -43,6 +51,13 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
         // Initialize storage paths for downloads/conversions
         com.hazel.android.util.StoragePaths.init(this)
         com.hazel.android.util.SdCards.init(this)
+
+        // Before anything connects: every connection outside yt-dlp asks this selector, which
+        // reads the proxy setting, waiting for storage the first time if it has to.
+        com.hazel.android.download.AdvancedSettingsStore.loader = {
+            runBlocking { com.hazel.android.data.SettingsRepository.getAdvancedSettings(this@HazelApp).first() }
+        }
+        NetworkProxy.install()
 
         // Install crash logger — captures uncaught exceptions in-memory
         CrashLogger.install(this)
@@ -61,8 +76,16 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
         // The advanced engine settings are read by every request, so they are held in
         // memory and kept in step with storage from here on.
         applicationScope.launch {
+            var webProxy = ""
             com.hazel.android.data.SettingsRepository.getAdvancedSettings(this@HazelApp).collect {
                 com.hazel.android.download.AdvancedSettingsStore.current = it
+                // Web views take the proxy on the main thread, and only when it changes, so
+                // nothing is done for them until a proxy has been set.
+                val proxy = NetworkProxy.parse(it.activeProxy)
+                if (proxy?.url.orEmpty() != webProxy) {
+                    webProxy = proxy?.url.orEmpty()
+                    withContext(Dispatchers.Main) { WebViewProxy.apply(proxy) }
+                }
             }
         }
         // Incognito decides whether a read may be written to disk, which is asked from

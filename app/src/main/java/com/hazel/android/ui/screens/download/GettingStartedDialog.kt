@@ -1,5 +1,10 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.ActionsRow
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.hazel.android.ui.components.EqualWidthActions
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -138,15 +143,16 @@ fun GettingStartedDialog(
                 )
 
                 Column(
-                    modifier = Modifier.padding(24.dp),
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Header: Flat step badge on left, clean Skip text on right
-                    Row(
+                    // Header: Flat step badge on left, clean Skip text on right. Skip moves
+                    // under the badge only when the two do not fit one line.
+                    ActionsRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                        start = {
                         // Flat badge without border
                         Surface(
                             shape = CircleShape,
@@ -161,7 +167,8 @@ fun GettingStartedDialog(
                                 color = Color(0xFFE2E8F0)
                             )
                         }
-
+                        }
+                    ) {
                         // Clean Skip button
                         Box(
                             modifier = Modifier
@@ -246,7 +253,7 @@ fun GettingStartedDialog(
                                 lineHeight = 18.sp,
                                 modifier = Modifier
                                     .padding(horizontal = 8.dp)
-                                    .height(50.dp)
+                                    .heightIn(min = 50.dp)
                             )
                         }
                     }
@@ -284,6 +291,7 @@ fun GettingStartedDialog(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     // Controls Row
+                    // layout-safe: an icon button beside one action that takes the rest of the row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -315,101 +323,99 @@ fun GettingStartedDialog(
 
                         if (currentStep == 5) {
                             // Step 5 (Battery Optimization): Deny & Allow buttons of equal size
-                            Surface(
-                                onClick = { currentStep++ },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp),
-                                shape = CircleShape,
-                                color = Color(0xFF161616),
-                                border = androidx.compose.foundation.BorderStroke(
-                                    1.dp,
-                                    Color.White.copy(alpha = 0.12f)
-                                )
-                            ) {
-                                Box(
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.guide_deny),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = Color.White
+                            // Half the row each while both labels fit; one above the other when not.
+                            EqualWidthActions(modifier = Modifier.weight(1f), spacing = 10.dp) {
+                                Surface(
+                                    onClick = { currentStep++ },
+                                    modifier = Modifier.height(48.dp),
+                                    shape = CircleShape,
+                                    color = Color(0xFF161616),
+                                    border = androidx.compose.foundation.BorderStroke(
+                                        1.dp,
+                                        Color.White.copy(alpha = 0.12f)
                                     )
+                                ) {
+                                    Box(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.guide_deny),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color.White
+                                        )
+                                    }
                                 }
-                            }
 
-                            Spacer(modifier = Modifier.width(10.dp))
-
-                            Surface(
-                                onClick = {
-                                    onOpenBatterySettings()
-                                    currentStep++
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp),
-                                shape = CircleShape,
-                                color = Color.White,
-                                shadowElevation = 4.dp
-                            ) {
-                                Box(
-                                    contentAlignment = Alignment.Center
+                                Surface(
+                                    onClick = {
+                                        onOpenBatterySettings()
+                                        currentStep++
+                                    },
+                                    modifier = Modifier.height(48.dp),
+                                    shape = CircleShape,
+                                    color = Color.White,
+                                    shadowElevation = 4.dp
                                 ) {
-                                    Text(
-                                        text = stringResource(R.string.guide_allow),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
+                                    Box(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.guide_allow),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                    }
                                 }
                             }
                         } else if (currentStep == 6) {
                             // Step 5 (Notifications): Deny & Allow buttons of equal size
-                            Surface(
-                                onClick = dismissNoPermission,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp),
-                                shape = CircleShape,
-                                color = Color(0xFF161616),
-                                border = androidx.compose.foundation.BorderStroke(
-                                    1.dp,
-                                    Color.White.copy(alpha = 0.12f)
-                                )
-                            ) {
-                                Box(
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.guide_deny),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = Color.White
+                            // Half the row each while both labels fit; one above the other when not.
+                            EqualWidthActions(modifier = Modifier.weight(1f), spacing = 10.dp) {
+                                Surface(
+                                    onClick = dismissNoPermission,
+                                    modifier = Modifier.height(48.dp),
+                                    shape = CircleShape,
+                                    color = Color(0xFF161616),
+                                    border = androidx.compose.foundation.BorderStroke(
+                                        1.dp,
+                                        Color.White.copy(alpha = 0.12f)
                                     )
+                                ) {
+                                    Box(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.guide_deny),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color.White
+                                        )
+                                    }
                                 }
-                            }
 
-                            Spacer(modifier = Modifier.width(10.dp))
-
-                            Surface(
-                                onClick = dismissWithPermission,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp),
-                                shape = CircleShape,
-                                color = Color.White,
-                                shadowElevation = 4.dp
-                            ) {
-                                Box(
-                                    contentAlignment = Alignment.Center
+                                Surface(
+                                    onClick = dismissWithPermission,
+                                    modifier = Modifier.height(48.dp),
+                                    shape = CircleShape,
+                                    color = Color.White,
+                                    shadowElevation = 4.dp
                                 ) {
-                                    Text(
-                                        text = stringResource(R.string.guide_allow),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
+                                    Box(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.guide_allow),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                    }
                                 }
                             }
                         } else {

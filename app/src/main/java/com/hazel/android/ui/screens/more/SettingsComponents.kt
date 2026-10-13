@@ -3,6 +3,9 @@ package com.hazel.android.ui.screens.more
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,12 +34,14 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -51,6 +56,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -187,6 +193,35 @@ internal fun ActionSettingRow(
     SettingRow(icon = icon, title = title, summary = summary, enabled = enabled, onClick = onClick, trailing = trailing)
 }
 
+/**
+ * A setting with a screen of its own and a quick on or off. The text opens the screen; the
+ * switch, set apart by a thin rule, only turns it on or off.
+ */
+@Composable
+internal fun SplitSwitchSettingRow(
+    icon: ImageVector,
+    title: String,
+    summary: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    onOpen: () -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.weight(1f)) {
+            SettingRow(icon = icon, title = title, summary = summary, enabled = true, onClick = onOpen, valueStyle = true)
+        }
+        VerticalDivider(
+            modifier = Modifier.padding(vertical = 14.dp).fillMaxHeight(),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+    }
+}
+
 @Composable
 private fun SettingRow(
     icon: ImageVector,
@@ -216,15 +251,18 @@ private fun SettingRow(
             Text(
                 title,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
+                style = LocalTextStyle.current.copy(hyphens = Hyphens.Auto)
             )
             if (!summary.isNullOrBlank()) {
+                // A value is cut short, a description never is: a longer translation or a
+                // large font must still be able to say the whole thing.
                 Text(
                     summary,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(hyphens = Hyphens.Auto),
                     color = if (valueStyle) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f * alpha)
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f * alpha),
-                    maxLines = 2,
+                    maxLines = if (valueStyle) 2 else Int.MAX_VALUE,
                     overflow = TextOverflow.Ellipsis
                 )
             }

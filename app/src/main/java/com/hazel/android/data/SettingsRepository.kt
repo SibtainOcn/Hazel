@@ -185,6 +185,8 @@ object SettingsRepository {
     private val ADV_SLEEP_REQUESTS = intPreferencesKey("adv_sleep_requests")
     private val ADV_IMPERSONATE = stringPreferencesKey("adv_impersonate")
     private val ADV_IMPERSONATE_AVAILABLE = stringPreferencesKey("adv_impersonate_available")
+    private val ADV_PROXY = stringPreferencesKey("adv_proxy")
+    private val ADV_PROXY_ENABLED = booleanPreferencesKey("adv_proxy_enabled")
 
     fun getAdvancedSettings(context: Context): Flow<com.hazel.android.download.AdvancedSettings> =
         context.dataStore.data.map { prefs ->
@@ -200,7 +202,9 @@ object SettingsRepository {
                 sleepRequestsSeconds = prefs[ADV_SLEEP_REQUESTS] ?: 0,
                 impersonate = prefs[ADV_IMPERSONATE].orEmpty(),
                 impersonateAvailable = prefs[ADV_IMPERSONATE_AVAILABLE].orEmpty().split(',')
-                    .map { it.trim() }.filter { it.isNotBlank() }
+                    .map { it.trim() }.filter { it.isNotBlank() },
+                proxy = prefs[ADV_PROXY].orEmpty(),
+                proxyEnabled = prefs[ADV_PROXY_ENABLED] ?: false
             )
         }
 
@@ -217,6 +221,8 @@ object SettingsRepository {
             prefs[ADV_SLEEP_REQUESTS] = settings.sleepRequestsSeconds
             prefs[ADV_IMPERSONATE] = settings.impersonate
             prefs[ADV_IMPERSONATE_AVAILABLE] = settings.impersonateAvailable.joinToString(",")
+            prefs[ADV_PROXY] = settings.proxy
+            prefs[ADV_PROXY_ENABLED] = settings.proxyEnabled
         }
         // In force at once, rather than when the stored value next comes round.
         com.hazel.android.download.AdvancedSettingsStore.current = settings
@@ -462,10 +468,9 @@ object SettingsRepository {
      * in it is only discovered when a download runs slower than a modem, and nobody has a
      * particular number in mind anyway. These cover the reasons for setting one at all,
      * which are sparing a metered connection and leaving room for everything else on the
-     * network.
+     * network. No limit is the empty value, named by the screen in the app's language.
      */
     val SPEED_LIMITS: List<Pair<String, String>> = listOf(
-        "" to "No limit",
         "256K" to "256 KB/s",
         "512K" to "512 KB/s",
         "1M" to "1 MB/s",
@@ -473,11 +478,6 @@ object SettingsRepository {
         "5M" to "5 MB/s",
         "10M" to "10 MB/s"
     )
-
-    /** What to call the stored ceiling, falling back to its own text if it is not a preset. */
-    fun speedLimitLabel(limit: String): String =
-        SPEED_LIMITS.firstOrNull { it.first == limit }?.second
-            ?: limit.ifBlank { "No limit" }
 
     /**
      * How many pieces of a stream split into fragments (DASH and HLS, which is most of

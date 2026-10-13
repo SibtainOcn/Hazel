@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -33,6 +34,11 @@ import com.hazel.android.ui.components.liftedOverKeyboard
 import com.hazel.android.ui.components.rememberSheetKeyboard
 import com.hazel.android.ui.components.ShimmerLabel
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +54,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -87,6 +94,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
@@ -264,11 +272,15 @@ fun FormatSheet(
     var openSections by rememberSaveable(info.url) { mutableStateOf(SECTION_QUALITY) }
     val openList = openSections.split(',').filter { it.isNotBlank() }
     fun isOpen(section: String) = section in openList
+    // A field being typed in is let go before its section closes, whether closed by hand or
+    // by another opening past the limit. Taken away while it still held the keyboard, it
+    // could be left unable to take it again until the sheet was reopened.
+    val focusManager = LocalFocusManager.current
     fun toggle(section: String) {
-        openSections = (
-            if (section in openList) openList - section
-            else (openList + section).takeLast(MAX_OPEN_SECTIONS)
-        ).joinToString(",")
+        val next = if (section in openList) openList - section
+        else (openList + section).takeLast(MAX_OPEN_SECTIONS)
+        if (SECTION_DETAILS in openList && SECTION_DETAILS !in next) focusManager.clearFocus()
+        openSections = next.joinToString(",")
     }
     val detailsOpen = isOpen(SECTION_DETAILS)
     val qualityOpen = isOpen(SECTION_QUALITY)
@@ -318,11 +330,10 @@ fun FormatSheet(
         ) {
 
             // ── Header: title block on the left, download action on the right ──
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
+            // Play stacks above the download action, or both move under the heading, only
+            // where the heading would otherwise have a word broken to make room for them.
+            SheetHeaderLayout {
+                Column {
                     if (isReadingLink) {
                         // Still reading: the heading says so, with light running through
                         // the word, and the line under it stays so nothing moves when the
@@ -372,7 +383,6 @@ fun FormatSheet(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
                 }
 
                 // The one filled control on the sheet, in the accent, so the thing the
@@ -422,6 +432,7 @@ fun FormatSheet(
             // them, and a short bar under the chosen word says which without ruling a line
             // across the sheet. The link and incognito buttons take the room to their right,
             // rather than a row of their own at the end of the sheet.
+            // layout-safe: the tabs and two icon buttons; nothing here holds a long label
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Row(
                     // The words, not their touch targets, line up with the heading.
@@ -463,14 +474,16 @@ fun FormatSheet(
                         label = stringResource(R.string.format_sheet_label_title),
                         value = title,
                         onValueChange = { title = it },
-                        color = fieldColor
+                        color = fieldColor,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     EditableField(
                         label = stringResource(R.string.format_sheet_label_author),
                         value = author,
                         onValueChange = { author = it },
-                        color = fieldColor
+                        color = fieldColor,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
                     )
                 }
             }
@@ -1019,21 +1032,40 @@ private class Feedback(val message: String)
 @Composable
 internal fun defaultFieldColor(): Color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
 
-/** Labelled box whose value the user can type into, matching the read-only fields' look. */
+/**
+ * Labelled box whose value the user can type into, matching the read-only fields' look.
+ *
+ * The whole box takes a tap, not only the line of text in it: a tap on the label or the
+ * padding puts the cursor in this box's own field and brings the keyboard back if it was
+ * put away. A tap on the text itself is left to the field, which places the cursor there.
+ */
 @Composable
 internal fun EditableField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    color: Color = defaultFieldColor()
+    color: Color = defaultFieldColor(),
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         color = color
     ) {
-        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+        Column(
+            modifier = Modifier
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    focusRequester.requestFocus()
+                    keyboardController?.show()
+                }
+                .padding(horizontal = 14.dp, vertical = 10.dp)
+        ) {
             Text(
                 label,
                 style = MaterialTheme.typography.labelSmall,
@@ -1044,11 +1076,14 @@ internal fun EditableField(
                 value = value,
                 onValueChange = onValueChange,
                 singleLine = true,
+                keyboardOptions = keyboardOptions,
                 textStyle = LocalTextStyle.current
                     .merge(MaterialTheme.typography.bodyMedium)
                     .copy(color = MaterialTheme.colorScheme.onSurface),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester)
             )
         }
     }

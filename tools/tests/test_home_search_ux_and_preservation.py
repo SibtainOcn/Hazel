@@ -246,7 +246,7 @@ def test_search_and_history_screen_ux():
                "combinedClickable(onClick = onUse, onLongClick = onRemove)" in row
                and "onRemove = { removing = entry }" in search_content
                and "RemoveEntryDialog(" in search_content)
-    dialog = search_content[search_content.index("private fun RemoveEntryDialog("):search_content.index("private fun HistoryRow(")]
+    dialog = search_content[search_content.index("fun RemoveEntryDialog("):search_content.index("private fun HistoryRow(")]
     check_true("The remove dialog names the entry, removes it and can copy it",
                "R.string.search_remove_confirm_body" in dialog and "R.string.search_remove" in dialog
                and "copySheetLink(context, entry)" in dialog)

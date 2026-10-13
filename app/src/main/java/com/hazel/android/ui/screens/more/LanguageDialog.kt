@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.more
 
+import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -78,13 +79,13 @@ fun LanguageSheet(
     ) {
         Column {
             // ── Heading, with the actions on the right ──
-            Row(
+            // The actions move under the heading only where a word of it would otherwise be
+            // broken to make room for them.
+            SheetHeaderLayout(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, end = 8.dp, top = 2.dp, bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(start = 20.dp, end = 8.dp, top = 2.dp, bottom = 12.dp)
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column {
                     Text(
                         stringResource(R.string.language_title),
                         style = MaterialTheme.typography.titleMedium,
@@ -104,28 +105,31 @@ fun LanguageSheet(
                     )
                 }
 
-                TextButton(onClick = onDismiss) {
-                    Text(
-                        stringResource(R.string.language_cancel),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
+                // layout-safe: the actions as one group; SheetHeaderLayout moves it under the heading
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TextButton(onClick = onDismiss) {
+                        Text(
+                            stringResource(R.string.language_cancel),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
 
-                Spacer(modifier = Modifier.width(2.dp))
+                    Spacer(modifier = Modifier.width(2.dp))
 
-                Surface(
-                    onClick = { onConfirm(draft) },
-                    shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.primary
-                ) {
-                    Text(
-                        stringResource(R.string.language_confirm),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp)
-                    )
+                    Surface(
+                        onClick = { onConfirm(draft) },
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    ) {
+                        Text(
+                            stringResource(R.string.language_confirm),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp)
+                        )
+                    }
                 }
             }
 

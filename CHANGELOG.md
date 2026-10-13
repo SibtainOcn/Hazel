@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- A proxy for every connection Hazel makes (#92). Under More, Advanced, Proxy opens a screen to pick HTTP, HTTPS, SOCKS5 or SOCKS5h and enter the host, port and, if the proxy needs one, a user name and password; the switch beside it turns the proxy off and on without forgetting it, and takes effect without a restart. Reading links, downloads, search and its suggestions, playing in the app, NewPipe, thumbnails, PO tokens, the sign-in page, the guide and update checks all go through it. With a proxy on, a connection that cannot reach it fails with a message saying so, rather than going out directly, and the sign-in page does not open on a device whose web view cannot use the proxy. Cutting part of a video, and some live streams, cannot go through a SOCKS proxy, which ffmpeg does not support, and say so when they fail. A backup keeps the proxy but not its password.
+
+### Changed
+- Settings descriptions are shorter, one plain sentence each, in every language. Twenty-nine descriptions, hints and getting-started steps that ran to two or three sentences now say the same in about one line.
+- Download settings, Appearance and Tools have the same header and back arrow as the other settings screens.
+- On a phone held sideways, a foldable or a tablet, the home screen's results, the queue and the downloads list lay their cards out two, three or four across, in place of one card stretched across the screen, which stood half the screen tall and showed three at a time. A phone held upright shows one column as before. On a tablet, the Download all sheet's list of links grows with the screen's height rather than showing only a few.
+- With a phone held sideways, the Download all sheet takes the screen's width and splits in two: the links down one side at the sheet's full height, and the heading, Adjust, the buttons and Download down the other. Stacked on a screen that short, the list had room for one link. Held upright, and on a tablet, the sheet is as before.
+- On Download settings, a limit's chip moves under its title when a word of the title or its description would not fit beside it, as with a long translation or a large font on a narrow phone, in place of breaking the word in two. The chip's label wraps to a second line rather than being cut short.
+
+### Fixed
+- Download settings, Appearance and Tools scroll. With a large font, a long translation or a short screen, the last rows of Download settings, and its storage note, were cut off below the navigation buttons and could not be reached (#87).
+- Settings descriptions show in full. A description longer than two lines ended in "…", which with a large font or a longer translation hid part of what a setting does.
+- "No limit" on Download settings and On/Off for the dark theme are translated; they showed in English in every language.
+- The download sheet's heading no longer breaks into single letters when Play is shown beside Download in a longer language or with a large font. Where the heading would not fit whole beside the two buttons, Play now stacks above Download, and on the narrowest screens both move under the heading. Everywhere it fits, the header looks as before.
+- Typing in the Title or Author box on the download sheet starts in capitals, as the keyboard does elsewhere: the title at the start of each sentence, the author at the start of each word. The keyboard opened in small letters and stayed there.
+- A tap anywhere in the Title or Author box on the download sheet puts the cursor in that field and brings the keyboard back, not only a tap on the line of text. Closing Details while typing lets go of the field first, which could otherwise be left unable to take the keyboard again until the sheet was reopened.
+- Buttons in dialogs and sheets no longer squeeze a label into a column of letters in a longer language or with a large font. Where they do not fit one line they wrap onto the next, at the end, and equal-width buttons stack one above the other. This covers Already downloaded, Could not read this link, the link dialog, Remove from search history, the cut sheet, a saved sign-in, the error log, and Deny and Allow in the getting started guide. The format list and language headers move their buttons under the title where the title would otherwise break. Everywhere the buttons fit, they look as before.
+- A failed download's card grows taller at a large font instead of drawing its status and buttons over its title and reason, and its buttons move under the status rather than squeezing it to nothing.
+- The getting started guide shows each step's description in full at a large font, where it was cut off after two lines, and Skip moves under the step count rather than breaking in two.
 
 ## [1.1.13] - 2026-10-06
 ### Added

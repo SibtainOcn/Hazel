@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.webkit.HttpAuthHandler
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -109,6 +110,13 @@ object PoTokenGenerator {
 
     /** Main thread. */
     private fun run(id: Int, videoIds: List<String>) {
+        // With a proxy set, YouTube's challenge must not go out directly, so no token is made
+        // until web views are on the proxy too. The read goes ahead without one.
+        if (!WebViewProxy.inStep()) {
+            record(false, "web view not on the proxy")
+            pending.remove(id)?.invoke(null)
+            return
+        }
         main.removeCallbacks(release)
         main.postDelayed(release, IDLE_MS)
         val view = webView ?: create() ?: run {
@@ -134,6 +142,10 @@ object PoTokenGenerator {
             settings.javaScriptEnabled = true
             addJavascriptInterface(Bridge, "HazelPoToken")
             webViewClient = object : WebViewClient() {
+                override fun onReceivedHttpAuthRequest(view: WebView?, handler: HttpAuthHandler, host: String?, realm: String?) {
+                    if (!WebViewProxy.answerAuth(handler, host)) handler.cancel()
+                }
+
                 override fun onPageFinished(view: WebView?, url: String?) {
                     if (pageReady) return
                     pageReady = true

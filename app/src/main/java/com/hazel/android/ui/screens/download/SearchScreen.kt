@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.ActionsRow
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -566,7 +567,7 @@ private fun ClearHistoryDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
  * dialog, so it is plain which one goes.
  */
 @Composable
-private fun RemoveEntryDialog(entry: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+internal fun RemoveEntryDialog(entry: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -579,11 +580,10 @@ private fun RemoveEntryDialog(entry: String, onConfirm: () -> Unit, onDismiss: (
             )
         },
         text = { Text(stringResource(R.string.search_remove_confirm_body)) },
+        // Copy, Cancel and Remove as one group, which wraps rather than squeezing a label
+        // where the three do not fit one line.
         confirmButton = {
-            TextButton(onClick = onConfirm) { Text(stringResource(R.string.search_remove)) }
-        },
-        dismissButton = {
-            Row {
+            ActionsRow(spacing = 0.dp) {
                 TextButton(onClick = {
                     copySheetLink(context, entry)
                     // Android 13 and later show their own notice of a copy.
@@ -593,6 +593,7 @@ private fun RemoveEntryDialog(entry: String, onConfirm: () -> Unit, onDismiss: (
                     onDismiss()
                 }) { Text(stringResource(R.string.sheet_link_copy)) }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.search_cancel)) }
+                TextButton(onClick = onConfirm) { Text(stringResource(R.string.search_remove)) }
             }
         }
     )

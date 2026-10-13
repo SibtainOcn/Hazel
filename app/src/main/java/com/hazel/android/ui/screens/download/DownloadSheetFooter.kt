@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.ActionsRow
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -192,7 +193,7 @@ private fun LinkDialog(
             )
         },
         confirmButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ActionsRow(spacing = 8.dp) {
                 FlatChip(label = stringResource(R.string.sheet_link_copy), onClick = onCopy)
                 if (onOpen != null) {
                     FlatChip(label = stringResource(R.string.sheet_link_open), onClick = onOpen, selected = true)

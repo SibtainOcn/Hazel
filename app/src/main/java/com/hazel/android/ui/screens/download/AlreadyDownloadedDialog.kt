@@ -2,6 +2,7 @@ package com.hazel.android.ui.screens.download
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import com.hazel.android.ui.components.ActionsRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -227,12 +228,11 @@ fun AlreadyDownloadedDialog(
         // Three actions spaced apart read as three unrelated choices; grouped and weighted
         // they read as one decision with an obvious default. Playing what already exists is
         // usually the answer here, so it is present but quiet, and the only action that
-        // costs anything is the one carrying the emphasis.
+        // costs anything is the one carrying the emphasis. Where the three do not fit one
+        // line (a long translation, a large font) the last wraps under the others, at the
+        // end, rather than being squeezed.
         confirmButton = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
+            ActionsRow(spacing = 2.dp) {
                 TextButton(
                     onClick = onDismiss,
                     contentPadding = COMPACT_PADDING
