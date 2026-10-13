@@ -1,4 +1,5 @@
 import com.android.build.api.variant.FilterConfiguration
+import java.util.Locale
 import java.util.Properties
 
 plugins {
@@ -373,4 +374,81 @@ tasks.register("testDebugUnitTest") {
     dependsOn("testGithubDebugUnitTest", "testFdroidDebugUnitTest")
     description = "Runs unit tests for all debug variants."
     group = "verification"
+}
+
+// ── Test progress ──
+//
+// A line per finished test with a running count, a bar, the share done and the time so far,
+// so a long run (the layout tests take minutes) shows where it is instead of sitting silent
+// until the end. Printed even with -q. Gradle cannot count the tests before they run, so the
+// total is the one the last run with the same filter found; the first run shows the count only.
+class TestProgress : TestListener {
+    private var totalFile: File? = null
+    private var started = System.currentTimeMillis()
+    private var expected: Int? = null
+    private var done = 0
+    private var failed = 0
+
+    /** Called as the task starts, once its filter is known. */
+    fun start(file: File) {
+        totalFile = file
+        started = System.currentTimeMillis()
+        expected = runCatching { file.readText().trim().toInt() }.getOrNull()
+        done = 0
+        failed = 0
+    }
+
+    override fun beforeSuite(suite: TestDescriptor) {}
+    override fun beforeTest(test: TestDescriptor) {}
+
+    override fun afterTest(test: TestDescriptor, result: TestResult) {
+        done++
+        val mark = when (result.resultType) {
+            TestResult.ResultType.SUCCESS -> "ok  "
+            TestResult.ResultType.FAILURE -> { failed++; "FAIL" }
+            else -> "skip"
+        }
+        val total = expected?.coerceAtLeast(done)
+        val share = total?.let { done * 100.0 / it }
+        val bar = share?.let { s -> val n = (s / 5).toInt(); "[" + "#".repeat(n) + "-".repeat(20 - n) + "] " }.orEmpty()
+        val percent = share?.let { String.format(Locale.ROOT, "%5.1f%% ", it) }.orEmpty()
+        val count = if (total != null) "$done/$total" else "$done"
+        val took = (result.endTime - result.startTime) / 1000.0
+        println(
+            String.format(Locale.ROOT, "%s%s%s %s  %s  %s > %s (%.1fs)",
+                bar, percent, count, elapsed(), mark, test.className?.substringAfterLast('.') ?: "", test.name, took)
+        )
+        if (result.resultType == TestResult.ResultType.FAILURE) {
+            result.exception?.message?.lineSequence()?.firstOrNull()?.let { println("      $it") }
+        }
+    }
+
+    override fun afterSuite(suite: TestDescriptor, result: TestResult) {
+        if (suite.parent != null) return
+        val file = totalFile
+        if (done > 0 && file != null) {
+            file.parentFile.mkdirs()
+            file.writeText(done.toString())
+        }
+        println("Tests: $done run, $failed failed, ${elapsed()}")
+    }
+
+    private fun elapsed(): String {
+        val s = (System.currentTimeMillis() - started) / 1000
+        return String.format(Locale.ROOT, "%02d:%02d", s / 60, s % 60)
+    }
+}
+
+tasks.withType<Test>().configureEach {
+    val progress = TestProgress()
+    addTestListener(progress)
+    val totals = layout.buildDirectory.dir("test-progress")
+    doFirst {
+        // One remembered total per task and filter (--tests included), so a filtered run
+        // does not borrow the full run's total.
+        val fromCommandLine = (filter as? org.gradle.api.internal.tasks.testing.filter.DefaultTestFilter)
+            ?.commandLineIncludePatterns.orEmpty()
+        val filters = (filter.includePatterns + fromCommandLine).sorted().joinToString(",")
+        progress.start(totals.get().file("$name-${Integer.toHexString(filters.hashCode())}.total").asFile)
+    }
 }
