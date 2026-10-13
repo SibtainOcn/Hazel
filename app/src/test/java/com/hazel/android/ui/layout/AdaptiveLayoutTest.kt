@@ -40,10 +40,13 @@ import com.hazel.android.ui.screens.more.AdvancedScreen
 import com.hazel.android.ui.screens.more.AppearanceScreen
 import com.hazel.android.ui.screens.more.ProxyScreen
 import com.hazel.android.ui.screens.more.LanguageSheet
+import com.hazel.android.ui.screens.more.StorageCleanupScreen
 import com.hazel.android.ui.screens.more.StorageLocationsScreen
 import com.hazel.android.ui.screens.queue.FailedCard
 import com.hazel.android.ui.screens.queue.FailureLogSheet
 import com.hazel.android.ui.theme.HazelTheme
+import com.hazel.android.util.TempCategory
+import com.hazel.android.util.TempStorage
 import java.util.Locale
 import org.junit.Rule
 import org.junit.rules.ExternalResource
@@ -268,6 +271,25 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
     fun advancedScreen() {
         show { AdvancedScreen(onBack = {}) }
         checkAndCapture("advanced")
+    }
+
+    /**
+     * Sizes from KB to GB, one empty, and one far longer than any real size, which has to
+     * end in an ellipsis inside its chip rather than push the text aside.
+     */
+    private val cleanupSample = listOf(
+        TempCategory("ytdlp_cache", R.string.cleanup_category_link_data_label, R.string.cleanup_category_link_data_description, 50_541_363),
+        TempCategory(TempStorage.LINK_READS, R.string.cleanup_category_link_reads_label, R.string.cleanup_category_link_reads_description, 2_202_009, inClearAll = false),
+        TempCategory("partial_downloads", R.string.cleanup_category_partial_downloads_label, R.string.cleanup_category_partial_downloads_description, 1_325_598_134_272),
+        TempCategory("converted", R.string.cleanup_category_conversions_label, R.string.cleanup_category_conversions_description, 0),
+        TempCategory("engine", R.string.cleanup_category_engine_label, R.string.cleanup_category_engine_description, 195_766_272, safeToClear = false),
+        TempCategory("other_cache", R.string.cleanup_category_other_cache_label, R.string.cleanup_category_other_cache_description, 524_288)
+    )
+
+    @Test
+    fun storageCleanupScreen() {
+        show { StorageCleanupScreen(onBack = {}, sample = cleanupSample) }
+        checkAndCapture("storage_cleanup")
     }
 
     @Test
