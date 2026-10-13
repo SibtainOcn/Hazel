@@ -89,7 +89,7 @@ Español
 - Selecciona distintos formatos y contenedores de descarga
 
 ### Buscar y reproducir
-- **Búsqueda** - escribe palabras en lugar de un enlace para buscar en YouTube, YouTube Music, SoundCloud, Bandcamp o Bilibili, con sugerencias de búsqueda opcionales
+- **Búsqueda** - escribe palabras en lugar de un enlace para buscar en YouTube, YouTube Music, SoundCloud o Bandcamp, con sugerencias de búsqueda opcionales
 - **Reproduce antes de descargar** - reproduce cualquier resultado o enlace en su propia tarjeta, con barra de progreso, doble toque para saltar, pantalla completa y selector de calidad, en cualquier sitio que Hazel pueda leer
 - **Recortar** - descarga solo una parte de un vídeo o pista, eligiendo el rango sobre una vista previa en directo
 - **Directos** - graba desde el inicio de una transmisión en directo, o espera a un estreno y descárgalo después

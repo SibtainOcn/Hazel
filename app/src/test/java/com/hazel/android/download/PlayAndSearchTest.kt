@@ -190,13 +190,8 @@ class PlayAndSearchTest {
             assertTrue(MediaSearch.newPipeFirst(SearchSource.BANDCAMP, engine))
             assertFalse(MediaSearch.newPipeAfter(SearchSource.BANDCAMP, engine))
         }
-        // Only yt-dlp can search these: NewPipe is never asked.
-        listOf(SearchSource.BILIBILI).forEach { site ->
-            listOf(newPipe, ytDlp).forEach { engine ->
-                assertFalse(MediaSearch.newPipeFirst(site, engine), "$site, $engine")
-                assertFalse(MediaSearch.newPipeAfter(site, engine), "$site, $engine")
-            }
-        }
+        // Every site search offers is one NewPipe knows; none is left to yt-dlp alone.
+        SearchSource.entries.forEach { assertTrue(it.newPipeService != null, "$it") }
     }
 
     @Test

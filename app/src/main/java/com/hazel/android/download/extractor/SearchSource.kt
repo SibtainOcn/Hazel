@@ -28,8 +28,7 @@ enum class SearchSource(
         ytDlpSearchSection = "#songs"
     ),
     SOUNDCLOUD(R.string.search_source_soundcloud, "SoundCloud", "tracks", ytDlpPrefix = "scsearch"),
-    BANDCAMP(R.string.search_source_bandcamp, "Bandcamp"),
-    BILIBILI(R.string.search_source_bilibili, ytDlpPrefix = "bilisearch");
+    BANDCAMP(R.string.search_source_bandcamp, "Bandcamp");
 
     val readableByYtDlp: Boolean get() = ytDlpPrefix != null || ytDlpSearchUrl != null
 

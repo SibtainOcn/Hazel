@@ -823,7 +823,6 @@
     <string name="search_source_youtube_music" translatable="false">YouTube Music</string>
     <string name="search_source_soundcloud" translatable="false">SoundCloud</string>
     <string name="search_source_bandcamp" translatable="false">Bandcamp</string>
-    <string name="search_source_bilibili" translatable="false">Bilibili</string>
     <plurals name="player_skip_seconds">
         <item quantity="one">%d second</item>
         <item quantity="other">%d seconds</item>
