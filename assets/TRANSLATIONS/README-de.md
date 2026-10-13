@@ -89,7 +89,7 @@ Deutsch
 - Wähle verschiedene Download-Formate und Container
 
 ### Suchen & Abspielen
-- **Suche** - tippe Begriffe statt eines Links, um YouTube, YouTube Music, SoundCloud, Bandcamp, Bilibili, Niconico, PRX oder Rokfin zu durchsuchen, optional mit Suchvorschlägen
+- **Suche** - tippe Begriffe statt eines Links, um YouTube, YouTube Music, SoundCloud oder Bandcamp zu durchsuchen, optional mit Suchvorschlägen
 - **Abspielen vor dem Download** - spiele jedes Ergebnis oder jeden Link direkt auf seiner Karte ab, mit Suchleiste, Doppeltippen zum Springen, Vollbild und Qualitätsauswahl, auf jeder Seite, die Hazel lesen kann
 - **Schneiden** - lade nur einen Teil eines Videos oder Titels herunter und wähle den Bereich in einer Live-Vorschau
 - **Livestreams** - nimm einen Livestream von Anfang an auf oder warte auf eine Premiere und lade sie dann herunter

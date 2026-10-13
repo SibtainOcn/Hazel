@@ -356,6 +356,16 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[SEARCH_SUGGESTIONS_KEY] = enabled }
     }
 
+    private val WEB_SEARCH_NOTICE_KEY = booleanPreferencesKey("web_search_notice_seen")
+
+    /** Whether the note on searching the Web has been read, so it shows only the first time. */
+    fun getWebSearchNoticeSeen(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[WEB_SEARCH_NOTICE_KEY] ?: false }
+
+    suspend fun setWebSearchNoticeSeen(context: Context) {
+        context.dataStore.edit { prefs -> prefs[WEB_SEARCH_NOTICE_KEY] = true }
+    }
+
     // ── First run ──
 
     private val GUIDE_SEEN_KEY = booleanPreferencesKey("guide_seen")

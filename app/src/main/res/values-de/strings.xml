@@ -40,14 +40,22 @@
     <string name="search_back">Zurück</string>
     <string name="search_more">Mehr</string>
     <string name="search_add_link">Noch einen Link hinzufügen</string>
+    <string name="search_link_already_added">Bereits in der Liste</string>
     <string name="search_clear">Löschen</string>
     <string name="search_clear_results">Ergebnisse leeren</string>
     <string name="search_clear_history">Suchverlauf löschen</string>
+    <string name="search_under_maintenance">Wird gerade überarbeitet</string>
+    <string name="search_options_title">Suchoptionen</string>
+    <string name="search_web_title">Im Web suchen</string>
+    <string name="search_web_beta">Beta</string>
+    <string name="search_web_notice">Findet Videos auf jeder Website, von der Hazel laden kann. Wiedergabe und Downloads funktionieren möglicherweise nicht auf jeder Website.</string>
+    <string name="search_web_continue">Weiter</string>
     <string name="search_empty_history">Deine Suchen und Links erscheinen hier</string>
     <string name="search_no_matches">Keine Treffer</string>
     <string name="search_remove">Entfernen</string>
     <string name="search_all">Alle suchen</string>
     <string name="search_remove_confirm_body">Aus dem Suchverlauf entfernen?</string>
+    <string name="search_remove_from_list_body">Diesen Link aus der Liste entfernen?</string>
     <string name="search_entry_copied">In die Zwischenablage kopiert</string>
     <string name="search_edit_before">Vor dem Suchen bearbeiten</string>
     <string name="search_paste_and_fetch">Einfügen und laden</string>
@@ -178,6 +186,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">Mehr</string>
+    <string name="settings_search">Einstellungen durchsuchen</string>
+    <string name="settings_search_hint">Finde eine Einstellung über ihren Namen oder das, was sie tut</string>
+    <string name="settings_search_none">Keine Einstellungen für %1$s gefunden</string>
     <string name="more_battery_title">Downloads im Hintergrund</string>
     <string name="more_battery_body">Manche Telefone stoppen Hintergrund-Downloads zum Akkusparen. Uneingeschränkt verhindert das.</string>
     <string name="more_downloads">Downloads</string>
@@ -228,8 +239,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">SponsorBlock-Filterung wählen</string>
-    <string name="options_sponsorblock_ok">OK</string>
-    <string name="options_sponsorblock_cancel">Abbrechen</string>
     <string name="options_chapters_title">Kapitel</string>
     <string name="options_chapters_in_videos">Kapitel in Videos</string>
     <string name="options_chapters_split">Nach Kapiteln aufteilen</string>
@@ -753,10 +762,7 @@
     <string name="save_location_error_card_folder">%1$s konnte auf der Karte nicht erstellt werden, daher wird im gewählten Ordner gespeichert.</string>
     <string name="save_fallback_title">An anderem Ort gespeichert</string>
     <string name="save_fallback_body">Diese Dateien konnten nicht in %1$s geschrieben werden. Die Karte wurde vielleicht entfernt, ist voll oder erlaubt keinen Zugriff mehr. Sie wurden stattdessen in %2$s gespeichert.</string>
-    <string name="home_start_with">Beginne mit</string>
-    <string name="home_start_paste">Link einfügen</string>
-    <string name="home_start_search">Suchen</string>
-    <string name="home_start_downloads">Downloads</string>
+    <string name="home_empty_hint">Füge einen Link ein oder suche, um loszulegen</string>
     <string name="more_getting_started">Erste Schritte</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">Download gestartet</string>

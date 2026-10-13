@@ -89,7 +89,7 @@ Bahasa Indonesia
 - Pilih format dan kontainer unduhan yang berbeda
 
 ### Cari & Putar
-- **Pencarian** - ketik kata alih-alih tautan untuk mencari di YouTube, YouTube Music, SoundCloud, Bandcamp, Bilibili, Niconico, PRX, atau Rokfin, dengan saran pencarian opsional
+- **Pencarian** - ketik kata alih-alih tautan untuk mencari di YouTube, YouTube Music, SoundCloud atau Bandcamp, dengan saran pencarian opsional
 - **Putar sebelum mengunduh** - putar hasil atau tautan apa pun langsung di kartunya, dengan bilah geser, ketuk dua kali untuk melompat, layar penuh, dan pemilih kualitas, di situs mana pun yang bisa dibaca Hazel
 - **Potong** - unduh hanya sebagian video atau trek, dengan memilih rentangnya pada pratinjau langsung
 - **Siaran langsung** - rekam dari awal siaran langsung, atau tunggu tayang perdana lalu unduh

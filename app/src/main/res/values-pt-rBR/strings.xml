@@ -40,14 +40,22 @@
     <string name="search_back">Voltar</string>
     <string name="search_more">Mais</string>
     <string name="search_add_link">Adicionar outro link</string>
+    <string name="search_link_already_added">Já está na lista</string>
     <string name="search_clear">Apagar</string>
     <string name="search_clear_results">Limpar os resultados</string>
     <string name="search_clear_history">Apagar o histórico de pesquisa</string>
+    <string name="search_under_maintenance">Em manutenção</string>
+    <string name="search_options_title">Opções de pesquisa</string>
+    <string name="search_web_title">Pesquisar na web</string>
+    <string name="search_web_beta">Beta</string>
+    <string name="search_web_notice">Encontra vídeos em qualquer site que o Hazel consiga baixar. A reprodução e os downloads podem não funcionar em todos os sites.</string>
+    <string name="search_web_continue">Continuar</string>
     <string name="search_empty_history">Suas buscas e links aparecerão aqui</string>
     <string name="search_no_matches">Nenhuma correspondência</string>
     <string name="search_remove">Remover</string>
     <string name="search_all">Pesquisar tudo</string>
     <string name="search_remove_confirm_body">Remover do histórico de pesquisa?</string>
+    <string name="search_remove_from_list_body">Remover este link da lista?</string>
     <string name="search_entry_copied">Copiado para a área de transferência</string>
     <string name="search_edit_before">Editar antes de pesquisar</string>
     <string name="search_paste_and_fetch">Colar e buscar</string>
@@ -182,6 +190,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">Mais</string>
+    <string name="settings_search">Pesquisar configurações</string>
+    <string name="settings_search_hint">Encontre uma configuração pelo nome ou pelo que ela faz</string>
+    <string name="settings_search_none">Nenhuma configuração encontrada para %1$s</string>
     <string name="more_battery_title">Downloads em segundo plano</string>
     <string name="more_battery_body">Alguns celulares param downloads em segundo plano para poupar bateria. Uso irrestrito evita isso.</string>
     <string name="more_downloads">Downloads</string>
@@ -232,8 +243,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Escolha a filtragem do SponsorBlock</string>
-    <string name="options_sponsorblock_ok">OK</string>
-    <string name="options_sponsorblock_cancel">Cancelar</string>
     <string name="options_chapters_title">Capítulos</string>
     <string name="options_chapters_in_videos">Capítulos nos vídeos</string>
     <string name="options_chapters_split">Dividir por capítulos</string>
@@ -762,10 +771,7 @@
     <string name="save_location_error_card_folder">Não foi possível criar %1$s no cartão, então os downloads serão salvos na pasta escolhida.</string>
     <string name="save_fallback_title">Salvo em outro lugar</string>
     <string name="save_fallback_body">Não foi possível gravar em %1$s. O cartão pode ter sido removido, estar cheio ou não permitir mais o acesso. Os arquivos foram salvos em %2$s.</string>
-    <string name="home_start_with">Comece por</string>
-    <string name="home_start_paste">Colar link</string>
-    <string name="home_start_search">Pesquisar</string>
-    <string name="home_start_downloads">Downloads</string>
+    <string name="home_empty_hint">Cole um link ou pesquise para começar</string>
     <string name="more_getting_started">Primeiros passos</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">Download iniciado</string>

@@ -1,9 +1,12 @@
 package com.hazel.android.download
 
+import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.MediaSearch
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.download.extractor.SearchSuggestions
 import com.hazel.android.download.playback.StreamResolver
 import com.hazel.android.ui.screens.download.isLinks
+import com.hazel.android.ui.screens.download.linkParts
 import org.json.JSONObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -155,7 +158,7 @@ class PlayAndSearchTest {
         assertEquals("ytsearch25:lofi beats", SearchSource.YOUTUBE.ytDlpTarget("lofi beats", 25))
         assertEquals("scsearch10:rain", SearchSource.SOUNDCLOUD.ytDlpTarget("rain", 10))
         assertEquals(
-            "https://music.youtube.com/search?q=lofi+beats",
+            "https://music.youtube.com/search?q=lofi+beats#songs",
             SearchSource.YOUTUBE_MUSIC.ytDlpTarget("lofi beats", 25)
         )
         assertNull(SearchSource.BANDCAMP.ytDlpTarget("anything", 25))
@@ -169,5 +172,35 @@ class PlayAndSearchTest {
             SearchSuggestions.parse("""["oggy",["oggy and the cockroaches","oggy"],[],{}]""")
         )
         assertEquals(emptyList(), SearchSuggestions.parse("not json"))
+    }
+
+    @Test
+    fun eachSearchEngineHasTheOtherBehindItWhereBothCanSearch() {
+        val newPipe = ListingSource.NEWPIPE
+        val ytDlp = ListingSource.YT_DLP
+        // Both can search these: the picked one first, the other behind it.
+        listOf(SearchSource.YOUTUBE, SearchSource.YOUTUBE_MUSIC, SearchSource.SOUNDCLOUD).forEach { site ->
+            assertTrue(MediaSearch.newPipeFirst(site, newPipe), "$site, NewPipe picked")
+            assertFalse(MediaSearch.newPipeAfter(site, newPipe), "$site, NewPipe picked")
+            assertFalse(MediaSearch.newPipeFirst(site, ytDlp), "$site, yt-dlp picked")
+            assertTrue(MediaSearch.newPipeAfter(site, ytDlp), "$site, yt-dlp picked")
+        }
+        // Only NewPipe can search Bandcamp, whatever is picked.
+        listOf(newPipe, ytDlp).forEach { engine ->
+            assertTrue(MediaSearch.newPipeFirst(SearchSource.BANDCAMP, engine))
+            assertFalse(MediaSearch.newPipeAfter(SearchSource.BANDCAMP, engine))
+        }
+        // Every site search offers is one NewPipe knows; none is left to yt-dlp alone.
+        SearchSource.entries.forEach { assertTrue(it.newPipeService != null, "$it") }
+    }
+
+    @Test
+    fun splitsQueuedLinkIntoSiteAndRest() {
+        assertEquals("youtu.be" to "/ftkic7Tdpcg?si=NP7e", linkParts("https://youtu.be/ftkic7Tdpcg?si=NP7e"))
+        assertEquals("youtube.com" to "/watch?v=abc", linkParts("https://www.youtube.com/watch?v=abc"))
+        assertEquals("youtu.be" to "/abc", linkParts("youtu.be/abc"))
+        assertEquals("example.com" to "", linkParts("https://example.com"))
+        // Not an address: shown whole rather than lost.
+        assertEquals("not a link" to "", linkParts("not a link"))
     }
 }

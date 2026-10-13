@@ -89,7 +89,7 @@
 - 选择不同的下载格式和容器
 
 ### 搜索与播放
-- **搜索** - 输入关键词而不是链接，即可搜索 YouTube、YouTube Music、SoundCloud、Bandcamp、Bilibili、Niconico、PRX 或 Rokfin，可选搜索建议
+- **搜索** - 输入关键词而不是链接，即可搜索 YouTube、YouTube Music、SoundCloud 或 Bandcamp，可选搜索建议
 - **先播放再下载** - 直接在卡片上播放任意结果或链接，支持进度条、双击快进、全屏和画质选择，适用于 Hazel 能读取的任何网站
 - **剪辑** - 只下载视频或音轨的一部分，在实时预览中选择范围
 - **直播** - 从直播开头开始录制，或等待首映后再下载

@@ -4,19 +4,21 @@ import com.hazel.android.ui.components.ActionsRow
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,12 +26,14 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -37,14 +41,10 @@ import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.InputChip
-import androidx.compose.material3.InputChipDefaults
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,6 +52,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -85,19 +87,21 @@ import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.download.extractor.SearchSuggestions
 import com.hazel.android.ui.components.FlatChip
+import com.hazel.android.ui.screens.more.groupShape
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.net.URI
 
 /**
  * Full screen search and link entry.
  *
  * Links are read as links; anything else is searched for on the site picked in the chips
  * under the field. More than one link can be queued before anything is read: the plus
- * button parks a typed link as a chip and clears the field for the next one.
+ * button parks a typed link in a list under the field and clears the field for the next one.
  *
  * Earlier searches and links sit underneath, with suggestions from Google when those are
  * turned on. Tapping one uses it; the arrow beside it puts it in the field for editing.
@@ -132,9 +136,10 @@ fun SearchScreen(
     }
 
     var menuOpen by remember { mutableStateOf(false) }
-    var showClearHistoryConfirm by remember { mutableStateOf(false) }
     // The remembered link a long press asked to remove, until the dialog is answered.
     var removing by remember { mutableStateOf<String?>(null) }
+    // The same for a link in the list waiting to be read.
+    var removingQueued by remember { mutableStateOf<String?>(null) }
 
     // Needed only to open the folder a repeat warning refers to.
     val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }.collectAsState(initial = SaveDirs())
@@ -174,9 +179,17 @@ fun SearchScreen(
     fun typedLinks(): List<String> =
         text.split(WHITESPACE).map { it.trim() }.filter { it.isNotBlank() }
 
+    // A link already in the list, even spelled differently, is not added twice. When that is
+    // all the field holds it stays put and says so, rather than vanishing as if added.
     fun queueCurrent() {
-        val entries = typedLinks().filterNot { it in queued }
-        if (entries.isNotEmpty()) queued = queued + entries
+        val typed = typedLinks()
+        val entries = typed.filterNot { link -> queued.any { it == link || LinkKey.sameMedia(it, link) } }
+            .distinctBy { LinkKey.canonical(it).ifBlank { it } }
+        if (entries.isEmpty() && typed.isNotEmpty()) {
+            Toast.makeText(context, resources.getString(R.string.search_link_already_added), Toast.LENGTH_SHORT).show()
+            return
+        }
+        queued = queued + entries
         text = ""
     }
 
@@ -282,18 +295,6 @@ fun SearchScreen(
             )
         }
 
-        if (showClearHistoryConfirm) {
-            ClearHistoryDialog(
-                onConfirm = {
-                    showClearHistoryConfirm = false
-                    scope.launch {
-                        SearchHistoryRepository.clear(context)
-                    }
-                },
-                onDismiss = { showClearHistoryConfirm = false }
-            )
-        }
-
         removing?.let { entry ->
             RemoveEntryDialog(
                 entry = entry,
@@ -304,6 +305,25 @@ fun SearchScreen(
                     }
                 },
                 onDismiss = { removing = null }
+            )
+        }
+
+        removingQueued?.let { entry ->
+            RemoveEntryDialog(
+                entry = entry,
+                body = stringResource(R.string.search_remove_from_list_body),
+                onConfirm = {
+                    removingQueued = null
+                    queued = queued - entry
+                },
+                onDismiss = { removingQueued = null }
+            )
+        }
+
+        if (menuOpen) {
+            SearchOptionsSheet(
+                onClearResults = onClearResults,
+                onDismiss = { menuOpen = false }
             )
         }
 
@@ -321,7 +341,7 @@ fun SearchScreen(
         ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            // ── Input row ──
+            // ── Title row: back, the screen's name, and the search options ──
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -329,74 +349,111 @@ fun SearchScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.search_back))
+                    Icon(Icons.AutoMirrored.Filled.ArrowBackIos, contentDescription = stringResource(R.string.search_back))
                 }
-
-                TextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    placeholder = { Text(stringResource(R.string.search_hint)) },
-                    singleLine = true,
-                    modifier = Modifier
-                        .weight(1f)
-                        .focusRequester(focusRequester),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.background,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                        focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-                        unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent
-                    ),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = { submit() })
+                Text(
+                    stringResource(R.string.fetch_settings_search),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
-
-                // With nothing typed there is nothing to add or clear, so the space the
-                // those controls occupy carries the menu instead. It is also the only
-                // moment the menu is worth offering: its actions clear things, and clearing
-                // is not what someone half way through typing a link is after.
-                if (text.isBlank()) {
-                    Box {
-                        IconButton(onClick = { menuOpen = true }) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.search_more))
-                        }
-                        DropdownMenu(
-                            expanded = menuOpen,
-                            onDismissRequest = { menuOpen = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.search_clear_results)) },
-                                onClick = {
-                                    menuOpen = false
-                                    onClearResults()
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.search_clear_history)) },
-                                onClick = {
-                                    menuOpen = false
-                                    showClearHistoryConfirm = true
-                                }
-                            )
-                        }
-                    }
-                }
-
-                // Parks the typed link so another can be entered.
-                if (text.isNotBlank() && !typingWords) {
-                    IconButton(onClick = { queueCurrent() }) {
-                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.search_add_link))
-                    }
-                }
-                if (text.isNotBlank() || queued.isNotEmpty()) {
-                    IconButton(
-                        onClick = {
-                            text = ""
-                            queued = emptyList()
-                        }
+                // Reads every queued link, offered only while there are some.
+                if (queued.isNotEmpty()) {
+                    Surface(
+                        onClick = { submit() },
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_clear))
+                        Row(
+                            modifier = Modifier.padding(start = 12.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painterResource(R.drawable.ic_search),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                stringResource(R.string.search_all),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1
+                            )
+                        }
                     }
                 }
+                IconButton(onClick = { menuOpen = true }) {
+                    Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.search_more))
+                }
+            }
+
+            // ── The field, with clear inside it and add just after it ──
+            // A long link gets nearly the whole row, and the actions on what is typed sit
+            // beside it rather than crowding the title row.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // The same margin both sides, unless add stands in the right one.
+                    .padding(start = 12.dp, end = if (text.isNotBlank() && !typingWords) 4.dp else 12.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+            Surface(
+                modifier = Modifier.weight(1f),
+                // The corners of the app's dialogs and cards, rather than a full pill.
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Row(
+                    modifier = Modifier.padding(end = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextField(
+                        value = text,
+                        onValueChange = { text = it },
+                        placeholder = { Text(stringResource(R.string.search_hint)) },
+                        singleLine = true,
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { submit() })
+                    )
+
+                    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides FIELD_ACTION_SIZE) {
+                        if (text.isNotBlank() || queued.isNotEmpty()) {
+                            IconButton(
+                                onClick = {
+                                    text = ""
+                                    queued = emptyList()
+                                },
+                                modifier = Modifier.size(FIELD_ACTION_SIZE)
+                            ) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = stringResource(R.string.search_clear),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            // Parks the typed link so another can be entered.
+            if (text.isNotBlank() && !typingWords) {
+                IconButton(onClick = { queueCurrent() }) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.search_add_link))
+                }
+            }
             }
 
             // ── Where to search ──
@@ -422,45 +479,25 @@ fun SearchScreen(
             HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
 
             // ── Queued links ──
+            // How many, and the one action that reads them all, over the links themselves as
+            // one group of rows. Holding a row asks before taking it out; a tap does nothing,
+            // so a link is never lost to a stray touch.
             if (queued.isNotEmpty()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    FlowRow(
-                        modifier = Modifier.weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .heightIn(max = QUEUE_MAX_HEIGHT)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
-                        queued.forEach { entry ->
-                            InputChip(
-                                selected = false,
-                                onClick = { queued = queued - entry },
-                                label = {
-                                    Text(
-                                        entry,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                trailingIcon = {
-                                    Icon(
-                                        Icons.Filled.Close,
-                                        contentDescription = stringResource(R.string.search_remove),
-                                        modifier = Modifier.size(InputChipDefaults.IconSize)
-                                    )
-                                }
+                        queued.forEachIndexed { index, entry ->
+                            QueuedLinkRow(
+                                entry = entry,
+                                position = index + 1,
+                                shape = groupShape(index, queued.size),
+                                onHold = { removingQueued = entry }
                             )
                         }
-                    }
-
-                    IconButton(onClick = { submit() }) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_search),
-                            contentDescription = stringResource(R.string.search_all),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
                     }
                 }
 
@@ -542,32 +579,94 @@ fun SearchScreen(
     }
 }
 
-// Clear search history confirmation dialog raised outside the Dialog so it sits on top.
-// Called from within SearchScreen after the user picks "Clear search history" from the
-// 3-dot menu, matching the same guard used on the home screen bar.
+/**
+ * One link waiting to be read: its place in the list, then the site it is on, with the rest
+ * of the address dimmed under it so the two are easy to tell apart at a glance.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ClearHistoryDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.search_clear_history_confirm_title), style = MaterialTheme.typography.titleMedium) },
-        text = { Text(stringResource(R.string.search_clear_history_confirm_body)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.search_clear_history), color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.search_cancel)) }
+private fun QueuedLinkRow(
+    entry: String,
+    position: Int,
+    shape: RoundedCornerShape,
+    onHold: () -> Unit
+) {
+    val (site, rest) = remember(entry) { linkParts(entry) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            .combinedClickable(
+                onClick = {},
+                onLongClick = onHold,
+                onLongClickLabel = stringResource(R.string.search_remove)
+            )
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(26.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                position.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
-    )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                site,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (rest.isNotEmpty()) {
+                Text(
+                    rest,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
 }
 
 /**
- * Asks before forgetting one remembered link, raised by holding its row. The entry heads the
- * dialog, so it is plain which one goes.
+ * A link as the site it is on and the rest of its address: `youtu.be` and `/abc?si=x`.
+ * The leading `www.` is dropped from the site. Anything that does not read as an address
+ * comes back whole, as the site, with nothing after it.
+ */
+internal fun linkParts(link: String): Pair<String, String> {
+    val withScheme = if ("://" in link) link else "https://$link"
+    val uri = runCatching { URI(withScheme) }.getOrNull()
+    val host = uri?.host?.removePrefix("www.")
+    if (uri == null || host.isNullOrBlank()) return link to ""
+    val rest = (uri.rawPath ?: "") + (uri.rawQuery?.let { "?$it" } ?: "")
+    return host to rest
+}
+
+/**
+ * Asks before taking a link away, raised by holding its row: from the search history by
+ * default, or from wherever [body] says. The entry heads the dialog, so it is plain which
+ * one goes.
  */
 @Composable
-internal fun RemoveEntryDialog(entry: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+internal fun RemoveEntryDialog(
+    entry: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    body: String = stringResource(R.string.search_remove_confirm_body)
+) {
     val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -579,7 +678,7 @@ internal fun RemoveEntryDialog(entry: String, onConfirm: () -> Unit, onDismiss: 
                 overflow = TextOverflow.Ellipsis
             )
         },
-        text = { Text(stringResource(R.string.search_remove_confirm_body)) },
+        text = { Text(body) },
         // Copy, Cancel and Remove as one group, which wraps rather than squeezing a label
         // where the three do not fit one line.
         confirmButton = {
@@ -697,6 +796,12 @@ internal fun isLinks(text: String): Boolean {
 private val BARE_ADDRESS = Regex("""^[\p{L}\p{N}-]+(\.[\p{L}\p{N}-]+)*\.[\p{L}]{2,}(:\d+)?([/?#]\S*)?$""")
 
 private const val SUGGESTION_DELAY_MS = 250L
+
+/** The clear button inside the field: smaller than the usual 48 dp, so it sits close. */
+private val FIELD_ACTION_SIZE = 36.dp
+
+/** How tall the list of queued links grows before it scrolls, so history stays in view. */
+private val QUEUE_MAX_HEIGHT = 236.dp
 
 /** Any run of whitespace, which is what separates one pasted link from the next. */
 private val WHITESPACE = Regex("""\s+""")

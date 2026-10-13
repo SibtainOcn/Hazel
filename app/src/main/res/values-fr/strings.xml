@@ -40,14 +40,22 @@
     <string name="search_back">Retour</string>
     <string name="search_more">Plus</string>
     <string name="search_add_link">Ajouter un autre lien</string>
+    <string name="search_link_already_added">Déjà dans la liste</string>
     <string name="search_clear">Effacer</string>
     <string name="search_clear_results">Vider les résultats</string>
     <string name="search_clear_history">Effacer l\'historique de recherche</string>
+    <string name="search_under_maintenance">En maintenance</string>
+    <string name="search_options_title">Options de recherche</string>
+    <string name="search_web_title">Rechercher sur le Web</string>
+    <string name="search_web_beta">Bêta</string>
+    <string name="search_web_notice">Trouve des vidéos sur tout site que Hazel peut télécharger. La lecture et les téléchargements peuvent ne pas fonctionner sur tous les sites.</string>
+    <string name="search_web_continue">Continuer</string>
     <string name="search_empty_history">Vos recherches et liens apparaîtront ici</string>
     <string name="search_no_matches">Aucune correspondance</string>
     <string name="search_remove">Retirer</string>
     <string name="search_all">Tout chercher</string>
     <string name="search_remove_confirm_body">Supprimer de l\'historique de recherche ?</string>
+    <string name="search_remove_from_list_body">Retirer ce lien de la liste ?</string>
     <string name="search_entry_copied">Copié dans le presse-papiers</string>
     <string name="search_edit_before">Modifier avant de chercher</string>
     <string name="search_paste_and_fetch">Coller et chercher</string>
@@ -182,6 +190,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">Plus</string>
+    <string name="settings_search">Rechercher dans les réglages</string>
+    <string name="settings_search_hint">Trouvez un réglage par son nom ou par ce qu\'il fait</string>
+    <string name="settings_search_none">Aucun réglage trouvé pour %1$s</string>
     <string name="more_battery_title">Téléchargements en arrière-plan</string>
     <string name="more_battery_body">Certains téléphones coupent les téléchargements en arrière-plan. L’usage illimité l’évite.</string>
     <string name="more_downloads">Téléchargements</string>
@@ -232,8 +243,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Choisir le filtrage SponsorBlock</string>
-    <string name="options_sponsorblock_ok">OK</string>
-    <string name="options_sponsorblock_cancel">Annuler</string>
     <string name="options_chapters_title">Chapitres</string>
     <string name="options_chapters_in_videos">Chapitres dans les vidéos</string>
     <string name="options_chapters_split">Découper par chapitres</string>
@@ -762,10 +771,7 @@
     <string name="save_location_error_card_folder">Impossible de créer %1$s sur la carte, les téléchargements iront donc dans le dossier choisi.</string>
     <string name="save_fallback_title">Enregistré ailleurs</string>
     <string name="save_fallback_body">Impossible d\'écrire ces fichiers dans %1$s. La carte a peut-être été retirée, est pleine ou n\'autorise plus l\'accès. Ils ont été enregistrés dans %2$s.</string>
-    <string name="home_start_with">Commencer par</string>
-    <string name="home_start_paste">Coller un lien</string>
-    <string name="home_start_search">Rechercher</string>
-    <string name="home_start_downloads">Téléchargements</string>
+    <string name="home_empty_hint">Collez un lien ou lancez une recherche pour commencer</string>
     <string name="more_getting_started">Prise en main</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">Téléchargement lancé</string>

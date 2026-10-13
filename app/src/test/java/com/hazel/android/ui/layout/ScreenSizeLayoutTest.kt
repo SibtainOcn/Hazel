@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import com.hazel.android.data.DownloadHistoryRepository
@@ -21,6 +22,10 @@ import com.hazel.android.download.MediaInfo
 import com.hazel.android.ui.components.MediaCard
 import com.hazel.android.ui.components.gridColumns
 import com.hazel.android.ui.components.gridItems
+import com.hazel.android.R
+import com.hazel.android.download.extractor.SearchSource
+import com.hazel.android.ui.screens.download.SearchOptionsSheet
+import com.hazel.android.ui.screens.download.SearchSourceSheet
 import com.hazel.android.ui.screens.download.batch.BatchDownloadSheet
 import com.hazel.android.ui.screens.history.HistoryScreen
 import com.hazel.android.ui.screens.queue.FailedCard
@@ -79,7 +84,7 @@ class ScreenSizeLayoutTest(private val size: String, private val qualifiers: Str
     private val shots = LayoutShots()
 
     @get:Rule
-    val rules: RuleChain = RuleChain.outerRule(device).around(compose).around(shots)
+    val rules: RuleChain = RuleChain.outerRule(SettleGuard()).around(device).around(compose).around(shots)
 
     private val context get() = ApplicationProvider.getApplicationContext<android.content.Context>()
 
@@ -182,5 +187,23 @@ class ScreenSizeLayoutTest(private val size: String, private val qualifiers: Str
             )
         }
         capture("download_all")
+    }
+
+    @Test
+    fun searchOptionsSheet() {
+        show { SearchOptionsSheet(onClearResults = {}, onDismiss = {}) }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText(
+                ApplicationProvider.getApplicationContext<android.content.Context>().getString(R.string.search_clear_history),
+                useUnmergedTree = true
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+        }
+        capture("search_options")
+    }
+
+    @Test
+    fun searchSourceSheet() {
+        show { SearchSourceSheet(selected = SearchSource.YOUTUBE, onDismiss = {}) }
+        capture("search_source")
     }
 }

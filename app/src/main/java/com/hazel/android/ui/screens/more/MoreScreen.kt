@@ -34,6 +34,8 @@ import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Update
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -88,7 +90,8 @@ fun MoreScreen(
     onNavigateToProcessing: () -> Unit = {},
     onNavigateToAdvanced: () -> Unit = {},
     onNavigateToBackup: () -> Unit = {},
-    onNavigateToDocumentation: () -> Unit = {}
+    onNavigateToDocumentation: () -> Unit = {},
+    onNavigateToSettingsSearch: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val listingSource by remember(context) { SettingsRepository.getListingSource(context) }.collectAsState(initial = ListingSource.DEFAULT)
@@ -173,12 +176,23 @@ fun MoreScreen(
         // The screen names itself, the way the downloads list does. The app's name used to
         // sit above it in a bar of its own; with that gone this is what the screen opens
         // on, rather than the first card arriving with no introduction.
-        Text(
-            stringResource(R.string.more_title),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                stringResource(R.string.more_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            // Every setting, found by name, from its own screen.
+            IconButton(onClick = onNavigateToSettingsSearch) {
+                Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.settings_search))
+            }
+        }
 
         // Android suspends a long network job shortly after the app leaves the foreground,
         // so without this exemption a download stops when the screen is turned off. It
@@ -229,19 +243,21 @@ fun MoreScreen(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
+          // A name too long for its row at a large font breaks at a syllable with a hyphen,
+          // rather than leaving its last letter alone on the next line.
+          androidx.compose.material3.ProvideTextStyle(
+              androidx.compose.material3.LocalTextStyle.current.copy(
+                  hyphens = androidx.compose.ui.text.style.Hyphens.Auto,
+                  lineBreak = androidx.compose.ui.text.style.LineBreak.Paragraph
+              )
+          ) {
             // Appearance: theme and accent colour
             ListItem(
                 headlineContent = { Text(stringResource(R.string.more_appearance)) },
                 leadingContent = {
                     Icon(Icons.Filled.Palette, null, tint = MaterialTheme.colorScheme.primary)
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToAppearance() }
             )
@@ -257,13 +273,7 @@ fun MoreScreen(
                 leadingContent = {
                     Icon(Icons.Filled.Tune, null, tint = MaterialTheme.colorScheme.primary)
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToProcessing() }
             )
@@ -279,13 +289,7 @@ fun MoreScreen(
                 leadingContent = {
                     Icon(Icons.Filled.Build, null, tint = MaterialTheme.colorScheme.primary)
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToAdvanced() }
             )
@@ -300,13 +304,7 @@ fun MoreScreen(
                 leadingContent = {
                     Icon(Icons.Filled.SettingsBackupRestore, null, tint = MaterialTheme.colorScheme.primary)
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToBackup() }
             )
@@ -322,13 +320,7 @@ fun MoreScreen(
                 leadingContent = {
                     Icon(Icons.Filled.Folder, null, tint = MaterialTheme.colorScheme.primary)
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToStorageLocations() }
             )
@@ -338,19 +330,18 @@ fun MoreScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Language. It says the current choice on the right the way the temporary files
-            // row says its size.
+            // Language, with the current choice under it. On the right, a long language name
+            // at a large font squeezed the row's own name until it broke apart.
             ListItem(
                 headlineContent = { Text(stringResource(R.string.more_language)) },
-                leadingContent = {
-                    Icon(Icons.Filled.Language, null, tint = MaterialTheme.colorScheme.primary)
-                },
-                trailingContent = {
+                supportingContent = {
                     Text(
                         languageLabel,
-                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                     )
+                },
+                leadingContent = {
+                    Icon(Icons.Filled.Language, null, tint = MaterialTheme.colorScheme.primary)
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { languageDialogOpen = true }
@@ -367,13 +358,7 @@ fun MoreScreen(
                 leadingContent = {
                     Icon(Icons.Filled.Cookie, null, tint = MaterialTheme.colorScheme.primary)
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToCookies() }
             )
@@ -389,13 +374,7 @@ fun MoreScreen(
                 leadingContent = {
                     Icon(Icons.Filled.Speed, null, tint = MaterialTheme.colorScheme.primary)
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToFetchSettings() }
             )
@@ -405,31 +384,23 @@ fun MoreScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            // Working files the app holds, with the running total so it is visible without
-            // opening the screen.
+            // Working files the app holds, with the running total under the name so it is
+            // visible without opening the screen, and leaves the name room at a large font.
             ListItem(
                 headlineContent = { Text(stringResource(R.string.more_temporary_files)) },
+                supportingContent = {
+                    Text(
+                        formatFileSize(tempBytes).ifBlank { "0 KB" },
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                },
                 leadingContent = {
                     Icon(
                         Icons.Filled.DeleteSweep, null,
                         tint = MaterialTheme.colorScheme.primary
                     )
                 },
-                trailingContent = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            formatFileSize(tempBytes).ifBlank { "0 KB" },
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToStorageCleanup() }
             )
@@ -450,13 +421,7 @@ fun MoreScreen(
                         modifier = Modifier.size(24.dp)
                     )
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToConverter() }
             )
@@ -487,13 +452,7 @@ fun MoreScreen(
                         }
                     }
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToUpdate() }
             )
@@ -510,13 +469,7 @@ fun MoreScreen(
                 leadingContent = {
                     Icon(Icons.Filled.Favorite, null, tint = MaterialTheme.colorScheme.primary)
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToSponsor() }
             )
@@ -539,13 +492,7 @@ fun MoreScreen(
                 leadingContent = {
                     Icon(Icons.Filled.Bolt, null, tint = MaterialTheme.colorScheme.primary)
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { guideOpen = true }
             )
@@ -571,16 +518,25 @@ fun MoreScreen(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
+                trailingContent = { MoreChevron() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onNavigateToDocumentation() }
             )
+          }
         }
     }
+}
+
+/**
+ * The arrow at the end of a row that opens a screen. At a large font it is left out, so the
+ * row's name has the room instead of breaking a long word.
+ */
+@Composable
+private fun MoreChevron() {
+    if (androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.5f) return
+    Icon(
+        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+        modifier = Modifier.size(16.dp)
+    )
 }

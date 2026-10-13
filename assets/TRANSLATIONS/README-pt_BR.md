@@ -89,7 +89,7 @@ Português (Brasil)
 - Selecione diferentes formatos e contêineres de download
 
 ### Pesquisar e reproduzir
-- **Pesquisa** - digite palavras em vez de um link para pesquisar no YouTube, YouTube Music, SoundCloud, Bandcamp, Bilibili, Niconico, PRX ou Rokfin, com sugestões de pesquisa opcionais
+- **Pesquisa** - digite palavras em vez de um link para pesquisar no YouTube, YouTube Music, SoundCloud ou Bandcamp, com sugestões de pesquisa opcionais
 - **Reproduza antes de baixar** - reproduza qualquer resultado ou link direto no card, com barra de progresso, toque duplo para pular, tela cheia e seletor de qualidade, em qualquer site que o Hazel consiga ler
 - **Cortar** - baixe só uma parte de um vídeo ou faixa, escolhendo o trecho em uma prévia ao vivo
 - **Transmissões ao vivo** - grave desde o início de uma live, ou aguarde uma estreia e baixe em seguida

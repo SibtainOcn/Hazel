@@ -40,14 +40,22 @@
     <string name="search_back">戻る</string>
     <string name="search_more">その他</string>
     <string name="search_add_link">リンクを追加</string>
+    <string name="search_link_already_added">すでにリストにあります</string>
     <string name="search_clear">消去</string>
     <string name="search_clear_results">検索結果を消去</string>
     <string name="search_clear_history">検索履歴を削除</string>
+    <string name="search_under_maintenance">メンテナンス中</string>
+    <string name="search_options_title">検索オプション</string>
+    <string name="search_web_title">ウェブで検索</string>
+    <string name="search_web_beta">ベータ</string>
+    <string name="search_web_notice">Hazel がダウンロードできるすべてのサイトから動画を探します。一部のサイトでは再生やダウンロードができない場合があります。</string>
+    <string name="search_web_continue">続ける</string>
     <string name="search_empty_history">検索とリンクの履歴がここに表示されます</string>
     <string name="search_no_matches">一致するものはありません</string>
     <string name="search_remove">削除</string>
     <string name="search_all">すべて検索</string>
     <string name="search_remove_confirm_body">検索履歴から削除しますか？</string>
+    <string name="search_remove_from_list_body">このリンクをリストから削除しますか？</string>
     <string name="search_entry_copied">クリップボードにコピーしました</string>
     <string name="search_edit_before">検索前に編集</string>
     <string name="search_paste_and_fetch">貼り付けて取得</string>
@@ -174,6 +182,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">その他</string>
+    <string name="settings_search">設定を検索</string>
+    <string name="settings_search_hint">名前や働きから設定を探せます</string>
+    <string name="settings_search_none">%1$s に一致する設定はありません</string>
     <string name="more_battery_title">バックグラウンドダウンロード</string>
     <string name="more_battery_body">一部の端末は電池節約のためバックグラウンドのダウンロードを止めます。制限なしで防げます。</string>
     <string name="more_downloads">ダウンロード</string>
@@ -224,8 +235,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">SponsorBlock フィルタの選択</string>
-    <string name="options_sponsorblock_ok">OK</string>
-    <string name="options_sponsorblock_cancel">キャンセル</string>
     <string name="options_chapters_title">チャプター</string>
     <string name="options_chapters_in_videos">動画内にチャプターを含める</string>
     <string name="options_chapters_split">チャプターごとに分割</string>
@@ -744,10 +753,7 @@
     <string name="save_location_error_card_folder">カードに %1$s を作成できなかったため、選択したフォルダに保存します。</string>
     <string name="save_fallback_title">別の場所に保存しました</string>
     <string name="save_fallback_body">%1$s に書き込めませんでした。カードが取り外されたか、容量不足か、アクセスが許可されていない可能性があります。代わりに %2$s に保存しました。</string>
-    <string name="home_start_with">はじめる</string>
-    <string name="home_start_paste">リンクを貼り付け</string>
-    <string name="home_start_search">検索</string>
-    <string name="home_start_downloads">ダウンロード</string>
+    <string name="home_empty_hint">リンクを貼り付けるか検索して始めましょう</string>
     <string name="more_getting_started">はじめに</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">ダウンロードを開始しました</string>

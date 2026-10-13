@@ -40,14 +40,22 @@
     <string name="search_back">Назад</string>
     <string name="search_more">Ещё</string>
     <string name="search_add_link">Добавить ещё ссылку</string>
+    <string name="search_link_already_added">Уже в списке</string>
     <string name="search_clear">Очистить</string>
     <string name="search_clear_results">Очистить результаты</string>
     <string name="search_clear_history">Очистить историю поиска</string>
+    <string name="search_under_maintenance">На обслуживании</string>
+    <string name="search_options_title">Параметры поиска</string>
+    <string name="search_web_title">Искать в интернете</string>
+    <string name="search_web_beta">Бета</string>
+    <string name="search_web_notice">Ищет видео на любом сайте, с которого Hazel может скачивать. Воспроизведение и загрузка могут работать не на всех сайтах.</string>
+    <string name="search_web_continue">Продолжить</string>
     <string name="search_empty_history">Здесь появятся ваши запросы и ссылки</string>
     <string name="search_no_matches">Совпадений нет</string>
     <string name="search_remove">Удалить</string>
     <string name="search_all">Искать везде</string>
     <string name="search_remove_confirm_body">Удалить из истории поиска?</string>
+    <string name="search_remove_from_list_body">Убрать эту ссылку из списка?</string>
     <string name="search_entry_copied">Скопировано в буфер обмена</string>
     <string name="search_edit_before">Изменить перед поиском</string>
     <string name="search_paste_and_fetch">Вставить и загрузить</string>
@@ -186,6 +194,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">Ещё</string>
+    <string name="settings_search">Поиск настроек</string>
+    <string name="settings_search_hint">Найдите настройку по названию или по тому, что она делает</string>
+    <string name="settings_search_none">Нет настроек по запросу %1$s</string>
     <string name="more_battery_title">Фоновые загрузки</string>
     <string name="more_battery_body">Некоторые телефоны останавливают фоновые загрузки ради батареи. Режим без ограничений это исключает.</string>
     <string name="more_downloads">Загрузки</string>
@@ -236,8 +247,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Фильтрация SponsorBlock</string>
-    <string name="options_sponsorblock_ok">ОК</string>
-    <string name="options_sponsorblock_cancel">Отмена</string>
     <string name="options_chapters_title">Разделы</string>
     <string name="options_chapters_in_videos">Разделы в видео</string>
     <string name="options_chapters_split">Разделить по разделам</string>
@@ -770,10 +779,7 @@
     <string name="save_location_error_card_folder">Не удалось создать %1$s на карте, поэтому загрузки будут сохраняться в выбранную папку.</string>
     <string name="save_fallback_title">Сохранено в другом месте</string>
     <string name="save_fallback_body">Не удалось записать в %1$s. Возможно, карту извлекли, она заполнена или больше не даёт доступа. Файлы сохранены в %2$s.</string>
-    <string name="home_start_with">Начните с</string>
-    <string name="home_start_paste">Вставить ссылку</string>
-    <string name="home_start_search">Поиск</string>
-    <string name="home_start_downloads">Загрузки</string>
+    <string name="home_empty_hint">Вставьте ссылку или начните поиск</string>
     <string name="more_getting_started">Начало работы</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">Загрузка началась</string>

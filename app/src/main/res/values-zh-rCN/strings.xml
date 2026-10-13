@@ -40,14 +40,22 @@
     <string name="search_back">返回</string>
     <string name="search_more">更多</string>
     <string name="search_add_link">再添加一个链接</string>
+    <string name="search_link_already_added">已在列表中</string>
     <string name="search_clear">清除</string>
     <string name="search_clear_results">清空结果</string>
     <string name="search_clear_history">清除搜索记录</string>
+    <string name="search_under_maintenance">维护中</string>
+    <string name="search_options_title">搜索选项</string>
+    <string name="search_web_title">搜索网络</string>
+    <string name="search_web_beta">测试版</string>
+    <string name="search_web_notice">在 Hazel 可下载的任意网站上查找视频。部分网站可能无法播放或下载。</string>
+    <string name="search_web_continue">继续</string>
     <string name="search_empty_history">你的搜索和链接会显示在这里</string>
     <string name="search_no_matches">没有匹配项</string>
     <string name="search_remove">移除</string>
     <string name="search_all">全部搜索</string>
     <string name="search_remove_confirm_body">要从搜索记录中移除吗？</string>
+    <string name="search_remove_from_list_body">要从列表中移除此链接吗？</string>
     <string name="search_entry_copied">已复制到剪贴板</string>
     <string name="search_edit_before">搜索前先编辑</string>
     <string name="search_paste_and_fetch">粘贴并读取</string>
@@ -174,6 +182,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">更多</string>
+    <string name="settings_search">搜索设置</string>
+    <string name="settings_search_hint">按名称或用途查找设置</string>
+    <string name="settings_search_none">没有找到与 %1$s 相关的设置</string>
     <string name="more_battery_title">后台下载</string>
     <string name="more_battery_body">部分手机为省电会中断后台下载。设为不受限制即可避免。</string>
     <string name="more_downloads">下载</string>
@@ -224,8 +235,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">选择 SponsorBlock 过滤</string>
-    <string name="options_sponsorblock_ok">确定</string>
-    <string name="options_sponsorblock_cancel">取消</string>
     <string name="options_chapters_title">章节</string>
     <string name="options_chapters_in_videos">视频中的章节</string>
     <string name="options_chapters_split">按章节分割</string>
@@ -744,10 +753,7 @@
     <string name="save_location_error_card_folder">无法在存储卡上创建 %1$s，下载内容将保存到你选择的文件夹。</string>
     <string name="save_fallback_title">已保存到其他位置</string>
     <string name="save_fallback_body">无法写入 %1$s。存储卡可能已被移除、已满或不再允许访问。文件已改为保存到 %2$s。</string>
-    <string name="home_start_with">从这里开始</string>
-    <string name="home_start_paste">粘贴链接</string>
-    <string name="home_start_search">搜索</string>
-    <string name="home_start_downloads">下载</string>
+    <string name="home_empty_hint">粘贴链接或搜索以开始</string>
     <string name="more_getting_started">入门指南</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">已开始下载</string>

@@ -82,8 +82,6 @@ data class DownloadPlan(
 data class DownloadState(
     val url: String = "",
     val isFetching: Boolean = false,
-    /** How far through a multi-link read the app is, for the progress line. */
-    val fetchProgress: String = "",
     /** How many links the current read covers, so the screen can stand in for each one. */
     val fetchCount: Int = 0,
     /** The words the results on screen were searched for, or blank when they came from links. */
@@ -830,7 +828,6 @@ class DownloadViewModel : ViewModel() {
             info = null,
             batch = if (runInHand) s.batch else emptyList(),
             isComplete = false,
-            fetchProgress = "",
             fetchCount = valid.size,
             searchQuery = ""
         ) }
@@ -846,12 +843,6 @@ class DownloadViewModel : ViewModel() {
             var lastFailure = ""
 
             try {
-                if (valid.size > 1) {
-                    _state.update { s -> s.copy(
-                        fetchProgress = HazelApp.instance.getString(R.string.fetch_settings_reading_links)
-                    ) }
-                }
-
                 // Each pasted link is asked what it holds, and a link holding a collection
                 // contributes one card per entry. Reads run together rather than in turn,
                 // because each one is almost entirely waiting.
@@ -881,14 +872,13 @@ class DownloadViewModel : ViewModel() {
                     lastFailure = HazelApp.instance.getString(R.string.no_results_error_title)
                 }
             } catch (_: CancellationException) {
-                _state.update { s -> s.copy(isFetching = false, fetchProgress = "") }
+                _state.update { s -> s.copy(isFetching = false) }
                 return@launch
             } catch (e: Exception) {
                 lastFailure = e.message?.trim().orEmpty()
                 val message = sanitizeError(lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) })
                 _state.update { s -> s.copy(
                     isFetching = false,
-                    fetchProgress = "",
                     errorLog = lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) }
                 ) }
                 if (notifyFailure) {
@@ -910,13 +900,11 @@ class DownloadViewModel : ViewModel() {
             _state.update { s -> if (resolved.isEmpty()) {
                 s.copy(
                     isFetching = false,
-                    fetchProgress = "",
                     errorLog = lastFailure.ifBlank { HazelApp.instance.getString(R.string.no_results_error_title) }
                 )
             } else {
                 s.copy(
                     isFetching = false,
-                    fetchProgress = "",
                     results = resolved,
                     info = resolved.singleOrNull(),
                     savedAside = false
@@ -953,7 +941,6 @@ class DownloadViewModel : ViewModel() {
             info = null,
             batch = if (runInHand) s.batch else emptyList(),
             isComplete = false,
-            fetchProgress = "",
             fetchCount = SEARCH_SKELETONS,
             searchQuery = text
         ) }

@@ -19,7 +19,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,19 +43,14 @@ import androidx.compose.material.icons.Icons
 
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentPaste
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -141,9 +135,7 @@ fun DownloadScreen(
     onSharesConsumed: () -> Unit = {},
     downloadViewModel: DownloadViewModel = viewModel(),
     /** Opens the queue screen, where a download in hand is paused, resumed or cancelled. */
-    onOpenQueue: () -> Unit = {},
-    /** Opens the downloads list, from the starters on an empty home screen. */
-    onOpenDownloads: () -> Unit = {}
+    onOpenQueue: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -201,13 +193,16 @@ fun DownloadScreen(
     // the screen is for; it separates itself from the list instead, so the two stop reading
     // as one surface the moment they start overlapping. Asked of the scroll itself rather
     // than of the first visible row: the empty screen leads with a row of no height, which
-    // made its starters the first visible row and drew the separator over a blank screen.
-    val listScrolled by remember { derivedStateOf { listState.canScrollBackward } }
+    // made its empty-screen hint the first visible row and drew the separator over a blank screen.
+    //
+    // Only with cards in the list. With none, the error row that leads it has no height, so
+    // the list reports itself as past that row, and able to scroll back to it, without
+    // anything having moved; that drew the separator and the scrollbar over an empty screen.
+    val listScrolled by remember {
+        derivedStateOf { listState.canScrollBackward && state.results.isNotEmpty() }
+    }
 
     var searchOpen by remember { mutableStateOf(false) }
-    // Counts taps on the empty screen's Paste starter; the paste itself is set up further
-    // down, beside the paste button it shares its work with.
-    var pasteRequests by remember { mutableStateOf(0) }
     // The one card playing, if any. Starting another stops it. The player itself is held
     // here rather than in the card, so full screen cannot drop it along with the card when
     // the list lays itself out again.
@@ -348,7 +343,6 @@ fun DownloadScreen(
     // warning is still raised here rather than there.
     var cameFromShare by remember { mutableStateOf(false) }
 
-    var showClearConfirmDialog by remember { mutableStateOf(false) }
 
     // A single link goes straight to its sheet. A set of links does not, because the list
     // itself is the thing to look at first.
@@ -422,31 +416,13 @@ fun DownloadScreen(
             // the screen on the first flick.
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Home screen search bar with overflow 3-dot menu (clear results / clear history).
-            // The menu reuses the same actions the full SearchScreen exposes in its own
-            // 3-dot, so the two entry points behave identically.
+            // Home screen search bar. Its 3-dot opens the same search options sheet the full
+            // SearchScreen opens, so the two entry points behave identically.
             var homeMenuOpen by remember { mutableStateOf(false) }
-            var showClearHistoryConfirm by remember { mutableStateOf(false) }
-            val homeScope = rememberCoroutineScope()
-
-            if (showClearHistoryConfirm) {
-                AlertDialog(
-                    onDismissRequest = { showClearHistoryConfirm = false },
-                    title = { Text(stringResource(R.string.search_clear_history_confirm_title), fontWeight = FontWeight.Bold) },
-                    text = { Text(stringResource(R.string.search_clear_history_confirm_body)) },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            showClearHistoryConfirm = false
-                            homeScope.launch(Dispatchers.IO) {
-                                SearchHistoryRepository.clear(context.applicationContext)
-                            }
-                        }) { Text(stringResource(R.string.search_clear_history), color = MaterialTheme.colorScheme.error) }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showClearHistoryConfirm = false }) {
-                            Text(stringResource(R.string.search_cancel))
-                        }
-                    }
+            if (homeMenuOpen) {
+                SearchOptionsSheet(
+                    onClearResults = downloadViewModel::clearResults,
+                    onDismiss = { homeMenuOpen = false }
                 )
             }
 
@@ -458,11 +434,7 @@ fun DownloadScreen(
                     cameFromShare = false
                     searchOpen = true
                 },
-                onClearResults = { showClearConfirmDialog = true },
-                onClearHistory = { showClearHistoryConfirm = true },
-                menuOpen = homeMenuOpen,
                 onMenuOpen = { homeMenuOpen = true },
-                onMenuDismiss = { homeMenuOpen = false },
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
 
@@ -499,14 +471,6 @@ fun DownloadScreen(
                         .clipToBounds()
                 ) {
                     Column {
-                        if (state.fetchProgress.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                state.fetchProgress,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
                         Spacer(modifier = Modifier.height(16.dp))
                         // As many cards as the screen has room for, each at its real size, so
                         // the last one runs off the bottom rather than being squeezed. A tall
@@ -552,7 +516,10 @@ fun DownloadScreen(
                             end = 20.dp,
                             // Room for the action that floats over the list, on the same terms as
                             // the action itself.
-                            bottom = 96.dp
+                            // Kept only while there are cards: on an empty screen it made the
+                            // list taller than its space, and the hint sat that much above the
+                            // middle.
+                            bottom = if (orderedResults.isEmpty()) 0.dp else LIST_BOTTOM_ROOM
                         )
                     ) {
                         gridItems(orderedResults, columns, SKELETON_SPACING, key = { it.url }) { info ->
@@ -626,14 +593,6 @@ fun DownloadScreen(
                         if (state.isFetching && orderedResults.isNotEmpty()) {
                             item(key = "fetching") {
                                 Column {
-                                    if (state.fetchProgress.isNotBlank()) {
-                                        Spacer(modifier = Modifier.height(12.dp))
-                                        Text(
-                                            state.fetchProgress,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
                                     ShimmerHost(modifier = Modifier.fillMaxWidth()) {
                                         Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                                             Spacer(modifier = Modifier.height(4.dp))
@@ -696,46 +655,34 @@ fun DownloadScreen(
                             }
                         }
 
-                        // Nothing read yet: three ways to start, as plain chips rather than a
-                        // picture, so the empty screen offers something to do.
+                        // Nothing read yet: a faint mark and one line, and nothing to tap. The
+                        // search bar above and the paste button already offer every way to
+                        // start, so the middle of the screen stays quiet.
                         if (!incognito && state.results.isEmpty() && !state.isFetching) {
-                            item(key = "starters") {
-                                // Fills the space under the search bar, so the chips sit
-                                // in its middle rather than near the top.
+                            item(key = "empty") {
+                                // Fills the space between the search bar and the bottom bar,
+                                // so the line sits in its middle.
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .fillParentMaxHeight(),
+                                        .fillParentMaxHeight()
+                                        .padding(horizontal = 32.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
-                                    Text(
-                                        stringResource(R.string.home_start_with),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_download_minimal),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(40.dp),
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
                                     )
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    androidx.compose.foundation.layout.FlowRow(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                                        modifier = Modifier.padding(horizontal = 24.dp)
-                                    ) {
-                                        com.hazel.android.ui.components.FlatChip(
-                                            label = stringResource(R.string.home_start_paste),
-                                            onClick = { pasteRequests++ }
-                                        )
-                                        com.hazel.android.ui.components.FlatChip(
-                                            label = stringResource(R.string.home_start_search),
-                                            onClick = {
-                                                cameFromShare = false
-                                                searchOpen = true
-                                            }
-                                        )
-                                        com.hazel.android.ui.components.FlatChip(
-                                            label = stringResource(R.string.home_start_downloads),
-                                            onClick = onOpenDownloads
-                                        )
-                                    }
+                                    Spacer(modifier = Modifier.height(14.dp))
+                                    Text(
+                                        stringResource(R.string.home_empty_hint),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                                        textAlign = TextAlign.Center
+                                    )
                                 }
                             }
                         }
@@ -772,11 +719,14 @@ fun DownloadScreen(
                             }
                         }
                     }
-                    FastScrollbar(
-                        listState,
-                        Modifier.align(Alignment.TopEnd),
-                        trackPadding = androidx.compose.foundation.layout.PaddingValues(top = 12.dp, bottom = 96.dp)
-                    )
+                    // Nothing to move through on an empty screen, so no bar over it.
+                    if (orderedResults.isNotEmpty()) {
+                        FastScrollbar(
+                            listState,
+                            Modifier.align(Alignment.TopEnd),
+                            trackPadding = androidx.compose.foundation.layout.PaddingValues(top = 12.dp, bottom = LIST_BOTTOM_ROOM)
+                        )
+                    }
                 }
             }
         }
@@ -832,8 +782,6 @@ fun DownloadScreen(
                         }
                     }
         }
-
-        LaunchedEffect(pasteRequests) { if (pasteRequests > 0) pasteFromClipboard() }
 
         // The paste button shows while the clipboard holds something to paste, the way a
         // copied link is nearly always what brings someone here. Its label shows for a
@@ -1047,67 +995,23 @@ fun DownloadScreen(
             onDismiss = { batchSheetVisible = false }
         )
     }
-
-
-    if (showClearConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showClearConfirmDialog = false },
-            title = {
-                Text(
-                    text = stringResource(R.string.download_clear_confirm_title),
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Text(
-                    text = stringResource(R.string.download_clear_confirm_body)
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showClearConfirmDialog = false
-                        downloadViewModel.clearResults()
-                    }
-                ) {
-                    Text(
-                        stringResource(R.string.download_clear),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showClearConfirmDialog = false }
-                ) {
-                    Text(stringResource(R.string.download_cancel))
-                }
-            }
-        )
-    }
 }
 
 /**
  * The resting search field. Tapping it opens the full screen entry, which is where links
  * are actually typed, so this stays a button rather than an input.
  *
- * It carries nothing else. The menu that used to sit on it acts on the search history and
- * the resolved results, which are both things the entry screen is already about, so it
- * lives there now and this is a single control that does one thing.
+ * Its 3-dot opens the search options sheet, the same one the search screen opens.
  *
- * It is drawn on the highest surface tone with an outline, because on the near-black
- * background a low-alpha fill has almost no edge and the field reads as empty space.
+ * It is drawn on the highest surface tone, with no outline: the tone alone gives it its edge
+ * against the near-black background.
  */
 @Composable
 private fun UrlSearchBar(
     url: String,
     onOpenSearch: () -> Unit,
-    onClearResults: () -> Unit = {},
-    onClearHistory: () -> Unit = {},
     shineProgress: Float = 0f,
-    menuOpen: Boolean = false,
     onMenuOpen: () -> Unit = {},
-    onMenuDismiss: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -1117,8 +1021,7 @@ private fun UrlSearchBar(
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(26.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        color = MaterialTheme.colorScheme.surfaceContainerHighest
     ) {
         Row(
             modifier = Modifier
@@ -1143,36 +1046,15 @@ private fun UrlSearchBar(
                 modifier = Modifier.weight(1f)
             )
 
-            // Right: 3-dot overflow menu mirroring the full SearchScreen's menu
-            Box {
-                IconButton(onClick = onMenuOpen, modifier = Modifier.size(40.dp)) {
-                    Icon(
-                        Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.search_more),
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                DropdownMenu(
-                    expanded = menuOpen,
-                    onDismissRequest = onMenuDismiss
-                ) {
-
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.search_clear_results)) },
-                        onClick = {
-                            onMenuDismiss()
-                            onClearResults()
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.search_clear_history)) },
-                        onClick = {
-                            onMenuDismiss()
-                            onClearHistory()
-                        }
-                    )
-                }
+            // Opens the same search options sheet the search screen's own 3-dot does.
+            IconButton(onClick = onMenuOpen, modifier = Modifier.size(40.dp)) {
+                Icon(
+                    painterResource(R.drawable.ic_more_vert),
+                    contentDescription = stringResource(R.string.search_more),
+                    // The same size and tone as the search screen's, so the two read as one.
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }
@@ -1485,6 +1367,9 @@ private fun MediaCard(
 
 /** Gap between skeleton cards, the same as between the cards they stand in for. */
 private val SKELETON_SPACING = 20.dp
+
+/** Room at the foot of the results list for the action that floats over it. */
+private val LIST_BOTTOM_ROOM = 96.dp
 
 /** A row of [columns] skeleton cards, the width the real ones will take. */
 @Composable

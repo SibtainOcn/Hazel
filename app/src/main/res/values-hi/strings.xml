@@ -40,14 +40,22 @@
     <string name="search_back">वापस</string>
     <string name="search_more">और</string>
     <string name="search_add_link">एक और लिंक जोड़ें</string>
+    <string name="search_link_already_added">पहले से सूची में है</string>
     <string name="search_clear">मिटाएँ</string>
     <string name="search_clear_results">परिणाम हटाएँ</string>
     <string name="search_clear_history">खोज इतिहास मिटाएँ</string>
+    <string name="search_under_maintenance">रखरखाव जारी है</string>
+    <string name="search_options_title">खोज विकल्प</string>
+    <string name="search_web_title">वेब पर खोजें</string>
+    <string name="search_web_beta">बीटा</string>
+    <string name="search_web_notice">उन सभी साइटों पर वीडियो खोजता है जिनसे Hazel डाउनलोड कर सकता है। प्लेबैक और डाउनलोड हर साइट पर काम न करें, ऐसा हो सकता है।</string>
+    <string name="search_web_continue">जारी रखें</string>
     <string name="search_empty_history">आपकी खोजें और लिंक यहां दिखेंगे</string>
     <string name="search_no_matches">कोई मेल नहीं</string>
     <string name="search_remove">हटाएँ</string>
     <string name="search_all">सब खोजें</string>
     <string name="search_remove_confirm_body">खोज इतिहास से हटाएँ?</string>
+    <string name="search_remove_from_list_body">इस लिंक को सूची से हटाएँ?</string>
     <string name="search_entry_copied">क्लिपबोर्ड पर कॉपी किया गया</string>
     <string name="search_edit_before">खोजने से पहले बदलें</string>
     <string name="search_paste_and_fetch">चिपकाएँ और खोजें</string>
@@ -178,6 +186,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">और</string>
+    <string name="settings_search">सेटिंग खोजें</string>
+    <string name="settings_search_hint">किसी सेटिंग को उसके नाम या उसके काम से खोजें</string>
+    <string name="settings_search_none">%1$s के लिए कोई सेटिंग नहीं मिली</string>
     <string name="more_battery_title">पृष्ठभूमि में डाउनलोड</string>
     <string name="more_battery_body">कुछ फ़ोन बैटरी बचाने के लिए बैकग्राउंड डाउनलोड रोक देते हैं। अप्रतिबंधित उपयोग इसे रोकता है।</string>
     <string name="more_downloads">डाउनलोड</string>
@@ -228,8 +239,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">SponsorBlock फ़िल्टर चुनें</string>
-    <string name="options_sponsorblock_ok">ठीक है</string>
-    <string name="options_sponsorblock_cancel">रद्द करें</string>
     <string name="options_chapters_title">अध्याय</string>
     <string name="options_chapters_in_videos">वीडियो में अध्याय</string>
     <string name="options_chapters_split">अध्यायों में बाँटें</string>
@@ -753,10 +762,7 @@
     <string name="save_location_error_card_folder">कार्ड पर %1$s नहीं बन सका, इसलिए डाउनलोड आपके चुने फ़ोल्डर में सहेजे जाएँगे।</string>
     <string name="save_fallback_title">दूसरी जगह सहेजा गया</string>
     <string name="save_fallback_body">ये %1$s में नहीं लिखे जा सके। हो सकता है कार्ड निकाल दिया गया हो, भर गया हो या अब पहुँच न देता हो। इन्हें %2$s में सहेजा गया।</string>
-    <string name="home_start_with">यहाँ से शुरू करें</string>
-    <string name="home_start_paste">लिंक पेस्ट करें</string>
-    <string name="home_start_search">खोजें</string>
-    <string name="home_start_downloads">डाउनलोड</string>
+    <string name="home_empty_hint">शुरू करने के लिए कोई लिंक पेस्ट करें या खोजें</string>
     <string name="more_getting_started">शुरुआत करें</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">डाउनलोड शुरू हुआ</string>

@@ -89,7 +89,7 @@ Italiano
 - Seleziona diversi formati e contenitori di download
 
 ### Cerca e riproduci
-- **Ricerca** - digita parole invece di un link per cercare su YouTube, YouTube Music, SoundCloud, Bandcamp, Bilibili, Niconico, PRX o Rokfin, con suggerimenti di ricerca opzionali
+- **Ricerca** - digita parole invece di un link per cercare su YouTube, YouTube Music, SoundCloud o Bandcamp, con suggerimenti di ricerca opzionali
 - **Riproduci prima di scaricare** - riproduci qualsiasi risultato o link direttamente sulla sua scheda, con barra di avanzamento, doppio tocco per saltare, schermo intero e scelta della qualità, su ogni sito che Hazel può leggere
 - **Taglio** - scarica solo una parte di un video o di una traccia, scegliendo l'intervallo su un'anteprima dal vivo
 - **Dirette** - registra dall'inizio di una diretta, oppure attendi una prima e poi scaricala

@@ -271,6 +271,12 @@ fun DocumentationPageScreen(
                 modifier = Modifier.fillMaxSize(),
                 factory = { viewContext ->
                     com.hazel.android.ui.components.TrackedWebView(viewContext, scroll).apply {
+                        // Without a full-size layout the page's viewport height reads as 0,
+                        // so anything the site sizes in vh (its search panel) collapses.
+                        layoutParams = android.view.ViewGroup.LayoutParams(
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                        )
                         setBackgroundColor(background.toArgb())
                         settings.javaScriptEnabled = true
                         settings.domStorageEnabled = true

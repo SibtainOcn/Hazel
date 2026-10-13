@@ -20,6 +20,10 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.performTextInput
+import com.hazel.android.ui.screens.more.MoreScreen
+import com.hazel.android.ui.screens.more.SettingsSearchScreen
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
@@ -36,14 +40,23 @@ import com.hazel.android.ui.screens.download.GettingStartedDialog
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.ui.screens.download.NoResultsDialog
 import com.hazel.android.ui.screens.download.RemoveEntryDialog
+import com.hazel.android.ui.screens.download.SearchOptionsSheet
+import com.hazel.android.ui.screens.download.SearchSourceSheet
+import com.hazel.android.ui.screens.download.SponsorBlockDialog
+import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.SearchSource
+import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import com.hazel.android.ui.screens.more.AdvancedScreen
 import com.hazel.android.ui.screens.more.AppearanceScreen
 import com.hazel.android.ui.screens.more.ProxyScreen
 import com.hazel.android.ui.screens.more.LanguageSheet
+import com.hazel.android.ui.screens.more.StorageCleanupScreen
 import com.hazel.android.ui.screens.more.StorageLocationsScreen
 import com.hazel.android.ui.screens.queue.FailedCard
 import com.hazel.android.ui.screens.queue.FailureLogSheet
 import com.hazel.android.ui.theme.HazelTheme
+import com.hazel.android.util.TempCategory
+import com.hazel.android.util.TempStorage
 import java.util.Locale
 import org.junit.Rule
 import org.junit.rules.ExternalResource
@@ -104,7 +117,7 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
     private val shots = LayoutShots()
 
     @get:Rule
-    val rules: RuleChain = RuleChain.outerRule(device).around(compose).around(shots)
+    val rules: RuleChain = RuleChain.outerRule(SettleGuard()).around(device).around(compose).around(shots)
 
     private fun string(id: Int) =
         ApplicationProvider.getApplicationContext<android.content.Context>().getString(id)
@@ -122,10 +135,10 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
     }
 
     /** Shows [content] in the app's dark theme. */
-    private fun show(content: @Composable () -> Unit) {
+    private fun show(dark: Boolean = true, accent: String = "Cyan", content: @Composable () -> Unit) {
         compose.setContent {
             CompositionLocalProvider(LocalActivityResultRegistryOwner provides pickerHost) {
-                HazelTheme(darkTheme = true) {
+                HazelTheme(darkTheme = dark, accentName = accent) {
                     Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
                         content()
                     }
@@ -270,6 +283,25 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
         checkAndCapture("advanced")
     }
 
+    /**
+     * Sizes from KB to GB, one empty, and one far longer than any real size, which has to
+     * end in an ellipsis inside its chip rather than push the text aside.
+     */
+    private val cleanupSample = listOf(
+        TempCategory("ytdlp_cache", R.string.cleanup_category_link_data_label, R.string.cleanup_category_link_data_description, 50_541_363),
+        TempCategory(TempStorage.LINK_READS, R.string.cleanup_category_link_reads_label, R.string.cleanup_category_link_reads_description, 2_202_009, inClearAll = false),
+        TempCategory("partial_downloads", R.string.cleanup_category_partial_downloads_label, R.string.cleanup_category_partial_downloads_description, 1_325_598_134_272),
+        TempCategory("converted", R.string.cleanup_category_conversions_label, R.string.cleanup_category_conversions_description, 0),
+        TempCategory("engine", R.string.cleanup_category_engine_label, R.string.cleanup_category_engine_description, 195_766_272, safeToClear = false),
+        TempCategory("other_cache", R.string.cleanup_category_other_cache_label, R.string.cleanup_category_other_cache_description, 524_288)
+    )
+
+    @Test
+    fun storageCleanupScreen() {
+        show { StorageCleanupScreen(onBack = {}, sample = cleanupSample) }
+        checkAndCapture("storage_cleanup")
+    }
+
     @Test
     fun proxyScreen() {
         show { ProxyScreen(onBack = {}) }
@@ -359,5 +391,79 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
     fun languageSheet() {
         show { LanguageSheet(current = tag, onConfirm = {}, onDismiss = {}) }
         checkAndCapture("language")
+    }
+
+    /** Waits for [text] to be drawn, for screens that read their settings before showing. */
+    private fun awaitText(text: String) {
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText(text, useUnmergedTree = true)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun searchOptionsSheet() {
+        show { SearchOptionsSheet(onClearResults = {}, onDismiss = {}) }
+        awaitText(string(R.string.search_clear_history))
+        checkAndCapture("search_options")
+    }
+
+    @Test
+    fun searchSourceSheet() {
+        show { SearchSourceSheet(selected = SearchSource.YOUTUBE, onDismiss = {}) }
+        checkAndCapture("search_source")
+    }
+
+    @Test
+    fun moreScreen() {
+        show { MoreScreen() }
+        awaitText(string(R.string.more_documentation))
+        checkAndCapture("more")
+    }
+
+    @Test
+    fun settingsSearch() = settingsSearchIn("settings_search", dark = true, accent = "Cyan")
+
+    // The marker is its own yellow, so it must read the same on a light page and a grey accent.
+    @Test
+    fun settingsSearchLight() = settingsSearchIn("settings_search_light", dark = false, accent = "White")
+
+    @Test
+    fun settingsSearchGold() = settingsSearchIn("settings_search_gold", dark = true, accent = "Gold")
+
+    private fun settingsSearchIn(name: String, dark: Boolean, accent: String) {
+        show(dark, accent) { SettingsSearchScreen(onBack = {}, onOpen = {}, onOpenBatterySettings = {}) }
+        compose.onNode(hasSetTextAction()).performTextInput(string(R.string.processing_video_format).split(' ').first())
+        awaitText(string(R.string.processing_title))
+        checkAndCapture(name)
+    }
+
+    @Test
+    fun webSearchNotice() {
+        show { SearchSourceSheet(selected = SearchSource.YOUTUBE, onDismiss = {}) }
+        compose.onAllNodesWithText(string(R.string.search_web_title), useUnmergedTree = true)[0].performClick()
+        awaitText(string(R.string.search_web_notice))
+        checkAndCapture("web_search_notice")
+    }
+
+    @Test
+    fun singleChoiceDialog() {
+        show {
+            SingleChoiceDialog(
+                title = string(R.string.fetch_settings_search_with),
+                choices = ListingSource.entries.map { it to string(it.labelRes) },
+                selected = ListingSource.NEWPIPE,
+                onSelect = {},
+                onDismiss = {},
+                describe = { string(it.descriptionRes) }
+            )
+        }
+        checkAndCapture("single_choice")
+    }
+
+    @Test
+    fun multiChoiceDialog() {
+        show { SponsorBlockDialog(options = DownloadOptions(sponsorBlockFilters = setOf("sponsor")), onConfirm = {}, onDismiss = {}) }
+        checkAndCapture("multi_choice")
     }
 }

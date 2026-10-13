@@ -40,14 +40,22 @@
     <string name="search_back">Kembali</string>
     <string name="search_more">Lainnya</string>
     <string name="search_add_link">Tambah tautan lain</string>
+    <string name="search_link_already_added">Sudah ada di daftar</string>
     <string name="search_clear">Hapus</string>
     <string name="search_clear_results">Hapus hasil</string>
     <string name="search_clear_history">Hapus riwayat pencarian</string>
+    <string name="search_under_maintenance">Sedang dalam pemeliharaan</string>
+    <string name="search_options_title">Opsi pencarian</string>
+    <string name="search_web_title">Cari di web</string>
+    <string name="search_web_beta">Beta</string>
+    <string name="search_web_notice">Menemukan video di situs mana pun yang bisa diunduh Hazel. Pemutaran dan unduhan mungkin tidak berfungsi di semua situs.</string>
+    <string name="search_web_continue">Lanjutkan</string>
     <string name="search_empty_history">Pencarian dan tautan Anda akan muncul di sini</string>
     <string name="search_no_matches">Tidak ada yang cocok</string>
     <string name="search_remove">Hapus</string>
     <string name="search_all">Cari semua</string>
     <string name="search_remove_confirm_body">Hapus dari riwayat penelusuran?</string>
+    <string name="search_remove_from_list_body">Hapus tautan ini dari daftar?</string>
     <string name="search_entry_copied">Disalin ke papan klip</string>
     <string name="search_edit_before">Edit sebelum mencari</string>
     <string name="search_paste_and_fetch">Tempel dan ambil</string>
@@ -174,6 +182,9 @@
 
     <!-- MoreScreen -->
     <string name="more_title">Lainnya</string>
+    <string name="settings_search">Cari pengaturan</string>
+    <string name="settings_search_hint">Temukan pengaturan dari namanya atau dari fungsinya</string>
+    <string name="settings_search_none">Tidak ada pengaturan untuk %1$s</string>
     <string name="more_battery_title">Unduhan latar belakang</string>
     <string name="more_battery_body">Beberapa ponsel menghentikan unduhan latar untuk hemat baterai. Tanpa batasan mencegahnya.</string>
     <string name="more_downloads">Unduhan</string>
@@ -224,8 +235,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Pilih penyaringan SponsorBlock</string>
-    <string name="options_sponsorblock_ok">OK</string>
-    <string name="options_sponsorblock_cancel">Batal</string>
     <string name="options_chapters_title">Bab</string>
     <string name="options_chapters_in_videos">Bab dalam video</string>
     <string name="options_chapters_split">Bagi berdasarkan bab</string>
@@ -744,10 +753,7 @@
     <string name="save_location_error_card_folder">Tidak bisa membuat %1$s di kartu, jadi unduhan akan disimpan di folder yang Anda pilih.</string>
     <string name="save_fallback_title">Disimpan di tempat lain</string>
     <string name="save_fallback_body">File ini tidak bisa ditulis ke %1$s. Kartu mungkin dilepas, penuh, atau tidak lagi mengizinkan akses. File disimpan ke %2$s.</string>
-    <string name="home_start_with">Mulai dengan</string>
-    <string name="home_start_paste">Tempel tautan</string>
-    <string name="home_start_search">Cari</string>
-    <string name="home_start_downloads">Unduhan</string>
+    <string name="home_empty_hint">Tempel tautan atau cari untuk memulai</string>
     <string name="more_getting_started">Memulai</string>
     <string name="instant_label">Instant</string>
     <string name="instant_started">Unduhan dimulai</string>
