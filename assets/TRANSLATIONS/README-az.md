@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="../HAZEL-BANNER.png" alt="Hazel Banner" width="100%" />
+  <img src="../new-banner.png" alt="Hazel Banner" width="100%" />
 </p>
 
 <div align="center">
@@ -48,6 +48,7 @@ Azərbaycanca
 [![Download](https://img.shields.io/badge/Download-0A0A0A?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/packages/com.hazel.android/)
 <a href="https://www.buymeacoffee.com/sibtainocean"><img src="https://img.shields.io/badge/-Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" /></a>
+<a href="https://developer.android.com/jetpack/compose"><img src="https://img.shields.io/badge/Jetpack%20Compose-0A0A0A?style=for-the-badge&logo=jetpackcompose&logoColor=4285F4" alt="Jetpack Compose" /></a>
 
 ![API](https://img.shields.io/badge/API-24%2B-brightgreen?style=flat-square)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
@@ -55,7 +56,7 @@ Azərbaycanca
 [![Release](https://img.shields.io/github/v/release/SibtainOcn/Hazel?style=flat-square&label=release&color=cyan)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Changelog](https://img.shields.io/badge/Changelog-orange?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md)
 [![Downloads](https://img.shields.io/github/downloads/SibtainOcn/Hazel/total?style=flat-square)](https://github.com/SibtainOcn/Hazel/releases)
-[![Supported Sites](https://img.shields.io/badge/supported--sites-1000%2B-green?style=flat-square)](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+[![Supported Sites](https://img.shields.io/badge/supported--sites-1500%2B-green?style=flat-square)](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
 [![Stars](https://img.shields.io/github/stars/SibtainOcn/Hazel?style=flat-square)](https://github.com/SibtainOcn/Hazel/stargazers)
 
 </div>
@@ -81,7 +82,7 @@ Azərbaycanca
 
 ## 💡 Xüsusiyyətlər:
 
-- YouTube, Instagram, TikTok, X, Reddit, SoundCloud və [1000-dən çox digər saytdan](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) audio və video yükləyin
+- YouTube, Instagram, TikTok, X, Reddit, SoundCloud və [1500-dən çox digər saytdan](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) audio və video yükləyin
 - Bir keçid, eyni anda bir neçə keçid və ya bütöv pleylist / kanal yapışdırın və bir kliklə toplu yükləyin
 - **Hazel Instant** - istənilən başqa tətbiqdən keçidi paylaşın və yükləmə bir dəfə təyin etdiyiniz keyfiyyətdə dərhal başlayır
 - Mənbə bir neçə audio trek dərc etdikdə konkret trekləri seçin
@@ -173,8 +174,6 @@ You should have received a copy of the GNU General Public License along with Haz
 Hazel [yt-dlp](https://github.com/yt-dlp/yt-dlp) üçün qrafik interfeysdir və [youtubedl-android](https://github.com/yausername/youtubedl-android) əsasında hazırlanıb.
 Sürətli siyahılar, axtarış və oxutma axınları üçün [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor), oxutma üçün isə [Media3 ExoPlayer](https://github.com/androidx/media).
 
-> *[yt-dlp](https://github.com/yt-dlp/yt-dlp) komandasına xüsusi təşəkkür - onların əməyi olmasaydı, Hazel mövcud olmazdı.*
->
 <div align="right">
 <table><td>
 <a href="#start-of-content">👆 Yuxarı qayıt</a>

@@ -56,7 +56,7 @@ English
 [![Release](https://img.shields.io/github/v/release/SibtainOcn/Hazel?style=flat-square&label=release&color=cyan)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Changelog](https://img.shields.io/badge/Changelog-orange?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md)
 [![Downloads](https://img.shields.io/github/downloads/SibtainOcn/Hazel/total?style=flat-square)](https://github.com/SibtainOcn/Hazel/releases)
-[![Supported Sites](https://img.shields.io/badge/supported--sites-1000%2B-green?style=flat-square)](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+[![Supported Sites](https://img.shields.io/badge/supported--sites-1500%2B-green?style=flat-square)](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
 [![Stars](https://img.shields.io/github/stars/SibtainOcn/Hazel?style=flat-square)](https://github.com/SibtainOcn/Hazel/stargazers)
 
 </div>
@@ -82,7 +82,7 @@ English
 
 ## 💡 Features:
 
-- Download audio and video from YouTube, Instagram, TikTok, X, Reddit, SoundCloud and [1000+ other sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+- Download audio and video from YouTube, Instagram, TikTok, X, Reddit, SoundCloud and [1500+ other sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
 - Paste one link, several at once, or an entire playlist / channel with one-click batch downloading
 - **Hazel Instant** - share a link with any other app and the download begins immediately at a quality you set once
 - Choose specific soundtracks when a source publishes several audio tracks
@@ -176,10 +176,8 @@ You should have received a copy of the GNU General Public License along with Haz
 ## 🧱 Credits
 
 Hazel is a GUI for [yt-dlp](https://github.com/yt-dlp/yt-dlp), based on [youtubedl-android](https://github.com/yausername/youtubedl-android).
-[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) for fast listing, search and playback streams, and [Media3 ExoPlayer](https://github.com/androidx/media) for playback. Some designs inspiration taken from [YTDLnis](https://github.com/deniscerri/ytdlnis)
+[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) for fast listing, search and playback streams, and [Media3 ExoPlayer](https://github.com/androidx/media) for playback.
 
-> *Special thanks to the [yt-dlp](https://github.com/yt-dlp/yt-dlp) team - without their work, Hazel wouldn't exist.*
-> 
 <div align="right">
 <table><td>
 <a href="#start-of-content">👆 Scroll to top</a>
