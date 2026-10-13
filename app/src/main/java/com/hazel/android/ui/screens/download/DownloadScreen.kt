@@ -19,7 +19,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,15 +47,11 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentPaste
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -348,7 +343,6 @@ fun DownloadScreen(
     // warning is still raised here rather than there.
     var cameFromShare by remember { mutableStateOf(false) }
 
-    var showClearConfirmDialog by remember { mutableStateOf(false) }
 
     // A single link goes straight to its sheet. A set of links does not, because the list
     // itself is the thing to look at first.
@@ -422,31 +416,13 @@ fun DownloadScreen(
             // the screen on the first flick.
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Home screen search bar with overflow 3-dot menu (clear results / clear history).
-            // The menu reuses the same actions the full SearchScreen exposes in its own
-            // 3-dot, so the two entry points behave identically.
+            // Home screen search bar. Its 3-dot opens the same search options sheet the full
+            // SearchScreen opens, so the two entry points behave identically.
             var homeMenuOpen by remember { mutableStateOf(false) }
-            var showClearHistoryConfirm by remember { mutableStateOf(false) }
-            val homeScope = rememberCoroutineScope()
-
-            if (showClearHistoryConfirm) {
-                AlertDialog(
-                    onDismissRequest = { showClearHistoryConfirm = false },
-                    title = { Text(stringResource(R.string.search_clear_history_confirm_title), fontWeight = FontWeight.Bold) },
-                    text = { Text(stringResource(R.string.search_clear_history_confirm_body)) },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            showClearHistoryConfirm = false
-                            homeScope.launch(Dispatchers.IO) {
-                                SearchHistoryRepository.clear(context.applicationContext)
-                            }
-                        }) { Text(stringResource(R.string.search_clear_history), color = MaterialTheme.colorScheme.error) }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showClearHistoryConfirm = false }) {
-                            Text(stringResource(R.string.search_cancel))
-                        }
-                    }
+            if (homeMenuOpen) {
+                SearchOptionsSheet(
+                    onClearResults = downloadViewModel::clearResults,
+                    onDismiss = { homeMenuOpen = false }
                 )
             }
 
@@ -458,11 +434,7 @@ fun DownloadScreen(
                     cameFromShare = false
                     searchOpen = true
                 },
-                onClearResults = { showClearConfirmDialog = true },
-                onClearHistory = { showClearHistoryConfirm = true },
-                menuOpen = homeMenuOpen,
                 onMenuOpen = { homeMenuOpen = true },
-                onMenuDismiss = { homeMenuOpen = false },
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
 
@@ -1047,67 +1019,23 @@ fun DownloadScreen(
             onDismiss = { batchSheetVisible = false }
         )
     }
-
-
-    if (showClearConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showClearConfirmDialog = false },
-            title = {
-                Text(
-                    text = stringResource(R.string.download_clear_confirm_title),
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Text(
-                    text = stringResource(R.string.download_clear_confirm_body)
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showClearConfirmDialog = false
-                        downloadViewModel.clearResults()
-                    }
-                ) {
-                    Text(
-                        stringResource(R.string.download_clear),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showClearConfirmDialog = false }
-                ) {
-                    Text(stringResource(R.string.download_cancel))
-                }
-            }
-        )
-    }
 }
 
 /**
  * The resting search field. Tapping it opens the full screen entry, which is where links
  * are actually typed, so this stays a button rather than an input.
  *
- * It carries nothing else. The menu that used to sit on it acts on the search history and
- * the resolved results, which are both things the entry screen is already about, so it
- * lives there now and this is a single control that does one thing.
+ * Its 3-dot opens the search options sheet, the same one the search screen opens.
  *
- * It is drawn on the highest surface tone with an outline, because on the near-black
- * background a low-alpha fill has almost no edge and the field reads as empty space.
+ * It is drawn on the highest surface tone, with no outline: the tone alone gives it its edge
+ * against the near-black background.
  */
 @Composable
 private fun UrlSearchBar(
     url: String,
     onOpenSearch: () -> Unit,
-    onClearResults: () -> Unit = {},
-    onClearHistory: () -> Unit = {},
     shineProgress: Float = 0f,
-    menuOpen: Boolean = false,
     onMenuOpen: () -> Unit = {},
-    onMenuDismiss: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -1117,8 +1045,7 @@ private fun UrlSearchBar(
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(26.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        color = MaterialTheme.colorScheme.surfaceContainerHighest
     ) {
         Row(
             modifier = Modifier
@@ -1143,36 +1070,14 @@ private fun UrlSearchBar(
                 modifier = Modifier.weight(1f)
             )
 
-            // Right: 3-dot overflow menu mirroring the full SearchScreen's menu
-            Box {
-                IconButton(onClick = onMenuOpen, modifier = Modifier.size(40.dp)) {
-                    Icon(
-                        Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.search_more),
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                DropdownMenu(
-                    expanded = menuOpen,
-                    onDismissRequest = onMenuDismiss
-                ) {
-
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.search_clear_results)) },
-                        onClick = {
-                            onMenuDismiss()
-                            onClearResults()
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.search_clear_history)) },
-                        onClick = {
-                            onMenuDismiss()
-                            onClearHistory()
-                        }
-                    )
-                }
+            // Opens the same search options sheet the search screen's own 3-dot does.
+            IconButton(onClick = onMenuOpen, modifier = Modifier.size(40.dp)) {
+                Icon(
+                    Icons.Filled.MoreVert,
+                    contentDescription = stringResource(R.string.search_more),
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

@@ -3,6 +3,8 @@ package com.hazel.android.ui.screens.history
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.hazel.android.ui.components.FlatChip
+import com.hazel.android.ui.screens.more.ChoiceRow
+import com.hazel.android.ui.screens.more.groupShape
 import com.hazel.android.ui.components.FlatIconButton
 import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
@@ -38,7 +40,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -60,7 +61,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -428,24 +428,22 @@ fun HistoryScreen() {
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                 )
-                HistoryStatus.entries.forEach { option ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .selectable(
-                                selected = option == status,
-                                role = Role.RadioButton,
-                                onClick = {
-                                    status = option
-                                    statusSheetOpen = false
-                                }
-                            )
-                            .padding(horizontal = 16.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(selected = option == status, onClick = null)
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(stringResource(option.labelRes), style = MaterialTheme.typography.bodyLarge)
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    HistoryStatus.entries.forEachIndexed { index, option ->
+                        ChoiceRow(
+                            label = stringResource(option.labelRes),
+                            description = null,
+                            chosen = option == status,
+                            role = Role.RadioButton,
+                            shape = groupShape(index, HistoryStatus.entries.size),
+                            onClick = {
+                                status = option
+                                statusSheetOpen = false
+                            }
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))

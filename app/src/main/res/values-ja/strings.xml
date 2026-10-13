@@ -43,6 +43,8 @@
     <string name="search_clear">消去</string>
     <string name="search_clear_results">検索結果を消去</string>
     <string name="search_clear_history">検索履歴を削除</string>
+    <string name="search_under_maintenance">メンテナンス中</string>
+    <string name="search_options_title">検索オプション</string>
     <string name="search_empty_history">検索とリンクの履歴がここに表示されます</string>
     <string name="search_no_matches">一致するものはありません</string>
     <string name="search_remove">削除</string>
@@ -224,8 +226,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">SponsorBlock フィルタの選択</string>
-    <string name="options_sponsorblock_ok">OK</string>
-    <string name="options_sponsorblock_cancel">キャンセル</string>
     <string name="options_chapters_title">チャプター</string>
     <string name="options_chapters_in_videos">動画内にチャプターを含める</string>
     <string name="options_chapters_split">チャプターごとに分割</string>

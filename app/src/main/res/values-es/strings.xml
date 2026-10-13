@@ -43,6 +43,8 @@
     <string name="search_clear">Borrar</string>
     <string name="search_clear_results">Vaciar resultados</string>
     <string name="search_clear_history">Borrar el historial de búsqueda</string>
+    <string name="search_under_maintenance">En mantenimiento</string>
+    <string name="search_options_title">Opciones de búsqueda</string>
     <string name="search_empty_history">Tus búsquedas y enlaces aparecerán aquí</string>
     <string name="search_no_matches">Sin coincidencias</string>
     <string name="search_remove">Quitar</string>
@@ -232,8 +234,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">Elige el filtrado de SponsorBlock</string>
-    <string name="options_sponsorblock_ok">Aceptar</string>
-    <string name="options_sponsorblock_cancel">Cancelar</string>
     <string name="options_chapters_title">Capítulos</string>
     <string name="options_chapters_in_videos">Capítulos en los vídeos</string>
     <string name="options_chapters_split">Dividir por capítulos</string>

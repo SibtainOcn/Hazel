@@ -43,6 +43,8 @@
     <string name="search_clear">清除</string>
     <string name="search_clear_results">清空结果</string>
     <string name="search_clear_history">清除搜索记录</string>
+    <string name="search_under_maintenance">维护中</string>
+    <string name="search_options_title">搜索选项</string>
     <string name="search_empty_history">你的搜索和链接会显示在这里</string>
     <string name="search_no_matches">没有匹配项</string>
     <string name="search_remove">移除</string>
@@ -224,8 +226,6 @@
 
     <!-- DownloadOptionDialogs -->
     <string name="options_sponsorblock_title">选择 SponsorBlock 过滤</string>
-    <string name="options_sponsorblock_ok">确定</string>
-    <string name="options_sponsorblock_cancel">取消</string>
     <string name="options_chapters_title">章节</string>
     <string name="options_chapters_in_videos">视频中的章节</string>
     <string name="options_chapters_split">按章节分割</string>
