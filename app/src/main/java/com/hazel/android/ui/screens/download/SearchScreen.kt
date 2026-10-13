@@ -38,7 +38,6 @@ import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -344,7 +343,7 @@ fun SearchScreen(
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = { menuOpen = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.search_more))
+                    Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.search_more))
                 }
             }
 

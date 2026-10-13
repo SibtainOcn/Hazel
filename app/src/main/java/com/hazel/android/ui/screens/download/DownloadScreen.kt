@@ -43,7 +43,6 @@ import androidx.compose.material.icons.Icons
 
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentPaste
@@ -1066,10 +1065,11 @@ private fun UrlSearchBar(
             // Opens the same search options sheet the search screen's own 3-dot does.
             IconButton(onClick = onMenuOpen, modifier = Modifier.size(40.dp)) {
                 Icon(
-                    Icons.Filled.MoreVert,
+                    painterResource(R.drawable.ic_more_vert),
                     contentDescription = stringResource(R.string.search_more),
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    // The same size and tone as the search screen's, so the two read as one.
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
