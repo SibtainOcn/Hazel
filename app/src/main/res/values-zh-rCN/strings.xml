@@ -40,6 +40,7 @@
     <string name="search_back">返回</string>
     <string name="search_more">更多</string>
     <string name="search_add_link">再添加一个链接</string>
+    <string name="search_link_already_added">已在列表中</string>
     <string name="search_clear">清除</string>
     <string name="search_clear_results">清空结果</string>
     <string name="search_clear_history">清除搜索记录</string>

@@ -40,6 +40,7 @@
     <string name="search_back">Zurück</string>
     <string name="search_more">Mehr</string>
     <string name="search_add_link">Noch einen Link hinzufügen</string>
+    <string name="search_link_already_added">Bereits in der Liste</string>
     <string name="search_clear">Löschen</string>
     <string name="search_clear_results">Ergebnisse leeren</string>
     <string name="search_clear_history">Suchverlauf löschen</string>

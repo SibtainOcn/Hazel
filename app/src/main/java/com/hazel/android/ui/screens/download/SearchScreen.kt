@@ -173,9 +173,17 @@ fun SearchScreen(
     fun typedLinks(): List<String> =
         text.split(WHITESPACE).map { it.trim() }.filter { it.isNotBlank() }
 
+    // A link already in the list, even spelled differently, is not added twice. When that is
+    // all the field holds it stays put and says so, rather than vanishing as if added.
     fun queueCurrent() {
-        val entries = typedLinks().filterNot { it in queued }
-        if (entries.isNotEmpty()) queued = queued + entries
+        val typed = typedLinks()
+        val entries = typed.filterNot { link -> queued.any { it == link || LinkKey.sameMedia(it, link) } }
+            .distinctBy { LinkKey.canonical(it).ifBlank { it } }
+        if (entries.isEmpty() && typed.isNotEmpty()) {
+            Toast.makeText(context, resources.getString(R.string.search_link_already_added), Toast.LENGTH_SHORT).show()
+            return
+        }
+        queued = queued + entries
         text = ""
     }
 

@@ -40,6 +40,7 @@
     <string name="search_back">वापस</string>
     <string name="search_more">और</string>
     <string name="search_add_link">एक और लिंक जोड़ें</string>
+    <string name="search_link_already_added">पहले से सूची में है</string>
     <string name="search_clear">मिटाएँ</string>
     <string name="search_clear_results">परिणाम हटाएँ</string>
     <string name="search_clear_history">खोज इतिहास मिटाएँ</string>

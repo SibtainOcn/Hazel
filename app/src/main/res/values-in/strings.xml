@@ -40,6 +40,7 @@
     <string name="search_back">Kembali</string>
     <string name="search_more">Lainnya</string>
     <string name="search_add_link">Tambah tautan lain</string>
+    <string name="search_link_already_added">Sudah ada di daftar</string>
     <string name="search_clear">Hapus</string>
     <string name="search_clear_results">Hapus hasil</string>
     <string name="search_clear_history">Hapus riwayat pencarian</string>

@@ -51,6 +51,7 @@
     <string name="search_back">Back</string>
     <string name="search_more">More</string>
     <string name="search_add_link">Add another link</string>
+    <string name="search_link_already_added">Already in the list</string>
     <string name="search_clear">Clear</string>
     <string name="search_clear_results">Clear results</string>
     <string name="search_clear_history">Clear search history</string>

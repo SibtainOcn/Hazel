@@ -40,6 +40,7 @@
     <string name="search_back">Назад</string>
     <string name="search_more">Ещё</string>
     <string name="search_add_link">Добавить ещё ссылку</string>
+    <string name="search_link_already_added">Уже в списке</string>
     <string name="search_clear">Очистить</string>
     <string name="search_clear_results">Очистить результаты</string>
     <string name="search_clear_history">Очистить историю поиска</string>
