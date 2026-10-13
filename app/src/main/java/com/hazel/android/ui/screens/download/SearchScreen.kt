@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.draw.rotate
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -359,7 +360,8 @@ fun SearchScreen(
             ) {
             Surface(
                 modifier = Modifier.weight(1f),
-                shape = CircleShape,
+                // The corners of the app's dialogs and cards, rather than a full pill.
+                shape = RoundedCornerShape(20.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh
             ) {
                 Row(
