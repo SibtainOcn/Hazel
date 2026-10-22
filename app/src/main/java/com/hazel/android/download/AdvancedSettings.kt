@@ -126,12 +126,13 @@ data class AdvancedSettings(
 
     companion object {
         /**
-         * YouTube player clients yt-dlp 2026.08 knows. A name it does not know is skipped
+         * YouTube player clients yt-dlp 2026.10 knows. A name it does not know is skipped
          * with a warning, so the list only has to be current, not complete.
          */
         val PLAYER_CLIENTS = listOf(
             "web", "web_safari", "web_embedded", "web_music", "web_creator", "mweb",
-            "android", "android_vr", "ios", "visionos", "tv", "tv_downgraded", "tv_simply"
+            "android", "android_vr", "ios", "visionos", "tv", "tv_downgraded", "tv_samsung",
+            "tv_simply"
         )
 
         /** The clients whose tokens come from the web challenge the device can run. */

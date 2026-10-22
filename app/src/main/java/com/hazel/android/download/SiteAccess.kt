@@ -50,7 +50,7 @@ fun YoutubeDLRequest.applySiteAccess(access: SiteAccess, url: String) {
     // user agents internally. Passing mobile WebView user agents forces YouTube to return
     // stripped-down mobile markup which breaks playlist and tab page extraction.
     if (access.userAgent.isNotBlank() && !isYouTube(url)) {
-        addOption("--add-header", "User-Agent:${access.userAgent}")
+        addOption("--add-headers","User-Agent:${access.userAgent}")
     }
 }
 

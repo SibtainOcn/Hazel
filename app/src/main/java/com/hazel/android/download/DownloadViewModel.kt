@@ -2406,8 +2406,10 @@ class DownloadViewModel : ViewModel() {
                     // The engine's own way of asking for a soundtrack by name, which is
                     // what still gets the right language when the id above has gone.
                     languageFilter?.let { append("${format.selector}+$it/") }
-                    append("${format.selector}+bestaudio/${format.selector}")
+                    append("${format.selector}+bestaudio/${format.selector}/")
+                    append(NEAREST_VIDEO)
                 }
+                nearestHeight(format)?.let { addOption("-S", it) }
                 // The one line worth having in the log: what the download actually asked
                 // for. A soundtrack chosen in the sheet only means anything if it reaches
                 // this expression, and this is where that can be seen.
@@ -2418,9 +2420,15 @@ class DownloadViewModel : ViewModel() {
             // An audio download is already the soundtrack that was chosen, so the filter
             // only stands in for it if that stream is no longer offered.
             !isVideo && languageFilter != null ->
-                addOption("-f", "${format.selector}/$languageFilter/ba")
+                addOption("-f", "${format.selector}/$languageFilter/$NEAREST_AUDIO")
 
-            else -> addOption("-f", format.selector)
+            !isVideo -> addOption("-f", "${format.selector}/$NEAREST_AUDIO")
+
+            else -> {
+                addOption("-f", "${format.selector}/$NEAREST_VIDEO")
+                nearestHeight(format)?.let { addOption("-S", it) }
+                needsMerge = true
+            }
         }
 
         if (isVideo) {
@@ -3208,6 +3216,18 @@ class DownloadViewModel : ViewModel() {
 
         /** Format reads allowed to run together; see [resolveFormats]. */
         private const val FORMAT_READS_AT_ONCE = 3
+
+        /**
+         * The last resort after a concrete format id. yt-dlp names a stream by which player
+         * clients answered (616 in one run, 616-hls in the next), so an id from the read can
+         * be gone by the download. These take the nearest stream instead of failing.
+         */
+        const val NEAREST_VIDEO = "bv*+ba/b"
+        const val NEAREST_AUDIO = "ba/b"
+
+        /** The sort that keeps [NEAREST_VIDEO] at the chosen height, when one is known. */
+        fun nearestHeight(format: MediaFormat): String? =
+            format.height.takeIf { it > 0 }?.let { "res:$it" }
 
         /** Containers with no tag atom that can hold cover art. */
         val NO_ARTWORK_CONTAINERS = setOf("webm", "avi", "flv")

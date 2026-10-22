@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Website on phones: cards skip their own blur and use a shorter shadow, and the background glow no longer drifts (it was meant to stay still on phones), so pages scroll smoothly in the app's documentation and in mobile browsers. Desktop is unchanged.
 - Format sheet OK is a solid accent button, and pills and chips use a clean tint on glass.
 - Support Hazel uses flat cards without borders. The yt-dlp and Hazel update screens use the accent for their switches, channel picker and section titles; the status banner keeps its own colours.
+### Fixed
+- YouTube downloads, Hazel Instant above all, no longer fail with "Requested format is not available" after the yt-dlp 2026.10.21 update. yt-dlp can name the same stream differently between the read and the download, so a format that has gone now falls back to the nearest one at the chosen height.
+- The YouTube player client list in Advanced includes the new `tv_samsung` client, and the user agent header uses yt-dlp's full option name.
 
 ## [1.1.14] - 2026-10-14
 ### Added
