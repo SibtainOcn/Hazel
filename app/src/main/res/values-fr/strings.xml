@@ -558,6 +558,8 @@
     <string name="glass_style_accent">Accent</string>
     <string name="glass_style_wallpaper">Fond d\'écran</string>
     <string name="glass_style_sunset">Coucher de soleil</string>
+    <string name="glass_style_nebula">Nébuleuse</string>
+    <string name="glass_style_forest">Forêt</string>
     <string name="glass_style_ocean">Océan</string>
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">À votre goût</string>

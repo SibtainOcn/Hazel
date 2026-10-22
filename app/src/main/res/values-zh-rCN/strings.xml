@@ -544,6 +544,8 @@
     <string name="glass_style_accent">强调色</string>
     <string name="glass_style_wallpaper">壁纸</string>
     <string name="glass_style_sunset">日落</string>
+    <string name="glass_style_nebula">星云</string>
+    <string name="glass_style_forest">森林</string>
     <string name="glass_style_ocean">海洋</string>
     <string name="glass_style_mono">单色</string>
     <string name="guide_step_appearance_title">按你的喜好</string>

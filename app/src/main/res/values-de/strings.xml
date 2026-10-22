@@ -551,6 +551,8 @@
     <string name="glass_style_accent">Akzent</string>
     <string name="glass_style_wallpaper">Hintergrund</string>
     <string name="glass_style_sunset">Sonnenuntergang</string>
+    <string name="glass_style_nebula">Nebula</string>
+    <string name="glass_style_forest">Wald</string>
     <string name="glass_style_ocean">Ozean</string>
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Mach es zu deinem</string>

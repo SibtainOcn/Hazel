@@ -185,7 +185,7 @@ class GlassThemeTest(private val theme: String, private val dark: Boolean) {
     @Test
     fun gettingStartedAppearanceCardSavesChoices() {
         runBlocking {
-            SettingsRepository.setDarkTheme(context, true)
+            SettingsRepository.setDarkTheme(context, dark)
             SettingsRepository.setGlassEnabled(context, true)
             SettingsRepository.setGlassStyle(context, GlassStyle.AURORA.key)
         }
@@ -211,7 +211,7 @@ class GlassThemeTest(private val theme: String, private val dark: Boolean) {
         compose.waitForIdle()
         compose.waitUntil(5_000) {
             runBlocking {
-                SettingsRepository.isDarkTheme(context).first() == false &&
+                SettingsRepository.isDarkTheme(context).first() == !dark &&
                     SettingsRepository.getGlassStyle(context).first() == GlassStyle.SUNSET.key
             }
         }

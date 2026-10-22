@@ -544,6 +544,8 @@
     <string name="glass_style_accent">アクセント</string>
     <string name="glass_style_wallpaper">壁紙</string>
     <string name="glass_style_sunset">夕焼け</string>
+    <string name="glass_style_nebula">ネビュラ</string>
+    <string name="glass_style_forest">フォレスト</string>
     <string name="glass_style_ocean">オーシャン</string>
     <string name="glass_style_mono">モノ</string>
     <string name="guide_step_appearance_title">自分好みに</string>

@@ -1,40 +1,17 @@
 package com.hazel.android.ui.screens.download
 
-import com.hazel.android.ui.theme.GlassStyle
-import com.hazel.android.ui.components.GlassStyleSwatch
-import com.hazel.android.ui.components.GlassStylePickerDialog
-import com.hazel.android.ui.components.AccentPickerDialog
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.layout.layout
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.SizeTransform
-import androidx.compose.ui.semantics.Role
-import androidx.compose.foundation.selection.toggleable
-import kotlinx.coroutines.launch
-import com.hazel.android.ui.theme.AccentColors
-import com.hazel.android.data.SettingsRepository
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.collectAsState
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material.icons.outlined.Palette
-import androidx.compose.material.icons.Icons
-import com.hazel.android.ui.components.ActionsRow
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import com.hazel.android.ui.components.EqualWidthActions
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -42,45 +19,78 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.hazel.android.R
+import com.hazel.android.data.SettingsRepository
+import com.hazel.android.ui.components.AccentPickerDialog
+import com.hazel.android.ui.components.ActionsRow
+import com.hazel.android.ui.components.EqualWidthActions
+import com.hazel.android.ui.components.GlassStylePickerDialog
+import com.hazel.android.ui.components.GlassStyleSwatch
+import com.hazel.android.ui.motion.M3Motion
+import com.hazel.android.ui.theme.AccentColors
+import com.hazel.android.ui.theme.GlassStyle
+import com.hazel.android.ui.theme.LocalDarkTheme
+import com.hazel.android.ui.theme.LocalGlass
+import com.hazel.android.ui.theme.glassBackdrop
 import com.hazel.android.util.PermissionHelper
+import kotlinx.coroutines.launch
 
 /**
  * Getting-started onboarding stepper carousel, shown on first app launch.
@@ -94,8 +104,7 @@ import com.hazel.android.util.PermissionHelper
  * 6. Battery Optimization (Deny or Allow options of equal size)
  * 7. Notifications (Deny or Allow options of equal size)
  *
- * Designed with a deep dark (#000000 / #0A0A0A) background, fine subtle blue
- * gradient, crisp white primary actions, and clean minimalist styling.
+ * Follows the app theme: accent coloured Material 3 actions on the glass surface when glass is on.
  */
 @Composable
 fun GettingStartedDialog(
@@ -105,19 +114,19 @@ fun GettingStartedDialog(
     var currentStep by remember { mutableIntStateOf(1) }
     val totalSteps = 7
     val context = LocalContext.current
+    val glass = LocalGlass.current
+    val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(32.dp)
+    val slidePx = with(LocalDensity.current) { StepSlide.roundToPx() }
+    val appearance = rememberAppearanceState()
 
-    // Dismiss with notification permission request
     val dismissWithPermission: () -> Unit = {
         onDismiss()
         if (Build.VERSION.SDK_INT >= 33) {
             PermissionHelper.ensureNotificationPermission(context)
         }
     }
-
-    // Dismiss without requesting notification permission now
-    val dismissNoPermission: () -> Unit = {
-        onDismiss()
-    }
+    val next: () -> Unit = { if (currentStep < totalSteps) currentStep++ }
 
     Dialog(
         onDismissRequest = dismissWithPermission,
@@ -126,295 +135,158 @@ fun GettingStartedDialog(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            shape = RoundedCornerShape(32.dp),
-            color = Color.Transparent,
-            shadowElevation = 24.dp
+                .padding(horizontal = 24.dp)
+                .glassBackdrop(shape),
+            shape = shape,
+            color = colors.surfaceContainerHigh,
+            shadowElevation = if (glass) 0.dp else 6.dp
         ) {
-            Box(
+            Column(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(32.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFF0D111A), // Fine subtle dark blue tone at top
-                                Color(0xFF07090E), // Deep dark surface
-                                Color(0xFF000000)  // Pitch black
-                            )
-                        )
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = Color.White.copy(alpha = 0.08f),
-                        shape = RoundedCornerShape(32.dp)
-                    )
+                    .verticalScroll(rememberScrollState())
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Header: Flat step badge on left, clean Skip text on right. Skip moves
-                    // under the badge only when the two do not fit one line.
-                    ActionsRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        start = {
-                        // Flat badge without border
-                        Surface(
-                            shape = CircleShape,
-                            color = Color(0xFF161616)
-                        ) {
+                ActionsRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    start = {
+                        Surface(shape = CircleShape, color = colors.primary.copy(alpha = 0.14f)) {
                             Text(
                                 text = stringResource(R.string.guide_step_badge, currentStep, totalSteps),
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.8.sp,
-                                color = Color(0xFFE2E8F0)
+                                color = colors.primary
                             )
                         }
-                        }
+                    }
+                ) {
+                    TextButton(
+                        onClick = dismissWithPermission,
+                        colors = ButtonDefaults.textButtonColors(contentColor = colors.onSurfaceVariant)
                     ) {
-                        // Clean Skip button
+                        Text(stringResource(R.string.guide_skip), fontWeight = FontWeight.SemiBold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                AnimatedContent(
+                    targetState = currentStep,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .steadyHeight(StepMinHeight),
+                    contentAlignment = Alignment.Center,
+                    transitionSpec = {
+                        val dir = if (targetState > initialState) 1 else -1
+                        (slideInHorizontally(M3Motion.emphasized(StepMillis)) { dir * slidePx } +
+                            fadeIn(tween(FadeInMillis, delayMillis = FadeOutMillis, easing = LinearOutSlowInEasing))) togetherWith
+                            (slideOutHorizontally(M3Motion.emphasized(StepMillis)) { -dir * slidePx } +
+                                fadeOut(tween(FadeOutMillis, easing = FastOutLinearInEasing))) using
+                            SizeTransform(clip = false) { _, _ -> snap() }
+                    },
+                    label = "guideStep"
+                ) { step ->
+                    if (step == APPEARANCE_STEP) {
+                        AppearanceStep(appearance)
+                    } else {
+                        val data = stepData(step)
+                        StepHeader(
+                            icon = painterResource(data.iconRes),
+                            title = stringResource(data.titleRes),
+                            description = stringResource(data.descRes)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    for (i in 1..totalSteps) {
+                        val active = i == currentStep
+                        val width by animateDpAsState(
+                            targetValue = if (active) 28.dp else 8.dp,
+                            animationSpec = M3Motion.emphasized(StepMillis),
+                            label = "dotWidth"
+                        )
+                        val dot by animateColorAsState(
+                            targetValue = if (active) colors.primary else colors.onSurface.copy(alpha = 0.16f),
+                            animationSpec = tween(StepMillis),
+                            label = "dotColor"
+                        )
                         Box(
                             modifier = Modifier
+                                .padding(horizontal = 4.dp)
+                                .width(width)
+                                .height(8.dp)
                                 .clip(CircleShape)
-                                .clickable(onClick = dismissWithPermission)
-                                .padding(horizontal = 12.dp, vertical = 6.dp),
-                            contentAlignment = Alignment.Center
+                                .background(dot)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // layout-safe: an icon button beside one action that takes the rest of the row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FilledTonalIconButton(
+                        onClick = { if (currentStep > 1) currentStep-- },
+                        enabled = currentStep > 1,
+                        modifier = Modifier.size(48.dp),
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = colors.surfaceContainerHighest,
+                            contentColor = colors.onSurface
+                        )
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.back),
+                            contentDescription = stringResource(R.string.guide_back),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    when (currentStep) {
+                        BATTERY_STEP -> DenyAllow(
+                            modifier = Modifier.weight(1f),
+                            onDeny = next,
+                            onAllow = {
+                                onOpenBatterySettings()
+                                next()
+                            }
+                        )
+                        totalSteps -> DenyAllow(
+                            modifier = Modifier.weight(1f),
+                            onDeny = onDismiss,
+                            onAllow = dismissWithPermission
+                        )
+                        else -> Button(
+                            onClick = next,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            contentPadding = ActionPadding
                         ) {
                             Text(
-                                text = stringResource(R.string.guide_skip),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF8E8E93)
+                                text = stringResource(R.string.guide_next),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold
                             )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Slide Content
-                    AnimatedContent(
-                        targetState = currentStep,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .steadyHeight(StepMinHeight),
-                        contentAlignment = Alignment.Center,
-                        transitionSpec = {
-                            val forward = targetState > initialState
-                            (slideInHorizontally(tween(StepMillis)) { if (forward) it / 5 else -it / 5 } +
-                                fadeIn(tween(StepMillis))) togetherWith
-                                (slideOutHorizontally(tween(StepMillis)) { if (forward) -it / 5 else it / 5 } +
-                                    fadeOut(tween(StepMillis / 2))) using
-                                SizeTransform(clip = false) { _, _ -> snap() }
-                        }
-                    ) { step ->
-                        if (step == APPEARANCE_STEP) {
-                            AppearanceStep()
-                            return@AnimatedContent
-                        }
-                        val data = stepData(step)
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            StepHeader(
-                                icon = painterResource(data.iconRes),
-                                title = stringResource(data.titleRes),
-                                description = stringResource(data.descRes)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                painter = painterResource(R.drawable.small_chevron),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
                             )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Progress Dots
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        for (i in 1..totalSteps) {
-                            val width by animateDpAsState(
-                                targetValue = if (i == currentStep) 28.dp else 8.dp,
-                                animationSpec = tween(StepMillis)
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .width(width)
-                                    .height(8.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (i == currentStep) Color.White
-                                        else Color(0xFF262626)
-                                    )
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Controls Row
-                    // layout-safe: an icon button beside one action that takes the rest of the row
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Back button (enabled on steps 2..5)
-                        Surface(
-                            onClick = { if (currentStep > 1) currentStep-- },
-                            modifier = Modifier.size(48.dp),
-                            shape = CircleShape,
-                            color = Color(0xFF141414),
-                            border = androidx.compose.foundation.BorderStroke(
-                                0.5.dp,
-                                Color.White.copy(alpha = 0.08f)
-                            ),
-                            enabled = currentStep > 1
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    painter = painterResource(R.drawable.back),
-                                    contentDescription = stringResource(R.string.guide_back),
-                                    modifier = Modifier.size(20.dp),
-                                    tint = if (currentStep > 1) Color.White
-                                    else Color(0xFF404040)
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        if (currentStep == 6) {
-                            // Step 6 (Battery Optimization): Deny & Allow buttons of equal size
-                            // Half the row each while both labels fit; one above the other when not.
-                            EqualWidthActions(modifier = Modifier.weight(1f), spacing = 10.dp) {
-                                Surface(
-                                    onClick = { currentStep++ },
-                                    modifier = Modifier.height(48.dp),
-                                    shape = CircleShape,
-                                    color = Color(0xFF161616),
-                                    border = androidx.compose.foundation.BorderStroke(
-                                        1.dp,
-                                        Color.White.copy(alpha = 0.12f)
-                                    )
-                                ) {
-                                    Box(
-                                        modifier = Modifier.padding(horizontal = 16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.guide_deny),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = Color.White
-                                        )
-                                    }
-                                }
-
-                                Surface(
-                                    onClick = {
-                                        onOpenBatterySettings()
-                                        currentStep++
-                                    },
-                                    modifier = Modifier.height(48.dp),
-                                    shape = CircleShape,
-                                    color = Color.White,
-                                    shadowElevation = 4.dp
-                                ) {
-                                    Box(
-                                        modifier = Modifier.padding(horizontal = 16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.guide_allow),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.Black
-                                        )
-                                    }
-                                }
-                            }
-                        } else if (currentStep == 7) {
-                            // Step 7 (Notifications): Deny & Allow buttons of equal size
-                            // Half the row each while both labels fit; one above the other when not.
-                            EqualWidthActions(modifier = Modifier.weight(1f), spacing = 10.dp) {
-                                Surface(
-                                    onClick = dismissNoPermission,
-                                    modifier = Modifier.height(48.dp),
-                                    shape = CircleShape,
-                                    color = Color(0xFF161616),
-                                    border = androidx.compose.foundation.BorderStroke(
-                                        1.dp,
-                                        Color.White.copy(alpha = 0.12f)
-                                    )
-                                ) {
-                                    Box(
-                                        modifier = Modifier.padding(horizontal = 16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.guide_deny),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = Color.White
-                                        )
-                                    }
-                                }
-
-                                Surface(
-                                    onClick = dismissWithPermission,
-                                    modifier = Modifier.height(48.dp),
-                                    shape = CircleShape,
-                                    color = Color.White,
-                                    shadowElevation = 4.dp
-                                ) {
-                                    Box(
-                                        modifier = Modifier.padding(horizontal = 16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.guide_allow),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.Black
-                                        )
-                                    }
-                                }
-                            }
-                        } else {
-                            // Other steps: Next
-                            Surface(
-                                onClick = { currentStep++ },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp),
-                                shape = CircleShape,
-                                color = Color.White,
-                                shadowElevation = 4.dp
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.guide_next),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Icon(
-                                        painter = painterResource(R.drawable.small_chevron),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                        tint = Color.Black
-                                    )
-                                }
-                            }
                         }
                     }
                 }
@@ -423,49 +295,88 @@ fun GettingStartedDialog(
     }
 }
 
-// Step data definitions
+@Composable
+private fun DenyAllow(modifier: Modifier, onDeny: () -> Unit, onAllow: () -> Unit) {
+    EqualWidthActions(modifier = modifier, spacing = 10.dp) {
+        OutlinedButton(
+            onClick = onDeny,
+            modifier = Modifier.height(48.dp),
+            contentPadding = ActionPadding
+        ) {
+            Text(
+                text = stringResource(R.string.guide_deny),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        Button(
+            onClick = onAllow,
+            modifier = Modifier.height(48.dp),
+            contentPadding = ActionPadding
+        ) {
+            Text(
+                text = stringResource(R.string.guide_allow),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
 
 @Composable
 private fun StepHeader(icon: Painter, title: String, description: String) {
+    val colors = MaterialTheme.colorScheme
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Surface(
-            modifier = Modifier.size(80.dp),
-            shape = RoundedCornerShape(26.dp),
-            color = Color(0xFF141414),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(26.dp))
+                .background(colors.primary.copy(alpha = 0.14f))
         ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(16.dp)) {
-                Icon(painter = icon, contentDescription = null, modifier = Modifier.size(40.dp), tint = Color.White)
-            }
+            Icon(painter = icon, contentDescription = null, modifier = Modifier.size(40.dp), tint = colors.primary)
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            letterSpacing = (-0.5).sp
-        )
+        StepTitle(title)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodySmall,
-            color = Color(0xFFA0A0A0),
-            textAlign = TextAlign.Center,
-            lineHeight = 18.sp,
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .heightIn(min = 50.dp)
-        )
+        StepDescription(description, Modifier.heightIn(min = 50.dp))
     }
 }
 
-private const val StepMillis = 240
+@Composable
+private fun StepTitle(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center,
+        letterSpacing = (-0.5).sp
+    )
+}
+
+@Composable
+private fun StepDescription(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        lineHeight = 18.sp,
+        modifier = modifier.padding(horizontal = 8.dp)
+    )
+}
+
+private const val StepMillis = 300
+private const val FadeOutMillis = 90
+private const val FadeInMillis = 210
+private val StepSlide = 30.dp
 private val StepMinHeight = 292.dp
+private val ActionPadding = PaddingValues(horizontal = 16.dp)
 
 @Composable
 private fun Modifier.steadyHeight(min: Dp): Modifier {
@@ -478,58 +389,84 @@ private fun Modifier.steadyHeight(min: Dp): Modifier {
     }
 }
 
+/**
+ * Appearance choices for the guide. Read once when the guide opens, and switches flip
+ * at once on tap while the setting is saved in the background.
+ */
+private class AppearanceState(
+    dark: Boolean,
+    glass: Boolean,
+    val accent: () -> String,
+    val styleKey: () -> String,
+    val setDark: (Boolean) -> Unit,
+    val setGlass: (Boolean) -> Unit,
+    val setAccent: (String) -> Unit,
+    val setStyle: (GlassStyle) -> Unit,
+) {
+    var dark by mutableStateOf(dark)
+    var glass by mutableStateOf(glass)
+}
+
 @Composable
-private fun AppearanceStep() {
+private fun rememberAppearanceState(): AppearanceState {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val savedDark by remember(context) { SettingsRepository.isDarkTheme(context) }.collectAsState(initial = null)
-    val accent by remember(context) { SettingsRepository.getAccentColor(context) }.collectAsState(initial = "White")
-    val glass by remember(context) { SettingsRepository.isGlassEnabled(context) }.collectAsState(initial = true)
-    val styleKey by remember(context) { SettingsRepository.getGlassStyle(context) }.collectAsState(initial = GlassStyle.AURORA.key)
-    val style = GlassStyle.fromKey(styleKey)
+    val dark = LocalDarkTheme.current
+    val glass = LocalGlass.current
+    val accent by remember(context) { SettingsRepository.getAccentColor(context) }.collectAsState(initial = null)
+    val styleKey by remember(context) { SettingsRepository.getGlassStyle(context) }.collectAsState(initial = null)
+    val save: (suspend () -> Unit) -> Unit = { write -> scope.launch { runCatching { write() } } }
+    return remember(context) {
+        AppearanceState(
+            dark = dark,
+            glass = glass,
+            accent = { accent ?: AccentColors.first().name },
+            styleKey = { styleKey ?: GlassStyle.AURORA.key },
+            setDark = { on -> save { SettingsRepository.setDarkTheme(context, on) } },
+            setGlass = { on -> save { SettingsRepository.setGlassEnabled(context, on) } },
+            setAccent = { name -> save { SettingsRepository.setAccentColor(context, name) } },
+            setStyle = { style -> save { SettingsRepository.setGlassStyle(context, style.key) } },
+        )
+    }
+}
+
+@Composable
+private fun AppearanceStep(state: AppearanceState) {
+    val colors = MaterialTheme.colorScheme
+    val accent = state.accent()
+    val style = GlassStyle.fromKey(state.styleKey())
+    val accentColor = (AccentColors.find { it.name == accent } ?: AccentColors.first()).let {
+        if (state.dark) it.dark else it.light
+    }
     var accentPicker by remember { mutableStateOf(false) }
     var stylePicker by remember { mutableStateOf(false) }
-    val save: (suspend () -> Unit) -> Unit = { write -> scope.launch { runCatching { write() } } }
-    val accentColor = (AccentColors.find { it.name == accent } ?: AccentColors.first()).dark
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(R.string.guide_step_appearance_title),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            letterSpacing = (-0.5).sp
-        )
+        StepTitle(stringResource(R.string.guide_step_appearance_title))
         Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = stringResource(R.string.guide_step_appearance_desc),
-            style = MaterialTheme.typography.bodySmall,
-            color = Color(0xFFA0A0A0),
-            textAlign = TextAlign.Center,
-            lineHeight = 18.sp,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        )
+        StepDescription(stringResource(R.string.guide_step_appearance_desc))
         Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color(0xFF111111))
+                .background(colors.surfaceContainerHighest)
         ) {
-            ToggleRow(stringResource(R.string.appearance_dark_theme), savedDark ?: true) { on ->
-                save { SettingsRepository.setDarkTheme(context, on) }
+            ToggleRow(stringResource(R.string.appearance_dark_theme), state.dark) { on ->
+                state.dark = on
+                state.setDark(on)
             }
             RowDivider()
             PickRow(stringResource(R.string.appearance_accent_color), enabled = true, onClick = { accentPicker = true }) {
                 Box(Modifier.size(22.dp).clip(CircleShape).background(accentColor))
             }
             RowDivider()
-            ToggleRow(stringResource(R.string.appearance_glass), glass) { on ->
-                save { SettingsRepository.setGlassEnabled(context, on) }
+            ToggleRow(stringResource(R.string.appearance_glass), state.glass) { on ->
+                state.glass = on
+                state.setGlass(on)
             }
             RowDivider()
-            PickRow(stringResource(R.string.glass_style_title), enabled = glass, onClick = { stylePicker = true }) {
+            PickRow(stringResource(R.string.glass_style_title), enabled = state.glass, onClick = { stylePicker = true }) {
                 GlassStyleSwatch(style, accent)
             }
         }
@@ -538,7 +475,7 @@ private fun AppearanceStep() {
     if (accentPicker) {
         AccentPickerDialog(
             accentName = accent,
-            onAccentChanged = { name -> save { SettingsRepository.setAccentColor(context, name) } },
+            onAccentChanged = state.setAccent,
             onDismiss = { accentPicker = false }
         )
     }
@@ -546,7 +483,7 @@ private fun AppearanceStep() {
         GlassStylePickerDialog(
             current = style,
             accentName = accent,
-            onPick = { picked -> save { SettingsRepository.setGlassStyle(context, picked.key) } },
+            onPick = state.setStyle,
             onDismiss = { stylePicker = false }
         )
     }
@@ -563,17 +500,7 @@ private fun ToggleRow(label: String, checked: Boolean, onChange: (Boolean) -> Un
         verticalAlignment = Alignment.CenterVertically
     ) {
         RowLabel(label, Modifier.weight(1f))
-        Switch(
-            checked = checked,
-            onCheckedChange = null,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.Black,
-                checkedTrackColor = Color.White,
-                uncheckedThumbColor = Color(0xFF8E8E93),
-                uncheckedTrackColor = Color(0xFF161616),
-                uncheckedBorderColor = Color.White.copy(alpha = 0.12f)
-            )
-        )
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 
@@ -584,7 +511,7 @@ private fun PickRow(label: String, enabled: Boolean, onClick: () -> Unit, traili
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .alpha(if (enabled) 1f else 0.4f)
+            .alpha(if (enabled) 1f else 0.38f)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -595,7 +522,7 @@ private fun PickRow(label: String, enabled: Boolean, onClick: () -> Unit, traili
             painter = painterResource(R.drawable.small_chevron),
             contentDescription = null,
             modifier = Modifier.size(14.dp),
-            tint = Color(0xFF8E8E93)
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -606,19 +533,16 @@ private fun RowLabel(text: String, modifier: Modifier) {
         text = text,
         style = MaterialTheme.typography.bodyMedium,
         fontWeight = FontWeight.SemiBold,
-        color = Color.White,
+        color = MaterialTheme.colorScheme.onSurface,
         modifier = modifier
     )
 }
 
 @Composable
 private fun RowDivider() {
-    Box(
-        Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth()
-            .height(1.dp)
-            .background(Color.White.copy(alpha = 0.06f))
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        color = MaterialTheme.colorScheme.outlineVariant
     )
 }
 
@@ -629,6 +553,7 @@ private data class StepInfo(
 )
 
 private const val APPEARANCE_STEP = 2
+private const val BATTERY_STEP = 6
 
 private fun stepData(step: Int): StepInfo = when (step) {
     1 -> StepInfo(

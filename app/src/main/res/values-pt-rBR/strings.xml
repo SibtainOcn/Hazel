@@ -558,6 +558,8 @@
     <string name="glass_style_accent">Destaque</string>
     <string name="glass_style_wallpaper">Papel de parede</string>
     <string name="glass_style_sunset">Pôr do sol</string>
+    <string name="glass_style_nebula">Nebulosa</string>
+    <string name="glass_style_forest">Floresta</string>
     <string name="glass_style_ocean">Oceano</string>
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Do seu jeito</string>

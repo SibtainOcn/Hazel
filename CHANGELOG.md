@@ -11,9 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Getting started asks for theme, accent and glass as its second step, and applies each choice at once.
 
 ### Changed
-- Glass style under Appearance and in Getting started: Aurora, Accent, Wallpaper (Android 12 and later), Sunset, Ocean or Mono.
-- Six more accent colours (Sky, Violet, Lavender, Coral, Lime, Mint), and Crimson is now a true crimson. The accent list scrolls.
+- Glass style under Appearance and in Getting started: Aurora, Ocean, Accent, Wallpaper (Android 12 and later), Sunset, Nebula, Forest or Mono.
+- Six more accent colours (Sky, Violet, Lavender, Coral, Lime, Mint), and Crimson is now a true crimson. Five more after that (Magenta, Rose, Amber, Mocha, Slate). The accent and glass style lists show about five at a time and scroll, smaller on short screens.
 - The Getting started appearance step keeps the same size as the other steps and moves between steps more smoothly.
+- Getting started follows the theme: accent coloured Material 3 buttons with a visible press ripple, glass when glass is on, and a light version in light theme. Theme and glass switches flip at once on tap.
 - Format sheet OK is a solid accent button, and pills and chips use a clean tint on glass.
 - Support Hazel uses flat cards without borders. The yt-dlp and Hazel update screens use the accent for their switches, channel picker and section titles; the status banner keeps its own colours.
 

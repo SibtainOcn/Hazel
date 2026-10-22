@@ -43,6 +43,8 @@ fun glassStyleLabel(style: GlassStyle): String = stringResource(
         GlassStyle.ACCENT -> R.string.glass_style_accent
         GlassStyle.WALLPAPER -> R.string.glass_style_wallpaper
         GlassStyle.SUNSET -> R.string.glass_style_sunset
+        GlassStyle.NEBULA -> R.string.glass_style_nebula
+        GlassStyle.FOREST -> R.string.glass_style_forest
         GlassStyle.OCEAN -> R.string.glass_style_ocean
         GlassStyle.MONO -> R.string.glass_style_mono
     }
@@ -82,7 +84,7 @@ fun GlassStylePickerDialog(
         title = { Text(stringResource(R.string.glass_style_title), fontWeight = FontWeight.Bold) },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier.pickerListHeight(54.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 GlassStyle.available.forEach { style ->

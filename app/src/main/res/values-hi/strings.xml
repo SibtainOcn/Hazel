@@ -551,6 +551,8 @@
     <string name="glass_style_accent">एक्सेंट</string>
     <string name="glass_style_wallpaper">वॉलपेपर</string>
     <string name="glass_style_sunset">सूर्यास्त</string>
+    <string name="glass_style_nebula">नीहारिका</string>
+    <string name="glass_style_forest">जंगल</string>
     <string name="glass_style_ocean">समुद्र</string>
     <string name="glass_style_mono">मोनो</string>
     <string name="guide_step_appearance_title">इसे अपना बनाएं</string>

@@ -623,6 +623,8 @@
     <string name="glass_style_accent">Accent</string>
     <string name="glass_style_wallpaper">Wallpaper</string>
     <string name="glass_style_sunset">Sunset</string>
+    <string name="glass_style_nebula">Nebula</string>
+    <string name="glass_style_forest">Forest</string>
     <string name="glass_style_ocean">Ocean</string>
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Make it yours</string>

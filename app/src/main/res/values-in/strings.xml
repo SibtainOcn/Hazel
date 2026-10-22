@@ -544,6 +544,8 @@
     <string name="glass_style_accent">Aksen</string>
     <string name="glass_style_wallpaper">Wallpaper</string>
     <string name="glass_style_sunset">Senja</string>
+    <string name="glass_style_nebula">Nebula</string>
+    <string name="glass_style_forest">Hutan</string>
     <string name="glass_style_ocean">Samudra</string>
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Buat sesuai seleramu</string>
