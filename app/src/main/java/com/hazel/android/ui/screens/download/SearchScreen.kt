@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.theme.glassScreen
 import com.hazel.android.ui.components.ActionsRow
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -40,7 +41,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -328,7 +329,7 @@ fun SearchScreen(
         }
 
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().glassScreen(),
             color = MaterialTheme.colorScheme.background
         ) {
         Box(

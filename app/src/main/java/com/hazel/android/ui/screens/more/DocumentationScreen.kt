@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.more
 
+import com.hazel.android.ui.theme.LocalDarkTheme
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
@@ -54,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -202,7 +202,7 @@ fun DocumentationPageScreen(
     val context = LocalContext.current
     val scheme = MaterialTheme.colorScheme
     val background = scheme.background
-    val dark = background.luminance() < 0.5f
+    val dark = LocalDarkTheme.current
     val scope = rememberCoroutineScope()
 
     // A repository file is read directly and drawn here; a site page, or a file that could

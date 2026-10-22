@@ -545,6 +545,12 @@
     <string name="appearance_on">An</string>
     <string name="appearance_off">Aus</string>
     <string name="appearance_accent_color">Akzentfarbe</string>
+    <string name="appearance_glass">Glaseffekt</string>
+    <string name="guide_step_appearance_title">Mach es zu deinem</string>
+    <string name="guide_step_appearance_desc">Wähle ein Design, eine Akzentfarbe und den Glas-Look. Du kannst das jederzeit in den Einstellungen ändern.</string>
+    <string name="guide_theme">Design</string>
+    <string name="guide_theme_dark">Dunkel</string>
+    <string name="guide_theme_light">Hell</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Akzentfarbe</string>

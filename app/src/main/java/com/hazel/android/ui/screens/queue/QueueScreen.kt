@@ -38,7 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenu

@@ -1,5 +1,8 @@
 package com.hazel.android
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
+import com.hazel.android.ui.theme.glassScreen
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -99,6 +102,7 @@ class MainActivity : ComponentActivity() {
             val isDark = savedTheme ?: true // Default to dark on first install
 
             val accentName by remember(this) { SettingsRepository.getAccentColor(this) }.collectAsState(initial = null)
+            val glassPref by remember(this) { SettingsRepository.isGlassEnabled(this) }.collectAsState(initial = null)
 
             // The preferences decide the whole palette, so the app waits for them rather
             // than painting once in the wrong colours and correcting itself.
@@ -115,13 +119,17 @@ class MainActivity : ComponentActivity() {
                 minimumShown = true
             }
 
-            if (resolvedAccent == null || !minimumShown) {
+            val glass = glassPref
+            if (resolvedAccent == null || glass == null || !minimumShown) {
                 HazelTheme(darkTheme = isDark) { SplashScreen() }
                 return@setContent
             }
 
-            HazelTheme(darkTheme = isDark, accentName = resolvedAccent) {
-                Surface(modifier = Modifier.fillMaxSize()) {
+            HazelTheme(darkTheme = isDark, accentName = resolvedAccent, glass = glass) {
+                Surface(
+                    modifier = Modifier.fillMaxSize().glassScreen(),
+                    color = if (glass) Color.Transparent else MaterialTheme.colorScheme.surface
+                ) {
                     AppNavigation(
                         pendingShares = pendingShares,
                         pendingFailure = pendingFailure,
@@ -136,6 +144,10 @@ class MainActivity : ComponentActivity() {
                         accentName = resolvedAccent,
                         onAccentChanged = { name ->
                             scope.launch { SettingsRepository.setAccentColor(this@MainActivity, name) }
+                        },
+                        glassEnabled = glass,
+                        onToggleGlass = {
+                            scope.launch { SettingsRepository.setGlassEnabled(this@MainActivity, !glass) }
                         }
                     )
                 }

@@ -1,5 +1,6 @@
 package com.hazel.android.update
 
+import com.hazel.android.ui.theme.LocalDarkTheme
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -30,7 +31,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.material3.TopAppBar
@@ -42,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -55,7 +54,7 @@ import androidx.compose.ui.unit.sp
  */
 object UpdateTokens {
     val isDark: Boolean
-        @Composable get() = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+        @Composable get() = LocalDarkTheme.current
 
     val Bg: Color
         @Composable get() = if (isDark) Color(0xFF0A0A0A) else Color(0xFFF7F5F1)

@@ -1,12 +1,12 @@
 package com.hazel.android.ui.screens.more
 
+import com.hazel.android.ui.theme.LocalDarkTheme
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,7 +68,7 @@ import com.hazel.android.util.openInAppBrowser
 @Composable
 fun SponsorScreen(onBack: () -> Unit) {
     val context = LocalContext.current
-    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val isDark = LocalDarkTheme.current
 
     // Independent theme-adaptive color tokens matching GettingStartedDialog black shades aesthetic
     val surfaceColor = if (isDark) Color(0xFF121418) else Color(0xFFFFFFFF)

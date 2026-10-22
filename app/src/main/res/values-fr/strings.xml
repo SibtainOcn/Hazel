@@ -552,6 +552,12 @@
     <string name="appearance_on">Activé</string>
     <string name="appearance_off">Désactivé</string>
     <string name="appearance_accent_color">Couleur d\'accent</string>
+    <string name="appearance_glass">Effet verre</string>
+    <string name="guide_step_appearance_title">À votre goût</string>
+    <string name="guide_step_appearance_desc">Choisissez un thème, une couleur d\'accent et l\'effet verre. Vous pourrez les modifier à tout moment dans les réglages.</string>
+    <string name="guide_theme">Thème</string>
+    <string name="guide_theme_dark">Sombre</string>
+    <string name="guide_theme_light">Clair</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Couleur d\'accent</string>

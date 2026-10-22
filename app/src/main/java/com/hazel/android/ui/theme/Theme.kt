@@ -6,6 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
@@ -15,11 +16,12 @@ import androidx.core.view.WindowCompat
 fun HazelTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     accentName: String = "Cyan",
+    glass: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val accent = AccentColors.find { it.name == accentName } ?: AccentColors.first()
 
-    val colorScheme = if (darkTheme) {
+    val baseScheme = if (darkTheme) {
         darkColorScheme(
             primary = accent.dark,
             onPrimary = DarkBackground,
@@ -76,6 +78,8 @@ fun HazelTheme(
         )
     }
 
+    val colorScheme = if (glass) baseScheme.toGlass(darkTheme) else baseScheme
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -87,9 +91,11 @@ fun HazelTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = HazelTypography,
-        content = content
-    )
+    CompositionLocalProvider(LocalGlass provides glass, LocalDarkTheme provides darkTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = HazelTypography,
+            content = content
+        )
+    }
 }

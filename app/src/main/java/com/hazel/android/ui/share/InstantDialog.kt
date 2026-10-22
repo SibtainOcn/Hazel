@@ -1,5 +1,6 @@
 package com.hazel.android.ui.share
 
+import com.hazel.android.ui.theme.glassBackdrop
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -69,7 +70,11 @@ fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit) {
     }
 
     Dialog(onDismissRequest = onConfirm) {
-        Surface(shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+        Surface(
+            modifier = Modifier.glassBackdrop(RoundedCornerShape(28.dp)),
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh
+        ) {
             Column(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally

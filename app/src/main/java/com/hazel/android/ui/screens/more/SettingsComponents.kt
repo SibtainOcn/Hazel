@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.more
 
+import com.hazel.android.ui.theme.glassBackdrop
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +30,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -357,6 +358,7 @@ private fun ChoiceDialog(
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Surface(
+            modifier = Modifier.glassBackdrop(RoundedCornerShape(28.dp)),
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh
         ) {

@@ -617,6 +617,12 @@
     <string name="appearance_on">On</string>
     <string name="appearance_off">Off</string>
     <string name="appearance_accent_color">Accent Color</string>
+    <string name="appearance_glass">Glass effect</string>
+    <string name="guide_step_appearance_title">Make it yours</string>
+    <string name="guide_step_appearance_desc">Pick a theme, an accent and the glass look. You can change them any time in settings.</string>
+    <string name="guide_theme">Theme</string>
+    <string name="guide_theme_dark">Dark</string>
+    <string name="guide_theme_light">Light</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Accent Color</string>

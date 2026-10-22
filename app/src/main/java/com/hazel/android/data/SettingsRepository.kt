@@ -24,6 +24,7 @@ object SettingsRepository {
 
     private val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
     private val ACCENT_COLOR_KEY = stringPreferencesKey("accent_color")
+    private val GLASS_KEY = booleanPreferencesKey("glass_theme")
     private val FILENAME_TEMPLATE_KEY = stringPreferencesKey("filename_template")
     private val EMBED_THUMBNAIL_KEY = booleanPreferencesKey("embed_thumbnail")
 
@@ -43,6 +44,14 @@ object SettingsRepository {
 
     suspend fun setAccentColor(context: Context, name: String) {
         context.dataStore.edit { prefs -> prefs[ACCENT_COLOR_KEY] = name }
+    }
+
+    fun isGlassEnabled(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[GLASS_KEY] ?: true }
+    }
+
+    suspend fun setGlassEnabled(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GLASS_KEY] = enabled }
     }
 
     // Output filename template passed to yt-dlp as -o

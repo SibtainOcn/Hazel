@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.more
 
+import androidx.compose.material.icons.outlined.BlurOn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -50,6 +51,8 @@ fun AppearanceScreen(
     onToggleTheme: () -> Unit,
     accentName: String,
     onAccentChanged: (String) -> Unit,
+    glassEnabled: Boolean,
+    onToggleGlass: () -> Unit,
     onBack: () -> Unit
 ) {
     var accentPickerVisible by remember { mutableStateOf(false) }
@@ -86,6 +89,33 @@ fun AppearanceScreen(
                 },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable { onToggleTheme() }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.appearance_glass)) },
+                supportingContent = {
+                    Text(stringResource(if (glassEnabled) R.string.appearance_on else R.string.appearance_off))
+                },
+                leadingContent = {
+                    Icon(Icons.Outlined.BlurOn, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                trailingContent = {
+                    Switch(
+                        checked = glassEnabled,
+                        onCheckedChange = { onToggleGlass() },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onToggleGlass() }
             )
 
             HorizontalDivider(

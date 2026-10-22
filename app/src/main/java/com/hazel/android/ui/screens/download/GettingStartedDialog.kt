@@ -1,5 +1,22 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.selectable
+import kotlinx.coroutines.launch
+import com.hazel.android.ui.theme.AccentColors
+import com.hazel.android.data.SettingsRepository
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.horizontalScroll
 import com.hazel.android.ui.components.ActionsRow
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
@@ -66,13 +83,14 @@ import com.hazel.android.util.PermissionHelper
 /**
  * Getting-started onboarding stepper carousel, shown on first app launch.
  *
- * 6 slides introduce core capabilities:
+ * 7 slides introduce core capabilities:
  * 1. Paste and Download
- * 2. Format Selection
- * 3. Share to Hazel
- * 4. Hazel Instant
- * 5. Battery Optimization (Deny or Allow options of equal size)
- * 6. Notifications (Deny or Allow options of equal size)
+ * 2. Appearance (theme, accent, glass), saved as soon as it is picked
+ * 3. Format Selection
+ * 4. Share to Hazel
+ * 5. Hazel Instant
+ * 6. Battery Optimization (Deny or Allow options of equal size)
+ * 7. Notifications (Deny or Allow options of equal size)
  *
  * Designed with a deep dark (#000000 / #0A0A0A) background, fine subtle blue
  * gradient, crisp white primary actions, and clean minimalist styling.
@@ -83,7 +101,7 @@ fun GettingStartedDialog(
     onDismiss: () -> Unit
 ) {
     var currentStep by remember { mutableIntStateOf(1) }
-    val totalSteps = 6
+    val totalSteps = 7
     val context = LocalContext.current
 
     // Dismiss with notification permission request
@@ -202,58 +220,19 @@ fun GettingStartedDialog(
                                     ) + fadeOut(tween(200)))
                         }
                     ) { step ->
+                        if (step == APPEARANCE_STEP) {
+                            AppearanceStep()
+                            return@AnimatedContent
+                        }
                         val data = stepData(step)
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            // Icon container with subtle border
-                            Surface(
-                                modifier = Modifier.size(80.dp),
-                                shape = RoundedCornerShape(26.dp),
-                                color = Color(0xFF141414),
-                                border = androidx.compose.foundation.BorderStroke(
-                                    1.dp,
-                                    Color.White.copy(alpha = 0.08f)
-                                )
-                            ) {
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier.padding(16.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(data.iconRes),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(40.dp),
-                                        tint = Color.White
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(20.dp))
-
-                            // Step title
-                            Text(
-                                text = stringResource(data.titleRes),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                textAlign = TextAlign.Center,
-                                letterSpacing = (-0.5).sp
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            // Step description
-                            Text(
-                                text = stringResource(data.descRes),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFFA0A0A0),
-                                textAlign = TextAlign.Center,
-                                lineHeight = 18.sp,
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .heightIn(min = 50.dp)
+                            StepHeader(
+                                icon = painterResource(data.iconRes),
+                                title = stringResource(data.titleRes),
+                                description = stringResource(data.descRes)
                             )
                         }
                     }
@@ -321,8 +300,8 @@ fun GettingStartedDialog(
 
                         Spacer(modifier = Modifier.width(10.dp))
 
-                        if (currentStep == 5) {
-                            // Step 5 (Battery Optimization): Deny & Allow buttons of equal size
+                        if (currentStep == 6) {
+                            // Step 6 (Battery Optimization): Deny & Allow buttons of equal size
                             // Half the row each while both labels fit; one above the other when not.
                             EqualWidthActions(modifier = Modifier.weight(1f), spacing = 10.dp) {
                                 Surface(
@@ -371,8 +350,8 @@ fun GettingStartedDialog(
                                     }
                                 }
                             }
-                        } else if (currentStep == 6) {
-                            // Step 5 (Notifications): Deny & Allow buttons of equal size
+                        } else if (currentStep == 7) {
+                            // Step 7 (Notifications): Deny & Allow buttons of equal size
                             // Half the row each while both labels fit; one above the other when not.
                             EqualWidthActions(modifier = Modifier.weight(1f), spacing = 10.dp) {
                                 Surface(
@@ -419,7 +398,7 @@ fun GettingStartedDialog(
                                 }
                             }
                         } else {
-                            // Steps 1..3: Primary Next button
+                            // Other steps: Next
                             Surface(
                                 onClick = { currentStep++ },
                                 modifier = Modifier
@@ -458,49 +437,204 @@ fun GettingStartedDialog(
 
 // Step data definitions
 
+@Composable
+private fun StepHeader(icon: Painter, title: String, description: String) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Surface(
+            modifier = Modifier.size(80.dp),
+            shape = RoundedCornerShape(26.dp),
+            color = Color(0xFF141414),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
+        ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(16.dp)) {
+                Icon(painter = icon, contentDescription = null, modifier = Modifier.size(40.dp), tint = Color.White)
+            }
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            letterSpacing = (-0.5).sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(0xFFA0A0A0),
+            textAlign = TextAlign.Center,
+            lineHeight = 18.sp,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .heightIn(min = 50.dp)
+        )
+    }
+}
+
+@Composable
+private fun AppearanceStep() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val savedDark by remember(context) { SettingsRepository.isDarkTheme(context) }.collectAsState(initial = null)
+    val accent by remember(context) { SettingsRepository.getAccentColor(context) }.collectAsState(initial = null)
+    val glass by remember(context) { SettingsRepository.isGlassEnabled(context) }.collectAsState(initial = true)
+    val dark = savedDark ?: true
+    val save: (suspend () -> Unit) -> Unit = { write -> scope.launch { runCatching { write() } } }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        StepHeader(
+            icon = rememberVectorPainter(Icons.Outlined.Palette),
+            title = stringResource(R.string.guide_step_appearance_title),
+            description = stringResource(R.string.guide_step_appearance_desc)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        SettingLabel(stringResource(R.string.guide_theme))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(CircleShape)
+                .background(Color(0xFF111111))
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            ThemeOption(stringResource(R.string.guide_theme_dark), selected = dark, modifier = Modifier.weight(1f)) {
+                save { SettingsRepository.setDarkTheme(context, true) }
+            }
+            ThemeOption(stringResource(R.string.guide_theme_light), selected = !dark, modifier = Modifier.weight(1f)) {
+                save { SettingsRepository.setDarkTheme(context, false) }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        SettingLabel(stringResource(R.string.appearance_accent_color))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            AccentColors.forEach { option ->
+                val selected = option.name == accent
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, if (selected) Color.White else Color.Transparent, CircleShape)
+                        .selectable(selected = selected, role = Role.RadioButton) {
+                            save { SettingsRepository.setAccentColor(context, option.name) }
+                        }
+                        .semantics { contentDescription = option.name }
+                        .padding(6.dp)
+                        .clip(CircleShape)
+                        .background(option.dark)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .toggleable(value = glass, role = Role.Switch) { checked ->
+                    save { SettingsRepository.setGlassEnabled(context, checked) }
+                }
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.appearance_glass),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = glass,
+                onCheckedChange = null,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.Black,
+                    checkedTrackColor = Color.White,
+                    uncheckedThumbColor = Color(0xFF8E8E93),
+                    uncheckedTrackColor = Color(0xFF161616),
+                    uncheckedBorderColor = Color.White.copy(alpha = 0.12f)
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = Color(0xFF8E8E93),
+        modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+    )
+}
+
+@Composable
+private fun ThemeOption(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.height(44.dp),
+        shape = CircleShape,
+        color = if (selected) Color.White else Color.Transparent
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                color = if (selected) Color.Black else Color.White
+            )
+        }
+    }
+}
+
 private data class StepInfo(
     val titleRes: Int,
     val descRes: Int,
     val iconRes: Int
 )
 
-/**
- * Returns the content for each of the 6 getting-started steps.
- *
- * Step 1: Paste and Download (link icon)
- * Step 2: Format Selection (sliders-horizontal icon)
- * Step 3: Share to Hazel (share icon)
- * Step 4: Hazel Instant (the app's own Hazel SVG bolt icon)
- * Step 5: Battery Optimization (battery charge icon)
- * Step 6: Notifications (bell icon)
- */
+private const val APPEARANCE_STEP = 2
+
 private fun stepData(step: Int): StepInfo = when (step) {
     1 -> StepInfo(
         titleRes = R.string.guide_step1_title,
         descRes = R.string.guide_step_paste_link,
         iconRes = R.drawable.ic_link
     )
-    2 -> StepInfo(
+    3 -> StepInfo(
         titleRes = R.string.guide_step2_title,
         descRes = R.string.guide_step_pick_format,
         iconRes = R.drawable.more_tab
     )
-    3 -> StepInfo(
+    4 -> StepInfo(
         titleRes = R.string.guide_step_share_title,
         descRes = R.string.guide_step_share_sheet,
         iconRes = R.drawable.ic_share
     )
-    4 -> StepInfo(
+    5 -> StepInfo(
         titleRes = R.string.guide_step3_title,
         descRes = R.string.guide_step_share_instant,
         iconRes = R.drawable.ic_hazel_bolt
     )
-    5 -> StepInfo(
+    6 -> StepInfo(
         titleRes = R.string.guide_step4_title,
         descRes = R.string.guide_step_battery_unrestricted,
         iconRes = R.drawable.battery_charge
     )
-    6 -> StepInfo(
+    7 -> StepInfo(
         titleRes = R.string.guide_step5_title,
         descRes = R.string.guide_step_notifications,
         iconRes = R.drawable.ic_bell

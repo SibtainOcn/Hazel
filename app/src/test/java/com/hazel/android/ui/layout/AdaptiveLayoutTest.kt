@@ -382,7 +382,7 @@ class AdaptiveLayoutTest(private val language: String, private val fontScale: Fl
     @Test
     fun appearance() {
         show {
-            AppearanceScreen(isDarkTheme = true, onToggleTheme = {}, accentName = "Teal", onAccentChanged = {}, onBack = {})
+            AppearanceScreen(isDarkTheme = true, onToggleTheme = {}, accentName = "Teal", onAccentChanged = {}, glassEnabled = true, onToggleGlass = {}, onBack = {})
         }
         checkAndCapture("appearance")
     }

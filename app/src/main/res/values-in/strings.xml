@@ -538,6 +538,12 @@
     <string name="appearance_on">Aktif</string>
     <string name="appearance_off">Mati</string>
     <string name="appearance_accent_color">Warna Aksen</string>
+    <string name="appearance_glass">Efek kaca</string>
+    <string name="guide_step_appearance_title">Buat sesuai seleramu</string>
+    <string name="guide_step_appearance_desc">Pilih tema, warna aksen, dan tampilan kaca. Kamu bisa mengubahnya kapan saja di pengaturan.</string>
+    <string name="guide_theme">Tema</string>
+    <string name="guide_theme_dark">Gelap</string>
+    <string name="guide_theme_light">Terang</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Warna Aksen</string>
