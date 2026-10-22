@@ -26,6 +26,9 @@ import androidx.compose.ui.unit.dp
 val LocalGlass = staticCompositionLocalOf { false }
 val LocalDarkTheme = staticCompositionLocalOf { true }
 
+/** Glass over another app: an opaque base with only a faint tint, so nothing behind shows through. */
+val LocalGlassSolid = staticCompositionLocalOf { false }
+
 enum class GlassStyle(val key: String) {
     AURORA("aurora"), OCEAN("ocean"), ACCENT("accent"), WALLPAPER("wallpaper"),
     SUNSET("sunset"), NEBULA("nebula"), FOREST("forest"), MONO("mono");
@@ -141,10 +144,17 @@ fun Modifier.glassScreen(): Modifier =
 
 private val SheetBleed = 64.dp
 
-private fun overlayScale(dark: Boolean) = if (dark) 0.6f else 0.7f
+private fun overlayScale(dark: Boolean, solid: Boolean) = when {
+    solid -> 0.22f
+    dark -> 0.6f
+    else -> 0.7f
+}
 
-private fun overlayBase(dark: Boolean): Color =
-    if (dark) Color(0xFF07080C).copy(alpha = 0.94f) else GlassLightBase.copy(alpha = 0.95f)
+private fun overlayBase(dark: Boolean, solid: Boolean): Color = when {
+    solid -> if (dark) GlassDarkBase else GlassLightBase
+    dark -> Color(0xFF07080C).copy(alpha = 0.94f)
+    else -> GlassLightBase.copy(alpha = 0.95f)
+}
 
 @Composable
 fun tonalFill(alpha: Float): Color {
@@ -163,17 +173,18 @@ fun opaqueSurface(): Color {
 @Composable
 fun glassSheetColor(containerColor: Color): Color {
     if (!LocalGlass.current) return containerColor
-    return containerColor.compositeOver(overlayBase(LocalDarkTheme.current))
+    return containerColor.compositeOver(overlayBase(LocalDarkTheme.current, LocalGlassSolid.current))
 }
 
 @Composable
 fun Modifier.glassSheetGlow(): Modifier {
     if (!LocalGlass.current) return this
     val dark = LocalDarkTheme.current
+    val scale = overlayScale(dark, LocalGlassSolid.current)
     val palette = LocalGlassPalette.current
     return drawWithCache {
         val bleed = SheetBleed.toPx()
-        val spots = auroraSpots(palette, dark, overlayScale(dark), Size(size.width, size.height + bleed * 2), -bleed)
+        val spots = auroraSpots(palette, dark, scale, Size(size.width, size.height + bleed * 2), -bleed)
         onDrawBehind { drawSpots(spots) }
     }
 }
@@ -182,13 +193,15 @@ fun Modifier.glassSheetGlow(): Modifier {
 fun Modifier.glassBackdrop(shape: Shape, solid: Boolean = false, enabled: Boolean = LocalGlass.current): Modifier {
     if (!enabled) return this
     val dark = LocalDarkTheme.current
-    val base = if (solid) (if (dark) GlassDarkBase else GlassLightBase) else overlayBase(dark)
+    val solidGlass = LocalGlassSolid.current
+    val base = if (solid) (if (dark) GlassDarkBase else GlassLightBase) else overlayBase(dark, solidGlass)
+    val scale = overlayScale(dark, solidGlass)
     val palette = LocalGlassPalette.current
     val edge = if (dark) Color.White.copy(alpha = 0.09f) else Color.White.copy(alpha = 0.9f)
     return this
         .clip(shape)
         .drawWithCache {
-            val spots = auroraSpots(palette, dark, overlayScale(dark), size)
+            val spots = auroraSpots(palette, dark, scale, size)
             onDrawBehind {
                 drawRect(base)
                 drawSpots(spots)

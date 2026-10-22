@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Getting started appearance step keeps the same size as the other steps and moves between steps more smoothly.
 - Getting started follows the theme: accent coloured Material 3 buttons with a visible press ripple, glass when glass is on, and a light version in light theme. Theme and glass switches flip at once on tap.
 - Switches that are off show a clear grey thumb and outline on dark glass, and the yt-dlp and Hazel update screens use the standard switch with tap feedback.
+- Sharing a link from another app opens its sheet on solid black with only a faint glass tint and edge, so the app behind never shows through. Hazel Instant matches, and its settings and OK buttons are a matched Material 3 Expressive pair.
+- Support Hazel opens with "Like Hazel? Give it some love" and a shorter note.
+- Website on phones: cards skip their own blur and use a shorter shadow, and the background glow no longer drifts (it was meant to stay still on phones), so pages scroll smoothly in the app's documentation and in mobile browsers. Desktop is unchanged.
 - Format sheet OK is a solid accent button, and pills and chips use a clean tint on glass.
 - Support Hazel uses flat cards without borders. The yt-dlp and Hazel update screens use the accent for their switches, channel picker and section titles; the status banner keeps its own colours.
 

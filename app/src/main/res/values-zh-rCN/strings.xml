@@ -213,9 +213,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">返回</string>
     <string name="sponsor_title">支持 Hazel</string>
-    <string name="sponsor_hero_title">免费，而且会一直免费</string>
-    <string name="sponsor_hero_body">Hazel 是在晚上和周末做出来的，它免费送出，因为一个对下载收费的下载器是更差的下载器。站点在不断变化，跟上它们才是真正的工作。</string>
-    <string name="sponsor_hero_closing">如果这个应用替你省下了一个下午，下面任何一种方式都能把那段时间还回去。如果没有，那些不花钱的方式一样有帮助。</string>
+    <string name="sponsor_hero_title">喜欢 Hazel？给它一点爱</string>
+    <string name="sponsor_hero_body">如果 Hazel 对你有帮助，欢迎支持它的开发。你的支持能让我持续改进 Hazel 并开发新功能。每一份爱都意义非凡。💚</string>
     <string name="sponsor_section_ways">支持的方式</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">按月或只付一次，随时可以取消。全程由 GitHub 处理。</string>

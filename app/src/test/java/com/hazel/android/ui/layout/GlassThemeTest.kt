@@ -14,6 +14,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -150,6 +154,54 @@ class GlassThemeTest(private val theme: String, private val dark: Boolean) {
         capture("instant_dialog")
         compose.onNodeWithText(context.getString(R.string.instant_ok)).assertIsDisplayed().performClick()
         assertEquals(true, confirmed)
+    }
+
+    @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+    @Test
+    fun shareOverlayIsSolidOverOtherApps() {
+        org.junit.Assume.assumeTrue(dark)
+        compose.setContent {
+            HazelTheme(darkTheme = true, accentName = "Pink", glass = true) {
+                androidx.compose.runtime.CompositionLocalProvider(com.hazel.android.ui.theme.LocalGlassSolid provides true) {
+                    androidx.compose.foundation.layout.Column(Modifier.fillMaxSize()) {
+                        listOf(Color.Red, Color.Yellow, Color.Cyan, Color.White).forEach {
+                            androidx.compose.foundation.layout.Box(
+                                Modifier.fillMaxWidth().weight(1f).background(it)
+                            )
+                        }
+                    }
+                    com.hazel.android.ui.components.ModalBottomSheet(
+                        onDismissRequest = {},
+                        sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                        containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
+                    ) {
+                        androidx.compose.material3.Surface(
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerHigh,
+                            modifier = Modifier.fillMaxWidth().padding(20.dp)
+                        ) { Text("Video quality", Modifier.padding(24.dp)) }
+                        androidx.compose.foundation.layout.Spacer(Modifier.padding(120.dp))
+                    }
+                }
+            }
+        }
+        capture("share_sheet_solid")
+        compose.onNodeWithText("Video quality").assertIsDisplayed()
+    }
+
+    @Test
+    fun instantDialogIsSolidOverOtherApps() {
+        org.junit.Assume.assumeTrue(dark)
+        compose.setContent {
+            HazelTheme(darkTheme = true, accentName = "Pink", glass = true) {
+                androidx.compose.runtime.CompositionLocalProvider(com.hazel.android.ui.theme.LocalGlassSolid provides true) {
+                    androidx.compose.foundation.layout.Box(Modifier.fillMaxSize().background(Color.Yellow))
+                    com.hazel.android.ui.share.InstantDialog(onConfirm = {}, onTune = {}, glass = true)
+                }
+            }
+        }
+        capture("instant_dialog_solid")
+        compose.onNodeWithText(context.getString(R.string.instant_ok)).assertIsDisplayed()
     }
 
     @Test

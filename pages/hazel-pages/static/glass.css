@@ -103,11 +103,21 @@ details.q, .faq-still, .faq-empty, .give a, .help-grid > *, .promise, .next-up a
 @media (max-width: 1260px) and (min-width: 1081px), (max-width: 640px) {
   .search-btn { backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
 }
-/* Phones: lighter blur, still aurora */
+/* Phones: lighter blur, still aurora. Cards skip their own blur (the aurora behind them is
+   already soft) and take a slightly firmer fill and a shorter shadow, so scrolling stays smooth. */
 @media (max-width: 640px) {
-  :root { --blur: blur(14px) saturate(1.3); }
-  .aurora i { filter: blur(90px); animation: none; }
+  :root { --blur: blur(14px) saturate(1.3); --surface: rgba(255, 255, 255, .065); --glass-shadow: 0 12px 28px -18px rgba(0, 0, 0, .6); }
+  :root[data-theme="light"] { --surface: rgba(255, 255, 255, .7); --glass-shadow: 0 10px 24px -18px rgba(60, 50, 30, .18); }
+  .aurora i { filter: blur(90px); }
+  .aurora i:nth-child(n) { animation: none; }
+  .tile, .way, .privacy .left, .privacy li, .numbers div, .verify, .panel, .steps li, .device,
+  details.q, .faq-still, .faq-empty, .give a, .help-grid > *, .promise, .next-up a, .f-panel,
+  .pill, .btn-ghost, .gallery-nav button, .viewer button, .toc-mobile select, .faq-search input,
+  footer, .sites { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (max-width: 640px) and (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) { --surface: rgba(255, 255, 255, .7); --glass-shadow: 0 10px 24px -18px rgba(60, 50, 30, .18); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .aurora i { animation: none; }
+  .aurora i:nth-child(n) { animation: none; }
 }

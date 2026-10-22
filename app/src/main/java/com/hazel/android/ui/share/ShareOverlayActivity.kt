@@ -6,6 +6,7 @@ import com.hazel.android.ui.theme.LocalGlassPalette
 import com.hazel.android.ui.theme.GlassStyle
 import com.hazel.android.ui.theme.LocalGlass
 import com.hazel.android.ui.theme.LocalDarkTheme
+import com.hazel.android.ui.theme.LocalGlassSolid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import com.hazel.android.ui.screens.download.rememberSaveDirPicker
@@ -103,7 +104,12 @@ private fun overlayColorScheme(accentName: String): androidx.compose.material3.C
 private fun OverlayTheme(accentName: String, glass: Boolean, style: GlassStyle, content: @Composable () -> Unit) {
     val scheme = overlayColorScheme(accentName).let { if (glass) it.toGlass(dark = true) else it }
     val palette = glassPalette(style, dark = true, accent = scheme.primary)
-    CompositionLocalProvider(LocalGlass provides glass, LocalDarkTheme provides true, LocalGlassPalette provides palette) {
+    CompositionLocalProvider(
+        LocalGlass provides glass,
+        LocalGlassSolid provides true,
+        LocalDarkTheme provides true,
+        LocalGlassPalette provides palette
+    ) {
         MaterialTheme(colorScheme = scheme, typography = HazelTypography, content = content)
     }
 }

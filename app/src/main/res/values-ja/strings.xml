@@ -213,9 +213,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">戻る</string>
     <string name="sponsor_title">Hazel を支援</string>
-    <string name="sponsor_hero_title">完全無料、これからもずっと</string>
-    <string name="sponsor_hero_body">Hazelは夜間や週末に開発されており、完全無料で提供されています。サイト側の仕様変更は頻繁に発生し、それに対応し続けることが主な開発作業です。</string>
-    <string name="sponsor_hero_closing">このアプリが役立ったと感じたら、以下の方法で支援していただけると幸いです。費用のかからない支援方法も同様に大きな力になります。</string>
+    <string name="sponsor_hero_title">Hazel が気に入りましたか？応援をお願いします</string>
+    <string name="sponsor_hero_body">Hazel が役に立っているなら、開発の支援をご検討ください。皆さんの支援が Hazel の改善と新機能づくりを続ける力になります。どんな小さな応援もとても励みになります。💚</string>
     <string name="sponsor_section_ways">支援方法</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">毎月または1回限り、いつでもキャンセル可能。GitHubを通じて安全に処理されます。</string>

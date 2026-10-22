@@ -569,10 +569,13 @@
   });
 })();
 
-// Pause the aurora while scrolling.
+// Pause the aurora while scrolling. Phones and reduced motion never animate it, so they skip
+// the class and the page-wide style pass it costs.
 (function () {
   var root = document.documentElement, timer = 0;
+  var still = window.matchMedia('(max-width: 640px), (prefers-reduced-motion: reduce)');
   window.addEventListener('scroll', function () {
+    if (still.matches) return;
     if (!timer) root.classList.add('is-scrolling');
     clearTimeout(timer);
     timer = setTimeout(function () { root.classList.remove('is-scrolling'); timer = 0; }, 180);

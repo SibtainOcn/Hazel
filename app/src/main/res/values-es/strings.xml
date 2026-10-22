@@ -221,9 +221,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Atrás</string>
     <string name="sponsor_title">Apoyar a Hazel</string>
-    <string name="sponsor_hero_title">Gratis, y así va a seguir</string>
-    <string name="sponsor_hero_body">Hazel se hace por las tardes y los fines de semana, y se regala porque un descargador que cobra por la descarga es un descargador peor. Los sitios cambian constantemente, y seguirles el ritmo es el trabajo.</string>
-    <string name="sponsor_hero_closing">Si la aplicación te ahorró una tarde, cualquiera de estas opciones devuelve ese tiempo. Si no lo hizo, las que no cuestan nada ayudan igual.</string>
+    <string name="sponsor_hero_title">¿Te gusta Hazel? Dale un poco de cariño</string>
+    <string name="sponsor_hero_body">Si Hazel te ha sido útil, considera apoyar su desarrollo. Tu apoyo me ayuda a seguir mejorando Hazel y a crear nuevas funciones. Cada muestra de cariño significa mucho. 💚</string>
     <string name="sponsor_section_ways">Formas de apoyar</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Mensual o una sola vez, cancela cuando quieras. Lo gestiona GitHub por completo.</string>

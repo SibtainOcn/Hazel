@@ -225,9 +225,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Назад</string>
     <string name="sponsor_title">Поддержать Hazel</string>
-    <string name="sponsor_hero_title">Бесплатно и навсегда</string>
-    <string name="sponsor_hero_body">Hazel создаётся по вечерам и выходным. Приложение остаётся бесплатным, ведь платный загрузчик только хуже. Сайты постоянно меняются, и адаптация к ним требует времени.</string>
-    <string name="sponsor_hero_closing">Если приложение сэкономило вам время, любая поддержка поможет его развитию. Если нет, бесплатные способы поддержать проект помогут ничуть не меньше.</string>
+    <string name="sponsor_hero_title">Нравится Hazel? Поддержите его</string>
+    <string name="sponsor_hero_body">Если Hazel вам пригодился, поддержите его разработку. Ваша поддержка помогает мне улучшать Hazel и добавлять новые функции. Любая поддержка очень много значит. 💚</string>
     <string name="sponsor_section_ways">Способы поддержки</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Ежемесячно или единоразово, с возможностью отмены в любой момент. Всё обрабатывается через GitHub.</string>

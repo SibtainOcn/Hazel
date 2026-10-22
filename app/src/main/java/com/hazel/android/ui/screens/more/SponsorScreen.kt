@@ -274,15 +274,6 @@ private fun HeroCard(
                 color = textSecondary,
                 lineHeight = 22.sp
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                stringResource(R.string.sponsor_hero_closing),
-                style = MaterialTheme.typography.bodyMedium,
-                color = textSecondary,
-                lineHeight = 22.sp
-            )
         }
     }
 }
