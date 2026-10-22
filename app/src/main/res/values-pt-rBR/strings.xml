@@ -571,7 +571,6 @@
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Cor de destaque</string>
-    <string name="accent_picker_close">Fechar</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">Leitura de links</string>
@@ -674,6 +673,9 @@
     <string name="advanced_reset">Redefinir configurações avançadas</string>
     <string name="advanced_reset_title">Redefinir as configurações avançadas?</string>
     <string name="advanced_reset_body">Cada opção desta tela volta a ficar desligada ou vazia.</string>
+    <string name="appearance_reset">Redefinir aparência</string>
+    <string name="appearance_reset_title">Redefinir a aparência?</string>
+    <string name="appearance_reset_body">Tema, destaque e vidro voltam para escuro, White e Floresta.</string>
     <string name="processing_step_fetch">Buscar</string>
     <string name="processing_step_merge">Juntar</string>
     <string name="processing_step_extract">Extrair</string>

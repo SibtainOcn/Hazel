@@ -17,7 +17,7 @@ fun HazelTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     accentName: String = "Cyan",
     glass: Boolean = false,
-    glassStyle: GlassStyle = GlassStyle.AURORA,
+    glassStyle: GlassStyle = GlassStyle.DEFAULT,
     content: @Composable () -> Unit
 ) {
     val accent = AccentColors.find { it.name == accentName } ?: AccentColors.first()

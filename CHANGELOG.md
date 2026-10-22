@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Switches that are off show a clear grey thumb and outline on dark glass, and the yt-dlp and Hazel update screens use the standard switch with tap feedback.
 - Sharing a link from another app opens its sheet on solid black with only a faint glass tint and edge, so the app behind never shows through. Hazel Instant matches, and its settings and OK buttons are a matched Material 3 Expressive pair.
 - Support Hazel opens with "Like Hazel? Give it some love" and a shorter note.
+- Forest is the default glass style. Appearance has a Reset appearance row that brings back dark theme, White accent, glass on and Forest, and its accent and glass style pickers use the same grouped choice dialog as SponsorBlock and the other settings.
 - Website on phones: cards skip their own blur and use a shorter shadow, and the background glow no longer drifts (it was meant to stay still on phones), so pages scroll smoothly in the app's documentation and in mobile browsers. Desktop is unchanged.
 - Format sheet OK is a solid accent button, and pills and chips use a clean tint on glass.
 - Support Hazel uses flat cards without borders. The yt-dlp and Hazel update screens use the accent for their switches, channel picker and section titles; the status banner keeps its own colours.

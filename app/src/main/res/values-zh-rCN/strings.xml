@@ -557,7 +557,6 @@
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">强调色</string>
-    <string name="accent_picker_close">关闭</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">链接读取</string>
@@ -658,6 +657,9 @@
     <string name="advanced_reset">重置高级设置</string>
     <string name="advanced_reset_title">重置高级设置？</string>
     <string name="advanced_reset_body">此页面上的每个选项都将恢复为关闭或空白。</string>
+    <string name="appearance_reset">重置外观</string>
+    <string name="appearance_reset_title">重置外观？</string>
+    <string name="appearance_reset_body">主题、强调色和玻璃效果将恢复为深色、White和森林。</string>
     <string name="processing_step_fetch">获取</string>
     <string name="processing_step_merge">合并</string>
     <string name="processing_step_extract">提取</string>

@@ -285,7 +285,8 @@ internal fun <T> SingleChoiceDialog(
     selected: T,
     onSelect: (T) -> Unit,
     onDismiss: () -> Unit,
-    describe: @Composable (T) -> String? = { null }
+    describe: @Composable (T) -> String? = { null },
+    leading: (@Composable (T) -> Unit)? = null
 ) {
     ChoiceDialog(title = title, onDismiss = onDismiss) {
         itemsIndexed(choices) { index, (value, label) ->
@@ -295,7 +296,8 @@ internal fun <T> SingleChoiceDialog(
                 chosen = value == selected,
                 shape = groupShape(index, choices.size),
                 role = Role.RadioButton,
-                onClick = { if (value == selected) onDismiss() else onSelect(value) }
+                onClick = { if (value == selected) onDismiss() else onSelect(value) },
+                leading = leading?.let { { it(value) } }
             )
         }
     }

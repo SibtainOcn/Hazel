@@ -578,7 +578,6 @@
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Цветовой акцент</string>
-    <string name="accent_picker_close">Закрыть</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">Чтение ссылок</string>
@@ -681,6 +680,9 @@
     <string name="advanced_reset">Сбросить расширенные настройки</string>
     <string name="advanced_reset_title">Сбросить расширенные настройки?</string>
     <string name="advanced_reset_body">Все параметры на этом экране снова станут выключенными или пустыми.</string>
+    <string name="appearance_reset">Сбросить оформление</string>
+    <string name="appearance_reset_title">Сбросить оформление?</string>
+    <string name="appearance_reset_body">Тема, акцент и стекло вернутся к тёмной теме, White и «Лесу».</string>
     <string name="processing_step_fetch">Загрузка</string>
     <string name="processing_step_merge">Слияние</string>
     <string name="processing_step_extract">Извлечение</string>

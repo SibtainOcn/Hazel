@@ -557,7 +557,6 @@
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Warna Aksen</string>
-    <string name="accent_picker_close">Tutup</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">Pembacaan Tautan</string>
@@ -658,6 +657,9 @@
     <string name="advanced_reset">Atur ulang pengaturan lanjutan</string>
     <string name="advanced_reset_title">Atur ulang pengaturan lanjutan?</string>
     <string name="advanced_reset_body">Setiap opsi di layar ini kembali mati atau kosong.</string>
+    <string name="appearance_reset">Atur ulang tampilan</string>
+    <string name="appearance_reset_title">Atur ulang tampilan?</string>
+    <string name="appearance_reset_body">Tema, aksen, dan kaca kembali ke gelap, White, dan Hutan.</string>
     <string name="processing_step_fetch">Ambil</string>
     <string name="processing_step_merge">Gabung</string>
     <string name="processing_step_extract">Ekstrak</string>

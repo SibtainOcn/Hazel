@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material3.Card
@@ -45,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
+import com.hazel.android.data.SettingsRepository
 import com.hazel.android.ui.components.AccentPickerDialog
 import com.hazel.android.ui.theme.AccentColors
 
@@ -65,6 +67,7 @@ fun AppearanceScreen(
 ) {
     var accentPickerVisible by remember { mutableStateOf(false) }
     var glassPickerVisible by remember { mutableStateOf(false) }
+    var resetVisible by remember { mutableStateOf(false) }
     val currentAccent = AccentColors.find { it.name == accentName } ?: AccentColors.first()
 
     SettingsScreen(title = stringResource(R.string.appearance_title), onBack = onBack) {
@@ -179,6 +182,28 @@ fun AppearanceScreen(
                 modifier = Modifier.clickable { accentPickerVisible = true }
             )
         }
+
+        FlatSettingButton(
+            icon = Icons.Filled.RestartAlt,
+            text = stringResource(R.string.appearance_reset),
+            onClick = { resetVisible = true }
+        )
+    }
+
+    if (resetVisible) {
+        ConfirmSettingDialog(
+            title = stringResource(R.string.appearance_reset_title),
+            body = stringResource(R.string.appearance_reset_body),
+            confirm = stringResource(R.string.format_sheet_reset),
+            onConfirm = {
+                if (!isDarkTheme) onToggleTheme()
+                if (accentName != SettingsRepository.DEFAULT_ACCENT) onAccentChanged(SettingsRepository.DEFAULT_ACCENT)
+                if (!glassEnabled) onToggleGlass()
+                if (glassStyle != GlassStyle.DEFAULT) onGlassStyleChanged(GlassStyle.DEFAULT)
+                resetVisible = false
+            },
+            onDismiss = { resetVisible = false }
+        )
     }
 
     if (glassPickerVisible) {

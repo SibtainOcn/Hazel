@@ -571,7 +571,6 @@
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Color de acento</string>
-    <string name="accent_picker_close">Cerrar</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">Lectura de enlaces</string>
@@ -674,6 +673,9 @@
     <string name="advanced_reset">Restablecer ajustes avanzados</string>
     <string name="advanced_reset_title">¿Restablecer los ajustes avanzados?</string>
     <string name="advanced_reset_body">Cada opción de esta pantalla vuelve a desactivada o vacía.</string>
+    <string name="appearance_reset">Restablecer apariencia</string>
+    <string name="appearance_reset_title">¿Restablecer la apariencia?</string>
+    <string name="appearance_reset_body">El tema, el acento y el cristal vuelven a oscuro, White y Bosque.</string>
     <string name="processing_step_fetch">Obtener</string>
     <string name="processing_step_merge">Unir</string>
     <string name="processing_step_extract">Extraer</string>

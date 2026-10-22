@@ -427,7 +427,7 @@ internal fun rememberAppearanceState(): AppearanceState {
             dark = dark,
             glass = glass,
             accent = { accent ?: AccentColors.first().name },
-            styleKey = { styleKey ?: GlassStyle.AURORA.key },
+            styleKey = { styleKey ?: GlassStyle.DEFAULT.key },
             setDark = { on -> save { SettingsRepository.setDarkTheme(context, on) } },
             setGlass = { on -> save { SettingsRepository.setGlassEnabled(context, on) } },
             setAccent = { name -> save { SettingsRepository.setAccentColor(context, name) } },
