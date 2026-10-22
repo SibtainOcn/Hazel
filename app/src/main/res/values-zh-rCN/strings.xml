@@ -539,11 +539,15 @@
     <string name="appearance_off">关闭</string>
     <string name="appearance_accent_color">强调色</string>
     <string name="appearance_glass">玻璃效果</string>
+    <string name="glass_style_title">玻璃样式</string>
+    <string name="glass_style_aurora">极光</string>
+    <string name="glass_style_accent">强调色</string>
+    <string name="glass_style_wallpaper">壁纸</string>
+    <string name="glass_style_sunset">日落</string>
+    <string name="glass_style_ocean">海洋</string>
+    <string name="glass_style_mono">单色</string>
     <string name="guide_step_appearance_title">按你的喜好</string>
     <string name="guide_step_appearance_desc">选择主题、强调色和玻璃效果，之后可随时在设置中更改。</string>
-    <string name="guide_theme">主题</string>
-    <string name="guide_theme_dark">深色</string>
-    <string name="guide_theme_light">浅色</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">强调色</string>

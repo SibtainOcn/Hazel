@@ -1,5 +1,7 @@
 package com.hazel.android.ui.layout
 
+import androidx.compose.ui.test.getBoundsInRoot
+import com.hazel.android.ui.theme.GlassStyle
 import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -131,7 +133,7 @@ class GlassThemeTest(private val theme: String, private val dark: Boolean) {
     @Test
     fun instantDialogIsGlass() {
         var confirmed = false
-        show { com.hazel.android.ui.share.InstantDialog(onConfirm = { confirmed = true }, onTune = {}) }
+        show { com.hazel.android.ui.share.InstantDialog(onConfirm = { confirmed = true }, onTune = {}, glass = true) }
         capture("instant_dialog")
         compose.onNodeWithText(context.getString(R.string.instant_ok)).assertIsDisplayed().performClick()
         assertEquals(true, confirmed)
@@ -167,6 +169,8 @@ class GlassThemeTest(private val theme: String, private val dark: Boolean) {
                 onAccentChanged = {},
                 glassEnabled = glass,
                 onToggleGlass = { glass = !glass },
+                glassStyle = GlassStyle.AURORA,
+                onGlassStyleChanged = {},
                 onBack = {}
             )
         }
@@ -183,31 +187,43 @@ class GlassThemeTest(private val theme: String, private val dark: Boolean) {
         runBlocking {
             SettingsRepository.setDarkTheme(context, true)
             SettingsRepository.setGlassEnabled(context, true)
+            SettingsRepository.setGlassStyle(context, GlassStyle.AURORA.key)
         }
         show {
             var open by remember { mutableStateOf(true) }
             if (open) GettingStartedDialog(onOpenBatterySettings = {}, onDismiss = { open = false })
         }
-        compose.onNodeWithText(context.getString(R.string.guide_next)).performClick()
+        val next = context.getString(R.string.guide_next)
+        val nextTop = { compose.onNodeWithText(next).getBoundsInRoot().top }
+        val firstTop = nextTop()
+
+        compose.onNodeWithText(next).performClick()
         compose.waitForIdle()
         compose.onNodeWithText(context.getString(R.string.guide_step_appearance_title)).assertIsDisplayed()
+        assertEquals(firstTop, nextTop())
         capture("guide_appearance")
 
-        compose.onNodeWithText(context.getString(R.string.guide_theme_light)).assertHasClickAction().performClick()
-        compose.onNodeWithText(context.getString(R.string.appearance_glass)).performClick()
+        compose.onNodeWithText(context.getString(R.string.appearance_dark_theme)).assertHasClickAction().performClick()
+        compose.onNodeWithText(context.getString(R.string.glass_style_title)).performClick()
+        compose.onNodeWithText(context.getString(R.string.glass_style_sunset)).assertIsDisplayed()
+        capture("guide_glass_styles")
+        compose.onNodeWithText(context.getString(R.string.glass_style_sunset)).performClick()
         compose.waitForIdle()
         compose.waitUntil(5_000) {
-            runBlocking { SettingsRepository.isDarkTheme(context).first() == false && !SettingsRepository.isGlassEnabled(context).first() }
+            runBlocking {
+                SettingsRepository.isDarkTheme(context).first() == false &&
+                    SettingsRepository.getGlassStyle(context).first() == GlassStyle.SUNSET.key
+            }
         }
         runBlocking {
-            assertEquals(false, SettingsRepository.isDarkTheme(context).first())
-            assertEquals(false, SettingsRepository.isGlassEnabled(context).first())
-            SettingsRepository.setGlassEnabled(context, true)
             SettingsRepository.setDarkTheme(context, true)
+            SettingsRepository.setGlassStyle(context, GlassStyle.AURORA.key)
         }
-        compose.onNodeWithText(context.getString(R.string.guide_next)).performClick()
+
+        compose.onNodeWithText(next).performClick()
         compose.waitForIdle()
         compose.onNodeWithText(context.getString(R.string.guide_step2_title)).assertIsDisplayed()
+        assertEquals(firstTop, nextTop())
     }
 
     @Test

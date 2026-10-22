@@ -553,11 +553,15 @@
     <string name="appearance_off">Desligado</string>
     <string name="appearance_accent_color">Cor de destaque</string>
     <string name="appearance_glass">Efeito vidro</string>
+    <string name="glass_style_title">Estilo do vidro</string>
+    <string name="glass_style_aurora">Aurora</string>
+    <string name="glass_style_accent">Destaque</string>
+    <string name="glass_style_wallpaper">Papel de parede</string>
+    <string name="glass_style_sunset">Pôr do sol</string>
+    <string name="glass_style_ocean">Oceano</string>
+    <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Do seu jeito</string>
     <string name="guide_step_appearance_desc">Escolha o tema, a cor de destaque e o visual de vidro. Você pode mudar isso quando quiser nas configurações.</string>
-    <string name="guide_theme">Tema</string>
-    <string name="guide_theme_dark">Escuro</string>
-    <string name="guide_theme_light">Claro</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Cor de destaque</string>

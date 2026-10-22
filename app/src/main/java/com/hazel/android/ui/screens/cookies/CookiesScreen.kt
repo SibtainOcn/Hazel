@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.cookies
 
+import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.ActionsRow
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -666,7 +667,7 @@ private fun CookieDetailSheet(
 
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                color = tonalFill(0.35f),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {

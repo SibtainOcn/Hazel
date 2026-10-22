@@ -553,11 +553,15 @@
     <string name="appearance_off">Desactivado</string>
     <string name="appearance_accent_color">Color de acento</string>
     <string name="appearance_glass">Efecto cristal</string>
+    <string name="glass_style_title">Estilo de cristal</string>
+    <string name="glass_style_aurora">Aurora</string>
+    <string name="glass_style_accent">Acento</string>
+    <string name="glass_style_wallpaper">Fondo de pantalla</string>
+    <string name="glass_style_sunset">Atardecer</string>
+    <string name="glass_style_ocean">Océano</string>
+    <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Hazlo tuyo</string>
     <string name="guide_step_appearance_desc">Elige un tema, un color de acento y el aspecto de cristal. Puedes cambiarlos cuando quieras en los ajustes.</string>
-    <string name="guide_theme">Tema</string>
-    <string name="guide_theme_dark">Oscuro</string>
-    <string name="guide_theme_light">Claro</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Color de acento</string>

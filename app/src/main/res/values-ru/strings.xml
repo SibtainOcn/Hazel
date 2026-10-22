@@ -560,11 +560,15 @@
     <string name="appearance_off">Выкл.</string>
     <string name="appearance_accent_color">Цветовой акцент</string>
     <string name="appearance_glass">Эффект стекла</string>
+    <string name="glass_style_title">Стиль стекла</string>
+    <string name="glass_style_aurora">Сияние</string>
+    <string name="glass_style_accent">Акцент</string>
+    <string name="glass_style_wallpaper">Обои</string>
+    <string name="glass_style_sunset">Закат</string>
+    <string name="glass_style_ocean">Океан</string>
+    <string name="glass_style_mono">Моно</string>
     <string name="guide_step_appearance_title">Настройте под себя</string>
     <string name="guide_step_appearance_desc">Выберите тему, акцентный цвет и стеклянный вид. Их можно изменить в любой момент в настройках.</string>
-    <string name="guide_theme">Тема</string>
-    <string name="guide_theme_dark">Тёмная</string>
-    <string name="guide_theme_light">Светлая</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Цветовой акцент</string>

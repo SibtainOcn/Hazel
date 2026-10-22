@@ -1,5 +1,7 @@
 package com.hazel.android.ui.components
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -46,7 +48,7 @@ fun AccentPickerDialog(
             Text(stringResource(R.string.accent_picker_title), fontWeight = FontWeight.Bold)
         },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 AccentColors.forEach { accent ->
                     val isSelected = accent.name == accentName
                     Row(

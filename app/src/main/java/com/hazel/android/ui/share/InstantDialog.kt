@@ -58,7 +58,7 @@ import kotlinx.coroutines.delay
  * Instant downloads with are changed.
  */
 @Composable
-fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit) {
+fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit, glass: Boolean = false) {
     val close by rememberUpdatedState(onConfirm)
     var secondsLeft by remember { mutableIntStateOf(AUTO_CLOSE_SECONDS) }
     LaunchedEffect(Unit) {
@@ -71,9 +71,9 @@ fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit) {
 
     Dialog(onDismissRequest = onConfirm) {
         Surface(
-            modifier = Modifier.glassBackdrop(RoundedCornerShape(28.dp)),
+            modifier = Modifier.glassBackdrop(RoundedCornerShape(28.dp), solid = true, enabled = glass),
             shape = RoundedCornerShape(28.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh
+            color = if (glass) Color.White.copy(alpha = 0.05f) else MaterialTheme.colorScheme.surfaceContainerHigh
         ) {
             Column(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),

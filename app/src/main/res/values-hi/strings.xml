@@ -546,11 +546,15 @@
     <string name="appearance_off">बंद</string>
     <string name="appearance_accent_color">एक्सेंट रंग</string>
     <string name="appearance_glass">ग्लास इफ़ेक्ट</string>
+    <string name="glass_style_title">ग्लास स्टाइल</string>
+    <string name="glass_style_aurora">ऑरोरा</string>
+    <string name="glass_style_accent">एक्सेंट</string>
+    <string name="glass_style_wallpaper">वॉलपेपर</string>
+    <string name="glass_style_sunset">सूर्यास्त</string>
+    <string name="glass_style_ocean">समुद्र</string>
+    <string name="glass_style_mono">मोनो</string>
     <string name="guide_step_appearance_title">इसे अपना बनाएं</string>
     <string name="guide_step_appearance_desc">थीम, एक्सेंट रंग और ग्लास लुक चुनें। इन्हें आप कभी भी सेटिंग्स में बदल सकते हैं।</string>
-    <string name="guide_theme">थीम</string>
-    <string name="guide_theme_dark">डार्क</string>
-    <string name="guide_theme_light">लाइट</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">एक्सेंट रंग</string>

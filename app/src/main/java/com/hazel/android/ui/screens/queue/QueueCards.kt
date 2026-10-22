@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.queue
 
+import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MultiContentMeasurePolicy
 import androidx.compose.ui.unit.Constraints
@@ -108,7 +109,7 @@ fun QueuedCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = tonalFill(0.35f)
     ) {
         Box(
             modifier = Modifier
@@ -189,7 +190,7 @@ fun FailedCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = tonalFill(0.35f)
     ) {
         Box(
             modifier = Modifier

@@ -1,10 +1,17 @@
 package com.hazel.android.ui.screens.download
 
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import com.hazel.android.ui.theme.GlassStyle
+import com.hazel.android.ui.components.GlassStyleSwatch
+import com.hazel.android.ui.components.GlassStylePickerDialog
+import com.hazel.android.ui.components.AccentPickerDialog
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.layout.layout
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.SizeTransform
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.selection.selectable
 import kotlinx.coroutines.launch
 import com.hazel.android.ui.theme.AccentColors
 import com.hazel.android.data.SettingsRepository
@@ -16,7 +23,6 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.Icons
-import androidx.compose.foundation.horizontalScroll
 import com.hazel.android.ui.components.ActionsRow
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
@@ -28,9 +34,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -47,7 +51,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -64,7 +67,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -147,19 +149,6 @@ fun GettingStartedDialog(
                         shape = RoundedCornerShape(32.dp)
                     )
             ) {
-                // Subtle ambient glow in top-right
-                Box(
-                    modifier = Modifier
-                        .size(150.dp)
-                        .offset(x = 40.dp, y = (-48).dp)
-                        .align(Alignment.TopEnd)
-                        .blur(36.dp)
-                        .background(
-                            Color(0xFF1E293B).copy(alpha = 0.12f),
-                            CircleShape
-                        )
-                )
-
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
@@ -209,15 +198,17 @@ fun GettingStartedDialog(
                     // Slide Content
                     AnimatedContent(
                         targetState = currentStep,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .steadyHeight(StepMinHeight),
+                        contentAlignment = Alignment.Center,
                         transitionSpec = {
-                            (slideInHorizontally(
-                                initialOffsetX = { if (targetState > initialState) it / 4 else -it / 4 },
-                                animationSpec = tween(300)
-                            ) + fadeIn(tween(300))) togetherWith
-                                    (slideOutHorizontally(
-                                        targetOffsetX = { if (targetState > initialState) -it / 4 else it / 4 },
-                                        animationSpec = tween(300)
-                                    ) + fadeOut(tween(200)))
+                            val forward = targetState > initialState
+                            (slideInHorizontally(tween(StepMillis)) { if (forward) it / 5 else -it / 5 } +
+                                fadeIn(tween(StepMillis))) togetherWith
+                                (slideOutHorizontally(tween(StepMillis)) { if (forward) -it / 5 else it / 5 } +
+                                    fadeOut(tween(StepMillis / 2))) using
+                                SizeTransform(clip = false) { _, _ -> snap() }
                         }
                     ) { step ->
                         if (step == APPEARANCE_STEP) {
@@ -248,10 +239,7 @@ fun GettingStartedDialog(
                         for (i in 1..totalSteps) {
                             val width by animateDpAsState(
                                 targetValue = if (i == currentStep) 28.dp else 8.dp,
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessLow
-                                )
+                                animationSpec = tween(StepMillis)
                             )
                             Box(
                                 modifier = Modifier
@@ -476,128 +464,162 @@ private fun StepHeader(icon: Painter, title: String, description: String) {
     }
 }
 
+private const val StepMillis = 240
+private val StepMinHeight = 292.dp
+
+@Composable
+private fun Modifier.steadyHeight(min: Dp): Modifier {
+    val tallest = remember { IntArray(1) }
+    return layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        val height = maxOf(placeable.height, min.roundToPx(), tallest[0])
+        tallest[0] = height
+        layout(placeable.width, height) { placeable.place(0, (height - placeable.height) / 2) }
+    }
+}
+
 @Composable
 private fun AppearanceStep() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val savedDark by remember(context) { SettingsRepository.isDarkTheme(context) }.collectAsState(initial = null)
-    val accent by remember(context) { SettingsRepository.getAccentColor(context) }.collectAsState(initial = null)
+    val accent by remember(context) { SettingsRepository.getAccentColor(context) }.collectAsState(initial = "White")
     val glass by remember(context) { SettingsRepository.isGlassEnabled(context) }.collectAsState(initial = true)
-    val dark = savedDark ?: true
+    val styleKey by remember(context) { SettingsRepository.getGlassStyle(context) }.collectAsState(initial = GlassStyle.AURORA.key)
+    val style = GlassStyle.fromKey(styleKey)
+    var accentPicker by remember { mutableStateOf(false) }
+    var stylePicker by remember { mutableStateOf(false) }
     val save: (suspend () -> Unit) -> Unit = { write -> scope.launch { runCatching { write() } } }
+    val accentColor = (AccentColors.find { it.name == accent } ?: AccentColors.first()).dark
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        StepHeader(
-            icon = rememberVectorPainter(Icons.Outlined.Palette),
-            title = stringResource(R.string.guide_step_appearance_title),
-            description = stringResource(R.string.guide_step_appearance_desc)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.guide_step_appearance_title),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            letterSpacing = (-0.5).sp
         )
-
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = stringResource(R.string.guide_step_appearance_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(0xFFA0A0A0),
+            textAlign = TextAlign.Center,
+            lineHeight = 18.sp,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        SettingLabel(stringResource(R.string.guide_theme))
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(CircleShape)
+                .clip(RoundedCornerShape(20.dp))
                 .background(Color(0xFF111111))
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            ThemeOption(stringResource(R.string.guide_theme_dark), selected = dark, modifier = Modifier.weight(1f)) {
-                save { SettingsRepository.setDarkTheme(context, true) }
+            ToggleRow(stringResource(R.string.appearance_dark_theme), savedDark ?: true) { on ->
+                save { SettingsRepository.setDarkTheme(context, on) }
             }
-            ThemeOption(stringResource(R.string.guide_theme_light), selected = !dark, modifier = Modifier.weight(1f)) {
-                save { SettingsRepository.setDarkTheme(context, false) }
+            RowDivider()
+            PickRow(stringResource(R.string.appearance_accent_color), enabled = true, onClick = { accentPicker = true }) {
+                Box(Modifier.size(22.dp).clip(CircleShape).background(accentColor))
+            }
+            RowDivider()
+            ToggleRow(stringResource(R.string.appearance_glass), glass) { on ->
+                save { SettingsRepository.setGlassEnabled(context, on) }
+            }
+            RowDivider()
+            PickRow(stringResource(R.string.glass_style_title), enabled = glass, onClick = { stylePicker = true }) {
+                GlassStyleSwatch(style, accent)
             }
         }
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        SettingLabel(stringResource(R.string.appearance_accent_color))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            AccentColors.forEach { option ->
-                val selected = option.name == accent
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, if (selected) Color.White else Color.Transparent, CircleShape)
-                        .selectable(selected = selected, role = Role.RadioButton) {
-                            save { SettingsRepository.setAccentColor(context, option.name) }
-                        }
-                        .semantics { contentDescription = option.name }
-                        .padding(6.dp)
-                        .clip(CircleShape)
-                        .background(option.dark)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .toggleable(value = glass, role = Role.Switch) { checked ->
-                    save { SettingsRepository.setGlassEnabled(context, checked) }
-                }
-                .padding(vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.appearance_glass),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-                modifier = Modifier.weight(1f)
-            )
-            Switch(
-                checked = glass,
-                onCheckedChange = null,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.Black,
-                    checkedTrackColor = Color.White,
-                    uncheckedThumbColor = Color(0xFF8E8E93),
-                    uncheckedTrackColor = Color(0xFF161616),
-                    uncheckedBorderColor = Color.White.copy(alpha = 0.12f)
-                )
-            )
-        }
+    if (accentPicker) {
+        AccentPickerDialog(
+            accentName = accent,
+            onAccentChanged = { name -> save { SettingsRepository.setAccentColor(context, name) } },
+            onDismiss = { accentPicker = false }
+        )
+    }
+    if (stylePicker) {
+        GlassStylePickerDialog(
+            current = style,
+            accentName = accent,
+            onPick = { picked -> save { SettingsRepository.setGlassStyle(context, picked.key) } },
+            onDismiss = { stylePicker = false }
+        )
     }
 }
 
 @Composable
-private fun SettingLabel(text: String) {
+private fun ToggleRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RowLabel(label, Modifier.weight(1f))
+        Switch(
+            checked = checked,
+            onCheckedChange = null,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.Black,
+                checkedTrackColor = Color.White,
+                uncheckedThumbColor = Color(0xFF8E8E93),
+                uncheckedTrackColor = Color(0xFF161616),
+                uncheckedBorderColor = Color.White.copy(alpha = 0.12f)
+            )
+        )
+    }
+}
+
+@Composable
+private fun PickRow(label: String, enabled: Boolean, onClick: () -> Unit, trailing: @Composable () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .alpha(if (enabled) 1f else 0.4f)
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RowLabel(label, Modifier.weight(1f))
+        trailing()
+        Spacer(modifier = Modifier.width(10.dp))
+        Icon(
+            painter = painterResource(R.drawable.small_chevron),
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+            tint = Color(0xFF8E8E93)
+        )
+    }
+}
+
+@Composable
+private fun RowLabel(text: String, modifier: Modifier) {
     Text(
         text = text,
-        style = MaterialTheme.typography.labelMedium,
+        style = MaterialTheme.typography.bodyMedium,
         fontWeight = FontWeight.SemiBold,
-        color = Color(0xFF8E8E93),
-        modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+        color = Color.White,
+        modifier = modifier
     )
 }
 
 @Composable
-private fun ThemeOption(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier.height(44.dp),
-        shape = CircleShape,
-        color = if (selected) Color.White else Color.Transparent
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
-                color = if (selected) Color.Black else Color.White
-            )
-        }
-    }
+private fun RowDivider() {
+    Box(
+        Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(Color.White.copy(alpha = 0.06f))
+    )
 }
 
 private data class StepInfo(

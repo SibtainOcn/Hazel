@@ -1,5 +1,11 @@
 package com.hazel.android.ui.screens.more
 
+import androidx.compose.ui.draw.alpha
+import androidx.compose.material.icons.outlined.AutoAwesome
+import com.hazel.android.ui.components.glassStyleLabel
+import com.hazel.android.ui.components.GlassStyleSwatch
+import com.hazel.android.ui.components.GlassStylePickerDialog
+import com.hazel.android.ui.theme.GlassStyle
 import androidx.compose.material.icons.outlined.BlurOn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,9 +59,12 @@ fun AppearanceScreen(
     onAccentChanged: (String) -> Unit,
     glassEnabled: Boolean,
     onToggleGlass: () -> Unit,
+    glassStyle: GlassStyle,
+    onGlassStyleChanged: (GlassStyle) -> Unit,
     onBack: () -> Unit
 ) {
     var accentPickerVisible by remember { mutableStateOf(false) }
+    var glassPickerVisible by remember { mutableStateOf(false) }
     val currentAccent = AccentColors.find { it.name == accentName } ?: AccentColors.first()
 
     SettingsScreen(title = stringResource(R.string.appearance_title), onBack = onBack) {
@@ -123,6 +132,24 @@ fun AppearanceScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.glass_style_title)) },
+                supportingContent = { Text(glassStyleLabel(glassStyle)) },
+                leadingContent = {
+                    Icon(Icons.Outlined.AutoAwesome, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                trailingContent = { GlassStyleSwatch(glassStyle, accentName) },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier
+                    .clickable(enabled = glassEnabled) { glassPickerVisible = true }
+                    .alpha(if (glassEnabled) 1f else 0.45f)
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
             // Accent Color row — opens centered dialog
             ListItem(
                 headlineContent = { Text(stringResource(R.string.appearance_accent_color)) },
@@ -152,6 +179,15 @@ fun AppearanceScreen(
                 modifier = Modifier.clickable { accentPickerVisible = true }
             )
         }
+    }
+
+    if (glassPickerVisible) {
+        GlassStylePickerDialog(
+            current = glassStyle,
+            accentName = accentName,
+            onPick = onGlassStyleChanged,
+            onDismiss = { glassPickerVisible = false }
+        )
     }
 
     if (accentPickerVisible) {

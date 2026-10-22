@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.more
 
+import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.theme.glassBackdrop
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -509,7 +510,7 @@ internal fun FlatSettingButton(icon: ImageVector, text: String, onClick: () -> U
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+        color = tonalFill(0.55f),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp)

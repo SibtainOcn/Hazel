@@ -539,11 +539,15 @@
     <string name="appearance_off">オフ</string>
     <string name="appearance_accent_color">アクセントカラー</string>
     <string name="appearance_glass">ガラス効果</string>
+    <string name="glass_style_title">ガラスのスタイル</string>
+    <string name="glass_style_aurora">オーロラ</string>
+    <string name="glass_style_accent">アクセント</string>
+    <string name="glass_style_wallpaper">壁紙</string>
+    <string name="glass_style_sunset">夕焼け</string>
+    <string name="glass_style_ocean">オーシャン</string>
+    <string name="glass_style_mono">モノ</string>
     <string name="guide_step_appearance_title">自分好みに</string>
     <string name="guide_step_appearance_desc">テーマ、アクセントカラー、ガラスの見た目を選べます。あとから設定でいつでも変更できます。</string>
-    <string name="guide_theme">テーマ</string>
-    <string name="guide_theme_dark">ダーク</string>
-    <string name="guide_theme_light">ライト</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">アクセントカラー</string>

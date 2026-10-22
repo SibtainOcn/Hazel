@@ -546,11 +546,15 @@
     <string name="appearance_off">Aus</string>
     <string name="appearance_accent_color">Akzentfarbe</string>
     <string name="appearance_glass">Glaseffekt</string>
+    <string name="glass_style_title">Glasstil</string>
+    <string name="glass_style_aurora">Aurora</string>
+    <string name="glass_style_accent">Akzent</string>
+    <string name="glass_style_wallpaper">Hintergrund</string>
+    <string name="glass_style_sunset">Sonnenuntergang</string>
+    <string name="glass_style_ocean">Ozean</string>
+    <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Mach es zu deinem</string>
     <string name="guide_step_appearance_desc">Wähle ein Design, eine Akzentfarbe und den Glas-Look. Du kannst das jederzeit in den Einstellungen ändern.</string>
-    <string name="guide_theme">Design</string>
-    <string name="guide_theme_dark">Dunkel</string>
-    <string name="guide_theme_light">Hell</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Akzentfarbe</string>

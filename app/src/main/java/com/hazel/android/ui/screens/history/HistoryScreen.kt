@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.history
 
+import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.hazel.android.ui.components.FlatChip
@@ -624,7 +625,7 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, actions: EntryAct
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        color = tonalFill(0.3f)
     ) {
         Box(
             modifier = Modifier

@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
@@ -294,7 +295,9 @@ fun FormatSelectionSheet(
                         onClick = { draft?.let(onConfirm) },
                         enabled = draft != null,
                         shape = RoundedCornerShape(22.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                        color = if (draft != null) MaterialTheme.colorScheme.primary else tonalFill(0.55f),
+                        contentColor = if (draft != null) MaterialTheme.colorScheme.onPrimary
+                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                         modifier = Modifier.height(44.dp)
                     ) {
                         Row(
@@ -823,7 +826,7 @@ private fun SectionHeader(text: String, modifier: Modifier = Modifier, compact: 
     }
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        color = tonalFill(0.5f)
     ) {
         Text(
             text,

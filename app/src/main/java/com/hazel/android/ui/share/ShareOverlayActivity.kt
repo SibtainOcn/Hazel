@@ -1,6 +1,9 @@
 package com.hazel.android.ui.share
 
 import com.hazel.android.ui.theme.toGlass
+import com.hazel.android.ui.theme.glassPalette
+import com.hazel.android.ui.theme.LocalGlassPalette
+import com.hazel.android.ui.theme.GlassStyle
 import com.hazel.android.ui.theme.LocalGlass
 import com.hazel.android.ui.theme.LocalDarkTheme
 import androidx.compose.runtime.Composable
@@ -97,9 +100,10 @@ private fun overlayColorScheme(accentName: String): androidx.compose.material3.C
 }
 
 @Composable
-private fun OverlayTheme(accentName: String, glass: Boolean, content: @Composable () -> Unit) {
+private fun OverlayTheme(accentName: String, glass: Boolean, style: GlassStyle, content: @Composable () -> Unit) {
     val scheme = overlayColorScheme(accentName).let { if (glass) it.toGlass(dark = true) else it }
-    CompositionLocalProvider(LocalGlass provides glass, LocalDarkTheme provides true) {
+    val palette = glassPalette(style, dark = true, accent = scheme.primary)
+    CompositionLocalProvider(LocalGlass provides glass, LocalDarkTheme provides true, LocalGlassPalette provides palette) {
         MaterialTheme(colorScheme = scheme, typography = HazelTypography, content = content)
     }
 }
@@ -185,6 +189,7 @@ class ShareOverlayActivity : ComponentActivity() {
                 // The kind whose folder the picker is choosing, set as it opens.
                 val accentName by remember(this) { SettingsRepository.getAccentColor(this) }.collectAsState(initial = "Cyan")
                 val glass by remember(this) { SettingsRepository.isGlassEnabled(this) }.collectAsState(initial = true)
+                val glassStyle by remember(this) { SettingsRepository.getGlassStyle(this) }.collectAsState(initial = GlassStyle.AURORA.key)
 
                 LaunchedEffect(url) {
                     // Instant was handed its link in onCreate or onNewIntent, outside the
@@ -224,7 +229,7 @@ class ShareOverlayActivity : ComponentActivity() {
                     if (result.resultCode == Activity.RESULT_OK) downloadViewModel.fetchShare(url)
                 }
 
-                OverlayTheme(accentName, glass) {
+                OverlayTheme(accentName, glass, GlassStyle.fromKey(glassStyle)) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         val readHere = state.url == url
                         val results = if (readHere) state.results else emptyList()
@@ -240,6 +245,7 @@ class ShareOverlayActivity : ComponentActivity() {
                             // A failed read is reported by a notification, as any download
                             // that fails in the background is.
                             instant -> InstantDialog(
+                                glass = glass,
                                 onConfirm = { closeOverlay() },
                                 onTune = {
                                     startActivity(

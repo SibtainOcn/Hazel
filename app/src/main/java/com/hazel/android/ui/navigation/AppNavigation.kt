@@ -1,5 +1,6 @@
 package com.hazel.android.ui.navigation
 
+import com.hazel.android.ui.theme.GlassStyle
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -110,7 +111,9 @@ fun AppNavigation(
     accentName: String,
     onAccentChanged: (String) -> Unit,
     glassEnabled: Boolean,
-    onToggleGlass: () -> Unit
+    onToggleGlass: () -> Unit,
+    glassStyle: GlassStyle,
+    onGlassStyleChanged: (GlassStyle) -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -429,6 +432,8 @@ fun AppNavigation(
                     onAccentChanged = onAccentChanged,
                     glassEnabled = glassEnabled,
                     onToggleGlass = onToggleGlass,
+                    glassStyle = glassStyle,
+                    onGlassStyleChanged = onGlassStyleChanged,
                     onBack = { navController.popBackStack() }
                 )
             }
