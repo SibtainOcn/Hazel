@@ -1,112 +1,42 @@
 package com.hazel.android.ui.components
 
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import com.hazel.android.ui.components.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
+import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import com.hazel.android.ui.theme.AccentColors
 
-/**
- * Accent color picker dialog, opened from the Appearance screen.
- */
+/** Accent colour picker, in the same choice dialog the other settings use. */
 @Composable
 fun AccentPickerDialog(
     accentName: String,
     onAccentChanged: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(stringResource(R.string.accent_picker_title), fontWeight = FontWeight.Bold)
+    SingleChoiceDialog(
+        title = stringResource(R.string.accent_picker_title),
+        choices = AccentColors.map { it.name to it.name },
+        selected = accentName,
+        onSelect = {
+            onAccentChanged(it)
+            onDismiss()
         },
-        text = {
-            Column(Modifier.pickerListHeight(48.dp).verticalScroll(rememberScrollState())) {
-                AccentColors.forEach { accent ->
-                    val isSelected = accent.name == accentName
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .clickable {
-                                onAccentChanged(accent.name)
-                                onDismiss()
-                            }
-                            .padding(horizontal = 12.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (isSelected) {
-                                Icon(
-                                    Icons.Filled.Check, null,
-                                    modifier = Modifier.size(18.dp),
-                                    tint = accent.dark
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-                            }
-                            Text(
-                                accent.name,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) accent.dark else MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .size(18.dp)
-                                .clip(CircleShape)
-                                .background(accent.dark)
-                                .then(
-                                    if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                                    else Modifier
-                                )
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.accent_picker_close))
-            }
+        onDismiss = onDismiss,
+        leading = { name ->
+            val accent = AccentColors.find { it.name == name } ?: AccentColors.first()
+            Box(
+                Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(accent.dark)
+            )
         }
     )
-}
-
-/** About five rows with the next one peeking, never more than ~45% of the screen height. */
-@Composable
-internal fun Modifier.pickerListHeight(rowHeight: Dp): Modifier {
-    val screen = LocalConfiguration.current.screenHeightDp.dp
-    return heightIn(max = minOf(rowHeight * 5.5f, screen * 0.45f))
 }

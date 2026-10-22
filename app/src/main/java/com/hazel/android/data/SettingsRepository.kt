@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.map
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "hazel_settings")
 
 object SettingsRepository {
+    const val DEFAULT_ACCENT = "White"
+
 
     private val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
     private val ACCENT_COLOR_KEY = stringPreferencesKey("accent_color")
@@ -40,7 +42,7 @@ object SettingsRepository {
 
     // Accent color
     fun getAccentColor(context: Context): Flow<String> {
-        return context.dataStore.data.map { prefs -> prefs[ACCENT_COLOR_KEY] ?: "White" }
+        return context.dataStore.data.map { prefs -> prefs[ACCENT_COLOR_KEY] ?: DEFAULT_ACCENT }
     }
 
     suspend fun setAccentColor(context: Context, name: String) {
@@ -56,7 +58,7 @@ object SettingsRepository {
     }
 
     fun getGlassStyle(context: Context): Flow<String> {
-        return context.dataStore.data.map { prefs -> prefs[GLASS_STYLE_KEY] ?: "aurora" }
+        return context.dataStore.data.map { prefs -> prefs[GLASS_STYLE_KEY] ?: com.hazel.android.ui.theme.GlassStyle.DEFAULT.key }
     }
 
     suspend fun setGlassStyle(context: Context, key: String) {

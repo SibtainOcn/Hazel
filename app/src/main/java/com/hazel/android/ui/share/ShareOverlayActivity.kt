@@ -195,7 +195,7 @@ class ShareOverlayActivity : ComponentActivity() {
                 // The kind whose folder the picker is choosing, set as it opens.
                 val accentName by remember(this) { SettingsRepository.getAccentColor(this) }.collectAsState(initial = "Cyan")
                 val glass by remember(this) { SettingsRepository.isGlassEnabled(this) }.collectAsState(initial = true)
-                val glassStyle by remember(this) { SettingsRepository.getGlassStyle(this) }.collectAsState(initial = GlassStyle.AURORA.key)
+                val glassStyle by remember(this) { SettingsRepository.getGlassStyle(this) }.collectAsState(initial = GlassStyle.DEFAULT.key)
 
                 LaunchedEffect(url) {
                     // Instant was handed its link in onCreate or onNewIntent, outside the

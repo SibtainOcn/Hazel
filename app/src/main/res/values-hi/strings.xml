@@ -564,7 +564,6 @@
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">एक्सेंट रंग</string>
-    <string name="accent_picker_close">बंद करें</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">लिंक पढ़ना</string>
@@ -666,6 +665,9 @@
     <string name="advanced_reset">एडवांस्ड सेटिंग्स रीसेट करें</string>
     <string name="advanced_reset_title">एडवांस्ड सेटिंग्स रीसेट करें?</string>
     <string name="advanced_reset_body">इस स्क्रीन का हर विकल्प फिर से बंद या खाली हो जाएगा।</string>
+    <string name="appearance_reset">रूप-रंग रीसेट करें</string>
+    <string name="appearance_reset_title">रूप-रंग रीसेट करें?</string>
+    <string name="appearance_reset_body">थीम, एक्सेंट और ग्लास फिर से डार्क, White और फ़ॉरेस्ट हो जाएंगे।</string>
     <string name="processing_step_fetch">लाना</string>
     <string name="processing_step_merge">जोड़ना</string>
     <string name="processing_step_extract">निकालना</string>

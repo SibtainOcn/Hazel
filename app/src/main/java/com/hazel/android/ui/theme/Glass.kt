@@ -34,7 +34,9 @@ enum class GlassStyle(val key: String) {
     SUNSET("sunset"), NEBULA("nebula"), FOREST("forest"), MONO("mono");
 
     companion object {
-        fun fromKey(key: String?): GlassStyle = entries.firstOrNull { it.key == key } ?: AURORA
+        val DEFAULT = FOREST
+
+        fun fromKey(key: String?): GlassStyle = entries.firstOrNull { it.key == key } ?: DEFAULT
 
         val available: List<GlassStyle>
             get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) entries else entries - WALLPAPER

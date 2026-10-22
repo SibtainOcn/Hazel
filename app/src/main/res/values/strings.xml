@@ -636,7 +636,6 @@
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Accent Color</string>
-    <string name="accent_picker_close">Close</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">Link Reading</string>
@@ -744,6 +743,9 @@
     <string name="advanced_reset">Reset advanced settings</string>
     <string name="advanced_reset_title">Reset advanced settings?</string>
     <string name="advanced_reset_body">Every option on this screen goes back to off or empty.</string>
+    <string name="appearance_reset">Reset appearance</string>
+    <string name="appearance_reset_title">Reset appearance?</string>
+    <string name="appearance_reset_body">Theme, accent and glass go back to dark, White and Forest.</string>
     <string name="processing_step_fetch">Fetch</string>
     <string name="processing_step_merge">Merge</string>
     <string name="processing_step_extract">Extract</string>

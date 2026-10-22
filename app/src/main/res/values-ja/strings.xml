@@ -557,7 +557,6 @@
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">アクセントカラー</string>
-    <string name="accent_picker_close">閉じる</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">リンクの読み込み</string>
@@ -658,6 +657,9 @@
     <string name="advanced_reset">詳細設定をリセット</string>
     <string name="advanced_reset_title">詳細設定をリセットしますか？</string>
     <string name="advanced_reset_body">この画面のすべての項目がオフまたは空に戻ります。</string>
+    <string name="appearance_reset">外観をリセット</string>
+    <string name="appearance_reset_title">外観をリセットしますか？</string>
+    <string name="appearance_reset_body">テーマ、アクセント、ガラスがダーク、White、フォレストに戻ります。</string>
     <string name="processing_step_fetch">取得</string>
     <string name="processing_step_merge">結合</string>
     <string name="processing_step_extract">抽出</string>
