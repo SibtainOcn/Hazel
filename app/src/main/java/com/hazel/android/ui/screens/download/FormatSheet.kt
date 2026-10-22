@@ -81,7 +81,8 @@ import androidx.compose.material3.MaterialTheme
 import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -175,7 +176,7 @@ fun FormatSheet(
     // Opened at full height. The sheet's own content is a full screen of format rows and
     // fields, so a half-height first stop showed only the header and made an extra drag a
     // condition of using it. The set-of-links sheet already opens this way.
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
 
     // Open on the tab the settings name, if the source has formats for it, or else on the
     // one it has. A format the sheet was opened with decides it outright.

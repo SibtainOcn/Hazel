@@ -86,15 +86,11 @@ fun SponsorScreen(onBack: () -> Unit) {
     val iconTint = if (isDark) Color.White else Color(0xFF0F172A)
     val chevronTint = if (isDark) Color(0xFF717784) else Color(0xFF94A3B8)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 20.dp)
                 .padding(top = 4.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -113,113 +109,120 @@ fun SponsorScreen(onBack: () -> Unit) {
                 color = textPrimary
             )
         }
-
-        HeroCard(
-            surfaceColor = surfaceColor,
-            badgeBg = badgeBg,
-            iconTint = iconTint,
-            textPrimary = textPrimary,
-            textSecondary = textSecondary
-        )
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        SectionLabel(
-            text = stringResource(R.string.sponsor_section_ways),
-            color = textPrimary
-        )
-
-        SupportCard(
-            icon = Icons.Filled.Favorite,
-            title = stringResource(R.string.sponsor_github_title),
-            subtitle = stringResource(R.string.sponsor_github_subtitle),
-            enabled = SPONSORS_URL.isNotBlank(),
-            surfaceColor = surfaceColor,
-            badgeBg = badgeBg,
-            iconTint = iconTint,
-            textPrimary = textPrimary,
-            textSecondary = textSecondary,
-            chevronTint = chevronTint,
-            onClick = { openLink(context, SPONSORS_URL) }
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        SupportCard(
-            icon = Icons.Filled.Coffee,
-            title = stringResource(R.string.sponsor_bmac_title),
-            subtitle = stringResource(R.string.sponsor_bmac_subtitle),
-            enabled = BMAC_URL.isNotBlank(),
-            surfaceColor = surfaceColor,
-            badgeBg = badgeBg,
-            iconTint = iconTint,
-            textPrimary = textPrimary,
-            textSecondary = textSecondary,
-            chevronTint = chevronTint,
-            onClick = { openLink(context, BMAC_URL) }
-        )
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        SectionLabel(
-            text = stringResource(R.string.sponsor_section_free),
-            color = textPrimary
-        )
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = surfaceColor)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
         ) {
-            Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                HelpRow(
-                    icon = Icons.Filled.Star,
-                    title = stringResource(R.string.sponsor_star_title),
-                    subtitle = stringResource(R.string.sponsor_star_subtitle),
-                    iconTint = iconTint,
-                    textPrimary = textPrimary,
-                    textSecondary = textSecondary,
-                    onClick = { openLink(context, SOURCE_URL) }
-                )
-                HelpRow(
-                    icon = Icons.Filled.Share,
-                    title = stringResource(R.string.sponsor_share_title),
-                    subtitle = stringResource(R.string.sponsor_share_subtitle),
-                    iconTint = iconTint,
-                    textPrimary = textPrimary,
-                    textSecondary = textSecondary,
-                    onClick = { shareApp(context) }
-                )
-                HelpRow(
-                    icon = Icons.Filled.BugReport,
-                    title = stringResource(R.string.sponsor_issues_title),
-                    subtitle = stringResource(R.string.sponsor_issues_subtitle),
-                    iconTint = iconTint,
-                    textPrimary = textPrimary,
-                    textSecondary = textSecondary,
-                    onClick = { openLink(context, ISSUES_URL) }
-                )
-                HelpRow(
-                    icon = Icons.Filled.Code,
-                    title = stringResource(R.string.sponsor_source_title),
-                    subtitle = stringResource(R.string.sponsor_source_subtitle),
-                    iconTint = iconTint,
-                    textPrimary = textPrimary,
-                    textSecondary = textSecondary,
-                    onClick = { openLink(context, SOURCE_URL) }
-                )
+            HeroCard(
+                surfaceColor = surfaceColor,
+                badgeBg = badgeBg,
+                iconTint = iconTint,
+                textPrimary = textPrimary,
+                textSecondary = textSecondary
+            )
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            SectionLabel(
+                text = stringResource(R.string.sponsor_section_ways),
+                color = textPrimary
+            )
+
+            SupportCard(
+                icon = Icons.Filled.Favorite,
+                title = stringResource(R.string.sponsor_github_title),
+                subtitle = stringResource(R.string.sponsor_github_subtitle),
+                enabled = SPONSORS_URL.isNotBlank(),
+                surfaceColor = surfaceColor,
+                badgeBg = badgeBg,
+                iconTint = iconTint,
+                textPrimary = textPrimary,
+                textSecondary = textSecondary,
+                chevronTint = chevronTint,
+                onClick = { openLink(context, SPONSORS_URL) }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            SupportCard(
+                icon = Icons.Filled.Coffee,
+                title = stringResource(R.string.sponsor_bmac_title),
+                subtitle = stringResource(R.string.sponsor_bmac_subtitle),
+                enabled = BMAC_URL.isNotBlank(),
+                surfaceColor = surfaceColor,
+                badgeBg = badgeBg,
+                iconTint = iconTint,
+                textPrimary = textPrimary,
+                textSecondary = textSecondary,
+                chevronTint = chevronTint,
+                onClick = { openLink(context, BMAC_URL) }
+            )
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            SectionLabel(
+                text = stringResource(R.string.sponsor_section_free),
+                color = textPrimary
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = surfaceColor)
+            ) {
+                Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                    HelpRow(
+                        icon = Icons.Filled.Star,
+                        title = stringResource(R.string.sponsor_star_title),
+                        subtitle = stringResource(R.string.sponsor_star_subtitle),
+                        iconTint = iconTint,
+                        textPrimary = textPrimary,
+                        textSecondary = textSecondary,
+                        onClick = { openLink(context, SOURCE_URL) }
+                    )
+                    HelpRow(
+                        icon = Icons.Filled.Share,
+                        title = stringResource(R.string.sponsor_share_title),
+                        subtitle = stringResource(R.string.sponsor_share_subtitle),
+                        iconTint = iconTint,
+                        textPrimary = textPrimary,
+                        textSecondary = textSecondary,
+                        onClick = { shareApp(context) }
+                    )
+                    HelpRow(
+                        icon = Icons.Filled.BugReport,
+                        title = stringResource(R.string.sponsor_issues_title),
+                        subtitle = stringResource(R.string.sponsor_issues_subtitle),
+                        iconTint = iconTint,
+                        textPrimary = textPrimary,
+                        textSecondary = textSecondary,
+                        onClick = { openLink(context, ISSUES_URL) }
+                    )
+                    HelpRow(
+                        icon = Icons.Filled.Code,
+                        title = stringResource(R.string.sponsor_source_title),
+                        subtitle = stringResource(R.string.sponsor_source_subtitle),
+                        iconTint = iconTint,
+                        textPrimary = textPrimary,
+                        textSecondary = textSecondary,
+                        onClick = { openLink(context, SOURCE_URL) }
+                    )
+                }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                stringResource(R.string.sponsor_footer),
+                style = MaterialTheme.typography.bodySmall,
+                color = textMuted
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            stringResource(R.string.sponsor_footer),
-            style = MaterialTheme.typography.bodySmall,
-            color = textMuted
-        )
-
-        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 

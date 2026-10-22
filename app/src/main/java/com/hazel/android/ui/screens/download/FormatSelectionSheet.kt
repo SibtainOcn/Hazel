@@ -58,7 +58,8 @@ import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -155,7 +156,7 @@ fun FormatSelectionSheet(
 ) {
     // Half height on open. The sheet is a list, and a list is readable from the top down,
     // so the whole screen is offered rather than demanded.
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
 
     var sort by remember { mutableStateOf(FormatSort.QUALITY) }
     var filter by remember { mutableStateOf(FormatFilter.ALL) }
@@ -623,7 +624,7 @@ private fun FormatFilterSheet(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)),
         containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = null
     ) {

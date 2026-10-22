@@ -669,6 +669,7 @@ internal fun RemoveEntryDialog(
     body: String = stringResource(R.string.search_remove_confirm_body)
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -688,7 +689,7 @@ internal fun RemoveEntryDialog(
                     copySheetLink(context, entry)
                     // Android 13 and later show their own notice of a copy.
                     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
-                        Toast.makeText(context, context.getString(R.string.search_entry_copied), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, resources.getString(R.string.search_entry_copied), Toast.LENGTH_SHORT).show()
                     }
                     onDismiss()
                 }) { Text(stringResource(R.string.sheet_link_copy)) }

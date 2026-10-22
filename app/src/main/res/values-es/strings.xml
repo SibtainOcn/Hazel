@@ -271,8 +271,6 @@
     <string name="cleanup_category_partial_downloads_description">Restos de descargas canceladas o fallidas.</string>
     <string name="cleanup_category_conversions_label">Conversiones sin terminar</string>
     <string name="cleanup_category_conversions_description">Archivos de trabajo sobrantes del conversor de audio.</string>
-    <string name="cleanup_category_engine_label">Archivos del motor yt-dlp</string>
-    <string name="cleanup_category_engine_description">El descargador y su entorno. Libera más espacio, pero la próxima descarga lo descomprime otra vez.</string>
     <string name="cleanup_category_other_cache_label">Otros archivos en caché</string>
     <string name="cleanup_category_other_cache_description">Miniaturas y todo lo demás guardado mientras se exploran enlaces.</string>
     <string name="cleanup_category_link_reads_label">Lecturas de enlaces guardadas</string>
@@ -283,10 +281,9 @@
     <string name="cleanup_confirm_clear">Borrar</string>
     <string name="cleanup_confirm_cancel">Cancelar</string>
     <string name="cleanup_confirm_all_title">¿Borrarlo todo?</string>
-    <string name="cleanup_confirm_all_body">Se liberarán %1$s. Tus descargas y tus sesiones guardadas se conservan, pero la siguiente descarga tardará más mientras se desempaqueta el motor otra vez.</string>
+    <string name="cleanup_confirm_all_body">Se liberarán %1$s. Tus descargas y sesiones guardadas se conservan.</string>
     <string name="cleanup_confirm_all_confirm">Borrarlo todo</string>
     <string name="cleanup_confirm_all_cancel">Cancelar</string>
-    <string name="cleanup_confirm_all_include_link_reads">Borrar también las lecturas de enlaces guardadas (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">Todas las descargas</string>
@@ -792,6 +789,8 @@
     <string name="home_empty_hint">Pega un enlace o busca para empezar</string>
     <string name="more_getting_started">Primeros pasos</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">Buscar</string>
+    <string name="share_shortcut_download">Descargar</string>
     <string name="instant_started">Descarga iniciada</string>
     <string name="instant_ok">Aceptar</string>
     <string name="instant_settings">Ajustes de síntesis</string>

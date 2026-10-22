@@ -278,8 +278,6 @@
     <string name="cleanup_category_partial_downloads_description">Pieces left by downloads that were cancelled or failed.</string>
     <string name="cleanup_category_conversions_label">Unfinished conversions</string>
     <string name="cleanup_category_conversions_description">Leftover working files from the audio converter.</string>
-    <string name="cleanup_category_engine_label">yt-dlp engine files</string>
-    <string name="cleanup_category_engine_description">The downloader and its runtime. Frees the most, but the next download unpacks it again.</string>
     <string name="cleanup_category_other_cache_label">Other cached files</string>
     <string name="cleanup_category_other_cache_description">Thumbnails and anything else cached while browsing links.</string>
     <string name="cleanup_category_link_reads_label">Saved link reads</string>
@@ -295,10 +293,9 @@
     <string name="cleanup_confirm_clear">Clear</string>
     <string name="cleanup_confirm_cancel">Cancel</string>
     <string name="cleanup_confirm_all_title">Clear everything?</string>
-    <string name="cleanup_confirm_all_body">%1$s will be freed. Your downloads and saved sign-ins are kept, but the next download will take longer while the engine is unpacked again.</string>
+    <string name="cleanup_confirm_all_body">%1$s will be freed. Your downloads and saved sign-ins are kept.</string>
     <string name="cleanup_confirm_all_confirm">Clear everything</string>
     <string name="cleanup_confirm_all_cancel">Cancel</string>
-    <string name="cleanup_confirm_all_include_link_reads">Also clear saved link reads (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">All Downloads</string>
@@ -866,6 +863,8 @@
     <string name="home_empty_hint">Paste a link or search to get started</string>
     <string name="more_getting_started">Getting started</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">Search</string>
+    <string name="share_shortcut_download">Download</string>
     <string name="instant_started">Download started</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Synthesizing settings</string>

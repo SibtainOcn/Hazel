@@ -60,13 +60,13 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
     private val _wifiOnly = MutableStateFlow(false)
     val wifiOnly: StateFlow<Boolean> = _wifiOnly.asStateFlow()
 
-    private val _notifyAvailable = MutableStateFlow(true)
+    private val _notifyAvailable = MutableStateFlow(false)
     val notifyAvailable: StateFlow<Boolean> = _notifyAvailable.asStateFlow()
 
-    private val _notifyComplete = MutableStateFlow(true)
+    private val _notifyComplete = MutableStateFlow(false)
     val notifyComplete: StateFlow<Boolean> = _notifyComplete.asStateFlow()
 
-    private val _notifyFailed = MutableStateFlow(true)
+    private val _notifyFailed = MutableStateFlow(false)
     val notifyFailed: StateFlow<Boolean> = _notifyFailed.asStateFlow()
 
     private var updateJob: Job? = null

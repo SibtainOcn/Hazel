@@ -54,6 +54,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.layout.Layout
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -242,12 +243,13 @@ private fun PlayerArea(
 ) {
     var controlsShown by remember { mutableStateOf(true) }
     var menuOpen by remember { mutableStateOf(false) }
+    var scrubbing by remember { mutableStateOf(false) }
     val loading = controller.phase == PlaybackController.Phase.LOADING ||
         (controller.isBuffering && !controller.isPlaying)
 
     // Controls step aside while the picture plays, and come back on a tap.
-    LaunchedEffect(controlsShown, controller.isPlaying, menuOpen) {
-        if (controlsShown && controller.isPlaying && !menuOpen) {
+    LaunchedEffect(controlsShown, controller.isPlaying, menuOpen, scrubbing) {
+        if (controlsShown && controller.isPlaying && !menuOpen && !scrubbing) {
             delay(CONTROLS_TIMEOUT_MS)
             controlsShown = false
         }
@@ -305,7 +307,7 @@ private fun PlayerArea(
             )
         }
 
-        val controlsVisible = controlsShown || !controller.isPlaying
+        val controlsVisible = controlsShown || scrubbing || !controller.isPlaying
         if (!controlsVisible && controller.durationMs > 0) {
             // A hairline of progress stays along the foot while the controls are away.
             ProgressLine(
@@ -375,9 +377,11 @@ private fun PlayerArea(
                     when {
                         controller.phase == PlaybackController.Phase.FAILED -> FailedNote(onRetry = controller::retry)
                         loading -> CircularProgressIndicator(
-                            color = Color.White,
-                            strokeWidth = 3.dp,
-                            modifier = Modifier.size(40.dp)
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+                            strokeWidth = 4.dp,
+                            strokeCap = StrokeCap.Round,
+                            modifier = Modifier.size(44.dp)
                         )
                         else -> Surface(
                             onClick = controller::toggle,
@@ -404,6 +408,7 @@ private fun PlayerArea(
                     fullscreen = fullscreen,
                     onToggleFullscreen = onToggleFullscreen,
                     onMenuChange = { menuOpen = it },
+                    onScrubChange = { scrubbing = it },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
@@ -426,9 +431,16 @@ private fun SeekBar(
     fullscreen: Boolean,
     onToggleFullscreen: () -> Unit,
     onMenuChange: (Boolean) -> Unit,
+    onScrubChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var scrubbing by remember { mutableStateOf(false) }
+    val setScrubbing = { value: Boolean ->
+        scrubbing = value
+        onScrubChange(value)
+    }
+    val latestScrubChange by rememberUpdatedState(onScrubChange)
+    DisposableEffect(Unit) { onDispose { latestScrubChange(false) } }
     var scrubFraction by remember { mutableFloatStateOf(0f) }
     val duration = controller.durationMs
     val enabled = duration > 0
@@ -443,6 +455,13 @@ private fun SeekBar(
     val accent = MaterialTheme.colorScheme.primary
 
     Column(modifier = modifier) {
+        if (scrubbing) {
+            ScrubTime(
+                text = formatClock((scrubFraction * duration).toLong()),
+                fraction = scrubFraction,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "${formatClock((played * duration).toLong())} / ${formatClock(duration)}",
@@ -478,14 +497,14 @@ private fun SeekBar(
                     if (!enabled) return@pointerInput
                     detectHorizontalDragGestures(
                         onDragStart = { offset ->
-                            scrubbing = true
                             scrubFraction = (offset.x / size.width).coerceIn(0f, 1f)
+                            setScrubbing(true)
                         },
                         onDragEnd = {
                             controller.seekTo((scrubFraction * length).toLong())
-                            scrubbing = false
+                            setScrubbing(false)
                         },
-                        onDragCancel = { scrubbing = false }
+                        onDragCancel = { setScrubbing(false) }
                     ) { change, _ ->
                         change.consume()
                         scrubFraction = (change.position.x / size.width).coerceIn(0f, 1f)
@@ -498,6 +517,32 @@ private fun SeekBar(
             drawSeekLine(y, stroke, buffered, Color.White.copy(alpha = 0.45f))
             drawSeekLine(y, stroke, played, accent)
             drawCircle(accent, radius = thumb.toPx(), center = Offset(size.width * played, y))
+        }
+    }
+}
+
+/** The time under the finger while the bar is dragged, held above that point of the bar. */
+@Composable
+private fun ScrubTime(text: String, fraction: Float, modifier: Modifier = Modifier) {
+    Layout(
+        content = {
+            Surface(shape = RoundedCornerShape(8.dp), color = Color.Black.copy(alpha = 0.75f)) {
+                Text(
+                    text,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                )
+            }
+        },
+        modifier = modifier.padding(bottom = 6.dp)
+    ) { measurables, constraints ->
+        val bubble = measurables.first().measure(constraints.copy(minWidth = 0))
+        layout(constraints.maxWidth, bubble.height) {
+            val x = (constraints.maxWidth * fraction - bubble.width / 2f)
+                .coerceIn(0f, (constraints.maxWidth - bubble.width).toFloat().coerceAtLeast(0f))
+            bubble.place(x.toInt(), 0)
         }
     }
 }

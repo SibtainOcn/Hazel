@@ -173,6 +173,7 @@ class ShareOverlayActivity : ComponentActivity() {
 
         sharedUrl = firstUrl
         instant = intent.isInstant()
+        if (savedInstanceState == null) com.hazel.android.util.AppShortcuts.reportShared(this, instant)
         // Only on a first start: an activity brought back after its process was reclaimed
         // must not download the same link a second time.
         if (instant && savedInstanceState == null) {
@@ -386,6 +387,7 @@ class ShareOverlayActivity : ComponentActivity() {
             return
         }
         instant = intent.isInstant()
+        com.hazel.android.util.AppShortcuts.reportShared(this, instant)
         if (instant) DownloadViewModelHolder.get().instantDownload(this, url)
         sharedUrl = url
     }

@@ -62,7 +62,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -162,15 +163,11 @@ fun CookiesScreen(onBack: () -> Unit) {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 20.dp)
                 .padding(top = 4.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -244,94 +241,101 @@ fun CookiesScreen(onBack: () -> Unit) {
                 }
             }
         }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+        ) {
+            Text(
+                stringResource(R.string.cookies_description),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                modifier = Modifier.padding(start = 4.dp, bottom = 16.dp)
+            )
 
-        Text(
-            stringResource(R.string.cookies_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-            modifier = Modifier.padding(start = 4.dp, bottom = 16.dp)
-        )
-
-        SettingsSection(
-            title = stringResource(R.string.cookies_section_general),
-            rows = listOf {
-                SwitchSettingRow(
-                    icon = Icons.Filled.Cookie,
-                    title = stringResource(R.string.cookies_use_title),
-                    summary = stringResource(R.string.cookies_use_description),
-                    checked = useCookies,
-                    onCheckedChange = { enabled ->
-                        scope.launch { CookieRepository.setUseCookies(context, enabled) }
-                    }
-                )
-            }
-        )
-
-        SettingsSection(
-            title = stringResource(R.string.cookies_section_add),
-            rows = listOf(
-                {
-                    ActionSettingRow(
-                        icon = Icons.AutoMirrored.Filled.Login,
-                        title = stringResource(R.string.cookies_add_sign_in),
-                        summary = stringResource(R.string.cookies_add_sign_in_summary),
-                        onClick = { adding = true }
-                    )
-                },
-                {
-                    ActionSettingRow(
-                        icon = Icons.Filled.UploadFile,
-                        title = stringResource(R.string.cookies_menu_import_file),
-                        summary = stringResource(R.string.cookies_add_import_file_summary),
-                        enabled = !importing,
-                        onClick = { filePickerLauncher.launch(arrayOf("text/*", "*/*")) },
-                        trailing = if (importing) {
-                            { HazelLoadingIndicator(size = 28.dp) }
-                        } else null
+            SettingsSection(
+                title = stringResource(R.string.cookies_section_general),
+                rows = listOf {
+                    SwitchSettingRow(
+                        icon = Icons.Filled.Cookie,
+                        title = stringResource(R.string.cookies_use_title),
+                        summary = stringResource(R.string.cookies_use_description),
+                        checked = useCookies,
+                        onCheckedChange = { enabled ->
+                            scope.launch { CookieRepository.setUseCookies(context, enabled) }
+                        }
                     )
                 }
             )
-        )
 
-        val saved = entries
-        when {
-            saved == null -> Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 32.dp),
-                contentAlignment = Alignment.Center
-            ) { HazelLoadingIndicator(size = 40.dp) }
-
-            saved.isEmpty() -> EmptyCookies()
-
-            else -> {
-                if (!useCookies) {
-                    Text(
-                        stringResource(R.string.cookies_off_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                        modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
-                    )
-                }
-                SettingsSection(
-                    title = stringResource(R.string.cookies_section_saved),
-                    rows = saved.map { entry ->
-                        {
-                            CookieEntryRow(
-                                entry = entry,
-                                active = useCookies,
-                                onClick = { editing = entry },
-                                onEnabledChange = { enabled ->
-                                    scope.launch { CookieRepository.setEnabled(context, entry.id, enabled) }
-                                }
-                            )
-                        }
+            SettingsSection(
+                title = stringResource(R.string.cookies_section_add),
+                rows = listOf(
+                    {
+                        ActionSettingRow(
+                            icon = Icons.AutoMirrored.Filled.Login,
+                            title = stringResource(R.string.cookies_add_sign_in),
+                            summary = stringResource(R.string.cookies_add_sign_in_summary),
+                            onClick = { adding = true }
+                        )
+                    },
+                    {
+                        ActionSettingRow(
+                            icon = Icons.Filled.UploadFile,
+                            title = stringResource(R.string.cookies_menu_import_file),
+                            summary = stringResource(R.string.cookies_add_import_file_summary),
+                            enabled = !importing,
+                            onClick = { filePickerLauncher.launch(arrayOf("text/*", "*/*")) },
+                            trailing = if (importing) {
+                                { HazelLoadingIndicator(size = 28.dp) }
+                            } else null
+                        )
                     }
                 )
-            }
-        }
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            val saved = entries
+            when {
+                saved == null -> Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp),
+                    contentAlignment = Alignment.Center
+                ) { HazelLoadingIndicator(size = 40.dp) }
+
+                saved.isEmpty() -> EmptyCookies()
+
+                else -> {
+                    if (!useCookies) {
+                        Text(
+                            stringResource(R.string.cookies_off_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                        )
+                    }
+                    SettingsSection(
+                        title = stringResource(R.string.cookies_section_saved),
+                        rows = saved.map { entry ->
+                            {
+                                CookieEntryRow(
+                                    entry = entry,
+                                    active = useCookies,
+                                    onClick = { editing = entry },
+                                    onEnabledChange = { enabled ->
+                                        scope.launch { CookieRepository.setEnabled(context, entry.id, enabled) }
+                                    }
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+        }
     }
 
     if (adding) {
@@ -539,7 +543,7 @@ private fun CookieMeta(summary: CookieSummary, showSite: Boolean) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddSignInSheet(onContinue: (String) -> Unit, onDismiss: () -> Unit) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
     var url by remember { mutableStateOf("") }
     val focus = remember { FocusRequester() }
     val ready = hasHost(withScheme(url))
@@ -610,7 +614,7 @@ private fun CookieDetailSheet(
     onDelete: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
     val summary = remember(entry) { CookieRepository.summaryOf(entry) }
     var title by remember { mutableStateOf(entry.title) }
     var url by remember { mutableStateOf(entry.url) }

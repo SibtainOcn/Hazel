@@ -23,9 +23,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Website on phones: cards skip their own blur and use a shorter shadow, and the background glow no longer drifts (it was meant to stay still on phones), so pages scroll smoothly in the app's documentation and in mobile browsers. Desktop is unchanged.
 - Format sheet OK is a solid accent button, and pills and chips use a clean tint on glass.
 - Support Hazel uses flat cards without borders. The yt-dlp and Hazel update screens use the accent for their switches, channel picker and section titles; the status banner keeps its own colours.
+- The title and back button stay at the top of long settings screens (Advanced, Synthesizing, Appearance, Support Hazel, Cookies, the user guide list and the rest) while the rows scroll under them. On Temp files the size summary stays in place as well.
+- Player: loading shows the Material 3 spinner on a faint track in your accent colour. Dragging the seek bar shows the time under your finger above the bar, keeps the controls up until you let go, and seeks on release.
+- Long-press the Hazel icon for shortcuts to Search, Downloads, Queue and More. Hazel and Hazel Instant are offered as direct share targets, so share sheets can rank them in their top row as you use them.
+- Libraries updated to their latest stable versions (Kotlin 2.4, Compose BOM 2026.09, AGP 9.4, Gradle 9.8, OkHttp, Coil, Media3 kept at 1.11), and the app compiles against Android 37. The target Android version is unchanged.
+- yt-dlp update notifications (available, installed, failed) are off by default, for new installs and for existing ones. Turn them on again under the yt-dlp update screen.
 ### Fixed
 - YouTube downloads, Hazel Instant above all, no longer fail with "Requested format is not available" after the yt-dlp 2026.10.21 update. yt-dlp can name the same stream differently between the read and the download, so a format that has gone now falls back to the nearest one at the chosen height.
 - The YouTube player client list in Advanced includes the new `tv_samsung` client, and the user agent header uses yt-dlp's full option name.
+- Temp files: Clear everything now clears every row, saved link reads included. The yt-dlp engine row is gone: it measured the wrong folder and cleared nothing, and clearing the real engine would have stopped downloads from working.
 
 ## [1.1.14] - 2026-10-14
 ### Added
