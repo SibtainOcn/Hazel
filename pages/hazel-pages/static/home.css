@@ -177,6 +177,20 @@
 .closing h2 { margin: 0 auto; font: 700 clamp(40px, 5.6vw, 84px)/1 var(--display); letter-spacing: -.045em; max-width: 16ch; text-wrap: balance; }
 .closing p { color: var(--fg-2); margin: 24px auto 0; max-width: 52ch; font-size: 18px; }
 .fine { margin-top: 22px; color: var(--fg-3); font-size: 15px; }
+.closing .give { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1000px; margin: 56px auto 0; text-align: left; }
+.closing .give a {
+  display: flex; flex-direction: column; padding: 40px; border-radius: var(--radius);
+  background: var(--surface); min-height: 280px; transition: background .2s, transform .2s;
+}
+.closing .give a:hover { background: var(--surface-2); transform: translateY(-2px); }
+.closing .give .logo { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; }
+.closing .give .logo svg { width: 26px; height: 26px; }
+.closing .give h3 { margin: 28px 0 0; font: 600 28px/1.2 var(--display); letter-spacing: -.02em; }
+.closing .give p { margin: 10px 0 0; max-width: 40ch; font-size: 17px; }
+.closing .give .go { margin-top: auto; padding-top: 28px; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
+.closing .give .go svg { width: 16px; height: 16px; transition: transform .15s; }
+.closing .give a:hover .go svg { transform: translateX(3px); }
+@media (max-width: 640px) { .closing .give { grid-template-columns: 1fr; } .closing .give a { padding: 28px 24px; min-height: 0; } }
 .fine a { color: var(--fg-2); border-bottom: 1px solid var(--line-2); }
 
 @media (max-width: 1080px) {

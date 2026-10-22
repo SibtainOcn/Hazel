@@ -15,7 +15,7 @@ release notes. Every entry's link is checked like any other link.
 
     python tools/site/build_site.py
 """
-import html as _html, json, pathlib, re, shutil, sys
+import hashlib, html as _html, json, pathlib, re, shutil, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 SITE = ROOT / 'pages' / 'hazel-pages'
@@ -24,6 +24,8 @@ STATIC = SITE / 'static'
 OUT = SITE / '_build'
 SCREENS = ROOT / 'fastlane' / 'metadata' / 'android' / 'en-US' / 'images' / 'phoneScreenshots'
 html_escape = _html.escape
+# Changes whenever a stylesheet or script changes, so browsers never mix a new page with old CSS.
+ASSET_V = hashlib.sha256(b''.join(f.read_bytes() for f in sorted(STATIC.iterdir()))).hexdigest()[:8]
 
 MARK = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">'
         '<path d="M15.268 18.229c-1.979 2.678-2.969 4.017-3.892 3.734-.923-.283-.923-1.925-.923-5.21v-.31c0-1.184 0-1.777-.379-2.148l-.02-.02'
@@ -308,7 +310,9 @@ def page(name, title, description, active, extra_css, facts):
         body = faq_ids(body)
     for key, value in facts.items():
         body = body.replace('{{' + key + '}}', value)
-    css = '<link rel="stylesheet" href="styles.css">' + (f'\n<link rel="stylesheet" href="{extra_css}">' if extra_css else '')
+    css = (f'<link rel="stylesheet" href="styles.css?v={ASSET_V}">'
+           + (f'\n<link rel="stylesheet" href="{extra_css}?v={ASSET_V}">' if extra_css else '')
+           + f'\n<link rel="stylesheet" href="glass.css?v={ASSET_V}">')
     return f'''<!doctype html>
 <html lang="en" data-theme="light">
 <head>
@@ -325,12 +329,13 @@ def page(name, title, description, active, extra_css, facts):
 {css}
 </head>
 <body>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 {nav(active)}
 <main>
 {body}
 </main>
 {FOOTER}
-<script src="site.js"></script>
+<script src="site.js?v={ASSET_V}"></script>
 </body>
 </html>
 '''
@@ -357,6 +362,7 @@ def check(pages, index=()):
             if re.match(r'(https?:|mailto:|data:)', ref):
                 continue
             path, _, anchor = ref.partition('#')
+            path = path.split('?', 1)[0]
             target = OUT / path if path else OUT / f'{name}.html'
             if path and not target.exists():
                 problems.append(f'{name}: broken link {ref}')

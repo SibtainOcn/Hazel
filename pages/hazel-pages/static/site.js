@@ -568,3 +568,13 @@
     else if (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); open(); }
   });
 })();
+
+// Pause the aurora while scrolling.
+(function () {
+  var root = document.documentElement, timer = 0;
+  window.addEventListener('scroll', function () {
+    if (!timer) root.classList.add('is-scrolling');
+    clearTimeout(timer);
+    timer = setTimeout(function () { root.classList.remove('is-scrolling'); timer = 0; }, 180);
+  }, { passive: true });
+})();
