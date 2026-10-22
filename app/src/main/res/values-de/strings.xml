@@ -267,8 +267,6 @@
     <string name="cleanup_category_partial_downloads_description">Reste von abgebrochenen oder fehlgeschlagenen Downloads.</string>
     <string name="cleanup_category_conversions_label">Unfertige Umwandlungen</string>
     <string name="cleanup_category_conversions_description">Übrig gebliebene Arbeitsdateien des Audio-Konverters.</string>
-    <string name="cleanup_category_engine_label">Dateien der yt-dlp-Engine</string>
-    <string name="cleanup_category_engine_description">Der Downloader und seine Laufzeit. Spart am meisten, der nächste Download entpackt neu.</string>
     <string name="cleanup_category_other_cache_label">Andere zwischengespeicherte Dateien</string>
     <string name="cleanup_category_other_cache_description">Vorschaubilder und alles andere, was beim Durchsehen von Links zwischengespeichert wurde.</string>
     <string name="cleanup_category_link_reads_label">Gespeicherte Link-Abfragen</string>
@@ -279,10 +277,9 @@
     <string name="cleanup_confirm_clear">Löschen</string>
     <string name="cleanup_confirm_cancel">Abbrechen</string>
     <string name="cleanup_confirm_all_title">Alles löschen?</string>
-    <string name="cleanup_confirm_all_body">%1$s werden frei. Deine Downloads und gespeicherten Anmeldungen bleiben erhalten, aber der nächste Download dauert länger, während die Engine erneut entpackt wird.</string>
+    <string name="cleanup_confirm_all_body">%1$s werden freigegeben. Deine Downloads und gespeicherten Anmeldungen bleiben erhalten.</string>
     <string name="cleanup_confirm_all_confirm">Alles löschen</string>
     <string name="cleanup_confirm_all_cancel">Abbrechen</string>
-    <string name="cleanup_confirm_all_include_link_reads">Auch gespeicherte Link-Abfragen löschen (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">Alle Downloads</string>

@@ -271,8 +271,6 @@
     <string name="cleanup_category_partial_downloads_description">Restes de téléchargements annulés ou échoués.</string>
     <string name="cleanup_category_conversions_label">Conversions inachevées</string>
     <string name="cleanup_category_conversions_description">Fichiers de travail restants du convertisseur audio.</string>
-    <string name="cleanup_category_engine_label">Fichiers du moteur yt-dlp</string>
-    <string name="cleanup_category_engine_description">Le téléchargeur et son environnement. Libère le plus, mais le prochain téléchargement le redécompresse.</string>
     <string name="cleanup_category_other_cache_label">Autres fichiers en cache</string>
     <string name="cleanup_category_other_cache_description">Les miniatures et tout ce qui a été mis en cache pendant la consultation des liens.</string>
     <string name="cleanup_category_link_reads_label">Lectures de liens enregistrées</string>
@@ -283,10 +281,9 @@
     <string name="cleanup_confirm_clear">Effacer</string>
     <string name="cleanup_confirm_cancel">Annuler</string>
     <string name="cleanup_confirm_all_title">Tout effacer ?</string>
-    <string name="cleanup_confirm_all_body">%1$s seront libérés. Vos téléchargements et vos connexions enregistrées sont conservés, mais le prochain téléchargement prendra plus de temps pendant la décompression du moteur.</string>
+    <string name="cleanup_confirm_all_body">%1$s seront libérés. Vos téléchargements et connexions enregistrées sont conservés.</string>
     <string name="cleanup_confirm_all_confirm">Tout effacer</string>
     <string name="cleanup_confirm_all_cancel">Annuler</string>
-    <string name="cleanup_confirm_all_include_link_reads">Effacer aussi les lectures de liens enregistrées (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">Tous les téléchargements</string>

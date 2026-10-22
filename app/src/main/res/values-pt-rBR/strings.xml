@@ -271,8 +271,6 @@
     <string name="cleanup_category_partial_downloads_description">Sobras de downloads cancelados ou que falharam.</string>
     <string name="cleanup_category_conversions_label">Conversões incompletas</string>
     <string name="cleanup_category_conversions_description">Arquivos de trabalho que sobraram do conversor de áudio.</string>
-    <string name="cleanup_category_engine_label">Arquivos do motor yt-dlp</string>
-    <string name="cleanup_category_engine_description">O downloader e seu runtime. Libera mais espaço, mas o próximo download o descompacta de novo.</string>
     <string name="cleanup_category_other_cache_label">Outros arquivos em cache</string>
     <string name="cleanup_category_other_cache_description">Miniaturas e tudo o mais guardado em cache enquanto você navega pelos links.</string>
     <string name="cleanup_category_link_reads_label">Leituras de links salvas</string>
@@ -283,10 +281,9 @@
     <string name="cleanup_confirm_clear">Limpar</string>
     <string name="cleanup_confirm_cancel">Cancelar</string>
     <string name="cleanup_confirm_all_title">Limpar tudo?</string>
-    <string name="cleanup_confirm_all_body">%1$s serão liberados. Seus downloads e logins salvos são mantidos, mas o próximo download vai demorar mais enquanto o motor é descompactado de novo.</string>
+    <string name="cleanup_confirm_all_body">%1$s serão liberados. Seus downloads e logins salvos são mantidos.</string>
     <string name="cleanup_confirm_all_confirm">Limpar tudo</string>
     <string name="cleanup_confirm_all_cancel">Cancelar</string>
-    <string name="cleanup_confirm_all_include_link_reads">Limpar também as leituras de links salvas (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">Todos os downloads</string>

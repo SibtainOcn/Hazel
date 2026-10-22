@@ -37,7 +37,6 @@ import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Link
-import androidx.compose.material.icons.outlined.Memory
 import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -93,7 +92,7 @@ import kotlinx.coroutines.launch
  * carry a delete mark in their size chip, which is what tells the user a row can be tapped;
  * an empty row has a plain chip and cannot be tapped.
  *
- * The title bar and Clear everything stay put; the summary and the categories scroll
+ * The title bar, the summary and Clear everything stay put; the categories scroll
  * between them, so the main action is always in reach however long the list runs at a
  * large font.
  *
@@ -136,6 +135,10 @@ fun StorageCleanupScreen(onBack: () -> Unit, sample: List<TempCategory>? = null)
             )
         }
 
+        Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 20.dp)) {
+            SummaryCard(categories = categories, total = total)
+        }
+
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -143,9 +146,6 @@ fun StorageCleanupScreen(onBack: () -> Unit, sample: List<TempCategory>? = null)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            SummaryCard(categories = categories, total = total)
-
-            Spacer(modifier = Modifier.height(20.dp))
 
             // One group of separate tiles: the ends of the group are fully rounded, the joins
             // between tiles only slightly, so the list reads as one set of distinct buttons.
@@ -211,42 +211,21 @@ fun StorageCleanupScreen(onBack: () -> Unit, sample: List<TempCategory>? = null)
     }
 
     if (confirmingAll) {
-        // What Clear everything leaves unless asked: saved link reads only make reopening a
-        // link instant and take little room, so they are kept unless this is ticked. Off
-        // each time the dialog opens.
-        val optional = categories.filter { !it.inClearAll && it.bytes > 0 }
-        var includeOptional by remember { mutableStateOf(false) }
-        val clearing = categories.filter { it.inClearAll || includeOptional }
         AlertDialog(
             onDismissRequest = { confirmingAll = false },
             icon = { Icon(Icons.Filled.DeleteSweep, contentDescription = null) },
             title = { Text(stringResource(R.string.cleanup_confirm_all_title), fontWeight = FontWeight.Bold) },
             text = {
-                Column {
-                    Text(
-                        stringResource(
-                            R.string.cleanup_confirm_all_body,
-                            formatFileSize(clearing.sumOf { it.bytes }).ifBlank { "0 KB" }
-                        )
+                Text(
+                    stringResource(
+                        R.string.cleanup_confirm_all_body,
+                        formatFileSize(total).ifBlank { "0 KB" }
                     )
-                    if (optional.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        ChoiceRow(
-                            label = stringResource(
-                                R.string.cleanup_confirm_all_include_link_reads,
-                                formatFileSize(optional.sumOf { it.bytes }).ifBlank { "0 KB" }
-                            ),
-                            description = null,
-                            chosen = includeOptional,
-                            role = Role.Checkbox,
-                            onClick = { includeOptional = !includeOptional }
-                        )
-                    }
-                }
+                )
             },
             confirmButton = {
                 TextButton(onClick = {
-                    val ids = clearing.map { it.id }
+                    val ids = categories.map { it.id }
                     confirmingAll = false
                     scope.launch {
                         ids.forEach { TempStorage.clear(context, it) }
@@ -534,7 +513,6 @@ private fun categoryColor(id: String): Color = when (id) {
     TempStorage.LINK_READS -> InfoBlue
     "partial_downloads" -> WarningAmber
     "converted" -> SuccessGreen
-    "engine" -> MaterialTheme.colorScheme.error
     else -> OtherCacheViolet
 }
 
@@ -545,7 +523,6 @@ private fun categoryIcon(id: String): ImageVector = when (id) {
     TempStorage.LINK_READS -> Icons.Outlined.History
     "partial_downloads" -> Icons.Outlined.Downloading
     "converted" -> Icons.Outlined.GraphicEq
-    "engine" -> Icons.Outlined.Memory
     "other_cache" -> Icons.Outlined.Image
     else -> Icons.Outlined.FolderOpen
 }

@@ -267,8 +267,6 @@
     <string name="cleanup_category_partial_downloads_description">रद्द या विफल डाउनलोड के बचे हिस्से।</string>
     <string name="cleanup_category_conversions_label">अधूरे रूपांतरण</string>
     <string name="cleanup_category_conversions_description">ऑडियो कन्वर्टर की बची हुई कार्य फ़ाइलें।</string>
-    <string name="cleanup_category_engine_label">yt-dlp इंजन की फ़ाइलें</string>
-    <string name="cleanup_category_engine_description">डाउनलोडर और उसका रनटाइम। सबसे ज़्यादा जगह खाली होती है, पर अगला डाउनलोड इसे फिर खोलेगा।</string>
     <string name="cleanup_category_other_cache_label">अन्य कैश की गई फ़ाइलें</string>
     <string name="cleanup_category_other_cache_description">थंबनेल और लिंक देखते समय कैश हुआ बाकी सब कुछ।</string>
     <string name="cleanup_category_link_reads_label">सहेजी गई लिंक जानकारी</string>
@@ -279,10 +277,9 @@
     <string name="cleanup_confirm_clear">मिटाएँ</string>
     <string name="cleanup_confirm_cancel">रद्द करें</string>
     <string name="cleanup_confirm_all_title">सब कुछ मिटाएँ?</string>
-    <string name="cleanup_confirm_all_body">%1$s खाली हो जाएगा। आपके डाउनलोड और सहेजे गए साइन इन बने रहेंगे, पर अगला डाउनलोड इंजन को फिर से खोलने में ज़्यादा समय लेगा।</string>
+    <string name="cleanup_confirm_all_body">%1$s खाली होगा। आपके डाउनलोड और सेव किए गए साइन-इन बने रहेंगे।</string>
     <string name="cleanup_confirm_all_confirm">सब कुछ मिटाएँ</string>
     <string name="cleanup_confirm_all_cancel">रद्द करें</string>
-    <string name="cleanup_confirm_all_include_link_reads">सहेजी गई लिंक जानकारी भी साफ़ करें (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">सभी डाउनलोड</string>

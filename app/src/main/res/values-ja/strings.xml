@@ -263,8 +263,6 @@
     <string name="cleanup_category_partial_downloads_description">キャンセルまたは失敗したダウンロードの残り。</string>
     <string name="cleanup_category_conversions_label">未完了の変換</string>
     <string name="cleanup_category_conversions_description">オーディオ変換で残った作業ファイル。</string>
-    <string name="cleanup_category_engine_label">yt-dlp エンジンファイル</string>
-    <string name="cleanup_category_engine_description">ダウンローダーとランタイム。最も容量が空きますが、次のダウンロードで再展開されます。</string>
     <string name="cleanup_category_other_cache_label">その他のキャッシュファイル</string>
     <string name="cleanup_category_other_cache_description">リンク閲覧時にキャッシュされたサムネイルなどです。</string>
     <string name="cleanup_category_link_reads_label">保存済みのリンク情報</string>
@@ -275,10 +273,9 @@
     <string name="cleanup_confirm_clear">削除</string>
     <string name="cleanup_confirm_cancel">キャンセル</string>
     <string name="cleanup_confirm_all_title">すべて削除しますか？</string>
-    <string name="cleanup_confirm_all_body">%1$s が解放されます。ダウンロードや保存されたログイン情報は保持されますが、エンジンの再展開のため次回ダウンロードに時間がかかります。</string>
+    <string name="cleanup_confirm_all_body">%1$s が解放されます。ダウンロードと保存済みのログインはそのまま残ります。</string>
     <string name="cleanup_confirm_all_confirm">すべて削除</string>
     <string name="cleanup_confirm_all_cancel">キャンセル</string>
-    <string name="cleanup_confirm_all_include_link_reads">保存済みのリンク情報も消去する（%1$s）</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">すべてのダウンロード</string>

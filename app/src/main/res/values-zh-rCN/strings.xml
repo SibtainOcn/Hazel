@@ -263,8 +263,6 @@
     <string name="cleanup_category_partial_downloads_description">已取消或失败的下载留下的片段。</string>
     <string name="cleanup_category_conversions_label">未完成的转换</string>
     <string name="cleanup_category_conversions_description">音频转换器遗留的工作文件。</string>
-    <string name="cleanup_category_engine_label">yt-dlp 引擎文件</string>
-    <string name="cleanup_category_engine_description">下载器及其运行环境。释放空间最多，但下次下载需重新解压。</string>
     <string name="cleanup_category_other_cache_label">其他缓存文件</string>
     <string name="cleanup_category_other_cache_description">缩略图，以及浏览链接时缓存下来的其他内容。</string>
     <string name="cleanup_category_link_reads_label">已保存的链接读取结果</string>
@@ -275,10 +273,9 @@
     <string name="cleanup_confirm_clear">清除</string>
     <string name="cleanup_confirm_cancel">取消</string>
     <string name="cleanup_confirm_all_title">全部清除？</string>
-    <string name="cleanup_confirm_all_body">将腾出 %1$s。你的下载和已保存的登录信息都会保留，但下次下载会因为要重新解包引擎而变慢。</string>
+    <string name="cleanup_confirm_all_body">将释放 %1$s。你的下载内容和已保存的登录信息会保留。</string>
     <string name="cleanup_confirm_all_confirm">全部清除</string>
     <string name="cleanup_confirm_all_cancel">取消</string>
-    <string name="cleanup_confirm_all_include_link_reads">同时清除已保存的链接读取结果（%1$s）</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">全部下载</string>

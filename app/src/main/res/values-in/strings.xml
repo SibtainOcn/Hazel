@@ -263,8 +263,6 @@
     <string name="cleanup_category_partial_downloads_description">Sisa unduhan yang dibatalkan atau gagal.</string>
     <string name="cleanup_category_conversions_label">Konversi belum selesai</string>
     <string name="cleanup_category_conversions_description">Sisa file kerja dari konverter audio.</string>
-    <string name="cleanup_category_engine_label">File mesin yt-dlp</string>
-    <string name="cleanup_category_engine_description">Pengunduh dan runtime-nya. Paling banyak menghemat ruang, tapi unduhan berikutnya membongkarnya lagi.</string>
     <string name="cleanup_category_other_cache_label">File cache lainnya</string>
     <string name="cleanup_category_other_cache_description">Gambar mini dan file lain yang di-cache saat menjelajahi tautan.</string>
     <string name="cleanup_category_link_reads_label">Bacaan tautan tersimpan</string>
@@ -275,10 +273,9 @@
     <string name="cleanup_confirm_clear">Hapus</string>
     <string name="cleanup_confirm_cancel">Batal</string>
     <string name="cleanup_confirm_all_title">Hapus semua?</string>
-    <string name="cleanup_confirm_all_body">%1$s ruang akan dikosongkan. Unduhan dan sesi masuk Anda akan tetap tersimpan, tetapi unduhan berikutnya akan membutuhkan waktu lebih lama karena mesin harus diekstrak ulang.</string>
+    <string name="cleanup_confirm_all_body">%1$s akan dikosongkan. Unduhan dan info masuk yang tersimpan tetap ada.</string>
     <string name="cleanup_confirm_all_confirm">Hapus semua</string>
     <string name="cleanup_confirm_all_cancel">Batal</string>
-    <string name="cleanup_confirm_all_include_link_reads">Hapus juga bacaan tautan tersimpan (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">Semua Unduhan</string>
