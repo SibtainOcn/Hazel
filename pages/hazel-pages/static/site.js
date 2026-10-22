@@ -7,8 +7,8 @@
   var order = ['light', 'dark', 'auto'];
   var labels = { auto: 'Theme: match system', light: 'Theme: light', dark: 'Theme: dark' };
   function current() { return root.getAttribute('data-theme') || 'auto'; }
-  // Light unless the visitor picked something else.
-  if (!root.hasAttribute('data-theme') && !root.hasAttribute('data-theme-auto')) root.setAttribute('data-theme', 'light');
+  // Dark unless the visitor picked something else.
+  if (!root.hasAttribute('data-theme') && !root.hasAttribute('data-theme-auto')) root.setAttribute('data-theme', 'dark');
   function apply(t) {
     if (t === 'auto') { root.removeAttribute('data-theme'); root.setAttribute('data-theme-auto', ''); } else { root.removeAttribute('data-theme-auto'); root.setAttribute('data-theme', t); }
     document.querySelectorAll('[data-theme-toggle]').forEach(function (b) {

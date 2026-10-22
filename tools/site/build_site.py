@@ -314,15 +314,15 @@ def page(name, title, description, active, extra_css, facts):
            + (f'\n<link rel="stylesheet" href="{extra_css}?v={ASSET_V}">' if extra_css else '')
            + f'\n<link rel="stylesheet" href="glass.css?v={ASSET_V}">')
     return f'''<!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hazel</title>
 <meta name="description" content="{description}">
-<meta name="theme-color" content="#f7f5f1">
+<meta name="theme-color" content="#000000">
 <link rel="icon" href="assets/Haze.svg">
-<script>try{{var t=localStorage.getItem('hazel-theme'),r=document.documentElement;if(t==='dark')r.setAttribute('data-theme','dark');else if(t==='auto'){{r.removeAttribute('data-theme');r.setAttribute('data-theme-auto','')}}}}catch(e){{}}</script>
+<script>try{{var t=localStorage.getItem('hazel-theme'),r=document.documentElement;if(t==='light')r.setAttribute('data-theme','light');else if(t==='auto'){{r.removeAttribute('data-theme');r.setAttribute('data-theme-auto','')}}}}catch(e){{}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
