@@ -123,7 +123,7 @@ val hazelChannel: String by lazy {
 
 android {
     namespace = "com.hazel.android"
-    compileSdk = 36
+    compileSdk = 37
 
     // ── Release signing, read from the external signing directory ──
     signingConfigs {
