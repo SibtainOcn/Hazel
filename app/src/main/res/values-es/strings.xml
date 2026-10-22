@@ -564,6 +564,11 @@
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Hazlo tuyo</string>
     <string name="guide_step_appearance_desc">Elige un tema, un color de acento y el aspecto de cristal. Puedes cambiarlos cuando quieras en los ajustes.</string>
+    <string name="whats_new_tag">Novedades</string>
+    <string name="whats_new_version">Versión %1$s</string>
+    <string name="whats_new_done">Entendido</string>
+    <string name="whats_new_glass_title">Un nuevo aspecto de cristal</string>
+    <string name="whats_new_glass_desc">Efecto cristal, nuevos estilos y colores de acento.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Color de acento</string>

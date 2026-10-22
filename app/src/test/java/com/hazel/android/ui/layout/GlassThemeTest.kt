@@ -29,6 +29,7 @@ import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.ui.components.AlertDialog
 import com.hazel.android.ui.components.MediaCard
 import com.hazel.android.ui.screens.download.GettingStartedDialog
+import com.hazel.android.ui.screens.download.WhatsNewDialog
 import com.hazel.android.ui.screens.download.SearchSourceSheet
 import com.hazel.android.ui.screens.more.AppearanceScreen
 import com.hazel.android.ui.theme.HazelTheme
@@ -88,6 +89,18 @@ class GlassThemeTest(private val theme: String, private val dark: Boolean) {
     private fun capture(name: String) {
         compose.waitForIdle()
         shots.take("build/outputs/roborazzi/glass/${name}_$theme.png")
+    }
+
+    @Test
+    fun whatsNewCardClosesOnDone() {
+        var open by mutableStateOf(true)
+        show(accent = "Cyan") { if (open) WhatsNewDialog(onDismiss = { open = false }) }
+        compose.onNodeWithText(context.getString(R.string.whats_new_glass_title)).assertIsDisplayed()
+        compose.onNodeWithText(context.getString(R.string.appearance_glass)).assertHasClickAction()
+        capture("whats_new")
+        compose.onNodeWithText(context.getString(R.string.whats_new_done)).performClick()
+        compose.waitForIdle()
+        assertEquals(false, open)
     }
 
     @Test

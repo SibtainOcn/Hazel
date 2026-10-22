@@ -550,6 +550,11 @@
     <string name="glass_style_mono">モノ</string>
     <string name="guide_step_appearance_title">自分好みに</string>
     <string name="guide_step_appearance_desc">テーマ、アクセントカラー、ガラスの見た目を選べます。あとから設定でいつでも変更できます。</string>
+    <string name="whats_new_tag">新機能</string>
+    <string name="whats_new_version">バージョン %1$s</string>
+    <string name="whats_new_done">OK</string>
+    <string name="whats_new_glass_title">新しいガラスの見た目</string>
+    <string name="whats_new_glass_desc">ガラス効果、新しいスタイルとアクセントカラー。</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">アクセントカラー</string>

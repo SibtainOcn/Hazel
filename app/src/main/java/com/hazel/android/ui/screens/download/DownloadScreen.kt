@@ -405,8 +405,27 @@ fun DownloadScreen(
     if (guideSeen == false) {
         GettingStartedDialog(
             onOpenBatterySettings = { openBatterySettings(context) },
-            onDismiss = { scope.launch { SettingsRepository.setGuideSeen(context) } }
+            onDismiss = { scope.launch { SettingsRepository.setGuideSeen(context, WhatsNew.RELEASE_ID) } }
         )
+    }
+
+    // Decided once, after both values load. The id is saved as the card first shows, so it
+    // cannot come back after a crash, a kill or a rotation, only with the next RELEASE_ID.
+    val whatsNewSeen by remember(context) { SettingsRepository.getWhatsNewSeen(context) }
+        .collectAsState(initial = null as String?)
+    var whatsNewDecided by rememberSaveable { mutableStateOf(false) }
+    var whatsNewOpen by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(guideSeen, whatsNewSeen) {
+        if (whatsNewDecided) return@LaunchedEffect
+        val show = WhatsNew.shouldShow(guideSeen, whatsNewSeen) ?: return@LaunchedEffect
+        whatsNewDecided = true
+        if (show) {
+            whatsNewOpen = true
+            runCatching { SettingsRepository.setWhatsNewSeen(context, WhatsNew.RELEASE_ID) }
+        }
+    }
+    if (whatsNewOpen) {
+        WhatsNewDialog(onDismiss = { whatsNewOpen = false })
     }
 
     Box(modifier = Modifier.fillMaxSize()) {

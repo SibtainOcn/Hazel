@@ -557,6 +557,11 @@
     <string name="glass_style_mono">मोनो</string>
     <string name="guide_step_appearance_title">इसे अपना बनाएं</string>
     <string name="guide_step_appearance_desc">थीम, एक्सेंट रंग और ग्लास लुक चुनें। इन्हें आप कभी भी सेटिंग्स में बदल सकते हैं।</string>
+    <string name="whats_new_tag">नया क्या है</string>
+    <string name="whats_new_version">संस्करण %1$s</string>
+    <string name="whats_new_done">ठीक है</string>
+    <string name="whats_new_glass_title">नया ग्लास लुक</string>
+    <string name="whats_new_glass_desc">ग्लास इफ़ेक्ट, नए स्टाइल और एक्सेंट रंग।</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">एक्सेंट रंग</string>

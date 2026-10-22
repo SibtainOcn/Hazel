@@ -629,6 +629,11 @@
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Make it yours</string>
     <string name="guide_step_appearance_desc">Pick a theme, an accent and the glass look. You can change them any time in settings.</string>
+    <string name="whats_new_tag">What\'s new</string>
+    <string name="whats_new_version">Version %1$s</string>
+    <string name="whats_new_done">Got it</string>
+    <string name="whats_new_glass_title">A new glass look</string>
+    <string name="whats_new_glass_desc">Glass effect, new styles and accents.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Accent Color</string>

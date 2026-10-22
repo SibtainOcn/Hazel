@@ -564,6 +564,11 @@
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Do seu jeito</string>
     <string name="guide_step_appearance_desc">Escolha o tema, a cor de destaque e o visual de vidro. Você pode mudar isso quando quiser nas configurações.</string>
+    <string name="whats_new_tag">Novidades</string>
+    <string name="whats_new_version">Versão %1$s</string>
+    <string name="whats_new_done">Entendi</string>
+    <string name="whats_new_glass_title">Um novo visual de vidro</string>
+    <string name="whats_new_glass_desc">Efeito de vidro, novos estilos e cores de destaque.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Cor de destaque</string>

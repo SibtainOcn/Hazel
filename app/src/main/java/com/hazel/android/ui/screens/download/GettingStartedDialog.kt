@@ -202,33 +202,7 @@ fun GettingStartedDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    for (i in 1..totalSteps) {
-                        val active = i == currentStep
-                        val width by animateDpAsState(
-                            targetValue = if (active) 28.dp else 8.dp,
-                            animationSpec = M3Motion.emphasized(StepMillis),
-                            label = "dotWidth"
-                        )
-                        val dot by animateColorAsState(
-                            targetValue = if (active) colors.primary else colors.onSurface.copy(alpha = 0.16f),
-                            animationSpec = tween(StepMillis),
-                            label = "dotColor"
-                        )
-                        Box(
-                            modifier = Modifier
-                                .padding(horizontal = 4.dp)
-                                .width(width)
-                                .height(8.dp)
-                                .clip(CircleShape)
-                                .background(dot)
-                        )
-                    }
-                }
+                StepDots(total = totalSteps, current = currentStep)
 
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -296,6 +270,38 @@ fun GettingStartedDialog(
 }
 
 @Composable
+internal fun StepDots(total: Int, current: Int) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        for (i in 1..total) {
+            val active = i == current
+            val width by animateDpAsState(
+                targetValue = if (active) 28.dp else 8.dp,
+                animationSpec = M3Motion.emphasized(StepMillis),
+                label = "dotWidth"
+            )
+            val dot by animateColorAsState(
+                targetValue = if (active) colors.primary else colors.onSurface.copy(alpha = 0.16f),
+                animationSpec = tween(StepMillis),
+                label = "dotColor"
+            )
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .width(width)
+                    .height(8.dp)
+                    .clip(CircleShape)
+                    .background(dot)
+            )
+        }
+    }
+}
+
+@Composable
 private fun DenyAllow(modifier: Modifier, onDeny: () -> Unit, onAllow: () -> Unit) {
     EqualWidthActions(modifier = modifier, spacing = 10.dp) {
         OutlinedButton(
@@ -348,7 +354,7 @@ private fun StepHeader(icon: Painter, title: String, description: String) {
 }
 
 @Composable
-private fun StepTitle(text: String) {
+internal fun StepTitle(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.titleLarge,
@@ -360,7 +366,7 @@ private fun StepTitle(text: String) {
 }
 
 @Composable
-private fun StepDescription(text: String, modifier: Modifier = Modifier) {
+internal fun StepDescription(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodySmall,
@@ -371,15 +377,15 @@ private fun StepDescription(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-private const val StepMillis = 300
-private const val FadeOutMillis = 90
-private const val FadeInMillis = 210
-private val StepSlide = 30.dp
-private val StepMinHeight = 292.dp
-private val ActionPadding = PaddingValues(horizontal = 16.dp)
+internal const val StepMillis = 300
+internal const val FadeOutMillis = 90
+internal const val FadeInMillis = 210
+internal val StepSlide = 30.dp
+internal val StepMinHeight = 292.dp
+internal val ActionPadding = PaddingValues(horizontal = 16.dp)
 
 @Composable
-private fun Modifier.steadyHeight(min: Dp): Modifier {
+internal fun Modifier.steadyHeight(min: Dp): Modifier {
     val tallest = remember { IntArray(1) }
     return layout { measurable, constraints ->
         val placeable = measurable.measure(constraints)
@@ -393,7 +399,7 @@ private fun Modifier.steadyHeight(min: Dp): Modifier {
  * Appearance choices for the guide. Read once when the guide opens, and switches flip
  * at once on tap while the setting is saved in the background.
  */
-private class AppearanceState(
+internal class AppearanceState(
     dark: Boolean,
     glass: Boolean,
     val accent: () -> String,
@@ -408,7 +414,7 @@ private class AppearanceState(
 }
 
 @Composable
-private fun rememberAppearanceState(): AppearanceState {
+internal fun rememberAppearanceState(): AppearanceState {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dark = LocalDarkTheme.current
@@ -431,7 +437,11 @@ private fun rememberAppearanceState(): AppearanceState {
 }
 
 @Composable
-private fun AppearanceStep(state: AppearanceState) {
+internal fun AppearanceStep(
+    state: AppearanceState,
+    title: String = stringResource(R.string.guide_step_appearance_title),
+    description: String = stringResource(R.string.guide_step_appearance_desc),
+) {
     val colors = MaterialTheme.colorScheme
     val accent = state.accent()
     val style = GlassStyle.fromKey(state.styleKey())
@@ -442,9 +452,9 @@ private fun AppearanceStep(state: AppearanceState) {
     var stylePicker by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        StepTitle(stringResource(R.string.guide_step_appearance_title))
+        StepTitle(title)
         Spacer(modifier = Modifier.height(6.dp))
-        StepDescription(stringResource(R.string.guide_step_appearance_desc))
+        StepDescription(description)
         Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier = Modifier

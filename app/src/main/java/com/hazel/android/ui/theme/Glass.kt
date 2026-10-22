@@ -207,6 +207,7 @@ fun ColorScheme.toGlass(dark: Boolean): ColorScheme = if (dark) {
         surfaceContainer = Color(0xFF111318),
         surfaceContainerHigh = Color.White.copy(alpha = 0.085f),
         surfaceContainerHighest = Color.White.copy(alpha = 0.11f),
+        outline = Color(0xFF8E9099),
         outlineVariant = Color.White.copy(alpha = 0.09f),
     )
 } else {

@@ -2,6 +2,7 @@ package com.hazel.android.update
 
 import com.hazel.android.ui.theme.LocalGlass
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import com.hazel.android.ui.theme.LocalDarkTheme
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -286,49 +287,12 @@ fun UpdaterListItem(
     trailing = trailing
 )
 
-/**
- * Material 3 Switch with animated thumb and custom track styling.
- */
 @Composable
 fun UpdateSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    val thumbOffset by animateDpAsState(
-        targetValue = if (checked) 24.dp else 4.dp,
-        animationSpec = tween(durationMillis = 180),
-        label = "switchThumbOffset"
-    )
-    val thumbSize by animateDpAsState(
-        targetValue = if (checked) 24.dp else 16.dp,
-        animationSpec = tween(durationMillis = 140),
-        label = "switchThumbSize"
-    )
-
-    Box(
-        modifier = Modifier
-            .size(width = 52.dp, height = 32.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (checked) MaterialTheme.colorScheme.primary else Color.Transparent)
-            .border(
-                width = 2.dp,
-                color = if (checked) MaterialTheme.colorScheme.primary else UpdateTokens.Outline,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { onCheckedChange(!checked) },
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Box(
-            modifier = Modifier
-                .offset(x = thumbOffset)
-                .size(thumbSize)
-                .clip(CircleShape)
-                .background(if (checked) MaterialTheme.colorScheme.onPrimary else UpdateTokens.OnSurfaceDim)
-        )
-    }
+    Switch(checked = checked, onCheckedChange = onCheckedChange)
 }
 
 /**

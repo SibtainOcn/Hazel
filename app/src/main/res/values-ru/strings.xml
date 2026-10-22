@@ -571,6 +571,11 @@
     <string name="glass_style_mono">Моно</string>
     <string name="guide_step_appearance_title">Настройте под себя</string>
     <string name="guide_step_appearance_desc">Выберите тему, акцентный цвет и стеклянный вид. Их можно изменить в любой момент в настройках.</string>
+    <string name="whats_new_tag">Что нового</string>
+    <string name="whats_new_version">Версия %1$s</string>
+    <string name="whats_new_done">Понятно</string>
+    <string name="whats_new_glass_title">Новый стеклянный вид</string>
+    <string name="whats_new_glass_desc">Эффект стекла, новые стили и акцентные цвета.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Цветовой акцент</string>

@@ -557,6 +557,11 @@
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Mach es zu deinem</string>
     <string name="guide_step_appearance_desc">Wähle ein Design, eine Akzentfarbe und den Glas-Look. Du kannst das jederzeit in den Einstellungen ändern.</string>
+    <string name="whats_new_tag">Neu</string>
+    <string name="whats_new_version">Version %1$s</string>
+    <string name="whats_new_done">Verstanden</string>
+    <string name="whats_new_glass_title">Der neue Glas-Look</string>
+    <string name="whats_new_glass_desc">Glaseffekt, neue Stile und Akzentfarben.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Akzentfarbe</string>

@@ -550,6 +550,11 @@
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Buat sesuai seleramu</string>
     <string name="guide_step_appearance_desc">Pilih tema, warna aksen, dan tampilan kaca. Kamu bisa mengubahnya kapan saja di pengaturan.</string>
+    <string name="whats_new_tag">Yang baru</string>
+    <string name="whats_new_version">Versi %1$s</string>
+    <string name="whats_new_done">Mengerti</string>
+    <string name="whats_new_glass_title">Tampilan kaca baru</string>
+    <string name="whats_new_glass_desc">Efek kaca, gaya dan warna aksen baru.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Warna Aksen</string>

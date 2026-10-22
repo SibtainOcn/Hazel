@@ -564,6 +564,11 @@
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">À votre goût</string>
     <string name="guide_step_appearance_desc">Choisissez un thème, une couleur d\'accent et l\'effet verre. Vous pourrez les modifier à tout moment dans les réglages.</string>
+    <string name="whats_new_tag">Nouveautés</string>
+    <string name="whats_new_version">Version %1$s</string>
+    <string name="whats_new_done">Compris</string>
+    <string name="whats_new_glass_title">Un nouvel effet verre</string>
+    <string name="whats_new_glass_desc">Effet verre, nouveaux styles et couleurs d\'accent.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Couleur d\'accent</string>

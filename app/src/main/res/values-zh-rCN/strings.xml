@@ -550,6 +550,11 @@
     <string name="glass_style_mono">单色</string>
     <string name="guide_step_appearance_title">按你的喜好</string>
     <string name="guide_step_appearance_desc">选择主题、强调色和玻璃效果，之后可随时在设置中更改。</string>
+    <string name="whats_new_tag">新功能</string>
+    <string name="whats_new_version">版本 %1$s</string>
+    <string name="whats_new_done">知道了</string>
+    <string name="whats_new_glass_title">全新玻璃效果</string>
+    <string name="whats_new_glass_desc">玻璃效果、新样式和强调色。</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">强调色</string>

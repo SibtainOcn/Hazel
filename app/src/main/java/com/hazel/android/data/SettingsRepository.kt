@@ -398,8 +398,25 @@ object SettingsRepository {
     fun getGuideSeen(context: Context): Flow<Boolean> =
         context.dataStore.data.map { prefs -> prefs[GUIDE_SEEN_KEY] ?: false }
 
-    suspend fun setGuideSeen(context: Context) {
-        context.dataStore.edit { prefs -> prefs[GUIDE_SEEN_KEY] = true }
+    /**
+     * Also records [whatsNewId] as seen, in the same write: the guide already shows what a
+     * fresh install would be told is new, so the two never appear one after the other.
+     */
+    suspend fun setGuideSeen(context: Context, whatsNewId: String? = null) {
+        context.dataStore.edit { prefs ->
+            prefs[GUIDE_SEEN_KEY] = true
+            if (whatsNewId != null) prefs[WHATS_NEW_SEEN_KEY] = whatsNewId
+        }
+    }
+
+    private val WHATS_NEW_SEEN_KEY = stringPreferencesKey("whats_new_seen")
+
+    /** The id of the last What's new shown on this install, empty when none has been. */
+    fun getWhatsNewSeen(context: Context): Flow<String> =
+        context.dataStore.data.map { prefs -> prefs[WHATS_NEW_SEEN_KEY] ?: "" }
+
+    suspend fun setWhatsNewSeen(context: Context, id: String) {
+        context.dataStore.edit { prefs -> prefs[WHATS_NEW_SEEN_KEY] = id }
     }
 
     // ── Incognito ──
