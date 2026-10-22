@@ -771,6 +771,8 @@
     <string name="home_empty_hint">粘贴链接或搜索以开始</string>
     <string name="more_getting_started">入门指南</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">搜索</string>
+    <string name="share_shortcut_download">下载</string>
     <string name="instant_started">已开始下载</string>
     <string name="instant_ok">确定</string>
     <string name="instant_settings">合成设置</string>

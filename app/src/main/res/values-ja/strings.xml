@@ -771,6 +771,8 @@
     <string name="home_empty_hint">リンクを貼り付けるか検索して始めましょう</string>
     <string name="more_getting_started">はじめに</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">検索</string>
+    <string name="share_shortcut_download">ダウンロード</string>
     <string name="instant_started">ダウンロードを開始しました</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">合成の設定</string>

@@ -771,6 +771,8 @@
     <string name="home_empty_hint">Tempel tautan atau cari untuk memulai</string>
     <string name="more_getting_started">Memulai</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">Cari</string>
+    <string name="share_shortcut_download">Unduh</string>
     <string name="instant_started">Unduhan dimulai</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Pengaturan sintesis</string>

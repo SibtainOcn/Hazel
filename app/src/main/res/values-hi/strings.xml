@@ -780,6 +780,8 @@
     <string name="home_empty_hint">शुरू करने के लिए कोई लिंक पेस्ट करें या खोजें</string>
     <string name="more_getting_started">शुरुआत करें</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">खोजें</string>
+    <string name="share_shortcut_download">डाउनलोड</string>
     <string name="instant_started">डाउनलोड शुरू हुआ</string>
     <string name="instant_ok">ठीक है</string>
     <string name="instant_settings">सिंथेसाइज़िंग सेटिंग्स</string>

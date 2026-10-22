@@ -780,6 +780,8 @@
     <string name="home_empty_hint">Füge einen Link ein oder suche, um loszulegen</string>
     <string name="more_getting_started">Erste Schritte</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">Suchen</string>
+    <string name="share_shortcut_download">Herunterladen</string>
     <string name="instant_started">Download gestartet</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Synthese-Einstellungen</string>

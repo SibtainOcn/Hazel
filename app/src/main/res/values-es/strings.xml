@@ -789,6 +789,8 @@
     <string name="home_empty_hint">Pega un enlace o busca para empezar</string>
     <string name="more_getting_started">Primeros pasos</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">Buscar</string>
+    <string name="share_shortcut_download">Descargar</string>
     <string name="instant_started">Descarga iniciada</string>
     <string name="instant_ok">Aceptar</string>
     <string name="instant_settings">Ajustes de síntesis</string>
