@@ -33,7 +33,8 @@ import androidx.compose.material3.MaterialTheme
 import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.annotation.StringRes
 import androidx.compose.ui.Alignment
@@ -116,7 +117,7 @@ fun BatchBitrateSheet(
     onSelect: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -241,7 +242,7 @@ private fun ChoiceSheet(
     onDismiss: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

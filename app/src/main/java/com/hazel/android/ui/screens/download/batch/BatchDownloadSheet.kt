@@ -59,7 +59,8 @@ import androidx.compose.material3.MaterialTheme
 import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -181,7 +182,7 @@ fun BatchDownloadSheet(
 ) {
     // Opened at full height: the list of links and the controls under it do not fit in a
     // half sheet, and a partly open sheet would hide the download action.
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
 
     val state = rememberBatchDownloadState(results)
     // The set starts from the download settings, and follows them if they change.

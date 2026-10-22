@@ -62,7 +62,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -542,7 +543,7 @@ private fun CookieMeta(summary: CookieSummary, showSite: Boolean) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddSignInSheet(onContinue: (String) -> Unit, onDismiss: () -> Unit) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
     var url by remember { mutableStateOf("") }
     val focus = remember { FocusRequester() }
     val ready = hasHost(withScheme(url))
@@ -613,7 +614,7 @@ private fun CookieDetailSheet(
     onDelete: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
     val summary = remember(entry) { CookieRepository.summaryOf(entry) }
     var title by remember { mutableStateOf(entry.title) }
     var url by remember { mutableStateOf(entry.url) }
