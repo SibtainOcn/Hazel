@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Glass look, on by default: soft colour light behind see-through screens, sheets and dialogs, in dark and light. Turn it off under More, Appearance, Glass effect.
 - Getting started asks for theme, accent and glass as its second step, and applies each choice at once.
 
+### Changed
+- Support Hazel uses flat cards without borders. The yt-dlp and Hazel update screens use the accent for their switches, channel picker and section titles; the status banner keeps its own colours.
+
 ## [1.1.14] - 2026-10-14
 ### Added
 - Search settings, from the search button at the top of More. A plain field with clear, and under it every setting whose name, line or screen holds all the words typed, best match first, each word marked in yellow that reads the same on every theme and accent. A match opens the screen it is on; Language and Getting started open where they are, as on More. Case and accents are ignored, and words are searched in the language the app is shown in.

@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
@@ -71,9 +72,9 @@ class GlassThemeTest(private val theme: String, private val dark: Boolean) {
 
     private val context get() = ApplicationProvider.getApplicationContext<Context>()
 
-    private fun show(content: @Composable () -> Unit) {
+    private fun show(accent: String = "White", content: @Composable () -> Unit) {
         compose.setContent {
-            HazelTheme(darkTheme = dark, accentName = "White", glass = true) {
+            HazelTheme(darkTheme = dark, accentName = accent, glass = true) {
                 Surface(color = Color.Transparent, modifier = Modifier.fillMaxSize().glassScreen()) {
                     content()
                 }
@@ -134,6 +135,25 @@ class GlassThemeTest(private val theme: String, private val dark: Boolean) {
         capture("instant_dialog")
         compose.onNodeWithText(context.getString(R.string.instant_ok)).assertIsDisplayed().performClick()
         assertEquals(true, confirmed)
+    }
+
+    @Test
+    fun sponsorScreenIsFlatGlass() {
+        show { com.hazel.android.ui.screens.more.SponsorScreen(onBack = {}) }
+        compose.onNodeWithContentDescription(context.getString(R.string.sponsor_back)).assertHasClickAction()
+        capture("sponsor")
+    }
+
+    @Test
+    fun ytDlpUpdateSwitchesFollowAccent() {
+        show(accent = "Pink") { com.hazel.android.update.YtDlpUpdateScreen(onBack = {}) }
+        capture("ytdlp_update")
+    }
+
+    @Test
+    fun hazelUpdateScreenIsGlass() {
+        show(accent = "Pink") { com.hazel.android.ui.screens.more.HazelUpdateScreen(onBack = {}) }
+        capture("hazel_update")
     }
 
     @Test
