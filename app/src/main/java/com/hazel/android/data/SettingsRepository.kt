@@ -644,6 +644,18 @@ object SettingsRepository {
     private val UPDATE_NOTIFY_AVAILABLE_KEY = booleanPreferencesKey("update_notify_available")
     private val UPDATE_NOTIFY_COMPLETE_KEY = booleanPreferencesKey("update_notify_complete")
     private val UPDATE_NOTIFY_FAILED_KEY = booleanPreferencesKey("update_notify_failed")
+    private val UPDATE_NOTIFY_OFF_APPLIED_KEY = booleanPreferencesKey("update_notify_off_applied")
+
+    /** yt-dlp update notices are off by default, once for installs that had them on. */
+    suspend fun applyUpdateNoticesOff(context: Context) {
+        context.dataStore.edit { prefs ->
+            if (prefs[UPDATE_NOTIFY_OFF_APPLIED_KEY] == true) return@edit
+            prefs.remove(UPDATE_NOTIFY_AVAILABLE_KEY)
+            prefs.remove(UPDATE_NOTIFY_COMPLETE_KEY)
+            prefs.remove(UPDATE_NOTIFY_FAILED_KEY)
+            prefs[UPDATE_NOTIFY_OFF_APPLIED_KEY] = true
+        }
+    }
 
     fun getHazelChannel(context: Context): Flow<String> {
         return context.dataStore.data.map { prefs -> prefs[HAZEL_CHANNEL_KEY] ?: "Stable" }
@@ -667,21 +679,21 @@ object SettingsRepository {
     }
 
     fun getUpdateNotifyAvailable(context: Context): Flow<Boolean> {
-        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_AVAILABLE_KEY] ?: true }
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_AVAILABLE_KEY] ?: false }
     }
     suspend fun setUpdateNotifyAvailable(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[UPDATE_NOTIFY_AVAILABLE_KEY] = enabled }
     }
 
     fun getUpdateNotifyComplete(context: Context): Flow<Boolean> {
-        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_COMPLETE_KEY] ?: true }
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_COMPLETE_KEY] ?: false }
     }
     suspend fun setUpdateNotifyComplete(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[UPDATE_NOTIFY_COMPLETE_KEY] = enabled }
     }
 
     fun getUpdateNotifyFailed(context: Context): Flow<Boolean> {
-        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_FAILED_KEY] ?: true }
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_FAILED_KEY] ?: false }
     }
     suspend fun setUpdateNotifyFailed(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[UPDATE_NOTIFY_FAILED_KEY] = enabled }
