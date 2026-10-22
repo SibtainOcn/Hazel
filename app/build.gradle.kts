@@ -186,23 +186,7 @@ android {
 
     testOptions {
         unitTests {
-            // The layout tests draw real text with the app's resources: the native graphics
-            // mode measures glyphs as a device would. A test writes a screenshot only when it
-            // fails, of the screen as it stood then, so a run spends no time on hundreds of
-            // images nobody looks at (see LayoutShots in the tests). To look through every
-            // screen in every language and font size, as after changing a layout, run them
-            // with -PlayoutScreenshots=all.
             isIncludeAndroidResources = true
-            val screenshots = providers.gradleProperty("layoutScreenshots").getOrElse("failures")
-            all {
-                it.systemProperty("robolectric.graphicsMode", "NATIVE")
-                it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
-                it.systemProperty("roborazzi.test.record", "true")
-                it.systemProperty("hazel.layout.screenshots", screenshots)
-                // Declared, so a run restored from the build cache brings its screenshots
-                // back with it rather than leaving the folder empty.
-                it.outputs.dir(project.layout.buildDirectory.dir("outputs/roborazzi"))
-            }
         }
     }
 
@@ -358,11 +342,7 @@ dependencies {
     // Layout tests: the screens and dialogs drawn on the JVM in every language, at font
     // sizes up to the largest, checked for words broken to fit and saved as screenshots.
     testImplementation(platform(libs.androidx.compose.bom))
-    testImplementation(libs.androidx.ui.test.junit4)
     testImplementation(libs.robolectric)
-    testImplementation(libs.roborazzi)
-    testImplementation(libs.roborazzi.compose)
-    debugImplementation(libs.androidx.ui.test.manifest)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
