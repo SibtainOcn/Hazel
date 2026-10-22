@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.ActionsRow
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -17,7 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Link
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -93,7 +94,7 @@ fun IncognitoButton(
             .clip(CircleShape)
             .background(
                 if (incognito) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+                else tonalFill(0.55f)
             )
             .clickable {
                 val enabled = !incognito

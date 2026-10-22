@@ -7,8 +7,8 @@
   var order = ['light', 'dark', 'auto'];
   var labels = { auto: 'Theme: match system', light: 'Theme: light', dark: 'Theme: dark' };
   function current() { return root.getAttribute('data-theme') || 'auto'; }
-  // Light unless the visitor picked something else.
-  if (!root.hasAttribute('data-theme') && !root.hasAttribute('data-theme-auto')) root.setAttribute('data-theme', 'light');
+  // Dark unless the visitor picked something else.
+  if (!root.hasAttribute('data-theme') && !root.hasAttribute('data-theme-auto')) root.setAttribute('data-theme', 'dark');
   function apply(t) {
     if (t === 'auto') { root.removeAttribute('data-theme'); root.setAttribute('data-theme-auto', ''); } else { root.removeAttribute('data-theme-auto'); root.setAttribute('data-theme', t); }
     document.querySelectorAll('[data-theme-toggle]').forEach(function (b) {
@@ -567,4 +567,17 @@
     if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey) && !e.altKey) { e.preventDefault(); open(); }
     else if (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); open(); }
   });
+})();
+
+// Pause the aurora while scrolling. Phones and reduced motion never animate it, so they skip
+// the class and the page-wide style pass it costs.
+(function () {
+  var root = document.documentElement, timer = 0;
+  var still = window.matchMedia('(max-width: 640px), (prefers-reduced-motion: reduce)');
+  window.addEventListener('scroll', function () {
+    if (still.matches) return;
+    if (!timer) root.classList.add('is-scrolling');
+    clearTimeout(timer);
+    timer = setTimeout(function () { root.classList.remove('is-scrolling'); timer = 0; }, 180);
+  }, { passive: true });
 })();

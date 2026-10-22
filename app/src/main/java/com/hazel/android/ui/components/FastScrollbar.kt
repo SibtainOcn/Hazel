@@ -1,5 +1,6 @@
 package com.hazel.android.ui.components
 
+import com.hazel.android.ui.theme.opaqueSurface
 import androidx.compose.runtime.Stable
 import android.webkit.WebView
 import android.graphics.Canvas
@@ -151,7 +152,7 @@ private fun ScrollThumb(
     }
 
     val accent = MaterialTheme.colorScheme.primary
-    val soft = lerp(accent, MaterialTheme.colorScheme.surface, SOFTEN)
+    val soft = lerp(accent, opaqueSurface(), SOFTEN)
     val color by animateColorAsState(
         when {
             held -> accent

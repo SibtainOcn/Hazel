@@ -221,9 +221,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Retour</string>
     <string name="sponsor_title">Soutenir Hazel</string>
-    <string name="sponsor_hero_title">Gratuit, et ça ne changera pas</string>
-    <string name="sponsor_hero_body">Hazel se construit le soir et le week-end, et il est donné parce qu\'un téléchargeur qui fait payer le téléchargement est un moins bon téléchargeur. Les sites changent sans arrêt, et suivre ces changements, c\'est tout le travail.</string>
-    <string name="sponsor_hero_closing">Si l\'application vous a fait gagner un après-midi, n\'importe laquelle des options ci-dessous rend ce temps. Sinon, celles qui ne coûtent rien aident tout autant.</string>
+    <string name="sponsor_hero_title">Vous aimez Hazel ? Donnez-lui un peu d\'amour</string>
+    <string name="sponsor_hero_body">Si Hazel vous a été utile, pensez à soutenir son développement. Votre soutien m\'aide à continuer d\'améliorer Hazel et à créer de nouvelles fonctionnalités. Chaque marque d\'amour compte beaucoup. 💚</string>
     <string name="sponsor_section_ways">Façons de soutenir</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Tous les mois ou une seule fois, résiliable quand vous voulez. Entièrement géré par GitHub.</string>
@@ -552,6 +551,23 @@
     <string name="appearance_on">Activé</string>
     <string name="appearance_off">Désactivé</string>
     <string name="appearance_accent_color">Couleur d\'accent</string>
+    <string name="appearance_glass">Effet verre</string>
+    <string name="glass_style_title">Style de verre</string>
+    <string name="glass_style_aurora">Aurore</string>
+    <string name="glass_style_accent">Accent</string>
+    <string name="glass_style_wallpaper">Fond d\'écran</string>
+    <string name="glass_style_sunset">Coucher de soleil</string>
+    <string name="glass_style_nebula">Nébuleuse</string>
+    <string name="glass_style_forest">Forêt</string>
+    <string name="glass_style_ocean">Océan</string>
+    <string name="glass_style_mono">Mono</string>
+    <string name="guide_step_appearance_title">À votre goût</string>
+    <string name="guide_step_appearance_desc">Choisissez un thème, une couleur d\'accent et l\'effet verre. Vous pourrez les modifier à tout moment dans les réglages.</string>
+    <string name="whats_new_tag">Nouveautés</string>
+    <string name="whats_new_version">Version %1$s</string>
+    <string name="whats_new_done">Compris</string>
+    <string name="whats_new_glass_title">Un nouvel effet verre</string>
+    <string name="whats_new_glass_desc">Effet verre, nouveaux styles et couleurs d\'accent.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Couleur d\'accent</string>

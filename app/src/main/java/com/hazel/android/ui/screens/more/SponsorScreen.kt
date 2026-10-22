@@ -1,12 +1,11 @@
 package com.hazel.android.ui.screens.more
 
+import com.hazel.android.ui.theme.LocalDarkTheme
+import com.hazel.android.ui.theme.LocalGlass
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,7 +41,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -68,16 +66,23 @@ import com.hazel.android.util.openInAppBrowser
 @Composable
 fun SponsorScreen(onBack: () -> Unit) {
     val context = LocalContext.current
-    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val isDark = LocalDarkTheme.current
 
     // Independent theme-adaptive color tokens matching GettingStartedDialog black shades aesthetic
-    val surfaceColor = if (isDark) Color(0xFF121418) else Color(0xFFFFFFFF)
-    val cardBorder = if (isDark) Color.White.copy(alpha = 0.08f) else Color(0xFFE5E7EB)
+    val glass = LocalGlass.current
+    val surfaceColor = when {
+        glass -> MaterialTheme.colorScheme.surface
+        isDark -> Color(0xFF121418)
+        else -> Color(0xFFFFFFFF)
+    }
     val textPrimary = if (isDark) Color(0xFFF9FAFB) else Color(0xFF0F172A)
     val textSecondary = if (isDark) Color(0xFFA0A7B5) else Color(0xFF475569)
     val textMuted = if (isDark) Color(0xFF717784) else Color(0xFF94A3B8)
-    val badgeBg = if (isDark) Color(0xFF1A1D24) else Color(0xFFF1F5F9)
-    val badgeBorder = if (isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFE2E8F0)
+    val badgeBg = when {
+        glass -> MaterialTheme.colorScheme.surfaceVariant
+        isDark -> Color(0xFF1A1D24)
+        else -> Color(0xFFF1F5F9)
+    }
     val iconTint = if (isDark) Color.White else Color(0xFF0F172A)
     val chevronTint = if (isDark) Color(0xFF717784) else Color(0xFF94A3B8)
 
@@ -110,11 +115,8 @@ fun SponsorScreen(onBack: () -> Unit) {
         }
 
         HeroCard(
-            isDark = isDark,
             surfaceColor = surfaceColor,
-            cardBorder = cardBorder,
             badgeBg = badgeBg,
-            badgeBorder = badgeBorder,
             iconTint = iconTint,
             textPrimary = textPrimary,
             textSecondary = textSecondary
@@ -133,9 +135,7 @@ fun SponsorScreen(onBack: () -> Unit) {
             subtitle = stringResource(R.string.sponsor_github_subtitle),
             enabled = SPONSORS_URL.isNotBlank(),
             surfaceColor = surfaceColor,
-            cardBorder = cardBorder,
             badgeBg = badgeBg,
-            badgeBorder = badgeBorder,
             iconTint = iconTint,
             textPrimary = textPrimary,
             textSecondary = textSecondary,
@@ -151,9 +151,7 @@ fun SponsorScreen(onBack: () -> Unit) {
             subtitle = stringResource(R.string.sponsor_bmac_subtitle),
             enabled = BMAC_URL.isNotBlank(),
             surfaceColor = surfaceColor,
-            cardBorder = cardBorder,
             badgeBg = badgeBg,
-            badgeBorder = badgeBorder,
             iconTint = iconTint,
             textPrimary = textPrimary,
             textSecondary = textSecondary,
@@ -171,8 +169,7 @@ fun SponsorScreen(onBack: () -> Unit) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = surfaceColor),
-            border = BorderStroke(1.dp, cardBorder)
+            colors = CardDefaults.cardColors(containerColor = surfaceColor)
         ) {
             Column(modifier = Modifier.padding(vertical = 4.dp)) {
                 HelpRow(
@@ -229,11 +226,8 @@ fun SponsorScreen(onBack: () -> Unit) {
 /** The block at the top, which is the part that has something to say. */
 @Composable
 private fun HeroCard(
-    isDark: Boolean,
     surfaceColor: Color,
-    cardBorder: Color,
     badgeBg: Color,
-    badgeBorder: Color,
     iconTint: Color,
     textPrimary: Color,
     textSecondary: Color
@@ -241,30 +235,17 @@ private fun HeroCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        color = surfaceColor,
-        border = BorderStroke(1.dp, cardBorder)
+        color = surfaceColor
     ) {
         Column(
             modifier = Modifier
-                .background(
-                    Brush.verticalGradient(
-                        colors = if (isDark) listOf(
-                            Color(0xFF1A1D24),
-                            Color(0xFF121418)
-                        ) else listOf(
-                            Color(0xFFF9FAFB),
-                            Color(0xFFFFFFFF)
-                        )
-                    )
-                )
                 .padding(24.dp)
         ) {
             Box(
                 modifier = Modifier
                     .size(52.dp)
                     .clip(CircleShape)
-                    .background(badgeBg)
-                    .border(1.dp, badgeBorder, CircleShape),
+                    .background(badgeBg),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -293,15 +274,6 @@ private fun HeroCard(
                 color = textSecondary,
                 lineHeight = 22.sp
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                stringResource(R.string.sponsor_hero_closing),
-                style = MaterialTheme.typography.bodyMedium,
-                color = textSecondary,
-                lineHeight = 22.sp
-            )
         }
     }
 }
@@ -325,9 +297,7 @@ private fun SupportCard(
     subtitle: String,
     enabled: Boolean,
     surfaceColor: Color,
-    cardBorder: Color,
     badgeBg: Color,
-    badgeBorder: Color,
     iconTint: Color,
     textPrimary: Color,
     textSecondary: Color,
@@ -337,8 +307,7 @@ private fun SupportCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = surfaceColor,
-        border = BorderStroke(1.dp, cardBorder)
+        color = surfaceColor
     ) {
         Row(
             modifier = Modifier
@@ -350,8 +319,7 @@ private fun SupportCard(
                 modifier = Modifier
                     .size(46.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(badgeBg)
-                    .border(1.dp, badgeBorder, RoundedCornerShape(14.dp)),
+                    .background(badgeBg),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

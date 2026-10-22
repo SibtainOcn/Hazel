@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Glass look, on by default: soft colour light behind see-through screens, sheets and dialogs, in dark and light. Turn it off under More, Appearance, Glass effect.
+- Getting started asks for theme, accent and glass as its second step, and applies each choice at once.
+- What's new: people who update see a short card once for a release that has news, never again after, and never on a fresh install (Getting started covers it). This release shows the glass look with its theme, accent and glass choices.
+
+### Changed
+- Glass style under Appearance and in Getting started: Aurora, Ocean, Accent, Wallpaper (Android 12 and later), Sunset, Nebula, Forest or Mono.
+- Six more accent colours (Sky, Violet, Lavender, Coral, Lime, Mint), and Crimson is now a true crimson. Five more after that (Magenta, Rose, Amber, Mocha, Slate). White is first in the list. The accent and glass style lists show about five at a time and scroll, smaller on short screens.
+- The Getting started appearance step keeps the same size as the other steps and moves between steps more smoothly.
+- Getting started follows the theme: accent coloured Material 3 buttons with a visible press ripple, glass when glass is on, and a light version in light theme. Theme and glass switches flip at once on tap.
+- Switches that are off show a clear grey thumb and outline on dark glass, and the yt-dlp and Hazel update screens use the standard switch with tap feedback.
+- Sharing a link from another app opens its sheet on solid black with only a faint glass tint and edge, so the app behind never shows through. Hazel Instant matches, and its settings and OK buttons are a matched Material 3 Expressive pair.
+- Support Hazel opens with "Like Hazel? Give it some love" and a shorter note.
+- Website on phones: cards skip their own blur and use a shorter shadow, and the background glow no longer drifts (it was meant to stay still on phones), so pages scroll smoothly in the app's documentation and in mobile browsers. Desktop is unchanged.
+- Format sheet OK is a solid accent button, and pills and chips use a clean tint on glass.
+- Support Hazel uses flat cards without borders. The yt-dlp and Hazel update screens use the accent for their switches, channel picker and section titles; the status banner keeps its own colours.
+
+## [1.1.14] - 2026-10-14
+### Added
 - Search settings, from the search button at the top of More. A plain field with clear, and under it every setting whose name, line or screen holds all the words typed, best match first, each word marked in yellow that reads the same on every theme and accent. A match opens the screen it is on; Language and Getting started open where they are, as on More. Case and accents are ignored, and words are searched in the language the app is shown in.
 
 ### Changed

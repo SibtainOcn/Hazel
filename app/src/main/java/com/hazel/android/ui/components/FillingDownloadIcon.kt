@@ -1,5 +1,6 @@
 package com.hazel.android.ui.components
 
+import com.hazel.android.ui.theme.LocalDarkTheme
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -10,7 +11,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.SolidColor
@@ -109,7 +108,7 @@ fun FillingDownloadIcon(
         animationSpec = infiniteRepeatable(tween(durationMillis = 2600, easing = LinearEasing)),
         label = "downloadWaveSwell"
     )
-    val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val dark = LocalDarkTheme.current
     val top = if (dark) Color(0xFF7CF3FF) else Color(0xFF4FE3F5)
     val bottom = if (dark) Color(0xFF2E8BFF) else Color(0xFF1565E8)
     val fillAlpha = if (flowing) 1f else 0.6f

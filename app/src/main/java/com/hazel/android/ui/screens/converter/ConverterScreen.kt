@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.converter
 
+import com.hazel.android.ui.theme.tonalFill
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
@@ -45,7 +46,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -332,7 +333,7 @@ private fun SourceCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        color = if (chosen) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = if (chosen) tonalFill(0.35f)
         else MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
     ) {
         Row(
@@ -392,7 +393,7 @@ private fun SettingRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = tonalFill(0.35f)
     ) {
         Row(
             modifier = Modifier
@@ -563,7 +564,7 @@ private fun ResultCard(
             .fillMaxWidth()
             .padding(top = 16.dp),
         shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = tonalFill(0.35f)
     ) {
         Column {
             Row(
@@ -764,7 +765,7 @@ private fun FlatField(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = tonalFill(0.35f)
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
             Text(

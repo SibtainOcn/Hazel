@@ -24,6 +24,8 @@ object SettingsRepository {
 
     private val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
     private val ACCENT_COLOR_KEY = stringPreferencesKey("accent_color")
+    private val GLASS_KEY = booleanPreferencesKey("glass_theme")
+    private val GLASS_STYLE_KEY = stringPreferencesKey("glass_style")
     private val FILENAME_TEMPLATE_KEY = stringPreferencesKey("filename_template")
     private val EMBED_THUMBNAIL_KEY = booleanPreferencesKey("embed_thumbnail")
 
@@ -43,6 +45,22 @@ object SettingsRepository {
 
     suspend fun setAccentColor(context: Context, name: String) {
         context.dataStore.edit { prefs -> prefs[ACCENT_COLOR_KEY] = name }
+    }
+
+    fun isGlassEnabled(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[GLASS_KEY] ?: true }
+    }
+
+    suspend fun setGlassEnabled(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GLASS_KEY] = enabled }
+    }
+
+    fun getGlassStyle(context: Context): Flow<String> {
+        return context.dataStore.data.map { prefs -> prefs[GLASS_STYLE_KEY] ?: "aurora" }
+    }
+
+    suspend fun setGlassStyle(context: Context, key: String) {
+        context.dataStore.edit { prefs -> prefs[GLASS_STYLE_KEY] = key }
     }
 
     // Output filename template passed to yt-dlp as -o
@@ -380,8 +398,25 @@ object SettingsRepository {
     fun getGuideSeen(context: Context): Flow<Boolean> =
         context.dataStore.data.map { prefs -> prefs[GUIDE_SEEN_KEY] ?: false }
 
-    suspend fun setGuideSeen(context: Context) {
-        context.dataStore.edit { prefs -> prefs[GUIDE_SEEN_KEY] = true }
+    /**
+     * Also records [whatsNewId] as seen, in the same write: the guide already shows what a
+     * fresh install would be told is new, so the two never appear one after the other.
+     */
+    suspend fun setGuideSeen(context: Context, whatsNewId: String? = null) {
+        context.dataStore.edit { prefs ->
+            prefs[GUIDE_SEEN_KEY] = true
+            if (whatsNewId != null) prefs[WHATS_NEW_SEEN_KEY] = whatsNewId
+        }
+    }
+
+    private val WHATS_NEW_SEEN_KEY = stringPreferencesKey("whats_new_seen")
+
+    /** The id of the last What's new shown on this install, empty when none has been. */
+    fun getWhatsNewSeen(context: Context): Flow<String> =
+        context.dataStore.data.map { prefs -> prefs[WHATS_NEW_SEEN_KEY] ?: "" }
+
+    suspend fun setWhatsNewSeen(context: Context, id: String) {
+        context.dataStore.edit { prefs -> prefs[WHATS_NEW_SEEN_KEY] = id }
     }
 
     // ── Incognito ──

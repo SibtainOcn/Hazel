@@ -1,5 +1,7 @@
 package com.hazel.android.ui.components
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -16,7 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.ui.theme.AccentColors
@@ -46,7 +51,7 @@ fun AccentPickerDialog(
             Text(stringResource(R.string.accent_picker_title), fontWeight = FontWeight.Bold)
         },
         text = {
-            Column {
+            Column(Modifier.pickerListHeight(48.dp).verticalScroll(rememberScrollState())) {
                 AccentColors.forEach { accent ->
                     val isSelected = accent.name == accentName
                     Row(
@@ -97,4 +102,11 @@ fun AccentPickerDialog(
             }
         }
     )
+}
+
+/** About five rows with the next one peeking, never more than ~45% of the screen height. */
+@Composable
+internal fun Modifier.pickerListHeight(rowHeight: Dp): Modifier {
+    val screen = LocalConfiguration.current.screenHeightDp.dp
+    return heightIn(max = minOf(rowHeight * 5.5f, screen * 0.45f))
 }

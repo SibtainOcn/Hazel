@@ -1,5 +1,6 @@
 package com.hazel.android.ui.components
 
+import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -136,7 +137,7 @@ fun MediaCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = tonalFill(0.35f)
     ) {
         Box(
             modifier = Modifier

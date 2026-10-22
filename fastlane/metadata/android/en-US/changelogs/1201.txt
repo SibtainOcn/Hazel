@@ -1,0 +1,6 @@
+* Proxy support: HTTP, HTTPS or SOCKS5 for every connection, never bypassed
+* Search your settings from the top of More
+* New search options sheet and a site picker for search
+* Redesigned Temporary Files, language picker and choice dialogs
+* Nothing cut off in long languages or at large font sizes
+* Redesigned cards that adapt dynamically to screen size, laying out in columns on tablets and bigger screens.

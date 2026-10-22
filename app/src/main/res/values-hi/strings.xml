@@ -217,9 +217,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">वापस</string>
     <string name="sponsor_title">Hazel का साथ दें</string>
-    <string name="sponsor_hero_title">मुफ़्त है, और मुफ़्त ही रहेगा</string>
-    <string name="sponsor_hero_body">Hazel शाम और छुट्टियों में बनाया जाता है, और मुफ़्त दिया जाता है क्योंकि डाउनलोड के पैसे लेने वाला डाउनलोडर एक कमज़ोर डाउनलोडर है। साइटें लगातार बदलती रहती हैं, और उनके साथ चलते रहना ही असली काम है।</string>
-    <string name="sponsor_hero_closing">अगर इस ऐप ने आपकी एक दोपहर बचाई है, तो नीचे दिया कोई भी तरीका वह समय वापस लौटा देता है। अगर नहीं बचाई, तो बिना पैसे वाले तरीके भी उतनी ही मदद करते हैं।</string>
+    <string name="sponsor_hero_title">Hazel पसंद है? इसे थोड़ा प्यार दें</string>
+    <string name="sponsor_hero_body">अगर Hazel आपके काम आया है, तो इसके विकास में साथ देने पर विचार करें। आपका साथ मुझे Hazel को बेहतर बनाते रहने और नई सुविधाएँ बनाने में मदद करता है। थोड़ा सा प्यार भी बहुत मायने रखता है। 💚</string>
     <string name="sponsor_section_ways">साथ देने के तरीके</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">हर महीने या एक बार, जब चाहें बंद करें। पूरा इंतज़ाम GitHub करता है।</string>
@@ -545,6 +544,23 @@
     <string name="appearance_on">चालू</string>
     <string name="appearance_off">बंद</string>
     <string name="appearance_accent_color">एक्सेंट रंग</string>
+    <string name="appearance_glass">ग्लास इफ़ेक्ट</string>
+    <string name="glass_style_title">ग्लास स्टाइल</string>
+    <string name="glass_style_aurora">ऑरोरा</string>
+    <string name="glass_style_accent">एक्सेंट</string>
+    <string name="glass_style_wallpaper">वॉलपेपर</string>
+    <string name="glass_style_sunset">सूर्यास्त</string>
+    <string name="glass_style_nebula">नीहारिका</string>
+    <string name="glass_style_forest">जंगल</string>
+    <string name="glass_style_ocean">समुद्र</string>
+    <string name="glass_style_mono">मोनो</string>
+    <string name="guide_step_appearance_title">इसे अपना बनाएं</string>
+    <string name="guide_step_appearance_desc">थीम, एक्सेंट रंग और ग्लास लुक चुनें। इन्हें आप कभी भी सेटिंग्स में बदल सकते हैं।</string>
+    <string name="whats_new_tag">नया क्या है</string>
+    <string name="whats_new_version">संस्करण %1$s</string>
+    <string name="whats_new_done">ठीक है</string>
+    <string name="whats_new_glass_title">नया ग्लास लुक</string>
+    <string name="whats_new_glass_desc">ग्लास इफ़ेक्ट, नए स्टाइल और एक्सेंट रंग।</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">एक्सेंट रंग</string>

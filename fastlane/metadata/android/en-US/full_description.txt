@@ -4,7 +4,7 @@ No account is needed, nothing is tracked, and nothing about what you download is
 
 Downloading
 
-* Works with YouTube, Instagram, TikTok, X, Reddit, SoundCloud and over 1000 other sites
+* Works with YouTube, Instagram, TikTok, X, Reddit, SoundCloud and over 1500 other sites
 * Paste one link, several at once, or a whole playlist or channel and queue them together
 * Hazel Instant: share a link from any other app and the download starts straight away, at a quality you set once
 * Downloads keep going in the background, and can be paused, resumed or cancelled from the card or the notification

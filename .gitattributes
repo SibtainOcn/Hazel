@@ -1,0 +1,4 @@
+# Keep the website and web helpers out of GitHub's language stats.
+*.html linguist-detectable=false
+*.css  linguist-detectable=false
+*.js   linguist-detectable=false

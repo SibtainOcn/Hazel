@@ -228,9 +228,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Back</string>
     <string name="sponsor_title">Support Hazel</string>
-    <string name="sponsor_hero_title">Free, and staying that way</string>
-    <string name="sponsor_hero_body">Hazel is built in evenings and weekends, and it is given away because a downloader that charges for the download is a worse downloader. Sites change constantly, and keeping up with them is the work.</string>
-    <string name="sponsor_hero_closing">If the app saved you an afternoon, anything below puts that time back into it. If it did not, the ways that cost nothing help just as much.</string>
+    <string name="sponsor_hero_title">Like Hazel? Give it some love</string>
+    <string name="sponsor_hero_body">If Hazel has been useful to you, consider supporting its development. Your support helps me keep improving Hazel and building new features. Every bit of love means a lot. 💚</string>
     <string name="sponsor_section_ways">Ways to support</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Monthly or one off, cancel whenever. Handled entirely by GitHub.</string>
@@ -617,6 +616,23 @@
     <string name="appearance_on">On</string>
     <string name="appearance_off">Off</string>
     <string name="appearance_accent_color">Accent Color</string>
+    <string name="appearance_glass">Glass effect</string>
+    <string name="glass_style_title">Glass style</string>
+    <string name="glass_style_aurora">Aurora</string>
+    <string name="glass_style_accent">Accent</string>
+    <string name="glass_style_wallpaper">Wallpaper</string>
+    <string name="glass_style_sunset">Sunset</string>
+    <string name="glass_style_nebula">Nebula</string>
+    <string name="glass_style_forest">Forest</string>
+    <string name="glass_style_ocean">Ocean</string>
+    <string name="glass_style_mono">Mono</string>
+    <string name="guide_step_appearance_title">Make it yours</string>
+    <string name="guide_step_appearance_desc">Pick a theme, an accent and the glass look. You can change them any time in settings.</string>
+    <string name="whats_new_tag">What\'s new</string>
+    <string name="whats_new_version">Version %1$s</string>
+    <string name="whats_new_done">Got it</string>
+    <string name="whats_new_glass_title">A new glass look</string>
+    <string name="whats_new_glass_desc">Glass effect, new styles and accents.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Accent Color</string>

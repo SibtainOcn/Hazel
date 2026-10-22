@@ -213,9 +213,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">戻る</string>
     <string name="sponsor_title">Hazel を支援</string>
-    <string name="sponsor_hero_title">完全無料、これからもずっと</string>
-    <string name="sponsor_hero_body">Hazelは夜間や週末に開発されており、完全無料で提供されています。サイト側の仕様変更は頻繁に発生し、それに対応し続けることが主な開発作業です。</string>
-    <string name="sponsor_hero_closing">このアプリが役立ったと感じたら、以下の方法で支援していただけると幸いです。費用のかからない支援方法も同様に大きな力になります。</string>
+    <string name="sponsor_hero_title">Hazel が気に入りましたか？応援をお願いします</string>
+    <string name="sponsor_hero_body">Hazel が役に立っているなら、開発の支援をご検討ください。皆さんの支援が Hazel の改善と新機能づくりを続ける力になります。どんな小さな応援もとても励みになります。💚</string>
     <string name="sponsor_section_ways">支援方法</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">毎月または1回限り、いつでもキャンセル可能。GitHubを通じて安全に処理されます。</string>
@@ -538,6 +537,23 @@
     <string name="appearance_on">オン</string>
     <string name="appearance_off">オフ</string>
     <string name="appearance_accent_color">アクセントカラー</string>
+    <string name="appearance_glass">ガラス効果</string>
+    <string name="glass_style_title">ガラスのスタイル</string>
+    <string name="glass_style_aurora">オーロラ</string>
+    <string name="glass_style_accent">アクセント</string>
+    <string name="glass_style_wallpaper">壁紙</string>
+    <string name="glass_style_sunset">夕焼け</string>
+    <string name="glass_style_nebula">ネビュラ</string>
+    <string name="glass_style_forest">フォレスト</string>
+    <string name="glass_style_ocean">オーシャン</string>
+    <string name="glass_style_mono">モノ</string>
+    <string name="guide_step_appearance_title">自分好みに</string>
+    <string name="guide_step_appearance_desc">テーマ、アクセントカラー、ガラスの見た目を選べます。あとから設定でいつでも変更できます。</string>
+    <string name="whats_new_tag">新機能</string>
+    <string name="whats_new_version">バージョン %1$s</string>
+    <string name="whats_new_done">OK</string>
+    <string name="whats_new_glass_title">新しいガラスの見た目</string>
+    <string name="whats_new_glass_desc">ガラス効果、新しいスタイルとアクセントカラー。</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">アクセントカラー</string>

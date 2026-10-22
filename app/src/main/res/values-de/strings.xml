@@ -217,9 +217,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Zurück</string>
     <string name="sponsor_title">Hazel unterstützen</string>
-    <string name="sponsor_hero_title">Kostenlos, und das bleibt so</string>
-    <string name="sponsor_hero_body">Hazel entsteht an Abenden und Wochenenden und wird verschenkt, weil ein Downloader, der für das Herunterladen Geld nimmt, ein schlechterer Downloader ist. Seiten ändern sich ständig, und mit ihnen Schritt zu halten ist die eigentliche Arbeit.</string>
-    <string name="sponsor_hero_closing">Wenn dir die App einen Nachmittag gespart hat, gibt jede der Möglichkeiten unten diese Zeit zurück. Wenn nicht, helfen die kostenlosen Wege genauso viel.</string>
+    <string name="sponsor_hero_title">Magst du Hazel? Zeig ein bisschen Liebe</string>
+    <string name="sponsor_hero_body">Wenn Hazel dir nützlich war, unterstütze gern die Entwicklung. Deine Unterstützung hilft mir, Hazel weiter zu verbessern und neue Funktionen zu bauen. Jedes bisschen Liebe bedeutet viel. 💚</string>
     <string name="sponsor_section_ways">Möglichkeiten zu unterstützen</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Monatlich oder einmalig, jederzeit kündbar. Wird komplett von GitHub abgewickelt.</string>
@@ -545,6 +544,23 @@
     <string name="appearance_on">An</string>
     <string name="appearance_off">Aus</string>
     <string name="appearance_accent_color">Akzentfarbe</string>
+    <string name="appearance_glass">Glaseffekt</string>
+    <string name="glass_style_title">Glasstil</string>
+    <string name="glass_style_aurora">Aurora</string>
+    <string name="glass_style_accent">Akzent</string>
+    <string name="glass_style_wallpaper">Hintergrund</string>
+    <string name="glass_style_sunset">Sonnenuntergang</string>
+    <string name="glass_style_nebula">Nebula</string>
+    <string name="glass_style_forest">Wald</string>
+    <string name="glass_style_ocean">Ozean</string>
+    <string name="glass_style_mono">Mono</string>
+    <string name="guide_step_appearance_title">Mach es zu deinem</string>
+    <string name="guide_step_appearance_desc">Wähle ein Design, eine Akzentfarbe und den Glas-Look. Du kannst das jederzeit in den Einstellungen ändern.</string>
+    <string name="whats_new_tag">Neu</string>
+    <string name="whats_new_version">Version %1$s</string>
+    <string name="whats_new_done">Verstanden</string>
+    <string name="whats_new_glass_title">Der neue Glas-Look</string>
+    <string name="whats_new_glass_desc">Glaseffekt, neue Stile und Akzentfarben.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Akzentfarbe</string>

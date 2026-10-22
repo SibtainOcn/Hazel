@@ -213,9 +213,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Kembali</string>
     <string name="sponsor_title">Dukung Hazel</string>
-    <string name="sponsor_hero_title">Gratis, dan akan selalu begitu</string>
-    <string name="sponsor_hero_body">Hazel dikembangkan di waktu luang dan akhir pekan, dan diberikan gratis karena aplikasi pengunduh berbayar adalah aplikasi yang buruk. Situs web selalu berubah, dan menyesuaikan dengannya membutuhkan waktu.</string>
-    <string name="sponsor_hero_closing">Jika aplikasi ini menghemat waktu Anda, dukungan di bawah ini sangat berarti bagi kelanjutannya. Jika tidak, bantuan tanpa biaya juga sama berharganya.</string>
+    <string name="sponsor_hero_title">Suka Hazel? Beri sedikit cinta</string>
+    <string name="sponsor_hero_body">Jika Hazel bermanfaat bagimu, pertimbangkan untuk mendukung pengembangannya. Dukunganmu membantuku terus menyempurnakan Hazel dan membuat fitur baru. Sekecil apa pun cinta darimu sangat berarti. 💚</string>
     <string name="sponsor_section_ways">Cara mendukung</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Bulanan atau sekali bayar, dapat dibatalkan kapan saja. Dikelola sepenuhnya oleh GitHub.</string>
@@ -538,6 +537,23 @@
     <string name="appearance_on">Aktif</string>
     <string name="appearance_off">Mati</string>
     <string name="appearance_accent_color">Warna Aksen</string>
+    <string name="appearance_glass">Efek kaca</string>
+    <string name="glass_style_title">Gaya kaca</string>
+    <string name="glass_style_aurora">Aurora</string>
+    <string name="glass_style_accent">Aksen</string>
+    <string name="glass_style_wallpaper">Wallpaper</string>
+    <string name="glass_style_sunset">Senja</string>
+    <string name="glass_style_nebula">Nebula</string>
+    <string name="glass_style_forest">Hutan</string>
+    <string name="glass_style_ocean">Samudra</string>
+    <string name="glass_style_mono">Mono</string>
+    <string name="guide_step_appearance_title">Buat sesuai seleramu</string>
+    <string name="guide_step_appearance_desc">Pilih tema, warna aksen, dan tampilan kaca. Kamu bisa mengubahnya kapan saja di pengaturan.</string>
+    <string name="whats_new_tag">Yang baru</string>
+    <string name="whats_new_version">Versi %1$s</string>
+    <string name="whats_new_done">Mengerti</string>
+    <string name="whats_new_glass_title">Tampilan kaca baru</string>
+    <string name="whats_new_glass_desc">Efek kaca, gaya dan warna aksen baru.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Warna Aksen</string>

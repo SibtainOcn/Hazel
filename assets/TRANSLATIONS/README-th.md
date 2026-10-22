@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="../HAZEL-BANNER.png" alt="Hazel Banner" width="100%" />
+  <img src="../new-banner.png" alt="Hazel Banner" width="100%" />
 </p>
 
 <div align="center">
@@ -48,6 +48,7 @@
 [![Download](https://img.shields.io/badge/Download-0A0A0A?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/packages/com.hazel.android/)
 <a href="https://www.buymeacoffee.com/sibtainocean"><img src="https://img.shields.io/badge/-Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" /></a>
+<a href="https://developer.android.com/jetpack/compose"><img src="https://img.shields.io/badge/Jetpack%20Compose-0A0A0A?style=for-the-badge&logo=jetpackcompose&logoColor=4285F4" alt="Jetpack Compose" /></a>
 
 ![API](https://img.shields.io/badge/API-24%2B-brightgreen?style=flat-square)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
@@ -55,7 +56,7 @@
 [![Release](https://img.shields.io/github/v/release/SibtainOcn/Hazel?style=flat-square&label=release&color=cyan)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Changelog](https://img.shields.io/badge/Changelog-orange?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md)
 [![Downloads](https://img.shields.io/github/downloads/SibtainOcn/Hazel/total?style=flat-square)](https://github.com/SibtainOcn/Hazel/releases)
-[![Supported Sites](https://img.shields.io/badge/supported--sites-1000%2B-green?style=flat-square)](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+[![Supported Sites](https://img.shields.io/badge/supported--sites-1500%2B-green?style=flat-square)](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
 [![Stars](https://img.shields.io/github/stars/SibtainOcn/Hazel?style=flat-square)](https://github.com/SibtainOcn/Hazel/stargazers)
 
 </div>
@@ -81,7 +82,7 @@
 
 ## 💡 คุณสมบัติ:
 
-- ดาวน์โหลดเสียงและวิดีโอจาก YouTube, Instagram, TikTok, X, Reddit, SoundCloud และ [เว็บไซต์อื่นอีกกว่า 1000 แห่ง](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+- ดาวน์โหลดเสียงและวิดีโอจาก YouTube, Instagram, TikTok, X, Reddit, SoundCloud และ [เว็บไซต์อื่นอีกกว่า 1500 แห่ง](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
 - วางลิงก์เดียว หลายลิงก์พร้อมกัน หรือทั้งเพลย์ลิสต์ / ช่อง แล้วดาวน์โหลดเป็นชุดได้ในคลิกเดียว
 - **Hazel Instant** - แชร์ลิงก์จากแอปอื่นใดก็ได้ แล้วการดาวน์โหลดจะเริ่มทันทีด้วยคุณภาพที่คุณตั้งไว้ครั้งเดียว
 - เลือกแทร็กเสียงเฉพาะได้เมื่อแหล่งที่มามีหลายแทร็ก
@@ -173,8 +174,6 @@ You should have received a copy of the GNU General Public License along with Haz
 Hazel เป็น GUI สำหรับ [yt-dlp](https://github.com/yt-dlp/yt-dlp) โดยพัฒนาบนพื้นฐานของ [youtubedl-android](https://github.com/yausername/youtubedl-android)
 [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) สำหรับรายการ การค้นหา และสตรีมการเล่นที่รวดเร็ว และ [Media3 ExoPlayer](https://github.com/androidx/media) สำหรับการเล่น
 
-> *ขอขอบคุณเป็นพิเศษแก่ทีม [yt-dlp](https://github.com/yt-dlp/yt-dlp) - หากไม่มีผลงานของพวกเขา Hazel ก็คงไม่เกิดขึ้น*
->
 <div align="right">
 <table><td>
 <a href="#start-of-content">👆 กลับไปด้านบน</a>
