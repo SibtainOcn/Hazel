@@ -47,100 +47,130 @@ English
 [![Android](https://img.shields.io/badge/Android-004242?style=for-the-badge&logo=android&logoColor=3DDC84)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Download](https://img.shields.io/badge/Download-0A0A0A?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/packages/com.hazel.android/)
+[![Obtainium](https://img.shields.io/badge/Obtainium-6750A4?style=for-the-badge&logo=android&logoColor=white)](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/SibtainOcn/Hazel)
 <a href="https://www.buymeacoffee.com/sibtainocean"><img src="https://img.shields.io/badge/-Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" /></a>
-<a href="https://developer.android.com/jetpack/compose"><img src="https://img.shields.io/badge/Jetpack%20Compose-0A0A0A?style=for-the-badge&logo=jetpackcompose&logoColor=4285F4" alt="Jetpack Compose" /></a>
 
+[![Stars](https://img.shields.io/github/stars/SibtainOcn/Hazel?style=flat-square&color=FFC107)](https://github.com/SibtainOcn/Hazel/stargazers)
 ![API](https://img.shields.io/badge/API-24%2B-brightgreen?style=flat-square)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/SibtainOcn/Hazel/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/SibtainOcn/Hazel/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/SibtainOcn/Hazel?style=flat-square&label=release&color=cyan)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Changelog](https://img.shields.io/badge/Changelog-orange?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md)
 [![Downloads](https://img.shields.io/github/downloads/SibtainOcn/Hazel/total?style=flat-square)](https://github.com/SibtainOcn/Hazel/releases)
 [![Supported Sites](https://img.shields.io/badge/supported--sites-1500%2B-green?style=flat-square)](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
-[![Stars](https://img.shields.io/github/stars/SibtainOcn/Hazel?style=flat-square)](https://github.com/SibtainOcn/Hazel/stargazers)
 
 </div>
+
+<p align="center">
+  <a href="https://sibtainocn.github.io/Hazel/hazel/"><b>🌐 Website</b></a> &nbsp;•&nbsp;
+  <a href="https://github.com/SibtainOcn/Hazel/releases/latest"><b>⬇️ Download</b></a> &nbsp;•&nbsp;
+  <a href="https://github.com/SibtainOcn/Hazel/wiki"><b>📖 Wiki</b></a> &nbsp;•&nbsp;
+  <a href="https://sibtainocn.github.io/Hazel/hazel/guide.html"><b>🧭 Guide</b></a> &nbsp;•&nbsp;
+  <a href="https://sibtainocn.github.io/Hazel/hazel/faq.html"><b>❓ FAQ</b></a>
+</p>
 
 *Only the links listed above ([GitHub Releases](https://github.com/SibtainOcn/Hazel/releases/latest) and [F-Droid](https://f-droid.org/packages/com.hazel.android/)) are the official, trusted sources of Hazel. Please be advised that any external websites or third-party vendors are unofficial and operate completely independently of me.*
 
-## 📲 Screenshots
+---
+## 💚 Like Hazel? Give it some love
 
-<div>
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="30%" />
+If Hazel has been useful to you, consider supporting its development. Your support helps me keep improving Hazel and building new features. Every bit of love means a lot.
+
+<div align="center">
+<table>
+  <tr><th align="center">☕ One-Time Support</th><th align="center">🤝 Ongoing Sponsorship</th></tr>
+  <tr>
+    <td align="center"><a href="https://www.buymeacoffee.com/sibtainocean"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee"></a></td>
+    <td align="center"><a href="https://github.com/sponsors/SibtainOcn"><img src="https://img.shields.io/badge/GitHub%20Sponsors-004242?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="GitHub Sponsors"></a></td>
+  </tr>
+</table>
+
+<sub>Support is never required and never unlocks anything. Every feature stays free for everyone. No money? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Star the repo</a> or <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">report a problem</a>, it helps just as much.</sub>
 </div>
 
-## 💡 Features:
+---
+## ✨ Why Choose Hazel?
 
-- Download audio and video from YouTube, Instagram, TikTok, X, Reddit, SoundCloud and [1500+ other sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
-- Paste one link, several at once, or an entire playlist / channel with one-click batch downloading
-- **Hazel Instant** - share a link with any other app and the download begins immediately at a quality you set once
-- Choose specific soundtracks when a source publishes several audio tracks
-- Edit title, author, and file type / metadata before saving
-- Select different download formats and containers
+Hazel is a free, open-source downloader for Android powered by **yt-dlp**. Save videos, music and playlists from **1500+ sites** with zero ads, zero tracking and no account.
 
-### Search & Play
-- **Search** - type words instead of a link to search YouTube, YouTube Music, SoundCloud or Bandcamp, with optional search suggestions
-- **Play before you download** - play any result or link right on its card, with a seek bar, double tap to skip, full screen and a quality picker, on any site Hazel can read
-- **Cut** - download only part of a video or track, choosing the range on a live preview
-- **Live streams** - record from the start of a live stream, or wait for a premiere and then download it
+<table>
+  <tr><th width="50%" align="left">📥 Downloading</th><th width="50%" align="left">🔍 Search & Play</th></tr>
+  <tr><td><b>1500+ sites:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud and <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">more</a>.</td><td><b>Search:</b> YouTube, YouTube Music, SoundCloud or Bandcamp, with optional suggestions.</td></tr>
+  <tr><td><b>Batch:</b> one link, many at once, or a whole playlist / channel.</td><td><b>Play first:</b> stream any result on its card with seek, double tap skip and full screen.</td></tr>
+  <tr><td><b>Hazel Instant:</b> share a link from any app and it starts at your saved quality.</td><td><b>Cut:</b> save only the part you want, chosen on a live preview.</td></tr>
+  <tr><td><b>Your format:</b> pick quality, container, audio track, and edit title / metadata.</td><td><b>Live streams:</b> record from the start, or wait for a premiere.</td></tr>
+</table>
 
-### Processing
-- **Language selection** - Save in any language the source video offers
-- **SponsorBlock** - cut out sponsors, intros, and other segments
-- **Chapters** - embed in the file, or split into one file per chapter
-- **Subtitles** - In the languages you pick
+<table>
+  <tr><th width="50%" align="left">⚙️ Processing & Downloads</th><th width="50%" align="left">🔒 Privacy & Customisation</th></tr>
+  <tr><td><b>SponsorBlock:</b> cut sponsors, intros and other segments.</td><td><b>No tracking:</b> no accounts, no analytics. Incognito and HTTP / SOCKS5 proxy built in.</td></tr>
+  <tr><td><b>Chapters & subtitles:</b> embed, split per chapter, pick subtitle and audio languages.</td><td><b>Glass look:</b> 8 see-through styles, dark and light themes, 20+ accent colours.</td></tr>
+  <tr><td><b>Background:</b> long downloads with pause, resume and cancel from the notification.</td><td><b>Engine updates:</b> update yt-dlp on its own, Stable, Nightly or Master channel.</td></tr>
+  <tr><td><b>Speed:</b> no limit by default, parallel fragments, optional cap and Wi-Fi only mode.</td><td><b>Extras:</b> 10+ app languages, offline audio converter, backup & restore, settings search.</td></tr>
+</table>
 
-### Downloads
-- Long-horizon background downloads supported
-- Pause, resume, and cancel from the card or the notification
-- Wi-Fi only mode - checked at start, so a transfer already going is not cut off
-- No speed limit by default, with parallel fragments and an optional speed cap
-- Results you have not downloaded yet stay on the home screen until you clear them
+## 📲 Screenshots
 
-### Privacy
-- **Incognito** - downloads are not added to your library and links are not remembered
-- **Proxy** - send every connection through an HTTP, HTTPS, SOCKS5 or SOCKS5h proxy, with a switch to turn it off
-- No accounts, no analytics, nothing sent anywhere (search suggestions, off by default, send what you type to Google)
-
-### Settings & Customisation
-- **Glass look** - see-through screens, sheets and dialogs in 8 styles (Forest, Aurora, Ocean, Accent, Wallpaper, Sunset, Nebula, Mono), or turn it off
-- Dark and light themes with 20+ accent colours
-- **Search settings** - find any setting by name from the top of More
-- Home screen shortcuts (Search, Downloads, Queue, More) and direct share targets
-- App languages - English, Spanish, Hindi, Simplified Chinese, Brazilian Portuguese, French, German, Russian, Japanese, Indonesian, and system default
-- Independent yt-dlp engine updates - Stable, Nightly or Master channel
-- Offline video-to-audio converter
-- **Backup & restore** - settings, downloads list, queue, cookies and search history
-
+<table>
+  <tr>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>▶️ Search & Play</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>📚 All Downloads</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>🎬 Download Options</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>🎚️ Format Picker</b></td>
+  </tr>
+  <tr>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>⏳ Download Queue</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>🌐 Audio Language</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>🔍 Smart Search</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>📃 Playlist Batch</b></td>
+  </tr>
+  <tr>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>🗣️ App Languages</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>✨ Glass Home</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>⚙️ More Settings</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>🎨 Appearance</b></td>
+  </tr>
+</table>
 
 ---
-## ⬇️ Download
+## ⬇️ Download & Install
 
-For most devices, it is recommended to install the **arm64-v8a** version of the apks
+Choose your preferred source to get the latest version of Hazel:
 
-- Download the latest stable version from [GitHub releases](https://github.com/SibtainOcn/Hazel/releases/latest)
-  - Install the [pre-release](https://github.com/SibtainOcn/Hazel/releases/) versions to help us test out new features & changes
+> **System Requirements:** Android 7.0+ (API 24) • 2GB RAM (3GB+ recommended) • ~75MB download, ~300MB free storage once set up
 
-- Stable releases are also available on [F-Droid](https://f-droid.org/packages/com.hazel.android/)
+<table align="center">
+  <tr><th>Source</th><th>Badge</th><th>Details</th></tr>
+  <tr>
+    <td><b>GitHub</b></td>
+    <td align="center"><a href="https://github.com/SibtainOcn/Hazel/releases/latest"><img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" alt="Get it on GitHub" height="50"></a></td>
+    <td>Direct APK download, with the in-app updater</td>
+  </tr>
+  <tr>
+    <td><b>F-Droid</b></td>
+    <td align="center"><a href="https://f-droid.org/packages/com.hazel.android/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="50"></a></td>
+    <td>Official repository, updates handled by F-Droid</td>
+  </tr>
+  <tr>
+    <td><b>Obtainium</b></td>
+    <td align="center"><a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/SibtainOcn/Hazel"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="50"></a></td>
+    <td>Auto-updates straight from GitHub</td>
+  </tr>
+</table>
 
-Hazel will always be free and open source for everyone. If you like it, consider supporting the project via [GitHub Sponsors](https://github.com/sponsors/SibtainOcn) or [Buy Me a Coffee](https://www.buymeacoffee.com/sibtainocean)!
+> [!Tip]
+>
+> **Not sure which APK?** Most devices are **arm64-v8a**. If you're unsure, download the **universal** build, it works on every.
 
-### 🔗  Connect with third-party apps
-The app's package name is `com.hazel.android`.
+> [!Note]
+>
+> GitHub APKs have the in-app updater, so new releases are detected and downloadable without visiting the releases page. F-Droid APKs don't, since F-Droid handles updates on its own.
+> Wondering what's new? Read the [release notes](https://github.com/SibtainOcn/Hazel/blob/main/RELEASE-NOTES.md) or the [Install guide](https://sibtainocn.github.io/Hazel/hazel/guide.html#install).
+
+### 🔗 Connect with third-party apps
+The app's package name is `com.hazel.android`. Use it to link Hazel with automation tools, launchers or other apps.
 
 ### ✅ Verify application signature
-Hazel release builds are reproducible. Official releases are signed with the developer certificate below. If the signature on your APK is different, a third party has modified the application. Always verify you are using the app with the original signature:
+Hazel release builds are reproducible and signed with the developer certificate below. If your APK shows a different signature, it has been modified by a third party, so don't install it.
 
 ```text
 Owner (DN): CN=sibtainocn
@@ -151,38 +181,32 @@ MD5:        3bcce9e14c616a9087766563875978e6
 [![Star History Chart](https://api.star-history.com/svg?repos=SibtainOcn/Hazel&type=Date)](https://www.star-history.com/#SibtainOcn/Hazel&Date)
 ## 🤝 Contributing
 
-Contributions are welcome!
+We welcome contributions! See our [CONTRIBUTING.md](https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md) for guidelines.
 
-> [!Note]
->
-> For submitting bug reports, feature requests, questions, or any other ideas to improve, please read [CONTRIBUTING.md](https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md) for instructions and guidelines first.
-
-## 📄 Licence
+- 📖 **Need help?** [Read the Wiki](https://github.com/SibtainOcn/Hazel/wiki)
+- 🐞 **Found a bug?** [Open an issue](https://github.com/SibtainOcn/Hazel/issues/new/choose)
+- 💡 **Have an idea?** [Request a feature](https://github.com/SibtainOcn/Hazel/issues/new/choose)
 
 [GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
 
-Copyright (C) 2026 SibtainOcn
+## 🏆 Credits
+**Developer & Architect:** [SibtainOcn](https://github.com/SibtainOcn)
 
-Hazel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+**Huge Thanks To:**
+* [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - F-Droid repository management
+* [yt-dlp](https://github.com/yt-dlp/yt-dlp) - The powerful download engine behind Hazel
+* [youtubedl-android](https://github.com/yausername/youtubedl-android) - yt-dlp bindings for Android
+* [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - Fast listing, search & playback streams
+* [Media3 ExoPlayer](https://github.com/androidx/media) - Smooth in-app playback
 
-Hazel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+---
 
-You should have received a copy of the GNU General Public License along with Hazel. If not, see <https://www.gnu.org/licenses/>.
+<h2 align="center">Made with ❤️ by SibtainOcn</h2>
 
-> [!Warning]
->
-> Except for the source code licensed under the GPLv3 license,
-> all other parties are prohibited from using Hazel's name as a downloader app,
-> and the same is true for Hazel's derivatives.
-> Derivatives include but are not limited to forks and unofficial builds.
+<p align="center">
+  <b>License:</b> <a href="https://github.com/SibtainOcn/Hazel/blob/main/LICENSE">GNU General Public License v3.0</a>
+</p>
 
-## 🧱 Credits
+<p align="center">© 2026 SibtainOcn. Licensed under GPL-3.0-or-later.</p>
 
-Hazel is a GUI for [yt-dlp](https://github.com/yt-dlp/yt-dlp), based on [youtubedl-android](https://github.com/yausername/youtubedl-android).
-[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) for fast listing, search and playback streams, and [Media3 ExoPlayer](https://github.com/androidx/media) for playback.
-
-<div align="right">
-<table><td>
-<a href="#start-of-content">👆 Scroll to top</a>
-</td></table>
-</div>
+<h3 align="center">⭐ If Hazel made your downloads easier, don't forget to star the repository! ⭐</h3>
