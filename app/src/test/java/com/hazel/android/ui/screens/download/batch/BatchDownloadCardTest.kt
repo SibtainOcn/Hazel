@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.ui.theme.sheetBlackColor
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -75,7 +76,7 @@ class BatchDownloadCardTest {
             HazelTheme(darkTheme = l.dark, accentName = l.accent, glass = l.glass, glassStyle = l.style) {
                 val density = LocalDensity.current
                 CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale)) {
-                    Box(Modifier.background(glassSheetColor(batchSheetColor)).padding(12.dp)) {
+                    Box(Modifier.background(glassSheetColor(sheetBlackColor)).padding(12.dp)) {
                     BatchDownloadCard(
                         info = info,
                         formatLabel = "Best quality",

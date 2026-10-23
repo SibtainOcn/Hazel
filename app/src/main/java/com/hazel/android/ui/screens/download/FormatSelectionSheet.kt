@@ -1,5 +1,8 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.theme.sheetBlackColor
+import com.hazel.android.ui.theme.sheetButtonColor
+import com.hazel.android.ui.theme.sheetRaisedColor
 import androidx.compose.ui.graphics.luminance
 import kotlin.math.roundToInt
 import androidx.compose.foundation.border
@@ -252,7 +255,7 @@ fun FormatSelectionSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = sheetBlackColor
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
 
@@ -540,7 +543,7 @@ private fun RailStop(
 ) {
     val scheme = MaterialTheme.colorScheme
     val fill by animateColorAsState(
-        if (selected) scheme.primary.copy(alpha = 0.16f) else scheme.surfaceContainerHigh,
+        if (selected) scheme.primary.copy(alpha = 0.16f) else sheetRaisedColor,
         animationSpec = tween(STOP_FADE_MS),
         label = "railFill"
     )
@@ -630,7 +633,7 @@ private fun FormatFilterSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = sheetBlackColor,
         dragHandle = null
     ) {
         Column(
@@ -880,7 +883,7 @@ fun FormatRow(
     val fill by animateColorAsState(
         when {
             selected -> scheme.primary.copy(alpha = 0.14f)
-            compact -> scheme.surfaceContainerHigh
+            compact -> sheetButtonColor
             else -> Color.Transparent
         },
         animationSpec = tween(STOP_FADE_MS),

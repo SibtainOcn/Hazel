@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.ui.theme.sheetRaisedColor
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -117,7 +118,7 @@ fun BatchDownloadCard(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
             // Solid while dragged, so the red only shows in the gap it leaves.
-            color = if (swiping) batchRaisedColor.compositeOver(opaqueSurface()) else batchRaisedColor
+            color = if (swiping) sheetRaisedColor.compositeOver(opaqueSurface()) else sheetRaisedColor
         ) {
             Row(
                 modifier = Modifier

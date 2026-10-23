@@ -39,7 +39,7 @@ import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.SearchSource
-import com.hazel.android.ui.screens.download.batch.batchSheetColor
+import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.ui.screens.more.ActionSettingRow
 import com.hazel.android.ui.screens.more.ConfirmSettingDialog
 import com.hazel.android.ui.screens.more.SuggestionsConsentDialog
@@ -113,7 +113,7 @@ fun SearchOptionsSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = batchSheetColor
+        containerColor = sheetBlackColor
     ) {
         val current = prefs ?: return@ModalBottomSheet
         Column(
