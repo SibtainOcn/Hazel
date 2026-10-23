@@ -52,10 +52,10 @@
   font: 500 15px/1.2 var(--display); color: var(--fg-2); transition: background .2s ease, color .2s ease;
 }
 .sites li:hover { background: var(--surface-2); color: var(--fg); }
-.sites li.more { padding: 0; background: color-mix(in srgb, var(--accent) 12%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 38%, transparent); }
+.sites li.more { padding: 0; background: color-mix(in srgb, var(--accent) 16%, transparent); box-shadow: none; }
 .sites li.more a { display: inline-flex; align-items: center; gap: 4px; padding: 9px 12px 9px 16px; color: var(--accent); text-decoration: none; border-radius: inherit; }
 .sites li.more svg { width: 15px; height: 15px; transition: transform .2s ease; }
-.sites li.more:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+.sites li.more:hover { background: color-mix(in srgb, var(--accent) 24%, transparent); }
 .sites li.more:hover svg { transform: translateX(2px); }
 .sites li.more a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
