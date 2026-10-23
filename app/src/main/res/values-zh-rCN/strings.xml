@@ -291,14 +291,38 @@
     <string name="history_clear_dialog_cancel">取消</string>
     <string name="history_delete_dialog_title">删除文件</string>
     <string name="history_delete_dialog_body">%1$s 将从你的设备上删除。</string>
-    <string name="history_toast_file_deleted">文件已删除</string>
-    <string name="history_toast_file_delete_failed">无法删除这个文件</string>
     <string name="history_delete_dialog_confirm">删除</string>
     <string name="history_delete_dialog_cancel">取消</string>
     <string name="history_card_options">选项</string>
     <string name="history_card_properties">属性</string>
     <string name="history_card_remove">从列表中移除</string>
     <string name="history_card_delete">删除文件</string>
+    <string name="history_menu_select">选择</string>
+    <string name="history_menu_select_all">全选</string>
+    <string name="history_select_none">取消全选</string>
+    <string name="history_select_close">取消选择</string>
+    <string name="history_select_act">移除或删除</string>
+    <string name="history_delete_many_title">删除文件</string>
+    <string name="history_remove_hint">文件仍保留在设备上</string>
+    <string name="history_delete_hint">从设备和此列表中删除文件</string>
+    <plurals name="history_selected_count">
+        <item quantity="other">已选择 %d 项</item>
+    </plurals>
+    <plurals name="history_delete_many_body">
+        <item quantity="other">将从设备中删除 %d 个文件。</item>
+    </plurals>
+    <plurals name="history_delete_many_gone">
+        <item quantity="other">%d 个已删除的项目将从列表中移除。</item>
+    </plurals>
+    <plurals name="history_toast_files_deleted">
+        <item quantity="other">已删除 %d 个文件</item>
+    </plurals>
+    <plurals name="history_toast_files_delete_failed">
+        <item quantity="other">有 %d 个文件无法删除</item>
+    </plurals>
+    <plurals name="history_toast_removed">
+        <item quantity="other">已从列表中移除 %d 项</item>
+    </plurals>
     <string name="history_tag_deleted">已删除</string>
     <string name="history_toast_file_gone">这个文件已经不在你的设备上了</string>
     <string name="history_tab_failed">已失败</string>

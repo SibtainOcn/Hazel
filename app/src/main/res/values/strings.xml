@@ -311,14 +311,44 @@
     <string name="history_clear_dialog_cancel">Cancel</string>
     <string name="history_delete_dialog_title">Delete file</string>
     <string name="history_delete_dialog_body">%1$s will be deleted from your device.</string>
-    <string name="history_toast_file_deleted">File deleted</string>
-    <string name="history_toast_file_delete_failed">Could not delete the file</string>
     <string name="history_delete_dialog_confirm">Delete</string>
     <string name="history_delete_dialog_cancel">Cancel</string>
     <string name="history_card_options">Options</string>
     <string name="history_card_properties">Properties</string>
     <string name="history_card_remove">Remove from list</string>
     <string name="history_card_delete">Delete file</string>
+    <string name="history_menu_select">Select</string>
+    <string name="history_menu_select_all">Select all</string>
+    <string name="history_select_none">Deselect all</string>
+    <string name="history_select_close">Cancel selection</string>
+    <string name="history_select_act">Remove or delete</string>
+    <string name="history_delete_many_title">Delete files</string>
+    <string name="history_remove_hint">Keeps the file on your device</string>
+    <string name="history_delete_hint">Deletes the file from your device and this list</string>
+    <plurals name="history_selected_count">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <plurals name="history_delete_many_body">
+        <item quantity="one">%d file will be deleted from your device.</item>
+        <item quantity="other">%d files will be deleted from your device.</item>
+    </plurals>
+    <plurals name="history_delete_many_gone">
+        <item quantity="one">%d already deleted item will be removed from the list.</item>
+        <item quantity="other">%d already deleted items will be removed from the list.</item>
+    </plurals>
+    <plurals name="history_toast_files_deleted">
+        <item quantity="one">%d file deleted</item>
+        <item quantity="other">%d files deleted</item>
+    </plurals>
+    <plurals name="history_toast_files_delete_failed">
+        <item quantity="one">%d file could not be deleted</item>
+        <item quantity="other">%d files could not be deleted</item>
+    </plurals>
+    <plurals name="history_toast_removed">
+        <item quantity="one">%d item removed from the list</item>
+        <item quantity="other">%d items removed from the list</item>
+    </plurals>
     <string name="history_tag_deleted">Deleted</string>
     <string name="history_toast_file_gone">This file is no longer on your device</string>
     <string name="history_tab_failed">Failed</string>

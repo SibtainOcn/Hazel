@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Glass look, on by default: soft colour light behind see-through screens, sheets and dialogs, in dark and light. Turn it off under More, Appearance, Glass effect.
 - Getting started asks for theme, accent and glass as its second step, and applies each choice at once.
+- Downloads: Select and Select all in the menu. Picked rows show a tick and a tint, and the top bar shows the count.
+- Downloads: long-press a row (or act on picked rows) to remove it from the list or delete the file too. Rows already marked Deleted are just cleared.
 - What's new: people who update see a short card once for a release that has news, never again after, and never on a fresh install (Getting started covers it). This release shows the glass look with its theme, accent and glass choices.
 
 ### Changed
@@ -29,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Libraries updated to their latest stable versions (Kotlin 2.4, Compose BOM 2026.09, AGP 9.4, Gradle 9.8, OkHttp, Coil, Media3 kept at 1.11), and the app compiles against Android 37. The target Android version is unchanged.
 - yt-dlp update notifications (available, installed, failed) are off by default, for new installs and for existing ones. Turn them on again under the yt-dlp update screen.
 ### Fixed
+- Deleting a download also removes it from the gallery and other media apps, on every Android version.
+- A file that fails to delete keeps its row instead of vanishing from the list.
+- Two downloads finishing at the same moment no longer share a row id.
+- Small toasts follow the theme, accent and glass style.
 - YouTube downloads, Hazel Instant above all, no longer fail with "Requested format is not available" after the yt-dlp 2026.10.21 update. yt-dlp can name the same stream differently between the read and the download, so a format that has gone now falls back to the nearest one at the chosen height.
 - The YouTube player client list in Advanced includes the new `tv_samsung` client, and the user agent header uses yt-dlp's full option name.
 - Temp files: Clear everything now clears every row, saved link reads included. The yt-dlp engine row is gone: it measured the wrong folder and cleared nothing, and clearing the real engine would have stopped downloads from working.

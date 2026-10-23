@@ -291,14 +291,38 @@
     <string name="history_clear_dialog_cancel">Batal</string>
     <string name="history_delete_dialog_title">Hapus file</string>
     <string name="history_delete_dialog_body">%1$s akan dihapus dari perangkat Anda.</string>
-    <string name="history_toast_file_deleted">File dihapus</string>
-    <string name="history_toast_file_delete_failed">Tidak dapat menghapus file</string>
     <string name="history_delete_dialog_confirm">Hapus</string>
     <string name="history_delete_dialog_cancel">Batal</string>
     <string name="history_card_options">Opsi</string>
     <string name="history_card_properties">Properti</string>
     <string name="history_card_remove">Hapus dari daftar</string>
     <string name="history_card_delete">Hapus file</string>
+    <string name="history_menu_select">Pilih</string>
+    <string name="history_menu_select_all">Pilih semua</string>
+    <string name="history_select_none">Batalkan semua pilihan</string>
+    <string name="history_select_close">Batalkan pilihan</string>
+    <string name="history_select_act">Hapus dari daftar atau hapus file</string>
+    <string name="history_delete_many_title">Hapus file</string>
+    <string name="history_remove_hint">File tetap ada di perangkat</string>
+    <string name="history_delete_hint">Menghapus file dari perangkat dan daftar ini</string>
+    <plurals name="history_selected_count">
+        <item quantity="other">%d dipilih</item>
+    </plurals>
+    <plurals name="history_delete_many_body">
+        <item quantity="other">%d file akan dihapus dari perangkat Anda.</item>
+    </plurals>
+    <plurals name="history_delete_many_gone">
+        <item quantity="other">%d item yang sudah dihapus akan dihapus dari daftar.</item>
+    </plurals>
+    <plurals name="history_toast_files_deleted">
+        <item quantity="other">%d file dihapus</item>
+    </plurals>
+    <plurals name="history_toast_files_delete_failed">
+        <item quantity="other">%d file tidak dapat dihapus</item>
+    </plurals>
+    <plurals name="history_toast_removed">
+        <item quantity="other">%d item dihapus dari daftar</item>
+    </plurals>
     <string name="history_tag_deleted">Dihapus</string>
     <string name="history_toast_file_gone">File ini sudah tidak ada di perangkat Anda</string>
     <string name="history_tab_failed">Gagal</string>
