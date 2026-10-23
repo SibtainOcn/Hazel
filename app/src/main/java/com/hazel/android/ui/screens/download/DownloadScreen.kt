@@ -3,6 +3,7 @@ package com.hazel.android.ui.screens.download
 import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import com.hazel.android.ui.components.AmbientDotGrid
 import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
 import android.content.Intent
@@ -677,34 +678,40 @@ fun DownloadScreen(
                             }
                         }
 
-                        // Nothing read yet: a faint mark and one line, and nothing to tap. The
-                        // search bar above and the paste button already offer every way to
-                        // start, so the middle of the screen stays quiet.
+                        // Nothing read yet: a faint mark and one line over a quiet dot grid
+                        // that answers a touch, and nothing to tap. The search bar above and
+                        // the paste button already offer every way to start.
                         if (!incognito && state.results.isEmpty() && !state.isFetching) {
                             item(key = "empty") {
                                 // Fills the space between the search bar and the bottom bar,
                                 // so the line sits in its middle.
-                                Column(
+                                Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .fillParentMaxHeight()
-                                        .padding(horizontal = 32.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
                                 ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_download_minimal),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(40.dp),
-                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                                    )
-                                    Spacer(modifier = Modifier.height(14.dp))
-                                    Text(
-                                        stringResource(R.string.home_empty_hint),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
-                                        textAlign = TextAlign.Center
-                                    )
+                                    AmbientDotGrid(Modifier.matchParentSize(), paused = searchOpen)
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 32.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_download_minimal),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(40.dp),
+                                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                                        )
+                                        Spacer(modifier = Modifier.height(14.dp))
+                                        Text(
+                                            stringResource(R.string.home_empty_hint),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
                                 }
                             }
                         }
