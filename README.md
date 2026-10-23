@@ -152,16 +152,18 @@ Choose your preferred source to get the latest version of Hazel:
     <td align="center"><a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/SibtainOcn/Hazel"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="50"></a></td>
     <td>Auto-updates straight from GitHub</td>
   </tr>
+  <tr>
+    <td><b>OpenAPK</b></td>
+    <td align="center"><a href="https://www.openapk.net/hazel/com.hazel.android/"><img src="https://www.openapk.net/images/openapk-badge.png" alt="Get it on OpenAPK" height="50"></a></td>
+    <td>Alternative APK source</td>
+  </tr>
 </table>
 
 > [!Tip]
 >
 > **Not sure which APK?** Most devices are **arm64-v8a**. If you're unsure, download the **universal** build, it works on every.
-
-> [!Note]
->
 > GitHub APKs have the in-app updater, so new releases are detected and downloadable without visiting the releases page. F-Droid APKs don't, since F-Droid handles updates on its own.
-> Wondering what's new? Read the [release notes](https://github.com/SibtainOcn/Hazel/blob/main/RELEASE-NOTES.md) or the [Install guide](https://sibtainocn.github.io/Hazel/hazel/guide.html#install).
+> Wondering what's new? Read the [release notes](https://sibtainocn.github.io/Hazel/hazel/whats-new.html) or the [Install guide](https://sibtainocn.github.io/Hazel/hazel/guide.html#install).
 
 ### 🔗 Connect with third-party apps
 The app's package name is `com.hazel.android`. Use it to link Hazel with automation tools, launchers or other apps.
