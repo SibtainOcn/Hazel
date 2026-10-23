@@ -64,6 +64,9 @@
     <string name="search_cancel">キャンセル</string>
     <string name="search_clear_history_confirm_title">検索履歴を削除しますか？</string>
     <string name="search_clear_history_confirm_body">保存された検索リンクがすべて削除されます。この操作は元に戻せません。</string>
+    <string name="search_results_cleared">検索結果を消去しました</string>
+    <string name="search_history_cleared">検索履歴を消去しました</string>
+    <string name="search_history_clear_failed">検索履歴を消去できませんでした</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">ダウンロード済み</string>
@@ -433,9 +436,6 @@
     <string name="batch_type_video">動画</string>
     <string name="batch_container_title">コンテナ</string>
     <string name="batch_container_subtitle">これらのリンクを保存するファイル形式</string>
-    <string name="batch_save_dir_title">保存場所</string>
-    <string name="batch_open_folder">このフォルダを開く</string>
-    <string name="batch_change_folder">フォルダを変更</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">サムネイル</string>
@@ -769,6 +769,9 @@
     <string name="fetch_settings_search_results">検索結果の件数</string>
     <string name="fetch_settings_suggestions">検索候補</string>
     <string name="fetch_settings_suggestions_summary">入力中に Google の検索候補を表示します。入力した内容は Google に送信されます。</string>
+    <string name="search_suggestions_confirm_title">検索候補をオンにしますか？</string>
+    <string name="search_suggestions_confirm_body">検索を入力すると、候補を取得するために入力した語句が Google に送信されます。リンクは送信されません。いつでもオフにできます。</string>
+    <string name="search_suggestions_confirm">オンにする</string>
     <string name="fetch_settings_playback">再生</string>
     <string name="fetch_settings_play_with">再生エンジン</string>
     <string name="fetch_settings_play_quality">再生画質</string>
@@ -783,6 +786,7 @@
     <string name="save_location_internal">内部ストレージ</string>
     <string name="save_location_card_hint">カードの %1$s に保存</string>
     <string name="save_location_free">空き %1$s</string>
+    <string name="save_location_folder_uses">このフォルダの使用量 %1$s</string>
     <string name="save_location_other">その他のフォルダ</string>
     <string name="save_location_other_hint">この端末またはカード上の任意のフォルダ</string>
     <string name="save_location_close">閉じる</string>

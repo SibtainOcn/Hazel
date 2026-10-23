@@ -64,6 +64,9 @@
     <string name="search_cancel">Cancelar</string>
     <string name="search_clear_history_confirm_title">Apagar o histórico de pesquisa?</string>
     <string name="search_clear_history_confirm_body">Todos os links de pesquisa salvos serão removidos. Essa ação não pode ser desfeita.</string>
+    <string name="search_results_cleared">Resultados limpos</string>
+    <string name="search_history_cleared">Histórico de pesquisa limpo</string>
+    <string name="search_history_clear_failed">Não foi possível limpar o histórico de pesquisa</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Já foi baixado</string>
@@ -455,9 +458,6 @@
     <string name="batch_type_video">Vídeo</string>
     <string name="batch_container_title">Contêiner</string>
     <string name="batch_container_subtitle">O arquivo em que estes links são salvos</string>
-    <string name="batch_save_dir_title">Onde salvar</string>
-    <string name="batch_open_folder">Abrir esta pasta</string>
-    <string name="batch_change_folder">Mudar de pasta</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Miniatura</string>
@@ -797,6 +797,9 @@
     <string name="fetch_settings_search_results">Resultados por busca</string>
     <string name="fetch_settings_suggestions">Sugestões de busca</string>
     <string name="fetch_settings_suggestions_summary">Sugere buscas do Google enquanto você digita. O que você digita é enviado ao Google.</string>
+    <string name="search_suggestions_confirm_title">Ativar sugestões de pesquisa?</string>
+    <string name="search_suggestions_confirm_body">Enquanto você digita uma pesquisa, suas palavras são enviadas ao Google para buscar sugestões. Links nunca são enviados. Você pode desativar isso a qualquer momento.</string>
+    <string name="search_suggestions_confirm">Ativar</string>
     <string name="fetch_settings_playback">Reprodução</string>
     <string name="fetch_settings_play_with">Reproduzir com</string>
     <string name="fetch_settings_play_quality">Qualidade de reprodução</string>
@@ -813,6 +816,7 @@
     <string name="save_location_internal">Armazenamento interno</string>
     <string name="save_location_card_hint">Salva em %1$s no cartão</string>
     <string name="save_location_free">%1$s livres</string>
+    <string name="save_location_folder_uses">Esta pasta ocupa %1$s</string>
     <string name="save_location_other">Outra pasta</string>
     <string name="save_location_other_hint">Qualquer pasta deste aparelho ou de um cartão</string>
     <string name="save_location_close">Fechar</string>

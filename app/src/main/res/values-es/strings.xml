@@ -64,6 +64,9 @@
     <string name="search_cancel">Cancelar</string>
     <string name="search_clear_history_confirm_title">¿Borrar el historial de búsqueda?</string>
     <string name="search_clear_history_confirm_body">Se eliminarán todos los enlaces de búsqueda guardados. Esta acción no se puede deshacer.</string>
+    <string name="search_results_cleared">Resultados borrados</string>
+    <string name="search_history_cleared">Historial de búsqueda borrado</string>
+    <string name="search_history_clear_failed">No se pudo borrar el historial de búsqueda</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Ya descargado</string>
@@ -455,9 +458,6 @@
     <string name="batch_type_video">Vídeo</string>
     <string name="batch_container_title">Contenedor</string>
     <string name="batch_container_subtitle">El archivo en el que se guardan estos enlaces</string>
-    <string name="batch_save_dir_title">Dónde guardar</string>
-    <string name="batch_open_folder">Abrir esta carpeta</string>
-    <string name="batch_change_folder">Cambiar de carpeta</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Miniatura</string>
@@ -797,6 +797,9 @@
     <string name="fetch_settings_search_results">Resultados por búsqueda</string>
     <string name="fetch_settings_suggestions">Sugerencias de búsqueda</string>
     <string name="fetch_settings_suggestions_summary">Sugiere búsquedas de Google mientras escribes. Lo que escribes se envía a Google.</string>
+    <string name="search_suggestions_confirm_title">¿Activar sugerencias de búsqueda?</string>
+    <string name="search_suggestions_confirm_body">Mientras escribes una búsqueda, tus palabras se envían a Google para obtener sugerencias. Los enlaces nunca se envían. Puedes desactivarlo cuando quieras.</string>
+    <string name="search_suggestions_confirm">Activar</string>
     <string name="fetch_settings_playback">Reproducción</string>
     <string name="fetch_settings_play_with">Reproducir con</string>
     <string name="fetch_settings_play_quality">Calidad de reproducción</string>
@@ -813,6 +816,7 @@
     <string name="save_location_internal">Almacenamiento interno</string>
     <string name="save_location_card_hint">Guarda en %1$s en la tarjeta</string>
     <string name="save_location_free">%1$s libres</string>
+    <string name="save_location_folder_uses">Esta carpeta ocupa %1$s</string>
     <string name="save_location_other">Otra carpeta</string>
     <string name="save_location_other_hint">Cualquier carpeta de este dispositivo o de una tarjeta</string>
     <string name="save_location_close">Cerrar</string>

@@ -18,9 +18,8 @@ import java.io.File
  * It is null when the system has not handed one out for this card.
  */
 data class SdCard(val uuid: String, val name: String, val appDir: File?) {
-    /** Space left on the card, or null when there is no folder on it to measure from. */
-    val freeBytes: Long? get() = appDir?.let { runCatching { it.usableSpace }.getOrNull() }
-    val totalBytes: Long? get() = appDir?.let { runCatching { it.totalSpace }.getOrNull() }
+    /** Room on the card, or null when there is no folder on it to measure from. */
+    fun space(): StorageSpace? = StorageSpace.of(appDir)
 }
 
 /**

@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Check
 import com.hazel.android.ui.components.AlertDialog
@@ -505,6 +506,26 @@ internal fun ConfirmSettingDialog(
             TextButton(onClick = onConfirm) {
                 Text(confirm, color = MaterialTheme.colorScheme.error)
             }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.download_cancel)) }
+        }
+    )
+}
+
+/**
+ * Asked before search suggestions are turned on, since from then on typed searches leave the
+ * device for Google. Turning them off needs no question.
+ */
+@Composable
+internal fun SuggestionsConsentDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Filled.Lightbulb, null) },
+        title = { Text(stringResource(R.string.search_suggestions_confirm_title), fontWeight = FontWeight.Bold) },
+        text = { Text(stringResource(R.string.search_suggestions_confirm_body)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text(stringResource(R.string.search_suggestions_confirm)) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.download_cancel)) }

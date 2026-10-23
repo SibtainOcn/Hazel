@@ -114,12 +114,8 @@ import com.hazel.android.util.MediaOpener
 import com.hazel.android.util.MediaPresence
 import kotlinx.coroutines.launch
 import android.app.Activity
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ErrorOutline
-import com.hazel.android.ui.screens.download.FeedbackToast
-import kotlinx.coroutines.delay
+import com.hazel.android.ui.screens.download.StatusToastHost
+import com.hazel.android.ui.screens.download.rememberStatusToastState
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -226,17 +222,8 @@ fun HistoryScreen() {
     }
     BackHandler(enabled = selecting) { exitSelection() }
 
-    var feedback by remember { mutableStateOf<DeleteFeedback?>(null) }
-    var shownFeedback by remember { mutableStateOf(DeleteFeedback("", true)) }
-    LaunchedEffect(feedback) {
-        val current = feedback ?: return@LaunchedEffect
-        shownFeedback = current
-        delay(2000)
-        feedback = null
-    }
-    fun toast(text: String, ok: Boolean = true) {
-        feedback = DeleteFeedback(text, ok)
-    }
+    val statusToast = rememberStatusToastState()
+    fun toast(text: String, ok: Boolean = true) = statusToast.show(text, ok)
 
     val consentLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
@@ -532,20 +519,12 @@ fun HistoryScreen() {
                     ) { dismissSearch() }
             )
         }
-        androidx.compose.animation.AnimatedVisibility(
-            visible = feedback != null,
-            enter = fadeIn() + scaleIn(initialScale = 0.9f),
-            exit = fadeOut() + scaleOut(targetScale = 0.9f),
-            modifier = Modifier
+        StatusToastHost(
+            statusToast,
+            Modifier
                 .align(Alignment.BottomCenter)
                 .padding(start = 20.dp, end = 20.dp, bottom = 24.dp)
-        ) {
-            FeedbackToast(
-                shownFeedback.message,
-                icon = if (shownFeedback.ok) Icons.Filled.CheckCircle else Icons.Filled.ErrorOutline,
-                iconTint = if (shownFeedback.ok) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-            )
-        }
+        )
         }
     }
 
@@ -782,7 +761,6 @@ private fun HistoryActionDialog(
 }
 
 /** A new instance per message, so the same text twice still shows twice. */
-private class DeleteFeedback(val message: String, val ok: Boolean)
 
 /** What can be done with one finished download, whichever layout draws it. */
 private class EntryActions(

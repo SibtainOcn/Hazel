@@ -126,7 +126,10 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
                         title = stringResource(R.string.fetch_settings_suggestions),
                         summary = stringResource(R.string.fetch_settings_suggestions_summary),
                         checked = suggestions,
-                        onCheckedChange = { scope.launch { SettingsRepository.setSearchSuggestions(context, it) } }
+                        onCheckedChange = { on ->
+                            if (on) open = Choice.SUGGESTIONS
+                            else scope.launch { SettingsRepository.setSearchSuggestions(context, false) }
+                        }
                     )
                 }
             )
@@ -158,6 +161,10 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
     val close = { open = Choice.NONE }
     when (open) {
         Choice.NONE -> Unit
+        Choice.SUGGESTIONS -> SuggestionsConsentDialog(
+            onConfirm = { scope.launch { SettingsRepository.setSearchSuggestions(context, true) }; close() },
+            onDismiss = close
+        )
         Choice.READ_ENGINE -> SingleChoiceDialog(
             title = stringResource(R.string.fetch_settings_read_with),
             choices = engineChoices,
@@ -224,5 +231,5 @@ internal fun engineSummary(engine: ListingSource): String = stringResource(
 )
 
 private enum class Choice {
-    NONE, READ_ENGINE, PATIENCE, SEARCH_SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, PLAY_QUALITY
+    NONE, READ_ENGINE, PATIENCE, SEARCH_SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, PLAY_QUALITY, SUGGESTIONS
 }

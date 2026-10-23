@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Libraries updated to their latest stable versions (Kotlin 2.4, Compose BOM 2026.09, AGP 9.4, Gradle 9.8, OkHttp, Coil, Media3 kept at 1.11), and the app compiles against Android 37. The target Android version is unchanged.
 - yt-dlp update notifications (available, installed, failed) are off by default, for new installs and for existing ones. Turn them on again under the yt-dlp update screen.
 - Quality list: generic rows label their tile with the quality (BEST, 1080 … WORST) instead of "DEFAULT", on an accent gradient.
+- Save location: internal storage shows a live space bar like SD cards, which turns red when nearly full, and a picked folder shows how much it holds. The playlist sheet uses the same dialog as the single download sheet and Downloads settings.
+- Glass background fades its colours softly into each other, with no round patches or banding on empty screens.
+- Search options: clearing results or history closes the sheet and shows a short confirmation, or an error if history could not be cleared.
+- Turning on search suggestions asks first, explaining that typed searches are sent to Google (links never are).
 ### Fixed
 - Playlist sheet could stop responding to taps after a link was swiped away.
 - Playlist rows no longer show the swipe-to-remove background at rest when glass is on.

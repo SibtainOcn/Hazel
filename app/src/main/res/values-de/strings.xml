@@ -64,6 +64,9 @@
     <string name="search_cancel">Abbrechen</string>
     <string name="search_clear_history_confirm_title">Suchverlauf löschen?</string>
     <string name="search_clear_history_confirm_body">Alle gespeicherten Suchlinks werden entfernt. Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="search_results_cleared">Suchergebnisse gelöscht</string>
+    <string name="search_history_cleared">Suchverlauf gelöscht</string>
+    <string name="search_history_clear_failed">Suchverlauf konnte nicht gelöscht werden</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Schon heruntergeladen</string>
@@ -444,9 +447,6 @@
     <string name="batch_type_video">Video</string>
     <string name="batch_container_title">Container</string>
     <string name="batch_container_subtitle">Die Datei, als die diese Links gespeichert werden</string>
-    <string name="batch_save_dir_title">Speicherort</string>
-    <string name="batch_open_folder">Diesen Ordner öffnen</string>
-    <string name="batch_change_folder">Ordner wechseln</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Vorschaubild</string>
@@ -783,6 +783,9 @@
     <string name="fetch_settings_search_results">Ergebnisse pro Suche</string>
     <string name="fetch_settings_suggestions">Suchvorschläge</string>
     <string name="fetch_settings_suggestions_summary">Schlägt beim Tippen Suchen von Google vor. Was du tippst, wird an Google gesendet.</string>
+    <string name="search_suggestions_confirm_title">Suchvorschläge einschalten?</string>
+    <string name="search_suggestions_confirm_body">Während du eine Suche tippst, werden deine Wörter an Google gesendet, um Vorschläge zu laden. Links werden nie gesendet. Du kannst das jederzeit ausschalten.</string>
+    <string name="search_suggestions_confirm">Einschalten</string>
     <string name="fetch_settings_playback">Wiedergabe</string>
     <string name="fetch_settings_play_with">Abspielen mit</string>
     <string name="fetch_settings_play_quality">Wiedergabequalität</string>
@@ -798,6 +801,7 @@
     <string name="save_location_internal">Interner Speicher</string>
     <string name="save_location_card_hint">Speichert in %1$s auf der Karte</string>
     <string name="save_location_free">%1$s frei</string>
+    <string name="save_location_folder_uses">Dieser Ordner belegt %1$s</string>
     <string name="save_location_other">Anderer Ordner</string>
     <string name="save_location_other_hint">Beliebiger Ordner auf diesem Gerät oder einer Karte</string>
     <string name="save_location_close">Schließen</string>

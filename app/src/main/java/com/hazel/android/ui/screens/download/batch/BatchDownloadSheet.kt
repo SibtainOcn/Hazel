@@ -114,6 +114,7 @@ import com.hazel.android.download.languageLabel
 import com.hazel.android.ui.screens.download.AudioLanguageSheet
 import com.hazel.android.ui.screens.download.ChaptersDialog
 import com.hazel.android.ui.screens.download.CookiesDialog
+import com.hazel.android.ui.screens.download.SaveDirDialog
 import com.hazel.android.ui.screens.download.rememberUseCookies
 import com.hazel.android.ui.screens.download.IncognitoButton
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
@@ -1001,10 +1002,10 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
-        BatchSheet.SAVE_DIR -> BatchSaveDirSheet(
+        BatchSheet.SAVE_DIR -> SaveDirDialog(
             isVideo = state.videoTab,
             saveDir = saveDirs.of(state.videoTab),
-            saveDirLabel = saveDirs.labelOf(state.videoTab),
+            label = saveDirs.labelOf(state.videoTab),
             onOpen = {
                 openSheet = BatchSheet.NONE
                 onOpenSaveDir(state.videoTab)

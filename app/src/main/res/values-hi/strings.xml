@@ -64,6 +64,9 @@
     <string name="search_cancel">रद्द करें</string>
     <string name="search_clear_history_confirm_title">खोज इतिहास मिटाएँ?</string>
     <string name="search_clear_history_confirm_body">सभी सहेजे गए खोज लिंक हटा दिए जाएँगे। इसे पहले जैसा नहीं किया जा सकता।</string>
+    <string name="search_results_cleared">खोज परिणाम साफ़ किए गए</string>
+    <string name="search_history_cleared">खोज इतिहास साफ़ किया गया</string>
+    <string name="search_history_clear_failed">खोज इतिहास साफ़ नहीं हो सका</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">पहले से डाउनलोड है</string>
@@ -444,9 +447,6 @@
     <string name="batch_type_video">वीडियो</string>
     <string name="batch_container_title">कंटेनर</string>
     <string name="batch_container_subtitle">ये लिंक जिस फ़ाइल के रूप में सहेजे जाएँगे</string>
-    <string name="batch_save_dir_title">सहेजने की जगह</string>
-    <string name="batch_open_folder">यह फ़ोल्डर खोलें</string>
-    <string name="batch_change_folder">फ़ोल्डर बदलें</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">थंबनेल</string>
@@ -783,6 +783,9 @@
     <string name="fetch_settings_search_results">हर खोज में नतीजे</string>
     <string name="fetch_settings_suggestions">खोज सुझाव</string>
     <string name="fetch_settings_suggestions_summary">टाइप करते समय Google से खोज सुझाता है। आप जो टाइप करते हैं वह Google को भेजा जाता है।</string>
+    <string name="search_suggestions_confirm_title">खोज सुझाव चालू करें?</string>
+    <string name="search_suggestions_confirm_body">खोज टाइप करते समय आपके शब्द सुझाव पाने के लिए Google को भेजे जाते हैं। लिंक कभी नहीं भेजे जाते। आप इसे कभी भी बंद कर सकते हैं।</string>
+    <string name="search_suggestions_confirm">चालू करें</string>
     <string name="fetch_settings_playback">प्लेबैक</string>
     <string name="fetch_settings_play_with">इससे चलाएं</string>
     <string name="fetch_settings_play_quality">प्लेबैक गुणवत्ता</string>
@@ -798,6 +801,7 @@
     <string name="save_location_internal">आंतरिक स्टोरेज</string>
     <string name="save_location_card_hint">कार्ड पर %1$s में सहेजता है</string>
     <string name="save_location_free">%1$s खाली</string>
+    <string name="save_location_folder_uses">यह फ़ोल्डर %1$s ले रहा है</string>
     <string name="save_location_other">दूसरा फ़ोल्डर</string>
     <string name="save_location_other_hint">इस डिवाइस या कार्ड का कोई भी फ़ोल्डर</string>
     <string name="save_location_close">बंद करें</string>

@@ -15,10 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.SdCard
 import androidx.compose.runtime.remember
 import androidx.compose.material3.SheetState
 import androidx.compose.runtime.getValue
@@ -26,11 +22,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
-import androidx.compose.ui.platform.LocalContext
-import com.hazel.android.data.SaveDir
-import com.hazel.android.util.SdCard
-import com.hazel.android.util.SdCards
-import com.hazel.android.util.StoragePaths
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -178,62 +169,6 @@ fun BatchContainerSheet(
                 onClick = { close { onSelect(if (choice == "Default") "" else choice) } }
             )
         }
-    }
-}
-
-/**
- * Where the batch is written, with the folder it is going to now: internal storage, an SD
- * card that is in, or any other folder, and a way to open the current one.
- */
-@Composable
-fun BatchSaveDirSheet(
-    isVideo: Boolean,
-    saveDir: SaveDir,
-    saveDirLabel: String,
-    onOpen: () -> Unit,
-    onPick: (card: SdCard?) -> Unit,
-    onReset: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    val context = LocalContext.current
-    val cards = remember { SdCards.list(context) }
-    val onCard = remember(saveDir.uri) { SdCards.cardOf(saveDir.uri, context) }
-
-    ChoiceSheet(
-        title = stringResource(R.string.batch_save_dir_title),
-        subtitle = saveDirLabel,
-        onDismiss = onDismiss
-    ) { close ->
-        ChoiceRow(
-            label = stringResource(R.string.save_location_internal) + " · " +
-                StoragePaths.downloadsDisplay(isAudio = !isVideo),
-            icon = Icons.Filled.PhoneAndroid,
-            selected = !saveDir.isCustom,
-            onClick = { close(onReset) }
-        )
-        cards.forEach { card ->
-            val free = card.freeBytes?.let {
-                stringResource(R.string.save_location_free, android.text.format.Formatter.formatShortFileSize(context, it))
-            }
-            ChoiceRow(
-                label = listOfNotNull(card.name, free).joinToString(" · "),
-                icon = Icons.Filled.SdCard,
-                selected = onCard?.uuid == card.uuid,
-                onClick = { close { onPick(card) } }
-            )
-        }
-        ChoiceRow(
-            label = stringResource(R.string.batch_change_folder),
-            icon = Icons.Filled.Edit,
-            selected = saveDir.isCustom && onCard == null,
-            onClick = { close { onPick(null) } }
-        )
-        ChoiceRow(
-            label = stringResource(R.string.batch_open_folder),
-            icon = Icons.Filled.Folder,
-            selected = false,
-            onClick = { close(onOpen) }
-        )
     }
 }
 
