@@ -1,5 +1,10 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.ui.graphics.luminance
+import kotlin.math.roundToInt
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.Brush
 import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.annotation.StringRes
@@ -891,7 +896,7 @@ fun FormatRow(
             .padding(horizontal = if (compact) 10.dp else 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ContainerBadge(text = format.displayContainer, compact = compact)
+        ContainerBadge(text = badgeTextOf(format), compact = compact)
 
         Spacer(modifier = Modifier.width(if (compact) 10.dp else 12.dp))
 
@@ -1014,21 +1019,60 @@ private const val MAX_ID_CHARS = 12
 /** Past this many characters a headline is a sentence rather than a label. */
 private const val LONG_HEADLINE = 22
 
+/**
+ * What a row's block says: the container for a real stream, and for a ladder rung, which
+ * has none, the rung itself (BEST, 1080, 128K, WORST) rather than "DEFAULT" on every row.
+ */
+internal fun badgeTextOf(format: MediaFormat): String {
+    if (!format.isGeneric) return format.displayContainer
+    val id = format.formatId.lowercase()
+    return when {
+        id.startsWith("worst") -> "WORST"
+        id.startsWith("best") -> "BEST"
+        format.hasVideo && format.height > 0 -> format.height.toString()
+        !format.hasVideo && format.bitrateKbps > 0 -> "${format.bitrateKbps.roundToInt()}K"
+        else -> format.displayContainer
+    }
+}
+
+/** The lower end of the block's fill: up to 30% into the container tone, less where the label would fade. */
+internal fun badgeFillEnd(primary: Color, container: Color, onPrimary: Color): Color =
+    listOf(0.3f, 0.2f, 0.1f).map { lerp(primary, container, it) }
+        .firstOrNull { contrastOf(onPrimary, it) >= BADGE_MIN_CONTRAST } ?: primary
+
+internal fun contrastOf(a: Color, b: Color): Float {
+    val hi = maxOf(a.luminance(), b.luminance())
+    val lo = minOf(a.luminance(), b.luminance())
+    return (hi + 0.05f) / (lo + 0.05f)
+}
+
+internal const val BADGE_MIN_CONTRAST = 3f
+
 /** The container block a row leads with, sized the same whatever the word inside it is. */
 @Composable
 private fun ContainerBadge(text: String, compact: Boolean = false) {
+    val primary = MaterialTheme.colorScheme.primary
+    // A light fall from the accent into its container tone, with a faint top edge, so the
+    // block has some depth instead of a flat fill. Text contrast stays with onPrimary.
+    val container = MaterialTheme.colorScheme.primaryContainer
+    val onPrimary = MaterialTheme.colorScheme.onPrimary
+    val fill = remember(primary, container, onPrimary) {
+        Brush.verticalGradient(listOf(primary, badgeFillEnd(primary, container, onPrimary)))
+    }
+    val shape = RoundedCornerShape(10.dp)
     Box(
         modifier = Modifier
             .size(width = if (compact) 48.dp else 60.dp, height = if (compact) 44.dp else 52.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.primary),
+            .clip(shape)
+            .background(fill)
+            .border(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.35f), Color.Transparent)), shape),
         contentAlignment = Alignment.Center
     ) {
         val cleanText = text.trim().uppercase()
         val fontSize = when {
-            cleanText.length > 5 -> if (compact) 9.sp else 10.sp
-            cleanText.length >= 4 -> if (compact) 10.sp else 11.5.sp
-            else -> if (compact) 12.sp else 13.sp
+            cleanText.length > 5 -> if (compact) 9.5.sp else 11.sp
+            cleanText.length >= 4 -> if (compact) 12.sp else 14.sp
+            else -> if (compact) 13.5.sp else 15.5.sp
         }
         Text(
             text = cleanText,

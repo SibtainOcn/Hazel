@@ -30,7 +30,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Long-press the Hazel icon for shortcuts to Search, Downloads, Queue and More. Hazel and Hazel Instant are offered as direct share targets, so share sheets can rank them in their top row as you use them.
 - Libraries updated to their latest stable versions (Kotlin 2.4, Compose BOM 2026.09, AGP 9.4, Gradle 9.8, OkHttp, Coil, Media3 kept at 1.11), and the app compiles against Android 37. The target Android version is unchanged.
 - yt-dlp update notifications (available, installed, failed) are off by default, for new installs and for existing ones. Turn them on again under the yt-dlp update screen.
+- Quality list: generic rows label their tile with the quality (BEST, 1080 … WORST) instead of "DEFAULT", on an accent gradient.
 ### Fixed
+- Playlist sheet could stop responding to taps after a link was swiped away.
+- Playlist rows no longer show the swipe-to-remove background at rest when glass is on.
+- Playlist search field no longer slips behind the keyboard when few links match.
+- Quality and size labels on playlist rows wrap on narrow screens and large font sizes instead of being cut off.
+- Playlist option pickers close smoothly before applying a choice.
 - Deleting a download also removes it from the gallery and other media apps, on every Android version.
 - A file that fails to delete keeps its row instead of vanishing from the list.
 - Two downloads finishing at the same moment no longer share a row id.

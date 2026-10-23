@@ -20,6 +20,12 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.SdCard
 import androidx.compose.runtime.remember
+import androidx.compose.material3.SheetState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import com.hazel.android.data.SaveDir
 import com.hazel.android.util.SdCard
@@ -93,18 +99,18 @@ fun BatchDownloadTypeSheet(
         title = stringResource(R.string.batch_type_sheet_title),
         subtitle = stringResource(R.string.batch_type_sheet_subtitle),
         onDismiss = onDismiss
-    ) {
+    ) { close ->
         ChoiceRow(
             label = stringResource(R.string.batch_type_audio),
             icon = Icons.Filled.MusicNote,
             selected = !isVideo,
-            onClick = { onSelect(false) }
+            onClick = { close { onSelect(false) } }
         )
         ChoiceRow(
             label = stringResource(R.string.batch_type_video),
             icon = Icons.Filled.Videocam,
             selected = isVideo,
-            onClick = { onSelect(true) }
+            onClick = { close { onSelect(true) } }
         )
     }
 }
@@ -118,6 +124,7 @@ fun BatchBitrateSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
+    val close = rememberCloseThen(sheetState)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -140,7 +147,7 @@ fun BatchBitrateSheet(
                     ChoiceRow(
                         label = stringResource(labelRes),
                         selected = quality == currentQuality,
-                        onClick = { onSelect(quality) }
+                        onClick = { close { onSelect(quality) } }
                     )
                 }
             }
@@ -162,13 +169,13 @@ fun BatchContainerSheet(
         title = stringResource(R.string.batch_container_title),
         subtitle = stringResource(R.string.batch_container_subtitle),
         onDismiss = onDismiss
-    ) {
+    ) { close ->
         choices.forEach { choice ->
             ChoiceRow(
                 label = choice,
                 selected = choice == current.ifBlank { "Default" },
                 // "Default" is stored as blank: it means "add no container option".
-                onClick = { onSelect(if (choice == "Default") "" else choice) }
+                onClick = { close { onSelect(if (choice == "Default") "" else choice) } }
             )
         }
     }
@@ -196,13 +203,13 @@ fun BatchSaveDirSheet(
         title = stringResource(R.string.batch_save_dir_title),
         subtitle = saveDirLabel,
         onDismiss = onDismiss
-    ) {
+    ) { close ->
         ChoiceRow(
             label = stringResource(R.string.save_location_internal) + " · " +
                 StoragePaths.downloadsDisplay(isAudio = !isVideo),
             icon = Icons.Filled.PhoneAndroid,
             selected = !saveDir.isCustom,
-            onClick = onReset
+            onClick = { close(onReset) }
         )
         cards.forEach { card ->
             val free = card.freeBytes?.let {
@@ -212,20 +219,20 @@ fun BatchSaveDirSheet(
                 label = listOfNotNull(card.name, free).joinToString(" · "),
                 icon = Icons.Filled.SdCard,
                 selected = onCard?.uuid == card.uuid,
-                onClick = { onPick(card) }
+                onClick = { close { onPick(card) } }
             )
         }
         ChoiceRow(
             label = stringResource(R.string.batch_change_folder),
             icon = Icons.Filled.Edit,
             selected = saveDir.isCustom && onCard == null,
-            onClick = { onPick(null) }
+            onClick = { close { onPick(null) } }
         )
         ChoiceRow(
             label = stringResource(R.string.batch_open_folder),
             icon = Icons.Filled.Folder,
             selected = false,
-            onClick = onOpen
+            onClick = { close(onOpen) }
         )
     }
 }
@@ -240,9 +247,10 @@ private fun ChoiceSheet(
     title: String,
     subtitle: String,
     onDismiss: () -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable (close: (() -> Unit) -> Unit) -> Unit
 ) {
     val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
+    val close = rememberCloseThen(sheetState)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -257,9 +265,32 @@ private fun ChoiceSheet(
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                content()
+                content(close)
             }
             Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+/**
+ * Slides a stacked sheet away before its choice runs, so it never leaves mid-animation.
+ * The choice runs even if the slide is cut short, and only once however fast the taps.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun rememberCloseThen(sheetState: SheetState): (() -> Unit) -> Unit {
+    val scope = rememberCoroutineScope()
+    var closing by remember { mutableStateOf(false) }
+    return { action ->
+        if (!closing) {
+            closing = true
+            scope.launch {
+                try {
+                    sheetState.hide()
+                } finally {
+                    action()
+                }
+            }
         }
     }
 }

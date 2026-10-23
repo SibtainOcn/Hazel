@@ -339,10 +339,11 @@ dependencies {
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.json)
 
-    // Layout tests: the screens and dialogs drawn on the JVM in every language, at font
-    // sizes up to the largest, checked for words broken to fit and saved as screenshots.
+    // Compose checks drawn on the JVM: themes, accents, glass, font and screen sizes.
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
