@@ -14,9 +14,13 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.RadialGradient
+import android.graphics.Shader
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.compositeOver
@@ -105,38 +109,76 @@ fun glassPreview(style: GlassStyle): List<Color> = fixedPalette(style) ?: Aurora
 val GlassDarkBase = Color(0xFF000000)
 val GlassLightBase = Color(0xFFF6F7FB)
 
-private class AuroraSpot(val brush: Brush, val center: Offset, val radius: Float)
+// A bell-shaped fade that reaches zero with no slope, so a glow has no visible rim.
+private val FalloffStops = floatArrayOf(0f, 0.15f, 0.3f, 0.45f, 0.6f, 0.75f, 0.9f, 1f)
+private val FalloffLevels = floatArrayOf(1f, 0.94f, 0.79f, 0.58f, 0.33f, 0.13f, 0.02f, 0f)
+private const val GlowReach = 1.15f
+private const val MaxStretch = 1.5f
 
-private fun auroraSpots(palette: List<Color>, dark: Boolean, scale: Float, area: Size, top: Float = 0f): List<AuroraSpot> {
-    val opacity = (if (dark) 0.42f else 0.55f) * scale
-    return GlowSpots.zip(palette) { g, color ->
-        val a = opacity * g.strength
-        val center = Offset(area.width * g.x, top + area.height * g.y)
-        val r = area.width * g.radius
-        AuroraSpot(
-            Brush.radialGradient(
-                0f to color.copy(alpha = a),
-                0.45f to color.copy(alpha = a * 0.55f),
-                1f to Color.Transparent,
-                center = center,
-                radius = r,
-            ),
-            center,
-            r,
-        )
-    }
+private class AuroraSpot(val shader: Shader, val x: Float, val y: Float, val radius: Float, val stretch: Float)
+
+private class AuroraLayer(val spots: List<AuroraSpot>, val wash: Shader?) {
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.DITHER_FLAG)
 }
 
-private fun DrawScope.drawSpots(spots: List<AuroraSpot>) {
-    for (s in spots) drawCircle(brush = s.brush, radius = s.radius, center = s.center)
+private fun auroraLayer(
+    palette: List<Color>,
+    dark: Boolean,
+    scale: Float,
+    area: Size,
+    top: Float = 0f,
+    wash: Boolean = false,
+): AuroraLayer {
+    val opacity = (if (dark) 0.4f else 0.52f) * scale
+    // Tall areas get oval glows, so a phone screen is not dotted with round discs.
+    val stretch = (area.height / area.width).coerceIn(1f, MaxStretch)
+    val spots = GlowSpots.zip(palette) { g, color ->
+        val a = opacity * g.strength
+        val x = area.width * g.x
+        val y = top + area.height * g.y
+        val r = area.width * g.radius * GlowReach
+        val colors = IntArray(FalloffLevels.size) { color.copy(alpha = a * FalloffLevels[it]).toArgb() }
+        AuroraSpot(RadialGradient(x, y, r, colors, FalloffStops, Shader.TileMode.CLAMP), x, y, r, stretch)
+    }
+    val washShader = if (wash && palette.size >= 3) {
+        val w = opacity * 0.18f
+        LinearGradient(
+            0f, top, 0f, top + area.height,
+            intArrayOf(
+                palette[0].copy(alpha = w).toArgb(),
+                Color.Transparent.toArgb(),
+                palette[2].copy(alpha = w * 0.8f).toArgb(),
+            ),
+            floatArrayOf(0f, 0.55f, 1f),
+            Shader.TileMode.CLAMP,
+        )
+    } else null
+    return AuroraLayer(spots, washShader)
+}
+
+private fun DrawScope.drawAurora(layer: AuroraLayer) = drawIntoCanvas { canvas ->
+    val native = canvas.nativeCanvas
+    val paint = layer.paint
+    layer.wash?.let {
+        paint.shader = it
+        native.drawRect(0f, 0f, size.width, size.height, paint)
+    }
+    for (s in layer.spots) {
+        paint.shader = s.shader
+        native.save()
+        native.scale(1f, s.stretch, s.x, s.y)
+        native.drawCircle(s.x, s.y, s.radius, paint)
+        native.restore()
+    }
+    paint.shader = null
 }
 
 fun Modifier.auroraBackground(dark: Boolean, palette: List<Color>): Modifier = drawWithCache {
-    val spots = auroraSpots(palette, dark, 1f, size)
+    val layer = auroraLayer(palette, dark, 1f, size, wash = true)
     val base = if (dark) GlassDarkBase else GlassLightBase
     onDrawBehind {
         drawRect(base)
-        drawSpots(spots)
+        drawAurora(layer)
     }
 }
 
@@ -186,8 +228,8 @@ fun Modifier.glassSheetGlow(): Modifier {
     val palette = LocalGlassPalette.current
     return drawWithCache {
         val bleed = SheetBleed.toPx()
-        val spots = auroraSpots(palette, dark, scale, Size(size.width, size.height + bleed * 2), -bleed)
-        onDrawBehind { drawSpots(spots) }
+        val layer = auroraLayer(palette, dark, scale, Size(size.width, size.height + bleed * 2), -bleed)
+        onDrawBehind { drawAurora(layer) }
     }
 }
 
@@ -203,10 +245,10 @@ fun Modifier.glassBackdrop(shape: Shape, solid: Boolean = false, enabled: Boolea
     return this
         .clip(shape)
         .drawWithCache {
-            val spots = auroraSpots(palette, dark, scale, size)
+            val layer = auroraLayer(palette, dark, scale, size)
             onDrawBehind {
                 drawRect(base)
-                drawSpots(spots)
+                drawAurora(layer)
             }
         }
         .border(1.dp, edge, shape)

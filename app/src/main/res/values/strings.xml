@@ -503,9 +503,6 @@
     <string name="batch_type_video">Video</string>
     <string name="batch_container_title">Container</string>
     <string name="batch_container_subtitle">The file these links are saved as</string>
-    <string name="batch_save_dir_title">Save location</string>
-    <string name="batch_open_folder">Open this folder</string>
-    <string name="batch_change_folder">Change folder</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Thumbnail</string>
@@ -881,6 +878,7 @@
     <string name="save_location_internal">Internal storage</string>
     <string name="save_location_card_hint">Saves to %1$s on the card</string>
     <string name="save_location_free">%1$s free</string>
+    <string name="save_location_folder_uses">This folder uses %1$s</string>
     <string name="save_location_other">Other folder</string>
     <string name="save_location_other_hint">Any folder on this device or a card</string>
     <string name="save_location_close">Close</string>

@@ -466,9 +466,6 @@
     <string name="batch_type_video">Видео</string>
     <string name="batch_container_title">Контейнер</string>
     <string name="batch_container_subtitle">Формат файла для сохранения ссылок</string>
-    <string name="batch_save_dir_title">Место сохранения</string>
-    <string name="batch_open_folder">Открыть эту папку</string>
-    <string name="batch_change_folder">Сменить папку</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Обложка</string>
@@ -827,6 +824,7 @@
     <string name="save_location_internal">Внутренняя память</string>
     <string name="save_location_card_hint">Сохраняет в %1$s на карте</string>
     <string name="save_location_free">Свободно: %1$s</string>
+    <string name="save_location_folder_uses">Папка занимает %1$s</string>
     <string name="save_location_other">Другая папка</string>
     <string name="save_location_other_hint">Любая папка на устройстве или карте</string>
     <string name="save_location_close">Закрыть</string>

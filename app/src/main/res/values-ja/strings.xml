@@ -433,9 +433,6 @@
     <string name="batch_type_video">動画</string>
     <string name="batch_container_title">コンテナ</string>
     <string name="batch_container_subtitle">これらのリンクを保存するファイル形式</string>
-    <string name="batch_save_dir_title">保存場所</string>
-    <string name="batch_open_folder">このフォルダを開く</string>
-    <string name="batch_change_folder">フォルダを変更</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">サムネイル</string>
@@ -783,6 +780,7 @@
     <string name="save_location_internal">内部ストレージ</string>
     <string name="save_location_card_hint">カードの %1$s に保存</string>
     <string name="save_location_free">空き %1$s</string>
+    <string name="save_location_folder_uses">このフォルダの使用量 %1$s</string>
     <string name="save_location_other">その他のフォルダ</string>
     <string name="save_location_other_hint">この端末またはカード上の任意のフォルダ</string>
     <string name="save_location_close">閉じる</string>

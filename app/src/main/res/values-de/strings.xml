@@ -444,9 +444,6 @@
     <string name="batch_type_video">Video</string>
     <string name="batch_container_title">Container</string>
     <string name="batch_container_subtitle">Die Datei, als die diese Links gespeichert werden</string>
-    <string name="batch_save_dir_title">Speicherort</string>
-    <string name="batch_open_folder">Diesen Ordner öffnen</string>
-    <string name="batch_change_folder">Ordner wechseln</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Vorschaubild</string>
@@ -798,6 +795,7 @@
     <string name="save_location_internal">Interner Speicher</string>
     <string name="save_location_card_hint">Speichert in %1$s auf der Karte</string>
     <string name="save_location_free">%1$s frei</string>
+    <string name="save_location_folder_uses">Dieser Ordner belegt %1$s</string>
     <string name="save_location_other">Anderer Ordner</string>
     <string name="save_location_other_hint">Beliebiger Ordner auf diesem Gerät oder einer Karte</string>
     <string name="save_location_close">Schließen</string>

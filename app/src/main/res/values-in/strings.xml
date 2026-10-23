@@ -433,9 +433,6 @@
     <string name="batch_type_video">Video</string>
     <string name="batch_container_title">Wadah</string>
     <string name="batch_container_subtitle">Format file penyimpanan tautan-tautan ini</string>
-    <string name="batch_save_dir_title">Lokasi penyimpanan</string>
-    <string name="batch_open_folder">Buka folder ini</string>
-    <string name="batch_change_folder">Ubah folder</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Gambar mini</string>
@@ -783,6 +780,7 @@
     <string name="save_location_internal">Penyimpanan internal</string>
     <string name="save_location_card_hint">Disimpan ke %1$s di kartu</string>
     <string name="save_location_free">%1$s kosong</string>
+    <string name="save_location_folder_uses">Folder ini memakai %1$s</string>
     <string name="save_location_other">Folder lain</string>
     <string name="save_location_other_hint">Folder mana pun di perangkat ini atau kartu</string>
     <string name="save_location_close">Tutup</string>

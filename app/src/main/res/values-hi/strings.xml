@@ -444,9 +444,6 @@
     <string name="batch_type_video">वीडियो</string>
     <string name="batch_container_title">कंटेनर</string>
     <string name="batch_container_subtitle">ये लिंक जिस फ़ाइल के रूप में सहेजे जाएँगे</string>
-    <string name="batch_save_dir_title">सहेजने की जगह</string>
-    <string name="batch_open_folder">यह फ़ोल्डर खोलें</string>
-    <string name="batch_change_folder">फ़ोल्डर बदलें</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">थंबनेल</string>
@@ -798,6 +795,7 @@
     <string name="save_location_internal">आंतरिक स्टोरेज</string>
     <string name="save_location_card_hint">कार्ड पर %1$s में सहेजता है</string>
     <string name="save_location_free">%1$s खाली</string>
+    <string name="save_location_folder_uses">यह फ़ोल्डर %1$s ले रहा है</string>
     <string name="save_location_other">दूसरा फ़ोल्डर</string>
     <string name="save_location_other_hint">इस डिवाइस या कार्ड का कोई भी फ़ोल्डर</string>
     <string name="save_location_close">बंद करें</string>

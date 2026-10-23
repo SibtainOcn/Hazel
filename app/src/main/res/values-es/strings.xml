@@ -455,9 +455,6 @@
     <string name="batch_type_video">Vídeo</string>
     <string name="batch_container_title">Contenedor</string>
     <string name="batch_container_subtitle">El archivo en el que se guardan estos enlaces</string>
-    <string name="batch_save_dir_title">Dónde guardar</string>
-    <string name="batch_open_folder">Abrir esta carpeta</string>
-    <string name="batch_change_folder">Cambiar de carpeta</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Miniatura</string>
@@ -813,6 +810,7 @@
     <string name="save_location_internal">Almacenamiento interno</string>
     <string name="save_location_card_hint">Guarda en %1$s en la tarjeta</string>
     <string name="save_location_free">%1$s libres</string>
+    <string name="save_location_folder_uses">Esta carpeta ocupa %1$s</string>
     <string name="save_location_other">Otra carpeta</string>
     <string name="save_location_other_hint">Cualquier carpeta de este dispositivo o de una tarjeta</string>
     <string name="save_location_close">Cerrar</string>

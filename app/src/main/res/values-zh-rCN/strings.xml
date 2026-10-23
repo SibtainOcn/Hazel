@@ -433,9 +433,6 @@
     <string name="batch_type_video">视频</string>
     <string name="batch_container_title">封装格式</string>
     <string name="batch_container_subtitle">这些链接会保存成哪种文件</string>
-    <string name="batch_save_dir_title">保存位置</string>
-    <string name="batch_open_folder">打开这个文件夹</string>
-    <string name="batch_change_folder">更换文件夹</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">缩略图</string>
@@ -783,6 +780,7 @@
     <string name="save_location_internal">内部存储</string>
     <string name="save_location_card_hint">保存到存储卡上的 %1$s</string>
     <string name="save_location_free">可用 %1$s</string>
+    <string name="save_location_folder_uses">此文件夹已用 %1$s</string>
     <string name="save_location_other">其他文件夹</string>
     <string name="save_location_other_hint">此设备或存储卡上的任意文件夹</string>
     <string name="save_location_close">关闭</string>
