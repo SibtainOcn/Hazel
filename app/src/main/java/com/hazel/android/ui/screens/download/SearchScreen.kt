@@ -137,6 +137,7 @@ fun SearchScreen(
     }
 
     var menuOpen by remember { mutableStateOf(false) }
+    val statusToast = rememberStatusToastState()
     // The remembered link a long press asked to remove, until the dialog is answered.
     var removing by remember { mutableStateOf<String?>(null) }
     // The same for a link in the list waiting to be read.
@@ -324,7 +325,8 @@ fun SearchScreen(
         if (menuOpen) {
             SearchOptionsSheet(
                 onClearResults = onClearResults,
-                onDismiss = { menuOpen = false }
+                onDismiss = { menuOpen = false },
+                onCleared = statusToast::show
             )
         }
 
@@ -575,6 +577,13 @@ fun SearchScreen(
                     }
                 }
             }
+            StatusToastHost(
+                statusToast,
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .imePadding()
+                    .padding(start = 20.dp, end = 20.dp, bottom = 88.dp)
+            )
         }
         }
     }

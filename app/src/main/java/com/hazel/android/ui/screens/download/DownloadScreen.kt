@@ -428,6 +428,7 @@ fun DownloadScreen(
         WhatsNewDialog(onDismiss = { whatsNewOpen = false })
     }
 
+    val statusToast = rememberStatusToastState()
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
 
@@ -442,7 +443,8 @@ fun DownloadScreen(
             if (homeMenuOpen) {
                 SearchOptionsSheet(
                     onClearResults = downloadViewModel::clearResults,
-                    onDismiss = { homeMenuOpen = false }
+                    onDismiss = { homeMenuOpen = false },
+                    onCleared = statusToast::show
                 )
             }
 
@@ -842,6 +844,13 @@ fun DownloadScreen(
                 )
             }
         }
+        // Above the paste button, so a long message never runs under it.
+        StatusToastHost(
+            statusToast,
+            Modifier
+                .align(Alignment.BottomCenter)
+                .padding(start = 20.dp, end = 20.dp, bottom = 104.dp)
+        )
     }
 
     // A card that has gone from the results takes its player with it.

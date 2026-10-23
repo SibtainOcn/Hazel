@@ -64,6 +64,9 @@
     <string name="search_cancel">Annuler</string>
     <string name="search_clear_history_confirm_title">Effacer l\'historique de recherche ?</string>
     <string name="search_clear_history_confirm_body">Tous les liens de recherche enregistrés seront supprimés. Cette action est irréversible.</string>
+    <string name="search_results_cleared">Résultats effacés</string>
+    <string name="search_history_cleared">Historique de recherche effacé</string>
+    <string name="search_history_clear_failed">Impossible d\'effacer l\'historique de recherche</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Déjà téléchargé</string>
@@ -794,6 +797,9 @@
     <string name="fetch_settings_search_results">Résultats par recherche</string>
     <string name="fetch_settings_suggestions">Suggestions de recherche</string>
     <string name="fetch_settings_suggestions_summary">Propose des recherches de Google pendant la saisie. Ce que vous tapez est envoyé à Google.</string>
+    <string name="search_suggestions_confirm_title">Activer les suggestions de recherche ?</string>
+    <string name="search_suggestions_confirm_body">Pendant que vous tapez une recherche, vos mots sont envoyés à Google pour obtenir des suggestions. Les liens ne sont jamais envoyés. Vous pouvez désactiver cette option à tout moment.</string>
+    <string name="search_suggestions_confirm">Activer</string>
     <string name="fetch_settings_playback">Lecture</string>
     <string name="fetch_settings_play_with">Lire avec</string>
     <string name="fetch_settings_play_quality">Qualité de lecture</string>

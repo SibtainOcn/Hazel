@@ -64,6 +64,9 @@
     <string name="search_cancel">キャンセル</string>
     <string name="search_clear_history_confirm_title">検索履歴を削除しますか？</string>
     <string name="search_clear_history_confirm_body">保存された検索リンクがすべて削除されます。この操作は元に戻せません。</string>
+    <string name="search_results_cleared">検索結果を消去しました</string>
+    <string name="search_history_cleared">検索履歴を消去しました</string>
+    <string name="search_history_clear_failed">検索履歴を消去できませんでした</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">ダウンロード済み</string>
@@ -766,6 +769,9 @@
     <string name="fetch_settings_search_results">検索結果の件数</string>
     <string name="fetch_settings_suggestions">検索候補</string>
     <string name="fetch_settings_suggestions_summary">入力中に Google の検索候補を表示します。入力した内容は Google に送信されます。</string>
+    <string name="search_suggestions_confirm_title">検索候補をオンにしますか？</string>
+    <string name="search_suggestions_confirm_body">検索を入力すると、候補を取得するために入力した語句が Google に送信されます。リンクは送信されません。いつでもオフにできます。</string>
+    <string name="search_suggestions_confirm">オンにする</string>
     <string name="fetch_settings_playback">再生</string>
     <string name="fetch_settings_play_with">再生エンジン</string>
     <string name="fetch_settings_play_quality">再生画質</string>

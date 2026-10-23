@@ -64,6 +64,9 @@
     <string name="search_cancel">Cancelar</string>
     <string name="search_clear_history_confirm_title">¿Borrar el historial de búsqueda?</string>
     <string name="search_clear_history_confirm_body">Se eliminarán todos los enlaces de búsqueda guardados. Esta acción no se puede deshacer.</string>
+    <string name="search_results_cleared">Resultados borrados</string>
+    <string name="search_history_cleared">Historial de búsqueda borrado</string>
+    <string name="search_history_clear_failed">No se pudo borrar el historial de búsqueda</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Ya descargado</string>
@@ -794,6 +797,9 @@
     <string name="fetch_settings_search_results">Resultados por búsqueda</string>
     <string name="fetch_settings_suggestions">Sugerencias de búsqueda</string>
     <string name="fetch_settings_suggestions_summary">Sugiere búsquedas de Google mientras escribes. Lo que escribes se envía a Google.</string>
+    <string name="search_suggestions_confirm_title">¿Activar sugerencias de búsqueda?</string>
+    <string name="search_suggestions_confirm_body">Mientras escribes una búsqueda, tus palabras se envían a Google para obtener sugerencias. Los enlaces nunca se envían. Puedes desactivarlo cuando quieras.</string>
+    <string name="search_suggestions_confirm">Activar</string>
     <string name="fetch_settings_playback">Reproducción</string>
     <string name="fetch_settings_play_with">Reproducir con</string>
     <string name="fetch_settings_play_quality">Calidad de reproducción</string>

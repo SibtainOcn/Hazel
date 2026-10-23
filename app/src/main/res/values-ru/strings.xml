@@ -64,6 +64,9 @@
     <string name="search_cancel">Отмена</string>
     <string name="search_clear_history_confirm_title">Очистить историю поиска?</string>
     <string name="search_clear_history_confirm_body">Все сохраненные ссылки поиска будут удалены. Это действие нельзя отменить.</string>
+    <string name="search_results_cleared">Результаты очищены</string>
+    <string name="search_history_cleared">История поиска очищена</string>
+    <string name="search_history_clear_failed">Не удалось очистить историю поиска</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Уже загружено</string>
@@ -807,6 +810,9 @@
     <string name="fetch_settings_search_results">Результатов за поиск</string>
     <string name="fetch_settings_suggestions">Подсказки поиска</string>
     <string name="fetch_settings_suggestions_summary">Показывает подсказки Google при вводе. Введённый текст отправляется в Google.</string>
+    <string name="search_suggestions_confirm_title">Включить подсказки поиска?</string>
+    <string name="search_suggestions_confirm_body">Пока вы вводите запрос, ваши слова отправляются в Google, чтобы получить подсказки. Ссылки никогда не отправляются. Это можно отключить в любой момент.</string>
+    <string name="search_suggestions_confirm">Включить</string>
     <string name="fetch_settings_playback">Воспроизведение</string>
     <string name="fetch_settings_play_with">Воспроизводить через</string>
     <string name="fetch_settings_play_quality">Качество воспроизведения</string>

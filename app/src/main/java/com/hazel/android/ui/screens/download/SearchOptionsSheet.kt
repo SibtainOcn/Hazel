@@ -34,7 +34,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.hazel.android.HazelApp
 import com.hazel.android.R
 import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
@@ -43,12 +42,15 @@ import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.ui.screens.download.batch.batchSheetColor
 import com.hazel.android.ui.screens.more.ActionSettingRow
 import com.hazel.android.ui.screens.more.ConfirmSettingDialog
+import com.hazel.android.ui.screens.more.SuggestionsConsentDialog
 import com.hazel.android.ui.screens.more.SettingsSection
 import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import com.hazel.android.ui.screens.more.SwitchSettingRow
 import com.hazel.android.ui.screens.more.engineSummary
 import com.hazel.android.ui.screens.more.ValueSettingRow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -59,17 +61,38 @@ import kotlinx.coroutines.launch
  *
  * Choosing where to search opens [SearchSourceSheet] over this one.
  *
- * Every dialog a row raises, the two clear confirmations included, opens over the sheet and
- * leaves it in place underneath, so backing out of one lands back on the sheet.
+ * Every dialog a row raises opens over the sheet and leaves it in place underneath, so backing
+ * out of one lands back on the sheet. Confirming a clear closes the sheet, then [onCleared]
+ * reports how it went.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchOptionsSheet(
     onClearResults: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** Told how a clear went, after the sheet has slid away, so the screen can say so. */
+    onCleared: (message: String, ok: Boolean) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
+    val resultsCleared = stringResource(R.string.search_results_cleared)
+    val historyCleared = stringResource(R.string.search_history_cleared)
+    val historyFailed = stringResource(R.string.search_history_clear_failed)
+    var finishing by remember { mutableStateOf(false) }
+    fun finish(message: String, ok: Boolean) {
+        scope.launch {
+            try {
+                sheetState.hide()
+            } finally {
+                onDismiss()
+                onCleared(message, ok)
+            }
+        }
+    }
 
     // Read as one, and nothing is drawn until it has been: the rows then open on what is
     // saved, never on a default that flips to the saved value a frame later.
@@ -89,7 +112,7 @@ fun SearchOptionsSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)),
+        sheetState = sheetState,
         containerColor = batchSheetColor
     ) {
         val current = prefs ?: return@ModalBottomSheet
@@ -139,7 +162,10 @@ fun SearchOptionsSheet(
                             icon = Icons.Filled.Lightbulb,
                             title = stringResource(R.string.fetch_settings_suggestions),
                             checked = current.suggestions,
-                            onCheckedChange = { scope.launch { SettingsRepository.setSearchSuggestions(context, it) } }
+                            onCheckedChange = { on ->
+                                if (on) open = SearchChoice.SUGGESTIONS
+                                else scope.launch { SettingsRepository.setSearchSuggestions(context, false) }
+                            }
                         )
                     }
                 )
@@ -211,22 +237,40 @@ fun SearchOptionsSheet(
             onDismiss = close,
             describe = { engineSummary(it) }
         )
+        SearchChoice.SUGGESTIONS -> SuggestionsConsentDialog(
+            onConfirm = { scope.launch { SettingsRepository.setSearchSuggestions(context, true) }; close() },
+            onDismiss = close
+        )
         SearchChoice.CLEAR_RESULTS -> ConfirmSettingDialog(
             title = stringResource(R.string.download_clear_confirm_title),
             body = stringResource(R.string.download_clear_confirm_body),
             confirm = stringResource(R.string.download_clear),
-            onConfirm = { close(); onClearResults() },
+            onConfirm = {
+                close()
+                if (!finishing) {
+                    finishing = true
+                    onClearResults()
+                    finish(resultsCleared, ok = true)
+                }
+            },
             onDismiss = close
         )
-        // Cleared on the app's scope, so closing the sheet straight after cannot cut it short.
+        // The clear cannot be cut short by the sheet closing; the toast follows once it is done.
         SearchChoice.CLEAR_HISTORY -> ConfirmSettingDialog(
             title = stringResource(R.string.search_clear_history_confirm_title),
             body = stringResource(R.string.search_clear_history_confirm_body),
             confirm = stringResource(R.string.search_clear_history),
             onConfirm = {
                 close()
-                HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
-                    SearchHistoryRepository.clear(context.applicationContext)
+                if (!finishing) {
+                    finishing = true
+                    val appContext = context.applicationContext
+                    scope.launch {
+                        val ok = withContext(NonCancellable + Dispatchers.IO) {
+                            runCatching { SearchHistoryRepository.clear(appContext) }.isSuccess
+                        }
+                        finish(if (ok) historyCleared else historyFailed, ok)
+                    }
                 }
             },
             onDismiss = close
@@ -242,4 +286,4 @@ private data class SearchPrefs(
     val playEngine: ListingSource
 )
 
-private enum class SearchChoice { NONE, SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, CLEAR_RESULTS, CLEAR_HISTORY }
+private enum class SearchChoice { NONE, SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, SUGGESTIONS, CLEAR_RESULTS, CLEAR_HISTORY }

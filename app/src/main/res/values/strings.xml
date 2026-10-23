@@ -75,6 +75,9 @@
     <string name="search_cancel">Cancel</string>
     <string name="search_clear_history_confirm_title">Clear search history?</string>
     <string name="search_clear_history_confirm_body">All saved search links will be removed. This cannot be undone.</string>
+    <string name="search_results_cleared">Search results cleared</string>
+    <string name="search_history_cleared">Search history cleared</string>
+    <string name="search_history_clear_failed">Couldn\'t clear search history</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Already downloaded</string>
@@ -858,6 +861,9 @@
     <string name="fetch_settings_search_results">Results per search</string>
     <string name="fetch_settings_suggestions">Search suggestions</string>
     <string name="fetch_settings_suggestions_summary">Suggests searches from Google as you type. What you type is sent to Google.</string>
+    <string name="search_suggestions_confirm_title">Turn on search suggestions?</string>
+    <string name="search_suggestions_confirm_body">As you type a search, your words are sent to Google to fetch suggestions. Links are never sent. You can turn this off at any time.</string>
+    <string name="search_suggestions_confirm">Turn on</string>
     <string name="fetch_settings_playback">Playback</string>
     <string name="fetch_settings_play_with">Play with</string>
     <string name="fetch_settings_play_quality">Playback quality</string>
