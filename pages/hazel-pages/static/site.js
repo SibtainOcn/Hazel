@@ -582,3 +582,26 @@
     timer = setTimeout(function () { aurora.classList.remove('paused'); timer = 0; }, 180);
   }, { passive: true });
 })();
+
+// ── GitHub stars: the live count in the header and on the home page. Kept for an hour so
+//    page changes don't spend GitHub's limit of 60 requests an hour per visitor. ──
+(function () {
+  var KEY = 'hazel-stars', HOUR = 3600000;
+  function short(n) { return n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n); }
+  function show(n) {
+    document.querySelectorAll('[data-gh-stars]').forEach(function (el) {
+      el.querySelector('[data-gh-stars-n]').textContent = short(n); el.hidden = false; el.parentNode.classList.add('has-stars');
+      el.parentNode.setAttribute('aria-label', 'Hazel on GitHub, ' + n + ' stars');
+    });
+    document.querySelectorAll('[data-gh-stars-count]').forEach(function (el) { el.textContent = short(n); });
+  }
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  if (saved && typeof saved.n === 'number') show(saved.n);
+  if (saved && Date.now() - saved.t < HOUR) return;
+  fetch('https://api.github.com/repos/SibtainOcn/Hazel').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    if (!d || typeof d.stargazers_count !== 'number') return;
+    show(d.stargazers_count);
+    try { localStorage.setItem(KEY, JSON.stringify({ n: d.stargazers_count, t: Date.now() })); } catch (e) {}
+  }).catch(function () {});
+})();

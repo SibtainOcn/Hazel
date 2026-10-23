@@ -87,7 +87,7 @@ footer { background: var(--bg-2); box-shadow: inset 0 1px 0 var(--edge); }
    they skip their own backdrop blur on every screen. With the aurora drifting behind them, a
    blur on each one was redone every frame. Only bars and controls that cover page content or
    images keep it. */
-.tile, .way, .privacy .left, .privacy li, .numbers div, .verify, .panel, .steps li, .device,
+.tile, .way, .privacy .left, .privacy li, .numbers > *, .verify, .panel, .steps li, .device,
 details.q, .faq-still, .faq-empty, .give a, .help-grid > *, .promise, .next-up a, .f-panel {
   box-shadow: inset 0 0 0 1px var(--edge), var(--glass-shadow);
 }

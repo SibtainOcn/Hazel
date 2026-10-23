@@ -74,6 +74,9 @@ button { font: inherit; color: inherit; }
 }
 .icon-btn:hover { color: var(--fg); background: var(--surface); border-color: var(--line); }
 .icon-btn svg { width: 20px; height: 20px; }
+.gh-link.has-stars { width: auto; padding: 0 12px; gap: 9px; grid-auto-flow: column; box-shadow: inset 0 0 0 1px var(--line); }
+.gh-stars { display: inline-flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--fg); }
+.icon-btn .gh-star { width: 15px; height: 15px; color: var(--fg-2); }
 
 /* ── Nav ── */
 .nav {
