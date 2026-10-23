@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Home and the empty Running, In queue and Failed tabs have a faint dot grid in the glass colours (the accent without glass, darker ink in light theme). A faint glow drifts slowly across it, and dots near your finger lift and brighten, then settle back. It stays still when the system has animations turned off.
+- Home and the empty Running, In queue and Failed tabs show faint stars in the glass colours (the accent without glass), toned so they stay visible on every theme, accent and glass style. They twinkle and drift slowly upward, fade out towards the edges, and brighten near your finger. They stay still when the system has animations turned off.
 - Glass look, on by default: soft colour light behind see-through screens, sheets and dialogs, in dark and light. Turn it off under More, Appearance, Glass effect.
 - Getting started asks for theme, accent and glass as its second step, and applies each choice at once.
 - Downloads: Select and Select all in the menu. Picked rows show a tick and a tint, and the top bar shows the count.

@@ -3,7 +3,7 @@ package com.hazel.android.ui.screens.download
 import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import com.hazel.android.ui.components.AmbientDotGrid
+import com.hazel.android.ui.components.AmbientStarField
 import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
 import android.content.Intent
@@ -678,7 +678,7 @@ fun DownloadScreen(
                             }
                         }
 
-                        // Nothing read yet: a faint mark and one line over a quiet dot grid
+                        // Nothing read yet: a faint mark and one line over quiet drifting stars
                         // that answers a touch, and nothing to tap. The search bar above and
                         // the paste button already offer every way to start.
                         if (!incognito && state.results.isEmpty() && !state.isFetching) {
@@ -690,7 +690,7 @@ fun DownloadScreen(
                                         .fillMaxWidth()
                                         .fillParentMaxHeight()
                                 ) {
-                                    AmbientDotGrid(Modifier.matchParentSize(), paused = searchOpen)
+                                    AmbientStarField(Modifier.matchParentSize(), paused = searchOpen)
                                     Column(
                                         modifier = Modifier
                                             .fillMaxSize()
