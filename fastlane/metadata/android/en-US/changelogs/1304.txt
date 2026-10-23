@@ -1,0 +1,8 @@
+* New glass look with 8 styles and 11 more accents
+* Select and delete many downloads at once, files leave the gallery too
+* Fixed YouTube downloads failing with "Requested format is not available"
+* Playlist sheet no longer freezes after swiping a link away
+* Save location shows free space for internal storage and SD cards
+* Home screen shortcuts and direct share targets
+* Clear everything in Temp files now clears all
+* Settings headers stay on top, seek bar shows time
