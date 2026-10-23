@@ -114,7 +114,10 @@ English
 - No accounts, no analytics, nothing sent anywhere (search suggestions, off by default, send what you type to Google)
 
 ### Settings & Customisation
-- Dark and light themes with accent colour
+- **Glass look** - see-through screens, sheets and dialogs in 8 styles (Forest, Aurora, Ocean, Accent, Wallpaper, Sunset, Nebula, Mono), or turn it off
+- Dark and light themes with 20+ accent colours
+- **Search settings** - find any setting by name from the top of More
+- Home screen shortcuts (Search, Downloads, Queue, More) and direct share targets
 - App languages - English, Spanish, Hindi, Simplified Chinese, Brazilian Portuguese, French, German, Russian, Japanese, Indonesian, and system default
 - Independent yt-dlp engine updates - Stable, Nightly or Master channel
 - Offline video-to-audio converter
