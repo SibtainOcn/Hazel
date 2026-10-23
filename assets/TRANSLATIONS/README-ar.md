@@ -90,7 +90,7 @@
 Hazel هو أداة تنزيل مجانية ومفتوحة المصدر لنظام Android مدعومة بـ **yt-dlp**. احفظ الفيديوهات والموسيقى وقوائم التشغيل من **أكثر من 1500 موقع** بدون إعلانات، بدون تتبع، وبدون حساب.
 
 <table>
-  <tr><th width="50%" align="left">📥 التنزيلات</th><th width="50%" align="left">🔍 البحث والتجميع</th></tr>
+  <tr><th width="50%" align="left">📥 التنزيلات</th><th width="50%" align="left">🔍 البحث والتشغيل</th></tr>
   <tr><td><b>أكثر من 1500 موقع:</b> YouTube و Instagram و TikTok و X و Reddit و SoundCloud و <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">المزيد</a>.</td><td><b>البحث:</b> YouTube أو YouTube Music أو SoundCloud أو Bandcamp، مع اقتراحات اختيارية.</td></tr>
   <tr><td><b>دفعة واحدة:</b> رابط واحد، روابط متعددة، أو قائمة تشغيل / قناة بالكامل.</td><td><b>تشغيل أولاً:</b> تشغيل أي نتيجة مباشرة في بطاقتها مع شريط التقدم، النقر المزدوج للتخطي، والشاشة الكاملة.</td></tr>
   <tr><td><b>Hazel Instant:</b> شارك رابطًا من أي تطبيق وابدأ التنزيل بالجودة المحفوظة لديك.</td><td><b>قص:</b> احفظ الجزء الذي تريده فقط، المحدد من خلال معاينة مباشرة.</td></tr>
@@ -115,7 +115,7 @@ Hazel هو أداة تنزيل مجانية ومفتوحة المصدر لنظا
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>🎚️ أداة اختيار التنسيق</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>⏳ قائمة التنزيل</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>⏳ قائمة انتظار التنزيل</b></td>
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>🌐 لغة الصوت</b></td>
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>🔍 البحث الذكي</b></td>
     <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>📃 قائمة الدفعات</b></td>
@@ -169,7 +169,7 @@ Hazel هو أداة تنزيل مجانية ومفتوحة المصدر لنظا
 اسم حزمة التطبيق هو `com.hazel.android`. استخدمه لربط Hazel بأدوات الأتمتة أو المشغلات أو التطبيقات الأخرى.
 
 ### ✅ التحقق من توقيع التطبيق
-إصدارات Hazel قابلة لإعادة التجميع وموقعة بشهادة المطور أدناه. إذا أظهر ملف APK توقيعًا مختلفًا، فهذا يعني أنه تم تعديله بواسطة طرف ثالث، لذا لا تقم بتثبيته.
+إصدارات Hazel قابلة لإعادة الإنتاج وموقعة بشهادة المطور أدناه. إذا أظهر ملف APK توقيعًا مختلفًا، فهذا يعني أنه تم تعديله بواسطة طرف ثالث، لذا لا تقم بتثبيته.
 
 ```text
 Owner (DN): CN=sibtainocn
@@ -188,7 +188,7 @@ MD5:        3bcce9e14c616a9087766563875978e6
 
 [GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
 
-## 🏆 الائتمانات والتقدير
+## 🏆 شكر وتقدير
 **المطور والمهندس المعماري:** [SibtainOcn](https://github.com/SibtainOcn)
 
 **شكر جزيل لـ:**

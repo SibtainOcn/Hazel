@@ -68,7 +68,7 @@
 </p>
 
 ---
-## 💚 از Hazel خوشتان می‌آید؟ کمی به آن عشق بورزید
+## 💚 از Hazel خوشتان می‌آید؟ از آن حمایت کنید
 
 اگر Hazel برای شما مفید بوده است، حمایت از توسعه آن را مد نظر قرار دهید. حمایت شما به من کمک می‌کند تا به بهبود Hazel و ایجاد ویژگی‌های جدید ادامه دهم. هر حمایتی بسیار ارزشمند است.
 
@@ -188,7 +188,7 @@ MD5:        3bcce9e14c616a9087766563875978e6
 
 [GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
 
-## 🏆 اعتبارات
+## 🏆 قدردانی
 **توسعه‌دهنده و معمار:** [SibtainOcn](https://github.com/SibtainOcn)
 
 **با تشکر فراوان از:**
