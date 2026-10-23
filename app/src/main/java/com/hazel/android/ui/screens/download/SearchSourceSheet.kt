@@ -54,7 +54,7 @@ import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.ui.components.EqualWidthActions
-import com.hazel.android.ui.screens.download.batch.batchSheetColor
+import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.ui.screens.more.ChoiceRow
 import com.hazel.android.ui.screens.more.DialogButton
 import com.hazel.android.ui.screens.more.groupShape
@@ -91,7 +91,7 @@ fun SearchSourceSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)),
-        containerColor = batchSheetColor
+        containerColor = sheetBlackColor
     ) {
         Column(
             modifier = Modifier

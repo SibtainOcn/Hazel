@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.theme.sheetBlackColor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -73,7 +74,7 @@ fun AudioLanguageSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = sheetBlackColor
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Column(

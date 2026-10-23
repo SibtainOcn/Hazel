@@ -1,5 +1,8 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.theme.sheetBlackColor
+import com.hazel.android.ui.theme.sheetButtonColor
+import com.hazel.android.ui.theme.sheetRaisedColor
 import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.compose.animation.AnimatedVisibility
@@ -310,7 +313,7 @@ fun FormatSheet(
     }
 
     // One step up from the section, so a field reads as a field inside it.
-    val fieldColor = MaterialTheme.colorScheme.surfaceContainerHighest
+    val fieldColor = sheetButtonColor
 
     // Editing the title or author opens the keyboard over the sheet rather than lifting it,
     // unless the keyboard would cover the field; then the sheet rises by that much only.
@@ -320,7 +323,7 @@ fun FormatSheet(
         onDismissRequest = onDismiss,
         modifier = Modifier.liftedOverKeyboard(keyboard),
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = sheetBlackColor
     ) {
       KeyboardOverSheet(keyboard)
       Box {
@@ -894,7 +897,7 @@ internal fun SheetSection(
     summary: String,
     expanded: Boolean,
     onToggle: () -> Unit,
-    color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    color: Color = sheetRaisedColor,
     content: @Composable () -> Unit
 ) {
     val turn by animateFloatAsState(

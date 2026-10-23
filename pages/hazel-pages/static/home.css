@@ -36,6 +36,9 @@
 .device img { width: 100%; height: auto; aspect-ratio: 1080 / 2302; object-fit: cover; border-radius: clamp(24px, 2.1vw, 34px); }
 .stage .side { margin-top: 88px; }
 .stage .side img { opacity: .9; }
+.stage .far { display: none; width: clamp(180px, 13vw, 240px); margin-top: 176px; }
+.stage .far img { opacity: .78; }
+@media (min-width: 1400px) { .stage .far { display: block; } }
 
 .sites { margin-top: 112px; }
 .sites-card {

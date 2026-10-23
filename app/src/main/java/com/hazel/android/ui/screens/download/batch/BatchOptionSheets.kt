@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.ui.theme.sheetRaisedColor
+import com.hazel.android.ui.theme.sheetBlackColor
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -120,7 +122,7 @@ fun BatchBitrateSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = batchSheetColor
+        containerColor = sheetBlackColor
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             SheetHeader(
@@ -190,7 +192,7 @@ private fun ChoiceSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = batchSheetColor
+        containerColor = sheetBlackColor
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             SheetHeader(title, subtitle)
@@ -264,7 +266,7 @@ private fun ChoiceRow(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-        else batchRaisedColor
+        else sheetRaisedColor
     ) {
         Row(
             modifier = Modifier

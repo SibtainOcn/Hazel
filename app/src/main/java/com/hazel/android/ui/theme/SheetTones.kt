@@ -1,21 +1,19 @@
-package com.hazel.android.ui.screens.download.batch
+package com.hazel.android.ui.theme
 
-import com.hazel.android.ui.theme.LocalGlass
-import com.hazel.android.ui.theme.LocalDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 
 /**
- * The near-black tones the set-of-links sheet is drawn in.
+ * The near-black tones the download sheets are drawn in, for one link or a set of links.
  *
- * The sheet covers most of the screen and is mostly artwork, so it is kept darker than the
- * app's ordinary surfaces: flat black behind, and one step up from it for the rows and the
- * bar, which is enough to separate them without adding a grey cast behind every thumbnail.
+ * The sheets cover most of the screen and are mostly artwork, so they are kept darker than the
+ * app's ordinary surfaces: flat black behind, one step up for rows and sections, and one more
+ * for fields and buttons inside them.
  *
- * On a light theme none of that applies, so the scheme's own surfaces are used instead and
- * these read as the plain Material colours they replace.
+ * On a light theme or with glass on, the scheme's own surfaces are used instead, so every
+ * theme, accent and glass style keeps the colours it was drawn for.
  */
 private val SHEET_BLACK = Color(0xFF000000)
 private val RAISED_BLACK = Color(0xFF0A0A0A)
@@ -26,7 +24,7 @@ private val isDarkScheme: Boolean
     get() = LocalDarkTheme.current
 
 /** Behind the sheet itself. */
-val batchSheetColor: Color
+val sheetBlackColor: Color
     @Composable @ReadOnlyComposable
     get() = if (isDarkScheme && !LocalGlass.current) SHEET_BLACK else MaterialTheme.colorScheme.surface
 
@@ -34,11 +32,11 @@ val batchSheetColor: Color
  * The action bar's own buttons, one step up from the bar so each reads as something to tap
  * rather than as a label printed on it.
  */
-val batchButtonColor: Color
+val sheetButtonColor: Color
     @Composable @ReadOnlyComposable
     get() = if (isDarkScheme && !LocalGlass.current) BUTTON_BLACK else MaterialTheme.colorScheme.surfaceContainerHighest
 
 /** The rows, the action bar, and the rows inside the sheets it opens. */
-val batchRaisedColor: Color
+val sheetRaisedColor: Color
     @Composable @ReadOnlyComposable
     get() = if (isDarkScheme && !LocalGlass.current) RAISED_BLACK else MaterialTheme.colorScheme.surfaceContainerHigh

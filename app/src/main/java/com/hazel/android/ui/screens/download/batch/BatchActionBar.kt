@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.ui.theme.sheetButtonColor
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -101,7 +102,7 @@ private fun BarButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        color = batchButtonColor,
+        color = sheetButtonColor,
         modifier = Modifier
             .height(44.dp)
             .semantics { contentDescription = description }

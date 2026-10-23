@@ -1,5 +1,8 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.ui.theme.sheetRaisedColor
+import com.hazel.android.ui.theme.sheetButtonColor
+import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
 import androidx.compose.animation.fadeIn
@@ -261,7 +264,7 @@ fun BatchDownloadSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = batchSheetColor,
+        containerColor = sheetBlackColor,
         sheetMaxWidth = if (twoPane) Dp.Unspecified else BottomSheetDefaults.SheetMaxWidth
     ) {
         Box(
@@ -581,7 +584,7 @@ fun BatchDownloadSheet(
                     ).plus(containerLabel).joinToString(", "),
                     expanded = adjustOpen,
                     onToggle = { adjustOpen = !adjustOpen },
-                    color = batchRaisedColor
+                    color = sheetRaisedColor
                 ) {
                     // Wraps rather than scrolling sideways: a chip past the edge is a
                     // setting nobody can see. The chips are a little trimmed so more of
@@ -1080,7 +1083,7 @@ private fun LinkSearchField(
     Surface(
         modifier = modifier.height(42.dp),
         shape = RoundedCornerShape(21.dp),
-        color = batchButtonColor
+        color = sheetButtonColor
     ) {
         Row(
             modifier = Modifier.padding(start = 14.dp),
