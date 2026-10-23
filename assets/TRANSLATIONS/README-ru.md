@@ -46,97 +46,130 @@
 
 [![Android](https://img.shields.io/badge/Android-004242?style=for-the-badge&logo=android&logoColor=3DDC84)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Download](https://img.shields.io/badge/Download-0A0A0A?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SibtainOcn/Hazel/releases/latest)
-[![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/packages/com.hazel.android/)
+![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
 <a href="https://www.buymeacoffee.com/sibtainocean"><img src="https://img.shields.io/badge/-Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" /></a>
-<a href="https://developer.android.com/jetpack/compose"><img src="https://img.shields.io/badge/Jetpack%20Compose-0A0A0A?style=for-the-badge&logo=jetpackcompose&logoColor=4285F4" alt="Jetpack Compose" /></a>
 
+[![Stars](https://img.shields.io/github/stars/SibtainOcn/Hazel?style=flat-square&color=FFC107)](https://github.com/SibtainOcn/Hazel/stargazers)
 ![API](https://img.shields.io/badge/API-24%2B-brightgreen?style=flat-square)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/SibtainOcn/Hazel/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/SibtainOcn/Hazel/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/SibtainOcn/Hazel?style=flat-square&label=release&color=cyan)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Changelog](https://img.shields.io/badge/Changelog-orange?style=flat-square)](https://github.com/SibtainOcn/Hazel/blob/main/CHANGELOG.md)
 [![Downloads](https://img.shields.io/github/downloads/SibtainOcn/Hazel/total?style=flat-square)](https://github.com/SibtainOcn/Hazel/releases)
 [![Supported Sites](https://img.shields.io/badge/supported--sites-1500%2B-green?style=flat-square)](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
-[![Stars](https://img.shields.io/github/stars/SibtainOcn/Hazel?style=flat-square)](https://github.com/SibtainOcn/Hazel/stargazers)
 
 </div>
 
-*Только ссылки, указанные выше ([GitHub Releases](https://github.com/SibtainOcn/Hazel/releases/latest) и [F-Droid](https://f-droid.org/packages/com.hazel.android/)), являются официальными и надёжными источниками Hazel. Обратите внимание: любые сторонние сайты и продавцы неофициальны и действуют полностью независимо от меня.*
+<p align="center">
+  <a href="https://sibtainocn.github.io/Hazel/hazel/"><b>🌐 Сайт</b></a> &nbsp;•&nbsp;
+  <a href="https://github.com/SibtainOcn/Hazel/releases/latest"><b>⬇️ Скачать</b></a> &nbsp;•&nbsp;
+  <a href="https://github.com/SibtainOcn/Hazel/wiki"><b>📖 Вики</b></a> &nbsp;•&nbsp;
+  <a href="https://sibtainocn.github.io/Hazel/hazel/guide.html"><b>🧭 Руководство</b></a> &nbsp;•&nbsp;
+  <a href="https://sibtainocn.github.io/Hazel/hazel/faq.html"><b>❓ FAQ</b></a>
+</p>
+
+---
+## 💚 Нравится Hazel? Поддержите его
+
+Если Hazel оказался вам полезен, подумайте о поддержке его разработки. Ваша поддержка помогает мне улучшать Hazel и создавать новые функции. Любая помощь очень много значит.
+
+<div align="center">
+<table>
+  <tr><th align="center">☕ Разовая поддержка</th><th align="center">🤝 Постоянное спонсорство</th></tr>
+  <tr>
+    <td align="center"><a href="https://www.buymeacoffee.com/sibtainocean"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee"></a></td>
+    <td align="center"><a href="https://github.com/sponsors/SibtainOcn"><img src="https://img.shields.io/badge/GitHub%20Sponsors-004242?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="GitHub Sponsors"></a></td>
+  </tr>
+</table>
+
+<sub>Поддержка никогда не обязательна и ничего не открывает. Все функции остаются бесплатными для всех. Нет денег? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Поставьте звезду репозиторию</a> или <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">сообщите о проблеме</a>, это помогает не меньше.</sub>
+</div>
+
+---
+## ✨ Почему Hazel?
+
+Hazel — бесплатный загрузчик с открытым кодом для Android на основе **yt-dlp**. Сохраняйте видео, музыку и плейлисты с **более чем 1500 сайтов** без рекламы, слежки и аккаунта.
+
+<table>
+  <tr><th width="50%" align="left">📥 Загрузка</th><th width="50%" align="left">🔍 Поиск и воспроизведение</th></tr>
+  <tr><td><b>1500+ сайтов:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud и <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">другие</a>.</td><td><b>Поиск:</b> YouTube, YouTube Music, SoundCloud или Bandcamp, с необязательными подсказками.</td></tr>
+  <tr><td><b>Пакетно:</b> одна ссылка, несколько сразу или целый плейлист / канал.</td><td><b>Сначала смотрите:</b> воспроизводите любой результат прямо в карточке с перемоткой, двойным касанием и полноэкранным режимом.</td></tr>
+  <tr><td><b>Hazel Instant:</b> поделитесь ссылкой из любого приложения, и загрузка начнётся в сохранённом качестве.</td><td><b>Обрезка:</b> сохраняйте только нужный фрагмент, выбранный в живом предпросмотре.</td></tr>
+  <tr><td><b>Ваш формат:</b> выбирайте качество, контейнер, звуковую дорожку и редактируйте название / метаданные.</td><td><b>Трансляции:</b> записывайте с самого начала или дождитесь премьеры.</td></tr>
+</table>
+
+<table>
+  <tr><th width="50%" align="left">⚙️ Обработка и загрузки</th><th width="50%" align="left">🔒 Приватность и настройка</th></tr>
+  <tr><td><b>SponsorBlock:</b> вырезайте спонсорские вставки, заставки и другие сегменты.</td><td><b>Без слежки:</b> без аккаунтов и аналитики. Инкогнито и прокси HTTP / SOCKS5 встроены.</td></tr>
+  <tr><td><b>Главы и субтитры:</b> встраивайте, делите по главам, выбирайте языки субтитров и аудио.</td><td><b>Стеклянный вид:</b> 8 полупрозрачных стилей, тёмная и светлая темы, 20+ акцентных цветов.</td></tr>
+  <tr><td><b>Фоновый режим:</b> долгие загрузки с паузой, продолжением и отменой из уведомления.</td><td><b>Обновления движка:</b> обновляйте yt-dlp отдельно, канал Stable, Nightly или Master.</td></tr>
+  <tr><td><b>Скорость:</b> без ограничений по умолчанию, параллельные фрагменты, лимит по желанию и режим только Wi-Fi.</td><td><b>Дополнительно:</b> 10+ языков, офлайн-конвертер аудио, резервное копирование и восстановление, поиск по настройкам.</td></tr>
+</table>
 
 ## 📲 Скриншоты
 
-<div>
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="30%" />
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="30%" />
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="30%" />
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="30%" />
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="30%" />
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="30%" />
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="30%" />
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="30%" />
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="30%" />
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="30%" />
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="30%" />
-<img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="30%" />
-</div>
-
-## 💡 Возможности:
-
-- Скачивайте аудио и видео с YouTube, Instagram, TikTok, X, Reddit, SoundCloud и [более 1500 других сайтов](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
-- Вставьте одну ссылку, несколько сразу или целый плейлист / канал и скачайте всё пакетом в один клик
-- **Hazel Instant** - поделитесь ссылкой из любого другого приложения, и загрузка начнётся сразу в качестве, которое вы задали один раз
-- Выбирайте конкретные звуковые дорожки, если источник публикует несколько
-- Редактируйте название, автора и тип файла / метаданные перед сохранением
-- Выбирайте разные форматы и контейнеры загрузки
-
-### Поиск и воспроизведение
-- **Поиск** - вводите слова вместо ссылки, чтобы искать на YouTube, YouTube Music, SoundCloud или Bandcamp, с необязательными поисковыми подсказками
-- **Смотрите до скачивания** - воспроизводите любой результат или ссылку прямо в карточке, с полосой перемотки, двойным касанием для пропуска, полноэкранным режимом и выбором качества, на любом сайте, который читает Hazel
-- **Обрезка** - скачивайте только часть видео или трека, выбирая отрезок в живом предпросмотре
-- **Прямые трансляции** - записывайте трансляцию с самого начала или дождитесь премьеры и скачайте её
-
-### Обработка
-- **Выбор языка** - сохраняйте на любом языке, который предлагает исходное видео
-- **SponsorBlock** - вырезайте спонсорские вставки, заставки и другие сегменты
-- **Главы** - встраивайте в файл или разделяйте на отдельный файл для каждой главы
-- **Субтитры** - на выбранных вами языках
-
-### Загрузки
-- Поддержка длительных фоновых загрузок
-- Пауза, возобновление и отмена из карточки или уведомления
-- Режим «только Wi-Fi» - проверяется при запуске, поэтому уже идущая передача не прерывается
-- По умолчанию без ограничения скорости, с параллельными фрагментами и необязательным лимитом
-- Ещё не скачанные результаты остаются на главном экране, пока вы их не очистите
-
-### Конфиденциальность
-- **Инкогнито** - загрузки не добавляются в библиотеку, а ссылки не запоминаются
-- Никаких аккаунтов, никакой аналитики, ничего никуда не отправляется (поисковые подсказки, по умолчанию выключенные, отправляют введённый текст в Google)
-
-### Настройки и персонализация
-- Тёмная и светлая темы с акцентным цветом
-- Языки приложения - английский, испанский, хинди, упрощённый китайский, бразильский португальский, французский, немецкий, русский, японский, индонезийский и язык системы
-- Независимые обновления движка yt-dlp - канал Stable, Nightly или Master
-- Офлайн-конвертер видео в аудио
-- **Резервное копирование и восстановление** - настройки, список загрузок, очередь, cookies и история поиска
-
+<table>
+  <tr>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>▶️ Поиск и просмотр</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>📚 Все загрузки</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>🎬 Параметры загрузки</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>🎚️ Выбор формата</b></td>
+  </tr>
+  <tr>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>⏳ Очередь загрузок</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>🌐 Язык аудио</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>🔍 Умный поиск</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>📃 Пакетный плейлист</b></td>
+  </tr>
+  <tr>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>🗣️ Языки приложения</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>✨ Стеклянная главная</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>⚙️ Другие настройки</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>🎨 Оформление</b></td>
+  </tr>
+</table>
 
 ---
-## ⬇️ Скачать
+## ⬇️ Скачать и установить
 
-Для большинства устройств рекомендуется устанавливать версию APK **arm64-v8a**
+Выберите удобный источник, чтобы получить последнюю версию Hazel:
 
-- Скачайте последнюю стабильную версию из [GitHub releases](https://github.com/SibtainOcn/Hazel/releases/latest)
-  - Устанавливайте [предварительные](https://github.com/SibtainOcn/Hazel/releases/) версии, чтобы помочь нам тестировать новые функции и изменения
+> **Системные требования:** Android 7.0+ (API 24) • 2 ГБ ОЗУ (рекомендуется 3 ГБ+) • ~75 МБ загрузки, ~300 МБ свободного места после настройки
 
-- Стабильные версии также доступны в [F-Droid](https://f-droid.org/packages/com.hazel.android/)
+<table align="center">
+  <tr><th>Источник</th><th>Значок</th><th>Подробности</th></tr>
+  <tr>
+    <td><b>GitHub</b></td>
+    <td align="center"><a href="https://github.com/SibtainOcn/Hazel/releases/latest"><img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" alt="Get it on GitHub" height="50"></a></td>
+    <td>Прямая загрузка APK, со встроенным обновлением</td>
+  </tr>
+  <tr>
+    <td><b>F-Droid</b></td>
+    <td align="center"><a href="https://f-droid.org/packages/com.hazel.android/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="50"></a></td>
+    <td>Официальный репозиторий, обновления через F-Droid</td>
+  </tr>
+  <tr>
+    <td><b>Obtainium</b></td>
+    <td align="center"><a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/SibtainOcn/Hazel"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="50"></a></td>
+    <td>Автообновления прямо с GitHub</td>
+  </tr>
+  <tr>
+    <td><b>OpenAPK</b></td>
+    <td align="center"><a href="https://www.openapk.net/hazel/com.hazel.android/"><img src="https://www.openapk.net/images/openapk-badge.png" alt="Get it on OpenAPK" height="50"></a></td>
+    <td>Альтернативный источник APK</td>
+  </tr>
+</table>
 
-Hazel всегда будет бесплатным и открытым для всех. Если он вам нравится, поддержите проект через [GitHub Sponsors](https://github.com/sponsors/SibtainOcn) или [Buy Me a Coffee](https://www.buymeacoffee.com/sibtainocean)!
+> [!Tip]
+>
+> **Не знаете, какой APK?** Большинство устройств — **arm64-v8a**. Если не уверены, скачайте сборку **universal**, она работает везде.
+> APK с GitHub имеют встроенное обновление, поэтому новые версии обнаруживаются и скачиваются без посещения страницы релизов. APK из F-Droid — нет, так как F-Droid сам управляет обновлениями.
+> Что нового? Читайте [примечания к выпуску](https://sibtainocn.github.io/Hazel/hazel/whats-new.html) или [руководство по установке](https://sibtainocn.github.io/Hazel/hazel/guide.html#install).
 
-### 🔗  Подключение к сторонним приложениям
-Имя пакета приложения - `com.hazel.android`.
+### 🔗 Связь со сторонними приложениями
+Имя пакета приложения — `com.hazel.android`. Используйте его, чтобы связать Hazel с инструментами автоматизации, лаунчерами или другими приложениями.
 
 ### ✅ Проверка подписи приложения
-Сборки Hazel воспроизводимы. Официальные релизы подписаны сертификатом разработчика, указанным ниже. Если подпись вашего APK отличается, приложение было изменено третьей стороной. Всегда проверяйте, что используете приложение с оригинальной подписью:
+Релизные сборки Hazel воспроизводимы и подписаны сертификатом разработчика ниже. Если ваш APK показывает другую подпись, он был изменён третьей стороной, поэтому не устанавливайте его.
 
 ```text
 Owner (DN): CN=sibtainocn
@@ -144,38 +177,35 @@ SHA-256:    0377e9c8352c017e42583cea1715c40c400a51c4045c268825ffc9bae1305c86
 SHA-1:      d5c4a6a86d3cde1c1c722564f1efaf8893ea85a2
 MD5:        3bcce9e14c616a9087766563875978e6
 ```
+[![Star History Chart](https://api.star-history.com/svg?repos=SibtainOcn/Hazel&type=Date)](https://www.star-history.com/#SibtainOcn/Hazel&Date)
+## 🤝 Участие
 
-## 🤝 Участие в разработке
+Мы рады любому вкладу! Правила смотрите в нашем [CONTRIBUTING.md](https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md).
 
-Мы рады любому вкладу!
-
-> [!Note]
->
-> Прежде чем отправлять сообщения об ошибках, запросы функций, вопросы или другие идеи по улучшению, прочитайте [CONTRIBUTING.md](https://github.com/SibtainOcn/Hazel/blob/main/CONTRIBUTING.md) с инструкциями и правилами.
-
-## 📄 Лицензия
+- 📖 **Нужна помощь?** [Читайте Вики](https://github.com/SibtainOcn/Hazel/wiki)
+- 🐞 **Нашли ошибку?** [Создайте issue](https://github.com/SibtainOcn/Hazel/issues/new/choose)
+- 💡 **Есть идея?** [Предложите функцию](https://github.com/SibtainOcn/Hazel/issues/new/choose)
 
 [GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
 
-Copyright (C) 2026 SibtainOcn
+## 🏆 Благодарности
+**Разработчик и архитектор:** [SibtainOcn](https://github.com/SibtainOcn)
 
-Hazel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+**Огромное спасибо:**
+* [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - Управление репозиторием F-Droid
+* [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Мощный движок загрузки, на котором работает Hazel
+* [youtubedl-android](https://github.com/yausername/youtubedl-android) - Привязки yt-dlp для Android
+* [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - Быстрые списки, поиск и потоки воспроизведения
+* [Media3 ExoPlayer](https://github.com/androidx/media) - Плавное воспроизведение в приложении
 
-Hazel is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+---
 
-You should have received a copy of the GNU General Public License along with Hazel. If not, see <https://www.gnu.org/licenses/>.
+<h2 align="center">Сделано с ❤️ SibtainOcn</h2>
 
-> [!Warning]
->
-> За исключением исходного кода, распространяемого по лицензии GPLv3, всем остальным сторонам запрещено использовать имя Hazel для приложения-загрузчика; то же относится и к производным от Hazel. К производным относятся, помимо прочего, форки и неофициальные сборки.
+<p align="center">
+  <b>Лицензия:</b> <a href="https://github.com/SibtainOcn/Hazel/blob/main/LICENSE">GNU General Public License v3.0</a>
+</p>
 
-## 🧱 Благодарности
+<p align="center">© 2026 SibtainOcn. Распространяется по лицензии GPL-3.0-or-later.</p>
 
-Hazel - это графический интерфейс для [yt-dlp](https://github.com/yt-dlp/yt-dlp), основанный на [youtubedl-android](https://github.com/yausername/youtubedl-android).
-[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - для быстрых списков, поиска и потоков воспроизведения, и [Media3 ExoPlayer](https://github.com/androidx/media) - для воспроизведения.
-
-<div align="right">
-<table><td>
-<a href="#start-of-content">👆 Наверх</a>
-</td></table>
-</div>
+<h3 align="center">⭐ Если Hazel упростил ваши загрузки, не забудьте поставить звезду репозиторию! ⭐</h3>
