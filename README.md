@@ -46,8 +46,7 @@ English
 
 [![Android](https://img.shields.io/badge/Android-004242?style=for-the-badge&logo=android&logoColor=3DDC84)](https://github.com/SibtainOcn/Hazel/releases/latest)
 [![Download](https://img.shields.io/badge/Download-0A0A0A?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SibtainOcn/Hazel/releases/latest)
-[![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/packages/com.hazel.android/)
-[![Obtainium](https://img.shields.io/badge/Obtainium-6750A4?style=for-the-badge&logo=android&logoColor=white)](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/SibtainOcn/Hazel)
+![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
 <a href="https://www.buymeacoffee.com/sibtainocean"><img src="https://img.shields.io/badge/-Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" /></a>
 
 [![Stars](https://img.shields.io/github/stars/SibtainOcn/Hazel?style=flat-square&color=FFC107)](https://github.com/SibtainOcn/Hazel/stargazers)
@@ -67,8 +66,6 @@ English
   <a href="https://sibtainocn.github.io/Hazel/hazel/guide.html"><b>🧭 Guide</b></a> &nbsp;•&nbsp;
   <a href="https://sibtainocn.github.io/Hazel/hazel/faq.html"><b>❓ FAQ</b></a>
 </p>
-
-*Only the links listed above ([GitHub Releases](https://github.com/SibtainOcn/Hazel/releases/latest) and [F-Droid](https://f-droid.org/packages/com.hazel.android/)) are the official, trusted sources of Hazel. Please be advised that any external websites or third-party vendors are unofficial and operate completely independently of me.*
 
 ---
 ## 💚 Like Hazel? Give it some love
