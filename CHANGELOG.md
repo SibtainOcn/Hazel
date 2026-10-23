@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.15] - 2026-10-23
 ### Added
 - Home and the empty Running, In queue and Failed tabs show faint stars in the glass colours (the accent without glass), toned so they stay visible on every theme, accent and glass style. They twinkle and drift slowly upward, fade out towards the edges, and brighten near your finger. They stay still when the system has animations turned off.
 - Glass look, on by default: soft colour light behind see-through screens, sheets and dialogs, in dark and light. Turn it off under More, Appearance, Glass effect.
