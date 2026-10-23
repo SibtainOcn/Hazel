@@ -769,7 +769,7 @@
     <string name="fetch_settings_search_results">Hasil per pencarian</string>
     <string name="fetch_settings_suggestions">Saran pencarian</string>
     <string name="fetch_settings_suggestions_summary">Menyarankan pencarian dari Google saat Anda mengetik. Yang Anda ketik dikirim ke Google.</string>
-    <string name="search_suggestions_confirm_title">Aktifkan saran pencarian?</string>
+    <string name="search_suggestions_confirm_title">Catatan</string>
     <string name="search_suggestions_confirm_body">Saat Anda mengetik pencarian, kata-kata Anda dikirim ke Google untuk mendapatkan saran. Tautan tidak pernah dikirim. Anda dapat menonaktifkannya kapan saja.</string>
     <string name="search_suggestions_confirm">Aktifkan</string>
     <string name="fetch_settings_playback">Pemutaran</string>

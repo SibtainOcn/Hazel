@@ -797,7 +797,7 @@
     <string name="fetch_settings_search_results">Resultados por búsqueda</string>
     <string name="fetch_settings_suggestions">Sugerencias de búsqueda</string>
     <string name="fetch_settings_suggestions_summary">Sugiere búsquedas de Google mientras escribes. Lo que escribes se envía a Google.</string>
-    <string name="search_suggestions_confirm_title">¿Activar sugerencias de búsqueda?</string>
+    <string name="search_suggestions_confirm_title">Nota</string>
     <string name="search_suggestions_confirm_body">Mientras escribes una búsqueda, tus palabras se envían a Google para obtener sugerencias. Los enlaces nunca se envían. Puedes desactivarlo cuando quieras.</string>
     <string name="search_suggestions_confirm">Activar</string>
     <string name="fetch_settings_playback">Reproducción</string>

@@ -797,7 +797,7 @@
     <string name="fetch_settings_search_results">Résultats par recherche</string>
     <string name="fetch_settings_suggestions">Suggestions de recherche</string>
     <string name="fetch_settings_suggestions_summary">Propose des recherches de Google pendant la saisie. Ce que vous tapez est envoyé à Google.</string>
-    <string name="search_suggestions_confirm_title">Activer les suggestions de recherche ?</string>
+    <string name="search_suggestions_confirm_title">Remarque</string>
     <string name="search_suggestions_confirm_body">Pendant que vous tapez une recherche, vos mots sont envoyés à Google pour obtenir des suggestions. Les liens ne sont jamais envoyés. Vous pouvez désactiver cette option à tout moment.</string>
     <string name="search_suggestions_confirm">Activer</string>
     <string name="fetch_settings_playback">Lecture</string>
