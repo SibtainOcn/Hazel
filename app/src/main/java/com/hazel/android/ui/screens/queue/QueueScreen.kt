@@ -2,7 +2,7 @@ package com.hazel.android.ui.screens.queue
 
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import com.hazel.android.ui.components.AmbientDotGrid
+import com.hazel.android.ui.components.AmbientStarField
 import com.hazel.android.ui.components.ScrollShrink
 import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
@@ -642,7 +642,7 @@ private fun QueueList(
 ) {
     if (isEmpty) {
         Box(modifier = Modifier.fillMaxSize()) {
-            AmbientDotGrid(Modifier.matchParentSize(), paused = !inView)
+            AmbientStarField(Modifier.matchParentSize(), paused = !inView)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
