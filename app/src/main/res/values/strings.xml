@@ -861,7 +861,7 @@
     <string name="fetch_settings_search_results">Results per search</string>
     <string name="fetch_settings_suggestions">Search suggestions</string>
     <string name="fetch_settings_suggestions_summary">Suggests searches from Google as you type. What you type is sent to Google.</string>
-    <string name="search_suggestions_confirm_title">Turn on search suggestions?</string>
+    <string name="search_suggestions_confirm_title">Note</string>
     <string name="search_suggestions_confirm_body">As you type a search, your words are sent to Google to fetch suggestions. Links are never sent. You can turn this off at any time.</string>
     <string name="search_suggestions_confirm">Turn on</string>
     <string name="fetch_settings_playback">Playback</string>

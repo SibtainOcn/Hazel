@@ -769,7 +769,7 @@
     <string name="fetch_settings_search_results">每次搜索结果数</string>
     <string name="fetch_settings_suggestions">搜索建议</string>
     <string name="fetch_settings_suggestions_summary">输入时显示 Google 搜索建议。你输入的内容会发送给 Google。</string>
-    <string name="search_suggestions_confirm_title">开启搜索建议？</string>
+    <string name="search_suggestions_confirm_title">提示</string>
     <string name="search_suggestions_confirm_body">输入搜索内容时，你输入的文字会发送给 Google 以获取建议。链接不会被发送。你可以随时关闭此功能。</string>
     <string name="search_suggestions_confirm">开启</string>
     <string name="fetch_settings_playback">播放</string>

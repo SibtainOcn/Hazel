@@ -783,7 +783,7 @@
     <string name="fetch_settings_search_results">हर खोज में नतीजे</string>
     <string name="fetch_settings_suggestions">खोज सुझाव</string>
     <string name="fetch_settings_suggestions_summary">टाइप करते समय Google से खोज सुझाता है। आप जो टाइप करते हैं वह Google को भेजा जाता है।</string>
-    <string name="search_suggestions_confirm_title">खोज सुझाव चालू करें?</string>
+    <string name="search_suggestions_confirm_title">ध्यान दें</string>
     <string name="search_suggestions_confirm_body">खोज टाइप करते समय आपके शब्द सुझाव पाने के लिए Google को भेजे जाते हैं। लिंक कभी नहीं भेजे जाते। आप इसे कभी भी बंद कर सकते हैं।</string>
     <string name="search_suggestions_confirm">चालू करें</string>
     <string name="fetch_settings_playback">प्लेबैक</string>
