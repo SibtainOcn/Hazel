@@ -68,7 +68,6 @@ English
 <div>
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="30%" />
@@ -76,8 +75,9 @@ English
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="30%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="30%" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="30%" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="30%" />
 </div>
 
 ## 💡 Features:
