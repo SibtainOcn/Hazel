@@ -80,7 +80,7 @@ html { scrollbar-width: thin; scrollbar-color: var(--thumb) transparent; }
 .nav.scrolled { background: color-mix(in srgb, var(--bg) 68%, transparent); box-shadow: inset 0 -1px 0 var(--edge); }
 .mobile-menu.open { background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); }
 footer { background: var(--bg-2); box-shadow: inset 0 1px 0 var(--edge); }
-.sites { box-shadow: inset 0 1px 0 var(--edge), inset 0 -1px 0 var(--edge); }
+
 
 /* ── Glass cards ──
    Cards, chips and the footer sit over nothing but the aurora, which is already blurred, so
