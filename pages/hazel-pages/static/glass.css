@@ -66,7 +66,7 @@
 @keyframes hz-drift1 { to { transform: translate3d(8vw, 6vh, 0) scale(1.08); } }
 @keyframes hz-drift2 { to { transform: translate3d(-6vw, 10vh, 0) scale(.94); } }
 @keyframes hz-drift3 { to { transform: translate3d(-10vw, -8vh, 0) scale(1.1); } }
-.is-scrolling .aurora i { animation-play-state: paused; }
+.aurora.paused i { animation-play-state: paused; }
 
 /* ── Scrollbar ── */
 html { scrollbar-width: thin; scrollbar-color: var(--thumb) transparent; }
@@ -79,19 +79,22 @@ html { scrollbar-width: thin; scrollbar-color: var(--thumb) transparent; }
 .nav { background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); }
 .nav.scrolled { background: color-mix(in srgb, var(--bg) 68%, transparent); box-shadow: inset 0 -1px 0 var(--edge); }
 .mobile-menu.open { background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); }
-footer { background: var(--bg-2); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); box-shadow: inset 0 1px 0 var(--edge); }
-.sites { backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); box-shadow: inset 0 1px 0 var(--edge), inset 0 -1px 0 var(--edge); }
+footer { background: var(--bg-2); box-shadow: inset 0 1px 0 var(--edge); }
 
-/* ── Glass cards ── */
+
+/* ── Glass cards ──
+   Cards, chips and the footer sit over nothing but the aurora, which is already blurred, so
+   they skip their own backdrop blur on every screen. With the aurora drifting behind them, a
+   blur on each one was redone every frame. Only bars and controls that cover page content or
+   images keep it. */
 .tile, .way, .privacy .left, .privacy li, .numbers div, .verify, .panel, .steps li, .device,
 details.q, .faq-still, .faq-empty, .give a, .help-grid > *, .promise, .next-up a, .f-panel {
-  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
   box-shadow: inset 0 0 0 1px var(--edge), var(--glass-shadow);
 }
 .pill, .btn-ghost, .search-btn, .gallery-nav button, .viewer button, .toc-mobile select, .faq-search input {
-  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
   box-shadow: inset 0 0 0 1px var(--edge);
 }
+.gallery-nav button, .viewer button { backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); }
 .pill { border-color: transparent; }
 .faq-search input:focus { box-shadow: inset 0 0 0 2px var(--accent); }
 .f-panel { background: color-mix(in srgb, var(--bg) 70%, transparent); }
@@ -100,20 +103,22 @@ details.q, .faq-still, .faq-empty, .give a, .help-grid > *, .promise, .next-up a
 .mini, .share div:not(.on), .chips span:not(.on), .opt:not(.on), .kinds span:not(.on), .steps-mini i,
 .fingerprint code, .copy-btn, .langs span, .credits li, .search-btn kbd { background: var(--inset); }
 
-@media (max-width: 1260px) and (min-width: 1081px), (max-width: 640px) {
-  .search-btn { backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
+/* A touch firmer fill on every screen, standing in for the blur the cards no longer take. */
+:root { --surface: rgba(255, 255, 255, .06); }
+:root[data-theme="light"] { --surface: rgba(255, 255, 255, .64); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) { --surface: rgba(255, 255, 255, .64); }
 }
-/* Phones: lighter blur, still aurora. Cards skip their own blur (the aurora behind them is
-   already soft) and take a slightly firmer fill and a shorter shadow, so scrolling stays smooth. */
+@media (max-width: 1260px) and (min-width: 1081px), (max-width: 640px) {
+  .search-btn { box-shadow: none; }
+}
+/* Phones: lighter blur, a still aurora, a slightly firmer fill and a shorter shadow. */
 @media (max-width: 640px) {
   :root { --blur: blur(14px) saturate(1.3); --surface: rgba(255, 255, 255, .065); --glass-shadow: 0 12px 28px -18px rgba(0, 0, 0, .6); }
   :root[data-theme="light"] { --surface: rgba(255, 255, 255, .7); --glass-shadow: 0 10px 24px -18px rgba(60, 50, 30, .18); }
   .aurora i { filter: blur(90px); }
   .aurora i:nth-child(n) { animation: none; }
-  .tile, .way, .privacy .left, .privacy li, .numbers div, .verify, .panel, .steps li, .device,
-  details.q, .faq-still, .faq-empty, .give a, .help-grid > *, .promise, .next-up a, .f-panel,
-  .pill, .btn-ghost, .gallery-nav button, .viewer button, .toc-mobile select, .faq-search input,
-  footer, .sites { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .gallery-nav button, .viewer button { backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
 @media (max-width: 640px) and (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) { --surface: rgba(255, 255, 255, .7); --glass-shadow: 0 10px 24px -18px rgba(60, 50, 30, .18); }
