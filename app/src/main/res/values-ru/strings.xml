@@ -810,7 +810,7 @@
     <string name="fetch_settings_search_results">Результатов за поиск</string>
     <string name="fetch_settings_suggestions">Подсказки поиска</string>
     <string name="fetch_settings_suggestions_summary">Показывает подсказки Google при вводе. Введённый текст отправляется в Google.</string>
-    <string name="search_suggestions_confirm_title">Включить подсказки поиска?</string>
+    <string name="search_suggestions_confirm_title">Примечание</string>
     <string name="search_suggestions_confirm_body">Пока вы вводите запрос, ваши слова отправляются в Google, чтобы получить подсказки. Ссылки никогда не отправляются. Это можно отключить в любой момент.</string>
     <string name="search_suggestions_confirm">Включить</string>
     <string name="fetch_settings_playback">Воспроизведение</string>
