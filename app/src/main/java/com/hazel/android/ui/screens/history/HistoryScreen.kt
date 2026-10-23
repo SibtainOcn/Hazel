@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.history
 
+import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.hazel.android.ui.components.FlatChip
@@ -9,7 +10,6 @@ import com.hazel.android.ui.components.FlatIconButton
 import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
 import androidx.compose.foundation.lazy.rememberLazyListState
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -52,19 +52,20 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.ViewAgenda
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -112,6 +113,28 @@ import com.hazel.android.ui.components.rememberPresence
 import com.hazel.android.util.MediaOpener
 import com.hazel.android.util.MediaPresence
 import kotlinx.coroutines.launch
+import android.app.Activity
+import com.hazel.android.ui.screens.download.StatusToastHost
+import com.hazel.android.ui.screens.download.rememberStatusToastState
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Deselect
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.RemoveCircleOutline
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.window.Dialog
+import com.hazel.android.ui.theme.glassBackdrop
+import com.hazel.android.util.MediaDeleter
 
 /**
  * What has finished downloading.
@@ -146,8 +169,12 @@ fun HistoryScreen() {
     var menuOpen by remember { mutableStateOf(false) }
     var statusSheetOpen by remember { mutableStateOf(false) }
     var confirmRemoveAll by remember { mutableStateOf(false) }
-    var pendingDelete by remember { mutableStateOf<HistoryEntry?>(null) }
+    var confirmDelete by remember { mutableStateOf<List<HistoryEntry>?>(null) }
+    var actionFor by remember { mutableStateOf<List<HistoryEntry>?>(null) }
     var properties by remember { mutableStateOf<HistoryEntry?>(null) }
+    var selecting by remember { mutableStateOf(false) }
+    var selected by remember { mutableStateOf<Set<Long>>(emptySet()) }
+    var consentIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
 
     val presence = rememberPresence(history)
 
@@ -185,9 +212,70 @@ fun HistoryScreen() {
             }
     }
 
+    LaunchedEffect(visible) {
+        selected = HistorySelection.prune(selected, visible)
+        if (visible.isEmpty()) selecting = false
+    }
+    val exitSelection = {
+        selecting = false
+        selected = emptySet()
+    }
+    BackHandler(enabled = selecting) { exitSelection() }
+
+    val statusToast = rememberStatusToastState()
+    fun toast(text: String, ok: Boolean = true) = statusToast.show(text, ok)
+
+    val consentLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        val ids = consentIds
+        consentIds = emptySet()
+        if (result.resultCode == Activity.RESULT_OK && ids.isNotEmpty()) {
+            scope.launch {
+                DownloadHistoryRepository.removeAll(context, ids)
+                MediaPresence.forget()
+                toast(resources.getQuantityString(R.plurals.history_toast_files_deleted, ids.size, ids.size))
+            }
+        }
+    }
+
+    val deleteFiles: (List<HistoryEntry>) -> Unit = { entries ->
+        scope.launch {
+            val gone = entries.filter { presence[it.id] == false }.mapTo(HashSet()) { it.id }
+            val outcome = DownloadHistoryRepository.deleteFiles(context, entries, gone)
+            val request = MediaDeleter.consentRequest(context, outcome.consentUris)
+            val asked = request != null && runCatching {
+                consentIds = outcome.consentIds
+                consentLauncher.launch(IntentSenderRequest.Builder(request.intentSender).build())
+            }.onFailure { consentIds = emptySet() }.isSuccess
+            val failed = outcome.failed + if (asked) 0 else outcome.consentIds.size
+            when {
+                failed > 0 -> toast(resources.getQuantityString(R.plurals.history_toast_files_delete_failed, failed, failed), ok = false)
+                outcome.deleted > 0 -> toast(
+                    resources.getQuantityString(R.plurals.history_toast_files_deleted, outcome.deleted, outcome.deleted)
+                )
+                outcome.removedIds.isNotEmpty() -> toast(
+                    resources.getQuantityString(R.plurals.history_toast_removed, outcome.removedIds.size, outcome.removedIds.size)
+                )
+            }
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
-        // ── Title and actions ──
-        Row(
+        if (selecting) {
+            SelectionHeader(
+                count = selected.size,
+                allChosen = HistorySelection.allChosen(selected, visible),
+                onClose = exitSelection,
+                onToggleAll = {
+                    selected = if (HistorySelection.allChosen(selected, visible)) emptySet()
+                    else HistorySelection.all(visible)
+                },
+                onAct = {
+                    HistorySelection.targets(selected, visible).takeIf { it.isNotEmpty() }?.let { actionFor = it }
+                }
+            )
+        } else Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 20.dp, end = 4.dp, top = 8.dp),
@@ -219,6 +307,26 @@ fun HistoryScreen() {
                     Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.history_menu_action))
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.history_menu_select)) },
+                        enabled = visible.isNotEmpty(),
+                        onClick = {
+                            menuOpen = false
+                            keyboard?.hide()
+                            selected = emptySet()
+                            selecting = true
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.history_menu_select_all)) },
+                        enabled = visible.isNotEmpty(),
+                        onClick = {
+                            menuOpen = false
+                            keyboard?.hide()
+                            selected = HistorySelection.all(visible)
+                            selecting = true
+                        }
+                    )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.history_menu_remove_all)) },
                         enabled = history.isNotEmpty(),
@@ -379,30 +487,29 @@ fun HistoryScreen() {
                                     MediaOpener.play(context, entry.fileUri, entry.isVideo)
                                 } else {
                                     presence[entry.id] = false
-                                    Toast.makeText(
-                                        context,
-                                        resources.getString(R.string.history_toast_file_gone),
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    toast(resources.getString(R.string.history_toast_file_gone), ok = false)
                                 }
                             }
                         }
+                        val toggle = { selected = HistorySelection.toggle(selected, entry.id) }
                         val actions = EntryActions(
-                            onOpen = open,
+                            onOpen = if (selecting) toggle else open,
+                            onHold = if (selecting) toggle else { { actionFor = listOf(entry) } },
                             onProperties = { properties = entry },
                             onRemove = { scope.launch { DownloadHistoryRepository.remove(context, entry.id) } },
-                            onDeleteFile = { pendingDelete = entry }
+                            onDeleteFile = { confirmDelete = listOf(entry) }
                         )
+                        val mark = if (selecting) entry.id in selected else null
                         Box(modifier = Modifier.scrollShrink(shrink)) {
-                            if (listLayout) HistoryRow(entry, present, actions)
-                            else HistoryCard(entry, present, actions)
+                            if (listLayout) HistoryRow(entry, present, mark, actions)
+                            else HistoryCard(entry, present, mark, actions)
                         }
                     }
                 }
                 FastScrollbar(listState, Modifier.align(Alignment.TopEnd), PaddingValues(top = 8.dp, bottom = 24.dp))
             }
         }
-        if (searchOpen) {
+        if (searchOpen && !selecting) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -412,13 +519,19 @@ fun HistoryScreen() {
                     ) { dismissSearch() }
             )
         }
+        StatusToastHost(
+            statusToast,
+            Modifier
+                .align(Alignment.BottomCenter)
+                .padding(start = 20.dp, end = 20.dp, bottom = 24.dp)
+        )
         }
     }
 
     if (statusSheetOpen) {
         ModalBottomSheet(
             onDismissRequest = { statusSheetOpen = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)),
             dragHandle = null
         ) {
             Column(modifier = Modifier.padding(top = 20.dp).navigationBarsPadding()) {
@@ -478,29 +591,55 @@ fun HistoryScreen() {
         )
     }
 
-    pendingDelete?.let { entry ->
+    actionFor?.let { entries ->
+        HistoryActionDialog(
+            entries = entries,
+            anyPresent = entries.any { presence[it.id] != false },
+            onDismiss = { actionFor = null },
+            onProperties = { properties = entries.single() },
+            onRemove = {
+                val ids = entries.mapTo(HashSet()) { it.id }
+                scope.launch {
+                    DownloadHistoryRepository.removeAll(context, ids)
+                    toast(resources.getQuantityString(R.plurals.history_toast_removed, ids.size, ids.size))
+                }
+                exitSelection()
+            },
+            onDelete = { confirmDelete = entries }
+        )
+    }
+
+    confirmDelete?.let { entries ->
+        val goneCount = entries.count { presence[it.id] == false }
+        val fileCount = entries.size - goneCount
         AlertDialog(
-            onDismissRequest = { pendingDelete = null },
-            title = { Text(stringResource(R.string.history_delete_dialog_title), fontWeight = FontWeight.Bold) },
-            text = { Text(stringResource(R.string.history_delete_dialog_body, entry.fileName)) },
+            onDismissRequest = { confirmDelete = null },
+            title = {
+                Text(
+                    stringResource(
+                        if (entries.size == 1) R.string.history_delete_dialog_title else R.string.history_delete_many_title
+                    ),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    if (entries.size == 1) stringResource(R.string.history_delete_dialog_body, entries.single().fileName)
+                    else listOfNotNull(
+                        pluralStringResource(R.plurals.history_delete_many_body, fileCount, fileCount).takeIf { fileCount > 0 },
+                        pluralStringResource(R.plurals.history_delete_many_gone, goneCount, goneCount).takeIf { goneCount > 0 }
+                    ).joinToString("\n\n")
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
-                    pendingDelete = null
-                    scope.launch {
-                        val deleted = DownloadHistoryRepository.deleteFile(context, entry)
-                        Toast.makeText(
-                            context,
-                            resources.getString(
-                                if (deleted) R.string.history_toast_file_deleted
-                                else R.string.history_toast_file_delete_failed
-                            ),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                    confirmDelete = null
+                    deleteFiles(entries)
+                    exitSelection()
                 }) { Text(stringResource(R.string.history_delete_dialog_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) {
+                TextButton(onClick = { confirmDelete = null }) {
                     Text(stringResource(R.string.history_delete_dialog_cancel))
                 }
             }
@@ -508,9 +647,125 @@ fun HistoryScreen() {
     }
 }
 
+/** The top bar while picking rows: how many are picked, select all, and what to do with them. */
+@Composable
+private fun SelectionHeader(
+    count: Int,
+    allChosen: Boolean,
+    onClose: () -> Unit,
+    onToggleAll: () -> Unit,
+    onAct: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, end = 12.dp, top = 8.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f))
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onClose) {
+            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.history_select_close))
+        }
+        Text(
+            pluralStringResource(R.plurals.history_selected_count, count, count),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(onClick = onToggleAll) {
+            Icon(
+                if (allChosen) Icons.Filled.Deselect else Icons.Filled.SelectAll,
+                contentDescription = stringResource(
+                    if (allChosen) R.string.history_select_none else R.string.history_menu_select_all
+                ),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+        IconButton(onClick = onAct, enabled = count > 0) {
+            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.history_select_act))
+        }
+    }
+}
+
+/** What a held row, or the picked rows, can do: leave the files and clear the list, or delete the files too. */
+@Composable
+private fun HistoryActionDialog(
+    entries: List<HistoryEntry>,
+    anyPresent: Boolean,
+    onDismiss: () -> Unit,
+    onProperties: () -> Unit,
+    onRemove: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val single = entries.size == 1
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier.glassBackdrop(RoundedCornerShape(28.dp)),
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh
+        ) {
+            Column(modifier = Modifier.padding(top = 24.dp, bottom = 16.dp)) {
+                Text(
+                    if (single) entries.single().title
+                    else pluralStringResource(R.plurals.history_selected_count, entries.size, entries.size),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 16.dp)
+                )
+                val options = buildList<Triple<Int, ImageVector, () -> Unit>> {
+                    if (single) add(Triple(R.string.history_card_properties, Icons.Filled.Info, onProperties))
+                    add(Triple(R.string.history_card_remove, Icons.Filled.RemoveCircleOutline, onRemove))
+                    if (anyPresent) add(Triple(R.string.history_card_delete, Icons.Filled.DeleteForever, onDelete))
+                }
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    options.forEachIndexed { index, (label, icon, action) ->
+                        val destructive = icon == Icons.Filled.DeleteForever
+                        ChoiceRow(
+                            label = stringResource(label),
+                            description = when (label) {
+                                R.string.history_card_remove -> stringResource(R.string.history_remove_hint)
+                                R.string.history_card_delete -> stringResource(R.string.history_delete_hint)
+                                else -> null
+                            },
+                            chosen = false,
+                            role = Role.Button,
+                            shape = groupShape(index, options.size),
+                            leading = {
+                                Icon(
+                                    icon,
+                                    contentDescription = null,
+                                    tint = if (destructive) MaterialTheme.colorScheme.error
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            },
+                            onClick = {
+                                onDismiss()
+                                action()
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** A new instance per message, so the same text twice still shows twice. */
+
 /** What can be done with one finished download, whichever layout draws it. */
 private class EntryActions(
     val onOpen: () -> Unit,
+    val onHold: () -> Unit,
     val onProperties: () -> Unit,
     val onRemove: () -> Unit,
     val onDeleteFile: () -> Unit
@@ -618,21 +873,22 @@ private fun EntryMenu(
 /** A finished download at full width, its artwork behind its details. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HistoryCard(entry: HistoryEntry, present: Boolean, actions: EntryActions) {
+private fun HistoryCard(entry: HistoryEntry, present: Boolean, mark: Boolean?, actions: EntryActions) {
     var menuOpen by remember { mutableStateOf(false) }
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        color = tonalFill(0.3f),
+        border = if (mark == true) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
                 .combinedClickable(
-                    onClick = { if (present) actions.onOpen() },
-                    onLongClick = actions.onProperties
+                    onClick = { if (mark != null || present) actions.onOpen() },
+                    onLongClick = actions.onHold
                 )
         ) {
             Artwork(entry, present, Modifier.fillMaxSize())
@@ -668,7 +924,12 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, actions: EntryAct
                 }
             }
 
-            Box(modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
+            if (mark == true) {
+                Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)))
+            }
+            if (mark != null) {
+                SelectMark(mark, Modifier.align(Alignment.TopEnd).padding(12.dp), onImage = true)
+            } else Box(modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
                 IconButton(onClick = { menuOpen = true }) {
                     Icon(
                         painterResource(R.drawable.ic_more_vert),
@@ -717,17 +978,18 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, actions: EntryAct
 /** A finished download as one compact row: artwork at the side, details beside it. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HistoryRow(entry: HistoryEntry, present: Boolean, actions: EntryActions) {
-    var menuOpen by remember { mutableStateOf(false) }
-
+private fun HistoryRow(entry: HistoryEntry, present: Boolean, mark: Boolean?, actions: EntryActions) {
     Box {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
+                .background(
+                    if (mark == true) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f) else Color.Transparent
+                )
                 .combinedClickable(
-                    onClick = { if (present) actions.onOpen() },
-                    onLongClick = { menuOpen = true }
+                    onClick = { if (mark != null || present) actions.onOpen() },
+                    onLongClick = actions.onHold
                 )
                 .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -771,7 +1033,8 @@ private fun HistoryRow(entry: HistoryEntry, present: Boolean, actions: EntryActi
                 }
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Icon(
+            if (mark != null) SelectMark(mark)
+            else Icon(
                 if (entry.isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
                 contentDescription = stringResource(
                     if (entry.isVideo) R.string.properties_kind_video else R.string.properties_kind_audio
@@ -780,7 +1043,36 @@ private fun HistoryRow(entry: HistoryEntry, present: Boolean, actions: EntryActi
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        EntryMenu(menuOpen, present, actions) { menuOpen = false }
+    }
+}
+
+/** The tick on a row while picking: filled when picked, an empty ring when not. */
+@Composable
+private fun SelectMark(chosen: Boolean, modifier: Modifier = Modifier, onImage: Boolean = false) {
+    Box(
+        modifier = modifier
+            .size(24.dp)
+            .clip(CircleShape)
+            .background(if (chosen) MaterialTheme.colorScheme.primary else if (onImage) Color.Black.copy(alpha = 0.25f) else Color.Transparent)
+            .border(
+                2.dp,
+                when {
+                    chosen -> MaterialTheme.colorScheme.primary
+                    onImage -> Color.White.copy(alpha = 0.85f)
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                CircleShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        if (chosen) {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(16.dp)
+            )
+        }
     }
 }
 

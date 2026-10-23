@@ -1,5 +1,12 @@
 package com.hazel.android.ui.screens.more
 
+import androidx.compose.ui.draw.alpha
+import androidx.compose.material.icons.outlined.AutoAwesome
+import com.hazel.android.ui.components.glassStyleLabel
+import com.hazel.android.ui.components.GlassStyleSwatch
+import com.hazel.android.ui.components.GlassStylePickerDialog
+import com.hazel.android.ui.theme.GlassStyle
+import androidx.compose.material.icons.outlined.BlurOn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -14,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material3.Card
@@ -38,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
+import com.hazel.android.data.SettingsRepository
 import com.hazel.android.ui.components.AccentPickerDialog
 import com.hazel.android.ui.theme.AccentColors
 
@@ -50,9 +59,15 @@ fun AppearanceScreen(
     onToggleTheme: () -> Unit,
     accentName: String,
     onAccentChanged: (String) -> Unit,
+    glassEnabled: Boolean,
+    onToggleGlass: () -> Unit,
+    glassStyle: GlassStyle,
+    onGlassStyleChanged: (GlassStyle) -> Unit,
     onBack: () -> Unit
 ) {
     var accentPickerVisible by remember { mutableStateOf(false) }
+    var glassPickerVisible by remember { mutableStateOf(false) }
+    var resetVisible by remember { mutableStateOf(false) }
     val currentAccent = AccentColors.find { it.name == accentName } ?: AccentColors.first()
 
     SettingsScreen(title = stringResource(R.string.appearance_title), onBack = onBack) {
@@ -93,6 +108,51 @@ fun AppearanceScreen(
                 color = MaterialTheme.colorScheme.surfaceVariant
             )
 
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.appearance_glass)) },
+                supportingContent = {
+                    Text(stringResource(if (glassEnabled) R.string.appearance_on else R.string.appearance_off))
+                },
+                leadingContent = {
+                    Icon(Icons.Outlined.BlurOn, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                trailingContent = {
+                    Switch(
+                        checked = glassEnabled,
+                        onCheckedChange = { onToggleGlass() },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.clickable { onToggleGlass() }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.glass_style_title)) },
+                supportingContent = { Text(glassStyleLabel(glassStyle)) },
+                leadingContent = {
+                    Icon(Icons.Outlined.AutoAwesome, null, tint = MaterialTheme.colorScheme.primary)
+                },
+                trailingContent = { GlassStyleSwatch(glassStyle, accentName) },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier
+                    .clickable(enabled = glassEnabled) { glassPickerVisible = true }
+                    .alpha(if (glassEnabled) 1f else 0.45f)
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
+
             // Accent Color row — opens centered dialog
             ListItem(
                 headlineContent = { Text(stringResource(R.string.appearance_accent_color)) },
@@ -122,6 +182,37 @@ fun AppearanceScreen(
                 modifier = Modifier.clickable { accentPickerVisible = true }
             )
         }
+
+        FlatSettingButton(
+            icon = Icons.Filled.RestartAlt,
+            text = stringResource(R.string.appearance_reset),
+            onClick = { resetVisible = true }
+        )
+    }
+
+    if (resetVisible) {
+        ConfirmSettingDialog(
+            title = stringResource(R.string.appearance_reset_title),
+            body = stringResource(R.string.appearance_reset_body),
+            confirm = stringResource(R.string.format_sheet_reset),
+            onConfirm = {
+                if (!isDarkTheme) onToggleTheme()
+                if (accentName != SettingsRepository.DEFAULT_ACCENT) onAccentChanged(SettingsRepository.DEFAULT_ACCENT)
+                if (!glassEnabled) onToggleGlass()
+                if (glassStyle != GlassStyle.DEFAULT) onGlassStyleChanged(GlassStyle.DEFAULT)
+                resetVisible = false
+            },
+            onDismiss = { resetVisible = false }
+        )
+    }
+
+    if (glassPickerVisible) {
+        GlassStylePickerDialog(
+            current = glassStyle,
+            accentName = accentName,
+            onPick = onGlassStyleChanged,
+            onDismiss = { glassPickerVisible = false }
+        )
     }
 
     if (accentPickerVisible) {

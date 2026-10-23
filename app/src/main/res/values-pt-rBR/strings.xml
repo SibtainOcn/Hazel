@@ -64,6 +64,9 @@
     <string name="search_cancel">Cancelar</string>
     <string name="search_clear_history_confirm_title">Apagar o histórico de pesquisa?</string>
     <string name="search_clear_history_confirm_body">Todos os links de pesquisa salvos serão removidos. Essa ação não pode ser desfeita.</string>
+    <string name="search_results_cleared">Resultados limpos</string>
+    <string name="search_history_cleared">Histórico de pesquisa limpo</string>
+    <string name="search_history_clear_failed">Não foi possível limpar o histórico de pesquisa</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Já foi baixado</string>
@@ -221,9 +224,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Voltar</string>
     <string name="sponsor_title">Apoiar o Hazel</string>
-    <string name="sponsor_hero_title">Gratuito, e vai continuar assim</string>
-    <string name="sponsor_hero_body">O Hazel é feito à noite e nos fins de semana, e é dado de graça porque um baixador que cobra pelo download é um baixador pior. Os sites mudam o tempo todo, e acompanhar essas mudanças é o trabalho.</string>
-    <string name="sponsor_hero_closing">Se o aplicativo te poupou uma tarde, qualquer uma das opções abaixo devolve esse tempo. Se não poupou, as formas que não custam nada ajudam do mesmo jeito.</string>
+    <string name="sponsor_hero_title">Gosta do Hazel? Dê um pouco de carinho</string>
+    <string name="sponsor_hero_body">Se o Hazel tem sido útil para você, considere apoiar o desenvolvimento. Seu apoio me ajuda a continuar melhorando o Hazel e criando novos recursos. Todo carinho conta muito. 💚</string>
     <string name="sponsor_section_ways">Formas de apoiar</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Mensal ou uma vez só, cancele quando quiser. Tudo é cuidado pelo GitHub.</string>
@@ -272,8 +274,6 @@
     <string name="cleanup_category_partial_downloads_description">Sobras de downloads cancelados ou que falharam.</string>
     <string name="cleanup_category_conversions_label">Conversões incompletas</string>
     <string name="cleanup_category_conversions_description">Arquivos de trabalho que sobraram do conversor de áudio.</string>
-    <string name="cleanup_category_engine_label">Arquivos do motor yt-dlp</string>
-    <string name="cleanup_category_engine_description">O downloader e seu runtime. Libera mais espaço, mas o próximo download o descompacta de novo.</string>
     <string name="cleanup_category_other_cache_label">Outros arquivos em cache</string>
     <string name="cleanup_category_other_cache_description">Miniaturas e tudo o mais guardado em cache enquanto você navega pelos links.</string>
     <string name="cleanup_category_link_reads_label">Leituras de links salvas</string>
@@ -284,10 +284,9 @@
     <string name="cleanup_confirm_clear">Limpar</string>
     <string name="cleanup_confirm_cancel">Cancelar</string>
     <string name="cleanup_confirm_all_title">Limpar tudo?</string>
-    <string name="cleanup_confirm_all_body">%1$s serão liberados. Seus downloads e logins salvos são mantidos, mas o próximo download vai demorar mais enquanto o motor é descompactado de novo.</string>
+    <string name="cleanup_confirm_all_body">%1$s serão liberados. Seus downloads e logins salvos são mantidos.</string>
     <string name="cleanup_confirm_all_confirm">Limpar tudo</string>
     <string name="cleanup_confirm_all_cancel">Cancelar</string>
-    <string name="cleanup_confirm_all_include_link_reads">Limpar também as leituras de links salvas (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">Todos os downloads</string>
@@ -303,14 +302,50 @@
     <string name="history_clear_dialog_cancel">Cancelar</string>
     <string name="history_delete_dialog_title">Excluir o arquivo</string>
     <string name="history_delete_dialog_body">%1$s será excluído do seu aparelho.</string>
-    <string name="history_toast_file_deleted">Arquivo excluído</string>
-    <string name="history_toast_file_delete_failed">Não foi possível excluir o arquivo</string>
     <string name="history_delete_dialog_confirm">Excluir</string>
     <string name="history_delete_dialog_cancel">Cancelar</string>
     <string name="history_card_options">Opções</string>
     <string name="history_card_properties">Propriedades</string>
     <string name="history_card_remove">Remover da lista</string>
     <string name="history_card_delete">Excluir o arquivo</string>
+    <string name="history_menu_select">Selecionar</string>
+    <string name="history_menu_select_all">Selecionar tudo</string>
+    <string name="history_select_none">Desmarcar tudo</string>
+    <string name="history_select_close">Cancelar seleção</string>
+    <string name="history_select_act">Remover ou excluir</string>
+    <string name="history_delete_many_title">Excluir arquivos</string>
+    <string name="history_remove_hint">O arquivo continua no seu dispositivo</string>
+    <string name="history_delete_hint">Exclui o arquivo do dispositivo e desta lista</string>
+    <plurals name="history_selected_count">
+        <item quantity="one">%d selecionado</item>
+        <item quantity="many">%d selecionados</item>
+        <item quantity="other">%d selecionados</item>
+    </plurals>
+    <plurals name="history_delete_many_body">
+        <item quantity="one">%d arquivo será excluído do seu dispositivo.</item>
+        <item quantity="many">%d arquivos serão excluídos do seu dispositivo.</item>
+        <item quantity="other">%d arquivos serão excluídos do seu dispositivo.</item>
+    </plurals>
+    <plurals name="history_delete_many_gone">
+        <item quantity="one">%d item já excluído será removido da lista.</item>
+        <item quantity="many">%d itens já excluídos serão removidos da lista.</item>
+        <item quantity="other">%d itens já excluídos serão removidos da lista.</item>
+    </plurals>
+    <plurals name="history_toast_files_deleted">
+        <item quantity="one">%d arquivo excluído</item>
+        <item quantity="many">%d arquivos excluídos</item>
+        <item quantity="other">%d arquivos excluídos</item>
+    </plurals>
+    <plurals name="history_toast_files_delete_failed">
+        <item quantity="one">Não foi possível excluir %d arquivo</item>
+        <item quantity="many">Não foi possível excluir %d arquivos</item>
+        <item quantity="other">Não foi possível excluir %d arquivos</item>
+    </plurals>
+    <plurals name="history_toast_removed">
+        <item quantity="one">%d item removido da lista</item>
+        <item quantity="many">%d itens removidos da lista</item>
+        <item quantity="other">%d itens removidos da lista</item>
+    </plurals>
     <string name="history_tag_deleted">Excluído</string>
     <string name="history_toast_file_gone">Este arquivo não está mais no seu aparelho</string>
     <string name="history_tab_failed">Com falha</string>
@@ -423,9 +458,6 @@
     <string name="batch_type_video">Vídeo</string>
     <string name="batch_container_title">Contêiner</string>
     <string name="batch_container_subtitle">O arquivo em que estes links são salvos</string>
-    <string name="batch_save_dir_title">Onde salvar</string>
-    <string name="batch_open_folder">Abrir esta pasta</string>
-    <string name="batch_change_folder">Mudar de pasta</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Miniatura</string>
@@ -552,10 +584,26 @@
     <string name="appearance_on">Ligado</string>
     <string name="appearance_off">Desligado</string>
     <string name="appearance_accent_color">Cor de destaque</string>
+    <string name="appearance_glass">Efeito vidro</string>
+    <string name="glass_style_title">Estilo do vidro</string>
+    <string name="glass_style_aurora">Aurora</string>
+    <string name="glass_style_accent">Destaque</string>
+    <string name="glass_style_wallpaper">Papel de parede</string>
+    <string name="glass_style_sunset">Pôr do sol</string>
+    <string name="glass_style_nebula">Nebulosa</string>
+    <string name="glass_style_forest">Floresta</string>
+    <string name="glass_style_ocean">Oceano</string>
+    <string name="glass_style_mono">Mono</string>
+    <string name="guide_step_appearance_title">Do seu jeito</string>
+    <string name="guide_step_appearance_desc">Escolha o tema, a cor de destaque e o visual de vidro. Você pode mudar isso quando quiser nas configurações.</string>
+    <string name="whats_new_tag">Novidades</string>
+    <string name="whats_new_version">Versão %1$s</string>
+    <string name="whats_new_done">Entendi</string>
+    <string name="whats_new_glass_title">Um novo visual de vidro</string>
+    <string name="whats_new_glass_desc">Efeito de vidro, novos estilos e cores de destaque.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Cor de destaque</string>
-    <string name="accent_picker_close">Fechar</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">Leitura de links</string>
@@ -658,6 +706,9 @@
     <string name="advanced_reset">Redefinir configurações avançadas</string>
     <string name="advanced_reset_title">Redefinir as configurações avançadas?</string>
     <string name="advanced_reset_body">Cada opção desta tela volta a ficar desligada ou vazia.</string>
+    <string name="appearance_reset">Redefinir aparência</string>
+    <string name="appearance_reset_title">Redefinir a aparência?</string>
+    <string name="appearance_reset_body">Tema, destaque e vidro voltam para escuro, White e Floresta.</string>
     <string name="processing_step_fetch">Buscar</string>
     <string name="processing_step_merge">Juntar</string>
     <string name="processing_step_extract">Extrair</string>
@@ -746,6 +797,9 @@
     <string name="fetch_settings_search_results">Resultados por busca</string>
     <string name="fetch_settings_suggestions">Sugestões de busca</string>
     <string name="fetch_settings_suggestions_summary">Sugere buscas do Google enquanto você digita. O que você digita é enviado ao Google.</string>
+    <string name="search_suggestions_confirm_title">Observação</string>
+    <string name="search_suggestions_confirm_body">Enquanto você digita uma pesquisa, suas palavras são enviadas ao Google para buscar sugestões. Links nunca são enviados. Você pode desativar isso a qualquer momento.</string>
+    <string name="search_suggestions_confirm">Ativar</string>
     <string name="fetch_settings_playback">Reprodução</string>
     <string name="fetch_settings_play_with">Reproduzir com</string>
     <string name="fetch_settings_play_quality">Qualidade de reprodução</string>
@@ -762,6 +816,7 @@
     <string name="save_location_internal">Armazenamento interno</string>
     <string name="save_location_card_hint">Salva em %1$s no cartão</string>
     <string name="save_location_free">%1$s livres</string>
+    <string name="save_location_folder_uses">Esta pasta ocupa %1$s</string>
     <string name="save_location_other">Outra pasta</string>
     <string name="save_location_other_hint">Qualquer pasta deste aparelho ou de um cartão</string>
     <string name="save_location_close">Fechar</string>
@@ -774,6 +829,8 @@
     <string name="home_empty_hint">Cole um link ou pesquise para começar</string>
     <string name="more_getting_started">Primeiros passos</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">Pesquisar</string>
+    <string name="share_shortcut_download">Baixar</string>
     <string name="instant_started">Download iniciado</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Configurações de síntese</string>

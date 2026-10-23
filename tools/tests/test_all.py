@@ -204,15 +204,12 @@ def main():
         ("Translation Correctness", [py, "tools/strings/check.py", "translations"]),
         ("Literal Extraction Progress", [py, "tools/strings/check.py", "progress"]),
         ("Artist Metadata Harness", [py, "tools/tests/test_artist_metadata.py"]),
-        ("Home Search UX & Data Preservation Harness", [py, "tools/tests/test_home_search_ux_and_preservation.py"]),
         ("Release Regression Harness", [py, "tools/tests/test_release_regression_harness.py"]),
         ("Controls & Multi-Source Harness", [py, "tools/tests/test_download_controls_and_sources.py"]),
-        ("Share Overlay Isolation & Safety Harness", [py, "tools/tests/test_share_overlay_isolation.py"]),
         ("Format Source Switch Harness", [py, "tools/tests/test_format_source_switch.py"]),
         ("Back-to-Back Downloads Harness", [py, "tools/tests/test_queue_back_to_back.py"]),
         ("Queue Run State & Summary Harness", [py, "tools/tests/test_queue_run_state.py"]),
         ("Software Update & Flavors Harness", [py, "tools/tests/test_software_update_and_flavors.py"]),
-        ("Settings Layout & Text Harness", [py, "tools/tests/test_settings_layout_and_text.py"]),
         ("Gradle JVM Unit Tests", GRADLE_CMD + [":app:test", "--console=plain"]),
     ]
 

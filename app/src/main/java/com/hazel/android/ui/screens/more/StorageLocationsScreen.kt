@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.more
 
+import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -304,7 +305,7 @@ private fun <T> LimitDropdownRow(
                 Surface(
                     onClick = { menuOpen = true },
                     shape = RoundedCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+                    color = tonalFill(0.55f)
                 ) {
                     Row(
                         modifier = Modifier.padding(start = 14.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),

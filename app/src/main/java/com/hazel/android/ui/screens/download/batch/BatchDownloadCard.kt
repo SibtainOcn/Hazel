@@ -29,19 +29,15 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
-import androidx.compose.material3.AlertDialog
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import com.hazel.android.ui.components.FlatChip
-import kotlinx.coroutines.launch
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import com.hazel.android.ui.theme.opaqueSurface
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -78,56 +74,29 @@ fun BatchDownloadCard(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onTypeClick: () -> Unit,
-    onRemove: () -> Unit
+    removeAsked: Boolean,
+    onAskRemove: () -> Unit
 ) {
     // Half the row's width before a swipe counts, and only towards the "Remove" label, so a
     // sideways nudge while scrolling the list does not start one.
     val dismissState = rememberSwipeToDismissBoxState(positionalThreshold = { it * 0.5f })
-    val scope = rememberCoroutineScope()
-    var confirmRemove by remember { mutableStateOf(false) }
-
-    // A swipe only asks. The row stays out of the way while the question is up, and slides
-    // back if the answer is no.
-    if (confirmRemove) {
-        val keep = {
-            confirmRemove = false
-            scope.launch { dismissState.reset() }
-            Unit
-        }
-        AlertDialog(
-            onDismissRequest = keep,
-            title = { Text(stringResource(R.string.batch_remove_title), fontWeight = FontWeight.Bold) },
-            text = {
-                Text(
-                    stringResource(R.string.batch_remove_body, info.title),
-                    maxLines = 4,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
-            confirmButton = {
-                FlatChip(
-                    label = stringResource(R.string.batch_card_remove),
-                    selected = true,
-                    onClick = {
-                        confirmRemove = false
-                        onRemove()
-                    }
-                )
-            },
-            dismissButton = {
-                FlatChip(label = stringResource(R.string.options_text_input_cancel), onClick = keep)
-            }
-        )
+    // A swipe only asks; the sheet shows the question beside itself, not inside this row,
+    // so closing it can never leave the sheet ignoring touches. The row slides back once
+    // the question is gone and the link is still here.
+    LaunchedEffect(removeAsked) {
+        if (!removeAsked && dismissState.currentValue != SwipeToDismissBoxValue.Settled) dismissState.reset()
     }
+
+    val swiping = dismissState.dismissDirection != SwipeToDismissBoxValue.Settled
 
     SwipeToDismissBox(
         state = dismissState,
         enableDismissFromStartToEnd = false,
-        onDismiss = { value -> if (value != SwipeToDismissBoxValue.Settled) confirmRemove = true },
+        onDismiss = { value -> if (value != SwipeToDismissBoxValue.Settled) onAskRemove() },
         backgroundContent = {
-            // Fills the row exactly, so nothing of it shows until the row is actually
-            // dragged aside.
-            Box(
+            // Drawn only while the row is dragged: a glass row is see-through, so a layer
+            // that was always there showed through every row at rest.
+            if (swiping) Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(10.dp))
@@ -147,9 +116,8 @@ fun BatchDownloadCard(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
-            // Opaque: a translucent row would let the swipe background show through it
-            // while the row is sitting still.
-            color = batchRaisedColor
+            // Solid while dragged, so the red only shows in the gap it leaves.
+            color = if (swiping) batchRaisedColor.compositeOver(opaqueSurface()) else batchRaisedColor
         ) {
             Row(
                 modifier = Modifier
@@ -206,7 +174,12 @@ fun BatchDownloadCard(
                         overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.height(6.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // Wraps instead of squeezing, so the size never shrinks to "…" on a narrow
+                    // screen or a large font.
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         if (formatLabel.isNotBlank()) {
                             // Marked when the link carries a choice of its own, so a set
                             // where one link was changed does not look uniform.

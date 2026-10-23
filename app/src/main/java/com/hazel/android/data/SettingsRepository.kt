@@ -21,9 +21,13 @@ import kotlinx.coroutines.flow.map
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "hazel_settings")
 
 object SettingsRepository {
+    const val DEFAULT_ACCENT = "White"
+
 
     private val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
     private val ACCENT_COLOR_KEY = stringPreferencesKey("accent_color")
+    private val GLASS_KEY = booleanPreferencesKey("glass_theme")
+    private val GLASS_STYLE_KEY = stringPreferencesKey("glass_style")
     private val FILENAME_TEMPLATE_KEY = stringPreferencesKey("filename_template")
     private val EMBED_THUMBNAIL_KEY = booleanPreferencesKey("embed_thumbnail")
 
@@ -38,11 +42,27 @@ object SettingsRepository {
 
     // Accent color
     fun getAccentColor(context: Context): Flow<String> {
-        return context.dataStore.data.map { prefs -> prefs[ACCENT_COLOR_KEY] ?: "White" }
+        return context.dataStore.data.map { prefs -> prefs[ACCENT_COLOR_KEY] ?: DEFAULT_ACCENT }
     }
 
     suspend fun setAccentColor(context: Context, name: String) {
         context.dataStore.edit { prefs -> prefs[ACCENT_COLOR_KEY] = name }
+    }
+
+    fun isGlassEnabled(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { prefs -> prefs[GLASS_KEY] ?: true }
+    }
+
+    suspend fun setGlassEnabled(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GLASS_KEY] = enabled }
+    }
+
+    fun getGlassStyle(context: Context): Flow<String> {
+        return context.dataStore.data.map { prefs -> prefs[GLASS_STYLE_KEY] ?: com.hazel.android.ui.theme.GlassStyle.DEFAULT.key }
+    }
+
+    suspend fun setGlassStyle(context: Context, key: String) {
+        context.dataStore.edit { prefs -> prefs[GLASS_STYLE_KEY] = key }
     }
 
     // Output filename template passed to yt-dlp as -o
@@ -380,8 +400,25 @@ object SettingsRepository {
     fun getGuideSeen(context: Context): Flow<Boolean> =
         context.dataStore.data.map { prefs -> prefs[GUIDE_SEEN_KEY] ?: false }
 
-    suspend fun setGuideSeen(context: Context) {
-        context.dataStore.edit { prefs -> prefs[GUIDE_SEEN_KEY] = true }
+    /**
+     * Also records [whatsNewId] as seen, in the same write: the guide already shows what a
+     * fresh install would be told is new, so the two never appear one after the other.
+     */
+    suspend fun setGuideSeen(context: Context, whatsNewId: String? = null) {
+        context.dataStore.edit { prefs ->
+            prefs[GUIDE_SEEN_KEY] = true
+            if (whatsNewId != null) prefs[WHATS_NEW_SEEN_KEY] = whatsNewId
+        }
+    }
+
+    private val WHATS_NEW_SEEN_KEY = stringPreferencesKey("whats_new_seen")
+
+    /** The id of the last What's new shown on this install, empty when none has been. */
+    fun getWhatsNewSeen(context: Context): Flow<String> =
+        context.dataStore.data.map { prefs -> prefs[WHATS_NEW_SEEN_KEY] ?: "" }
+
+    suspend fun setWhatsNewSeen(context: Context, id: String) {
+        context.dataStore.edit { prefs -> prefs[WHATS_NEW_SEEN_KEY] = id }
     }
 
     // ── Incognito ──
@@ -607,6 +644,18 @@ object SettingsRepository {
     private val UPDATE_NOTIFY_AVAILABLE_KEY = booleanPreferencesKey("update_notify_available")
     private val UPDATE_NOTIFY_COMPLETE_KEY = booleanPreferencesKey("update_notify_complete")
     private val UPDATE_NOTIFY_FAILED_KEY = booleanPreferencesKey("update_notify_failed")
+    private val UPDATE_NOTIFY_OFF_APPLIED_KEY = booleanPreferencesKey("update_notify_off_applied")
+
+    /** yt-dlp update notices are off by default, once for installs that had them on. */
+    suspend fun applyUpdateNoticesOff(context: Context) {
+        context.dataStore.edit { prefs ->
+            if (prefs[UPDATE_NOTIFY_OFF_APPLIED_KEY] == true) return@edit
+            prefs.remove(UPDATE_NOTIFY_AVAILABLE_KEY)
+            prefs.remove(UPDATE_NOTIFY_COMPLETE_KEY)
+            prefs.remove(UPDATE_NOTIFY_FAILED_KEY)
+            prefs[UPDATE_NOTIFY_OFF_APPLIED_KEY] = true
+        }
+    }
 
     fun getHazelChannel(context: Context): Flow<String> {
         return context.dataStore.data.map { prefs -> prefs[HAZEL_CHANNEL_KEY] ?: "Stable" }
@@ -630,21 +679,21 @@ object SettingsRepository {
     }
 
     fun getUpdateNotifyAvailable(context: Context): Flow<Boolean> {
-        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_AVAILABLE_KEY] ?: true }
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_AVAILABLE_KEY] ?: false }
     }
     suspend fun setUpdateNotifyAvailable(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[UPDATE_NOTIFY_AVAILABLE_KEY] = enabled }
     }
 
     fun getUpdateNotifyComplete(context: Context): Flow<Boolean> {
-        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_COMPLETE_KEY] ?: true }
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_COMPLETE_KEY] ?: false }
     }
     suspend fun setUpdateNotifyComplete(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[UPDATE_NOTIFY_COMPLETE_KEY] = enabled }
     }
 
     fun getUpdateNotifyFailed(context: Context): Flow<Boolean> {
-        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_FAILED_KEY] ?: true }
+        return context.dataStore.data.map { prefs -> prefs[UPDATE_NOTIFY_FAILED_KEY] ?: false }
     }
     suspend fun setUpdateNotifyFailed(context: Context, enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[UPDATE_NOTIFY_FAILED_KEY] = enabled }

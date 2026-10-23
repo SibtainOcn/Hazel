@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -56,10 +57,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -102,6 +104,8 @@ import com.hazel.android.download.MediaFormat
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.newpipe.NewPipeEngine
 import com.hazel.android.download.MediaInfo
+import com.hazel.android.ui.components.AlertDialog
+import com.hazel.android.ui.components.FlatChip
 import com.hazel.android.download.WORST_HEIGHT
 import com.hazel.android.download.BatchAudioFormats
 import com.hazel.android.download.GenericFormats
@@ -110,6 +114,7 @@ import com.hazel.android.download.languageLabel
 import com.hazel.android.ui.screens.download.AudioLanguageSheet
 import com.hazel.android.ui.screens.download.ChaptersDialog
 import com.hazel.android.ui.screens.download.CookiesDialog
+import com.hazel.android.ui.screens.download.SaveDirDialog
 import com.hazel.android.ui.screens.download.rememberUseCookies
 import com.hazel.android.ui.screens.download.IncognitoButton
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
@@ -181,7 +186,7 @@ fun BatchDownloadSheet(
 ) {
     // Opened at full height: the list of links and the controls under it do not fit in a
     // half sheet, and a partly open sheet would hide the download action.
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
 
     val state = rememberBatchDownloadState(results)
     // The set starts from the download settings, and follows them if they change.
@@ -241,6 +246,8 @@ fun BatchDownloadSheet(
     // The link dialog, kept out here and composed beside the sheet rather than inside it,
     // so closing it never leaves the sheet ignoring touches.
     var linkDialogOpen by remember { mutableStateOf(false) }
+    // A swiped row's "remove?" question, kept here for the same reason.
+    var pendingRemove by remember { mutableStateOf<MediaInfo?>(null) }
     val links = remember(results) { results.map { it.url } }
     val linkSource = sourceUrl?.trim()?.takeIf { it.startsWith("http") && it.none(Char::isWhitespace) }
 
@@ -519,7 +526,8 @@ fun BatchDownloadSheet(
                             focusedUrl = info.url
                             openSheet = BatchSheet.ITEM_TYPE
                         },
-                        onRemove = { onRemove(info) }
+                        removeAsked = pendingRemove?.url == info.url,
+                        onAskRemove = { pendingRemove = info }
                     )
                     }
                 }
@@ -773,10 +781,13 @@ fun BatchDownloadSheet(
                 } else {
                     280.dp
                 }
+                // While searching, the list keeps its full height however few links match, so
+                // the sheet does not shrink and drop the search field behind the keyboard.
                 linkList(
                     Modifier
                         .weight(1f, fill = false)
-                        .heightIn(max = listMaxHeight)
+                        .heightIn(min = if (searchOpen) listMaxHeight else 0.dp, max = listMaxHeight)
+                        .testTag(BATCH_LINK_LIST_TAG)
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -813,6 +824,34 @@ fun BatchDownloadSheet(
             links = linkSource?.let { listOf(it) } ?: links,
             onFeedback = { message -> feedback = BatchFeedback(message) },
             onDismiss = { linkDialogOpen = false }
+        )
+    }
+
+    pendingRemove?.let { info ->
+        val keep = { pendingRemove = null }
+        AlertDialog(
+            onDismissRequest = keep,
+            title = { Text(stringResource(R.string.batch_remove_title), fontWeight = FontWeight.Bold) },
+            text = {
+                Text(
+                    stringResource(R.string.batch_remove_body, info.title),
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            confirmButton = {
+                FlatChip(
+                    label = stringResource(R.string.batch_card_remove),
+                    selected = true,
+                    onClick = {
+                        pendingRemove = null
+                        onRemove(info)
+                    }
+                )
+            },
+            dismissButton = {
+                FlatChip(label = stringResource(R.string.options_text_input_cancel), onClick = keep)
+            }
         )
     }
 
@@ -963,10 +1002,10 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
-        BatchSheet.SAVE_DIR -> BatchSaveDirSheet(
+        BatchSheet.SAVE_DIR -> SaveDirDialog(
             isVideo = state.videoTab,
             saveDir = saveDirs.of(state.videoTab),
-            saveDirLabel = saveDirs.labelOf(state.videoTab),
+            label = saveDirs.labelOf(state.videoTab),
             onOpen = {
                 openSheet = BatchSheet.NONE
                 onOpenSaveDir(state.videoTab)
@@ -1147,6 +1186,7 @@ private val SIDE = 12.dp
  * upright phone, so its rows lay out as they do there.
  */
 private const val TWO_PANE_MIN_WIDTH_DP = 600
+internal const val BATCH_LINK_LIST_TAG = "batch_link_list"
 private const val TWO_PANE_MAX_HEIGHT_DP = 480
 
 /** One message from the footer; a new one for every tap, so a repeat starts its time over. */

@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.more
 
+import com.hazel.android.ui.theme.LocalDarkTheme
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
@@ -54,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -138,42 +138,46 @@ fun DocumentationScreen(
     onBack: () -> Unit,
     onOpen: (DocPage) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-    ) {
-        DocsHeader(title = stringResource(R.string.docs_title), onBack = onBack)
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+            DocsHeader(title = stringResource(R.string.docs_title), onBack = onBack)
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
         ) {
-            DocPage.entries.forEachIndexed { index, page ->
-                if (index > 0) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                DocPage.entries.forEachIndexed { index, page ->
+                    if (index > 0) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    }
+                    ListItem(
+                        headlineContent = { Text(stringResource(page.labelRes)) },
+                        leadingContent = { Icon(page.icon, null, tint = MaterialTheme.colorScheme.primary) },
+                        trailingContent = {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                        modifier = Modifier.clickable { onOpen(page) }
                     )
                 }
-                ListItem(
-                    headlineContent = { Text(stringResource(page.labelRes)) },
-                    leadingContent = { Icon(page.icon, null, tint = MaterialTheme.colorScheme.primary) },
-                    trailingContent = {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                            modifier = Modifier.size(16.dp)
-                        )
-                    },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.clickable { onOpen(page) }
-                )
             }
+            Spacer(modifier = Modifier.height(24.dp))
         }
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -202,7 +206,7 @@ fun DocumentationPageScreen(
     val context = LocalContext.current
     val scheme = MaterialTheme.colorScheme
     val background = scheme.background
-    val dark = background.luminance() < 0.5f
+    val dark = LocalDarkTheme.current
     val scope = rememberCoroutineScope()
 
     // A repository file is read directly and drawn here; a site page, or a file that could

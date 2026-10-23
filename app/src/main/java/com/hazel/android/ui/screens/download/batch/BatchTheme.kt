@@ -1,10 +1,11 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.ui.theme.LocalGlass
+import com.hazel.android.ui.theme.LocalDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 
 /**
  * The near-black tones the set-of-links sheet is drawn in.
@@ -22,12 +23,12 @@ private val BUTTON_BLACK = Color(0xFF1C1C1E)
 
 private val isDarkScheme: Boolean
     @Composable @ReadOnlyComposable
-    get() = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    get() = LocalDarkTheme.current
 
 /** Behind the sheet itself. */
 val batchSheetColor: Color
     @Composable @ReadOnlyComposable
-    get() = if (isDarkScheme) SHEET_BLACK else MaterialTheme.colorScheme.surface
+    get() = if (isDarkScheme && !LocalGlass.current) SHEET_BLACK else MaterialTheme.colorScheme.surface
 
 /**
  * The action bar's own buttons, one step up from the bar so each reads as something to tap
@@ -35,9 +36,9 @@ val batchSheetColor: Color
  */
 val batchButtonColor: Color
     @Composable @ReadOnlyComposable
-    get() = if (isDarkScheme) BUTTON_BLACK else MaterialTheme.colorScheme.surfaceContainerHighest
+    get() = if (isDarkScheme && !LocalGlass.current) BUTTON_BLACK else MaterialTheme.colorScheme.surfaceContainerHighest
 
 /** The rows, the action bar, and the rows inside the sheets it opens. */
 val batchRaisedColor: Color
     @Composable @ReadOnlyComposable
-    get() = if (isDarkScheme) RAISED_BLACK else MaterialTheme.colorScheme.surfaceContainerHigh
+    get() = if (isDarkScheme && !LocalGlass.current) RAISED_BLACK else MaterialTheme.colorScheme.surfaceContainerHigh

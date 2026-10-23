@@ -1,5 +1,6 @@
 package com.hazel.android.ui.share
 
+import com.hazel.android.ui.theme.glassBackdrop
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -21,6 +22,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -56,8 +61,9 @@ import kotlinx.coroutines.delay
  * few seconds. OK closes it sooner; the tune button opens Synthesizing, where the settings
  * Instant downloads with are changed.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit) {
+fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit, glass: Boolean = false) {
     val close by rememberUpdatedState(onConfirm)
     var secondsLeft by remember { mutableIntStateOf(AUTO_CLOSE_SECONDS) }
     LaunchedEffect(Unit) {
@@ -69,7 +75,11 @@ fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit) {
     }
 
     Dialog(onDismissRequest = onConfirm) {
-        Surface(shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+        Surface(
+            modifier = Modifier.glassBackdrop(RoundedCornerShape(28.dp), enabled = glass),
+            shape = RoundedCornerShape(28.dp),
+            color = if (glass) Color.White.copy(alpha = 0.05f) else MaterialTheme.colorScheme.surfaceContainerHigh
+        ) {
             Column(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -96,15 +106,40 @@ fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    FilledTonalIconButton(onClick = onTune) {
-                        Icon(Icons.Filled.Tune, contentDescription = stringResource(R.string.instant_settings))
+                    FilledTonalIconButton(
+                        onClick = onTune,
+                        shapes = IconButtonDefaults.shapes(),
+                        modifier = Modifier.size(
+                            IconButtonDefaults.mediumContainerSize(IconButtonDefaults.IconButtonWidthOption.Wide)
+                        ),
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    ) {
+                        Icon(
+                            Icons.Filled.Tune,
+                            contentDescription = stringResource(R.string.instant_settings),
+                            modifier = Modifier.size(IconButtonDefaults.mediumIconSize)
+                        )
                     }
-                    Button(onClick = onConfirm) {
-                        Text(stringResource(R.string.instant_ok), fontWeight = FontWeight.Bold)
+                    Button(
+                        onClick = onConfirm,
+                        shapes = ButtonDefaults.shapes(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = ButtonDefaults.MediumContainerHeight),
+                        contentPadding = ButtonDefaults.contentPaddingFor(ButtonDefaults.MediumContainerHeight)
+                    ) {
+                        Text(
+                            stringResource(R.string.instant_ok),
+                            style = ButtonDefaults.textStyleFor(ButtonDefaults.MediumContainerHeight),
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }

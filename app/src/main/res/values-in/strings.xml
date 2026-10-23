@@ -64,6 +64,9 @@
     <string name="search_cancel">Batal</string>
     <string name="search_clear_history_confirm_title">Hapus riwayat pencarian?</string>
     <string name="search_clear_history_confirm_body">Semua tautan pencarian yang disimpan akan dihapus. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="search_results_cleared">Hasil pencarian dihapus</string>
+    <string name="search_history_cleared">Riwayat pencarian dihapus</string>
+    <string name="search_history_clear_failed">Tidak dapat menghapus riwayat pencarian</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">Sudah diunduh</string>
@@ -213,9 +216,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">Kembali</string>
     <string name="sponsor_title">Dukung Hazel</string>
-    <string name="sponsor_hero_title">Gratis, dan akan selalu begitu</string>
-    <string name="sponsor_hero_body">Hazel dikembangkan di waktu luang dan akhir pekan, dan diberikan gratis karena aplikasi pengunduh berbayar adalah aplikasi yang buruk. Situs web selalu berubah, dan menyesuaikan dengannya membutuhkan waktu.</string>
-    <string name="sponsor_hero_closing">Jika aplikasi ini menghemat waktu Anda, dukungan di bawah ini sangat berarti bagi kelanjutannya. Jika tidak, bantuan tanpa biaya juga sama berharganya.</string>
+    <string name="sponsor_hero_title">Suka Hazel? Beri sedikit cinta</string>
+    <string name="sponsor_hero_body">Jika Hazel bermanfaat bagimu, pertimbangkan untuk mendukung pengembangannya. Dukunganmu membantuku terus menyempurnakan Hazel dan membuat fitur baru. Sekecil apa pun cinta darimu sangat berarti. 💚</string>
     <string name="sponsor_section_ways">Cara mendukung</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">Bulanan atau sekali bayar, dapat dibatalkan kapan saja. Dikelola sepenuhnya oleh GitHub.</string>
@@ -264,8 +266,6 @@
     <string name="cleanup_category_partial_downloads_description">Sisa unduhan yang dibatalkan atau gagal.</string>
     <string name="cleanup_category_conversions_label">Konversi belum selesai</string>
     <string name="cleanup_category_conversions_description">Sisa file kerja dari konverter audio.</string>
-    <string name="cleanup_category_engine_label">File mesin yt-dlp</string>
-    <string name="cleanup_category_engine_description">Pengunduh dan runtime-nya. Paling banyak menghemat ruang, tapi unduhan berikutnya membongkarnya lagi.</string>
     <string name="cleanup_category_other_cache_label">File cache lainnya</string>
     <string name="cleanup_category_other_cache_description">Gambar mini dan file lain yang di-cache saat menjelajahi tautan.</string>
     <string name="cleanup_category_link_reads_label">Bacaan tautan tersimpan</string>
@@ -276,10 +276,9 @@
     <string name="cleanup_confirm_clear">Hapus</string>
     <string name="cleanup_confirm_cancel">Batal</string>
     <string name="cleanup_confirm_all_title">Hapus semua?</string>
-    <string name="cleanup_confirm_all_body">%1$s ruang akan dikosongkan. Unduhan dan sesi masuk Anda akan tetap tersimpan, tetapi unduhan berikutnya akan membutuhkan waktu lebih lama karena mesin harus diekstrak ulang.</string>
+    <string name="cleanup_confirm_all_body">%1$s akan dikosongkan. Unduhan dan info masuk yang tersimpan tetap ada.</string>
     <string name="cleanup_confirm_all_confirm">Hapus semua</string>
     <string name="cleanup_confirm_all_cancel">Batal</string>
-    <string name="cleanup_confirm_all_include_link_reads">Hapus juga bacaan tautan tersimpan (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">Semua Unduhan</string>
@@ -295,14 +294,38 @@
     <string name="history_clear_dialog_cancel">Batal</string>
     <string name="history_delete_dialog_title">Hapus file</string>
     <string name="history_delete_dialog_body">%1$s akan dihapus dari perangkat Anda.</string>
-    <string name="history_toast_file_deleted">File dihapus</string>
-    <string name="history_toast_file_delete_failed">Tidak dapat menghapus file</string>
     <string name="history_delete_dialog_confirm">Hapus</string>
     <string name="history_delete_dialog_cancel">Batal</string>
     <string name="history_card_options">Opsi</string>
     <string name="history_card_properties">Properti</string>
     <string name="history_card_remove">Hapus dari daftar</string>
     <string name="history_card_delete">Hapus file</string>
+    <string name="history_menu_select">Pilih</string>
+    <string name="history_menu_select_all">Pilih semua</string>
+    <string name="history_select_none">Batalkan semua pilihan</string>
+    <string name="history_select_close">Batalkan pilihan</string>
+    <string name="history_select_act">Hapus dari daftar atau hapus file</string>
+    <string name="history_delete_many_title">Hapus file</string>
+    <string name="history_remove_hint">File tetap ada di perangkat</string>
+    <string name="history_delete_hint">Menghapus file dari perangkat dan daftar ini</string>
+    <plurals name="history_selected_count">
+        <item quantity="other">%d dipilih</item>
+    </plurals>
+    <plurals name="history_delete_many_body">
+        <item quantity="other">%d file akan dihapus dari perangkat Anda.</item>
+    </plurals>
+    <plurals name="history_delete_many_gone">
+        <item quantity="other">%d item yang sudah dihapus akan dihapus dari daftar.</item>
+    </plurals>
+    <plurals name="history_toast_files_deleted">
+        <item quantity="other">%d file dihapus</item>
+    </plurals>
+    <plurals name="history_toast_files_delete_failed">
+        <item quantity="other">%d file tidak dapat dihapus</item>
+    </plurals>
+    <plurals name="history_toast_removed">
+        <item quantity="other">%d item dihapus dari daftar</item>
+    </plurals>
     <string name="history_tag_deleted">Dihapus</string>
     <string name="history_toast_file_gone">File ini sudah tidak ada di perangkat Anda</string>
     <string name="history_tab_failed">Gagal</string>
@@ -413,9 +436,6 @@
     <string name="batch_type_video">Video</string>
     <string name="batch_container_title">Wadah</string>
     <string name="batch_container_subtitle">Format file penyimpanan tautan-tautan ini</string>
-    <string name="batch_save_dir_title">Lokasi penyimpanan</string>
-    <string name="batch_open_folder">Buka folder ini</string>
-    <string name="batch_change_folder">Ubah folder</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Gambar mini</string>
@@ -538,10 +558,26 @@
     <string name="appearance_on">Aktif</string>
     <string name="appearance_off">Mati</string>
     <string name="appearance_accent_color">Warna Aksen</string>
+    <string name="appearance_glass">Efek kaca</string>
+    <string name="glass_style_title">Gaya kaca</string>
+    <string name="glass_style_aurora">Aurora</string>
+    <string name="glass_style_accent">Aksen</string>
+    <string name="glass_style_wallpaper">Wallpaper</string>
+    <string name="glass_style_sunset">Senja</string>
+    <string name="glass_style_nebula">Nebula</string>
+    <string name="glass_style_forest">Hutan</string>
+    <string name="glass_style_ocean">Samudra</string>
+    <string name="glass_style_mono">Mono</string>
+    <string name="guide_step_appearance_title">Buat sesuai seleramu</string>
+    <string name="guide_step_appearance_desc">Pilih tema, warna aksen, dan tampilan kaca. Kamu bisa mengubahnya kapan saja di pengaturan.</string>
+    <string name="whats_new_tag">Yang baru</string>
+    <string name="whats_new_version">Versi %1$s</string>
+    <string name="whats_new_done">Mengerti</string>
+    <string name="whats_new_glass_title">Tampilan kaca baru</string>
+    <string name="whats_new_glass_desc">Efek kaca, gaya dan warna aksen baru.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Warna Aksen</string>
-    <string name="accent_picker_close">Tutup</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">Pembacaan Tautan</string>
@@ -642,6 +678,9 @@
     <string name="advanced_reset">Atur ulang pengaturan lanjutan</string>
     <string name="advanced_reset_title">Atur ulang pengaturan lanjutan?</string>
     <string name="advanced_reset_body">Setiap opsi di layar ini kembali mati atau kosong.</string>
+    <string name="appearance_reset">Atur ulang tampilan</string>
+    <string name="appearance_reset_title">Atur ulang tampilan?</string>
+    <string name="appearance_reset_body">Tema, aksen, dan kaca kembali ke gelap, White, dan Hutan.</string>
     <string name="processing_step_fetch">Ambil</string>
     <string name="processing_step_merge">Gabung</string>
     <string name="processing_step_extract">Ekstrak</string>
@@ -730,6 +769,9 @@
     <string name="fetch_settings_search_results">Hasil per pencarian</string>
     <string name="fetch_settings_suggestions">Saran pencarian</string>
     <string name="fetch_settings_suggestions_summary">Menyarankan pencarian dari Google saat Anda mengetik. Yang Anda ketik dikirim ke Google.</string>
+    <string name="search_suggestions_confirm_title">Catatan</string>
+    <string name="search_suggestions_confirm_body">Saat Anda mengetik pencarian, kata-kata Anda dikirim ke Google untuk mendapatkan saran. Tautan tidak pernah dikirim. Anda dapat menonaktifkannya kapan saja.</string>
+    <string name="search_suggestions_confirm">Aktifkan</string>
     <string name="fetch_settings_playback">Pemutaran</string>
     <string name="fetch_settings_play_with">Putar dengan</string>
     <string name="fetch_settings_play_quality">Kualitas pemutaran</string>
@@ -744,6 +786,7 @@
     <string name="save_location_internal">Penyimpanan internal</string>
     <string name="save_location_card_hint">Disimpan ke %1$s di kartu</string>
     <string name="save_location_free">%1$s kosong</string>
+    <string name="save_location_folder_uses">Folder ini memakai %1$s</string>
     <string name="save_location_other">Folder lain</string>
     <string name="save_location_other_hint">Folder mana pun di perangkat ini atau kartu</string>
     <string name="save_location_close">Tutup</string>
@@ -756,6 +799,8 @@
     <string name="home_empty_hint">Tempel tautan atau cari untuk memulai</string>
     <string name="more_getting_started">Memulai</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">Cari</string>
+    <string name="share_shortcut_download">Unduh</string>
     <string name="instant_started">Unduhan dimulai</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Pengaturan sintesis</string>

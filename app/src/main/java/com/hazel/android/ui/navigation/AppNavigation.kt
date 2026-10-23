@@ -1,5 +1,6 @@
 package com.hazel.android.ui.navigation
 
+import com.hazel.android.ui.theme.GlassStyle
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -108,7 +109,11 @@ fun AppNavigation(
     isDarkTheme: Boolean,
     onToggleTheme: () -> Unit,
     accentName: String,
-    onAccentChanged: (String) -> Unit
+    onAccentChanged: (String) -> Unit,
+    glassEnabled: Boolean,
+    onToggleGlass: () -> Unit,
+    glassStyle: GlassStyle,
+    onGlassStyleChanged: (GlassStyle) -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -296,8 +301,12 @@ fun AppNavigation(
                     selectedRoute = bottomNavItems.firstOrNull { screen ->
                         currentDestination?.hierarchy?.any { it.route == screen.route } == true
                     }?.route,
-                    containerColor = if (isDarkTheme) Color(0xFF000000)
-                    else MaterialTheme.colorScheme.surfaceContainerHigh,
+                    containerColor = when {
+                        glassEnabled && isDarkTheme -> Color.Black.copy(alpha = 0.3f)
+                        glassEnabled -> Color.White.copy(alpha = 0.45f)
+                        isDarkTheme -> Color(0xFF000000)
+                        else -> MaterialTheme.colorScheme.surfaceContainerHigh
+                    },
                     onSelect = { item ->
                         navController.navigate(item.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -421,6 +430,10 @@ fun AppNavigation(
                     onToggleTheme = onToggleTheme,
                     accentName = accentName,
                     onAccentChanged = onAccentChanged,
+                    glassEnabled = glassEnabled,
+                    onToggleGlass = onToggleGlass,
+                    glassStyle = glassStyle,
+                    onGlassStyleChanged = onGlassStyleChanged,
                     onBack = { navController.popBackStack() }
                 )
             }

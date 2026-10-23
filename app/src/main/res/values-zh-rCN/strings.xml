@@ -64,6 +64,9 @@
     <string name="search_cancel">取消</string>
     <string name="search_clear_history_confirm_title">清除搜索记录？</string>
     <string name="search_clear_history_confirm_body">所有已保存的搜索链接都将被移除。此操作无法撤消。</string>
+    <string name="search_results_cleared">已清除搜索结果</string>
+    <string name="search_history_cleared">已清除搜索历史</string>
+    <string name="search_history_clear_failed">无法清除搜索历史</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">已经下载过</string>
@@ -213,9 +216,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">返回</string>
     <string name="sponsor_title">支持 Hazel</string>
-    <string name="sponsor_hero_title">免费，而且会一直免费</string>
-    <string name="sponsor_hero_body">Hazel 是在晚上和周末做出来的，它免费送出，因为一个对下载收费的下载器是更差的下载器。站点在不断变化，跟上它们才是真正的工作。</string>
-    <string name="sponsor_hero_closing">如果这个应用替你省下了一个下午，下面任何一种方式都能把那段时间还回去。如果没有，那些不花钱的方式一样有帮助。</string>
+    <string name="sponsor_hero_title">喜欢 Hazel？给它一点爱</string>
+    <string name="sponsor_hero_body">如果 Hazel 对你有帮助，欢迎支持它的开发。你的支持能让我持续改进 Hazel 并开发新功能。每一份爱都意义非凡。💚</string>
     <string name="sponsor_section_ways">支持的方式</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">按月或只付一次，随时可以取消。全程由 GitHub 处理。</string>
@@ -264,8 +266,6 @@
     <string name="cleanup_category_partial_downloads_description">已取消或失败的下载留下的片段。</string>
     <string name="cleanup_category_conversions_label">未完成的转换</string>
     <string name="cleanup_category_conversions_description">音频转换器遗留的工作文件。</string>
-    <string name="cleanup_category_engine_label">yt-dlp 引擎文件</string>
-    <string name="cleanup_category_engine_description">下载器及其运行环境。释放空间最多，但下次下载需重新解压。</string>
     <string name="cleanup_category_other_cache_label">其他缓存文件</string>
     <string name="cleanup_category_other_cache_description">缩略图，以及浏览链接时缓存下来的其他内容。</string>
     <string name="cleanup_category_link_reads_label">已保存的链接读取结果</string>
@@ -276,10 +276,9 @@
     <string name="cleanup_confirm_clear">清除</string>
     <string name="cleanup_confirm_cancel">取消</string>
     <string name="cleanup_confirm_all_title">全部清除？</string>
-    <string name="cleanup_confirm_all_body">将腾出 %1$s。你的下载和已保存的登录信息都会保留，但下次下载会因为要重新解包引擎而变慢。</string>
+    <string name="cleanup_confirm_all_body">将释放 %1$s。你的下载内容和已保存的登录信息会保留。</string>
     <string name="cleanup_confirm_all_confirm">全部清除</string>
     <string name="cleanup_confirm_all_cancel">取消</string>
-    <string name="cleanup_confirm_all_include_link_reads">同时清除已保存的链接读取结果（%1$s）</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">全部下载</string>
@@ -295,14 +294,38 @@
     <string name="history_clear_dialog_cancel">取消</string>
     <string name="history_delete_dialog_title">删除文件</string>
     <string name="history_delete_dialog_body">%1$s 将从你的设备上删除。</string>
-    <string name="history_toast_file_deleted">文件已删除</string>
-    <string name="history_toast_file_delete_failed">无法删除这个文件</string>
     <string name="history_delete_dialog_confirm">删除</string>
     <string name="history_delete_dialog_cancel">取消</string>
     <string name="history_card_options">选项</string>
     <string name="history_card_properties">属性</string>
     <string name="history_card_remove">从列表中移除</string>
     <string name="history_card_delete">删除文件</string>
+    <string name="history_menu_select">选择</string>
+    <string name="history_menu_select_all">全选</string>
+    <string name="history_select_none">取消全选</string>
+    <string name="history_select_close">取消选择</string>
+    <string name="history_select_act">移除或删除</string>
+    <string name="history_delete_many_title">删除文件</string>
+    <string name="history_remove_hint">文件仍保留在设备上</string>
+    <string name="history_delete_hint">从设备和此列表中删除文件</string>
+    <plurals name="history_selected_count">
+        <item quantity="other">已选择 %d 项</item>
+    </plurals>
+    <plurals name="history_delete_many_body">
+        <item quantity="other">将从设备中删除 %d 个文件。</item>
+    </plurals>
+    <plurals name="history_delete_many_gone">
+        <item quantity="other">%d 个已删除的项目将从列表中移除。</item>
+    </plurals>
+    <plurals name="history_toast_files_deleted">
+        <item quantity="other">已删除 %d 个文件</item>
+    </plurals>
+    <plurals name="history_toast_files_delete_failed">
+        <item quantity="other">有 %d 个文件无法删除</item>
+    </plurals>
+    <plurals name="history_toast_removed">
+        <item quantity="other">已从列表中移除 %d 项</item>
+    </plurals>
     <string name="history_tag_deleted">已删除</string>
     <string name="history_toast_file_gone">这个文件已经不在你的设备上了</string>
     <string name="history_tab_failed">已失败</string>
@@ -413,9 +436,6 @@
     <string name="batch_type_video">视频</string>
     <string name="batch_container_title">封装格式</string>
     <string name="batch_container_subtitle">这些链接会保存成哪种文件</string>
-    <string name="batch_save_dir_title">保存位置</string>
-    <string name="batch_open_folder">打开这个文件夹</string>
-    <string name="batch_change_folder">更换文件夹</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">缩略图</string>
@@ -538,10 +558,26 @@
     <string name="appearance_on">开启</string>
     <string name="appearance_off">关闭</string>
     <string name="appearance_accent_color">强调色</string>
+    <string name="appearance_glass">玻璃效果</string>
+    <string name="glass_style_title">玻璃样式</string>
+    <string name="glass_style_aurora">极光</string>
+    <string name="glass_style_accent">强调色</string>
+    <string name="glass_style_wallpaper">壁纸</string>
+    <string name="glass_style_sunset">日落</string>
+    <string name="glass_style_nebula">星云</string>
+    <string name="glass_style_forest">森林</string>
+    <string name="glass_style_ocean">海洋</string>
+    <string name="glass_style_mono">单色</string>
+    <string name="guide_step_appearance_title">按你的喜好</string>
+    <string name="guide_step_appearance_desc">选择主题、强调色和玻璃效果，之后可随时在设置中更改。</string>
+    <string name="whats_new_tag">新功能</string>
+    <string name="whats_new_version">版本 %1$s</string>
+    <string name="whats_new_done">知道了</string>
+    <string name="whats_new_glass_title">全新玻璃效果</string>
+    <string name="whats_new_glass_desc">玻璃效果、新样式和强调色。</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">强调色</string>
-    <string name="accent_picker_close">关闭</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">链接读取</string>
@@ -642,6 +678,9 @@
     <string name="advanced_reset">重置高级设置</string>
     <string name="advanced_reset_title">重置高级设置？</string>
     <string name="advanced_reset_body">此页面上的每个选项都将恢复为关闭或空白。</string>
+    <string name="appearance_reset">重置外观</string>
+    <string name="appearance_reset_title">重置外观？</string>
+    <string name="appearance_reset_body">主题、强调色和玻璃效果将恢复为深色、White和森林。</string>
     <string name="processing_step_fetch">获取</string>
     <string name="processing_step_merge">合并</string>
     <string name="processing_step_extract">提取</string>
@@ -730,6 +769,9 @@
     <string name="fetch_settings_search_results">每次搜索结果数</string>
     <string name="fetch_settings_suggestions">搜索建议</string>
     <string name="fetch_settings_suggestions_summary">输入时显示 Google 搜索建议。你输入的内容会发送给 Google。</string>
+    <string name="search_suggestions_confirm_title">提示</string>
+    <string name="search_suggestions_confirm_body">输入搜索内容时，你输入的文字会发送给 Google 以获取建议。链接不会被发送。你可以随时关闭此功能。</string>
+    <string name="search_suggestions_confirm">开启</string>
     <string name="fetch_settings_playback">播放</string>
     <string name="fetch_settings_play_with">播放引擎</string>
     <string name="fetch_settings_play_quality">播放画质</string>
@@ -744,6 +786,7 @@
     <string name="save_location_internal">内部存储</string>
     <string name="save_location_card_hint">保存到存储卡上的 %1$s</string>
     <string name="save_location_free">可用 %1$s</string>
+    <string name="save_location_folder_uses">此文件夹已用 %1$s</string>
     <string name="save_location_other">其他文件夹</string>
     <string name="save_location_other_hint">此设备或存储卡上的任意文件夹</string>
     <string name="save_location_close">关闭</string>
@@ -756,6 +799,8 @@
     <string name="home_empty_hint">粘贴链接或搜索以开始</string>
     <string name="more_getting_started">入门指南</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">搜索</string>
+    <string name="share_shortcut_download">下载</string>
     <string name="instant_started">已开始下载</string>
     <string name="instant_ok">确定</string>
     <string name="instant_settings">合成设置</string>

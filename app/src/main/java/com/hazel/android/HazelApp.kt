@@ -62,6 +62,9 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
         // Install crash logger — captures uncaught exceptions in-memory
         CrashLogger.install(this)
 
+        applicationScope.launch { com.hazel.android.data.SettingsRepository.applyUpdateNoticesOff(this@HazelApp) }
+        applicationScope.launch(kotlinx.coroutines.Dispatchers.IO) { com.hazel.android.util.AppShortcuts.publish(this@HazelApp) }
+
         // Unpacking yt-dlp and FFmpeg is the heaviest thing the app ever does at launch,
         // and starting it here put it in competition with the work that gets the first
         // frame on screen. The UI asks for it once it has drawn instead. This is the

@@ -2,6 +2,7 @@ package com.hazel.android.ui.screens.queue
 
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import com.hazel.android.ui.components.AmbientDotGrid
 import com.hazel.android.ui.components.ScrollShrink
 import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
@@ -38,7 +39,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenu
@@ -357,7 +358,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                 QueueTab.RUNNING -> QueueList(
                     isEmpty = running.isEmpty(),
                     emptyIcon = Icons.Filled.Download,
-                    emptyText = stringResource(R.string.queue_empty_running)
+                    emptyText = stringResource(R.string.queue_empty_running),
+                    inView = pagerState.currentPage == page
                 ) { shrink, columns ->
                     gridItems(running, columns, CARD_SPACING, key = { "running_${it.info.url}" }) { item ->
                         val paused = item.batchItem?.state == BatchState.PAUSED
@@ -407,7 +409,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                 QueueTab.QUEUED -> QueueList(
                     isEmpty = waiting.isEmpty(),
                     emptyIcon = Icons.Filled.HourglassEmpty,
-                    emptyText = stringResource(R.string.queue_empty_queued)
+                    emptyText = stringResource(R.string.queue_empty_queued),
+                    inView = pagerState.currentPage == page
                 ) { shrink, columns ->
                     gridItems(waiting, columns, CARD_SPACING, key = { "queued_${it.url}" }) { item ->
                         Box(modifier = Modifier.scrollShrink(shrink)) {
@@ -423,7 +426,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                 QueueTab.FAILED -> QueueList(
                     isEmpty = failed.isEmpty(),
                     emptyIcon = Icons.Filled.ErrorOutline,
-                    emptyText = stringResource(R.string.history_empty_failed)
+                    emptyText = stringResource(R.string.history_empty_failed),
+                    inView = pagerState.currentPage == page
                 ) { shrink, columns ->
                     gridItems(failed, columns, CARD_SPACING, key = { "failed_${it.id}" }) { item ->
                         Box(modifier = Modifier.scrollShrink(shrink)) {
@@ -632,28 +636,33 @@ private fun QueueList(
     isEmpty: Boolean,
     emptyIcon: ImageVector,
     emptyText: String,
+    /** Whether this tab is the one in view; the others keep their grid still. */
+    inView: Boolean,
     content: androidx.compose.foundation.lazy.LazyListScope.(shrink: ScrollShrink, columns: Int) -> Unit
 ) {
     if (isEmpty) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                emptyIcon,
-                contentDescription = null,
-                modifier = Modifier.size(52.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-            )
-            Spacer(modifier = Modifier.height(14.dp))
-            Text(
-                emptyText,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            AmbientDotGrid(Modifier.matchParentSize(), paused = !inView)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    emptyIcon,
+                    contentDescription = null,
+                    modifier = Modifier.size(52.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                )
+                Spacer(modifier = Modifier.height(14.dp))
+                Text(
+                    emptyText,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     } else {
         val listState = rememberLazyListState()

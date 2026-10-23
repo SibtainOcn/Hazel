@@ -26,12 +26,7 @@ data class TempCategory(
      * True when clearing this makes the app slower rather than losing anything, so the
      * screen can say which entries are free to remove and which have a consequence.
      */
-    val safeToClear: Boolean = true,
-    /**
-     * Whether Clear everything takes this as well. False for what only makes the app
-     * quicker and costs almost nothing to keep, so it is cleared on its own or by asking.
-     */
-    val inClearAll: Boolean = true
+    val safeToClear: Boolean = true
 )
 
 /**
@@ -44,24 +39,20 @@ data class TempCategory(
  *
  * The user's downloaded media is never touched: it has been moved into public storage by
  * the time these directories are read.
+ *
+ * The engine (Python, yt-dlp, ffmpeg) is not listed: it is unpacked once into no-backup
+ * storage and marked as done, so removing it would leave the app unable to download.
  */
 object TempStorage {
-
-    /**
-     * The yt-dlp binary and its Python environment. Clearing this forces the app to unpack
-     * them again on next use, so it is offered but marked as having a cost.
-     */
-    private const val ENGINE_DIR = "youtubedl-android"
 
     /** The formats of links read lately, kept so opening one again needs no read. */
     const val LINK_READS = "link_reads"
 
     /** Folders in the cache that have a category of their own, not counted as "other". */
-    private val OWN_CATEGORY = setOf("yt-dlp", ENGINE_DIR, InfoCache.DIRECTORY_NAME)
+    private val OWN_CATEGORY = setOf("yt-dlp", InfoCache.DIRECTORY_NAME)
 
     suspend fun categories(context: Context): List<TempCategory> = withContext(Dispatchers.IO) {
         val cache = context.cacheDir
-        val files = context.filesDir
 
         listOf(
             TempCategory(
@@ -74,8 +65,7 @@ object TempStorage {
                 id = LINK_READS,
                 labelRes = R.string.cleanup_category_link_reads_label,
                 descriptionRes = R.string.cleanup_category_link_reads_description,
-                bytes = InfoCache.diskBytes(),
-                inClearAll = false
+                bytes = InfoCache.diskBytes()
             ),
             TempCategory(
                 id = "partial_downloads",
@@ -89,13 +79,6 @@ object TempStorage {
                 labelRes = R.string.cleanup_category_conversions_label,
                 descriptionRes = R.string.cleanup_category_conversions_description,
                 bytes = sizeOf(StoragePaths.tempConverted)
-            ),
-            TempCategory(
-                id = "engine",
-                labelRes = R.string.cleanup_category_engine_label,
-                descriptionRes = R.string.cleanup_category_engine_description,
-                bytes = sizeOf(File(files, ENGINE_DIR)) + sizeOf(File(cache, ENGINE_DIR)),
-                safeToClear = false
             ),
             TempCategory(
                 id = "other_cache",
@@ -119,7 +102,6 @@ object TempStorage {
      */
     suspend fun clear(context: Context, id: String) = withContext(Dispatchers.IO) {
         val cache = context.cacheDir
-        val files = context.filesDir
 
         when (id) {
             "ytdlp_cache" -> wipe(File(cache, "yt-dlp"))
@@ -127,10 +109,6 @@ object TempStorage {
             LINK_READS -> InfoCache.clear()
             "partial_downloads" -> SdCards.workRoots(context).forEach { wipe(it) }
             "converted" -> wipe(StoragePaths.tempConverted)
-            "engine" -> {
-                wipe(File(files, ENGINE_DIR))
-                wipe(File(cache, ENGINE_DIR))
-            }
             "other_cache" -> {
                 cache.listFiles()?.forEach { entry ->
                     // Saved sign-ins live here too, one file per site, and clearing the

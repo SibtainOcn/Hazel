@@ -39,6 +39,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -271,6 +272,7 @@ fun SettingsSearchScreen(
     onOpenBatterySettings: () -> Unit
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val configuration = LocalConfiguration.current
     val keyboard = LocalSoftwareKeyboardController.current
     val focus = remember { FocusRequester() }
@@ -281,9 +283,9 @@ fun SettingsSearchScreen(
         SETTINGS_INDEX.map { entry ->
             SettingText(
                 entry,
-                context.getString(entry.title),
-                entry.detail?.let(context::getString).orEmpty(),
-                context.getString(entry.screen)
+                resources.getString(entry.title),
+                entry.detail?.let(resources::getString).orEmpty(),
+                resources.getString(entry.screen)
             )
         }
     }

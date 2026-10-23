@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.theme.glassScreen
 import com.hazel.android.ui.components.ActionsRow
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -40,7 +41,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -136,6 +137,7 @@ fun SearchScreen(
     }
 
     var menuOpen by remember { mutableStateOf(false) }
+    val statusToast = rememberStatusToastState()
     // The remembered link a long press asked to remove, until the dialog is answered.
     var removing by remember { mutableStateOf<String?>(null) }
     // The same for a link in the list waiting to be read.
@@ -323,12 +325,13 @@ fun SearchScreen(
         if (menuOpen) {
             SearchOptionsSheet(
                 onClearResults = onClearResults,
-                onDismiss = { menuOpen = false }
+                onDismiss = { menuOpen = false },
+                onCleared = statusToast::show
             )
         }
 
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().glassScreen(),
             color = MaterialTheme.colorScheme.background
         ) {
         Box(
@@ -574,6 +577,13 @@ fun SearchScreen(
                     }
                 }
             }
+            StatusToastHost(
+                statusToast,
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .imePadding()
+                    .padding(start = 20.dp, end = 20.dp, bottom = 88.dp)
+            )
         }
         }
     }
@@ -668,6 +678,7 @@ internal fun RemoveEntryDialog(
     body: String = stringResource(R.string.search_remove_confirm_body)
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -687,7 +698,7 @@ internal fun RemoveEntryDialog(
                     copySheetLink(context, entry)
                     // Android 13 and later show their own notice of a copy.
                     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
-                        Toast.makeText(context, context.getString(R.string.search_entry_copied), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, resources.getString(R.string.search_entry_copied), Toast.LENGTH_SHORT).show()
                     }
                     onDismiss()
                 }) { Text(stringResource(R.string.sheet_link_copy)) }

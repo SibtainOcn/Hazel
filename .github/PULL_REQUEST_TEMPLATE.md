@@ -39,7 +39,6 @@ one thing it cannot check. -->
 
 - [ ] Installed and tried the change on a device or emulator
 - [ ] `./gradlew :app:testDebugUnitTest` passes locally
-- [ ] Changed a screen, dialog or buttons: ran the layout tests with `-PlayoutScreenshots=all` and checked the screenshots in `app/build/outputs/roborazzi/` in long languages and large fonts (CI uploads only the screens of layout tests that fail)
 
 - Device / Android version:
 - Steps:

@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.theme.tonalFill
+import android.content.Context
 import android.text.format.Formatter
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +21,7 @@ import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.SdCard
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +29,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import com.hazel.android.util.FolderSize
+import com.hazel.android.util.StorageSpace
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
@@ -48,7 +57,8 @@ import com.hazel.android.util.StoragePaths
  * each SD card that is in, or any other folder. Opening the current folder stays one tap.
  *
  * The choices are flat tinted surfaces, the same as the batch sheet's rows, with the one in
- * use filled in the accent colour; a card also shows how full it is.
+ * use filled in the accent colour. Internal storage and each card show how full they are,
+ * refreshed while the dialog is open.
  */
 @Composable
 internal fun SaveDirDialog(
@@ -62,9 +72,20 @@ internal fun SaveDirDialog(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val cards = remember { SdCards.list(context) }
     val onCard = remember(saveDir.uri) { SdCards.cardOf(saveDir.uri, context) }
     val kindFolder = "Hazel/" + SdCards.kindFolderName(isVideo)
+    val folderBytes by produceState<Long?>(null, saveDir.uri, onCard) {
+        if (saveDir.isCustom && onCard == null) {
+            value = withContext(Dispatchers.IO) { FolderSize.of(context, saveDir.uri) }
+        }
+    }
+    val firstCards = remember { SdCards.list(context) }
+    val volumes by produceState(Volumes(null, firstCards.map { it to null })) {
+        while (true) {
+            withContext(Dispatchers.IO) { runCatching { Volumes.read(context) }.getOrNull() }?.let { value = it }
+            delay(SPACE_REFRESH_MS)
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -82,28 +103,25 @@ internal fun SaveDirDialog(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
 
+                val internal = volumes.internal
                 SaveDirOption(
                     icon = Icons.Filled.PhoneAndroid,
                     title = stringResource(R.string.save_location_internal),
                     subtitle = StoragePaths.downloadsDisplay(isAudio = !isVideo),
+                    detail = internal?.let { freeLabel(it) },
+                    usedFraction = internal?.usedFraction,
                     selected = !saveDir.isCustom,
                     onClick = onReset
                 )
-                cards.forEach { card ->
+                volumes.cards.forEach { (card, space) ->
                     val selected = onCard?.uuid == card.uuid
-                    val free = card.freeBytes
-                    val total = card.totalBytes
                     SaveDirOption(
                         icon = Icons.Filled.SdCard,
                         title = card.name,
                         subtitle = if (selected) label
                         else stringResource(R.string.save_location_card_hint, kindFolder),
-                        detail = free?.let {
-                            stringResource(R.string.save_location_free, Formatter.formatShortFileSize(context, it))
-                        },
-                        usedFraction = if (free != null && total != null && total > 0) {
-                            (1f - free.toFloat() / total.toFloat()).coerceIn(0f, 1f)
-                        } else null,
+                        detail = space?.let { freeLabel(it) },
+                        usedFraction = space?.usedFraction,
                         selected = selected,
                         onClick = { onPick(card) }
                     )
@@ -113,6 +131,9 @@ internal fun SaveDirDialog(
                     title = stringResource(R.string.save_location_other),
                     subtitle = if (saveDir.isCustom && onCard == null) label
                     else stringResource(R.string.save_location_other_hint),
+                    detail = folderBytes?.let {
+                        stringResource(R.string.save_location_folder_uses, Formatter.formatShortFileSize(context, it))
+                    },
                     selected = saveDir.isCustom && onCard == null,
                     onClick = { onPick(null) }
                 )
@@ -122,6 +143,25 @@ internal fun SaveDirDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.save_location_close)) } }
     )
 }
+
+/** Internal storage and the cards that are in right now, each with how much room it has. */
+private class Volumes(val internal: StorageSpace?, val cards: List<Pair<SdCard, StorageSpace?>>) {
+    companion object {
+        fun read(context: Context) = Volumes(
+            StorageSpace.internal(context),
+            SdCards.list(context).map { it to it.space() }
+        )
+    }
+}
+
+private const val SPACE_REFRESH_MS = 2_000L
+private const val NEARLY_FULL = 0.9f
+
+@Composable
+private fun freeLabel(space: StorageSpace): String = stringResource(
+    R.string.save_location_free,
+    Formatter.formatShortFileSize(LocalContext.current, space.freeBytes)
+)
 
 /** One place to save to, as a flat surface; the one in use is tinted and checked. */
 @Composable
@@ -140,7 +180,7 @@ private fun SaveDirOption(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         color = if (selected) accent.copy(alpha = 0.12f)
-        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        else tonalFill(0.45f)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -176,7 +216,7 @@ private fun SaveDirOption(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(4.dp),
-                        color = accent,
+                        color = if (usedFraction >= NEARLY_FULL) MaterialTheme.colorScheme.error else accent,
                         trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
                         strokeCap = StrokeCap.Round,
                         gapSize = 0.dp,

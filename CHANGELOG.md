@@ -6,6 +6,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Home and the empty Running, In queue and Failed tabs have a faint dot grid in the glass colours (the accent without glass, darker ink in light theme). A faint glow drifts slowly across it, and dots near your finger lift and brighten, then settle back. It stays still when the system has animations turned off.
+- Glass look, on by default: soft colour light behind see-through screens, sheets and dialogs, in dark and light. Turn it off under More, Appearance, Glass effect.
+- Getting started asks for theme, accent and glass as its second step, and applies each choice at once.
+- Downloads: Select and Select all in the menu. Picked rows show a tick and a tint, and the top bar shows the count.
+- Downloads: long-press a row (or act on picked rows) to remove it from the list or delete the file too. Rows already marked Deleted are just cleared.
+- What's new: people who update see a short card once for a release that has news, never again after, and never on a fresh install (Getting started covers it). This release shows the glass look with its theme, accent and glass choices.
+
+### Changed
+- Glass style under Appearance and in Getting started: Aurora, Ocean, Accent, Wallpaper (Android 12 and later), Sunset, Nebula, Forest or Mono.
+- Six more accent colours (Sky, Violet, Lavender, Coral, Lime, Mint), and Crimson is now a true crimson. Five more after that (Magenta, Rose, Amber, Mocha, Slate). White is first in the list. The accent and glass style lists show about five at a time and scroll, smaller on short screens.
+- The Getting started appearance step keeps the same size as the other steps and moves between steps more smoothly.
+- Getting started follows the theme: accent coloured Material 3 buttons with a visible press ripple, glass when glass is on, and a light version in light theme. Theme and glass switches flip at once on tap.
+- Switches that are off show a clear grey thumb and outline on dark glass, and the yt-dlp and Hazel update screens use the standard switch with tap feedback.
+- Sharing a link from another app opens its sheet on solid black with only a faint glass tint and edge, so the app behind never shows through. Hazel Instant matches, and its settings and OK buttons are a matched Material 3 Expressive pair.
+- Support Hazel opens with "Like Hazel? Give it some love" and a shorter note.
+- Forest is the default glass style. Appearance has a Reset appearance row that brings back dark theme, White accent, glass on and Forest, and its accent and glass style pickers use the same grouped choice dialog as SponsorBlock and the other settings.
+- Website on phones: cards skip their own blur and use a shorter shadow, and the background glow no longer drifts (it was meant to stay still on phones), so pages scroll smoothly in the app's documentation and in mobile browsers.
+- Website on desktop: cards, chips and the footer no longer blur the background behind them (it is already soft), so the drifting glow no longer forces every card to redraw each frame. Only the top bar, image viewer buttons and overlays keep their blur, and pausing the glow while scrolling no longer restyles the whole page.
+- Website home: the "Works with" strip is a glass card with "1500+ sites supported" beside the sites shown as chips, and a See all sites link.
+- Format sheet OK is a solid accent button, and pills and chips use a clean tint on glass.
+- Support Hazel uses flat cards without borders. The yt-dlp and Hazel update screens use the accent for their switches, channel picker and section titles; the status banner keeps its own colours.
+- The title and back button stay at the top of long settings screens (Advanced, Synthesizing, Appearance, Support Hazel, Cookies, the user guide list and the rest) while the rows scroll under them. On Temp files the size summary stays in place as well.
+- Player: loading shows the Material 3 spinner on a faint track in your accent colour. Dragging the seek bar shows the time under your finger above the bar, keeps the controls up until you let go, and seeks on release.
+- Long-press the Hazel icon for shortcuts to Search, Downloads, Queue and More. Hazel and Hazel Instant are offered as direct share targets, so share sheets can rank them in their top row as you use them.
+- Libraries updated to their latest stable versions (Kotlin 2.4, Compose BOM 2026.09, AGP 9.4, Gradle 9.8, OkHttp, Coil, Media3 kept at 1.11), and the app compiles against Android 37. The target Android version is unchanged.
+- yt-dlp update notifications (available, installed, failed) are off by default, for new installs and for existing ones. Turn them on again under the yt-dlp update screen.
+- Quality list: generic rows label their tile with the quality (BEST, 1080 … WORST) instead of "DEFAULT", on an accent gradient.
+- Save location: internal storage shows a live space bar like SD cards, which turns red when nearly full, and a picked folder shows how much it holds. The playlist sheet uses the same dialog as the single download sheet and Downloads settings.
+- Glass background fades its colours softly into each other, with no round patches or banding on empty screens.
+- Search options: clearing results or history closes the sheet and shows a short confirmation, or an error if history could not be cleared.
+- Turning on search suggestions asks first, explaining that typed searches are sent to Google (links never are).
+### Fixed
+- Playlist sheet could stop responding to taps after a link was swiped away.
+- Playlist rows no longer show the swipe-to-remove background at rest when glass is on.
+- Playlist search field no longer slips behind the keyboard when few links match.
+- Quality and size labels on playlist rows wrap on narrow screens and large font sizes instead of being cut off.
+- Playlist option pickers close smoothly before applying a choice.
+- Deleting a download also removes it from the gallery and other media apps, on every Android version.
+- A file that fails to delete keeps its row instead of vanishing from the list.
+- Two downloads finishing at the same moment no longer share a row id.
+- Small toasts follow the theme, accent and glass style.
+- YouTube downloads, Hazel Instant above all, no longer fail with "Requested format is not available" after the yt-dlp 2026.10.21 update. yt-dlp can name the same stream differently between the read and the download, so a format that has gone now falls back to the nearest one at the chosen height.
+- The YouTube player client list in Advanced includes the new `tv_samsung` client, and the user agent header uses yt-dlp's full option name.
+- Temp files: Clear everything now clears every row, saved link reads included. The yt-dlp engine row is gone: it measured the wrong folder and cleared nothing, and clearing the real engine would have stopped downloads from working.
 
 ## [1.1.14] - 2026-10-14
 ### Added

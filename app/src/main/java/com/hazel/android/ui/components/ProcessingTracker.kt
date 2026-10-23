@@ -1,5 +1,6 @@
 package com.hazel.android.ui.components
 
+import com.hazel.android.ui.theme.opaqueSurface
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -98,7 +99,7 @@ fun ProcessingTracker(
     val labelStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
     val accent = MaterialTheme.colorScheme.primary
     val ink = MaterialTheme.colorScheme.onSurface
-    val shade = MaterialTheme.colorScheme.surface
+    val shade = opaqueSurface()
     val percent = fill?.let { "${(it.coerceIn(0f, 1f) * 100).roundToInt()}%" }
 
     Box(

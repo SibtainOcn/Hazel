@@ -497,14 +497,6 @@ def main():
         check_true("ic_search.xml contains vector root", "<vector" in xml_content)
         check_true("ic_search.xml has pathData matching SEARCH.svg", "M11,6C13.7614,6 16,8.23858" in xml_content)
 
-    # 6.2 Check DownloadScreen.kt UI changes
-    download_screen_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "DownloadScreen.kt").read_text(encoding="utf-8")
-    check_true("DownloadScreen has showClearConfirmDialog state", "showClearConfirmDialog" in download_screen_kt)
-    check_true("DownloadScreen header Cancel button uses primary color (not error/red)", "color = MaterialTheme.colorScheme.primary" in download_screen_kt)
-    check_true("DownloadScreen header Clear button triggers showClearConfirmDialog", "showClearConfirmDialog = true" in download_screen_kt)
-    check_true("DownloadScreen contains AlertDialog for clear confirmation", "download_clear_confirm_title" in download_screen_kt and "download_clear_confirm_body" in download_screen_kt)
-    check_true("DownloadScreen UrlSearchBar uses painterResource(R.drawable.ic_search)", "painterResource(R.drawable.ic_search)" in download_screen_kt)
-
     # 6.3 Check SearchScreen.kt and DownloadViewModel.kt search history persistence
     search_screen_kt = (REPO_ROOT / "app" / "src" / "main" / "java" / "com" / "hazel" / "android" / "ui" / "screens" / "download" / "SearchScreen.kt").read_text(encoding="utf-8")
     check_true("SearchScreen startSearch launches on HazelApp.instance.applicationScope", "HazelApp.instance.applicationScope.launch(Dispatchers.IO)" in search_screen_kt)

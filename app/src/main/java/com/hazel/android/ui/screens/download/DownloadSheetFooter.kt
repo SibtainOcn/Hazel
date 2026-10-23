@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.ActionsRow
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -13,11 +14,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.border
+import com.hazel.android.ui.theme.glassBackdrop
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Link
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -93,7 +97,7 @@ fun IncognitoButton(
             .clip(CircleShape)
             .background(
                 if (incognito) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+                else tonalFill(0.55f)
             )
             .clickable {
                 val enabled = !incognito
@@ -118,21 +122,39 @@ fun IncognitoButton(
 
 /** The short message a sheet shows after a tap, in the inverse tone so it reads over anything. */
 @Composable
-internal fun FeedbackToast(message: String, modifier: Modifier = Modifier) {
+internal fun FeedbackToast(
+    message: String,
+    modifier: Modifier = Modifier,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    iconTint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary
+) {
     // Sized to its words, like a system toast, so a one-word message is not a banner.
+    // Drawn on the same glass and theme surface as the dialogs, edged in the accent, so it
+    // reads on every theme, accent and glass style.
+    val shape = if (icon != null) RoundedCornerShape(50) else RoundedCornerShape(12.dp)
     Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.inverseSurface,
+        modifier = modifier
+            .glassBackdrop(shape)
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), shape),
+        shape = shape,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
         shadowElevation = 4.dp
     ) {
-        Text(
-            message,
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.inverseOnSurface,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-        )
+        androidx.compose.foundation.layout.Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (icon != null) {
+                Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(18.dp))
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
+            }
+            Text(
+                message,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 

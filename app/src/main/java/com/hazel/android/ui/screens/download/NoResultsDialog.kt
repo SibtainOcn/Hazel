@@ -15,7 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Link
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -71,6 +72,7 @@ fun NoResultsDialog(
     val addCookies = kind == FailureKind.REFUSED && canAddCookies
     val goAhead = kind == FailureKind.OTHER && canContinue
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -170,7 +172,7 @@ fun NoResultsDialog(
                     IconButton(onClick = {
                         com.hazel.android.util.copyToClipboard(context, link)
                         android.widget.Toast.makeText(
-                            context, context.getString(R.string.sheet_link_copied), android.widget.Toast.LENGTH_SHORT
+                            context, resources.getString(R.string.sheet_link_copied), android.widget.Toast.LENGTH_SHORT
                         ).show()
                     }) {
                         Icon(

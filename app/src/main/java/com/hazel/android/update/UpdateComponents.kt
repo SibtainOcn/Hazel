@@ -1,5 +1,9 @@
 package com.hazel.android.update
 
+import com.hazel.android.ui.theme.LocalGlass
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import com.hazel.android.ui.theme.LocalDarkTheme
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -30,7 +34,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.material3.TopAppBar
@@ -42,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -50,25 +52,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * These tokens adapt to light and dark theme while remaining strictly
- * independent of user-configured app accent colors (toggle buttons & update hero states).
+ * These tokens adapt to light, dark and glass while the update hero states stay
+ * independent of the user's accent. Switches and the channel picker follow the accent.
  */
 object UpdateTokens {
     val isDark: Boolean
-        @Composable get() = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+        @Composable get() = LocalDarkTheme.current
+
+    private val glass: Boolean
+        @Composable get() = LocalGlass.current
 
     val Bg: Color
-        @Composable get() = if (isDark) Color(0xFF0A0A0A) else Color(0xFFF7F5F1)
+        @Composable get() = if (glass) Color.Transparent else if (isDark) Color(0xFF0A0A0A) else Color(0xFFF7F5F1)
     val BgDeep: Color
-        @Composable get() = if (isDark) Color(0xFF000000) else Color(0xFFEDE9E3)
+        @Composable get() = if (glass) Color.Transparent else if (isDark) Color(0xFF000000) else Color(0xFFEDE9E3)
     val Surface: Color
-        @Composable get() = if (isDark) Color(0xFF141414) else Color(0xFFFFFFFF)
+        @Composable get() = if (glass) MaterialTheme.colorScheme.surface else if (isDark) Color(0xFF141414) else Color(0xFFFFFFFF)
     val Surface1: Color
-        @Composable get() = if (isDark) Color(0xFF1A1A1A) else Color(0xFFF5F2EE)
+        @Composable get() = if (glass) MaterialTheme.colorScheme.surfaceVariant else if (isDark) Color(0xFF1A1A1A) else Color(0xFFF5F2EE)
     val Surface2: Color
-        @Composable get() = if (isDark) Color(0xFF202020) else Color(0xFFEAE6E0)
+        @Composable get() = if (glass) MaterialTheme.colorScheme.surfaceContainerHigh else if (isDark) Color(0xFF202020) else Color(0xFFEAE6E0)
     val Surface3: Color
-        @Composable get() = if (isDark) Color(0xFF262626) else Color(0xFFE0DDD7)
+        @Composable get() = if (glass) MaterialTheme.colorScheme.surfaceContainerHighest else if (isDark) Color(0xFF262626) else Color(0xFFE0DDD7)
     val Outline: Color
         @Composable get() = if (isDark) Color(0xFF2C2C2C) else Color(0xFFDEDAD2)
     val OutlineSoft: Color
@@ -80,7 +85,7 @@ object UpdateTokens {
     val OnSurfaceDim: Color
         @Composable get() = if (isDark) Color(0xFF7A7A77) else Color(0xFF8D8880)
 
-    // Up-to-date hero state & independent emerald green toggle buttons
+    // Up-to-date hero state, independent emerald green
     val Accent: Color
         @Composable get() = if (isDark) Color(0xFF8FD6B8) else Color(0xFF1B6B4A)
     val AccentStrong: Color
@@ -156,7 +161,7 @@ fun UpdateSectionLabel(text: String, isFirst: Boolean = false) {
         fontSize = 12.sp,
         fontWeight = FontWeight.SemiBold,
         letterSpacing = 0.4.sp,
-        color = UpdateTokens.AccentStrong,
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
             .fillMaxWidth()
             .padding(
@@ -282,49 +287,12 @@ fun UpdaterListItem(
     trailing = trailing
 )
 
-/**
- * Material 3 Switch with animated thumb and custom track styling.
- */
 @Composable
 fun UpdateSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    val thumbOffset by animateDpAsState(
-        targetValue = if (checked) 24.dp else 4.dp,
-        animationSpec = tween(durationMillis = 180),
-        label = "switchThumbOffset"
-    )
-    val thumbSize by animateDpAsState(
-        targetValue = if (checked) 24.dp else 16.dp,
-        animationSpec = tween(durationMillis = 140),
-        label = "switchThumbSize"
-    )
-
-    Box(
-        modifier = Modifier
-            .size(width = 52.dp, height = 32.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (checked) UpdateTokens.Accent else Color.Transparent)
-            .border(
-                width = 2.dp,
-                color = if (checked) UpdateTokens.Accent else UpdateTokens.Outline,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { onCheckedChange(!checked) },
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Box(
-            modifier = Modifier
-                .offset(x = thumbOffset)
-                .size(thumbSize)
-                .clip(CircleShape)
-                .background(if (checked) UpdateTokens.AccentOn else UpdateTokens.OnSurfaceDim)
-        )
-    }
+    Switch(checked = checked, onCheckedChange = onCheckedChange)
 }
 
 /**
@@ -340,14 +308,14 @@ fun UpdateSegmentedButton(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, UpdateTokens.Outline, RoundedCornerShape(20.dp))
+            .background(UpdateTokens.Surface1)
     ) {
         options.forEachIndexed { index, label ->
             val isSelected = index == selectedIndex
             Row(
                 modifier = Modifier
                     .weight(1f)
-                    .background(if (isSelected) UpdateTokens.AccentContainer else Color.Transparent)
+                    .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f) else Color.Transparent)
                     .clickable { onSelect(index) }
                     .padding(vertical = 10.dp, horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -357,7 +325,7 @@ fun UpdateSegmentedButton(
                     Icon(
                         imageVector = Icons.Filled.Check,
                         contentDescription = null,
-                        tint = UpdateTokens.AccentStrong,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .size(16.dp)
                             .padding(end = 4.dp)
@@ -367,7 +335,7 @@ fun UpdateSegmentedButton(
                     text = label,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
-                    color = if (isSelected) UpdateTokens.AccentStrong else UpdateTokens.OnSurfaceVar
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else UpdateTokens.OnSurfaceVar
                 )
             }
             if (index < options.lastIndex) {
@@ -375,7 +343,7 @@ fun UpdateSegmentedButton(
                     modifier = Modifier
                         .width(1.dp)
                         .height(38.dp)
-                        .background(UpdateTokens.Outline)
+                        .background(UpdateTokens.OutlineSoft)
                 )
             }
         }

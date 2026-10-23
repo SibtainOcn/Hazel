@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.more
 
+import com.hazel.android.ui.theme.tonalFill
+import com.hazel.android.ui.theme.glassBackdrop
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,9 +29,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -74,42 +77,51 @@ internal fun SettingsScreen(
     description: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-    ) {
-        Row(
+    Column(modifier = Modifier.fillMaxSize()) {
+        SettingsHeader(title = title, onBack = onBack)
+        Column(
             modifier = Modifier
+                .weight(1f)
                 .fillMaxWidth()
-                .padding(top = 4.dp, bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
         ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBackIos,
-                    contentDescription = stringResource(R.string.settings_back)
+            if (description != null) {
+                Text(
+                    description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
             }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+            content()
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+/** The back button and title of a settings screen, kept in place above what scrolls. */
+@Composable
+internal fun SettingsHeader(title: String, onBack: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBackIos,
+                contentDescription = stringResource(R.string.settings_back)
             )
         }
-        if (description != null) {
-            Text(
-                description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-        }
-        content()
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -283,7 +295,8 @@ internal fun <T> SingleChoiceDialog(
     selected: T,
     onSelect: (T) -> Unit,
     onDismiss: () -> Unit,
-    describe: @Composable (T) -> String? = { null }
+    describe: @Composable (T) -> String? = { null },
+    leading: (@Composable (T) -> Unit)? = null
 ) {
     ChoiceDialog(title = title, onDismiss = onDismiss) {
         itemsIndexed(choices) { index, (value, label) ->
@@ -293,7 +306,8 @@ internal fun <T> SingleChoiceDialog(
                 chosen = value == selected,
                 shape = groupShape(index, choices.size),
                 role = Role.RadioButton,
-                onClick = { if (value == selected) onDismiss() else onSelect(value) }
+                onClick = { if (value == selected) onDismiss() else onSelect(value) },
+                leading = leading?.let { { it(value) } }
             )
         }
     }
@@ -357,6 +371,7 @@ private fun ChoiceDialog(
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Surface(
+            modifier = Modifier.glassBackdrop(RoundedCornerShape(28.dp)),
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh
         ) {
@@ -499,6 +514,26 @@ internal fun ConfirmSettingDialog(
 }
 
 /**
+ * Asked before search suggestions are turned on, since from then on typed searches leave the
+ * device for Google. Turning them off needs no question.
+ */
+@Composable
+internal fun SuggestionsConsentDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Filled.Lightbulb, null) },
+        title = { Text(stringResource(R.string.search_suggestions_confirm_title), fontWeight = FontWeight.Bold) },
+        text = { Text(stringResource(R.string.search_suggestions_confirm_body)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text(stringResource(R.string.search_suggestions_confirm)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.download_cancel)) }
+        }
+    )
+}
+
+/**
  * A full-width action at the foot of a settings screen, drawn as a flat surface like the
  * app's other buttons rather than as an outline.
  */
@@ -507,7 +542,7 @@ internal fun FlatSettingButton(icon: ImageVector, text: String, onClick: () -> U
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+        color = tonalFill(0.55f),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp)

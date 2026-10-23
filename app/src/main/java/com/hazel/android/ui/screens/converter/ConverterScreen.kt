@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.converter
 
+import com.hazel.android.ui.theme.tonalFill
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
@@ -45,12 +46,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -102,8 +104,8 @@ fun ConverterScreen(
 
     var formatSheetOpen by remember { mutableStateOf(false) }
     var detailsSheetOpen by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val detailsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
+    val detailsSheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
 
     // Whether a finished file will reach the user's own Music folder. Only ever false up to
     // Android 10, where that is a direct file write and the permission can be refused.
@@ -332,7 +334,7 @@ private fun SourceCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        color = if (chosen) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = if (chosen) tonalFill(0.35f)
         else MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
     ) {
         Row(
@@ -392,7 +394,7 @@ private fun SettingRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = tonalFill(0.35f)
     ) {
         Row(
             modifier = Modifier
@@ -563,7 +565,7 @@ private fun ResultCard(
             .fillMaxWidth()
             .padding(top = 16.dp),
         shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = tonalFill(0.35f)
     ) {
         Column {
             Row(
@@ -764,7 +766,7 @@ private fun FlatField(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = tonalFill(0.35f)
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
             Text(

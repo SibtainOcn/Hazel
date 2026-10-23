@@ -569,12 +569,16 @@
   });
 })();
 
-// Pause the aurora while scrolling.
+// Pause the aurora while scrolling. The class goes on the aurora alone, so only its four glows
+// are restyled, never the page. Phones and reduced motion never animate it, so they skip this.
 (function () {
-  var root = document.documentElement, timer = 0;
+  var aurora = document.querySelector('.aurora'), timer = 0;
+  if (!aurora) return;
+  var still = window.matchMedia('(max-width: 640px), (prefers-reduced-motion: reduce)');
   window.addEventListener('scroll', function () {
-    if (!timer) root.classList.add('is-scrolling');
+    if (still.matches) return;
+    if (!timer) aurora.classList.add('paused');
     clearTimeout(timer);
-    timer = setTimeout(function () { root.classList.remove('is-scrolling'); timer = 0; }, 180);
+    timer = setTimeout(function () { aurora.classList.remove('paused'); timer = 0; }, 180);
   }, { passive: true });
 })();

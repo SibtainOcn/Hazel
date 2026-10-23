@@ -1,7 +1,9 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import com.hazel.android.ui.components.AmbientDotGrid
 import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
 import android.content.Intent
@@ -404,10 +406,30 @@ fun DownloadScreen(
     if (guideSeen == false) {
         GettingStartedDialog(
             onOpenBatterySettings = { openBatterySettings(context) },
-            onDismiss = { scope.launch { SettingsRepository.setGuideSeen(context) } }
+            onDismiss = { scope.launch { SettingsRepository.setGuideSeen(context, WhatsNew.RELEASE_ID) } }
         )
     }
 
+    // Decided once, after both values load. The id is saved as the card first shows, so it
+    // cannot come back after a crash, a kill or a rotation, only with the next RELEASE_ID.
+    val whatsNewSeen by remember(context) { SettingsRepository.getWhatsNewSeen(context) }
+        .collectAsState(initial = null as String?)
+    var whatsNewDecided by rememberSaveable { mutableStateOf(false) }
+    var whatsNewOpen by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(guideSeen, whatsNewSeen) {
+        if (whatsNewDecided) return@LaunchedEffect
+        val show = WhatsNew.shouldShow(guideSeen, whatsNewSeen) ?: return@LaunchedEffect
+        whatsNewDecided = true
+        if (show) {
+            whatsNewOpen = true
+            runCatching { SettingsRepository.setWhatsNewSeen(context, WhatsNew.RELEASE_ID) }
+        }
+    }
+    if (whatsNewOpen) {
+        WhatsNewDialog(onDismiss = { whatsNewOpen = false })
+    }
+
+    val statusToast = rememberStatusToastState()
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
 
@@ -422,7 +444,8 @@ fun DownloadScreen(
             if (homeMenuOpen) {
                 SearchOptionsSheet(
                     onClearResults = downloadViewModel::clearResults,
-                    onDismiss = { homeMenuOpen = false }
+                    onDismiss = { homeMenuOpen = false },
+                    onCleared = statusToast::show
                 )
             }
 
@@ -655,34 +678,40 @@ fun DownloadScreen(
                             }
                         }
 
-                        // Nothing read yet: a faint mark and one line, and nothing to tap. The
-                        // search bar above and the paste button already offer every way to
-                        // start, so the middle of the screen stays quiet.
+                        // Nothing read yet: a faint mark and one line over a quiet dot grid
+                        // that answers a touch, and nothing to tap. The search bar above and
+                        // the paste button already offer every way to start.
                         if (!incognito && state.results.isEmpty() && !state.isFetching) {
                             item(key = "empty") {
                                 // Fills the space between the search bar and the bottom bar,
                                 // so the line sits in its middle.
-                                Column(
+                                Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .fillParentMaxHeight()
-                                        .padding(horizontal = 32.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
                                 ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_download_minimal),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(40.dp),
-                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                                    )
-                                    Spacer(modifier = Modifier.height(14.dp))
-                                    Text(
-                                        stringResource(R.string.home_empty_hint),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
-                                        textAlign = TextAlign.Center
-                                    )
+                                    AmbientDotGrid(Modifier.matchParentSize(), paused = searchOpen)
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 32.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_download_minimal),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(40.dp),
+                                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                                        )
+                                        Spacer(modifier = Modifier.height(14.dp))
+                                        Text(
+                                            stringResource(R.string.home_empty_hint),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -822,6 +851,13 @@ fun DownloadScreen(
                 )
             }
         }
+        // Above the paste button, so a long message never runs under it.
+        StatusToastHost(
+            statusToast,
+            Modifier
+                .align(Alignment.BottomCenter)
+                .padding(start = 20.dp, end = 20.dp, bottom = 104.dp)
+        )
     }
 
     // A card that has gone from the results takes its player with it.
@@ -1130,7 +1166,7 @@ private fun MediaCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        color = tonalFill(0.35f)
     ) {
         Box(
             modifier = Modifier

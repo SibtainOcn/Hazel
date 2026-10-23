@@ -64,6 +64,9 @@
     <string name="search_cancel">रद्द करें</string>
     <string name="search_clear_history_confirm_title">खोज इतिहास मिटाएँ?</string>
     <string name="search_clear_history_confirm_body">सभी सहेजे गए खोज लिंक हटा दिए जाएँगे। इसे पहले जैसा नहीं किया जा सकता।</string>
+    <string name="search_results_cleared">खोज परिणाम साफ़ किए गए</string>
+    <string name="search_history_cleared">खोज इतिहास साफ़ किया गया</string>
+    <string name="search_history_clear_failed">खोज इतिहास साफ़ नहीं हो सका</string>
 
     <!-- AlreadyDownloadedDialog -->
     <string name="already_downloaded_title">पहले से डाउनलोड है</string>
@@ -217,9 +220,8 @@
     <!-- SponsorScreen -->
     <string name="sponsor_back">वापस</string>
     <string name="sponsor_title">Hazel का साथ दें</string>
-    <string name="sponsor_hero_title">मुफ़्त है, और मुफ़्त ही रहेगा</string>
-    <string name="sponsor_hero_body">Hazel शाम और छुट्टियों में बनाया जाता है, और मुफ़्त दिया जाता है क्योंकि डाउनलोड के पैसे लेने वाला डाउनलोडर एक कमज़ोर डाउनलोडर है। साइटें लगातार बदलती रहती हैं, और उनके साथ चलते रहना ही असली काम है।</string>
-    <string name="sponsor_hero_closing">अगर इस ऐप ने आपकी एक दोपहर बचाई है, तो नीचे दिया कोई भी तरीका वह समय वापस लौटा देता है। अगर नहीं बचाई, तो बिना पैसे वाले तरीके भी उतनी ही मदद करते हैं।</string>
+    <string name="sponsor_hero_title">Hazel पसंद है? इसे थोड़ा प्यार दें</string>
+    <string name="sponsor_hero_body">अगर Hazel आपके काम आया है, तो इसके विकास में साथ देने पर विचार करें। आपका साथ मुझे Hazel को बेहतर बनाते रहने और नई सुविधाएँ बनाने में मदद करता है। थोड़ा सा प्यार भी बहुत मायने रखता है। 💚</string>
     <string name="sponsor_section_ways">साथ देने के तरीके</string>
     <string name="sponsor_github_title">GitHub Sponsors</string>
     <string name="sponsor_github_subtitle">हर महीने या एक बार, जब चाहें बंद करें। पूरा इंतज़ाम GitHub करता है।</string>
@@ -268,8 +270,6 @@
     <string name="cleanup_category_partial_downloads_description">रद्द या विफल डाउनलोड के बचे हिस्से।</string>
     <string name="cleanup_category_conversions_label">अधूरे रूपांतरण</string>
     <string name="cleanup_category_conversions_description">ऑडियो कन्वर्टर की बची हुई कार्य फ़ाइलें।</string>
-    <string name="cleanup_category_engine_label">yt-dlp इंजन की फ़ाइलें</string>
-    <string name="cleanup_category_engine_description">डाउनलोडर और उसका रनटाइम। सबसे ज़्यादा जगह खाली होती है, पर अगला डाउनलोड इसे फिर खोलेगा।</string>
     <string name="cleanup_category_other_cache_label">अन्य कैश की गई फ़ाइलें</string>
     <string name="cleanup_category_other_cache_description">थंबनेल और लिंक देखते समय कैश हुआ बाकी सब कुछ।</string>
     <string name="cleanup_category_link_reads_label">सहेजी गई लिंक जानकारी</string>
@@ -280,10 +280,9 @@
     <string name="cleanup_confirm_clear">मिटाएँ</string>
     <string name="cleanup_confirm_cancel">रद्द करें</string>
     <string name="cleanup_confirm_all_title">सब कुछ मिटाएँ?</string>
-    <string name="cleanup_confirm_all_body">%1$s खाली हो जाएगा। आपके डाउनलोड और सहेजे गए साइन इन बने रहेंगे, पर अगला डाउनलोड इंजन को फिर से खोलने में ज़्यादा समय लेगा।</string>
+    <string name="cleanup_confirm_all_body">%1$s खाली होगा। आपके डाउनलोड और सेव किए गए साइन-इन बने रहेंगे।</string>
     <string name="cleanup_confirm_all_confirm">सब कुछ मिटाएँ</string>
     <string name="cleanup_confirm_all_cancel">रद्द करें</string>
-    <string name="cleanup_confirm_all_include_link_reads">सहेजी गई लिंक जानकारी भी साफ़ करें (%1$s)</string>
 
     <!-- HistoryScreen -->
     <string name="history_title">सभी डाउनलोड</string>
@@ -299,14 +298,44 @@
     <string name="history_clear_dialog_cancel">रद्द करें</string>
     <string name="history_delete_dialog_title">फ़ाइल हटाएँ</string>
     <string name="history_delete_dialog_body">%1$s आपके डिवाइस से हटा दी जाएगी।</string>
-    <string name="history_toast_file_deleted">फ़ाइल हटा दी गई</string>
-    <string name="history_toast_file_delete_failed">फ़ाइल हटाई नहीं जा सकी</string>
     <string name="history_delete_dialog_confirm">हटाएँ</string>
     <string name="history_delete_dialog_cancel">रद्द करें</string>
     <string name="history_card_options">विकल्प</string>
     <string name="history_card_properties">विवरण</string>
     <string name="history_card_remove">सूची से हटाएँ</string>
     <string name="history_card_delete">फ़ाइल हटाएँ</string>
+    <string name="history_menu_select">चुनें</string>
+    <string name="history_menu_select_all">सभी चुनें</string>
+    <string name="history_select_none">सभी का चयन हटाएँ</string>
+    <string name="history_select_close">चयन रद्द करें</string>
+    <string name="history_select_act">हटाएँ या मिटाएँ</string>
+    <string name="history_delete_many_title">फ़ाइलें हटाएँ</string>
+    <string name="history_remove_hint">फ़ाइल आपके डिवाइस पर रहती है</string>
+    <string name="history_delete_hint">फ़ाइल को डिवाइस और इस सूची से हटाता है</string>
+    <plurals name="history_selected_count">
+        <item quantity="one">%d चुना गया</item>
+        <item quantity="other">%d चुने गए</item>
+    </plurals>
+    <plurals name="history_delete_many_body">
+        <item quantity="one">%d फ़ाइल आपके डिवाइस से हटा दी जाएगी।</item>
+        <item quantity="other">%d फ़ाइलें आपके डिवाइस से हटा दी जाएँगी।</item>
+    </plurals>
+    <plurals name="history_delete_many_gone">
+        <item quantity="one">पहले से हटाया गया %d आइटम सूची से हटा दिया जाएगा।</item>
+        <item quantity="other">पहले से हटाए गए %d आइटम सूची से हटा दिए जाएँगे।</item>
+    </plurals>
+    <plurals name="history_toast_files_deleted">
+        <item quantity="one">%d फ़ाइल हटाई गई</item>
+        <item quantity="other">%d फ़ाइलें हटाई गईं</item>
+    </plurals>
+    <plurals name="history_toast_files_delete_failed">
+        <item quantity="one">%d फ़ाइल हटाई नहीं जा सकी</item>
+        <item quantity="other">%d फ़ाइलें हटाई नहीं जा सकीं</item>
+    </plurals>
+    <plurals name="history_toast_removed">
+        <item quantity="one">%d आइटम सूची से हटाया गया</item>
+        <item quantity="other">%d आइटम सूची से हटाए गए</item>
+    </plurals>
     <string name="history_tag_deleted">हटाई गई</string>
     <string name="history_toast_file_gone">यह फ़ाइल अब आपके डिवाइस पर नहीं है</string>
     <string name="history_tab_failed">विफल</string>
@@ -418,9 +447,6 @@
     <string name="batch_type_video">वीडियो</string>
     <string name="batch_container_title">कंटेनर</string>
     <string name="batch_container_subtitle">ये लिंक जिस फ़ाइल के रूप में सहेजे जाएँगे</string>
-    <string name="batch_save_dir_title">सहेजने की जगह</string>
-    <string name="batch_open_folder">यह फ़ोल्डर खोलें</string>
-    <string name="batch_change_folder">फ़ोल्डर बदलें</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">थंबनेल</string>
@@ -545,10 +571,26 @@
     <string name="appearance_on">चालू</string>
     <string name="appearance_off">बंद</string>
     <string name="appearance_accent_color">एक्सेंट रंग</string>
+    <string name="appearance_glass">ग्लास इफ़ेक्ट</string>
+    <string name="glass_style_title">ग्लास स्टाइल</string>
+    <string name="glass_style_aurora">ऑरोरा</string>
+    <string name="glass_style_accent">एक्सेंट</string>
+    <string name="glass_style_wallpaper">वॉलपेपर</string>
+    <string name="glass_style_sunset">सूर्यास्त</string>
+    <string name="glass_style_nebula">नीहारिका</string>
+    <string name="glass_style_forest">जंगल</string>
+    <string name="glass_style_ocean">समुद्र</string>
+    <string name="glass_style_mono">मोनो</string>
+    <string name="guide_step_appearance_title">इसे अपना बनाएं</string>
+    <string name="guide_step_appearance_desc">थीम, एक्सेंट रंग और ग्लास लुक चुनें। इन्हें आप कभी भी सेटिंग्स में बदल सकते हैं।</string>
+    <string name="whats_new_tag">नया क्या है</string>
+    <string name="whats_new_version">संस्करण %1$s</string>
+    <string name="whats_new_done">ठीक है</string>
+    <string name="whats_new_glass_title">नया ग्लास लुक</string>
+    <string name="whats_new_glass_desc">ग्लास इफ़ेक्ट, नए स्टाइल और एक्सेंट रंग।</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">एक्सेंट रंग</string>
-    <string name="accent_picker_close">बंद करें</string>
 
     <!-- FetchSettingsScreen -->
     <string name="fetch_settings_title">लिंक पढ़ना</string>
@@ -650,6 +692,9 @@
     <string name="advanced_reset">एडवांस्ड सेटिंग्स रीसेट करें</string>
     <string name="advanced_reset_title">एडवांस्ड सेटिंग्स रीसेट करें?</string>
     <string name="advanced_reset_body">इस स्क्रीन का हर विकल्प फिर से बंद या खाली हो जाएगा।</string>
+    <string name="appearance_reset">रूप-रंग रीसेट करें</string>
+    <string name="appearance_reset_title">रूप-रंग रीसेट करें?</string>
+    <string name="appearance_reset_body">थीम, एक्सेंट और ग्लास फिर से डार्क, White और फ़ॉरेस्ट हो जाएंगे।</string>
     <string name="processing_step_fetch">लाना</string>
     <string name="processing_step_merge">जोड़ना</string>
     <string name="processing_step_extract">निकालना</string>
@@ -738,6 +783,9 @@
     <string name="fetch_settings_search_results">हर खोज में नतीजे</string>
     <string name="fetch_settings_suggestions">खोज सुझाव</string>
     <string name="fetch_settings_suggestions_summary">टाइप करते समय Google से खोज सुझाता है। आप जो टाइप करते हैं वह Google को भेजा जाता है।</string>
+    <string name="search_suggestions_confirm_title">ध्यान दें</string>
+    <string name="search_suggestions_confirm_body">खोज टाइप करते समय आपके शब्द सुझाव पाने के लिए Google को भेजे जाते हैं। लिंक कभी नहीं भेजे जाते। आप इसे कभी भी बंद कर सकते हैं।</string>
+    <string name="search_suggestions_confirm">चालू करें</string>
     <string name="fetch_settings_playback">प्लेबैक</string>
     <string name="fetch_settings_play_with">इससे चलाएं</string>
     <string name="fetch_settings_play_quality">प्लेबैक गुणवत्ता</string>
@@ -753,6 +801,7 @@
     <string name="save_location_internal">आंतरिक स्टोरेज</string>
     <string name="save_location_card_hint">कार्ड पर %1$s में सहेजता है</string>
     <string name="save_location_free">%1$s खाली</string>
+    <string name="save_location_folder_uses">यह फ़ोल्डर %1$s ले रहा है</string>
     <string name="save_location_other">दूसरा फ़ोल्डर</string>
     <string name="save_location_other_hint">इस डिवाइस या कार्ड का कोई भी फ़ोल्डर</string>
     <string name="save_location_close">बंद करें</string>
@@ -765,6 +814,8 @@
     <string name="home_empty_hint">शुरू करने के लिए कोई लिंक पेस्ट करें या खोजें</string>
     <string name="more_getting_started">शुरुआत करें</string>
     <string name="instant_label">Instant</string>
+    <string name="shortcut_search">खोजें</string>
+    <string name="share_shortcut_download">डाउनलोड</string>
     <string name="instant_started">डाउनलोड शुरू हुआ</string>
     <string name="instant_ok">ठीक है</string>
     <string name="instant_settings">सिंथेसाइज़िंग सेटिंग्स</string>

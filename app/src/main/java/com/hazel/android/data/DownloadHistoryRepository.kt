@@ -5,8 +5,10 @@ import android.net.Uri
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.hazel.android.util.LinkKey
+import com.hazel.android.util.MediaDeleter
 import com.hazel.android.util.MediaPresence
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
@@ -59,6 +61,26 @@ data class HistoryEntry(
         get() = fileName.substringAfterLast('.', "").uppercase()
 }
 
+/** What a delete did, entry by entry. */
+data class DeleteOutcome(
+    val deleted: Int,
+    val failed: Int,
+    val removedIds: Set<Long>,
+    val consentIds: Set<Long>,
+    val consentUris: List<Uri> = emptyList()
+) {
+    companion object {
+        fun of(results: Map<Long, MediaDeleter.Result>): DeleteOutcome = DeleteOutcome(
+            deleted = results.count { it.value == MediaDeleter.Result.DELETED },
+            failed = results.count { it.value == MediaDeleter.Result.FAILED },
+            removedIds = results.filterValues {
+                it == MediaDeleter.Result.DELETED || it == MediaDeleter.Result.GONE
+            }.keys,
+            consentIds = results.filterValues { it == MediaDeleter.Result.NEEDS_CONSENT }.keys
+        )
+    }
+}
+
 /** How the history list is ordered. */
 enum class HistorySort(@param:androidx.annotation.StringRes val labelRes: Int) {
     NEWEST(com.hazel.android.R.string.history_sort_date),
@@ -101,7 +123,7 @@ object DownloadHistoryRepository {
     suspend fun record(context: Context, entry: HistoryEntry) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs ->
             val existing = decode(prefs[HISTORY_KEY])
-            prefs[HISTORY_KEY] = encode((listOf(entry) + existing).take(LIMIT))
+            prefs[HISTORY_KEY] = encode((listOf(withFreeId(entry, existing)) + existing).take(LIMIT))
         }
     }
 
@@ -143,17 +165,24 @@ object DownloadHistoryRepository {
     suspend fun fileExists(context: Context, entry: HistoryEntry): Boolean =
         MediaPresence.refresh(context, entry.fileUri)
 
-    /** Deletes the file an entry points at, and the entry with it. */
-    suspend fun deleteFile(context: Context, entry: HistoryEntry): Boolean =
-        withContext(Dispatchers.IO) {
-            val deleted = runCatching {
-                entry.fileUri.isNotBlank() &&
-                        context.contentResolver.delete(Uri.parse(entry.fileUri), null, null) > 0
-            }.getOrDefault(false)
-            remove(context, entry.id)
-            // What was held about this address described a file that is no longer there.
+    /**
+     * Deletes the files behind [entries] and drops the records of those that are now gone.
+     * A file that could not be deleted keeps its record, so nothing disappears silently.
+     * Entries in [knownGone] are already off the device and only lose their record.
+     */
+    suspend fun deleteFiles(
+        context: Context,
+        entries: List<HistoryEntry>,
+        knownGone: Set<Long> = emptySet()
+    ): DeleteOutcome =
+        withContext(Dispatchers.IO + NonCancellable) {
+            val unique = entries.distinctBy { it.id }
+            val outcome = DeleteOutcome.of(unique.associate {
+                it.id to if (it.id in knownGone) MediaDeleter.Result.GONE else MediaDeleter.delete(context, it.fileUri)
+            })
+            removeAll(context, outcome.removedIds)
             MediaPresence.forget()
-            deleted
+            outcome.copy(consentUris = unique.filter { it.id in outcome.consentIds }.map { Uri.parse(it.fileUri) })
         }
 
     private fun encode(entries: List<HistoryEntry>): String {
@@ -208,7 +237,25 @@ object DownloadHistoryRepository {
                         embedded = json.optString("embedded")
                     )
                 }
-            }
+            }.let(::uniqueIds)
         }.getOrDefault(emptyList())
+    }
+
+    /** Two downloads can finish in the same millisecond; ids must stay unique so acting on one never touches another. */
+    internal fun withFreeId(entry: HistoryEntry, existing: List<HistoryEntry>): HistoryEntry {
+        if (existing.none { it.id == entry.id }) return entry
+        return entry.copy(id = maxOf(entry.id, existing.maxOf { it.id }) + 1)
+    }
+
+    /** Gives a repeated id in older records the next free one, the same way on every read. */
+    internal fun uniqueIds(entries: List<HistoryEntry>): List<HistoryEntry> {
+        val seen = HashSet<Long>(entries.size)
+        if (entries.all { seen.add(it.id) }) return entries
+        seen.clear()
+        var next = entries.maxOf { it.id } + 1
+        return entries.map { entry ->
+            if (seen.add(entry.id)) entry
+            else entry.copy(id = next++).also { seen.add(it.id) }
+        }
     }
 }
