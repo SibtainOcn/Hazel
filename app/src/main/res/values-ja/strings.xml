@@ -812,6 +812,8 @@
     <string name="player_pause">一時停止</string>
     <string name="player_close">プレーヤーを閉じる</string>
     <string name="player_fullscreen">全画面</string>
+    <string name="player_minimize">最小化</string>
+    <string name="player_expand">プレーヤーを開く</string>
     <string name="player_exit_fullscreen">全画面を終了</string>
     <string name="player_failed">再生できませんでした</string>
     <string name="player_retry">再試行</string>

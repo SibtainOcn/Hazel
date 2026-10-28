@@ -140,9 +140,12 @@ fun InlinePlayer(
     thumbnail: String?,
     fullscreen: Boolean,
     onFullscreen: () -> Unit,
-    onClose: () -> Unit,
+    onClose: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    onDownload: (() -> Unit)? = null
+    onDownload: (() -> Unit)? = null,
+    closeIcon: ImageVector = Icons.Filled.Close,
+    closeLabel: String? = null,
+    showControls: Boolean = true
 ) {
     Box(modifier = modifier.background(Color.Black)) {
         PlayerArea(
@@ -153,7 +156,10 @@ fun InlinePlayer(
             onToggleFullscreen = onFullscreen,
             onClose = onClose,
             onDownload = onDownload,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            closeIcon = closeIcon,
+            closeLabel = closeLabel,
+            showControls = showControls
         )
     }
 }
@@ -228,7 +234,10 @@ private fun PlayerArea(
     onToggleFullscreen: () -> Unit,
     onClose: (() -> Unit)?,
     onDownload: (() -> Unit)?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    closeIcon: ImageVector = Icons.Filled.Close,
+    closeLabel: String? = null,
+    showControls: Boolean = true
 ) {
     var controlsShown by remember { mutableStateOf(true) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -296,7 +305,7 @@ private fun PlayerArea(
             )
         }
 
-        val controlsVisible = controlsShown || scrubbing || !controller.isPlaying
+        val controlsVisible = showControls && (controlsShown || scrubbing || !controller.isPlaying)
         if (!controlsVisible && controller.durationMs > 0) {
             // A hairline of progress stays along the foot while the controls are away.
             ProgressLine(
@@ -329,8 +338,8 @@ private fun PlayerArea(
             ) {
                 if (onClose != null) {
                     GlassIcon(
-                        icon = Icons.Filled.Close,
-                        description = stringResource(R.string.player_close),
+                        icon = closeIcon,
+                        description = closeLabel ?: stringResource(R.string.player_close),
                         onClick = onClose,
                         modifier = Modifier
                             .align(Alignment.TopStart)
@@ -565,7 +574,7 @@ private fun MoreButton(controller: PlaybackController, onMenuChange: (Boolean) -
         } else {
             Text(
                 text,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1
             )
@@ -583,7 +592,8 @@ private fun MoreButton(controller: PlaybackController, onMenuChange: (Boolean) -
             // Offered only when this video has more than one quality to choose from.
             if (controller.hasVideo && (loading || heights.size > 1)) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.fetch_settings_play_quality)) },
+                    text = { Text(stringResource(R.string.properties_quality), maxLines = 1) },
+                    compact = true,
                     icon = Icons.Filled.HighQuality,
                     enabled = !loading,
                     trailingIcon = { Value(stringResource(R.string.player_quality_value, playingHeight)) },
@@ -594,7 +604,8 @@ private fun MoreButton(controller: PlaybackController, onMenuChange: (Boolean) -
                 )
             }
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.player_audio_track)) },
+                text = { Text(stringResource(R.string.player_audio_track), maxLines = 1) },
+                compact = true,
                 icon = Icons.Filled.Translate,
                 enabled = !loading,
                 trailingIcon = {
@@ -664,7 +675,7 @@ private fun audioTrackLabel(track: AudioTrack): String {
 
 /** The bar alone, for while the controls are hidden. */
 @Composable
-private fun ProgressLine(played: Float, buffered: Float, modifier: Modifier = Modifier) {
+internal fun ProgressLine(played: Float, buffered: Float, modifier: Modifier = Modifier) {
     val accent = MaterialTheme.colorScheme.primary
     Canvas(modifier = modifier) {
         val y = size.height / 2f

@@ -321,13 +321,18 @@ class DownloadViewModel : ViewModel() {
     /** Puts back the cards left on the home screen last time, then keeps the file current. */
     private suspend fun restoreHomeResults(app: HazelApp) {
         val incognito = SettingsRepository.getIncognito(app).first()
-        val saved = if (incognito) emptyList() else HomeResultsRepository.load(app)
-        // No sheet is selected, so none opens on its own.
-        _state.update { if (it.results.isEmpty() && !it.isFetching && saved.isNotEmpty()) it.copy(results = saved) else it }
+        val saved = if (incognito) null else HomeResultsRepository.load(app)
+        // No sheet is selected, so none opens on its own. The search words come back with
+        // their cards, so a search still reads as one after a restart.
+        _state.update {
+            if (saved != null && it.results.isEmpty() && !it.isFetching && saved.results.isNotEmpty()) {
+                it.copy(results = saved.results, searchQuery = saved.searchQuery)
+            } else it
+        }
         viewModelScope.launch(Dispatchers.IO) {
-            _state.map { it.results }.distinctUntilChanged().drop(1).collect { results ->
+            _state.map { it.results to it.searchQuery }.distinctUntilChanged().drop(1).collect { (results, query) ->
                 if (SettingsRepository.getIncognito(app).first()) HomeResultsRepository.clear(app)
-                else HomeResultsRepository.save(app, results)
+                else HomeResultsRepository.save(app, results, query)
             }
         }
     }

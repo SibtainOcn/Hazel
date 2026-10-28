@@ -94,13 +94,19 @@ private fun MenuTone.shape(): Shape = when (this) {
 
 /** [icon] on its [tone]'s coloured shape, as menus and option dialogs lead their rows with. */
 @Composable
-fun ToneBadge(icon: ImageVector, tone: MenuTone, modifier: Modifier = Modifier, enabled: Boolean = true) {
+fun ToneBadge(
+    icon: ImageVector,
+    tone: MenuTone,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    size: androidx.compose.ui.unit.Dp = 38.dp
+) {
     val color = MaterialTheme.colorScheme.primary
     val shape = tone.shape()
     val dark = LocalDarkTheme.current
     Box(
         modifier = modifier
-            .size(38.dp)
+            .size(size)
             .clip(shape)
             .background(color.copy(alpha = if (!enabled) 0.08f else if (dark) 0.22f else 0.16f)),
         contentAlignment = Alignment.Center
@@ -109,7 +115,7 @@ fun ToneBadge(icon: ImageVector, tone: MenuTone, modifier: Modifier = Modifier, 
             icon,
             contentDescription = null,
             tint = if (enabled) color else color.copy(alpha = 0.38f),
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier.size(size * 0.53f)
         )
     }
 }
@@ -128,7 +134,9 @@ fun DropdownMenuItem(
     tone: MenuTone = MenuTone.Accent,
     selected: Boolean = false,
     trailingIcon: (@Composable () -> Unit)? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    /** A smaller row, for a menu over a small surface such as the player. */
+    compact: Boolean = false
 ) {
     val dark = LocalDarkTheme.current
     val accent = MaterialTheme.colorScheme.primary
@@ -137,23 +145,23 @@ fun DropdownMenuItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 52.dp)
+            .heightIn(min = if (compact) 44.dp else 52.dp)
             .clip(ItemShape)
             .background(if (selected) accent.copy(alpha = if (dark) 0.2f else 0.14f) else tonalFill(0.5f))
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 8.dp),
+            .padding(horizontal = if (compact) 8.dp else 10.dp, vertical = if (compact) 6.dp else 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null) {
-            ToneBadge(icon, tone, enabled = enabled)
-            Spacer(Modifier.width(12.dp))
+            ToneBadge(icon, tone, enabled = enabled, size = if (compact) 30.dp else 38.dp)
+            Spacer(Modifier.width(if (compact) 10.dp else 12.dp))
         } else {
             Spacer(Modifier.width(6.dp))
         }
         Box(modifier = Modifier.weight(1f, fill = false)) {
             CompositionLocalProvider(LocalContentColor provides ink) {
                 ProvideTextStyle(
-                    MaterialTheme.typography.bodyLarge.copy(
+                    (if (compact) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyLarge).copy(
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
                     )
                 ) { text() }

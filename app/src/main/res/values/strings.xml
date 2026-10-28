@@ -904,6 +904,8 @@
     <string name="player_pause">Pause</string>
     <string name="player_close">Close player</string>
     <string name="player_fullscreen">Full screen</string>
+    <string name="player_minimize">Minimize</string>
+    <string name="player_expand">Open player</string>
     <string name="player_exit_fullscreen">Exit full screen</string>
     <string name="player_failed">Could not play this</string>
     <string name="player_retry">Try again</string>

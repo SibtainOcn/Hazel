@@ -22,7 +22,14 @@ object HomeResultsRepository {
 
     private fun file(context: Context) = File(context.filesDir, FILE_NAME)
 
-    fun save(context: Context, results: List<MediaInfo>) {
+    /** The cards and, when they came from a keyword search, its words. */
+    data class Saved(val results: List<MediaInfo>, val searchQuery: String)
+
+    /**
+     * Keeps [results], with the [searchQuery] that found them, so after a restart they are
+     * still known as a search: a search's cards get no Download all, a set's do.
+     */
+    fun save(context: Context, results: List<MediaInfo>, searchQuery: String = "") {
         runCatching {
             if (results.isEmpty()) {
                 file(context).delete()
@@ -38,21 +45,32 @@ object HomeResultsRepository {
                     put("duration", info.durationSeconds)
                 })
             }
+            val text = JSONObject()
+                .put(KEY_QUERY, searchQuery)
+                .put(KEY_RESULTS, array)
+                .toString()
             val target = file(context)
             val temp = File(target.parentFile, "$FILE_NAME.tmp")
-            temp.writeText(array.toString())
+            temp.writeText(text)
             if (!temp.renameTo(target)) {
-                target.writeText(array.toString())
+                target.writeText(text)
                 temp.delete()
             }
         }
     }
 
-    fun load(context: Context): List<MediaInfo> = runCatching {
+    fun load(context: Context): Saved = runCatching {
         val target = file(context)
-        if (!target.exists()) return emptyList()
-        val array = JSONArray(target.readText())
-        (0 until array.length()).mapNotNull { index ->
+        if (!target.exists()) return Saved(emptyList(), "")
+        parse(target.readText())
+    }.getOrDefault(Saved(emptyList(), ""))
+
+    /** Reads either form: an object with the search words, or the bare list kept before them. */
+    internal fun parse(text: String): Saved {
+        val trimmed = text.trimStart()
+        val root = if (trimmed.startsWith("{")) JSONObject(trimmed) else null
+        val array = root?.optJSONArray(KEY_RESULTS) ?: if (root == null) JSONArray(trimmed) else JSONArray()
+        val results = (0 until array.length()).mapNotNull { index ->
             val item = array.optJSONObject(index) ?: return@mapNotNull null
             val url = item.optString("url").takeIf { it.isNotBlank() } ?: return@mapNotNull null
             InfoCache.metadataFor(url) ?: MediaProbe.pendingFor(
@@ -65,7 +83,13 @@ object HomeResultsRepository {
                 )
             )
         }
-    }.getOrDefault(emptyList())
+        // Words with no cards to go with them mean nothing.
+        val query = if (results.isEmpty()) "" else root?.optString(KEY_QUERY).orEmpty()
+        return Saved(results, query)
+    }
+
+    private const val KEY_QUERY = "searchQuery"
+    private const val KEY_RESULTS = "results"
 
     fun clear(context: Context) {
         runCatching { file(context).delete() }

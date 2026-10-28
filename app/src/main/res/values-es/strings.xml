@@ -840,6 +840,8 @@
     <string name="player_pause">Pausa</string>
     <string name="player_close">Cerrar reproductor</string>
     <string name="player_fullscreen">Pantalla completa</string>
+    <string name="player_minimize">Minimizar</string>
+    <string name="player_expand">Abrir reproductor</string>
     <string name="player_exit_fullscreen">Salir de pantalla completa</string>
     <string name="player_failed">No se pudo reproducir</string>
     <string name="player_retry">Reintentar</string>

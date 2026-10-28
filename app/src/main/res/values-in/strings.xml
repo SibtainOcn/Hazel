@@ -812,6 +812,8 @@
     <string name="player_pause">Jeda</string>
     <string name="player_close">Tutup pemutar</string>
     <string name="player_fullscreen">Layar penuh</string>
+    <string name="player_minimize">Perkecil</string>
+    <string name="player_expand">Buka pemutar</string>
     <string name="player_exit_fullscreen">Keluar dari layar penuh</string>
     <string name="player_failed">Tidak dapat memutar ini</string>
     <string name="player_retry">Coba lagi</string>

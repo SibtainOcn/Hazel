@@ -853,6 +853,8 @@
     <string name="player_pause">Пауза</string>
     <string name="player_close">Закрыть плеер</string>
     <string name="player_fullscreen">Во весь экран</string>
+    <string name="player_minimize">Свернуть</string>
+    <string name="player_expand">Открыть плеер</string>
     <string name="player_exit_fullscreen">Выйти из полноэкранного режима</string>
     <string name="player_failed">Не удалось воспроизвести</string>
     <string name="player_retry">Повторить</string>
