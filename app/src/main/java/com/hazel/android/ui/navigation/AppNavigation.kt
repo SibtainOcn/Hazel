@@ -100,6 +100,12 @@ private val bottomNavItems = listOf(
     Screen.More,
 )
 
+private val tabRoutes = bottomNavItems.map { it.route }.toSet()
+
+/** True when both ends of the move are bottom bar tabs, which are peers rather than a step deeper. */
+private fun androidx.compose.animation.AnimatedContentTransitionScope<androidx.navigation.NavBackStackEntry>.isTabSwitch(): Boolean =
+    initialState.destination.route in tabRoutes && targetState.destination.route in tabRoutes
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(
@@ -343,10 +349,10 @@ fun AppNavigation(
             navController = navController,
             startDestination = Screen.Download.route,
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { M3Motion.forwardEnter() },
-            exitTransition = { M3Motion.forwardExit() },
-            popEnterTransition = { M3Motion.backEnter() },
-            popExitTransition = { M3Motion.backExit() }
+            enterTransition = { if (isTabSwitch()) M3Motion.tabEnter() else M3Motion.forwardEnter() },
+            exitTransition = { if (isTabSwitch()) M3Motion.tabExit() else M3Motion.forwardExit() },
+            popEnterTransition = { if (isTabSwitch()) M3Motion.tabEnter() else M3Motion.backEnter() },
+            popExitTransition = { if (isTabSwitch()) M3Motion.tabExit() else M3Motion.backExit() }
         ) {
             composable(Screen.Download.route) {
                 DownloadScreen(

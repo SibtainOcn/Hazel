@@ -25,66 +25,50 @@ object M3Motion {
     private val EmphasizedAccelerate = CubicBezierEasing(0.3f, 0.0f, 0.8f, 0.15f)
 
     // ============================================================================
-    // SCALE
-    // ============================================================================
-
-    /** Initial scale for entering screens (92% — subtle but noticeable) */
-    private const val ENTER_SCALE = 0.92f
-
-    // ============================================================================
-    // SCREEN TRANSITIONS — fade through
+    // SCREEN TRANSITIONS
     // ============================================================================
     //
-    // The screens behind the navigation bar are peers: nothing goes forward or back
-    // between Home, Downloads and More, so nothing should look as though it does. They
-    // used to slide vertically past each other by a twelfth of the height, and because a
-    // screen is drawn inside the bars rather than under them, that read as a short panel
-    // sliding about in the middle instead of one screen replacing another.
+    // The old and new screens always overlap, so no frame shows an empty screen, and
+    // nothing scales, which keeps the glass behind them from being redrawn at every size.
     //
-    // A fade through is what Material uses when there is no relationship to express: the
-    // outgoing screen fades quickly, and once it is gone the incoming one fades up while
-    // growing the last of the way to full size. Nothing translates, so nothing looks like
-    // it is arriving from somewhere.
+    // Opening a screen is a shared axis: the new one moves in a short way from the end
+    // while it fades up and the old one drifts the other way as it fades. Back plays the
+    // same motion in reverse. Tabs are peers, so switching them is a plain crossfade.
 
-    /** How long the outgoing screen takes to clear. */
-    private const val FADE_OUT_DURATION = 90
+    private const val AXIS_DURATION = 300
+    private const val AXIS_FADE_IN = 220
+    private const val AXIS_FADE_IN_DELAY = 50
+    private const val AXIS_FADE_OUT = 140
+    private const val TAB_FADE_IN = 200
+    private const val TAB_FADE_IN_DELAY = 40
+    private const val TAB_FADE_OUT = 110
 
-    /** How long the incoming screen takes, once the outgoing one has cleared. */
-    private const val FADE_IN_DURATION = 210
+    /** How far a screen travels, as a fraction of its width. */
+    private const val AXIS_SHIFT = 10
 
-    private fun fadeThroughEnter(): EnterTransition {
-        return fadeIn(
-            animationSpec = tween(
-                durationMillis = FADE_IN_DURATION,
-                delayMillis = FADE_OUT_DURATION,
-                easing = EmphasizedDecelerate
-            )
-        ) + scaleIn(
-            initialScale = ENTER_SCALE,
-            animationSpec = tween(
-                durationMillis = FADE_IN_DURATION,
-                delayMillis = FADE_OUT_DURATION,
-                easing = EmphasizedDecelerate
-            )
-        )
-    }
+    private val LinearOutSlowIn = CubicBezierEasing(0f, 0f, 0.2f, 1f)
+    private val FastOutLinearIn = CubicBezierEasing(0.4f, 0f, 1f, 1f)
 
-    private fun fadeThroughExit(): ExitTransition {
-        return fadeOut(
-            animationSpec = tween(
-                durationMillis = FADE_OUT_DURATION,
-                easing = EmphasizedAccelerate
-            )
-        )
-    }
+    private fun axisEnter(from: Int): EnterTransition =
+        slideInHorizontally(tween(AXIS_DURATION, easing = EmphasizedDecelerate)) { from * it / AXIS_SHIFT } +
+            fadeIn(tween(AXIS_FADE_IN, delayMillis = AXIS_FADE_IN_DELAY, easing = LinearOutSlowIn))
 
-    fun forwardEnter(): EnterTransition = fadeThroughEnter()
+    private fun axisExit(to: Int): ExitTransition =
+        slideOutHorizontally(tween(AXIS_DURATION, easing = EmphasizedDecelerate)) { to * it / AXIS_SHIFT } +
+            fadeOut(tween(AXIS_FADE_OUT, easing = FastOutLinearIn))
 
-    fun forwardExit(): ExitTransition = fadeThroughExit()
+    fun forwardEnter(): EnterTransition = axisEnter(1)
 
-    fun backEnter(): EnterTransition = fadeThroughEnter()
+    fun forwardExit(): ExitTransition = axisExit(-1)
 
-    fun backExit(): ExitTransition = fadeThroughExit()
+    fun backEnter(): EnterTransition = axisEnter(-1)
+
+    fun backExit(): ExitTransition = axisExit(1)
+
+    fun tabEnter(): EnterTransition =
+        fadeIn(tween(TAB_FADE_IN, delayMillis = TAB_FADE_IN_DELAY, easing = LinearOutSlowIn))
+
+    fun tabExit(): ExitTransition = fadeOut(tween(TAB_FADE_OUT, easing = FastOutLinearIn))
 
     // ============================================================================
     // CONTENT TRANSITIONS (elements appearing inside a screen)
