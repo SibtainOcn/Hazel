@@ -182,6 +182,10 @@ fun FormatSheet(
     ) -> Unit,
     onDismiss: () -> Unit
 ) {
+    // The quality ladder until the link is read, then its own formats, for every host.
+    @Suppress("NAME_SHADOWING")
+    val info = withLadderUntilRead(info)
+
     // Opened at full height. The sheet's own content is a full screen of format rows and
     // fields, so a half-height first stop showed only the header and made an extra drag a
     // condition of using it. The set-of-links sheet already opens this way.
@@ -1061,6 +1065,17 @@ private class Feedback(val message: String)
 /** The fill the sheet's fields rest on outside a section. */
 @Composable
 internal fun defaultFieldColor(): Color = tonalFill(0.45f)
+
+/** [info] with the quality ladders in place of its bare best rows until it is read. */
+@Composable
+private fun withLadderUntilRead(info: MediaInfo): MediaInfo {
+    val bestVideo = stringResource(R.string.batch_quality_best)
+    val bestAudio = stringResource(R.string.audio_quality_best)
+    val worst = stringResource(R.string.batch_quality_worst)
+    return remember(info, bestVideo, bestAudio, worst) {
+        GenericFormats.untilRead(info, bestVideo, bestAudio, worst)
+    }
+}
 
 /**
  * Labelled box whose value the user can type into, matching the read-only fields' look.
