@@ -132,14 +132,14 @@ internal fun BackupFileSheet(
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 CookieAction(Icons.Filled.Restore, R.string.backup_restore, readable,
-                    MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary, onRestore)
+                    MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary, onClick = onRestore)
                 val neutral = MaterialTheme.colorScheme.surfaceContainerHighest
                 val ink = MaterialTheme.colorScheme.onSurface
                 CookieAction(Icons.Filled.Visibility, R.string.backup_view, true, neutral, ink) { view(context, file.uri) }
                 CookieAction(Icons.Filled.FolderOpen, R.string.backup_show_folder, true, neutral, ink) {
                     openFolder(context, folderUri)
                 }
-                CookieAction(Icons.Filled.Share, R.string.backup_share, true, neutral, ink, onShare)
+                CookieAction(Icons.Filled.Share, R.string.backup_share, true, neutral, ink, onClick = onShare)
             }
 
             contents?.let { backup ->
@@ -198,6 +198,12 @@ private fun Tiles(file: BackupFile, contents: BackupRepository.Contents?) {
             add(backup.categories.size.toString() to stringResource(R.string.backup_categories_label))
         }
     }
+    JoinedTiles(tiles)
+}
+
+/** Value-over-label tiles joined into one row, as on the properties sheet. */
+@Composable
+internal fun JoinedTiles(tiles: List<Pair<String, String>>) {
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         tiles.forEachIndexed { index, (value, label) ->
             Column(

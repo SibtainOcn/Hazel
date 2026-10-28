@@ -52,8 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * These tokens adapt to light, dark and glass while the update hero states stay
- * independent of the user's accent. Switches and the channel picker follow the accent.
+ * These tokens adapt to light, dark and glass. The up-to-date state follows the user's accent;
+ * update-available and downloading keep their own amber and blue.
  */
 object UpdateTokens {
     val isDark: Boolean
@@ -85,15 +85,15 @@ object UpdateTokens {
     val OnSurfaceDim: Color
         @Composable get() = if (isDark) Color(0xFF7A7A77) else Color(0xFF8D8880)
 
-    // Up-to-date hero state, independent emerald green
+    // Up-to-date state, in the user's accent
     val Accent: Color
-        @Composable get() = if (isDark) Color(0xFF8FD6B8) else Color(0xFF1B6B4A)
+        @Composable get() = MaterialTheme.colorScheme.primary
     val AccentStrong: Color
-        @Composable get() = if (isDark) Color(0xFFA9E6CC) else Color(0xFF106841)
+        @Composable get() = MaterialTheme.colorScheme.primary
     val AccentOn: Color
-        @Composable get() = if (isDark) Color(0xFF003824) else Color(0xFFFFFFFF)
+        @Composable get() = MaterialTheme.colorScheme.onPrimary
     val AccentContainer: Color
-        @Composable get() = if (isDark) Color(0xFF0E3327) else Color(0xFFE2F4EC)
+        @Composable get() = MaterialTheme.colorScheme.primary.copy(alpha = if (isDark) 0.16f else 0.12f)
 
     // Update available hero state (Warm Amber / Gold)
     val Update: Color

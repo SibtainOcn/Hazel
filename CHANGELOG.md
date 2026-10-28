@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Software update and Hazel updates screens redesigned with stat tiles, shaped actions and copyable device info for bug reports.
+- Hazel updates: the status cookie shows live wavy progress while checking and downloading.
+- Update screens follow the theme accent; changelog opens in the in-app viewer from both screens.
 - Backup screen rebuilt: saved backups with restore, share and delete, a schedule, retention, category and folder choice.
 - Automatic backup now runs after every app update and on a schedule; old automatic backups are cleaned up.
 - Restore shows a preview, blocks backups from newer versions, and brings back the app language.

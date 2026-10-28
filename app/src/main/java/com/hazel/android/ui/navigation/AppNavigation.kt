@@ -479,7 +479,12 @@ fun AppNavigation(
                 SoftwareUpdateScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToHazelUpdate = { navController.navigate("hazel_update") },
-                    onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") }
+                    onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") },
+                    onOpenWhatsNew = { version ->
+                        navController.navigate(
+                            "docs/${com.hazel.android.ui.screens.more.DocPage.CHANGELOG.name}?version=${android.net.Uri.encode(version)}"
+                        )
+                    }
                 )
             }
             composable("hazel_update") {
@@ -499,7 +504,12 @@ fun AppNavigation(
                 SoftwareUpdateScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToHazelUpdate = { navController.navigate("hazel_update") },
-                    onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") }
+                    onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") },
+                    onOpenWhatsNew = { version ->
+                        navController.navigate(
+                            "docs/${com.hazel.android.ui.screens.more.DocPage.CHANGELOG.name}?version=${android.net.Uri.encode(version)}"
+                        )
+                    }
                 )
             }
         }

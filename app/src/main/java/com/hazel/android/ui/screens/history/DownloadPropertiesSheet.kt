@@ -306,6 +306,7 @@ internal fun CookieAction(
     enabled: Boolean,
     container: androidx.compose.ui.graphics.Color,
     content: androidx.compose.ui.graphics.Color,
+    shape: Shape = MaterialShapes.Cookie7Sided.toShape(),
     onClick: () -> Unit
 ) {
     Column(
@@ -321,7 +322,7 @@ internal fun CookieAction(
         Box(
             modifier = Modifier
                 .size(60.dp)
-                .clip(MaterialShapes.Cookie7Sided.toShape())
+                .clip(shape)
                 .background(container),
             contentAlignment = Alignment.Center
         ) {

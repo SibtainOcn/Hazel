@@ -1,21 +1,14 @@
 package com.hazel.android.ui.screens.more
 
-import androidx.compose.ui.text.style.TextOverflow
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,30 +16,34 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.InstallMobile
+import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.VerifiedUser
-import com.hazel.android.ui.components.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import com.hazel.android.ui.components.ModalBottomSheet
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -60,22 +57,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hazel.android.R
+import com.hazel.android.ui.components.AlertDialog
+import com.hazel.android.update.DebugInfo
 import com.hazel.android.update.HazelUpdateViewModel
 import com.hazel.android.update.HazelUpdater
-import com.hazel.android.update.UpdateListGroup
-import com.hazel.android.update.UpdateListItem
-import com.hazel.android.update.UpdateWavyProgress
-import com.hazel.android.update.UpdateSectionLabel
 import com.hazel.android.update.UpdateSegmentedButton
 import com.hazel.android.update.UpdateTokens
 import com.hazel.android.update.UpdateTopBar
+import com.hazel.android.update.UpdateWavyProgress
 import com.hazel.android.util.openInAppBrowser
 import java.util.Locale
 
@@ -195,36 +194,20 @@ fun HazelUpdateScreen(
     }
 
     Scaffold(
-        topBar = {
-            UpdateTopBar(
-                title = "Hazel updates",
-                onBack = onBack,
-                actions = {
-                    IconButton(
-                        onClick = { viewModel.checkForUpdate() },
-                        enabled = uiState !is HazelUpdateViewModel.UiState.Downloading
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Refresh,
-                            contentDescription = "Refresh",
-                            tint = UpdateTokens.OnSurface
-                        )
-                    }
-                }
-            )
-        },
+        topBar = { UpdateTopBar(title = stringResource(R.string.upd_hazel_title), onBack = onBack) },
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         containerColor = UpdateTokens.Bg
     ) { innerPadding ->
+        val busy = uiState is HazelUpdateViewModel.UiState.Downloading || uiState is HazelUpdateViewModel.UiState.Checking
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // ── Hero Status Card ──
-            HazelStatusCard(
+            HazelStatus(
                 state = uiState,
                 installedVersion = installedVersion,
                 channel = channel,
@@ -242,60 +225,78 @@ fun HazelUpdateScreen(
                         openInAppBrowser(context, HazelUpdater.FDROID_PACKAGE_URL)
                     }
                 },
-                onViewChangelog = { version, _ -> onOpenWhatsNew(version) }
+                onViewChangelog = onOpenWhatsNew
             )
 
-            // ── Update Channel (GitHub release builds only; F-Droid relies strictly on F-Droid repo releases) ──
-            if (!HazelUpdater.isFdroid()) {
-                UpdateSectionLabel(text = "Update channel", isFirst = true)
-                val channels = listOf("Stable", "Beta", "Nightly")
-                val selectedIdx = when (channel) {
-                    HazelUpdater.Channel.STABLE -> 0
-                    HazelUpdater.Channel.BETA -> 1
-                    HazelUpdater.Channel.NIGHTLY -> 2
+            val isFdroid = HazelUpdater.isFdroid()
+            JoinedTiles(
+                buildList {
+                    if (!isFdroid) add(channel.label to stringResource(R.string.upd_tile_channel))
+                    add(DebugInfo.versionCode() to stringResource(R.string.upd_tile_code))
+                    DebugInfo.installedLabel(context)?.let { add(it to stringResource(R.string.upd_tile_installed)) }
+                    add((if (isFdroid) "F-Droid" else "GitHub") to stringResource(R.string.upd_tile_source))
                 }
-                UpdateSegmentedButton(
-                    options = channels,
-                    selectedIndex = selectedIdx,
-                    onSelect = { idx ->
-                        when (idx) {
-                            0 -> viewModel.setChannel(HazelUpdater.Channel.STABLE)
-                            1 -> viewModel.setChannel(HazelUpdater.Channel.BETA)
-                            2 -> viewModel.setChannel(HazelUpdater.Channel.NIGHTLY)
+            )
+
+            UpdateActionRow(
+                listOf(
+                    UpdateAction(Icons.Filled.Refresh, R.string.upd_action_check, enabled = !busy) { viewModel.checkForUpdate() },
+                    UpdateAction(Icons.AutoMirrored.Filled.List, R.string.upd_action_changelog) { onOpenWhatsNew(installedVersion) },
+                    UpdateAction(Icons.Filled.NewReleases, R.string.upd_action_releases) {
+                        openInAppBrowser(context, if (isFdroid) HazelUpdater.FDROID_PACKAGE_URL else DebugInfo.RELEASES_URL)
+                    },
+                    UpdateAction(Icons.Filled.ContentCopy, R.string.upd_action_copy) {
+                        copyAndTell(context, "Hazel $installedVersion (${DebugInfo.versionCode()}) ${DebugInfo.build()}")
+                    }
+                )
+            )
+
+            // GitHub builds only; F-Droid ships what its own repository releases.
+            if (!isFdroid) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    com.hazel.android.ui.screens.history.SectionLabel(R.string.upd_section_channel)
+                    val selectedIdx = when (channel) {
+                        HazelUpdater.Channel.STABLE -> 0
+                        HazelUpdater.Channel.BETA -> 1
+                        HazelUpdater.Channel.NIGHTLY -> 2
+                    }
+                    UpdateSegmentedButton(
+                        options = listOf("Stable", "Beta", "Nightly"),
+                        selectedIndex = selectedIdx,
+                        onSelect = { idx ->
+                            when (idx) {
+                                0 -> viewModel.setChannel(HazelUpdater.Channel.STABLE)
+                                1 -> viewModel.setChannel(HazelUpdater.Channel.BETA)
+                                2 -> viewModel.setChannel(HazelUpdater.Channel.NIGHTLY)
+                            }
                         }
-                    }
-                )
+                    )
+                    Text(
+                        stringResource(R.string.upd_channel_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                }
             }
 
-            // ── Source ──
-            UpdateSectionLabel(text = "Source")
-            UpdateListGroup {
-                UpdateListItem(
-                    icon = Icons.Filled.Security,
-                    primary = "Repository",
-                    secondary = "github.com/${HazelUpdater.REPO_NAME}",
-                    showDivider = false,
-                    onClick = { openInAppBrowser(context, HazelUpdater.GITHUB_REPO_URL) },
-                    trailing = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                            contentDescription = null,
-                            tint = UpdateTokens.OnSurfaceDim,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+            ComponentGroup(
+                R.string.upd_section_source,
+                listOf(
+                    ComponentLink(
+                        Icons.Filled.Security, stringResource(R.string.upd_repository),
+                        "github.com/${HazelUpdater.REPO_NAME}", fresh = false
+                    ) { openInAppBrowser(context, HazelUpdater.GITHUB_REPO_URL) }
                 )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
+            )
         }
     }
-
-
 }
 
+/** What the update is doing, on a shaped mark that turns into live wavy progress while it works. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun HazelStatusCard(
+internal fun HazelStatus(
     state: HazelUpdateViewModel.UiState,
     installedVersion: String,
     channel: HazelUpdater.Channel,
@@ -304,459 +305,160 @@ private fun HazelStatusCard(
     onCancel: () -> Unit,
     onInstall: () -> Unit,
     onOpenFdroid: () -> Unit,
-    onViewChangelog: (version: String, notes: String) -> Unit
+    onViewChangelog: (version: String) -> Unit
 ) {
-    val containerColor = when (state) {
-        is HazelUpdateViewModel.UiState.Available -> UpdateTokens.UpdateContainer
-        is HazelUpdateViewModel.UiState.Downloading -> UpdateTokens.RunContainer
-        is HazelUpdateViewModel.UiState.ReadyToInstall -> UpdateTokens.AccentContainer
-        is HazelUpdateViewModel.UiState.Idle -> UpdateTokens.AccentContainer
-        else -> UpdateTokens.Surface
+    val tone = when (state) {
+        is HazelUpdateViewModel.UiState.Available -> UpdateTokens.Update
+        is HazelUpdateViewModel.UiState.Downloading, is HazelUpdateViewModel.UiState.Checking -> UpdateTokens.RunStrong
+        is HazelUpdateViewModel.UiState.Error -> UpdateTokens.Danger
+        else -> UpdateTokens.Accent
+    }
+    val (title, line) = when (state) {
+        is HazelUpdateViewModel.UiState.Idle ->
+            "Version $installedVersion" to stringResource(R.string.upd_status_ok, channel.label)
+        is HazelUpdateViewModel.UiState.Available -> "Version ${state.info.version}" to "Update available · you have $installedVersion"
+        is HazelUpdateViewModel.UiState.Downloading -> "Version ${state.info.version}" to "Downloading update…"
+        is HazelUpdateViewModel.UiState.ReadyToInstall -> "Version ${state.info.version}" to "Downloaded and ready to install"
+        is HazelUpdateViewModel.UiState.Checking ->
+            "Checking for updates…" to if (HazelUpdater.isFdroid()) "Connecting to F-Droid…" else "Connecting to GitHub…"
+        is HazelUpdateViewModel.UiState.FdroidManaged -> "Version $installedVersion" to "Up to date · managed by F-Droid"
+        is HazelUpdateViewModel.UiState.Error -> "Check couldn't finish" to state.message
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(containerColor)
-            .padding(horizontal = 16.dp, vertical = 14.dp)
-    ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    when (state) {
-                        is HazelUpdateViewModel.UiState.Idle -> {
-                            Text(
-                                text = "Up to date",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.AccentStrong
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Version $installedVersion installed",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface,
-                                lineHeight = 26.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "No updates available on ${channel.label} channel",
-                                fontSize = 13.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                        is HazelUpdateViewModel.UiState.Available -> {
-                            Text(
-                                text = "Update available",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.UpdateStrong
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Version ${state.info.version} is ready",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface,
-                                lineHeight = 26.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "You have $installedVersion",
-                                fontSize = 13.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                        is HazelUpdateViewModel.UiState.Downloading -> {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                PulsingDot(color = UpdateTokens.RunStrong)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Downloading update…",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = UpdateTokens.RunStrong
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Version ${state.info.version}",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface,
-                                lineHeight = 26.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Downloading release package",
-                                fontSize = 13.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                        is HazelUpdateViewModel.UiState.ReadyToInstall -> {
-                            Text(
-                                text = "Download complete",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.AccentStrong
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Version ${state.info.version} is ready",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface,
-                                lineHeight = 26.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Package is verified and ready",
-                                fontSize = 13.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                        is HazelUpdateViewModel.UiState.Checking -> {
-                            Text(
-                                text = "Checking for updates…",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.RunStrong
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = if (HazelUpdater.isFdroid()) "Connecting to F-Droid…" else "Connecting to GitHub…",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface,
-                                lineHeight = 26.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = if (HazelUpdater.isFdroid()) "Querying F-Droid release feed" else "Querying repository releases",
-                                fontSize = 13.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                        is HazelUpdateViewModel.UiState.FdroidManaged -> {
-                            Text(
-                                text = "F-Droid Distribution",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.AccentStrong
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Up to date",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface,
-                                lineHeight = 26.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Version $installedVersion installed",
-                                fontSize = 13.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                        is HazelUpdateViewModel.UiState.Error -> {
-                            Text(
-                                text = "Notice",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.Danger
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Check couldn't finish",
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = state.message,
-                                fontSize = 14.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                    }
-                }
-
-                // ── Status Badge ──
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            when (state) {
-                                is HazelUpdateViewModel.UiState.Available -> Color(0xFFFFCB80).copy(alpha = if (UpdateTokens.isDark) 0.14f else 0.35f)
-                                is HazelUpdateViewModel.UiState.Downloading -> Color(0xFFA8CDFF).copy(alpha = if (UpdateTokens.isDark) 0.14f else 0.35f)
-                                else -> Color(0xFF8FD6B8).copy(alpha = if (UpdateTokens.isDark) 0.14f else 0.35f)
-                            }
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    when (state) {
-                        is HazelUpdateViewModel.UiState.Available -> {
-                            Icon(
-                                imageVector = Icons.Filled.Download,
-                                contentDescription = null,
-                                tint = UpdateTokens.Update,
-                                modifier = Modifier.size(26.dp)
-                            )
-                        }
-                        is HazelUpdateViewModel.UiState.Downloading -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(28.dp),
-                                color = UpdateTokens.RunStrong,
-                                strokeWidth = 2.5.dp
-                            )
-                        }
-                        else -> {
-                            Icon(
-                                imageVector = Icons.Filled.VerifiedUser,
-                                contentDescription = null,
-                                tint = UpdateTokens.Accent,
-                                modifier = Modifier.size(26.dp)
-                            )
-                        }
-                    }
-                }
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(modifier = Modifier.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            StatusMark(state, tone)
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = UpdateTokens.OnSurface)
+                Text(line, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = tone,
+                    maxLines = 3, overflow = TextOverflow.Ellipsis)
             }
+        }
 
-            // ── Download Progress Figures ──
-            if (state is HazelUpdateViewModel.UiState.Downloading) {
-                Spacer(modifier = Modifier.height(10.dp))
-                val pct = if (state.totalBytes > 0) {
-                    (state.progressBytes.toFloat() / state.totalBytes.toFloat()).coerceIn(0f, 1f)
-                } else 0f
-
+        if (state is HazelUpdateViewModel.UiState.Downloading) {
+            val pct = if (state.totalBytes > 0) (state.progressBytes.toFloat() / state.totalBytes).coerceIn(0f, 1f) else 0f
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 UpdateWavyProgress(progress = if (state.totalBytes > 0) pct else null)
-
-                Spacer(modifier = Modifier.height(6.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val downloadedMb = state.progressBytes / (1024f * 1024f)
-                    val totalMb = state.totalBytes / (1024f * 1024f)
-                    val speedMb = state.speedBps / (1024f * 1024f)
-                    val speedText = if (state.speedBps > 0) String.format(Locale.US, "%.1f MB/s", speedMb) else "Connecting…"
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = String.format(Locale.US, "%.1f / %.1f MB", downloadedMb, totalMb),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = UpdateTokens.OnSurface
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "·  $speedText",
-                            fontSize = 12.sp,
-                            color = UpdateTokens.OnSurfaceDim
-                        )
-                    }
-                    val pctText = "${(pct * 100).toInt()}%"
-                    val etaText = if (state.etaSeconds > 0) " (${state.etaSeconds}s)" else ""
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    val mb = 1024f * 1024f
+                    val speed = if (state.speedBps > 0) String.format(Locale.US, "%.1f MB/s", state.speedBps / mb) else "Connecting…"
                     Text(
-                        text = "$pctText$etaText",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = UpdateTokens.RunStrong
+                        String.format(Locale.US, "%.1f / %.1f MB · %s", state.progressBytes / mb, state.totalBytes / mb, speed),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = UpdateTokens.OnSurfaceVar,
+                        modifier = Modifier.weight(1f)
                     )
+                    val eta = if (state.etaSeconds > 0) " · ${state.etaSeconds}s" else ""
+                    Text("${(pct * 100).toInt()}%$eta", style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold, color = UpdateTokens.RunStrong)
                 }
             }
+        }
 
-            // ── Actions Row ──
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                when (state) {
-                    is HazelUpdateViewModel.UiState.Idle -> {
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(UpdateTokens.Accent)
-                                .clickable(onClick = onCheckNow)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Check now",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.AccentOn
-                            )
-                        }
-                        // What's new in the version running now.
-                        Box(
-                            modifier = Modifier
-                                .weight(1f, fill = false)
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .clickable { onViewChangelog(installedVersion, "") }
-                                .padding(horizontal = 14.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Changelog $installedVersion",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.AccentStrong,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                    is HazelUpdateViewModel.UiState.Available -> {
-                        val isFdroid = HazelUpdater.isFdroid()
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(UpdateTokens.Update)
-                                .clickable(onClick = if (isFdroid) onOpenFdroid else onDownload)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = if (isFdroid) "Open in F-Droid" else "Download update",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.UpdateOn
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .clickable { onViewChangelog(state.info.version, state.info.changelog) }
-                                .padding(horizontal = 14.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "What's new",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.UpdateStrong
-                            )
+        val buttons: List<Triple<String, Boolean, () -> Unit>> = when (state) {
+            is HazelUpdateViewModel.UiState.Idle -> listOf(
+                Triple(stringResource(R.string.upd_action_changelog), false) { onViewChangelog(installedVersion) },
+                Triple("Check now", true, onCheckNow)
+            )
+            is HazelUpdateViewModel.UiState.Available -> listOf(
+                Triple("What's new", false) { onViewChangelog(state.info.version) },
+                if (HazelUpdater.isFdroid()) Triple("Open in F-Droid", true, onOpenFdroid) else Triple("Download update", true, onDownload)
+            )
+            is HazelUpdateViewModel.UiState.Downloading -> listOf(Triple("Cancel", false, onCancel))
+            is HazelUpdateViewModel.UiState.ReadyToInstall -> listOf(
+                Triple("What's new", false) { onViewChangelog(state.info.version) },
+                Triple("Install update", true, onInstall)
+            )
+            is HazelUpdateViewModel.UiState.FdroidManaged -> listOf(Triple("Open F-Droid", true, onOpenFdroid))
+            is HazelUpdateViewModel.UiState.Error -> listOf(Triple("Retry", true, onCheckNow))
+            is HazelUpdateViewModel.UiState.Checking -> emptyList()
+        }
+        if (buttons.isNotEmpty()) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                buttons.forEachIndexed { index, (text, filled, onClick) ->
+                    val first = index == 0
+                    val last = index == buttons.lastIndex
+                    Surface(
+                        onClick = onClick,
+                        shape = RoundedCornerShape(
+                            topStart = if (first) 26.dp else 8.dp, bottomStart = if (first) 26.dp else 8.dp,
+                            topEnd = if (last) 26.dp else 8.dp, bottomEnd = if (last) 26.dp else 8.dp
+                        ),
+                        color = if (filled) tone else MaterialTheme.colorScheme.surfaceContainerHighest,
+                        contentColor = if (filled) onTone(state) else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 52.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp, vertical = 14.dp)) {
+                            Text(text, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold,
+                                maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
-                    is HazelUpdateViewModel.UiState.Downloading -> {
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(UpdateTokens.Surface2)
-                                .clickable(onClick = onCancel)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Cancel",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.OnSurface
-                            )
-                        }
-                    }
-                    is HazelUpdateViewModel.UiState.ReadyToInstall -> {
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(UpdateTokens.Accent)
-                                .clickable(onClick = onInstall)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Install update",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.AccentOn
-                            )
-                        }
-                    }
-                    is HazelUpdateViewModel.UiState.FdroidManaged -> {
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(UpdateTokens.Accent)
-                                .clickable(onClick = onOpenFdroid)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Open F-Droid",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.AccentOn
-                            )
-                        }
-                    }
-                    is HazelUpdateViewModel.UiState.Error -> {
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(UpdateTokens.Surface2)
-                                .clickable(onClick = onCheckNow)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Retry",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.OnSurface
-                            )
-                        }
-                    }
-                    else -> {}
                 }
             }
+        }
 
-            // Download size info when available
-            if (state is HazelUpdateViewModel.UiState.Available && state.info.binarySize > 0) {
-                Spacer(modifier = Modifier.height(14.dp))
-                val mb = state.info.binarySize / (1024f * 1024f)
-                Text(
-                    text = String.format(Locale.US, "%.1f MB Download size", mb),
-                    fontSize = 12.5.sp,
-                    color = UpdateTokens.OnSurfaceDim
-                )
-            }
+        if (state is HazelUpdateViewModel.UiState.Available && state.info.binarySize > 0) {
+            Text(
+                String.format(Locale.US, "%.1f MB download", state.info.binarySize / (1024f * 1024f)),
+                style = MaterialTheme.typography.bodySmall,
+                color = UpdateTokens.OnSurfaceDim,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
         }
     }
 }
 
 @Composable
-private fun PulsingDot(color: Color) {
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 0.35f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 650, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulseAlpha"
-    )
+private fun onTone(state: HazelUpdateViewModel.UiState): Color = when (state) {
+    is HazelUpdateViewModel.UiState.Available -> UpdateTokens.UpdateOn
+    is HazelUpdateViewModel.UiState.Error -> MaterialTheme.colorScheme.onError
+    else -> UpdateTokens.AccentOn
+}
+
+/**
+ * A soft nine-sided cookie in the state's colour. While checking or downloading it holds
+ * the same wavy progress as the bar under it, live, or turning when the size is unknown.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun StatusMark(state: HazelUpdateViewModel.UiState, tone: Color) {
+    val working = state is HazelUpdateViewModel.UiState.Downloading || state is HazelUpdateViewModel.UiState.Checking
     Box(
         modifier = Modifier
-            .size(6.dp)
-            .clip(CircleShape)
-            .background(color.copy(alpha = alpha))
-    )
+            .size(64.dp)
+            .clip(MaterialShapes.Cookie9Sided.toShape())
+            .background(if (working) tone.copy(alpha = 0.18f) else tone),
+        contentAlignment = Alignment.Center
+    ) {
+        when {
+            state is HazelUpdateViewModel.UiState.Downloading && state.totalBytes > 0 -> {
+                val shown by animateFloatAsState(
+                    (state.progressBytes.toFloat() / state.totalBytes).coerceIn(0f, 1f),
+                    tween(600), label = "markProgress"
+                )
+                CircularWavyProgressIndicator(
+                    progress = { shown },
+                    modifier = Modifier.size(44.dp),
+                    color = tone,
+                    trackColor = tone.copy(alpha = 0.2f)
+                )
+                Icon(Icons.Filled.Download, null, tint = tone, modifier = Modifier.size(18.dp))
+            }
+            working -> CircularWavyProgressIndicator(modifier = Modifier.size(44.dp), color = tone, trackColor = tone.copy(alpha = 0.2f))
+            else -> Icon(
+                when (state) {
+                    is HazelUpdateViewModel.UiState.Available -> Icons.Filled.Download
+                    is HazelUpdateViewModel.UiState.ReadyToInstall -> Icons.Filled.InstallMobile
+                    is HazelUpdateViewModel.UiState.Error -> Icons.Filled.ErrorOutline
+                    else -> Icons.Filled.VerifiedUser
+                },
+                null,
+                tint = onTone(state),
+                modifier = Modifier.size(28.dp)
+            )
+        }
+    }
 }
