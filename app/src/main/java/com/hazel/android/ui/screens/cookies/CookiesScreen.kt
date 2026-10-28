@@ -103,6 +103,8 @@ import com.hazel.android.ui.screens.more.ConfirmSettingDialog
 import com.hazel.android.ui.screens.more.SettingsSection
 import com.hazel.android.ui.screens.more.SwitchSettingRow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 
 /**
  * Manages the cookie sets yt-dlp uses to reach content that needs a signed-in session.
@@ -145,10 +147,12 @@ fun CookiesScreen(onBack: () -> Unit) {
             importing = true
             scope.launch {
                 try {
-                    val fileName = queryFileName(context, uri) ?: "cookies.txt"
-                    val text = context.contentResolver.openInputStream(uri)?.use { stream ->
-                        stream.bufferedReader(Charsets.UTF_8).readText()
-                    }.orEmpty()
+                    val (fileName, text) = withContext(Dispatchers.IO) {
+                        (queryFileName(context, uri) ?: "cookies.txt") to
+                            context.contentResolver.openInputStream(uri)?.use { stream ->
+                                stream.bufferedReader(Charsets.UTF_8).readText()
+                            }.orEmpty()
+                    }
                     val imported = text.isNotBlank() &&
                         CookieRepository.importText(context, text, fileName)
                     toast(
