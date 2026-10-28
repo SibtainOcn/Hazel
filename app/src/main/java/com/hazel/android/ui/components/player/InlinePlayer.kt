@@ -1,14 +1,14 @@
 package com.hazel.android.ui.components.player
 
-import android.content.res.Configuration
-import android.view.OrientationEventListener
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.ActivityInfo
+import androidx.compose.runtime.SideEffect
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.HighQuality
 import com.hazel.android.ui.components.DropdownMenu
@@ -75,7 +75,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -156,10 +155,10 @@ fun InlinePlayer(
 /**
  * The same player over the whole screen, with the system bars hidden.
  *
- * The app itself never turns. A wide picture on an upright screen is drawn turned a
- * quarter, following which way the phone is tilted, so it fills the screen held sideways
- * whatever the rotation lock says. Turning the app instead restarted it and stopped
- * playback. A tall picture, or a screen already sideways, is drawn as it is.
+ * The screen turns with the picture: landscape for a wide one, either side, whatever the
+ * rotation lock says, and portrait for a tall one. So the status bar, menus and dialogs
+ * turn with it. The activities handle the turn themselves, so playback carries on, and the
+ * orientation in force before is put back on exit. A size not yet known counts as wide.
  */
 @Composable
 fun FullscreenPlayer(
@@ -168,25 +167,16 @@ fun FullscreenPlayer(
     onExit: () -> Unit,
     onDownload: (() -> Unit)? = null
 ) {
-    val context = LocalContext.current
-    val wide = remember { controller.aspectRatio == 0f || controller.aspectRatio >= 1f }
-    val upright = LocalConfiguration.current.orientation != Configuration.ORIENTATION_LANDSCAPE
-    val turn = wide && upright
-
-    // Which way to turn: towards whichever side the phone is tipped to. Read from the
-    // sensor directly, so it works with the rotation lock on.
-    var degrees by remember { mutableFloatStateOf(90f) }
-    DisposableEffect(turn) {
-        val listener = object : OrientationEventListener(context) {
-            override fun onOrientationChanged(orientation: Int) {
-                when (orientation) {
-                    in 60..120 -> degrees = -90f
-                    in 240..300 -> degrees = 90f
-                }
-            }
-        }
-        if (turn && listener.canDetectOrientation()) listener.enable()
-        onDispose { listener.disable() }
+    val activity = LocalContext.current.findActivity()
+    val ratio = controller.aspectRatio
+    val tall = ratio > 0f && ratio < 1f
+    val before = remember(activity) { activity?.requestedOrientation }
+    DisposableEffect(activity) {
+        onDispose { if (activity != null && before != null) activity.requestedOrientation = before }
+    }
+    SideEffect {
+        val wanted = if (tall) ActivityInfo.SCREEN_ORIENTATION_PORTRAIT else ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        if (activity != null && activity.requestedOrientation != wanted) activity.requestedOrientation = wanted
     }
 
     Dialog(
@@ -201,21 +191,12 @@ fun FullscreenPlayer(
                 hide(WindowInsetsCompat.Type.systemBars())
             }
         }
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black),
             contentAlignment = Alignment.Center
         ) {
-            val area = if (turn) {
-                Modifier
-                    .requiredSize(width = maxHeight, height = maxWidth)
-                    .graphicsLayer { rotationZ = degrees }
-            } else {
-                Modifier
-                    .fillMaxSize()
-                    .systemBarsPadding()
-            }
             PlayerArea(
                 controller = controller,
                 thumbnail = thumbnail,
@@ -224,7 +205,9 @@ fun FullscreenPlayer(
                 onToggleFullscreen = onExit,
                 onClose = null,
                 onDownload = onDownload,
-                modifier = area
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding()
             )
         }
     }
@@ -728,3 +711,9 @@ private const val MAX_PLAY_HEIGHT = 1080
 private const val SKIP_SECONDS = 5
 private const val SKIP_MS = SKIP_SECONDS * 1000L
 private const val SKIP_FLASH_MS = 700L
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
