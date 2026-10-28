@@ -201,14 +201,15 @@ fun SplashScreen(
 internal object SplashTimeline {
     const val TOTAL_MS = 1800f
     const val MAX_STEP_MS = 24f
-    const val HOME_AT_MS = 950f
+    /** After the bolt, spark and wordmark have all landed, so home's first layout stalls nothing moving. */
+    const val HOME_AT_MS = 1080f
     const val REVEAL_AT_MS = 1300f
     const val SPARK_SPAN = 0.16f
-    private const val TRACE_MS = 1000f
-    private const val SPARK_FADE_MS = 240f
-    private const val LETTER_AT_MS = 560f
-    private const val LETTER_STAGGER_MS = 50f
-    private const val LETTER_MS = 520f
+    private const val TRACE_MS = 820f
+    private const val SPARK_FADE_MS = 200f
+    private const val LETTER_AT_MS = 460f
+    private const val LETTER_STAGGER_MS = 40f
+    private const val LETTER_MS = 460f
     private const val REVEAL_MS = TOTAL_MS - REVEAL_AT_MS
 
     private val Draw = CubicBezierEasing(0.45f, 0f, 0.2f, 1f)
