@@ -67,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - yt-dlp release notes no longer open a missing page when the installed version is unknown.
+- Splash: the logo finishes drawing before home loads, so it no longer freezes mid-trace.
 - Search options: the sheet opens at half height instead of full screen.
 - Filename template: a slash, a stray %, a leading dot or a missing extension no longer loses or breaks the saved file.
 - Filename template: long artist, track or playlist names no longer fail with "File name too long", and extra arguments can no longer override the name.
