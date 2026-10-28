@@ -32,6 +32,7 @@ class FormatPickHarnessTest {
             val plain = assertNotNull(GenericFormats.applyTo(info, choice, null))
             out.append("${height.takeIf { it > 0 } ?: "best"}|none|${plain.formatId}|${plain.vcodec}|${plain.height}\n")
             if (height > 0) assertTrue(plain.height <= height, "no preference went over $height: ${plain.formatId}")
+            assertDirect(concrete, plain)
 
             for (codec in VideoCodec.entries) {
                 val picked = assertNotNull(GenericFormats.applyTo(info, choice, null, codec))
@@ -40,6 +41,7 @@ class FormatPickHarnessTest {
                 assertEquals(plain.height, picked.height, "$codec changed the height")
                 if (concrete.any { it.height == plain.height && codec.matches(it) }) {
                     assertTrue(codec.matches(picked), "$codec offered at ${plain.height}p but ${picked.formatId} picked")
+                    assertDirect(concrete.filter { codec.matches(it) }, picked)
                 }
             }
         }
@@ -53,5 +55,12 @@ class FormatPickHarnessTest {
             }
         }
         File("$path.picks").writeText(out.toString())
+    }
+
+    /** An HLS pick only where no direct stream of that height exists. */
+    private fun assertDirect(pool: List<MediaFormat>, picked: MediaFormat) {
+        if (picked.hls) {
+            assertTrue(pool.none { !it.hls && it.height == picked.height }, "HLS ${picked.formatId} picked over a direct stream")
+        }
     }
 }
