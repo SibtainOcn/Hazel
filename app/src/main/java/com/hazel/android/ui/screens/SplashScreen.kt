@@ -199,10 +199,10 @@ fun SplashScreen(
 
 /** Every pose of the splash as a function of its clock in milliseconds. */
 internal object SplashTimeline {
-    const val TOTAL_MS = 2150f
+    const val TOTAL_MS = 1800f
     const val MAX_STEP_MS = 24f
-    const val HOME_AT_MS = 1300f
-    const val REVEAL_AT_MS = 1650f
+    const val HOME_AT_MS = 950f
+    const val REVEAL_AT_MS = 1300f
     const val SPARK_SPAN = 0.16f
     private const val TRACE_MS = 1000f
     private const val SPARK_FADE_MS = 240f

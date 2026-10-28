@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Search options: the sheet opens at half height instead of full screen.
+- Splash: opens onto home as soon as the logo finishes, without the extra pause.
 - Player: the seek bar wave and play button no longer animate while paused.
 - Playlist sheet: Download takes only the ticked links (#126).
 - Instant: a YouTube video shared from a playlist or Mix downloads that video alone (#126).
