@@ -913,7 +913,7 @@ private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(28.dp)
-                        .clip(MaterialShapes.Cookie7Sided.toShape())
+                        .clip(MaterialShapes.Pentagon.toShape())
                         .background(MaterialTheme.colorScheme.onPrimary),
                     contentAlignment = Alignment.Center
                 ) {
