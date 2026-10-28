@@ -38,6 +38,7 @@
 
     <!-- SearchScreen -->
     <string name="search_hint">Rechercher ou coller une URL</string>
+    <string name="search_recent">Récents</string>
     <string name="search_back">Retour</string>
     <string name="search_more">Plus</string>
     <string name="search_add_link">Ajouter un autre lien</string>

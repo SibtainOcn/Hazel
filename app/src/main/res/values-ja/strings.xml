@@ -38,6 +38,7 @@
 
     <!-- SearchScreen -->
     <string name="search_hint">検索または URL を入力</string>
+    <string name="search_recent">最近</string>
     <string name="search_back">戻る</string>
     <string name="search_more">その他</string>
     <string name="search_add_link">リンクを追加</string>

@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Home: Download all is a slimmer accent pill led by a seven-sided cookie; each result plays from a flat accent six-sided cookie.
 - Home and Search: the paste button is larger and folds down onto an M3 rounded square.
 - Home: the search bar's icon sits on a solid accent seven-sided cookie.
+- Home header: the logo and name share one tonal pill.
+- Paste button: a dark tile with the icon on an accent seven-sided cookie.
+- Search: back and menu sit on soft tiles, the field leads with an accent cookie, the chosen source is an accent tab, and recent searches form one rounded group.
+- Home: the search bar's menu sits on the same soft tile as Search's.
+- Missing or loading thumbnails show the Hazel bolt on a soft accent cookie instead of a blank area.
+- Open folder lists every installed file manager, not only the built-in Files app.
 - All Downloads: Properties opens at half height with the title first, quick figures, and Play, Open with, Show file and Share on cookies.
 - All Downloads: Properties can copy the file name or link, open the link in a browser, download again or fetch the link again.
 - More: the title and search stay pinned while the settings scroll.

@@ -1095,13 +1095,12 @@ internal fun UrlSearchBar(
             )
 
             // Opens the same search options sheet the search screen's own 3-dot does.
-            IconButton(onClick = onMenuOpen, modifier = Modifier.size(40.dp)) {
+            com.hazel.android.ui.components.SoftIconButton(onClick = onMenuOpen, size = 40.dp, shape = RoundedCornerShape(13.dp)) {
                 Icon(
                     painterResource(R.drawable.ic_more_vert),
                     contentDescription = stringResource(R.string.search_more),
-                    // The same size and tone as the search screen's, so the two read as one.
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurface
+                    // The same tile as the search screen's, so the two read as one.
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
@@ -1208,22 +1207,14 @@ private fun MediaCard(
                     onClick = if (inHand) onOpenQueue else onOpenSheet
                 )
         ) {
-            // Sources without artwork simply show the placeholder glyph.
+            // Under the picture, so it shows while it loads, when it fails and when there is none.
+            com.hazel.android.ui.components.ArtworkPlaceholder(Modifier.matchParentSize())
             if (info.thumbnail != null) {
                 AsyncImage(
                     model = info.thumbnail,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Icon(
-                    Icons.Filled.MusicNote,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Alignment.Center),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
                 )
             }
 

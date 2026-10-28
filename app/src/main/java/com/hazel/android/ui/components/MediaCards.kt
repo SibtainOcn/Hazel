@@ -155,22 +155,14 @@ fun MediaCard(
                     }
                 )
         ) {
-            // Sources without artwork simply show the placeholder glyph.
+            // Under the picture, so it shows while it loads, when it fails and when there is none.
+            ArtworkPlaceholder(Modifier.matchParentSize())
             if (info.thumbnail != null) {
                 AsyncImage(
                     model = info.thumbnail,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Icon(
-                    Icons.Filled.MusicNote,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Alignment.Center),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
                 )
             }
 

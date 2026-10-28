@@ -38,6 +38,7 @@
 
     <!-- SearchScreen -->
     <string name="search_hint">खोजें या URL डालें</string>
+    <string name="search_recent">हाल के</string>
     <string name="search_back">वापस</string>
     <string name="search_more">और</string>
     <string name="search_add_link">एक और लिंक जोड़ें</string>

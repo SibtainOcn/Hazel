@@ -49,6 +49,7 @@
 
     <!-- SearchScreen -->
     <string name="search_hint">Search or insert URL</string>
+    <string name="search_recent">Recent</string>
     <string name="search_back">Back</string>
     <string name="search_more">More</string>
     <string name="search_add_link">Add another link</string>

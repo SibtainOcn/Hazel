@@ -184,6 +184,7 @@ private fun Header(entry: HistoryEntry, present: Boolean, facts: MediaFacts) {
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh),
                 contentAlignment = Alignment.Center
             ) {
+                com.hazel.android.ui.components.ArtworkPlaceholder()
                 if (entry.thumbnail != null) {
                     AsyncImage(
                         model = entry.thumbnail,
@@ -192,13 +193,6 @@ private fun Header(entry: HistoryEntry, present: Boolean, facts: MediaFacts) {
                         alpha = if (present) 1f else 0.55f,
                         colorFilter = if (present) null else GreyFilter,
                         modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Icon(
-                        if (entry.isVideo) Icons.Filled.PlayArrow else Icons.Filled.MusicNote,
-                        contentDescription = null,
-                        modifier = Modifier.size(26.dp),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
                     )
                 }
                 val length = formatDuration(entry.durationSeconds.takeIf { it > 0 } ?: facts.durationSeconds)

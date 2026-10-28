@@ -38,6 +38,7 @@
 
     <!-- SearchScreen -->
     <string name="search_hint">搜索或输入网址</string>
+    <string name="search_recent">最近</string>
     <string name="search_back">返回</string>
     <string name="search_more">更多</string>
     <string name="search_add_link">再添加一个链接</string>

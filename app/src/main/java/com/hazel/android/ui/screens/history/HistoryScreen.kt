@@ -1144,6 +1144,7 @@ private fun SelectMark(chosen: Boolean, modifier: Modifier = Modifier, onImage: 
 
 @Composable
 private fun Artwork(entry: HistoryEntry, present: Boolean, modifier: Modifier) {
+    com.hazel.android.ui.components.ArtworkPlaceholder(modifier)
     if (entry.thumbnail != null) {
         AsyncImage(
             model = entry.thumbnail,

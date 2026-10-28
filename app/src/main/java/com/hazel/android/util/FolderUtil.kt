@@ -28,20 +28,13 @@ object FolderUtil {
         if (!folder.exists()) folder.mkdirs()
 
         val documentUri = documentUriFor(folder)
-
-        // Most stock file managers open a documents URI directly, on every version from
-        // Android 7 onwards.
-        if (documentUri != null &&
-            startView(context, documentUri, "vnd.android.document/directory")
-        ) return
-
-        // Some builders' own managers answer to this and nothing else.
         val providerUri = runCatching {
             FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", folder)
         }.getOrNull()
-        if (providerUri != null &&
-            startView(context, providerUri, "resource/folder", grantRead = true)
-        ) return
+
+        // Every file manager on the device, offered together, rather than whichever one
+        // answers the first way of asking.
+        if (chooseManager(context, documentUri, providerUri)) return
 
         // The system's own picker, opened at this folder. Nothing is being picked: it is
         // the one file browser guaranteed to be present, and this is how it is asked to
@@ -96,7 +89,7 @@ object FolderUtil {
             MediaStoreHelper.folderDocument(treeUri)
         }.getOrDefault(treeUri)
 
-        if (startView(context, documentUri, "vnd.android.document/directory")) return
+        if (chooseManager(context, documentUri, null)) return
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val opened = runCatching {
@@ -113,18 +106,44 @@ object FolderUtil {
         Toast.makeText(context, MediaStoreHelper.describeTree(treeUri), Toast.LENGTH_LONG).show()
     }
 
-    private fun startView(
-        context: Context,
-        uri: Uri,
-        mimeType: String,
-        grantRead: Boolean = false
-    ): Boolean = runCatching {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(uri, mimeType)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            if (grantRead) addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    /** The folder types file managers register for, most specific first. */
+    private val FOLDER_TYPES = listOf("vnd.android.document/directory", "resource/folder", "inode/directory")
+
+    /**
+     * Gathers every app that opens a folder in any of the ways managers ask for, one entry per
+     * app, and lets the user pick. A single app opens directly. False when nothing answered.
+     */
+    private fun chooseManager(context: Context, documentUri: Uri?, providerUri: Uri?): Boolean = runCatching {
+        val asks = buildList {
+            documentUri?.let { uri -> FOLDER_TYPES.forEach { add(viewIntent(uri, it, grantRead = false)) } }
+            providerUri?.let { uri -> FOLDER_TYPES.drop(1).forEach { add(viewIntent(uri, it, grantRead = true)) } }
         }
-        context.startActivity(intent)
-        true
+        val pm = context.packageManager
+        val seen = HashSet<String>()
+        val targets = asks.flatMap { ask ->
+            @Suppress("DEPRECATION")
+            pm.queryIntentActivities(ask, 0).mapNotNull { info ->
+                val activity = info.activityInfo ?: return@mapNotNull null
+                if (!activity.exported || !seen.add(activity.packageName)) return@mapNotNull null
+                Intent(ask).setClassName(activity.packageName, activity.name)
+            }
+        }
+        when (targets.size) {
+            0 -> false
+            1 -> { context.startActivity(targets[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); true }
+            else -> {
+                val chooser = Intent.createChooser(targets[0], context.getString(com.hazel.android.R.string.media_open_chooser))
+                    .putExtra(Intent.EXTRA_INITIAL_INTENTS, targets.drop(1).toTypedArray())
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(chooser)
+                true
+            }
+        }
     }.getOrDefault(false)
+
+    private fun viewIntent(uri: Uri, type: String, grantRead: Boolean) = Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, type)
+        if (grantRead) addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
 }

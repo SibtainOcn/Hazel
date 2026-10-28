@@ -52,7 +52,6 @@ import com.hazel.android.R
 import com.hazel.android.download.BatchState
 import com.hazel.android.data.DownloadQueueRepository
 import com.hazel.android.ui.screens.queue.QueueScreen
-import com.hazel.android.ui.components.CookieBadge
 import com.hazel.android.ui.components.HazelBottomBar
 import com.hazel.android.ui.components.BottomBarItem
 import com.hazel.android.update.HazelUpdater
@@ -182,16 +181,21 @@ fun AppNavigation(
             if (currentRoute == Screen.Download.route) {
                 TopAppBar(
                     title = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            CookieBadge(size = 32.dp) {
-                                Icon(
-                                    painter = painterResource(R.drawable.update),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
-                                    tint = MaterialTheme.colorScheme.onBackground
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
+                        // One tonal pill holding the bolt and the name.
+                        Row(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
+                                .padding(start = 12.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.update),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = stringResource(R.string.app_name),
                                 style = MaterialTheme.typography.titleLarge,
