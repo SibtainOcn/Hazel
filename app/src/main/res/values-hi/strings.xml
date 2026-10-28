@@ -240,6 +240,8 @@
     <string name="sponsor_issues_subtitle">जो साइट काम करना बंद कर दे, उसका सुधार कोई और नहीं लिख सकता।</string>
     <string name="sponsor_source_title">कोड पढ़ें</string>
     <string name="sponsor_source_subtitle">इसकी हर पंक्ति सार्वजनिक है, और पुल रिक्वेस्ट का स्वागत है।</string>
+    <string name="sponsor_section_developer">डेवलपर</string>
+    <string name="sponsor_developer_subtitle">मेरी GitHub प्रोफ़ाइल और अन्य प्रोजेक्ट।</string>
 
 
     <!-- DownloadOptionDialogs -->

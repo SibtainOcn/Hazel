@@ -244,6 +244,8 @@
     <string name="sponsor_issues_subtitle">Um site que parou de funcionar é uma correção que mais ninguém consegue escrever.</string>
     <string name="sponsor_source_title">Leia o código</string>
     <string name="sponsor_source_subtitle">Cada linha dele é pública, e pull requests são bem-vindas.</string>
+    <string name="sponsor_section_developer">Desenvolvedor</string>
+    <string name="sponsor_developer_subtitle">Meu perfil do GitHub e outros projetos.</string>
 
 
     <!-- DownloadOptionDialogs -->

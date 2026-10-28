@@ -236,6 +236,8 @@
     <string name="sponsor_issues_subtitle">機能しなくなったサイトの報告は、問題解決のための貴重な情報です。</string>
     <string name="sponsor_source_title">ソースコードを見る</string>
     <string name="sponsor_source_subtitle">すべてのコードが公開されており、プルリクエストを歓迎しています。</string>
+    <string name="sponsor_section_developer">開発者</string>
+    <string name="sponsor_developer_subtitle">GitHubのプロフィールとほかのプロジェクト。</string>
 
 
     <!-- DownloadOptionDialogs -->

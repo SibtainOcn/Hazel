@@ -236,6 +236,8 @@
     <string name="sponsor_issues_subtitle">一个用不了的站点，别人写不出这个修复。</string>
     <string name="sponsor_source_title">阅读源代码</string>
     <string name="sponsor_source_subtitle">每一行都是公开的，也欢迎提交 pull request。</string>
+    <string name="sponsor_section_developer">开发者</string>
+    <string name="sponsor_developer_subtitle">我的 GitHub 主页和其他项目。</string>
 
 
     <!-- DownloadOptionDialogs -->

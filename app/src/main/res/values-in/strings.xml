@@ -236,6 +236,8 @@
     <string name="sponsor_issues_subtitle">Situs yang berhenti berfungsi adalah masalah yang perlu Anda laporkan agar bisa diperbaiki.</string>
     <string name="sponsor_source_title">Lihat kode sumber</string>
     <string name="sponsor_source_subtitle">Setiap baris kode bersifat terbuka, dan kontribusi sangat disambut.</string>
+    <string name="sponsor_section_developer">Pengembang</string>
+    <string name="sponsor_developer_subtitle">Profil GitHub saya dan proyek lainnya.</string>
 
 
     <!-- DownloadOptionDialogs -->

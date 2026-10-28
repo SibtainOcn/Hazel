@@ -244,6 +244,8 @@
     <string name="sponsor_issues_subtitle">Un sitio que dejó de funcionar es un arreglo que nadie más puede escribir.</string>
     <string name="sponsor_source_title">Lee el código</string>
     <string name="sponsor_source_subtitle">Cada línea es pública, y las pull requests son bienvenidas.</string>
+    <string name="sponsor_section_developer">Desarrollador</string>
+    <string name="sponsor_developer_subtitle">Mi perfil de GitHub y otros proyectos.</string>
 
 
     <!-- DownloadOptionDialogs -->

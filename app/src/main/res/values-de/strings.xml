@@ -240,6 +240,8 @@
     <string name="sponsor_issues_subtitle">Eine Seite, die nicht mehr funktioniert, ist ein Fix, den sonst niemand schreiben kann.</string>
     <string name="sponsor_source_title">Lies den Quellcode</string>
     <string name="sponsor_source_subtitle">Jede Zeile davon ist öffentlich, und Pull Requests sind willkommen.</string>
+    <string name="sponsor_section_developer">Entwickler</string>
+    <string name="sponsor_developer_subtitle">Mein GitHub-Profil und weitere Projekte.</string>
 
 
     <!-- DownloadOptionDialogs -->
