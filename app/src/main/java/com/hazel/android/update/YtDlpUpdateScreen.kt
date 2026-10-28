@@ -110,7 +110,7 @@ fun YtDlpUpdateScreen(
                 onViewChangelog = { ver, repo ->
                     val cleanRepo = repo.ifBlank { channel.repo }
                     val cleanVer = ver.trim()
-                    val url = if (cleanVer.isNotBlank()) {
+                    val url = if (cleanVer.firstOrNull()?.isDigit() == true) {
                         "https://github.com/$cleanRepo/releases/tag/$cleanVer"
                     } else {
                         channel.releasesUrl

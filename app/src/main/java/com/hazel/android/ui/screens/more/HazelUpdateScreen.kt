@@ -225,7 +225,15 @@ fun HazelUpdateScreen(
                         openInAppBrowser(context, HazelUpdater.FDROID_PACKAGE_URL)
                     }
                 },
-                onViewChangelog = onOpenWhatsNew
+                onViewChangelog = onOpenWhatsNew,
+                // The site page always shows the latest stable release; other channels keep their tagged notes.
+                onReleaseNotes = { version ->
+                    if (channel == HazelUpdater.Channel.STABLE || HazelUpdater.isFdroid()) {
+                        openInAppBrowser(context, DebugInfo.WHATS_NEW_URL)
+                    } else {
+                        onOpenWhatsNew(version)
+                    }
+                }
             )
 
             val isFdroid = HazelUpdater.isFdroid()
@@ -305,7 +313,8 @@ internal fun HazelStatus(
     onCancel: () -> Unit,
     onInstall: () -> Unit,
     onOpenFdroid: () -> Unit,
-    onViewChangelog: (version: String) -> Unit
+    onViewChangelog: (version: String) -> Unit,
+    onReleaseNotes: (version: String) -> Unit = onViewChangelog
 ) {
     val tone = when (state) {
         is HazelUpdateViewModel.UiState.Available -> UpdateTokens.Update
@@ -368,12 +377,12 @@ internal fun HazelStatus(
                 Triple("Check now", true, onCheckNow)
             )
             is HazelUpdateViewModel.UiState.Available -> listOf(
-                Triple("What's new", false) { onViewChangelog(state.info.version) },
+                Triple("What's new", false) { onReleaseNotes(state.info.version) },
                 if (HazelUpdater.isFdroid()) Triple("Open in F-Droid", true, onOpenFdroid) else Triple("Download update", true, onDownload)
             )
             is HazelUpdateViewModel.UiState.Downloading -> listOf(Triple("Cancel", false, onCancel))
             is HazelUpdateViewModel.UiState.ReadyToInstall -> listOf(
-                Triple("What's new", false) { onViewChangelog(state.info.version) },
+                Triple("What's new", false) { onReleaseNotes(state.info.version) },
                 Triple("Install update", true, onInstall)
             )
             is HazelUpdateViewModel.UiState.FdroidManaged -> listOf(Triple("Open F-Droid", true, onOpenFdroid))
