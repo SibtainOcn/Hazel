@@ -264,6 +264,7 @@
     <string name="options_subtitles_save">Сохранить субтитры</string>
     <string name="options_subtitles_save_auto">Сохранять автосубтитры</string>
     <string name="options_subtitles_languages_label">Языки субтитров</string>
+    <string name="options_subtitles_auto_caption">%1$s (авто)</string>
     <string name="options_subtitles_dismiss">Закрыть</string>
     <string name="options_subtitles_languages_title">Языки субтитров</string>
     <string name="options_subtitles_languages_hint">Выбор языков yt-dlp, напр. en,.*-orig. all — все языки.</string>

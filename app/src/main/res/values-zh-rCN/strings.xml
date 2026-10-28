@@ -252,6 +252,7 @@
     <string name="options_subtitles_save">保存字幕</string>
     <string name="options_subtitles_save_auto">保存自动生成的字幕</string>
     <string name="options_subtitles_languages_label">字幕语言</string>
+    <string name="options_subtitles_auto_caption">%1$s (自动)</string>
     <string name="options_subtitles_dismiss">知道了</string>
     <string name="options_subtitles_languages_title">字幕语言</string>
     <string name="options_subtitles_languages_hint">yt-dlp 语言选择器，例如 en,.*-orig。输入 all 选择全部语言。</string>

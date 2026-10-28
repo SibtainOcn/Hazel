@@ -268,6 +268,7 @@
     <string name="options_subtitles_save">Save subtitles</string>
     <string name="options_subtitles_save_auto">Save automatic subtitles</string>
     <string name="options_subtitles_languages_label">Subtitle languages</string>
+    <string name="options_subtitles_auto_caption">%1$s (auto)</string>
     <string name="options_subtitles_dismiss">Dismiss</string>
     <string name="options_subtitles_languages_title">Subtitle languages</string>
     <string name="options_subtitles_languages_hint">A yt-dlp language selector, e.g. en,.*-orig. Use all for every language.</string>

@@ -260,6 +260,7 @@
     <string name="options_subtitles_save">Salvar as legendas</string>
     <string name="options_subtitles_save_auto">Salvar as legendas automáticas</string>
     <string name="options_subtitles_languages_label">Idiomas das legendas</string>
+    <string name="options_subtitles_auto_caption">%1$s (automáticas)</string>
     <string name="options_subtitles_dismiss">Dispensar</string>
     <string name="options_subtitles_languages_title">Idiomas das legendas</string>
     <string name="options_subtitles_languages_hint">Um seletor de idioma do yt-dlp, ex. en,.*-orig. Use all para todos os idiomas.</string>

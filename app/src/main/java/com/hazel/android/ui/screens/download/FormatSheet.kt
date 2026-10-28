@@ -833,7 +833,9 @@ fun FormatSheet(
         SheetDialog.SUBTITLES -> SubtitlesDialog(
             options = options,
             onChange = onOptionsChange,
-            onDismiss = { openDialog = SheetDialog.NONE }
+            onDismiss = { openDialog = SheetDialog.NONE },
+            available = info.subtitles,
+            availableAuto = info.autoCaptions
         )
 
         SheetDialog.FILENAME -> FilenameTemplateSheet(
