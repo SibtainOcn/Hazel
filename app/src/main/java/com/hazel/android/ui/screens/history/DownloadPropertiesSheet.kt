@@ -100,7 +100,7 @@ fun DownloadPropertiesSheet(
     present: Boolean,
     onDismiss: () -> Unit,
     onRemove: () -> Unit = {},
-    onDelete: () -> Unit = {},
+    onDelete: (() -> Unit)? = {},
     onDownloadAgain: (() -> Unit)? = null,
     onFetchAgain: (() -> Unit)? = null
 ) {
@@ -528,11 +528,11 @@ private fun AgainGroup(onDownloadAgain: (() -> Unit)?, onFetchAgain: (() -> Unit
 }
 
 @Composable
-private fun ListActions(present: Boolean, onRemove: () -> Unit, onDelete: () -> Unit) {
+private fun ListActions(present: Boolean, onRemove: () -> Unit, onDelete: (() -> Unit)?) {
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         SplitButton(R.string.history_card_remove, splitShape(start = true), MaterialTheme.colorScheme.surfaceContainerHighest,
             MaterialTheme.colorScheme.onSurface, Modifier.weight(1f), onRemove)
-        if (present) {
+        if (present && onDelete != null) {
             SplitButton(R.string.history_card_delete, splitShape(start = false), MaterialTheme.colorScheme.errorContainer,
                 MaterialTheme.colorScheme.onErrorContainer, Modifier.weight(1f), onDelete)
         }

@@ -217,7 +217,9 @@ fun FormatSheet(
     var chosenVideo by remember(info.url) { mutableStateOf<MediaFormat?>(null) }
     var chosenAudio by remember(info.url) { mutableStateOf<MediaFormat?>(null) }
     val carry: (MediaFormat) -> MediaFormat = { choice ->
-        if (info.hasResolvedFormats) GenericFormats.applyTo(info, choice, preferredLanguage) ?: choice
+        if (info.hasResolvedFormats) GenericFormats.applyTo(
+            info, choice, preferredLanguage, options.videoCodecPreference, options.audioCodecPreference
+        ) ?: choice
         else choice
     }
 
