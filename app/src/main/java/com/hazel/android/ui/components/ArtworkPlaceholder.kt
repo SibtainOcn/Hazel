@@ -21,7 +21,7 @@ import com.hazel.android.R
 
 /**
  * What stands where a thumbnail goes when there is none, or it has not loaded yet, or it
- * failed: the Hazel bolt on a soft accent cookie over the surface tone. Drawn under the
+ * failed: the Hazel bolt on a soft accent pentagon over the surface tone. Drawn under the
  * picture, so a picture that arrives simply covers it.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -37,7 +37,7 @@ fun ArtworkPlaceholder(modifier: Modifier = Modifier.fillMaxSize()) {
                 .fillMaxHeight(0.46f)
                 .heightIn(max = 84.dp)
                 .aspectRatio(1f, matchHeightConstraintsFirst = true)
-                .clip(MaterialShapes.Cookie9Sided.toShape())
+                .clip(MaterialShapes.Pentagon.toShape())
                 .background(accent.copy(alpha = 0.16f)),
             contentAlignment = Alignment.Center
         ) {

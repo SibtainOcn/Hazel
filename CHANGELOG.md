@@ -24,8 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Home header: the logo and name share one tonal pill.
 - Paste button: a dark tile with the icon on an accent seven-sided cookie.
 - Search: back and menu sit on soft tiles, the field leads with an accent cookie, the chosen source is an accent tab, and recent searches form one rounded group.
-- Home: the search bar's menu sits on the same soft tile as Search's.
-- Missing or loading thumbnails show the Hazel bolt on a soft accent cookie instead of a blank area.
+- Home: the search bar's menu is a connected end segment, and incognito is a tonal circle that fills with the accent when on.
+- Search: buttons, chips and rows squeeze and morph their corners when pressed.
+- Bottom bar: each tab has its own shape behind its icon when chosen (cookie, pentagon, clover, gem), morphing in from a circle.
+- Home: the empty-screen download icon has a whole tray instead of a broken one.
+- Missing or loading thumbnails show the Hazel bolt on a soft accent pentagon instead of a blank area.
 - Open folder lists every installed file manager, not only the built-in Files app.
 - All Downloads: Properties opens at half height with the title first, quick figures, and Play, Open with, Show file and Share on cookies.
 - All Downloads: Properties can copy the file name or link, open the link in a browser, download again or fetch the link again.

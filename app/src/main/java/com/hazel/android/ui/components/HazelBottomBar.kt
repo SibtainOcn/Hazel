@@ -29,6 +29,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.graphics.shapes.Morph
+import com.hazel.android.ui.components.player.MorphShape
 
 /** One destination on the bottom bar. */
 data class BottomBarItem(
@@ -44,9 +53,11 @@ data class BottomBarItem(
  *
  * The destinations are few and their icons are the ones every app uses for them, so a
  * label under each only doubled the bar's height. The label is still the icon's name for
- * accessibility services. The chosen tab reads at full strength and the rest recede, which
- * is enough to say where the user is without a pill behind the icon.
+ * accessibility services. Each tab has its own M3 shape behind its icon when chosen (a
+ * cookie, a pentagon, a clover, a gem), morphing in from a circle with a spring, so moving
+ * between tabs reads as one shape becoming another.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HazelBottomBar(
     items: List<BottomBarItem>,
@@ -63,8 +74,16 @@ fun HazelBottomBar(
             .height(BAR_HEIGHT),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        items.forEach { item ->
+        items.forEachIndexed { index, item ->
             val selected = item.route == selectedRoute
+            val target = TabShapes[index % TabShapes.size]
+            val morph = remember(target) { Morph(MaterialShapes.Circle, target) }
+            // Overshoots a little on the way in, the expressive spring; gone when not chosen.
+            val grow by animateFloatAsState(
+                if (selected) 1f else 0f,
+                spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMediumLow),
+                label = "tabShape"
+            )
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -78,14 +97,27 @@ fun HazelBottomBar(
                     ),
                 contentAlignment = Alignment.Center
             ) {
+                if (grow > 0.001f) {
+                    val progress = grow.coerceIn(0f, 1f)
+                    Box(
+                        modifier = Modifier
+                            .size(INDICATOR_SIZE)
+                            .graphicsLayer {
+                                scaleX = grow
+                                scaleY = grow
+                                rotationZ = (1f - progress) * -45f
+                            }
+                            .clip(MorphShape(morph, progress))
+                            .background(MaterialTheme.colorScheme.primary)
+                    )
+                }
                 Box {
                     Icon(
                         painter = painterResource(item.icon),
                         contentDescription = stringResource(item.label),
                         modifier = Modifier.size(ICON_SIZE),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = if (selected) 1f else UNSELECTED_ALPHA
-                        )
+                        tint = if (selected) MaterialTheme.colorScheme.onPrimary
+                        else MaterialTheme.colorScheme.onSurface.copy(alpha = UNSELECTED_ALPHA)
                     )
                     if (item.showDot) {
                         Box(
@@ -104,5 +136,15 @@ fun HazelBottomBar(
 }
 
 private val BAR_HEIGHT = 56.dp
-private val ICON_SIZE = 26.dp
+private val ICON_SIZE = 24.dp
+private val INDICATOR_SIZE = 46.dp
+
+/** Home, History, Queue, More, in the bar's order. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private val TabShapes = listOf(
+    MaterialShapes.Cookie7Sided,
+    MaterialShapes.Pentagon,
+    MaterialShapes.Clover4Leaf,
+    MaterialShapes.Gem
+)
 private const val UNSELECTED_ALPHA = 0.55f

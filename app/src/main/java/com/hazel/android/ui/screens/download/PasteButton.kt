@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.draw.clip
+import com.hazel.android.ui.components.pressScale
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -143,12 +144,16 @@ fun PasteButton(
         square = true
     }
 
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val radius by com.hazel.android.ui.components.pressCorner(interaction, resting = if (square) 20.dp else 22.dp, pressed = 12.dp)
     Surface(
         onClick = onClick,
+        interactionSource = interaction,
         modifier = modifier
+            .then(Modifier.pressScale(interaction, pressed = 0.92f))
             .height(PASTE_SIZE)
             .animateContentSize(spring(stiffness = Spring.StiffnessMediumLow)),
-        shape = RoundedCornerShape(if (square) 20.dp else 22.dp),
+        shape = RoundedCornerShape(radius),
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {

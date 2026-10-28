@@ -89,6 +89,8 @@ import com.hazel.android.download.extractor.SearchSuggestions
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.semantics.semantics
+import com.hazel.android.ui.components.pressScale
+import com.hazel.android.ui.components.pressCorner
 import androidx.compose.ui.semantics.selected
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
@@ -360,7 +362,7 @@ fun SearchScreen(
             ) {
                 com.hazel.android.ui.components.SoftIconButton(
                     onClick = onDismiss,
-                    shape = CircleShape,
+                    corner = 22.dp,
                     modifier = Modifier.padding(start = 8.dp)
                 ) {
                     Icon(
@@ -763,13 +765,21 @@ private fun HistoryRow(
     onRemove: () -> Unit
 ) {
     // One row of the joined Recent group: tight corners between rows, round at its ends.
+    // Pressed, it squeezes slightly and lights up, the way the app's other controls answer.
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 1.dp)
+            .pressScale(interaction, pressed = 0.97f)
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .combinedClickable(onClick = onUse, onLongClick = onRemove)
+            .combinedClickable(
+                interactionSource = interaction,
+                indication = androidx.compose.material3.ripple(),
+                onClick = onUse,
+                onLongClick = onRemove
+            )
             .padding(start = 10.dp, end = 6.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -817,10 +827,12 @@ private fun FillArrow(onFill: () -> Unit) {
 /** A completion offered while typing. The row searches it; the arrow puts it in the field. */
 @Composable
 private fun SuggestionRow(query: String, onUse: () -> Unit, onFill: () -> Unit) {
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onUse)
+            .pressScale(interaction, pressed = 0.97f)
+            .clickable(interactionSource = interaction, indication = androidx.compose.material3.ripple(), onClick = onUse)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -878,12 +890,18 @@ private val WHITESPACE = Regex("""\s+""")
 @Composable
 private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit) {
     val accent = MaterialTheme.colorScheme.primary
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    // Pressed, the corners tighten and the chip squeezes; choosing one morphs pill to tab.
+    val resting by androidx.compose.animation.core.animateDpAsState(if (selected) 12.dp else 20.dp, label = "chip")
+    val radius by pressCorner(interaction, resting = resting, pressed = 8.dp)
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(if (selected) 12.dp else 20.dp),
+        shape = RoundedCornerShape(radius),
         color = if (selected) accent else MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+        interactionSource = interaction,
         modifier = Modifier
+            .pressScale(interaction)
             .height(40.dp)
             .semantics { this.selected = selected }
     ) {

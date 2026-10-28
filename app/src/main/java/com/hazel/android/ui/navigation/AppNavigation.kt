@@ -30,6 +30,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Surface
+import com.hazel.android.ui.components.pressScale
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -244,35 +247,41 @@ fun AppNavigation(
                         // it is active, plain and muted while it is not. A mode that
                         // silently changes what the app records has to be visible from the
                         // screen it affects, not buried in settings.
-                        IconButton(
+                        // Always on the same soft tone as the logo pill, so the header is
+                        // balanced; filled with the accent while it is on.
+                        val incognitoPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                        val incognitoFill by androidx.compose.animation.animateColorAsState(
+                            if (incognito) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f),
+                            label = "incognito"
+                        )
+                        Surface(
                             onClick = {
                                 scope.launch {
                                     SettingsRepository.setIncognito(context, !incognito)
                                 }
                             },
-                            modifier = Modifier.padding(end = 4.dp)
+                            interactionSource = incognitoPress,
+                            shape = CircleShape,
+                            color = incognitoFill,
+                            modifier = Modifier
+                                .padding(end = 12.dp)
+                                .pressScale(incognitoPress, pressed = 0.9f)
+                                .size(42.dp)
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.incognito),
-                                contentDescription = if (incognito) {
-                                    stringResource(R.string.nav_incognito_on)
-                                } else {
-                                    stringResource(R.string.nav_incognito_off)
-                                },
-                                modifier = Modifier
-                                    .size(34.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (incognito) {
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
-                                        } else {
-                                            Color.Transparent
-                                        }
-                                    )
-                                    .padding(6.dp),
-                                tint = if (incognito) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
-                            )
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    painter = painterResource(R.drawable.incognito),
+                                    contentDescription = if (incognito) {
+                                        stringResource(R.string.nav_incognito_on)
+                                    } else {
+                                        stringResource(R.string.nav_incognito_off)
+                                    },
+                                    modifier = Modifier.size(24.dp),
+                                    tint = if (incognito) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onBackground
+                                )
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(

@@ -36,6 +36,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
+import com.hazel.android.ui.components.pressScale
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -1054,19 +1056,27 @@ internal fun UrlSearchBar(
     onMenuOpen: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        onClick = onOpenSearch,
+    // The field and its menu as one connected group: round on the outside, tight where they meet.
+    val fieldShape = RoundedCornerShape(topStart = 26.dp, bottomStart = 26.dp, topEnd = 8.dp, bottomEnd = 8.dp)
+    Row(
         modifier = modifier
-            .refreshShine(shineProgress, RoundedCornerShape(26.dp))
             .fillMaxWidth()
             .height(52.dp),
-        shape = RoundedCornerShape(26.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
+    ) {
+    Surface(
+        onClick = onOpenSearch,
+        modifier = Modifier
+            .refreshShine(shineProgress, fieldShape)
+            .weight(1f)
+            .fillMaxHeight(),
+        shape = fieldShape,
         color = MaterialTheme.colorScheme.surfaceContainerHighest
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 8.dp, end = 6.dp),
+                .padding(start = 8.dp, end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -1093,17 +1103,31 @@ internal fun UrlSearchBar(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-
-            // Opens the same search options sheet the search screen's own 3-dot does.
-            com.hazel.android.ui.components.SoftIconButton(onClick = onMenuOpen, size = 40.dp, shape = RoundedCornerShape(13.dp)) {
-                Icon(
-                    painterResource(R.drawable.ic_more_vert),
-                    contentDescription = stringResource(R.string.search_more),
-                    // The same tile as the search screen's, so the two read as one.
-                    modifier = Modifier.size(22.dp)
-                )
-            }
         }
+    }
+
+    // Opens the same search options sheet the search screen's own 3-dot does. Pressed, its
+    // inner corners round out and it squeezes, the connected group's press.
+    val menuPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val inner by com.hazel.android.ui.components.pressCorner(menuPress, resting = 8.dp, pressed = 18.dp)
+    Surface(
+        onClick = onMenuOpen,
+        interactionSource = menuPress,
+        modifier = Modifier
+            .pressScale(menuPress, pressed = 0.92f)
+            .width(50.dp)
+            .fillMaxHeight(),
+        shape = RoundedCornerShape(topStart = inner, bottomStart = inner, topEnd = 26.dp, bottomEnd = 26.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                painterResource(R.drawable.ic_more_vert),
+                contentDescription = stringResource(R.string.search_more),
+                modifier = Modifier.size(22.dp)
+            )
+        }
+    }
     }
 }
 
