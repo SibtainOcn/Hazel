@@ -256,6 +256,7 @@
     <string name="options_subtitles_save">Untertitel speichern</string>
     <string name="options_subtitles_save_auto">Automatische Untertitel speichern</string>
     <string name="options_subtitles_languages_label">Untertitelsprachen</string>
+    <string name="options_subtitles_auto_caption">%1$s (automatisch)</string>
     <string name="options_subtitles_dismiss">Schließen</string>
     <string name="options_subtitles_languages_title">Untertitelsprachen</string>
     <string name="options_subtitles_languages_hint">Ein yt-dlp-Sprachfilter, z. B. en,.*-orig. all wählt jede Sprache.</string>

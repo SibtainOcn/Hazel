@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Home: hold a card's thumbnail for Play, Download, and, for a saved copy, Open and Properties.
+- Subtitles: the dialog lists the languages a video has, uploaded and auto, to pick with a tap.
 - Support: a Developer card that opens the developer's GitHub profile.
 - Mini player: scrolling away or starting a download moves the video to a mini player instead of stopping it; tap it to open it large.
 - Player menu next to full screen: quality and audio track, to switch between a video's original audio and its dubs.
@@ -79,6 +80,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A download chosen while a link is still being read shows on the Running tab at once, instead of after the read.
 - A quality chosen before a link is read, or by Instant, keeps the preferred video and audio codec once the formats arrive.
 - Quality picks take a direct stream over an HLS one of the same height and frame rate, which downloads faster.
+- Force IPv4 now applies to downloads too, not only to reading links.
+- Downloads check site certificates unless Advanced turns that off; the setting had no effect before.
+- Embedding subtitles with auto captions on now embeds the uploaded subtitles, not only the auto ones.
+- Audio quality steps take the nearest bitrate: 128 kbps no longer downloads a 65 kbps stream.
+- Extra download arguments apply from the first download after the app starts.
 - yt-dlp release notes no longer open a missing page when the installed version is unknown.
 - Download all no longer shows on search results restored after a restart.
 - Player no longer starts on a dubbed track when playing through yt-dlp.

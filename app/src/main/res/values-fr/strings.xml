@@ -260,6 +260,7 @@
     <string name="options_subtitles_save">Enregistrer les sous-titres</string>
     <string name="options_subtitles_save_auto">Enregistrer les sous-titres automatiques</string>
     <string name="options_subtitles_languages_label">Langues des sous-titres</string>
+    <string name="options_subtitles_auto_caption">%1$s (automatiques)</string>
     <string name="options_subtitles_dismiss">Ignorer</string>
     <string name="options_subtitles_languages_title">Langues des sous-titres</string>
     <string name="options_subtitles_languages_hint">Un sélecteur de langue yt-dlp, ex. en,.*-orig. Utilisez all pour toutes les langues.</string>

@@ -30,7 +30,11 @@ data class MediaInfo(
      * Which reader produced the formats. Kept so a format list reopened on this link names
      * the reader its rows came from, and so switching readers can find each one's last read.
      */
-    val readBy: ListingSource = ListingSource.YT_DLP
+    val readBy: ListingSource = ListingSource.YT_DLP,
+    /** Uploaded subtitle languages, as the `--sub-langs` keys the source names them by. */
+    val subtitles: List<String> = emptyList(),
+    /** Auto captions in the spoken language, by their `--sub-langs` key; translations are left out. */
+    val autoCaptions: List<String> = emptyList()
 ) {
     /** Streaming now. */
     val isLive: Boolean get() = liveStatus == "is_live"

@@ -1189,7 +1189,12 @@ internal fun UrlSearchBar(
                 modifier = Modifier
                     .size(38.dp)
                     .clip(MaterialShapes.Cookie7Sided.toShape())
-                    .background(MaterialTheme.colorScheme.primary),
+                    // The accent eased a quarter toward the bar, so it reads tonal beside it.
+                    .background(androidx.compose.ui.graphics.lerp(
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.surfaceContainerHighest,
+                        0.25f
+                    )),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

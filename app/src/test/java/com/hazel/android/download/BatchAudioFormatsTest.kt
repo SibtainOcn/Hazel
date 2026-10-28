@@ -62,9 +62,9 @@ class BatchAudioFormatsTest {
     }
 
     @Test
-    fun `a bitrate step stays under its bitrate and falls back to the best`() {
+    fun `a bitrate step takes the nearest bitrate and falls back to the best`() {
         assertEquals("ba/b", BatchAudioFormats.bitrateCeiling(128).selector)
-        assertEquals("abr:128", BatchAudioFormats.bitrateCeiling(128).sort)
+        assertEquals("abr~128", BatchAudioFormats.bitrateCeiling(128).sort)
     }
 
     @Test

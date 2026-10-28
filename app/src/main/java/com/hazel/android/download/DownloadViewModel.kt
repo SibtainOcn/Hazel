@@ -1510,7 +1510,8 @@ class DownloadViewModel : ViewModel() {
             val limits = TransferLimits(
                 speedLimit = SettingsRepository.getSpeedLimit(app).first(),
                 concurrentFragments = SettingsRepository.getConcurrentFragments(app).first(),
-                throttledRate = SettingsRepository.getThrottledRate(app).first()
+                throttledRate = SettingsRepository.getThrottledRate(app).first(),
+                forceIpv4 = SettingsRepository.getForceIpv4(app).first()
             )
 
             // Whether this run stopped for a pause, which is not the same as finishing.
@@ -2446,7 +2447,8 @@ class DownloadViewModel : ViewModel() {
         }
         // Below this speed the links are taken to be throttled and fetched again.
         if (limits.throttledRate.isNotBlank()) addOption("--throttled-rate", limits.throttledRate)
-        addOption("--no-check-certificates")
+        if (limits.forceIpv4) addOption("--force-ipv4")
+        // Certificates are checked unless Advanced turns that off, which applyAdvanced adds.
         addOption("--cache-dir", ytDlpCacheDir.absolutePath)
 
         // Saved sign-ins, which are what make age-restricted and members-only media
@@ -2680,9 +2682,12 @@ class DownloadViewModel : ViewModel() {
     private fun YoutubeDLRequest.applySubtitles(options: DownloadOptions) {
         // yt-dlp keeps the subtitle files it embedded only when they were also asked for as
         // files, so keeping them after embedding is asking for them as files as well.
-        if (options.writeSubs || (options.embedSubs && !options.deleteSubsAfterEmbed)) {
-            addOption("--write-subs")
-        }
+        val keepFiles = options.writeSubs || (options.embedSubs && !options.deleteSubsAfterEmbed)
+        // Named outright: yt-dlp fetches the uploaded subtitles for --embed-subs only while
+        // auto captions are off, so with both on it embedded the auto ones alone. Files
+        // fetched only to embed are then removed with no-keep-subs.
+        if (keepFiles || options.embedSubs) addOption("--write-subs")
+        if (options.embedSubs && !keepFiles) addOption("--compat-options", "no-keep-subs")
         if (options.writeAutoSubs) addOption("--write-auto-subs")
         if (options.embedSubs) addOption("--embed-subs")
 
@@ -3392,7 +3397,9 @@ internal fun workDirName(url: String): String {
 internal data class TransferLimits(
     val speedLimit: String = "",
     val concurrentFragments: Int = 8,
-    val throttledRate: String = ""
+    val throttledRate: String = "",
+    /** Fetch settings' Force IPv4, which a network with broken IPv6 needs for the media too. */
+    val forceIpv4: Boolean = false
 )
 
 /** What a cancelled item's entry says, as opposed to a failure's reason. */
