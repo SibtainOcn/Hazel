@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bottom bar: each tab has its own soft tonal shape behind its icon when chosen (cookie, pentagon, clover, gem), morphing in from a circle.
 - Home: the empty-screen download icon has a whole tray instead of a broken one.
 - Download queue: the tabs are a connected group; the chosen one rounds out into an accent pill, and the menu sits on a soft tile.
+- All Downloads: search, filter and menu form one connected group.
 - Missing or loading thumbnails show the Hazel bolt on a soft accent pentagon instead of a blank area.
 - Open folder lists every installed file manager, not only the built-in Files app.
 - All Downloads: Properties opens at half height with the title first, quick figures, and Play, Open with, Show file and Share on cookies.

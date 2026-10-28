@@ -41,3 +41,37 @@ fun SoftIconButton(
         Box(contentAlignment = Alignment.Center) { content() }
     }
 }
+
+/** Where a segment sits in a connected group, which decides which of its corners are round. */
+enum class SegmentPosition { First, Middle, Last }
+
+/**
+ * One icon button of a connected group: round where the group ends, tight where it meets
+ * its neighbours. Pressed, its tight corners round out and it squeezes.
+ */
+@Composable
+fun SegmentIconButton(
+    onClick: () -> Unit,
+    position: SegmentPosition,
+    modifier: Modifier = Modifier,
+    size: Dp = 44.dp,
+    content: @Composable () -> Unit
+) {
+    val interaction = remember { MutableInteractionSource() }
+    val outer = size / 2
+    val inner by pressCorner(interaction, resting = 8.dp, pressed = outer * 0.75f)
+    val start = if (position == SegmentPosition.First) outer else inner
+    val end = if (position == SegmentPosition.Last) outer else inner
+    Surface(
+        onClick = onClick,
+        modifier = modifier
+            .pressScale(interaction, pressed = 0.92f)
+            .size(size),
+        shape = RoundedCornerShape(topStart = start, bottomStart = start, topEnd = end, bottomEnd = end),
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        interactionSource = interaction
+    ) {
+        Box(contentAlignment = Alignment.Center) { content() }
+    }
+}

@@ -17,7 +17,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,10 +33,12 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.graphics.shapes.Morph
-import com.hazel.android.ui.components.player.MorphShape
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.graphics.asComposePath
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.graphics.shapes.toPath
 
 /** One destination on the bottom bar. */
 data class BottomBarItem(
@@ -78,12 +79,15 @@ fun HazelBottomBar(
             val selected = item.route == selectedRoute
             val target = TabShapes[index % TabShapes.size]
             val morph = remember(target) { Morph(MaterialShapes.Circle, target) }
-            // Overshoots a little on the way in, the expressive spring; gone when not chosen.
-            val grow by animateFloatAsState(
+            // One calm spring, no bounce; read only while drawing, so the bar is never
+            // recomposed for it and a tap starts nothing else.
+            val grow = animateFloatAsState(
                 if (selected) 1f else 0f,
-                spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMediumLow),
+                spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
                 label = "tabShape"
             )
+            // The same soft tone as the logo pill in the header.
+            val tone = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -93,25 +97,22 @@ fun HazelBottomBar(
                         onClick = { onSelect(item) },
                         role = Role.Tab,
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple(bounded = false, radius = 28.dp)
+                        indication = null
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (grow > 0.001f) {
-                    val progress = grow.coerceIn(0f, 1f)
-                    Box(
-                        modifier = Modifier
-                            .size(INDICATOR_SIZE)
-                            .graphicsLayer {
-                                scaleX = grow
-                                scaleY = grow
-                                rotationZ = (1f - progress) * -45f
-                            }
-                            .clip(MorphShape(morph, progress))
-                            // The same soft tone as the logo pill in the header.
-                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
-                    )
-                }
+                Box(
+                    modifier = Modifier
+                        .size(INDICATOR_SIZE)
+                        .drawBehind {
+                            val g = grow.value
+                            if (g <= 0.001f) return@drawBehind
+                            val path = morph.toPath(g.coerceIn(0f, 1f)).asComposePath()
+                            path.transform(Matrix().apply { scale(size.width * g, size.height * g) })
+                            val inset = size.width * (1f - g) / 2f
+                            translate(inset, size.height * (1f - g) / 2f) { drawPath(path, tone) }
+                        }
+                )
                 Box {
                     Icon(
                         painter = painterResource(item.icon),
