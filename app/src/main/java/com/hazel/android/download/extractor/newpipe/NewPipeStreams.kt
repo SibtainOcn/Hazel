@@ -1,6 +1,9 @@
 package com.hazel.android.download.extractor.newpipe
 
 import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.playback.AudioTrack
+import com.hazel.android.download.playback.AudioTracks
+import com.hazel.android.download.playback.AudioWish
 import com.hazel.android.download.playback.PlayableStream
 import org.schabi.newpipe.extractor.NewPipe
 import org.schabi.newpipe.extractor.services.youtube.YoutubeParsingHelper
@@ -16,7 +19,7 @@ import org.schabi.newpipe.extractor.MediaFormat as NewPipeFormat
 /** Picks a stream to play from what NewPipe reads for a link. */
 internal object NewPipeStreams {
 
-    fun playable(url: String, maxHeight: Int): PlayableStream? {
+    fun playable(url: String, maxHeight: Int, wish: AudioWish = AudioWish()): PlayableStream? {
         val service = NewPipeLister.service(url) ?: return null
         val info = StreamInfo.getInfo(service, url)
 
@@ -29,16 +32,22 @@ internal object NewPipeStreams {
 
         val muxed = withinCap(info.videoStreams.orEmpty(), maxHeight)
         val videoOnly = withinCap(info.videoOnlyStreams.orEmpty(), maxHeight)
-        val audio = info.audioStreams.orEmpty()
-            .filter { it.isPlainHttp() }
-            .maxWithOrNull(audioOrder)
+        val sounds = info.audioStreams.orEmpty().filter { it.isPlainHttp() }
+        // One best stream per track; more than one means the listener can choose.
+        val byTrack = sounds.groupBy { it.trackKey() }.mapNotNull { (_, group) -> group.maxWithOrNull(audioOrder) }
+        val tracks = if (byTrack.size > 1) byTrack.map { it.toAudioTrack() } else emptyList()
+        val track = AudioTracks.choose(tracks, wish)
+        val audio = track?.let { t -> byTrack.firstOrNull { it.content == t.url } }
+            ?: sounds.maxWithOrNull(audioOrder)
 
         val heights = (info.videoStreams.orEmpty() + info.videoOnlyStreams.orEmpty())
             .filter { it.isPlainHttp() && it.quality() > 0 }
             .map { it.quality() }.distinct().sortedDescending()
 
         val chosen = when {
-            videoOnly != null && audio != null && (muxed == null || videoOnly.quality() > muxed.quality()) ->
+            // With several tracks the sound is kept apart, so it can be swapped alone.
+            videoOnly != null && audio != null &&
+                (muxed == null || videoOnly.quality() > muxed.quality() || tracks.isNotEmpty()) ->
                 PlayableStream(
                     url = videoOnly.content,
                     audioUrl = audio.content,
@@ -61,8 +70,26 @@ internal object NewPipeStreams {
             hls != null -> hlsStream(hls, maxHeight)
             else -> null
         }
-        return chosen?.copy(heights = heights)
+        val playingTrack = track?.takeIf { chosen != null && (chosen.audioUrl ?: chosen.url) == it.url }
+        return chosen?.copy(
+            heights = heights,
+            audioTracks = if (playingTrack != null) tracks else emptyList(),
+            audioTrackId = playingTrack?.id
+        )
     }
+
+    private fun AudioStream.trackKey(): String? =
+        audioTrackId?.takeIf { it.isNotBlank() } ?: audioLocale?.toLanguageTag()?.takeIf { it != "und" }
+
+    private fun AudioStream.toAudioTrack() = AudioTrack(
+        id = trackKey() ?: content,
+        language = audioLocale?.toLanguageTag()?.takeIf { it != "und" }
+            ?: audioTrackId?.substringBefore('.')?.takeIf { it.isNotBlank() },
+        original = audioTrackType == AudioTrackType.ORIGINAL,
+        descriptive = audioTrackType == AudioTrackType.DESCRIPTIVE,
+        url = content,
+        headers = headersFor(content)
+    )
 
     private fun hlsStream(address: String, maxHeight: Int) = PlayableStream(
         url = address,

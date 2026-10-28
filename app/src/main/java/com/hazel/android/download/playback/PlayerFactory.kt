@@ -5,6 +5,8 @@ import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import com.hazel.android.download.NetworkProxy.throughProxy
@@ -64,7 +66,8 @@ object PlayerFactory {
         } else if (isHls || path.endsWith(".m3u8")) {
             HlsMediaSource.Factory(http).createMediaSource(item)
         } else {
-            ProgressiveMediaSource.Factory(http).createMediaSource(item)
+            val reader = if (ChunkedDataSource.needsChunks(url)) ChunkedDataSource.Factory(http) else http
+            ProgressiveMediaSource.Factory(reader).createMediaSource(item)
         }
     }
 
@@ -77,6 +80,46 @@ object PlayerFactory {
             else -> builder.setMaxVideoSize(Int.MAX_VALUE, stream.adaptiveCap)
         }
         player.trackSelectionParameters = builder.build()
+    }
+
+    /**
+     * Starts a manifest on the wished language, or on its main track when there is no wish.
+     * A pick left from an earlier stream is cleared, as its tracks are gone.
+     */
+    fun applyAudio(player: ExoPlayer, stream: PlayableStream) {
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+            .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
+            .setPreferredAudioLanguage(stream.preferredLanguage.takeIf { stream.isAdaptive })
+            .build()
+    }
+
+    /** The sound tracks inside a manifest, one per language, when there is more than one. */
+    fun manifestAudioTracks(tracks: Tracks): List<AudioTrack> {
+        val list = tracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO && it.length > 0 }.map { group ->
+            val format = group.getTrackFormat(0)
+            AudioTrack(
+                id = group.mediaTrackGroup.id,
+                language = format.language?.takeIf { it.isNotBlank() && it != C.LANGUAGE_UNDETERMINED },
+                original = format.roleFlags and C.ROLE_FLAG_MAIN != 0 ||
+                    format.selectionFlags and C.SELECTION_FLAG_DEFAULT != 0,
+                descriptive = format.roleFlags and C.ROLE_FLAG_DESCRIBES_VIDEO != 0
+            )
+        }.distinctBy { it.language to it.descriptive }
+        return if (list.size > 1) list else emptyList()
+    }
+
+    /** The manifest track playing now, by [AudioTrack.id]. */
+    fun selectedManifestAudio(tracks: Tracks): String? =
+        tracks.groups.firstOrNull { it.type == C.TRACK_TYPE_AUDIO && it.isSelected }?.mediaTrackGroup?.id
+
+    /** Plays the manifest track [id]; false when the manifest no longer has it. */
+    fun selectManifestAudio(player: ExoPlayer, id: String): Boolean {
+        val group = player.currentTracks.groups
+            .firstOrNull { it.type == C.TRACK_TYPE_AUDIO && it.mediaTrackGroup.id == id } ?: return false
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+            .setOverrideForType(TrackSelectionOverride(group.mediaTrackGroup, (0 until group.length).toList()))
+            .build()
+        return true
     }
 
     private const val BROWSER_USER_AGENT =

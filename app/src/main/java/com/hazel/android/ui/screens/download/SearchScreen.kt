@@ -38,7 +38,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import com.hazel.android.ui.components.AlertDialog
@@ -87,7 +86,16 @@ import com.hazel.android.data.SaveDirs
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.download.extractor.SearchSuggestions
-import com.hazel.android.ui.components.FlatChip
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.semantics
+import com.hazel.android.ui.components.pressScale
+import com.hazel.android.ui.components.pressCorner
+import androidx.compose.ui.semantics.selected
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material.icons.filled.PlayArrow
 import com.hazel.android.ui.screens.more.groupShape
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
@@ -107,6 +115,7 @@ import java.net.URI
  * Earlier searches and links sit underneath, with suggestions from Google when those are
  * turned on. Tapping one uses it; the arrow beside it puts it in the field for editing.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SearchScreen(
     initialQuery: String = "",
@@ -351,9 +360,19 @@ fun SearchScreen(
                     .padding(horizontal = 4.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBackIos, contentDescription = stringResource(R.string.search_back))
+                com.hazel.android.ui.components.SoftIconButton(
+                    onClick = onDismiss,
+                    corner = 22.dp,
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBackIos,
+                        contentDescription = stringResource(R.string.search_back),
+                        // The glyph sits left in its box; nudged so it reads centred in the circle.
+                        modifier = Modifier.size(20.dp).padding(start = 4.dp)
+                    )
                 }
+                Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     stringResource(R.string.fetch_settings_search),
                     style = MaterialTheme.typography.titleLarge,
@@ -389,8 +408,16 @@ fun SearchScreen(
                         }
                     }
                 }
-                IconButton(onClick = { menuOpen = true }) {
-                    Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.search_more))
+                Spacer(modifier = Modifier.width(8.dp))
+                com.hazel.android.ui.components.SoftIconButton(
+                    onClick = { menuOpen = true },
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Icon(
+                        painterResource(R.drawable.ic_more_vert),
+                        contentDescription = stringResource(R.string.search_more),
+                        modifier = Modifier.size(22.dp)
+                    )
                 }
             }
 
@@ -407,13 +434,28 @@ fun SearchScreen(
             Surface(
                 modifier = Modifier.weight(1f),
                 // The corners of the app's dialogs and cards, rather than a full pill.
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(28.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh
             ) {
                 Row(
-                    modifier = Modifier.padding(end = 6.dp),
+                    modifier = Modifier.padding(start = 8.dp, end = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // The same accent cookie the home bar leads with.
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(MaterialShapes.Cookie7Sided.toShape())
+                            .background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.ic_search),
+                            contentDescription = null,
+                            modifier = Modifier.size(19.dp),
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
                     TextField(
                         value = text,
                         onValueChange = { text = it },
@@ -469,7 +511,7 @@ fun SearchScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 SearchSource.entries.forEach { option ->
-                    FlatChip(
+                    SourceChip(
                         label = stringResource(option.labelRes),
                         selected = option == source,
                         onClick = {
@@ -524,8 +566,18 @@ fun SearchScreen(
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(suggestions, key = { it }) { entry ->
+                    if (suggestions.isNotEmpty()) item(key = "recent") {
+                        Text(
+                            stringResource(R.string.search_recent).uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            letterSpacing = 0.8.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 22.dp, top = 14.dp, bottom = 8.dp)
+                        )
+                    }
+                    itemsIndexed(suggestions, key = { _, it -> it }) { index, entry ->
                         HistoryRow(
+                            shape = groupShape(index, suggestions.size),
                             query = entry,
                             onUse = {
                                 text = entry
@@ -557,25 +609,15 @@ fun SearchScreen(
             // Offered only with nothing entered, which is the moment it stands for, and
             // held clear of the keyboard that is up for as long as this screen is.
             if (text.isBlank() && queued.isEmpty()) {
-                Surface(
+                PasteButton(
+                    stamp = rememberClipStamp(),
                     onClick = { pasteAndSearch() },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .imePadding()
-                        .padding(20.dp)
-                        .size(56.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primary
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Filled.ContentPaste,
-                            contentDescription = stringResource(R.string.search_paste_and_fetch),
-                            modifier = Modifier.size(22.dp),
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
+                        .padding(20.dp),
+                    description = stringResource(R.string.search_paste_and_fetch)
+                )
             }
             StatusToastHost(
                 statusToast,
@@ -716,25 +758,46 @@ internal fun RemoveEntryDialog(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HistoryRow(
+    shape: androidx.compose.ui.graphics.Shape,
     query: String,
     onUse: () -> Unit,
     onFill: () -> Unit,
     onRemove: () -> Unit
 ) {
+    // One row of the joined Recent group: tight corners between rows, round at its ends.
+    // Pressed, it squeezes slightly and lights up, the way the app's other controls answer.
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .combinedClickable(onClick = onUse, onLongClick = onRemove)
-            .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
+            .padding(horizontal = 12.dp, vertical = 1.dp)
+            .pressScale(interaction, pressed = 0.97f)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .combinedClickable(
+                interactionSource = interaction,
+                indication = androidx.compose.material3.ripple(),
+                onClick = onUse,
+                onLongClick = onRemove
+            )
+            .padding(start = 10.dp, end = 6.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            Icons.Filled.History,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        )
-        Spacer(modifier = Modifier.width(20.dp))
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Filled.History,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+        }
+        Spacer(modifier = Modifier.width(14.dp))
         Text(
             query,
             style = MaterialTheme.typography.bodyLarge,
@@ -764,10 +827,12 @@ private fun FillArrow(onFill: () -> Unit) {
 /** A completion offered while typing. The row searches it; the arrow puts it in the field. */
 @Composable
 private fun SuggestionRow(query: String, onUse: () -> Unit, onFill: () -> Unit) {
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onUse)
+            .pressScale(interaction, pressed = 0.97f)
+            .clickable(interactionSource = interaction, indication = androidx.compose.material3.ripple(), onClick = onUse)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -816,3 +881,52 @@ private val QUEUE_MAX_HEIGHT = 236.dp
 
 /** Any run of whitespace, which is what separates one pasted link from the next. */
 private val WHITESPACE = Regex("""\s+""")
+
+/**
+ * A search source. The chosen one is an accent tab led by a small cookie; the rest are soft
+ * pills.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val accent = MaterialTheme.colorScheme.primary
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    // Pressed, the corners tighten and the chip squeezes; choosing one morphs pill to tab.
+    val resting by androidx.compose.animation.core.animateDpAsState(if (selected) 12.dp else 20.dp, label = "chip")
+    val radius by pressCorner(interaction, resting = resting, pressed = 8.dp)
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(radius),
+        color = if (selected) accent else MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+        interactionSource = interaction,
+        modifier = Modifier
+            .pressScale(interaction)
+            .height(40.dp)
+            .semantics { this.selected = selected }
+    ) {
+        Row(
+            modifier = Modifier.padding(start = if (selected) 6.dp else 16.dp, end = if (selected) 14.dp else 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (selected) {
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(MaterialShapes.Cookie7Sided.toShape())
+                        .background(MaterialTheme.colorScheme.onPrimary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp), tint = accent)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                maxLines = 1
+            )
+        }
+    }
+}

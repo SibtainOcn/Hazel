@@ -121,7 +121,7 @@ fun QueuedCard(
                     onClick = onOpen
                 )
         ) {
-            Artwork(item.thumbnail, item.hasVideo)
+            Artwork(item.thumbnail)
             Box(modifier = Modifier.fillMaxSize().background(ArtworkScrim))
 
             TitleBlock(
@@ -535,7 +535,8 @@ private fun CardPill(
 }
 
 @Composable
-private fun Artwork(thumbnail: String?, hasVideo: Boolean) {
+private fun Artwork(thumbnail: String?) {
+    com.hazel.android.ui.components.ArtworkPlaceholder()
     if (thumbnail != null) {
         AsyncImage(
             model = thumbnail,
@@ -543,20 +544,6 @@ private fun Artwork(thumbnail: String?, hasVideo: Boolean) {
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-    } else {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                if (hasVideo) Icons.Filled.PlayArrow else Icons.Filled.MusicNote,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-            )
-        }
     }
 }
 

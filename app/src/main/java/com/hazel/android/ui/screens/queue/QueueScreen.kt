@@ -1,5 +1,23 @@
 package com.hazel.android.ui.screens.queue
 
+import androidx.compose.foundation.selection.selectableGroup
+import com.hazel.android.ui.components.pressScale
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Pause
+import com.hazel.android.ui.components.MenuTone
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.ClearAll
+import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.hazel.android.ui.components.AmbientStarField
@@ -40,16 +58,13 @@ import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Download
 import com.hazel.android.ui.components.AlertDialog
-import androidx.compose.material3.Badge
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -88,6 +103,96 @@ import com.hazel.android.util.copyToClipboard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/**
+ * One segment of the queue's tab group. Its outer edge is always round; its inner corners are
+ * tight until it is chosen, when it rounds out into an accent pill. Pressed, it squeezes. A
+ * count shows in a small badge, red for failures.
+ */
+@Composable
+private fun QueueTabSegment(
+    label: String,
+    count: Int,
+    alarm: Boolean,
+    selected: Boolean,
+    first: Boolean,
+    last: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val outer = 25.dp
+    val inner by androidx.compose.animation.core.animateDpAsState(
+        if (selected) outer else 8.dp,
+        androidx.compose.animation.core.spring(dampingRatio = 0.6f, stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow),
+        label = "segment"
+    )
+    val fill by androidx.compose.animation.animateColorAsState(
+        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
+        label = "segmentFill"
+    )
+    val ink = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val start = if (first) outer else inner
+    val end = if (last) outer else inner
+    Surface(
+        onClick = onClick,
+        interactionSource = interaction,
+        shape = RoundedCornerShape(topStart = start, bottomStart = start, topEnd = end, bottomEnd = end),
+        color = fill,
+        contentColor = ink,
+        modifier = modifier
+            .pressScale(interaction)
+            .height(50.dp)
+            .semantics {
+                this.selected = selected
+                role = Role.Tab
+            }
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false)
+            )
+            if (count > 0) {
+                Spacer(Modifier.width(6.dp))
+                Box(
+                    modifier = Modifier
+                        .heightIn(min = 22.dp)
+                        .widthIn(min = 22.dp)
+                        .clip(CircleShape)
+                        .background(
+                            when {
+                                alarm -> MaterialTheme.colorScheme.error
+                                selected -> MaterialTheme.colorScheme.onPrimary
+                                else -> MaterialTheme.colorScheme.primary
+                            }
+                        )
+                        .padding(horizontal = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        count.toString(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = when {
+                            alarm -> MaterialTheme.colorScheme.onError
+                            selected -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.onPrimary
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
 
 /** The queue screen's tabs, in the order a download passes through them. */
 private enum class QueueTab(val labelRes: Int) {
@@ -239,9 +344,13 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
             )
-            Box {
-                IconButton(onClick = { menuOpen = true }) {
-                    Icon(painterResource(R.drawable.ic_more_vert), stringResource(R.string.history_menu_action))
+            Box(modifier = Modifier.padding(end = 12.dp)) {
+                com.hazel.android.ui.components.SoftIconButton(onClick = { menuOpen = true }) {
+                    Icon(
+                        painterResource(R.drawable.ic_more_vert),
+                        stringResource(R.string.history_menu_action),
+                        modifier = Modifier.size(22.dp)
+                    )
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     val isMulti = running.size + waiting.size > 1
@@ -250,6 +359,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             text = {
                                 Text(stringResource(if (isMulti) R.string.download_pause_all else R.string.download_pause))
                             },
+                            icon = Icons.Filled.Pause,
+                            tone = MenuTone.Neutral,
                             onClick = {
                                 menuOpen = false
                                 downloadViewModel.pauseAll()
@@ -260,6 +371,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             text = {
                                 Text(stringResource(if (isMulti) R.string.download_resume_all else R.string.download_resume))
                             },
+                            icon = Icons.Filled.PlayArrow,
+                            tone = MenuTone.Accent,
                             onClick = {
                                 menuOpen = false
                                 downloadViewModel.resumeDownload()
@@ -270,6 +383,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                         text = {
                             Text(stringResource(if (isMulti) R.string.download_cancel_all else R.string.download_cancel_action))
                         },
+                        icon = Icons.Filled.Close,
+                        tone = MenuTone.Danger,
                         enabled = anythingInHand,
                         onClick = {
                             menuOpen = false
@@ -278,6 +393,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.history_queue_clear_all)) },
+                        icon = Icons.Filled.ClearAll,
+                        tone = MenuTone.Neutral,
                         enabled = waiting.isNotEmpty(),
                         onClick = {
                             menuOpen = false
@@ -286,6 +403,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.queue_failed_retry_all)) },
+                        icon = Icons.Filled.Refresh,
+                        tone = MenuTone.Accent,
                         enabled = failed.any { it.id !in retryingIds },
                         onClick = {
                             menuOpen = false
@@ -294,6 +413,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.queue_failed_select)) },
+                        icon = Icons.Filled.Checklist,
+                        tone = MenuTone.Info,
                         enabled = failed.isNotEmpty(),
                         onClick = {
                             menuOpen = false
@@ -303,6 +424,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.history_failed_clear_all)) },
+                        icon = Icons.Filled.DeleteSweep,
+                        tone = MenuTone.Danger,
                         enabled = failed.isNotEmpty(),
                         onClick = {
                             menuOpen = false
@@ -313,36 +436,31 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
             }
         }
 
-        PrimaryTabRow(
-            selectedTabIndex = pagerState.currentPage,
-            containerColor = MaterialTheme.colorScheme.background
+        // The tabs as one connected group: round on the outside, tight between segments, and
+        // the chosen one rounds out into an accent pill.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
         ) {
+            val last = QueueTab.entries.lastIndex
             QueueTab.entries.forEachIndexed { index, tab ->
                 val count = when (tab) {
                     QueueTab.RUNNING -> running.size
                     QueueTab.QUEUED -> waiting.size
                     QueueTab.FAILED -> failed.size
                 }
-                Tab(
+                QueueTabSegment(
+                    label = stringResource(tab.labelRes),
+                    count = count,
+                    alarm = tab == QueueTab.FAILED,
                     selected = pagerState.currentPage == index,
+                    first = index == 0,
+                    last = index == last,
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                stringResource(tab.labelRes),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f, fill = false)
-                            )
-                            if (count > 0) {
-                                Spacer(Modifier.width(6.dp))
-                                Badge(
-                                    containerColor = if (tab == QueueTab.FAILED) MaterialTheme.colorScheme.error
-                                    else MaterialTheme.colorScheme.primary
-                                ) { Text(count.toString()) }
-                            }
-                        }
-                    }
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -601,6 +719,25 @@ private fun runningItems(
                 isDownloading = false,
                 batchItem = BatchItem(held.url, held.title, BatchState.PAUSED),
                 queued = held
+            )
+        }
+    }
+    // Links Hazel Instant is still reading: shown from the moment they were shared, before
+    // they have a download or a place on the saved queue.
+    batch.forEach { item ->
+        if (item.reading && shown.add(item.url)) {
+            items += RunningItem(
+                info = MediaInfo(
+                    url = item.url,
+                    title = item.title,
+                    uploader = "",
+                    thumbnail = null,
+                    durationSeconds = 0,
+                    videoFormats = emptyList(),
+                    audioFormats = emptyList()
+                ),
+                isDownloading = false,
+                batchItem = item
             )
         }
     }

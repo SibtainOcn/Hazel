@@ -64,6 +64,7 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
 
         applicationScope.launch { com.hazel.android.data.SettingsRepository.applyUpdateNoticesOff(this@HazelApp) }
         applicationScope.launch(kotlinx.coroutines.Dispatchers.IO) { com.hazel.android.util.AppShortcuts.publish(this@HazelApp) }
+        applicationScope.launch { com.hazel.android.data.BackupRepository.onLaunch(this@HazelApp) }
 
         // Unpacking yt-dlp and FFmpeg is the heaviest thing the app ever does at launch,
         // and starting it here put it in competition with the work that gets the first
@@ -143,6 +144,6 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
          * Long enough that a normal launch always gets there first, short enough that a
          * start with no UI is not left waiting on it.
          */
-        private const val LIBRARY_INIT_FALLBACK_MS = 2_000L
+        private const val LIBRARY_INIT_FALLBACK_MS = 5_000L
     }
 }

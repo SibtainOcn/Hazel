@@ -1,5 +1,8 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.material3.toShape
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
@@ -14,6 +17,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.clip
+import com.hazel.android.ui.components.pressScale
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -104,55 +111,85 @@ private fun stampOf(clipboard: ClipboardManager): Long? {
 /** How long the button keeps its label after a new clip arrives, before it folds to an icon. */
 private const val PASTE_LABEL_MS = 1600L
 
+/** Time for the label to fold away before the button takes its square shape. */
+private const val PASTE_FOLD_MS = 450L
+
+/** The folded button is a square: the icon centred with equal room on every side. */
+private val PASTE_SIZE = 62.dp
+private val PASTE_ICON = 20.dp
+private val PASTE_COOKIE = 44.dp
+
 /**
  * The paste button: with its label when a new clip arrives, so it says what it is, then
- * folded down to its icon so it sits quietly over the list. [stamp] is the clip it is for,
- * and a new one opens it out again.
+ * folded down to its icon on an M3 rounded square so it sits quietly over the list. [stamp] is the clip
+ * it is for, and a new one opens it out again.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PasteButton(
     stamp: Long?,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    description: String = stringResource(R.string.search_paste)
 ) {
     var showLabel by remember { mutableStateOf(true) }
+    // The square waits until the fold has finished, so it is never drawn stretched over the label.
+    var square by remember { mutableStateOf(false) }
     LaunchedEffect(stamp) {
+        square = false
         showLabel = true
         delay(PASTE_LABEL_MS)
         showLabel = false
+        delay(PASTE_FOLD_MS)
+        square = true
     }
 
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val radius by com.hazel.android.ui.components.pressCorner(interaction, resting = if (square) 20.dp else 22.dp, pressed = 12.dp)
     Surface(
         onClick = onClick,
+        interactionSource = interaction,
         modifier = modifier
-            .height(56.dp)
+            .then(Modifier.pressScale(interaction, pressed = 0.92f))
+            .height(PASTE_SIZE)
             .animateContentSize(spring(stiffness = Spring.StiffnessMediumLow)),
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary
+        shape = RoundedCornerShape(radius),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        contentColor = MaterialTheme.colorScheme.onSurface
     ) {
+        // A dark tile with the icon on an accent cookie; folded, the cookie sits centred.
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.padding(horizontal = (PASTE_SIZE - PASTE_COOKIE) / 2),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                Icons.Filled.ContentPaste,
-                contentDescription = stringResource(R.string.search_paste),
-                modifier = Modifier.size(22.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(PASTE_COOKIE)
+                    .clip(MaterialShapes.Cookie7Sided.toShape())
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Filled.ContentPaste,
+                    contentDescription = description,
+                    modifier = Modifier.size(PASTE_ICON),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
             AnimatedVisibility(
                 visible = showLabel,
                 enter = expandHorizontally() + fadeIn(),
                 exit = shrinkHorizontally() + fadeOut()
             ) {
                 Row {
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         stringResource(R.string.search_paste),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1
                     )
+                    Spacer(modifier = Modifier.width(12.dp))
                 }
             }
         }

@@ -8,6 +8,6 @@
         dark whatever the device is set to, so the app icon always appears on the ground it
         was drawn for.
     -->
-    <color name="splash_background">#0A0A0A</color>
+    <color name="splash_background">#000000</color>
     <color name="splash_foreground">#FFFFFF</color>
 </resources>

@@ -70,4 +70,50 @@ object MediaOpener {
             )
         }
     }
+
+    /** Always asks which app opens the file, rather than going to the default player. */
+    fun openWith(context: Context, fileUri: String, isVideo: Boolean) {
+        if (fileUri.isBlank()) return toast(context, R.string.media_open_unknown_location)
+        val view = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(Uri.parse(fileUri), if (isVideo) "video/*" else "audio/*")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        start(context, Intent.createChooser(view, context.getString(R.string.media_open_chooser)))
+    }
+
+    /** Sends the file itself to another app. */
+    fun share(context: Context, fileUri: String, isVideo: Boolean) {
+        if (fileUri.isBlank()) return toast(context, R.string.media_open_unknown_location)
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = if (isVideo) "video/*" else "audio/*"
+            putExtra(Intent.EXTRA_STREAM, Uri.parse(fileUri))
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        start(context, Intent.createChooser(send, null))
+    }
+
+    /**
+     * Opens the folder holding the file: the folder inside a picked tree it was saved to, or
+     * the app's own folder for its kind.
+     */
+    fun showFile(context: Context, fileUri: String, isVideo: Boolean) {
+        val uri = runCatching { Uri.parse(fileUri) }.getOrNull()
+        val folder = uri?.takeIf { MediaStoreHelper.isDocumentInTree(it.pathSegments) }?.let {
+            runCatching {
+                val parent = android.provider.DocumentsContract.getDocumentId(it).substringBeforeLast('/', "")
+                parent.takeIf { id -> id.isNotEmpty() }
+                    ?.let { id -> android.provider.DocumentsContract.buildDocumentUriUsingTree(it, id) }
+            }.getOrNull()
+        }
+        if (folder != null) FolderUtil.openTree(context, folder) else openLocation(context, "", isVideo)
+    }
+
+    private fun start(context: Context, intent: Intent) {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (runCatching { context.startActivity(intent) }.isFailure) toast(context, R.string.media_open_no_app)
+    }
+
+    private fun toast(context: Context, id: Int) {
+        Toast.makeText(context, context.getString(id), Toast.LENGTH_SHORT).show()
+    }
 }

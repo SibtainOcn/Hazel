@@ -18,7 +18,10 @@ import kotlinx.coroutines.flow.Flow
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.map
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "hazel_settings")
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "hazel_settings",
+    produceMigrations = { context -> listOf(GlassDefaultMigration { wasUpdated(context) }) }
+)
 
 object SettingsRepository {
     const val DEFAULT_ACCENT = "White"
@@ -26,7 +29,7 @@ object SettingsRepository {
 
     private val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
     private val ACCENT_COLOR_KEY = stringPreferencesKey("accent_color")
-    private val GLASS_KEY = booleanPreferencesKey("glass_theme")
+    internal val GLASS_KEY = booleanPreferencesKey("glass_theme")
     private val GLASS_STYLE_KEY = stringPreferencesKey("glass_style")
     private val FILENAME_TEMPLATE_KEY = stringPreferencesKey("filename_template")
     private val EMBED_THUMBNAIL_KEY = booleanPreferencesKey("embed_thumbnail")
@@ -50,7 +53,7 @@ object SettingsRepository {
     }
 
     fun isGlassEnabled(context: Context): Flow<Boolean> {
-        return context.dataStore.data.map { prefs -> prefs[GLASS_KEY] ?: true }
+        return context.dataStore.data.map { prefs -> prefs[GLASS_KEY] ?: false }
     }
 
     suspend fun setGlassEnabled(context: Context, enabled: Boolean) {
@@ -319,6 +322,7 @@ object SettingsRepository {
     private val SEARCH_RESULTS_KEY = intPreferencesKey("search_results")
     private val PLAY_ENGINE_KEY = stringPreferencesKey("play_engine")
     private val PLAY_QUALITY_KEY = intPreferencesKey("play_quality")
+    private val PLAY_AUDIO_KEY = stringPreferencesKey("play_audio_language")
     private val SEARCH_SUGGESTIONS_KEY = booleanPreferencesKey("search_suggestions")
 
     val SEARCH_RESULT_COUNTS = listOf(10, 25, 50)
@@ -366,6 +370,17 @@ object SettingsRepository {
 
     suspend fun setPlayQuality(context: Context, height: Int) {
         context.dataStore.edit { prefs -> prefs[PLAY_QUALITY_KEY] = height }
+    }
+
+    /**
+     * The sound track the player starts on: blank for the original, "app" for the app's
+     * language, or a language code. A video without it plays its original.
+     */
+    fun getPlayAudioLanguage(context: Context): Flow<String> =
+        context.dataStore.data.map { prefs -> prefs[PLAY_AUDIO_KEY].orEmpty() }
+
+    suspend fun setPlayAudioLanguage(context: Context, language: String) {
+        context.dataStore.edit { prefs -> prefs[PLAY_AUDIO_KEY] = language }
     }
 
     /** Completions from Google while typing a search. Off unless turned on. */

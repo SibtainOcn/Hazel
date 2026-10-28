@@ -1,18 +1,20 @@
 package com.hazel.android.ui.components.player
 
-import android.content.res.Configuration
-import android.view.OrientationEventListener
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.ActivityInfo
+import androidx.compose.runtime.SideEffect
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.HighQuality
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Translate
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.runtime.collectAsState
 import com.hazel.android.data.SettingsRepository
 import kotlinx.coroutines.launch
@@ -54,6 +56,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.layout.Layout
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -75,7 +78,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -92,7 +94,10 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.download.languageLabel
+import com.hazel.android.download.playback.AudioTrack
 import com.hazel.android.download.playback.PlaybackController
+import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import kotlinx.coroutines.delay
 
 /**
@@ -135,9 +140,12 @@ fun InlinePlayer(
     thumbnail: String?,
     fullscreen: Boolean,
     onFullscreen: () -> Unit,
-    onClose: () -> Unit,
+    onClose: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    onDownload: (() -> Unit)? = null
+    onDownload: (() -> Unit)? = null,
+    closeIcon: ImageVector = Icons.Filled.Close,
+    closeLabel: String? = null,
+    showControls: Boolean = true
 ) {
     Box(modifier = modifier.background(Color.Black)) {
         PlayerArea(
@@ -148,7 +156,10 @@ fun InlinePlayer(
             onToggleFullscreen = onFullscreen,
             onClose = onClose,
             onDownload = onDownload,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            closeIcon = closeIcon,
+            closeLabel = closeLabel,
+            showControls = showControls
         )
     }
 }
@@ -156,10 +167,10 @@ fun InlinePlayer(
 /**
  * The same player over the whole screen, with the system bars hidden.
  *
- * The app itself never turns. A wide picture on an upright screen is drawn turned a
- * quarter, following which way the phone is tilted, so it fills the screen held sideways
- * whatever the rotation lock says. Turning the app instead restarted it and stopped
- * playback. A tall picture, or a screen already sideways, is drawn as it is.
+ * The screen turns with the picture: landscape for a wide one, either side, whatever the
+ * rotation lock says, and portrait for a tall one. So the status bar, menus and dialogs
+ * turn with it. The activities handle the turn themselves, so playback carries on, and the
+ * orientation in force before is put back on exit. A size not yet known counts as wide.
  */
 @Composable
 fun FullscreenPlayer(
@@ -168,25 +179,16 @@ fun FullscreenPlayer(
     onExit: () -> Unit,
     onDownload: (() -> Unit)? = null
 ) {
-    val context = LocalContext.current
-    val wide = remember { controller.aspectRatio == 0f || controller.aspectRatio >= 1f }
-    val upright = LocalConfiguration.current.orientation != Configuration.ORIENTATION_LANDSCAPE
-    val turn = wide && upright
-
-    // Which way to turn: towards whichever side the phone is tipped to. Read from the
-    // sensor directly, so it works with the rotation lock on.
-    var degrees by remember { mutableFloatStateOf(90f) }
-    DisposableEffect(turn) {
-        val listener = object : OrientationEventListener(context) {
-            override fun onOrientationChanged(orientation: Int) {
-                when (orientation) {
-                    in 60..120 -> degrees = -90f
-                    in 240..300 -> degrees = 90f
-                }
-            }
-        }
-        if (turn && listener.canDetectOrientation()) listener.enable()
-        onDispose { listener.disable() }
+    val activity = LocalContext.current.findActivity()
+    val ratio = controller.aspectRatio
+    val tall = ratio > 0f && ratio < 1f
+    val before = remember(activity) { activity?.requestedOrientation }
+    DisposableEffect(activity) {
+        onDispose { if (activity != null && before != null) activity.requestedOrientation = before }
+    }
+    SideEffect {
+        val wanted = if (tall) ActivityInfo.SCREEN_ORIENTATION_PORTRAIT else ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        if (activity != null && activity.requestedOrientation != wanted) activity.requestedOrientation = wanted
     }
 
     Dialog(
@@ -201,21 +203,12 @@ fun FullscreenPlayer(
                 hide(WindowInsetsCompat.Type.systemBars())
             }
         }
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black),
             contentAlignment = Alignment.Center
         ) {
-            val area = if (turn) {
-                Modifier
-                    .requiredSize(width = maxHeight, height = maxWidth)
-                    .graphicsLayer { rotationZ = degrees }
-            } else {
-                Modifier
-                    .fillMaxSize()
-                    .systemBarsPadding()
-            }
             PlayerArea(
                 controller = controller,
                 thumbnail = thumbnail,
@@ -224,7 +217,9 @@ fun FullscreenPlayer(
                 onToggleFullscreen = onExit,
                 onClose = null,
                 onDownload = onDownload,
-                modifier = area
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding()
             )
         }
     }
@@ -239,7 +234,10 @@ private fun PlayerArea(
     onToggleFullscreen: () -> Unit,
     onClose: (() -> Unit)?,
     onDownload: (() -> Unit)?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    closeIcon: ImageVector = Icons.Filled.Close,
+    closeLabel: String? = null,
+    showControls: Boolean = true
 ) {
     var controlsShown by remember { mutableStateOf(true) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -307,7 +305,7 @@ private fun PlayerArea(
             )
         }
 
-        val controlsVisible = controlsShown || scrubbing || !controller.isPlaying
+        val controlsVisible = showControls && (controlsShown || scrubbing || !controller.isPlaying)
         if (!controlsVisible && controller.durationMs > 0) {
             // A hairline of progress stays along the foot while the controls are away.
             ProgressLine(
@@ -340,8 +338,8 @@ private fun PlayerArea(
             ) {
                 if (onClose != null) {
                     GlassIcon(
-                        icon = Icons.Filled.Close,
-                        description = stringResource(R.string.player_close),
+                        icon = closeIcon,
+                        description = closeLabel ?: stringResource(R.string.player_close),
                         onClick = onClose,
                         modifier = Modifier
                             .align(Alignment.TopStart)
@@ -383,22 +381,19 @@ private fun PlayerArea(
                             strokeCap = StrokeCap.Round,
                             modifier = Modifier.size(44.dp)
                         )
-                        else -> Surface(
+                        else -> MorphingPlayButton(
+                            playing = controller.isPlaying,
                             onClick = controller::toggle,
-                            shape = CircleShape,
-                            color = Color.White,
-                            modifier = Modifier.size(52.dp)
+                            color = Color.White
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    if (controller.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                                    contentDescription = stringResource(
-                                        if (controller.isPlaying) R.string.player_pause else R.string.player_play
-                                    ),
-                                    tint = Color.Black,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
+                            Icon(
+                                if (controller.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                                contentDescription = stringResource(
+                                    if (controller.isPlaying) R.string.player_pause else R.string.player_play
+                                ),
+                                tint = Color.Black,
+                                modifier = Modifier.size(30.dp)
+                            )
                         }
                     }
                 }
@@ -421,9 +416,9 @@ private fun PlayerArea(
 }
 
 /**
- * Time on the left, full screen on the right, and a thin bar under them: played in the
- * accent, loaded in white, the rest faint. The dot on the bar grows while it is dragged,
- * and a tap anywhere on the bar jumps there.
+ * Time on the left, full screen on the right, and a bar under them: played in the accent
+ * as a flowing wave while the video plays, loaded in white, the rest faint. A finger on the
+ * bar lays the wave flat and lengthens its pill thumb, and a tap anywhere jumps there.
  */
 @Composable
 private fun SeekBar(
@@ -451,8 +446,10 @@ private fun SeekBar(
         else -> 0f
     }
     val buffered = if (enabled) (controller.bufferedMs.toFloat() / duration).coerceIn(0f, 1f) else 0f
-    val thumb by animateDpAsState(if (scrubbing) 8.dp else 6.dp, label = "seekThumb")
+    val thumb by animateDpAsState(if (scrubbing) 22.dp else 16.dp, label = "seekThumb")
     val accent = MaterialTheme.colorScheme.primary
+    // Flows while the video plays; a finger on the bar or a pause lays it flat.
+    val (wave, wavePhase) = rememberSeekWave(flowing = controller.isPlaying && !scrubbing)
 
     Column(modifier = modifier) {
         if (scrubbing) {
@@ -470,10 +467,7 @@ private fun SeekBar(
                 color = Color.White
             )
             Spacer(modifier = Modifier.weight(1f))
-            // Offered only when this video has more than one quality to choose from.
-            if (controller.hasVideo && controller.heights.count { it <= MAX_PLAY_HEIGHT } > 1) {
-                QualityButton(controller = controller, onMenuChange = onMenuChange)
-            }
+            MoreButton(controller = controller, onMenuChange = onMenuChange)
             GlassIcon(
                 icon = if (fullscreen) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen,
                 description = stringResource(
@@ -486,7 +480,7 @@ private fun SeekBar(
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(20.dp)
+                .height(28.dp)
                 .pointerInput(enabled) {
                     if (!enabled) return@pointerInput
                     detectTapGestures { offset ->
@@ -513,10 +507,11 @@ private fun SeekBar(
         ) {
             val y = size.height / 2f
             val stroke = if (scrubbing) 4.dp.toPx() else 3.dp.toPx()
-            drawSeekLine(y, stroke, 1f, Color.White.copy(alpha = 0.25f))
-            drawSeekLine(y, stroke, buffered, Color.White.copy(alpha = 0.45f))
-            drawSeekLine(y, stroke, played, accent)
-            drawCircle(accent, radius = thumb.toPx(), center = Offset(size.width * played, y))
+            // The track and the loaded part start at the thumb, so nothing runs under the wave.
+            drawSeekLine(y, stroke, 1f, Color.White.copy(alpha = 0.25f), from = played)
+            drawSeekLine(y, stroke, buffered, Color.White.copy(alpha = 0.45f), from = played)
+            drawWavyLine(y, stroke, played, accent, wave.value, wavePhase.value)
+            drawPillThumb(size.width * played, y, accent, height = thumb.toPx(), width = 5.dp.toPx())
         }
     }
 }
@@ -547,75 +542,140 @@ private fun ScrubTime(text: String, fraction: Float, modifier: Modifier = Modifi
     }
 }
 
+private enum class PlayerChoice { NONE, QUALITY, AUDIO }
+
 /**
- * The quality playing now, and a menu of the qualities this video has, from whichever
- * engine found it. The choice is saved as the playback quality, so later videos start at
- * it; a video without that quality plays the nearest one below, or its smallest.
+ * More choices for the playing video: its quality and its audio track, each opening a list.
+ * The quality is saved as the playback quality, so later videos start at it. A video with
+ * one sound track lists it as the original.
  */
 @Composable
-private fun QualityButton(controller: PlaybackController, onMenuChange: (Boolean) -> Unit) {
+private fun MoreButton(controller: PlaybackController, onMenuChange: (Boolean) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val cap by remember(context) { SettingsRepository.getPlayQuality(context) }
         .collectAsState(initial = SettingsRepository.DEFAULT_PLAY_QUALITY)
-    var open by remember { mutableStateOf(false) }
-    val setOpen = { value: Boolean ->
-        open = value
-        onMenuChange(value)
+    var menu by remember { mutableStateOf(false) }
+    var open by remember { mutableStateOf(PlayerChoice.NONE) }
+    val latestMenuChange by rememberUpdatedState(onMenuChange)
+    LaunchedEffect(menu, open) { latestMenuChange(menu || open != PlayerChoice.NONE) }
+    DisposableEffect(Unit) { onDispose { latestMenuChange(false) } }
+
+    val loading = controller.phase == PlaybackController.Phase.LOADING
+    val heights = controller.heights.filter { it <= MAX_PLAY_HEIGHT }
+    val playingHeight = controller.videoHeight.takeIf { it > 0 } ?: cap
+    val tracks = controller.audioTracks
+    val playingTrack = tracks.firstOrNull { it.id == controller.audioTrackId }
+
+    @Composable
+    fun Value(text: String) {
+        if (loading) {
+            LinearProgressIndicator(strokeCap = StrokeCap.Round, modifier = Modifier.width(36.dp))
+        } else {
+            Text(
+                text,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
+        }
     }
-    val playing = controller.videoHeight.takeIf { it > 0 } ?: cap
 
     Box {
-        Surface(
-            onClick = { setOpen(true) },
-            shape = RoundedCornerShape(8.dp),
-            color = Color.Transparent,
-            contentColor = Color.White
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Filled.HighQuality,
-                    contentDescription = stringResource(R.string.fetch_settings_play_quality),
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    stringResource(R.string.player_quality_value, playing),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        }
-        DropdownMenu(expanded = open, onDismissRequest = { setOpen(false) }) {
-            controller.heights.filter { it <= MAX_PLAY_HEIGHT }.forEach { height ->
+        GlassIcon(
+            icon = Icons.Filled.MoreVert,
+            description = stringResource(R.string.player_more_options),
+            onClick = { menu = true },
+            background = Color.Transparent
+        )
+        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+            // Offered only when this video has more than one quality to choose from.
+            if (controller.hasVideo && (loading || heights.size > 1)) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.player_quality_value, height)) },
-                    trailingIcon = if (height == playing) {
-                        { Icon(Icons.Filled.Check, contentDescription = null) }
-                    } else null,
+                    text = { Text(stringResource(R.string.properties_quality), maxLines = 1) },
+                    compact = true,
+                    icon = Icons.Filled.HighQuality,
+                    enabled = !loading,
+                    trailingIcon = { Value(stringResource(R.string.player_quality_value, playingHeight)) },
                     onClick = {
-                        setOpen(false)
-                        scope.launch {
-                            // Kept on the settings' own steps; the step at or above an odd
-                            // height still plays that height here.
-                            val step = SettingsRepository.PLAY_QUALITIES.firstOrNull { it >= height }
-                                ?: SettingsRepository.PLAY_QUALITIES.last()
-                            SettingsRepository.setPlayQuality(context, step)
-                            if (height != playing) controller.reload()
-                        }
+                        menu = false
+                        open = PlayerChoice.QUALITY
                     }
                 )
             }
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.player_audio_track), maxLines = 1) },
+                compact = true,
+                icon = Icons.Filled.Translate,
+                enabled = !loading,
+                trailingIcon = {
+                    Value(playingTrack?.let { audioTrackLabel(it) } ?: stringResource(R.string.player_audio_original))
+                },
+                onClick = {
+                    menu = false
+                    open = PlayerChoice.AUDIO
+                }
+            )
         }
+    }
+
+    val close = { open = PlayerChoice.NONE }
+    when (open) {
+        PlayerChoice.NONE -> Unit
+        PlayerChoice.QUALITY -> SingleChoiceDialog(
+            title = stringResource(R.string.fetch_settings_play_quality),
+            choices = heights.map { it to stringResource(R.string.player_quality_value, it) },
+            selected = playingHeight,
+            onSelect = { height ->
+                close()
+                scope.launch {
+                    // Kept on the settings' own steps; the step at or above an odd height
+                    // still plays that height here.
+                    val step = SettingsRepository.PLAY_QUALITIES.firstOrNull { it >= height }
+                        ?: SettingsRepository.PLAY_QUALITIES.last()
+                    SettingsRepository.setPlayQuality(context, step)
+                    controller.reload()
+                }
+            },
+            onDismiss = close
+        )
+        PlayerChoice.AUDIO -> {
+            val labelled = tracks.map { it to audioTrackLabel(it) }
+            // The original first, audio description last, the rest by name.
+            val choices = if (labelled.isEmpty()) {
+                listOf("" to stringResource(R.string.player_audio_original))
+            } else {
+                labelled.sortedWith(compareBy({ !it.first.original }, { it.first.descriptive }, { it.second }))
+                    .map { (track, label) -> track.id to label }
+            }
+            SingleChoiceDialog(
+                title = stringResource(R.string.player_audio_track),
+                choices = choices,
+                selected = if (tracks.isEmpty()) "" else controller.audioTrackId.orEmpty(),
+                onSelect = { id ->
+                    close()
+                    controller.selectAudio(id)
+                },
+                onDismiss = close
+            )
+        }
+    }
+}
+
+/** A track's language in the app's language, marked when it is the original or a description. */
+@Composable
+private fun audioTrackLabel(track: AudioTrack): String {
+    val name = track.language?.let(::languageLabel) ?: stringResource(R.string.player_audio_original)
+    return when {
+        track.descriptive -> stringResource(R.string.player_audio_descriptive, name)
+        track.original && track.language != null -> stringResource(R.string.player_audio_original_of, name)
+        else -> name
     }
 }
 
 /** The bar alone, for while the controls are hidden. */
 @Composable
-private fun ProgressLine(played: Float, buffered: Float, modifier: Modifier = Modifier) {
+internal fun ProgressLine(played: Float, buffered: Float, modifier: Modifier = Modifier) {
     val accent = MaterialTheme.colorScheme.primary
     Canvas(modifier = modifier) {
         val y = size.height / 2f
@@ -624,11 +684,11 @@ private fun ProgressLine(played: Float, buffered: Float, modifier: Modifier = Mo
     }
 }
 
-private fun DrawScope.drawSeekLine(y: Float, stroke: Float, fraction: Float, color: Color) {
-    if (fraction <= 0f) return
+private fun DrawScope.drawSeekLine(y: Float, stroke: Float, fraction: Float, color: Color, from: Float = 0f) {
+    if (fraction <= from) return
     drawLine(
         color = color,
-        start = Offset(0f, y),
+        start = Offset(size.width * from, y),
         end = Offset(size.width * fraction, y),
         strokeWidth = stroke,
         cap = StrokeCap.Round
@@ -727,3 +787,9 @@ private const val MAX_PLAY_HEIGHT = 1080
 private const val SKIP_SECONDS = 5
 private const val SKIP_MS = SKIP_SECONDS * 1000L
 private const val SKIP_FLASH_MS = 700L
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}

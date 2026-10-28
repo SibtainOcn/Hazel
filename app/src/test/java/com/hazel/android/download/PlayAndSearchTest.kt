@@ -4,6 +4,9 @@ import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.MediaSearch
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.download.extractor.SearchSuggestions
+import com.hazel.android.download.playback.AudioTrack
+import com.hazel.android.download.playback.AudioTracks
+import com.hazel.android.download.playback.AudioWish
 import com.hazel.android.download.playback.StreamResolver
 import com.hazel.android.ui.screens.download.isLinks
 import com.hazel.android.ui.screens.download.linkParts
@@ -37,6 +40,72 @@ class PlayAndSearchTest {
         assertNotNull(stream)
         assertEquals("https://a/720v", stream.url)
         assertEquals("https://a/audio", stream.audioUrl)
+    }
+
+    private val dubbed = arrayOf(
+        """{"url":"https://a/360","protocol":"https","vcodec":"avc1","acodec":"mp4a","height":360,"ext":"mp4"}""",
+        """{"url":"https://a/360v","protocol":"https","vcodec":"avc1","acodec":"none","height":360,"ext":"mp4"}""",
+        """{"url":"https://a/hi","protocol":"https","vcodec":"none","acodec":"mp4a","ext":"m4a","abr":130,"language":"hi","language_preference":-1}""",
+        """{"url":"https://a/en","protocol":"https","vcodec":"none","acodec":"mp4a","ext":"m4a","abr":128,"language":"en-US","language_preference":10}""",
+        """{"url":"https://a/en-ad","protocol":"https","vcodec":"none","acodec":"mp4a","ext":"m4a","abr":140,"language":"en-US-desc","language_preference":-10}"""
+    )
+
+    @Test
+    fun startsOnTheOriginalTrackAndListsEveryLanguage() {
+        val stream = StreamResolver.pick(media(*dubbed), maxHeight = 720)
+        assertNotNull(stream)
+        assertEquals("https://a/360v", stream.url)
+        assertEquals("https://a/en", stream.audioUrl)
+        assertEquals("en-US", stream.audioTrackId)
+        assertEquals(3, stream.audioTracks.size)
+        assertTrue(stream.audioTracks.single { it.id == "en-US-desc" }.descriptive)
+    }
+
+    @Test
+    fun startsOnTheWishedLanguageOrAPickedTrack() {
+        val byLanguage = StreamResolver.pick(media(*dubbed), 720, AudioWish(language = "hi-IN"))
+        assertEquals("https://a/hi", byLanguage?.audioUrl)
+        val missing = StreamResolver.pick(media(*dubbed), 720, AudioWish(language = "fr"))
+        assertEquals("https://a/en", missing?.audioUrl)
+        val picked = StreamResolver.pick(media(*dubbed), 720, AudioWish(trackId = "en-US-desc", language = "hi"))
+        assertEquals("https://a/en-ad", picked?.audioUrl)
+    }
+
+    @Test
+    fun swapsOnlyTheSound() {
+        val stream = StreamResolver.pick(media(*dubbed), maxHeight = 720)!!
+        val hindi = stream.audioTracks.single { it.language == "hi" }
+        val swapped = stream.withAudio(hindi)
+        assertEquals(stream.url, swapped?.url)
+        assertEquals("https://a/hi", swapped?.audioUrl)
+        assertEquals("hi", swapped?.audioTrackId)
+        assertNull(stream.withAudio(hindi.copy(url = "")))
+    }
+
+    @Test
+    fun choosingSkipsDescriptionUnlessAskedAndFallsBackToFirst() {
+        val tracks = listOf(
+            AudioTrack("a", "en", descriptive = true, url = "u1"),
+            AudioTrack("b", "es", url = "u2"),
+            AudioTrack("c", "de", url = "u3")
+        )
+        assertEquals("b", AudioTracks.choose(tracks, AudioWish())?.id)
+        assertEquals("b", AudioTracks.choose(tracks, AudioWish(language = "en"))?.id)
+        assertEquals("a", AudioTracks.choose(tracks, AudioWish(trackId = "a"))?.id)
+        assertNull(AudioTracks.choose(emptyList(), AudioWish(language = "en")))
+    }
+
+    @Test
+    fun oneLanguageOffersNoChoice() {
+        val stream = StreamResolver.pick(
+            media(
+                """{"url":"https://a/720v","protocol":"https","vcodec":"avc1","acodec":"none","height":720,"ext":"mp4"}""",
+                """{"url":"https://a/audio","protocol":"https","vcodec":"none","acodec":"mp4a","ext":"m4a","language":"en"}"""
+            ),
+            maxHeight = 720
+        )
+        assertTrue(stream!!.audioTracks.isEmpty())
+        assertNull(stream.audioTrackId)
     }
 
     @Test

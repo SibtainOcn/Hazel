@@ -2,6 +2,7 @@ package com.hazel.android.download
 
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkEntry
+import com.hazel.android.util.PostItem
 import com.hazel.android.util.UrlExtractor
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
@@ -78,7 +79,7 @@ object MediaProbe {
         processId: String,
         signedIn: Boolean
     ): MediaInfo {
-        val request = YoutubeDLRequest(url).apply {
+        val request = YoutubeDLRequest(PostItem.address(url)).apply {
             applySharedOptions(url, cacheDir, access, fetchMode, forceIpv4)
             addOption("--dump-single-json")
         }
@@ -90,7 +91,9 @@ object MediaProbe {
                 ?: throw IllegalStateException("No metadata returned")
 
             val json = JSONObject(payload)
-            val parsed = withStreamDuration(parse(url, json), json).copy(requiresSignIn = signedIn)
+            var parsed = withStreamDuration(parse(url, json), json).copy(requiresSignIn = signedIn)
+            // The engine reports the post's address; the item keeps its own.
+            if (PostItem.indexOf(url) != null) parsed = parsed.copy(url = url)
 
             // Kept so a repeat of this link needs no read, and so the download can replay
             // the payload instead of extracting the same thing over again.
@@ -154,6 +157,13 @@ object MediaProbe {
         // The same two-step as a single read, and for the same reason: a public list is
         // read anonymously, and the sign-in is kept for the one that will not open
         // without it.
+        // One item of a post is one item, read as such.
+        if (PostItem.indexOf(url) != null) {
+            return@withContext LinkContents.Single(
+                probe(url, cacheDir, access, fetchMode, forceIpv4, processId)
+            )
+        }
+
         val attempts = signInAttempts(url, access)
 
         attempts.forEachIndexed { index, attempt ->
@@ -212,12 +222,27 @@ object MediaProbe {
             return LinkContents.Single(info)
         }
 
-        val listed = buildList {
-            val length = entries.length()
-            for (index in 0 until length) {
-                val entry = entries.optJSONObject(index) ?: continue
-                toEntry(entry, url)?.let { add(it) }
+        val read = (0 until entries.length()).mapNotNull { index ->
+            val json = entries.optJSONObject(index) ?: return@mapNotNull null
+            toEntry(json, url)?.let { Triple(index, json, it) }
+        }
+
+        // The items of one post all carry the post's own address, and downloading that
+        // takes every one of them. Each is given its place in the post instead, and keeps
+        // the formats it was listed with, so it needs no read of its own.
+        val postAddress = firstNonBlank(root.optString("webpage_url"), url)
+        val sharing = read.groupingBy { it.third.url }.eachCount()
+        val listed = read.map { (index, json, entry) ->
+            val ownAddress = (sharing[entry.url] ?: 0) < 2 && entry.url != postAddress
+            if (read.size < 2 || ownAddress) return@map entry
+            val place = json.optInt("playlist_index").takeIf { it > 0 } ?: (index + 1)
+            val item = entry.copy(url = PostItem.of(entry.url, place))
+            if (json.optJSONArray("formats")?.length()?.let { it > 0 } == true) {
+                val info = withStreamDuration(parse(item.url, json), json)
+                    .copy(url = item.url, requiresSignIn = signedIn)
+                InfoCache.put(item.url, info, json.toString())
             }
+            item
         }
 
         // A wrapper holding exactly one entry is a single item wearing a collection's
@@ -336,6 +361,7 @@ object MediaProbe {
         // item or several, because that is exactly the question this option answers in
         // advance. Everywhere else the caller already knows it wants one item.
         if (singleItem) addOption("--no-playlist")
+        PostItem.indexOf(url)?.let { addOption("--playlist-items", it.toString()) }
         addOption("--no-warnings")
         addOption("--no-check-certificates")
         addOption("--skip-download")

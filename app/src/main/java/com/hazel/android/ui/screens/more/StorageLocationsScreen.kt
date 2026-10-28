@@ -24,8 +24,8 @@ import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -333,6 +333,7 @@ private fun <T> LimitDropdownRow(
                     choices.forEach { (value, label) ->
                         DropdownMenuItem(
                             text = { Text(label) },
+                            selected = value == selected,
                             onClick = {
                                 menuOpen = false
                                 onSelect(value)

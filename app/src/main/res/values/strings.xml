@@ -33,6 +33,7 @@
     <string name="download_waiting_wifi">Waiting for Wi-Fi</string>
     <string name="download_saved">Saved</string>
     <string name="download_queued">Queued</string>
+    <string name="download_reading_link">Reading link</string>
     <string name="download_downloaded">Downloaded</string>
     <string name="download_failed">Failed</string>
     <string name="download_remove_link">Remove link</string>
@@ -48,12 +49,15 @@
 
     <!-- SearchScreen -->
     <string name="search_hint">Search or insert URL</string>
+    <string name="search_recent">Recent</string>
     <string name="search_back">Back</string>
     <string name="search_more">More</string>
     <string name="search_add_link">Add another link</string>
     <string name="search_link_already_added">Already in the list</string>
     <string name="search_clear">Clear</string>
     <string name="search_clear_results">Clear results</string>
+    <string name="search_options_results">Results</string>
+    <string name="search_options_history">History</string>
     <string name="search_clear_history">Clear search history</string>
     <string name="search_under_maintenance">Under maintenance</string>
     <string name="search_options_title">Search options</string>
@@ -247,7 +251,9 @@
     <string name="sponsor_issues_subtitle">A site that stopped working is a fix nobody else can write.</string>
     <string name="sponsor_source_title">Read the source</string>
     <string name="sponsor_source_subtitle">Every line of it is public, and pull requests are welcome.</string>
-    <string name="sponsor_footer">No advertisements, nothing measured about what you download, and no feature held back for anyone. Support changes how much time goes into Hazel, not what it will do for you.</string>
+    <string name="sponsor_section_developer">Developer</string>
+    <string name="sponsor_developer_subtitle">My GitHub profile and other projects.</string>
+    <string name="sponsor_developer_name" translatable="false">SibtainOcn</string>
 
 
     <!-- DownloadOptionDialogs -->
@@ -266,7 +272,17 @@
     <string name="options_subtitles_languages_title">Subtitle languages</string>
     <string name="options_subtitles_languages_hint">A yt-dlp language selector, e.g. en,.*-orig. Use all for every language.</string>
     <string name="options_filename_title">Filename template</string>
-    <string name="options_filename_hint" formatted="false">yt-dlp output template. Use %(title)s, %(uploader)s, %(id)s and %(ext)s.</string>
+    <string name="options_filename_presets">Presets</string>
+    <string name="options_filename_fields">Insert a field</string>
+    <string name="options_filename_subtitle">How downloaded files are named</string>
+    <string name="options_filename_clear">Clear</string>
+    <string name="filename_preset_title">Title</string>
+    <string name="filename_preset_uploader_title">Uploader – Title</string>
+    <string name="filename_preset_date_title">Date – Title</string>
+    <string name="filename_preset_playlist_title">Playlist number – Title</string>
+    <string name="filename_preset_title_id">Title [ID]</string>
+    <string name="filename_preset_title_resolution">Title (resolution)</string>
+    <string name="filename_preset_artist_track">Artist – Track</string>
     <string name="options_text_input_save">Save</string>
     <string name="options_text_input_cancel">Cancel</string>
 
@@ -419,6 +435,17 @@
     <string name="properties_saved_to">Saved to</string>
     <string name="properties_downloaded">Downloaded</string>
     <string name="properties_source">Source</string>
+    <string name="properties_name">Name</string>
+    <string name="properties_section_media">Media</string>
+    <string name="properties_section_again">Get it again</string>
+    <string name="properties_show_file">Show file</string>
+    <string name="properties_share">Share</string>
+    <string name="properties_copied">Copied</string>
+    <string name="properties_download_again">Download again</string>
+    <string name="properties_download_again_hint">Best quality with your current settings</string>
+    <string name="properties_fetch_again">Fetch again</string>
+    <string name="properties_fetch_again_hint">Read the link fresh and pick a format</string>
+    <string name="properties_queued">Downloading again</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">Back</string>
@@ -497,9 +524,9 @@
     <string name="audio_quality_128kbps" translatable="false">128 kbps</string>
     <string name="audio_quality_64kbps" translatable="false">64 kbps</string>
     <string name="batch_audio_quality_subtitle">Used when converting to another format</string>
-    <string name="batch_bar_hq_auto" translatable="false">HQ: AUTO</string>
-    <string name="batch_bar_hq_best" translatable="false">HQ: BEST</string>
-    <string name="batch_bar_hq_value" translatable="false">HQ: %1$s</string>
+    <string name="batch_bar_hq_auto" translatable="false">AUTO</string>
+    <string name="batch_bar_hq_best" translatable="false">BEST</string>
+    <string name="batch_bar_hq_value" translatable="false">%1$s</string>
     <string name="batch_type_sheet_title">Preferred download type</string>
     <string name="batch_type_sheet_subtitle">What these links download as</string>
     <string name="batch_type_audio">Audio</string>
@@ -816,18 +843,12 @@
     <string name="more_backup">Backup</string>
     <string name="backup_title">Backup and restore</string>
     <string name="backup_description">Save settings, history, queue, cookies and searches to a file, then restore anywhere.</string>
-    <string name="backup_section_now">Now</string>
     <string name="backup_backup">Back up</string>
-    <string name="backup_backup_summary">Choose what to save</string>
     <string name="backup_restore">Restore</string>
-    <string name="backup_restore_summary">From a backup file</string>
     <string name="backup_section_where">Automatic</string>
     <string name="backup_auto">Automatic backup</string>
-    <string name="backup_auto_summary">Back up everything once when an update to Hazel is found</string>
     <string name="backup_folder">Backup folder</string>
-    <string name="backup_folder_reset">Use the default folder</string>
     <string name="backup_choose">Select backup categories</string>
-    <string name="backup_restore_choose">Select what to restore</string>
     <string name="backup_saved">Saved %1$s</string>
     <string name="backup_failed">The backup could not be saved</string>
     <string name="backup_not_a_backup">That file is not a Hazel backup</string>
@@ -836,13 +857,58 @@
     <string name="backup_category_history">Downloads</string>
     <string name="backup_category_queue">In queue</string>
     <string name="backup_category_failed">Failed</string>
-    <string name="backup_category_cookies">Cookies</string>
+    <string name="backup_category_cookies">Cookies and tokens</string>
     <string name="backup_category_search">Search history</string>
+    <string name="backup_auto_summary">Before updates</string>
+    <string name="backup_section_saved">Saved backups</string>
+    <string name="backup_saved_empty">No backups in this folder yet</string>
+    <string name="backup_kind_auto">Automatic · %1$s</string>
+    <string name="backup_kind_manual">Manual · %1$s</string>
+    <string name="backup_item_summary">%1$s · %2$s</string>
+    <string name="backup_last">Last backup</string>
+    <string name="backup_none_yet">No backup yet</string>
+    <string name="backup_schedule">Schedule</string>
+    <string name="backup_schedule_off">Off</string>
+    <string name="backup_schedule_daily">Daily</string>
+    <string name="backup_schedule_weekly">Weekly</string>
+    <string name="backup_keep">Automatic backups to keep</string>
+    <string name="backup_keep_all">All</string>
+    <string name="backup_keep_count">%1$d newest</string>
+    <string name="backup_include">Include in automatic backups</string>
+    <string name="backup_share">Share</string>
+    <string name="backup_share_failed">No app can share this file</string>
+    <string name="backup_delete">Delete</string>
+    <string name="backup_delete_title">Delete this backup?</string>
+    <string name="backup_delete_body">The file is removed from the folder. This cannot be undone.</string>
+    <string name="backup_delete_failed">The backup could not be deleted</string>
+    <string name="backup_restore_failed">The backup could not be restored</string>
+    <string name="backup_newer">This backup is from Hazel %1$s. Update the app to restore it.</string>
+    <string name="backup_preview_title">Restore this backup?</string>
+    <string name="backup_preview_from">Hazel %1$s · %2$s</string>
+    <string name="backup_entries">%1$d entries</string>
+    <string name="backup_offer_title">Restore your data?</string>
+    <string name="backup_offer_found">A backup from %1$s was found.</string>
+    <string name="backup_offer_pick">Pick a Hazel backup file to bring back your settings and downloads.</string>
+    <string name="backup_offer_choose">Choose file</string>
+    <string name="backup_not_now">Not now</string>
+    <string name="backup_folder_body">Where backups are saved. Automatic backups and the restore offer look here.</string>
+    <string name="backup_view">View</string>
+    <string name="backup_show_folder">Show folder</string>
+    <string name="backup_share_title">Share this backup?</string>
+    <string name="backup_share_body">A backup can hold your cookies, sign-in tokens, proxy user name and download history. Share it only with people and apps you trust.</string>
+    <string name="backup_view_failed">No app can open this</string>
+    <string name="backup_section_contains">Contains</string>
+    <string name="backup_included">Included</string>
+    <string name="backup_version">Version</string>
+    <string name="backup_entries_label">Entries</string>
+    <string name="backup_categories_label">Categories</string>
     <string name="search_no_results">No results for %1$s</string>
     <string name="player_play">Play</string>
     <string name="player_pause">Pause</string>
     <string name="player_close">Close player</string>
     <string name="player_fullscreen">Full screen</string>
+    <string name="player_minimize">Minimize</string>
+    <string name="player_expand">Open player</string>
     <string name="player_exit_fullscreen">Exit full screen</string>
     <string name="player_failed">Could not play this</string>
     <string name="player_retry">Try again</string>
@@ -867,6 +933,13 @@
     <string name="fetch_settings_playback">Playback</string>
     <string name="fetch_settings_play_with">Play with</string>
     <string name="fetch_settings_play_quality">Playback quality</string>
+    <string name="fetch_settings_play_audio">Audio language</string>
+    <string name="player_audio_original">Original</string>
+    <string name="player_audio_app_language">App language</string>
+    <string name="player_audio_track">Audio track</string>
+    <string name="player_more_options">More options</string>
+    <string name="player_audio_original_of">%1$s (original)</string>
+    <string name="player_audio_descriptive">%1$s (audio description)</string>
     <string name="fetch_settings_play_quality_value">Up to %1$dp</string>
     <string name="fetch_settings_engine_newpipe_summary">Fastest on YouTube, SoundCloud and Bandcamp. yt-dlp handles everything else.</string>
     <string name="fetch_settings_engine_ytdlp_summary">Slower to start, and works on every site yt-dlp supports.</string>
@@ -922,4 +995,38 @@
     <string name="proxy_remove">Remove proxy</string>
     <string name="proxy_host_invalid">Enter a host name or IP address</string>
     <string name="proxy_port_invalid">Enter a port from 1 to 65535</string>
+    <string name="upd_software_title">Software update</string>
+    <string name="upd_hazel_title">Hazel updates</string>
+    <string name="upd_ytdlp_bundled">Bundled</string>
+    <string name="upd_tile_hazel">Hazel</string>
+    <string name="upd_tile_cpu">CPU</string>
+    <string name="upd_tile_android">Android</string>
+    <string name="upd_tile_channel">Channel</string>
+    <string name="upd_tile_code">Code</string>
+    <string name="upd_tile_installed">Installed</string>
+    <string name="upd_tile_source">Source</string>
+    <string name="upd_tile_version">Version</string>
+    <string name="upd_action_changelog">Changelog</string>
+    <string name="upd_action_copy_info">Copy info</string>
+    <string name="upd_action_report">Report</string>
+    <string name="upd_action_releases">Releases</string>
+    <string name="upd_action_check">Check</string>
+    <string name="upd_action_copy">Copy</string>
+    <string name="upd_section_components">Components</string>
+    <string name="upd_section_device">Device</string>
+    <string name="upd_section_channel">Channel</string>
+    <string name="upd_section_source">Source</string>
+    <string name="upd_repository">Repository</string>
+    <string name="upd_label_model">Model</string>
+    <string name="upd_label_android">Android</string>
+    <string name="upd_label_arch">Architecture</string>
+    <string name="upd_label_build">Build</string>
+    <string name="upd_status_current">%1$s · up to date</string>
+    <string name="upd_status_ready">%1$s · update ready</string>
+    <string name="upd_hazel_fdroid">%1$s · managed by F-Droid</string>
+    <string name="upd_chip_new">New</string>
+    <string name="upd_copy_failed">Couldn\'t copy</string>
+    <string name="upd_report_copied">Device info copied. Paste it into the issue.</string>
+    <string name="upd_channel_note">Beta and Nightly get fixes first and can be less stable.</string>
+    <string name="upd_status_ok">Up to date on %1$s</string>
 </resources>

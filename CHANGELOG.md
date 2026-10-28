@@ -6,6 +6,90 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Support: a Developer card that opens the developer's GitHub profile.
+- Mini player: scrolling away or starting a download moves the video to a mini player instead of stopping it; tap it to open it large.
+- Player menu next to full screen: quality and audio track, to switch between a video's original audio and its dubs.
+- Playback audio language setting in Fetch settings, set to the original by default.
+
+### Changed
+- Home: tapping the Hazel logo in the header opens Support.
+- Software update and Hazel updates screens redesigned with stat tiles, shaped actions and copyable device info for bug reports.
+- Hazel updates: the status cookie shows live wavy progress while checking and downloading.
+- Update screens follow the theme and accent everywhere, including yt-dlp updates, which gets the same status cookie, tiles and shaped actions.
+- Channel pickers on the update screens are connected segments with the chosen one in the accent.
+- Changelog opens in the in-app viewer from the update screens.
+- What's new for an available stable update opens the release notes on the Hazel site.
+- Screen transitions: opening a screen slides along a shared axis and tabs crossfade, with no blank frame between screens.
+- Getting started steps and the Appearance screen use M3 shapes behind their icons.
+- The background downloads card on More follows the theme, with a shaped battery icon.
+- More opens without re-checking battery, language and temp size on the main thread every visit.
+- Cookie import and converter file picks read the file in the background.
+- Backup screen rebuilt: saved backups with restore, share and delete, a schedule, retention, category and folder choice.
+- Automatic backup now runs after every app update and on a schedule; old automatic backups are cleaned up.
+- Restore shows a preview, blocks backups from newer versions, and brings back the app language.
+- A fresh install offers to restore from a backup.
+- Each saved backup opens a sheet with restore, view, show folder and share; sharing warns that backups hold sensitive data.
+- The backup folder uses the storage dialog with SD cards and free space; a card gets its own Hazel/Backups folder.
+- Backups now cover sign-in tokens with cookies and the paused queue state; update-check markers stay on the device.
+- Format sheet skeleton uses the cookie badge, and the tune and refresh buttons sit on M3 shapes.
+- Glass is off by default on new installs. Existing users keep their current look.
+- New splash animation: the bolt draws itself, then a circle opens from it onto home. Replaces the static shimmer. Tap to skip; skipped when system animations are off.
+- Splash background is pure black in all themes. The system launch screen no longer shows an icon.
+- Smoother start: home is prepared behind the splash, and the yt-dlp and FFmpeg setup runs after it.
+- Faster cold start with a bundled startup profile, also applied on GitHub and F-Droid installs.
+- Splash runs at the display's highest refresh rate on Android 15 and later.
+- Home header logo sits on an M3 Expressive cookie badge. Hazel Instant uses the same shape behind its bolt.
+- Format sheet: badges sit on six-sided cookies. every badge is solid accent.
+- Playlist sheet: the bottom buttons form one connected group; the quality button shows the chosen quality alone (1080p, AUTO).
+- Playlist sheet: search, select and more buttons sit on six-sided cookies.
+- Menus across the app: rounded panels on glass or the theme surface; each item leads with its icon on an accent shape chosen by what it does, and the current choice is tinted.
+- Home: Download all is a slimmer accent pill led by a seven-sided cookie; each result plays from a flat accent six-sided cookie.
+- Home and Search: the paste button is larger and folds down onto an M3 rounded square.
+- Home: the search bar's icon sits on a solid accent seven-sided cookie.
+- Home header: the logo and name share one tonal pill.
+- Paste button: a dark tile with the icon on an accent seven-sided cookie.
+- Search: back and menu sit on soft tiles, the field leads with an accent cookie, the chosen source is an accent tab, and recent searches form one rounded group.
+- Home: the search bar's menu is a connected end segment, and incognito is a tonal circle that fills with the accent when on.
+- Search: buttons, chips and rows squeeze and morph their corners when pressed.
+- Bottom bar: each tab has its own soft tonal shape behind its icon when chosen (cookie, pentagon, clover, gem), morphing in from a circle.
+- Home: the empty-screen download icon has a whole tray instead of a broken one.
+- Download queue: the tabs are a connected group; the chosen one rounds out into an accent pill, and the menu sits on a soft tile.
+- All Downloads: search, filter and menu form one connected group.
+- Download sheet: Download matches Download all with its arrow on a cookie; link and incognito form one connected pair.
+- Missing or loading thumbnails show the Hazel bolt on a soft accent pentagon instead of a blank area.
+- Open folder lists every installed file manager, not only the built-in Files app.
+- All Downloads: Properties opens at half height with the title first, quick figures, and Play, Open with, Show file and Share on cookies.
+- All Downloads: Properties can copy the file name or link, open the link in a browser, download again or fetch the link again.
+- More: the title and search stay pinned while the settings scroll.
+- Audio language: language codes sit on seven-sided cookies.
+- Format filter sheet: compact grouped lists with a cookie marking each choice.
+- Text fields across the app are rounded tiles with a thin rim instead of outlined boxes.
+- Filename template opens in a sheet with presets and tap-to-insert fields, and stays above the keyboard.
+- Search options: Clear history and Clear results sit beside the title on six-sided cookies, so the sheet is shorter.
+- Hazel Instant: the bolt sits on a clearer cookie, and its shimmer is a faster, sharper sweep that shows on every accent in dark and light.
+- Sponsor: removed the closing paragraph.
+- All Downloads: the Status filter opens as a dialog instead of a sheet.
+- Player: the seek bar flows as a wave while playing and lies flat on touch or pause, with a pill thumb. Play is a pentagon while paused and a slowly turning six-sided cookie while playing. Both stay still when system animations are off.
+
+### Fixed
+- yt-dlp release notes no longer open a missing page when the installed version is unknown.
+- Download all no longer shows on search results restored after a restart.
+- Player no longer starts on a dubbed track when playing through yt-dlp.
+- Player no longer stalls a few seconds into YouTube videos.
+- Choice dialogs open scrolled to the selected option.
+- Splash: the logo finishes drawing before home loads, so it no longer freezes mid-trace.
+- Search options: the sheet opens at half height instead of full screen.
+- Filename template: a slash, a stray %, a leading dot or a missing extension no longer loses or breaks the saved file.
+- Filename template: long artist, track or playlist names no longer fail with "File name too long", and extra arguments can no longer override the name.
+- Splash: opens onto home as soon as the logo finishes, without the extra pause.
+- Player: full screen turns the screen to landscape for wide videos and portrait for tall ones, so the status bar and quality menu turn with it.
+- Player: the seek bar wave and play button no longer animate while paused.
+- Playlist sheet: Download takes only the ticked links (#126).
+- Instant: a YouTube video shared from a playlist or Mix downloads that video alone (#126).
+- Instant: each video of a multi-video X post downloads once, instead of every video per entry.
+- Instant: links are read in full before download, so the real best format is used instead of a guess.
+- Queue: a link shared to Instant shows on the Running tab while it is being read.
 
 ## [1.1.15] - 2026-10-23
 ### Added

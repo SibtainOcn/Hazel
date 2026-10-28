@@ -19,7 +19,7 @@ import androidx.compose.material.icons.filled.Image
 import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.hazel.android.ui.components.ExpressiveTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -274,22 +274,6 @@ fun SubtitlesDialog(
     }
 }
 
-/** The yt-dlp output template used to name the saved file. */
-@Composable
-fun FilenameTemplateDialog(
-    template: String,
-    onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    TextInputDialog(
-        title = stringResource(R.string.options_filename_title),
-        hint = stringResource(R.string.options_filename_hint),
-        value = template,
-        onConfirm = { onConfirm(it.ifBlank { DownloadOptions.DEFAULT_FILENAME_TEMPLATE }) },
-        onDismiss = onDismiss
-    )
-}
-
 @Composable
 internal fun ToggleRow(
     label: String,
@@ -338,7 +322,7 @@ internal fun TextInputDialog(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(
+                ExpressiveTextField(
                     value = draft,
                     onValueChange = { draft = it },
                     singleLine = true,

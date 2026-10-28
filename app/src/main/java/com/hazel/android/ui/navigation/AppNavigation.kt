@@ -30,12 +30,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Surface
+import com.hazel.android.ui.components.pressScale
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
@@ -96,6 +100,12 @@ private val bottomNavItems = listOf(
     Screen.Queue,
     Screen.More,
 )
+
+private val tabRoutes = bottomNavItems.map { it.route }.toSet()
+
+/** True when both ends of the move are bottom bar tabs, which are peers rather than a step deeper. */
+private fun androidx.compose.animation.AnimatedContentTransitionScope<androidx.navigation.NavBackStackEntry>.isTabSwitch(): Boolean =
+    initialState.destination.route in tabRoutes && targetState.destination.route in tabRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -171,6 +181,8 @@ fun AppNavigation(
         )
     }
 
+    com.hazel.android.ui.screens.more.BackupRestoreOffer()
+
     Scaffold(
         topBar = {
             // Only over the home screen. The other two carry their own headings, and the
@@ -181,19 +193,29 @@ fun AppNavigation(
             if (currentRoute == Screen.Download.route) {
                 TopAppBar(
                     title = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        // One tonal pill holding the bolt and the name; a tap opens Support.
+                        Row(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .clickable(role = Role.Button) {
+                                    navController.navigate("sponsor") { launchSingleTop = true }
+                                }
+                                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
+                                .padding(start = 12.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Icon(
                                 painter = painterResource(R.drawable.update),
                                 contentDescription = null,
-                                modifier = Modifier.size(22.dp),
-                                tint = MaterialTheme.colorScheme.primary
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = stringResource(R.string.app_name),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                         }
                     },
@@ -237,35 +259,41 @@ fun AppNavigation(
                         // it is active, plain and muted while it is not. A mode that
                         // silently changes what the app records has to be visible from the
                         // screen it affects, not buried in settings.
-                        IconButton(
+                        // Always on the same soft tone as the logo pill, so the header is
+                        // balanced; filled with the accent while it is on.
+                        val incognitoPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                        val incognitoFill by androidx.compose.animation.animateColorAsState(
+                            if (incognito) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f),
+                            label = "incognito"
+                        )
+                        Surface(
                             onClick = {
                                 scope.launch {
                                     SettingsRepository.setIncognito(context, !incognito)
                                 }
                             },
-                            modifier = Modifier.padding(end = 4.dp)
+                            interactionSource = incognitoPress,
+                            shape = CircleShape,
+                            color = incognitoFill,
+                            modifier = Modifier
+                                .padding(end = 12.dp)
+                                .pressScale(incognitoPress, pressed = 0.9f)
+                                .size(42.dp)
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.incognito),
-                                contentDescription = if (incognito) {
-                                    stringResource(R.string.nav_incognito_on)
-                                } else {
-                                    stringResource(R.string.nav_incognito_off)
-                                },
-                                modifier = Modifier
-                                    .size(34.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (incognito) {
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
-                                        } else {
-                                            Color.Transparent
-                                        }
-                                    )
-                                    .padding(6.dp),
-                                tint = if (incognito) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
-                            )
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    painter = painterResource(R.drawable.incognito),
+                                    contentDescription = if (incognito) {
+                                        stringResource(R.string.nav_incognito_on)
+                                    } else {
+                                        stringResource(R.string.nav_incognito_off)
+                                    },
+                                    modifier = Modifier.size(24.dp),
+                                    tint = if (incognito) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onBackground
+                                )
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -325,10 +353,10 @@ fun AppNavigation(
             navController = navController,
             startDestination = Screen.Download.route,
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { M3Motion.forwardEnter() },
-            exitTransition = { M3Motion.forwardExit() },
-            popEnterTransition = { M3Motion.backEnter() },
-            popExitTransition = { M3Motion.backExit() }
+            enterTransition = { if (isTabSwitch()) M3Motion.tabEnter() else M3Motion.forwardEnter() },
+            exitTransition = { if (isTabSwitch()) M3Motion.tabExit() else M3Motion.forwardExit() },
+            popEnterTransition = { if (isTabSwitch()) M3Motion.tabEnter() else M3Motion.backEnter() },
+            popExitTransition = { if (isTabSwitch()) M3Motion.tabExit() else M3Motion.backExit() }
         ) {
             composable(Screen.Download.route) {
                 DownloadScreen(
@@ -347,7 +375,21 @@ fun AppNavigation(
                 )
             }
             composable(Screen.History.route) {
-                HistoryScreen()
+                HistoryScreen(
+                    onDownloadAgain = { entry ->
+                        downloadViewModel.instantDownload(context, entry.url, audioOnlyOverride = !entry.isVideo)
+                    },
+                    onFetchAgain = { entry ->
+                        // Read the way a shared link is, then shown on Home, where its sheet opens.
+                        downloadViewModel.onUrlChange(entry.url)
+                        downloadViewModel.fetchAll(listOf(entry.url))
+                        navController.navigate(Screen.Download.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
             composable(Screen.Queue.route) {
                 QueueScreen(downloadViewModel = downloadViewModel)
@@ -447,7 +489,12 @@ fun AppNavigation(
                 SoftwareUpdateScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToHazelUpdate = { navController.navigate("hazel_update") },
-                    onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") }
+                    onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") },
+                    onOpenWhatsNew = { version ->
+                        navController.navigate(
+                            "docs/${com.hazel.android.ui.screens.more.DocPage.CHANGELOG.name}?version=${android.net.Uri.encode(version)}"
+                        )
+                    }
                 )
             }
             composable("hazel_update") {
@@ -467,7 +514,12 @@ fun AppNavigation(
                 SoftwareUpdateScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToHazelUpdate = { navController.navigate("hazel_update") },
-                    onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") }
+                    onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") },
+                    onOpenWhatsNew = { version ->
+                        navController.navigate(
+                            "docs/${com.hazel.android.ui.screens.more.DocPage.CHANGELOG.name}?version=${android.net.Uri.encode(version)}"
+                        )
+                    }
                 )
             }
         }

@@ -1,5 +1,20 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.player.miniWidth
+import com.hazel.android.ui.components.player.LargePlayer
+import com.hazel.android.ui.components.player.MiniPlayer
+import com.hazel.android.ui.components.player.PlayerPlace
+import com.hazel.android.ui.components.player.PlayerDock
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
 import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -33,6 +48,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
+import com.hazel.android.ui.components.pressScale
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -211,9 +228,13 @@ fun DownloadScreen(
     var playingUrl by remember { mutableStateOf<String?>(null) }
     var playerFullscreen by remember { mutableStateOf(false) }
     val playback = playingUrl?.let { rememberPlaybackController(it) }
+    // Moves the video between its card, the mini player and the large view, so a scroll or
+    // a download carries on playing instead of stopping it.
+    val dock = remember { PlayerDock() }
     val stopPlaying = {
         playingUrl = null
         playerFullscreen = false
+        dock.start(null)
     }
     var sheetVisible by remember { mutableStateOf(false) }
     var batchSheetVisible by remember { mutableStateOf(false) }
@@ -533,6 +554,7 @@ fun DownloadScreen(
                         state = listState,
                         modifier = Modifier
                             .fillMaxSize()
+                            .onGloballyPositioned { dock.viewport = it.boundsInWindow() }
                             .nestedScroll(shrink),
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(
                             start = 20.dp,
@@ -599,12 +621,18 @@ fun DownloadScreen(
                                     alreadyDownloaded = info.url in savedUrls,
                                     player = playback?.takeIf { playingUrl == info.url },
                                     playerFullscreen = playerFullscreen,
-                                    onPlay = { playingUrl = info.url },
-                                    onFullscreen = { playerFullscreen = true },
-                                    onStopPlaying = {
-                                        // Full screen takes the card off screen; that is no reason to stop.
-                                        if (playingUrl == info.url && !playerFullscreen) stopPlaying()
+                                    playerInCard = dock.place == PlayerPlace.CARD && !dock.docking,
+                                    onPlay = {
+                                        playingUrl = info.url
+                                        dock.start(info.url)
                                     },
+                                    onFullscreen = { playerFullscreen = true },
+                                    onStopPlaying = { if (playingUrl == info.url) stopPlaying() },
+                                    onPlayerMoved = { bounds, canDock ->
+                                        dock.onCardMoved(info.url, bounds, canDock, playerFullscreen)
+                                    },
+                                    onPlayerGone = { dock.onCardGone(info.url, playerFullscreen) },
+                                    onPlayerTakenOver = { dock.toMini(info.url) },
                                     onOpenSheet = openSheet,
                                     onOpenQueue = onOpenQueue
                                 )
@@ -820,10 +848,36 @@ fun DownloadScreen(
         val clipStamp = rememberClipStamp()
         var usedClipStamp by rememberSaveable { mutableStateOf<Long?>(null) }
         val showPaste = clipStamp != null && clipStamp != usedClipStamp && !state.isFetching
+
+        val miniShown = playback != null && (dock.place != PlayerPlace.CARD || dock.docking)
+        if (playback != null) {
+            MiniPlayer(
+                dock = dock,
+                controller = playback,
+                thumbnail = state.results.firstOrNull { it.url == playingUrl }?.thumbnail,
+                fullscreen = playerFullscreen,
+                onClose = stopPlaying
+            )
+        }
+        // The actions stand above the mini player when the screen is too narrow for both.
+        var screenWidth by remember { mutableIntStateOf(0) }
+        var actionsWidth by remember { mutableIntStateOf(0) }
+        val density = LocalDensity.current
+        // The actions' measured width includes their 20dp side padding, which matches the
+        // mini player's 12dp margin plus an 8dp gap, so they touch once wider than the rest.
+        val crowded = with(density) {
+            miniShown && actionsWidth > 0 && actionsWidth > screenWidth - miniWidth(screenWidth.toDp()).toPx()
+        }
+        val lift by animateDpAsState(
+            if (crowded) with(density) { (miniWidth(screenWidth.toDp()) * 9f / 16f) + 12.dp } else 0.dp,
+            label = "actionsLift"
+        )
+        Box(Modifier.matchParentSize().onSizeChanged { screenWidth = it.width })
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(20.dp),
+                .onSizeChanged { actionsWidth = it.width }
+                .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 20.dp + lift),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -863,6 +917,28 @@ fun DownloadScreen(
     // A card that has gone from the results takes its player with it.
     LaunchedEffect(state.results, playingUrl) {
         if (playingUrl != null && state.results.none { it.url == playingUrl }) stopPlaying()
+    }
+
+    if (dock.place == PlayerPlace.LARGE && playback != null) {
+        val playingInfo = state.results.firstOrNull { it.url == playingUrl }
+        LargePlayer(
+            dock = dock,
+            controller = playback,
+            title = playingInfo?.title,
+            author = playingInfo?.uploader,
+            thumbnail = playingInfo?.thumbnail,
+            fullscreen = playerFullscreen,
+            onFullscreen = { playerFullscreen = true },
+            onClose = stopPlaying,
+            onDownload = playingInfo?.let { info ->
+                {
+                    dock.collapse()
+                    downloadViewModel.selectResult(info)
+                    downloadViewModel.resolveFormats(info)
+                    sheetVisible = true
+                }
+            }
+        )
     }
 
     if (playerFullscreen && playback != null) {
@@ -1042,35 +1118,52 @@ fun DownloadScreen(
  * It is drawn on the highest surface tone, with no outline: the tone alone gives it its edge
  * against the near-black background.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun UrlSearchBar(
+internal fun UrlSearchBar(
     url: String,
     onOpenSearch: () -> Unit,
     shineProgress: Float = 0f,
     onMenuOpen: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        onClick = onOpenSearch,
+    // The field and its menu as one connected group: round on the outside, tight where they meet.
+    val fieldShape = RoundedCornerShape(topStart = 26.dp, bottomStart = 26.dp, topEnd = 8.dp, bottomEnd = 8.dp)
+    Row(
         modifier = modifier
-            .refreshShine(shineProgress, RoundedCornerShape(26.dp))
             .fillMaxWidth()
             .height(52.dp),
-        shape = RoundedCornerShape(26.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
+    ) {
+    Surface(
+        onClick = onOpenSearch,
+        modifier = Modifier
+            .refreshShine(shineProgress, fieldShape)
+            .weight(1f)
+            .fillMaxHeight(),
+        shape = fieldShape,
         color = MaterialTheme.colorScheme.surfaceContainerHighest
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 6.dp),
+                .padding(start = 8.dp, end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_search),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(MaterialShapes.Cookie7Sided.toShape())
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = null,
+                    modifier = Modifier.size(19.dp),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 url.ifBlank { stringResource(R.string.download_search_hint) },
@@ -1081,45 +1174,75 @@ private fun UrlSearchBar(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-
-            // Opens the same search options sheet the search screen's own 3-dot does.
-            IconButton(onClick = onMenuOpen, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    painterResource(R.drawable.ic_more_vert),
-                    contentDescription = stringResource(R.string.search_more),
-                    // The same size and tone as the search screen's, so the two read as one.
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
         }
+    }
+
+    // Opens the same search options sheet the search screen's own 3-dot does. Pressed, its
+    // inner corners round out and it squeezes, the connected group's press.
+    val menuPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val inner by com.hazel.android.ui.components.pressCorner(menuPress, resting = 8.dp, pressed = 18.dp)
+    Surface(
+        onClick = onMenuOpen,
+        interactionSource = menuPress,
+        modifier = Modifier
+            .pressScale(menuPress, pressed = 0.92f)
+            .width(50.dp)
+            .fillMaxHeight(),
+        shape = RoundedCornerShape(topStart = inner, bottomStart = inner, topEnd = 26.dp, bottomEnd = 26.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                painterResource(R.drawable.ic_more_vert),
+                contentDescription = stringResource(R.string.search_more),
+                modifier = Modifier.size(22.dp)
+            )
+        }
+    }
     }
 }
 
+/**
+ * Download all: an accent pill led by a filled seven-sided cookie in the inverted colour, the
+ * download arrow cut into it in the pill's own colour.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val fill = MaterialTheme.colorScheme.primary
+    val ink = MaterialTheme.colorScheme.onPrimary
     Surface(
         onClick = onClick,
-        modifier = modifier.height(52.dp),
-        shape = RoundedCornerShape(26.dp),
-        color = MaterialTheme.colorScheme.primary
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        color = fill
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 22.dp),
+            modifier = Modifier.padding(start = 5.dp, top = 5.dp, bottom = 5.dp, end = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                Icons.Filled.Download,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onPrimary
-            )
-            Spacer(modifier = Modifier.width(10.dp))
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(MaterialShapes.Cookie7Sided.toShape())
+                    .background(ink),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Filled.Download,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = fill
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
                 stringResource(R.string.download_download_all),
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -1136,6 +1259,7 @@ private fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifier
  * goes and the stage track takes the artwork over, so the card still reads as busy and says
  * which stage the file is at.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun MediaCard(
     info: MediaInfo,
@@ -1154,6 +1278,12 @@ private fun MediaCard(
     onPlay: () -> Unit = {},
     onFullscreen: () -> Unit = {},
     onStopPlaying: () -> Unit = {},
+    /** Whether the video shows in this card, rather than in the mini player or large view. */
+    playerInCard: Boolean = true,
+    /** Where the playing card's picture is in the window, and whether it can hold the video. */
+    onPlayerMoved: (Rect, Boolean) -> Unit = { _, _ -> },
+    onPlayerGone: () -> Unit = {},
+    onPlayerTakenOver: () -> Unit = {},
     onOpenSheet: () -> Unit,
     onOpenQueue: () -> Unit
 ) {
@@ -1172,28 +1302,25 @@ private fun MediaCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
+                .then(
+                    if (player != null) {
+                        Modifier.onGloballyPositioned { onPlayerMoved(it.boundsInWindow(), !inHand) }
+                    } else Modifier
+                )
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .clickable(
                     onClickLabel = if (inHand) stringResource(R.string.download_open_queue) else null,
                     onClick = if (inHand) onOpenQueue else onOpenSheet
                 )
         ) {
-            // Sources without artwork simply show the placeholder glyph.
+            // Under the picture, so it shows while it loads, when it fails and when there is none.
+            com.hazel.android.ui.components.ArtworkPlaceholder(Modifier.matchParentSize())
             if (info.thumbnail != null) {
                 AsyncImage(
                     model = info.thumbnail,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Icon(
-                    Icons.Filled.MusicNote,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Alignment.Center),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
                 )
             }
 
@@ -1360,15 +1487,15 @@ private fun MediaCard(
                 }
             }
 
-            // Bottom right corner plays the link, for one not in hand.
+            // Bottom right corner plays the link, for one not in hand, on a flat accent cookie.
             if (!inHand) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(10.dp)
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.55f))
+                        .size(44.dp)
+                        .clip(MaterialShapes.Cookie6Sided.toShape())
+                        .background(MaterialTheme.colorScheme.primary)
                         .clickable(
                             onClickLabel = stringResource(R.string.player_play),
                             onClick = onPlay
@@ -1378,15 +1505,19 @@ private fun MediaCard(
                     Icon(
                         Icons.Filled.PlayArrow,
                         contentDescription = stringResource(R.string.player_play),
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
             }
 
-            // Playing covers the artwork with the player until it is closed or scrolled away.
-            if (player != null && !inHand) {
-                DisposableEffect(info.url) { onDispose { onStopPlaying() } }
+            // Playing covers the artwork with the player while it is here. Scrolled away or
+            // taken over by a download, the video moves to the mini player and carries on.
+            if (player != null) {
+                DisposableEffect(info.url) { onDispose { onPlayerGone() } }
+                LaunchedEffect(inHand) { if (inHand) onPlayerTakenOver() }
+            }
+            if (player != null && !inHand && playerInCard) {
                 InlinePlayer(
                     controller = player,
                     thumbnail = info.thumbnail,

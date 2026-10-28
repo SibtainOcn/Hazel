@@ -28,7 +28,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -53,6 +56,7 @@ import com.hazel.android.ui.theme.AccentColors
 /**
  * Theme and accent color controls, moved off the top bar into their own screen.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppearanceScreen(
     isDarkTheme: Boolean,
@@ -83,10 +87,9 @@ fun AppearanceScreen(
                     Text(stringResource(if (isDarkTheme) R.string.appearance_on else R.string.appearance_off))
                 },
                 leadingContent = {
-                    Icon(
-                        imageVector = if (isDarkTheme) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                    ShapedIcon(
+                        if (isDarkTheme) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
+                        MaterialShapes.Cookie9Sided.toShape(), 40.dp
                     )
                 },
                 trailingContent = {
@@ -114,7 +117,7 @@ fun AppearanceScreen(
                     Text(stringResource(if (glassEnabled) R.string.appearance_on else R.string.appearance_off))
                 },
                 leadingContent = {
-                    Icon(Icons.Outlined.BlurOn, null, tint = MaterialTheme.colorScheme.primary)
+                    ShapedIcon(Icons.Outlined.BlurOn, MaterialShapes.Sunny.toShape(), 40.dp)
                 },
                 trailingContent = {
                     Switch(
@@ -139,7 +142,7 @@ fun AppearanceScreen(
                 headlineContent = { Text(stringResource(R.string.glass_style_title)) },
                 supportingContent = { Text(glassStyleLabel(glassStyle)) },
                 leadingContent = {
-                    Icon(Icons.Outlined.AutoAwesome, null, tint = MaterialTheme.colorScheme.primary)
+                    ShapedIcon(Icons.Outlined.AutoAwesome, MaterialShapes.Cookie6Sided.toShape(), 40.dp)
                 },
                 trailingContent = { GlassStyleSwatch(glassStyle, accentName) },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -169,7 +172,7 @@ fun AppearanceScreen(
                     }
                 },
                 leadingContent = {
-                    Icon(Icons.Filled.Palette, null, tint = MaterialTheme.colorScheme.primary)
+                    ShapedIcon(Icons.Filled.Palette, MaterialShapes.Clover4Leaf.toShape(), 40.dp)
                 },
                 trailingContent = {
                     Icon(

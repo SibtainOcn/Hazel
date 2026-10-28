@@ -171,7 +171,7 @@ private fun smoothstep(from: Float, to: Float, x: Float): Float {
 
 /** False when the system's animator duration scale is 0 (Remove animations is on). */
 @Composable
-private fun rememberAnimationsOn(): Boolean {
+internal fun rememberAnimationsOn(): Boolean {
     val context = LocalContext.current
     return remember(context) {
         runCatching {

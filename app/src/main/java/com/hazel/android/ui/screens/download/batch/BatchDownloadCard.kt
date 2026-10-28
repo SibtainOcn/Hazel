@@ -137,6 +137,7 @@ fun BatchDownloadCard(
                         .clip(RoundedCornerShape(6.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
+                    com.hazel.android.ui.components.ArtworkPlaceholder(Modifier.matchParentSize())
                     if (info.thumbnail != null) {
                         AsyncImage(
                             model = info.thumbnail,

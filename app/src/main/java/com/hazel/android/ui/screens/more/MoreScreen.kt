@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.BatteryChargingFull
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -34,19 +35,24 @@ import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Update
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.toShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
@@ -57,12 +63,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
+import com.hazel.android.ui.components.ShapeIconButton
 import com.hazel.android.ui.screens.download.isIgnoringBatteryOptimizations
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.LifecycleEventObserver
@@ -76,6 +84,7 @@ import com.hazel.android.update.YtDlpUpdater
 import com.hazel.android.util.AppLocale
 import com.hazel.android.util.TempStorage
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MoreScreen(
     onNavigateToAppearance: () -> Unit = {},
@@ -98,7 +107,7 @@ fun MoreScreen(
     val hasUpdateAvailable by remember(context) { SettingsRepository.getHasUpdateAvailable(context) }.collectAsState(initial = false)
 
     // Read when the screen appears so the row can show what clearing would free.
-    var tempBytes by remember { mutableStateOf(0L) }
+    var tempBytes by rememberSaveable { mutableStateOf(0L) }
     LaunchedEffect(Unit) { tempBytes = TempStorage.totalBytes(context) }
 
     // Read once as the screen is built, then again on every return to it, so coming back
@@ -111,11 +120,14 @@ fun MoreScreen(
     // everything under it down. The call is a single lookup, cheap enough to make before
     // the first frame instead of guessing.
     val lifecycleOwner = LocalLifecycleOwner.current
-    var batteryExempt by remember { mutableStateOf(isIgnoringBatteryOptimizations(context)) }
+    var batteryExempt by rememberSaveable { mutableStateOf(isIgnoringBatteryOptimizations(context)) }
+    val resumeScope = rememberCoroutineScope()
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                batteryExempt = isIgnoringBatteryOptimizations(context)
+                resumeScope.launch {
+                    batteryExempt = withContext(Dispatchers.Default) { isIgnoringBatteryOptimizations(context) }
+                }
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -131,8 +143,8 @@ fun MoreScreen(
     // only in composition dies with it, and the note that explains the change never
     // appeared on exactly the versions where the change is most abrupt.
     var languageChanged by rememberSaveable { mutableStateOf(false) }
-    var languageTag by remember { mutableStateOf(AppLocale.tag(context)) }
-    val languageLabel = AppLocale.label(context)
+    var languageTag by rememberSaveable { mutableStateOf(AppLocale.tag(context)) }
+    val languageLabel = remember(languageTag) { AppLocale.label(context) }
 
     if (languageDialogOpen) {
         LanguageSheet(
@@ -170,16 +182,14 @@ fun MoreScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(start = 20.dp, end = 20.dp, top = 16.dp)
     ) {
-        // The screen names itself, the way the downloads list does. The app's name used to
-        // sit above it in a bar of its own; with that gone this is what the screen opens
-        // on, rather than the first card arriving with no introduction.
+        // The screen names itself, the way the downloads list does, and stays pinned with
+        // its search while the settings below it scroll.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
+                .padding(bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -188,11 +198,29 @@ fun MoreScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
             )
-            // Every setting, found by name, from its own screen.
-            IconButton(onClick = onNavigateToSettingsSearch) {
-                Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.settings_search))
+            // Every setting, found by name, from its own screen. Drawn the way the home
+            // search bar draws its icon: a seven-sided cookie in the solid accent. The
+            // padding keeps the row exactly as tall as the 48dp button it replaces.
+            ShapeIconButton(
+                onClick = onNavigateToSettingsSearch,
+                modifier = Modifier.padding(4.dp),
+                filled = true,
+                shape = MaterialShapes.Cookie7Sided.toShape()
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = stringResource(R.string.settings_search),
+                    modifier = Modifier.size(19.dp)
+                )
             }
         }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 16.dp)
+        ) {
 
         // Android suspends a long network job shortly after the app leaves the foreground,
         // so without this exemption a download stops when the screen is turned off. It
@@ -203,34 +231,41 @@ fun MoreScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(28.dp),
+                color = MaterialTheme.colorScheme.surface,
                 onClick = onOpenBatterySettings
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.battery_charge),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(26.dp)
-                    )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(MaterialShapes.Cookie9Sided.toShape())
+                            .background(MaterialTheme.colorScheme.primary)
+                    ) {
+                        Icon(
+                            Icons.Rounded.BatteryChargingFull,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                     Spacer(modifier = Modifier.width(14.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             stringResource(R.string.more_battery_title),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             stringResource(R.string.more_battery_body),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                .copy(alpha = 0.8f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -523,6 +558,7 @@ fun MoreScreen(
                 modifier = Modifier.clickable { onNavigateToDocumentation() }
             )
           }
+        }
         }
     }
 }

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
@@ -77,7 +78,6 @@ fun SponsorScreen(onBack: () -> Unit) {
     }
     val textPrimary = if (isDark) Color(0xFFF9FAFB) else Color(0xFF0F172A)
     val textSecondary = if (isDark) Color(0xFFA0A7B5) else Color(0xFF475569)
-    val textMuted = if (isDark) Color(0xFF717784) else Color(0xFF94A3B8)
     val badgeBg = when {
         glass -> MaterialTheme.colorScheme.surfaceVariant
         isDark -> Color(0xFF1A1D24)
@@ -116,6 +116,27 @@ fun SponsorScreen(onBack: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
+            SectionLabel(
+                text = stringResource(R.string.sponsor_section_developer),
+                color = textPrimary
+            )
+
+            SupportCard(
+                icon = Icons.Filled.Person,
+                title = stringResource(R.string.sponsor_developer_name),
+                subtitle = stringResource(R.string.sponsor_developer_subtitle),
+                enabled = true,
+                surfaceColor = surfaceColor,
+                badgeBg = badgeBg,
+                iconTint = iconTint,
+                textPrimary = textPrimary,
+                textSecondary = textSecondary,
+                chevronTint = chevronTint,
+                onClick = { openLink(context, DEVELOPER_URL) }
+            )
+
+            Spacer(modifier = Modifier.height(28.dp))
+
             HeroCard(
                 surfaceColor = surfaceColor,
                 badgeBg = badgeBg,
@@ -212,14 +233,6 @@ fun SponsorScreen(onBack: () -> Unit) {
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                stringResource(R.string.sponsor_footer),
-                style = MaterialTheme.typography.bodySmall,
-                color = textMuted
-            )
 
             Spacer(modifier = Modifier.height(40.dp))
         }
@@ -432,6 +445,7 @@ private fun openLink(context: Context, url: String) {
 private const val SHARE_MESSAGE = "Hazel, a downloader with no ads and nothing held back:"
 
 private const val SOURCE_URL = "https://github.com/SibtainOcn/Hazel"
+private const val DEVELOPER_URL = "https://github.com/sibtainocn"
 private const val ISSUES_URL = "https://github.com/SibtainOcn/Hazel/issues"
 private const val SPONSORS_URL = "https://github.com/sponsors/SibtainOcn"
 

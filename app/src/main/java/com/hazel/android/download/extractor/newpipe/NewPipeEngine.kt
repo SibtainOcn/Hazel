@@ -3,6 +3,7 @@ package com.hazel.android.download.extractor.newpipe
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.extractor.LinkContents
 import com.hazel.android.download.extractor.LinkEntry
+import com.hazel.android.download.playback.AudioWish
 import com.hazel.android.download.playback.PlayableStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -32,9 +33,9 @@ object NewPipeEngine {
                 .getOrDefault(emptyList())
         }
 
-    suspend fun playable(url: String, maxHeight: Int): PlayableStream? =
+    suspend fun playable(url: String, maxHeight: Int, wish: AudioWish = AudioWish()): PlayableStream? =
         withContext(Dispatchers.IO) {
             if (!handlesStream(url)) return@withContext null
-            runCatching { NewPipeStreams.playable(url, maxHeight) }.getOrNull()
+            runCatching { NewPipeStreams.playable(url, maxHeight, wish) }.getOrNull()
         }
 }

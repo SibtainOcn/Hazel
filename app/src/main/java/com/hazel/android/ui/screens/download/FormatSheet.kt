@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
 import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.ui.theme.sheetButtonColor
 import com.hazel.android.ui.theme.sheetRaisedColor
@@ -139,7 +141,7 @@ import com.hazel.android.ui.components.keepFlingInSheet
  * turns the download action into one that hands the choice back instead, since there the
  * download does not start until the whole set is sent.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class, androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FormatSheet(
     info: MediaInfo,
@@ -402,23 +404,36 @@ fun FormatSheet(
                         }
                     },
                     enabled = selected != null,
-                    shape = RoundedCornerShape(22.dp),
+                    // Matches Download all: an accent pill led by a cookie in the ink colour,
+                    // the arrow cut into it in the pill's own colour.
+                    shape = RoundedCornerShape(24.dp),
                     color = if (selected != null) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                     contentColor = if (selected != null) MaterialTheme.colorScheme.onPrimary
                     else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    modifier = Modifier.height(44.dp)
+                    modifier = Modifier.height(48.dp)
                 ) {
+                    val fill = if (selected != null) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                     Row(
-                        modifier = Modifier.padding(horizontal = 20.dp),
+                        modifier = Modifier.padding(start = 5.dp, end = 18.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            if (confirmAsApply) Icons.Filled.Check else Icons.Filled.Download,
-                            null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(MaterialShapes.Cookie7Sided.toShape())
+                                .background(androidx.compose.material3.LocalContentColor.current),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                if (confirmAsApply) Icons.Filled.Check else Icons.Filled.Download,
+                                null,
+                                modifier = Modifier.size(18.dp),
+                                tint = if (selected != null) fill else MaterialTheme.colorScheme.surface
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             if (confirmAsApply) stringResource(R.string.format_sheet_ok) else stringResource(R.string.format_sheet_download),
                             style = MaterialTheme.typography.labelLarge,
@@ -458,9 +473,17 @@ fun FormatSheet(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                SheetLinkButton(enabled = info.url.isNotBlank(), onClick = { openDialog = SheetDialog.LINK })
-                Spacer(modifier = Modifier.width(10.dp))
-                IncognitoButton(onFeedback = { message -> feedback = Feedback(message) })
+                // Link and incognito as one connected pair, round at the outside.
+                SheetLinkButton(
+                    enabled = info.url.isNotBlank(),
+                    onClick = { openDialog = SheetDialog.LINK },
+                    shape = RoundedCornerShape(topStart = 22.dp, bottomStart = 22.dp, topEnd = 8.dp, bottomEnd = 8.dp)
+                )
+                Spacer(modifier = Modifier.width(3.dp))
+                IncognitoButton(
+                    onFeedback = { message -> feedback = Feedback(message) },
+                    shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 22.dp, bottomEnd = 22.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -807,7 +830,7 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
-        SheetDialog.FILENAME -> FilenameTemplateDialog(
+        SheetDialog.FILENAME -> FilenameTemplateSheet(
             template = options.filenameTemplate,
             onConfirm = {
                 onOptionsChange(options.copy(filenameTemplate = it))

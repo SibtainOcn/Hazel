@@ -5,9 +5,6 @@ import com.hazel.android.ui.theme.sheetButtonColor
 import com.hazel.android.ui.theme.sheetRaisedColor
 import androidx.compose.ui.graphics.luminance
 import kotlin.math.roundToInt
-import androidx.compose.foundation.border
-import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.Brush
 import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.annotation.StringRes
@@ -31,6 +28,10 @@ import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -61,7 +62,10 @@ import androidx.compose.material.icons.filled.UnfoldMore
 import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.toShape
 import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -81,6 +85,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -88,6 +93,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalDensity
 import com.hazel.android.R
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.FormatFilter
@@ -148,7 +154,7 @@ enum class FormatSort(@param:StringRes val labelRes: Int) {
  * these formats belong to, where that is not [info]'s own address: NewPipe sends no cookies,
  * so picking it for a site with a saved sign-in in use explains that instead of reading.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FormatSelectionSheet(
     info: MediaInfo,
@@ -284,6 +290,7 @@ fun FormatSelectionSheet(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     HeaderIconButton(
                         icon = Icons.Outlined.Tune,
+                        shape = MaterialShapes.Pentagon.toShape(),
                         description = stringResource(R.string.format_filter_title),
                         onClick = { filterSheetOpen = true }
                     )
@@ -587,18 +594,20 @@ private fun RailStop(
 
 private const val STOP_FADE_MS = 160
 
-/** A round button in the sheet's header, drawn the way the sort button always was. */
+/** A shaped tonal button in the sheet's header. */
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun HeaderIconButton(
     icon: ImageVector,
     description: String,
     onClick: () -> Unit,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    shape: Shape = MaterialShapes.Cookie9Sided.toShape()
 ) {
     Box(
         modifier = Modifier
             .size(44.dp)
-            .clip(CircleShape)
+            .clip(shape)
             .background(MaterialTheme.colorScheme.primary.copy(alpha = if (enabled) 0.18f else 0.08f))
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
@@ -641,24 +650,29 @@ private fun FormatFilterSheet(
                 .fillMaxWidth()
                 .keepFlingInSheet()
                 .verticalScroll(rememberScrollState())
-                .padding(top = 20.dp, bottom = 24.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 16.dp)
         ) {
-            FilterSection(stringResource(R.string.format_filter_title))
-            FormatFilter.entries.forEach { option ->
-                FilterOption(stringResource(option.labelRes), option == filter) { onFilter(option) }
-            }
-
-            FilterSection(stringResource(R.string.format_sort_title))
-            FormatSort.entries.forEach { option ->
-                FilterOption(stringResource(option.labelRes), option == sort) { onSort(option) }
-            }
-
+            FilterGroup(
+                title = stringResource(R.string.format_filter_title),
+                labels = FormatFilter.entries.map { stringResource(it.labelRes) },
+                selected = filter.ordinal,
+                onSelect = { onFilter(FormatFilter.entries[it]) }
+            )
+            FilterGroup(
+                title = stringResource(R.string.format_sort_title),
+                labels = FormatSort.entries.map { stringResource(it.labelRes) },
+                selected = sort.ordinal,
+                onSelect = { onSort(FormatSort.entries[it]) }
+            )
             if (source != null) {
-                FilterSection(stringResource(R.string.format_source_title))
                 // The reader that answers soonest first, as the reading settings list them.
-                listOf(ListingSource.NEWPIPE, ListingSource.YT_DLP).forEach { option ->
-                    FilterOption(stringResource(option.labelRes), option == source) { onSource(option) }
-                }
+                val readers = listOf(ListingSource.NEWPIPE, ListingSource.YT_DLP)
+                FilterGroup(
+                    title = stringResource(R.string.format_source_title),
+                    labels = readers.map { stringResource(it.labelRes) },
+                    selected = readers.indexOf(source),
+                    onSelect = { onSource(readers[it]) }
+                )
             }
 
             Spacer(modifier = Modifier.navigationBarsPadding())
@@ -666,36 +680,59 @@ private fun FormatFilterSheet(
     }
 }
 
+/**
+ * One section as a segmented list: rows joined by small gaps, the outer corners round and
+ * the inner ones tight, and a cookie marking the choice.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun FilterSection(title: String) {
+private fun FilterGroup(title: String, labels: List<String>, selected: Int, onSelect: (Int) -> Unit) {
     Text(
         title,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 4.dp)
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 4.dp, top = 10.dp, bottom = 8.dp)
     )
-}
-
-@Composable
-private fun FilterOption(label: String, selected: Boolean, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 24.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(modifier = Modifier.size(24.dp), contentAlignment = Alignment.Center) {
-            if (selected) {
-                Icon(
-                    Icons.Filled.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+    val outer = 20.dp
+    val inner = 6.dp
+    val mark = MaterialShapes.Cookie9Sided.toShape()
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        labels.forEachIndexed { index, label ->
+            val on = index == selected
+            val top = if (index == 0) outer else inner
+            val bottom = if (index == labels.lastIndex) outer else inner
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+                    .clip(RoundedCornerShape(topStart = top, topEnd = top, bottomStart = bottom, bottomEnd = bottom))
+                    .background(
+                        if (on) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+                    )
+                    .selectable(selected = on, role = Role.RadioButton, onClick = { onSelect(index) })
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
+                    color = if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .then(
+                            if (on) Modifier.clip(mark).background(MaterialTheme.colorScheme.primary)
+                            else Modifier.border(2.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                        )
                 )
             }
         }
-        Spacer(modifier = Modifier.width(24.dp))
-        Text(label, style = MaterialTheme.typography.bodyLarge)
     }
 }
 
@@ -1038,53 +1075,58 @@ internal fun badgeTextOf(format: MediaFormat): String {
     }
 }
 
-/** The lower end of the block's fill: up to 30% into the container tone, less where the label would fade. */
-internal fun badgeFillEnd(primary: Color, container: Color, onPrimary: Color): Color =
-    listOf(0.3f, 0.2f, 0.1f).map { lerp(primary, container, it) }
-        .firstOrNull { contrastOf(onPrimary, it) >= BADGE_MIN_CONTRAST } ?: primary
-
 internal fun contrastOf(a: Color, b: Color): Float {
     val hi = maxOf(a.luminance(), b.luminance())
     val lo = minOf(a.luminance(), b.luminance())
     return (hi + 0.05f) / (lo + 0.05f)
 }
 
-internal const val BADGE_MIN_CONTRAST = 3f
+/** How far a badge label follows a larger system font before it would leave its cookie. */
+private const val BADGE_MAX_FONT_GROWTH = 1.15f
 
-/** The container block a row leads with, sized the same whatever the word inside it is. */
+/** A ladder rung's label: onPrimary where it reads on the accent, else black or white, whichever reads better. */
+internal fun solidBadgeInk(primary: Color, onPrimary: Color): Color =
+    if (contrastOf(onPrimary, primary) >= SOLID_BADGE_MIN_CONTRAST) onPrimary
+    else listOf(Color.Black, Color.White).maxBy { contrastOf(it, primary) }
+
+internal const val SOLID_BADGE_MIN_CONTRAST = 3f
+
+/**
+ * The block a row leads with (BEST, MP4, WEBM, 1080), on a six-sided M3 cookie in the solid
+ * accent, every row coloured alike.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ContainerBadge(text: String, compact: Boolean = false) {
-    val primary = MaterialTheme.colorScheme.primary
-    // A light fall from the accent into its container tone, with a faint top edge, so the
-    // block has some depth instead of a flat fill. Text contrast stays with onPrimary.
-    val container = MaterialTheme.colorScheme.primaryContainer
+    val fill = MaterialTheme.colorScheme.primary
     val onPrimary = MaterialTheme.colorScheme.onPrimary
-    val fill = remember(primary, container, onPrimary) {
-        Brush.verticalGradient(listOf(primary, badgeFillEnd(primary, container, onPrimary)))
-    }
-    val shape = RoundedCornerShape(10.dp)
+    val ink = remember(fill, onPrimary) { solidBadgeInk(fill, onPrimary) }
     Box(
         modifier = Modifier
-            .size(width = if (compact) 48.dp else 60.dp, height = if (compact) 44.dp else 52.dp)
-            .clip(shape)
-            .background(fill)
-            .border(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.35f), Color.Transparent)), shape),
+            .size(if (compact) 48.dp else 58.dp)
+            .clip(MaterialShapes.Cookie6Sided.toShape())
+            .background(fill),
         contentAlignment = Alignment.Center
     ) {
         val cleanText = text.trim().uppercase()
+        // The cookie keeps its size, so the label grows with the font only a little before
+        // it would run past the shape's edge.
+        val fontScale = LocalDensity.current.fontScale
+        val growth = fontScale.coerceAtMost(BADGE_MAX_FONT_GROWTH) / fontScale
         val fontSize = when {
-            cleanText.length > 5 -> if (compact) 9.5.sp else 11.sp
-            cleanText.length >= 4 -> if (compact) 12.sp else 14.sp
-            else -> if (compact) 13.5.sp else 15.5.sp
-        }
+            cleanText.length > 4 -> if (compact) 9.sp else 10.5.sp
+            cleanText.length == 4 -> if (compact) 11.sp else 13.sp
+            else -> if (compact) 12.5.sp else 15.sp
+        } * growth
         Text(
             text = cleanText,
             style = MaterialTheme.typography.labelLarge,
             fontSize = fontSize,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 0.sp,
             maxLines = 1,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = ink,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 3.dp)

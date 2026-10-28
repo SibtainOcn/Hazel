@@ -59,12 +59,13 @@ import kotlinx.coroutines.launch
 fun SheetLinkButton(
     enabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    shape: androidx.compose.ui.graphics.Shape = CircleShape
 ) {
     Box(
         modifier = modifier
             .size(44.dp)
-            .clip(CircleShape)
+            .clip(shape)
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
@@ -85,25 +86,21 @@ fun SheetLinkButton(
 @Composable
 fun IncognitoButton(
     onFeedback: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    shape: androidx.compose.ui.graphics.Shape = CircleShape
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val incognito by remember(context) { SettingsRepository.getIncognito(context) }.collectAsState(initial = false)
+    val switch = rememberIncognitoSwitch(onFeedback)
+    val incognito = switch.on
 
     Box(
         modifier = modifier
             .size(44.dp)
-            .clip(CircleShape)
+            .clip(shape)
             .background(
                 if (incognito) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
                 else tonalFill(0.55f)
             )
-            .clickable {
-                val enabled = !incognito
-                scope.launch { SettingsRepository.setIncognito(context, enabled) }
-                onFeedback(if (enabled) "Incognito: Enabled" else "Incognito: Disabled")
-            },
+            .clickable(onClick = switch.toggle),
         contentAlignment = Alignment.Center
     ) {
         Icon(
@@ -117,6 +114,21 @@ fun IncognitoButton(
             tint = if (incognito) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
+    }
+}
+
+/** The app-wide incognito setting, and a toggle that says what it did through the feedback. */
+class IncognitoSwitch(val on: Boolean, val toggle: () -> Unit)
+
+@Composable
+fun rememberIncognitoSwitch(onFeedback: (String) -> Unit): IncognitoSwitch {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val incognito by remember(context) { SettingsRepository.getIncognito(context) }.collectAsState(initial = false)
+    return IncognitoSwitch(incognito) {
+        val enabled = !incognito
+        scope.launch { SettingsRepository.setIncognito(context, enabled) }
+        onFeedback(if (enabled) "Incognito: Enabled" else "Incognito: Disabled")
     }
 }
 

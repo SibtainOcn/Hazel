@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -52,8 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * These tokens adapt to light, dark and glass while the update hero states stay
- * independent of the user's accent. Switches and the channel picker follow the accent.
+ * These tokens adapt to light, dark and glass. The up-to-date state follows the user's accent;
+ * update-available and downloading keep their own amber and blue.
  */
 object UpdateTokens {
     val isDark: Boolean
@@ -62,38 +64,39 @@ object UpdateTokens {
     private val glass: Boolean
         @Composable get() = LocalGlass.current
 
+    // Neutrals come from the theme, so light, dark, glass and the accent's tint all carry through.
     val Bg: Color
-        @Composable get() = if (glass) Color.Transparent else if (isDark) Color(0xFF0A0A0A) else Color(0xFFF7F5F1)
+        @Composable get() = if (glass) Color.Transparent else MaterialTheme.colorScheme.background
     val BgDeep: Color
-        @Composable get() = if (glass) Color.Transparent else if (isDark) Color(0xFF000000) else Color(0xFFEDE9E3)
+        @Composable get() = if (glass) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerLowest
     val Surface: Color
-        @Composable get() = if (glass) MaterialTheme.colorScheme.surface else if (isDark) Color(0xFF141414) else Color(0xFFFFFFFF)
+        @Composable get() = MaterialTheme.colorScheme.surfaceContainerHigh
     val Surface1: Color
-        @Composable get() = if (glass) MaterialTheme.colorScheme.surfaceVariant else if (isDark) Color(0xFF1A1A1A) else Color(0xFFF5F2EE)
+        @Composable get() = MaterialTheme.colorScheme.surfaceContainer
     val Surface2: Color
-        @Composable get() = if (glass) MaterialTheme.colorScheme.surfaceContainerHigh else if (isDark) Color(0xFF202020) else Color(0xFFEAE6E0)
+        @Composable get() = MaterialTheme.colorScheme.surfaceContainerHighest
     val Surface3: Color
-        @Composable get() = if (glass) MaterialTheme.colorScheme.surfaceContainerHighest else if (isDark) Color(0xFF262626) else Color(0xFFE0DDD7)
+        @Composable get() = MaterialTheme.colorScheme.surfaceContainerHighest
     val Outline: Color
-        @Composable get() = if (isDark) Color(0xFF2C2C2C) else Color(0xFFDEDAD2)
+        @Composable get() = MaterialTheme.colorScheme.outlineVariant
     val OutlineSoft: Color
-        @Composable get() = if (isDark) Color(0xFF1F1F1F) else Color(0xFFECE8E1)
+        @Composable get() = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
     val OnSurface: Color
-        @Composable get() = if (isDark) Color(0xFFF2F2F0) else Color(0xFF1F1D1A)
+        @Composable get() = MaterialTheme.colorScheme.onSurface
     val OnSurfaceVar: Color
-        @Composable get() = if (isDark) Color(0xFFB8B8B4) else Color(0xFF5E5A53)
+        @Composable get() = MaterialTheme.colorScheme.onSurfaceVariant
     val OnSurfaceDim: Color
-        @Composable get() = if (isDark) Color(0xFF7A7A77) else Color(0xFF8D8880)
+        @Composable get() = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
 
-    // Up-to-date hero state, independent emerald green
+    // Up-to-date state, in the user's accent
     val Accent: Color
-        @Composable get() = if (isDark) Color(0xFF8FD6B8) else Color(0xFF1B6B4A)
+        @Composable get() = MaterialTheme.colorScheme.primary
     val AccentStrong: Color
-        @Composable get() = if (isDark) Color(0xFFA9E6CC) else Color(0xFF106841)
+        @Composable get() = MaterialTheme.colorScheme.primary
     val AccentOn: Color
-        @Composable get() = if (isDark) Color(0xFF003824) else Color(0xFFFFFFFF)
+        @Composable get() = MaterialTheme.colorScheme.onPrimary
     val AccentContainer: Color
-        @Composable get() = if (isDark) Color(0xFF0E3327) else Color(0xFFE2F4EC)
+        @Composable get() = MaterialTheme.colorScheme.primary.copy(alpha = if (isDark) 0.16f else 0.12f)
 
     // Update available hero state (Warm Amber / Gold)
     val Update: Color
@@ -157,34 +160,34 @@ fun UpdateTopBar(
 @Composable
 fun UpdateSectionLabel(text: String, isFirst: Boolean = false) {
     Text(
-        text = text,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.SemiBold,
-        letterSpacing = 0.4.sp,
-        color = MaterialTheme.colorScheme.primary,
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        letterSpacing = 0.8.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                start = 4.dp,
-                end = 4.dp,
-                top = if (isFirst) 0.dp else 24.dp,
-                bottom = 8.dp
-            )
+            .padding(start = 8.dp, end = 8.dp, top = if (isFirst) 0.dp else 24.dp, bottom = 8.dp)
     )
 }
 
+/**
+ * Rows joined into one rounded block: the group rounds the outer corners and the rows sit
+ * 2dp apart with tight corners between them, the way the properties sheet groups its rows.
+ */
 @Composable
 fun UpdateListGroup(content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(UpdateTokens.Surface)
+            .clip(RoundedCornerShape(24.dp)),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         content()
     }
 }
 
+/** One row of a [UpdateListGroup]; its icon sits on a tonal accent shape. [showDivider] is kept for callers and ignored. */
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun UpdateListItem(
     icon: ImageVector? = null,
@@ -195,54 +198,43 @@ fun UpdateListItem(
     onClick: (() -> Unit)? = null,
     trailing: @Composable () -> Unit = {}
 ) {
-    if (showDivider) {
-        HorizontalDivider(
-            color = UpdateTokens.OutlineSoft,
-            thickness = 1.dp,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-    }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 64.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(start = 12.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = UpdateTokens.OnSurfaceVar,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-        } else if (painter != null) {
-            Icon(
-                painter = painter,
-                contentDescription = null,
-                tint = UpdateTokens.OnSurfaceVar,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
+        if (icon != null || painter != null) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                contentAlignment = Alignment.Center
+            ) {
+                val tint = MaterialTheme.colorScheme.primary
+                if (icon != null) Icon(icon, null, tint = tint, modifier = Modifier.size(20.dp))
+                else if (painter != null) Icon(painter, null, tint = tint, modifier = Modifier.size(20.dp))
+            }
+            Spacer(modifier = Modifier.width(14.dp))
         }
 
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = primary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = UpdateTokens.OnSurface,
-                lineHeight = 22.sp
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = UpdateTokens.OnSurface
             )
             if (!secondary.isNullOrBlank()) {
                 Text(
                     text = secondary,
-                    fontSize = 13.sp,
-                    color = UpdateTokens.OnSurfaceDim,
-                    lineHeight = 18.sp,
-                    modifier = Modifier.padding(top = 2.dp)
+                    style = MaterialTheme.typography.bodySmall,
+                    color = UpdateTokens.OnSurfaceVar
                 )
             }
         }
@@ -304,19 +296,19 @@ fun UpdateSegmentedButton(
     selectedIndex: Int,
     onSelect: (Int) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(UpdateTokens.Surface1)
-    ) {
+    // Connected segments: round at the ends, tight between, the chosen one in the solid accent.
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
         options.forEachIndexed { index, label ->
             val isSelected = index == selectedIndex
+            val start = if (index == 0) 24.dp else 8.dp
+            val end = if (index == options.lastIndex) 24.dp else 8.dp
             Row(
                 modifier = Modifier
                     .weight(1f)
-                    .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f) else Color.Transparent)
-                    .clickable { onSelect(index) }
+                    .heightIn(min = 48.dp)
+                    .clip(RoundedCornerShape(topStart = start, bottomStart = start, topEnd = end, bottomEnd = end))
+                    .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .selectable(selected = isSelected, role = androidx.compose.ui.semantics.Role.RadioButton) { onSelect(index) }
                     .padding(vertical = 10.dp, horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -325,7 +317,7 @@ fun UpdateSegmentedButton(
                     Icon(
                         imageVector = Icons.Filled.Check,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier
                             .size(16.dp)
                             .padding(end = 4.dp)
@@ -333,17 +325,11 @@ fun UpdateSegmentedButton(
                 }
                 Text(
                     text = label,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = if (isSelected) MaterialTheme.colorScheme.primary else UpdateTokens.OnSurfaceVar
-                )
-            }
-            if (index < options.lastIndex) {
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .height(38.dp)
-                        .background(UpdateTokens.OutlineSoft)
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else UpdateTokens.OnSurfaceVar
                 )
             }
         }

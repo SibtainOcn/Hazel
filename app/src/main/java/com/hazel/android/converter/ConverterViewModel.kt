@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 data class ConversionState(
@@ -75,20 +76,24 @@ class ConverterViewModel : ViewModel() {
      *
      * The name and size are read here rather than at conversion time, because both come
      * from a query against the provider that may not answer the same way later, and the
-     * screen wants to show them the moment the picker closes.
+     * screen wants to show them the moment the picker closes. The query runs off the main
+     * thread, since a cloud provider can take a while to answer.
      */
     fun selectFile(context: Context, uri: Uri) {
-        val name = displayName(context, uri)
-        _state.value = _state.value.copy(
-            inputFileName = name,
-            inputSizeBytes = fileSize(context, uri),
-            inputFileUri = uri,
-            outputName = safeBaseName(name),
-            error = null,
-            isComplete = false,
-            statusLine = "",
-            progress = 0f
-        )
+        val app = context.applicationContext
+        viewModelScope.launch {
+            val (name, size) = withContext(Dispatchers.IO) { displayName(app, uri) to fileSize(app, uri) }
+            _state.value = _state.value.copy(
+                inputFileName = name,
+                inputSizeBytes = size,
+                inputFileUri = uri,
+                outputName = safeBaseName(name),
+                error = null,
+                isComplete = false,
+                statusLine = "",
+                progress = 0f
+            )
+        }
     }
 
     fun setOutputName(name: String) {

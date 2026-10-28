@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -148,7 +149,13 @@ fun LanguageSheet(
             }
 
             // ── The languages, two to a row ──
+            // Opens on the language in use, a row above it left in view.
+            val chosen = remember(current) {
+                AppLocale.LANGUAGES.indexOfFirst { it.tag.equals(current, ignoreCase = true) } + 1
+            }
+            val grid = rememberLazyGridState(initialFirstVisibleItemIndex = (chosen - 2).coerceAtLeast(0))
             LazyVerticalGrid(
+                state = grid,
                 // One column once the font is large enough that two would cut most names short.
                 columns = GridCells.Fixed(if (LocalDensity.current.fontScale >= 1.7f) 1 else 2),
                 modifier = Modifier

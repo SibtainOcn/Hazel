@@ -183,11 +183,15 @@ object SdCards {
      * purpose and is used as it is, and comes back unchanged. Null when the folders were
      * needed but the card would not make them, so the caller can say so.
      */
-    fun kindFolderIn(context: Context, treeUri: Uri, isVideo: Boolean): Uri? = runCatching {
+    fun kindFolderIn(context: Context, treeUri: Uri, isVideo: Boolean): Uri? =
+        hazelFolderIn(context, treeUri, kindFolderName(isVideo))
+
+    /** Hazel/[name] on a card's root, found or made; any other folder is used as it is. */
+    fun hazelFolderIn(context: Context, treeUri: Uri, name: String): Uri? = runCatching {
         val rootId = DocumentsContract.getTreeDocumentId(treeUri)
         if (!isVolumeRoot(rootId)) return treeUri
         val hazel = childFolder(context, treeUri, rootId, "Hazel") ?: return null
-        childFolder(context, treeUri, DocumentsContract.getDocumentId(hazel), kindFolderName(isVideo))
+        childFolder(context, treeUri, DocumentsContract.getDocumentId(hazel), name)
     }.getOrNull()
 
     fun kindFolderName(isVideo: Boolean): String = if (isVideo) "Video" else "Audio"

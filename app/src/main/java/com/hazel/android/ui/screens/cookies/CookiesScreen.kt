@@ -1,5 +1,9 @@
 package com.hazel.android.ui.screens.cookies
 
+import com.hazel.android.ui.components.MenuTone
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.FileOpen
+import androidx.compose.material.icons.filled.IosShare
 import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.ActionsRow
 import android.content.ClipData
@@ -49,15 +53,15 @@ import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import com.hazel.android.ui.components.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
+import com.hazel.android.ui.components.ExpressiveTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -99,6 +103,8 @@ import com.hazel.android.ui.screens.more.ConfirmSettingDialog
 import com.hazel.android.ui.screens.more.SettingsSection
 import com.hazel.android.ui.screens.more.SwitchSettingRow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 
 /**
  * Manages the cookie sets yt-dlp uses to reach content that needs a signed-in session.
@@ -141,10 +147,12 @@ fun CookiesScreen(onBack: () -> Unit) {
             importing = true
             scope.launch {
                 try {
-                    val fileName = queryFileName(context, uri) ?: "cookies.txt"
-                    val text = context.contentResolver.openInputStream(uri)?.use { stream ->
-                        stream.bufferedReader(Charsets.UTF_8).readText()
-                    }.orEmpty()
+                    val (fileName, text) = withContext(Dispatchers.IO) {
+                        (queryFileName(context, uri) ?: "cookies.txt") to
+                            context.contentResolver.openInputStream(uri)?.use { stream ->
+                                stream.bufferedReader(Charsets.UTF_8).readText()
+                            }.orEmpty()
+                    }
                     val imported = text.isNotBlank() &&
                         CookieRepository.importText(context, text, fileName)
                     toast(
@@ -192,6 +200,8 @@ fun CookiesScreen(onBack: () -> Unit) {
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.cookies_menu_import)) },
+                        icon = Icons.Filled.FileOpen,
+                        tone = MenuTone.Accent,
                         onClick = {
                             menuOpen = false
                             scope.launch {
@@ -211,6 +221,8 @@ fun CookiesScreen(onBack: () -> Unit) {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.cookies_menu_export)) },
+                        icon = Icons.Filled.IosShare,
+                        tone = MenuTone.Info,
                         enabled = !entries.isNullOrEmpty(),
                         onClick = {
                             menuOpen = false
@@ -232,6 +244,8 @@ fun CookiesScreen(onBack: () -> Unit) {
                                 color = MaterialTheme.colorScheme.error
                             )
                         },
+                        icon = Icons.Filled.DeleteForever,
+                        tone = MenuTone.Danger,
                         enabled = !entries.isNullOrEmpty(),
                         onClick = {
                             menuOpen = false
@@ -569,11 +583,10 @@ private fun AddSignInSheet(onContinue: (String) -> Unit, onDismiss: () -> Unit) 
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
             )
             Spacer(modifier = Modifier.height(20.dp))
-            OutlinedTextField(
+            ExpressiveTextField(
                 value = url,
                 onValueChange = { url = it },
                 label = { Text(stringResource(R.string.cookies_field_url)) },
-                leadingIcon = { Icon(Icons.Filled.Link, contentDescription = null) },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
@@ -647,7 +660,7 @@ private fun CookieDetailSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            OutlinedTextField(
+            ExpressiveTextField(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text(stringResource(R.string.cookies_field_title)) },
@@ -656,11 +669,10 @@ private fun CookieDetailSheet(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
+            ExpressiveTextField(
                 value = url,
                 onValueChange = { url = it },
                 label = { Text(stringResource(R.string.cookies_field_url)) },
-                leadingIcon = { Icon(Icons.Filled.Link, contentDescription = null) },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),

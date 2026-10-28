@@ -6,12 +6,12 @@ import androidx.compose.ui.graphics.Color
 import com.hazel.android.ui.theme.glassScreen
 import android.content.Context
 import android.content.Intent
+import android.animation.ValueAnimator
 import android.os.Bundle
-import android.os.Process
-import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
@@ -31,7 +32,6 @@ import com.hazel.android.ui.screens.SplashScreen
 import com.hazel.android.ui.theme.HazelTheme
 import com.hazel.android.util.AppLocale
 import com.hazel.android.util.PermissionHelper
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -90,10 +90,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             val scope = rememberCoroutineScope()
 
-            // The download engine unpacks itself on a background thread, but the unpacking
-            // still competes for the same CPU and disk as the first frame. Asked for only
-            // once that frame exists, so the launch is not paying for it.
-            LaunchedEffect(Unit) {
+            // Plays once per cold launch; skipped when the system has animations turned off.
+            var splashDone by rememberSaveable { mutableStateOf(!animatorsEnabled()) }
+            var homeWanted by rememberSaveable { mutableStateOf(false) }
+            var homeShown by remember { mutableStateOf(false) }
+
+            // The download engine unpacks on a background thread but still competes for CPU
+            // and disk, so it waits until the splash is over and a frame of home is drawn.
+            LaunchedEffect(splashDone) {
+                if (!splashDone) return@LaunchedEffect
                 withFrameNanos { }
                 HazelApp.instance.startLibraryInit()
                 com.hazel.android.update.HazelUpdater.checkUpdatesSilently(applicationContext)
@@ -110,70 +115,71 @@ class MainActivity : ComponentActivity() {
             // than painting once in the wrong colours and correcting itself.
             val resolvedAccent = accentName
 
-            // The splash is held for what is left of one short budget counted from the
-            // start of the process, so the time already spent on the system's launch
-            // window counts towards it instead of being added to it. Preferences usually
-            // load faster than that, and without a floor the splash could appear and
-            // vanish within a frame or two, which reads as a glitch rather than a launch.
-            var minimumShown by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) {
-                delay(remainingSplashHoldMs())
-                minimumShown = true
-            }
-
             val glass = glassPref
             val glassStyle = glassStyleKey?.let { GlassStyle.fromKey(it) }
-            if (resolvedAccent == null || glass == null || glassStyle == null || !minimumShown) {
-                HazelTheme(darkTheme = isDark) { SplashScreen() }
-                return@setContent
-            }
+            val ready = resolvedAccent != null && glass != null && glassStyle != null
 
-            HazelTheme(darkTheme = isDark, accentName = resolvedAccent, glass = glass, glassStyle = glassStyle) {
-                Surface(
-                    modifier = Modifier.fillMaxSize().glassScreen(),
-                    color = if (glass) Color.Transparent else MaterialTheme.colorScheme.surface
-                ) {
-                    AppNavigation(
-                        pendingShares = pendingShares,
-                        pendingFailure = pendingFailure,
-                        pendingRoute = pendingRoute,
-                        onPendingRouteConsumed = { pendingRoute = null },
-                        onPendingFailureConsumed = { pendingFailure = null },
-                        onSharesConsumed = { pendingShares.clear() },
-                        isDarkTheme = isDark,
-                        onToggleTheme = {
-                            scope.launch { SettingsRepository.setDarkTheme(this@MainActivity, !isDark) }
-                        },
-                        accentName = resolvedAccent,
-                        onAccentChanged = { name ->
-                            scope.launch { SettingsRepository.setAccentColor(this@MainActivity, name) }
-                        },
-                        glassEnabled = glass,
-                        onToggleGlass = {
-                            scope.launch { SettingsRepository.setGlassEnabled(this@MainActivity, !glass) }
-                        },
-                        glassStyle = glassStyle,
-                        onGlassStyleChanged = { style ->
-                            scope.launch { SettingsRepository.setGlassStyle(this@MainActivity, style.key) }
+            Box(Modifier.fillMaxSize()) {
+                // Home is built only once the splash logo has settled, so its heavy first
+                // layout never lands on the frames the splash is animating.
+                if (resolvedAccent != null && glass != null && glassStyle != null && (splashDone || homeWanted)) {
+                    // The splash opens onto home only once home draws smoothly, so its first
+                    // loads and image decodes happen behind the still logo, not during the reveal.
+                    LaunchedEffect(Unit) {
+                        var last = withFrameNanos { it }
+                        val giveUpAt = last + HOME_SETTLE_LIMIT_NS
+                        var smooth = 0
+                        while (smooth < HOME_SMOOTH_FRAMES && last < giveUpAt) {
+                            val now = withFrameNanos { it }
+                            smooth = if (now - last < SMOOTH_FRAME_NS) smooth + 1 else 0
+                            last = now
                         }
-                    )
+                        homeShown = true
+                    }
+                    HazelTheme(darkTheme = isDark, accentName = resolvedAccent, glass = glass, glassStyle = glassStyle) {
+                        Surface(
+                            modifier = Modifier.fillMaxSize().glassScreen(),
+                            color = if (glass) Color.Transparent else MaterialTheme.colorScheme.surface
+                        ) {
+                            AppNavigation(
+                                pendingShares = pendingShares,
+                                pendingFailure = pendingFailure,
+                                pendingRoute = pendingRoute,
+                                onPendingRouteConsumed = { pendingRoute = null },
+                                onPendingFailureConsumed = { pendingFailure = null },
+                                onSharesConsumed = { pendingShares.clear() },
+                                isDarkTheme = isDark,
+                                onToggleTheme = {
+                                    scope.launch { SettingsRepository.setDarkTheme(this@MainActivity, !isDark) }
+                                },
+                                accentName = resolvedAccent,
+                                onAccentChanged = { name ->
+                                    scope.launch { SettingsRepository.setAccentColor(this@MainActivity, name) }
+                                },
+                                glassEnabled = glass,
+                                onToggleGlass = {
+                                    scope.launch { SettingsRepository.setGlassEnabled(this@MainActivity, !glass) }
+                                },
+                                glassStyle = glassStyle,
+                                onGlassStyleChanged = { style ->
+                                    scope.launch { SettingsRepository.setGlassStyle(this@MainActivity, style.key) }
+                                }
+                            )
+                        }
+                    }
+                }
+                if (!splashDone) {
+                    HazelTheme(darkTheme = isDark) {
+                        SplashScreen(
+                            ready = ready,
+                            homeShown = homeShown,
+                            onWantHome = { homeWanted = true },
+                            onFinished = { splashDone = true }
+                        )
+                    }
                 }
             }
         }
-    }
-
-    /**
-     * How much longer to hold the splash, in milliseconds.
-     *
-     * What the user waits through is one span, not two: the system's launch window and
-     * then this screen, which are drawn to look the same. So the budget is measured from
-     * the moment the process started, and a slow start spends the budget rather than
-     * extending it. A fast start still gets [SPLASH_FLOOR_MS], because a splash that comes
-     * and goes inside a couple of frames looks like a fault.
-     */
-    private fun remainingSplashHoldMs(): Long {
-        val sinceProcessStart = SystemClock.elapsedRealtime() - Process.getStartElapsedRealtime()
-        return (SPLASH_BUDGET_MS - sinceProcessStart).coerceIn(SPLASH_FLOOR_MS, SPLASH_BUDGET_MS)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -224,8 +230,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/** The whole launch, from the process starting to the app being on screen. */
-private const val SPLASH_BUDGET_MS = 900L
+private const val HOME_SMOOTH_FRAMES = 3
+private const val SMOOTH_FRAME_NS = 24_000_000L
+private const val HOME_SETTLE_LIMIT_NS = 700_000_000L
 
-/** The least the splash is worth showing for once it is up. */
-private const val SPLASH_FLOOR_MS = 350L
+/** Whether the system plays animations; Android 7 has no direct call, so its setting is read. */
+private fun android.content.Context.animatorsEnabled(): Boolean =
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) ValueAnimator.areAnimatorsEnabled()
+    else android.provider.Settings.Global.getFloat(contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
