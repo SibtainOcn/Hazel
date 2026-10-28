@@ -812,6 +812,8 @@
     <string name="player_pause">暂停</string>
     <string name="player_close">关闭播放器</string>
     <string name="player_fullscreen">全屏</string>
+    <string name="player_minimize">最小化</string>
+    <string name="player_expand">打开播放器</string>
     <string name="player_exit_fullscreen">退出全屏</string>
     <string name="player_failed">无法播放</string>
     <string name="player_retry">重试</string>

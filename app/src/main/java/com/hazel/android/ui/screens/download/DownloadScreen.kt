@@ -1,5 +1,17 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.components.player.miniWidth
+import com.hazel.android.ui.components.player.LargePlayer
+import com.hazel.android.ui.components.player.MiniPlayer
+import com.hazel.android.ui.components.player.PlayerPlace
+import com.hazel.android.ui.components.player.PlayerDock
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
@@ -216,9 +228,13 @@ fun DownloadScreen(
     var playingUrl by remember { mutableStateOf<String?>(null) }
     var playerFullscreen by remember { mutableStateOf(false) }
     val playback = playingUrl?.let { rememberPlaybackController(it) }
+    // Moves the video between its card, the mini player and the large view, so a scroll or
+    // a download carries on playing instead of stopping it.
+    val dock = remember { PlayerDock() }
     val stopPlaying = {
         playingUrl = null
         playerFullscreen = false
+        dock.start(null)
     }
     var sheetVisible by remember { mutableStateOf(false) }
     var batchSheetVisible by remember { mutableStateOf(false) }
@@ -538,6 +554,7 @@ fun DownloadScreen(
                         state = listState,
                         modifier = Modifier
                             .fillMaxSize()
+                            .onGloballyPositioned { dock.viewport = it.boundsInWindow() }
                             .nestedScroll(shrink),
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(
                             start = 20.dp,
@@ -604,12 +621,18 @@ fun DownloadScreen(
                                     alreadyDownloaded = info.url in savedUrls,
                                     player = playback?.takeIf { playingUrl == info.url },
                                     playerFullscreen = playerFullscreen,
-                                    onPlay = { playingUrl = info.url },
-                                    onFullscreen = { playerFullscreen = true },
-                                    onStopPlaying = {
-                                        // Full screen takes the card off screen; that is no reason to stop.
-                                        if (playingUrl == info.url && !playerFullscreen) stopPlaying()
+                                    playerInCard = dock.place == PlayerPlace.CARD && !dock.docking,
+                                    onPlay = {
+                                        playingUrl = info.url
+                                        dock.start(info.url)
                                     },
+                                    onFullscreen = { playerFullscreen = true },
+                                    onStopPlaying = { if (playingUrl == info.url) stopPlaying() },
+                                    onPlayerMoved = { bounds, canDock ->
+                                        dock.onCardMoved(info.url, bounds, canDock, playerFullscreen)
+                                    },
+                                    onPlayerGone = { dock.onCardGone(info.url, playerFullscreen) },
+                                    onPlayerTakenOver = { dock.toMini(info.url) },
                                     onOpenSheet = openSheet,
                                     onOpenQueue = onOpenQueue
                                 )
@@ -825,10 +848,36 @@ fun DownloadScreen(
         val clipStamp = rememberClipStamp()
         var usedClipStamp by rememberSaveable { mutableStateOf<Long?>(null) }
         val showPaste = clipStamp != null && clipStamp != usedClipStamp && !state.isFetching
+
+        val miniShown = playback != null && (dock.place != PlayerPlace.CARD || dock.docking)
+        if (playback != null) {
+            MiniPlayer(
+                dock = dock,
+                controller = playback,
+                thumbnail = state.results.firstOrNull { it.url == playingUrl }?.thumbnail,
+                fullscreen = playerFullscreen,
+                onClose = stopPlaying
+            )
+        }
+        // The actions stand above the mini player when the screen is too narrow for both.
+        var screenWidth by remember { mutableIntStateOf(0) }
+        var actionsWidth by remember { mutableIntStateOf(0) }
+        val density = LocalDensity.current
+        // The actions' measured width includes their 20dp side padding, which matches the
+        // mini player's 12dp margin plus an 8dp gap, so they touch once wider than the rest.
+        val crowded = with(density) {
+            miniShown && actionsWidth > 0 && actionsWidth > screenWidth - miniWidth(screenWidth.toDp()).toPx()
+        }
+        val lift by animateDpAsState(
+            if (crowded) with(density) { (miniWidth(screenWidth.toDp()) * 9f / 16f) + 12.dp } else 0.dp,
+            label = "actionsLift"
+        )
+        Box(Modifier.matchParentSize().onSizeChanged { screenWidth = it.width })
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(20.dp),
+                .onSizeChanged { actionsWidth = it.width }
+                .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 20.dp + lift),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -868,6 +917,28 @@ fun DownloadScreen(
     // A card that has gone from the results takes its player with it.
     LaunchedEffect(state.results, playingUrl) {
         if (playingUrl != null && state.results.none { it.url == playingUrl }) stopPlaying()
+    }
+
+    if (dock.place == PlayerPlace.LARGE && playback != null) {
+        val playingInfo = state.results.firstOrNull { it.url == playingUrl }
+        LargePlayer(
+            dock = dock,
+            controller = playback,
+            title = playingInfo?.title,
+            author = playingInfo?.uploader,
+            thumbnail = playingInfo?.thumbnail,
+            fullscreen = playerFullscreen,
+            onFullscreen = { playerFullscreen = true },
+            onClose = stopPlaying,
+            onDownload = playingInfo?.let { info ->
+                {
+                    dock.collapse()
+                    downloadViewModel.selectResult(info)
+                    downloadViewModel.resolveFormats(info)
+                    sheetVisible = true
+                }
+            }
+        )
     }
 
     if (playerFullscreen && playback != null) {
@@ -1207,6 +1278,12 @@ private fun MediaCard(
     onPlay: () -> Unit = {},
     onFullscreen: () -> Unit = {},
     onStopPlaying: () -> Unit = {},
+    /** Whether the video shows in this card, rather than in the mini player or large view. */
+    playerInCard: Boolean = true,
+    /** Where the playing card's picture is in the window, and whether it can hold the video. */
+    onPlayerMoved: (Rect, Boolean) -> Unit = { _, _ -> },
+    onPlayerGone: () -> Unit = {},
+    onPlayerTakenOver: () -> Unit = {},
     onOpenSheet: () -> Unit,
     onOpenQueue: () -> Unit
 ) {
@@ -1225,6 +1302,11 @@ private fun MediaCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
+                .then(
+                    if (player != null) {
+                        Modifier.onGloballyPositioned { onPlayerMoved(it.boundsInWindow(), !inHand) }
+                    } else Modifier
+                )
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .clickable(
                     onClickLabel = if (inHand) stringResource(R.string.download_open_queue) else null,
@@ -1429,9 +1511,13 @@ private fun MediaCard(
                 }
             }
 
-            // Playing covers the artwork with the player until it is closed or scrolled away.
-            if (player != null && !inHand) {
-                DisposableEffect(info.url) { onDispose { onStopPlaying() } }
+            // Playing covers the artwork with the player while it is here. Scrolled away or
+            // taken over by a download, the video moves to the mini player and carries on.
+            if (player != null) {
+                DisposableEffect(info.url) { onDispose { onPlayerGone() } }
+                LaunchedEffect(inHand) { if (inHand) onPlayerTakenOver() }
+            }
+            if (player != null && !inHand && playerInCard) {
                 InlinePlayer(
                     controller = player,
                     thumbnail = info.thumbnail,

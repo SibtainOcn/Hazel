@@ -840,6 +840,8 @@
     <string name="player_pause">Pause</string>
     <string name="player_close">Fermer le lecteur</string>
     <string name="player_fullscreen">Plein écran</string>
+    <string name="player_minimize">Réduire</string>
+    <string name="player_expand">Ouvrir le lecteur</string>
     <string name="player_exit_fullscreen">Quitter le plein écran</string>
     <string name="player_failed">Lecture impossible</string>
     <string name="player_retry">Réessayer</string>

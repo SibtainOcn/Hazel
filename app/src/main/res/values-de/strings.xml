@@ -826,6 +826,8 @@
     <string name="player_pause">Pause</string>
     <string name="player_close">Player schließen</string>
     <string name="player_fullscreen">Vollbild</string>
+    <string name="player_minimize">Minimieren</string>
+    <string name="player_expand">Player öffnen</string>
     <string name="player_exit_fullscreen">Vollbild beenden</string>
     <string name="player_failed">Konnte nicht abgespielt werden</string>
     <string name="player_retry">Erneut versuchen</string>

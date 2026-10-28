@@ -840,6 +840,8 @@
     <string name="player_pause">Pausar</string>
     <string name="player_close">Fechar player</string>
     <string name="player_fullscreen">Tela cheia</string>
+    <string name="player_minimize">Minimizar</string>
+    <string name="player_expand">Abrir player</string>
     <string name="player_exit_fullscreen">Sair da tela cheia</string>
     <string name="player_failed">Não foi possível reproduzir</string>
     <string name="player_retry">Tentar de novo</string>

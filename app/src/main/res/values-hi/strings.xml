@@ -826,6 +826,8 @@
     <string name="player_pause">रोकें</string>
     <string name="player_close">प्लेयर बंद करें</string>
     <string name="player_fullscreen">पूरी स्क्रीन</string>
+    <string name="player_minimize">छोटा करें</string>
+    <string name="player_expand">प्लेयर खोलें</string>
     <string name="player_exit_fullscreen">पूरी स्क्रीन से बाहर</string>
     <string name="player_failed">इसे चलाया नहीं जा सका</string>
     <string name="player_retry">फिर कोशिश करें</string>
