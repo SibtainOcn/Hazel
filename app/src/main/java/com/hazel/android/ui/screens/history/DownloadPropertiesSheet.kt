@@ -300,7 +300,7 @@ private fun FileActions(entry: HistoryEntry, present: Boolean) {
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun CookieAction(
+internal fun CookieAction(
     icon: ImageVector,
     @StringRes label: Int,
     enabled: Boolean,
@@ -400,7 +400,7 @@ private fun Details(entry: HistoryEntry, facts: MediaFacts, onCopy: (String) -> 
 
 /** Rows joined into one rounded block, with tight corners between them. */
 @Composable
-private fun Group(@StringRes title: Int, rows: List<@Composable () -> Unit>) {
+internal fun Group(@StringRes title: Int, rows: List<@Composable () -> Unit>) {
     if (rows.isEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         SectionLabel(title)
@@ -419,7 +419,7 @@ private fun Group(@StringRes title: Int, rows: List<@Composable () -> Unit>) {
 }
 
 @Composable
-private fun SectionLabel(@StringRes title: Int) {
+internal fun SectionLabel(@StringRes title: Int) {
     Text(
         stringResource(title).uppercase(),
         style = MaterialTheme.typography.labelSmall,
@@ -435,7 +435,7 @@ private fun Label(text: String) {
 }
 
 @Composable
-private fun FactRow(label: String, value: String) {
+internal fun FactRow(label: String, value: String) {
     Row(modifier = Modifier.padding(end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Label(label)
         Spacer(modifier = Modifier.width(16.dp))
@@ -450,7 +450,7 @@ private fun FactRow(label: String, value: String) {
 }
 
 @Composable
-private fun StackedRow(label: String, value: String, icon: ImageVector, @StringRes action: Int, onAction: () -> Unit) {
+internal fun StackedRow(label: String, value: String, icon: ImageVector, @StringRes action: Int, onAction: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -462,7 +462,7 @@ private fun StackedRow(label: String, value: String, icon: ImageVector, @StringR
 }
 
 @Composable
-private fun SquareIcon(icon: ImageVector, @StringRes description: Int, onClick: () -> Unit) {
+internal fun SquareIcon(icon: ImageVector, @StringRes description: Int, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(44.dp)
@@ -476,7 +476,7 @@ private fun SquareIcon(icon: ImageVector, @StringRes description: Int, onClick: 
 }
 
 @Composable
-private fun Chip(text: String) {
+internal fun Chip(text: String) {
     Text(
         text,
         style = MaterialTheme.typography.labelMedium,
@@ -539,7 +539,7 @@ private fun ListActions(present: Boolean, onRemove: () -> Unit, onDelete: () -> 
 }
 
 @Composable
-private fun SplitButton(
+internal fun SplitButton(
     @StringRes label: Int,
     shape: Shape,
     container: androidx.compose.ui.graphics.Color,
@@ -559,7 +559,7 @@ private val Outer: Dp = 24.dp
 private val Inner: Dp = 6.dp
 
 /** The corners of one row in a joined group: round on the outside, tight between rows. */
-private fun rowShape(index: Int, count: Int, horizontal: Boolean = false): Shape {
+internal fun rowShape(index: Int, count: Int, horizontal: Boolean = false): Shape {
     val first = index == 0
     val last = index == count - 1
     val a = if (first) Outer else Inner
@@ -568,7 +568,7 @@ private fun rowShape(index: Int, count: Int, horizontal: Boolean = false): Shape
     else RoundedCornerShape(topStart = a, topEnd = a, bottomStart = b, bottomEnd = b)
 }
 
-private fun splitShape(start: Boolean): Shape =
+internal fun splitShape(start: Boolean): Shape =
     if (start) RoundedCornerShape(topStart = 26.dp, bottomStart = 26.dp, topEnd = 8.dp, bottomEnd = 8.dp)
     else RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 26.dp, bottomEnd = 26.dp)
 

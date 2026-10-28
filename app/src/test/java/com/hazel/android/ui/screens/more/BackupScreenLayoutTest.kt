@@ -59,6 +59,37 @@ class BackupScreenLayoutTest(private val qualifiers: String, private val fontSca
         compose.onNodeWithText(context.getString(R.string.backup_none_yet), useUnmergedTree = true).assertIsDisplayed()
     }
 
+    private fun checkSheet() {
+        RuntimeEnvironment.setQualifiers(qualifiers)
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val file = com.hazel.android.data.BackupFile(
+            android.net.Uri.parse("content://missing/hazel_auto_backup_1.0_2026-10-01_10-00-00.json"),
+            "hazel_auto_backup_1.0_2026-10-01_10-00-00.json", 2048, 0
+        )
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = false) {
+                val density = LocalDensity.current
+                CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale)) {
+                    BackupFileSheet(file, "", "", onRestore = {}, onShare = {}, onDelete = {}, onDismiss = {})
+                }
+            }
+        }
+        compose.waitForIdle()
+        val width = context.resources.displayMetrics.widthPixels
+        listOf(R.string.backup_share, R.string.backup_delete).forEach { id ->
+            val node = compose.onAllNodesWithText(context.getString(id), useUnmergedTree = true)[0].fetchSemanticsNode()
+            assertTrue("${context.getString(id)} runs off the screen", node.positionOnScreen.x + node.size.width <= width)
+        }
+    }
+
+    @Test
+    @Config(sdk = [24])
+    fun `sheet fits on the oldest android`() = checkSheet()
+
+    @Test
+    @Config(sdk = [35])
+    fun `sheet fits on the newest android`() = checkSheet()
+
     @Test
     @Config(sdk = [24])
     fun `fits on the oldest android`() = check()

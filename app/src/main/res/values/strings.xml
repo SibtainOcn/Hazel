@@ -854,7 +854,7 @@
     <string name="backup_category_history">Downloads</string>
     <string name="backup_category_queue">In queue</string>
     <string name="backup_category_failed">Failed</string>
-    <string name="backup_category_cookies">Cookies</string>
+    <string name="backup_category_cookies">Cookies and tokens</string>
     <string name="backup_category_search">Search history</string>
     <string name="backup_auto_summary">Before updates</string>
     <string name="backup_section_saved">Saved backups</string>
@@ -888,6 +888,17 @@
     <string name="backup_offer_pick">Pick a Hazel backup file to bring back your settings and downloads.</string>
     <string name="backup_offer_choose">Choose file</string>
     <string name="backup_not_now">Not now</string>
+    <string name="backup_folder_body">Where backups are saved. Automatic backups and the restore offer look here.</string>
+    <string name="backup_view">View</string>
+    <string name="backup_show_folder">Show folder</string>
+    <string name="backup_share_title">Share this backup?</string>
+    <string name="backup_share_body">A backup can hold your cookies, sign-in tokens, proxy user name and download history. Share it only with people and apps you trust.</string>
+    <string name="backup_view_failed">No app can open this</string>
+    <string name="backup_section_contains">Contains</string>
+    <string name="backup_included">Included</string>
+    <string name="backup_version">Version</string>
+    <string name="backup_entries_label">Entries</string>
+    <string name="backup_categories_label">Categories</string>
     <string name="search_no_results">No results for %1$s</string>
     <string name="player_play">Play</string>
     <string name="player_pause">Pause</string>

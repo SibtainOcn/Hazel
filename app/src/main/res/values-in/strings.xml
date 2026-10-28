@@ -762,7 +762,7 @@
     <string name="backup_category_history">Unduhan</string>
     <string name="backup_category_queue">Dalam antrean</string>
     <string name="backup_category_failed">Gagal</string>
-    <string name="backup_category_cookies">Cookie</string>
+    <string name="backup_category_cookies">Cookie dan token</string>
     <string name="backup_category_search">Riwayat pencarian</string>
     <string name="backup_auto_summary">Sebelum pembaruan</string>
     <string name="backup_section_saved">Cadangan tersimpan</string>
@@ -796,6 +796,17 @@
     <string name="backup_offer_pick">Pilih file cadangan Hazel untuk mengembalikan pengaturan dan unduhan.</string>
     <string name="backup_offer_choose">Pilih file</string>
     <string name="backup_not_now">Nanti</string>
+    <string name="backup_folder_body">Tempat cadangan disimpan. Cadangan otomatis dan tawaran pemulihan mencari di sini.</string>
+    <string name="backup_view">Lihat</string>
+    <string name="backup_show_folder">Tampilkan folder</string>
+    <string name="backup_share_title">Bagikan cadangan ini?</string>
+    <string name="backup_share_body">Cadangan bisa berisi cookie, token masuk, nama pengguna proxy, dan riwayat unduhan. Bagikan hanya kepada orang dan aplikasi yang Anda percaya.</string>
+    <string name="backup_view_failed">Tidak ada aplikasi yang bisa membukanya</string>
+    <string name="backup_section_contains">Berisi</string>
+    <string name="backup_included">Disertakan</string>
+    <string name="backup_version">Versi</string>
+    <string name="backup_entries_label">Entri</string>
+    <string name="backup_categories_label">Kategori</string>
     <string name="search_no_results">Tidak ada hasil untuk %1$s</string>
     <string name="player_play">Putar</string>
     <string name="player_pause">Jeda</string>

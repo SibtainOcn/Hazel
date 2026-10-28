@@ -87,6 +87,42 @@ class BackupRepositoryTest {
         assertFailsWith<BackupRepository.NotABackup> { BackupRepository.parse("not json") }
     }
 
+    private val everything = mutablePreferencesOf(
+        booleanPreferencesKey("wifi_only") to true,
+        stringPreferencesKey("download_history") to """[{"id":1}]""",
+        stringPreferencesKey("download_queue") to """[{"url":"q"}]""",
+        booleanPreferencesKey("download_queue_held") to true,
+        stringPreferencesKey("failed_downloads") to """[{"url":"f"}]""",
+        stringPreferencesKey("cookie_entries") to """[{"url":"c"}]""",
+        stringPreferencesKey("adv_po_tokens") to "token",
+        stringPreferencesKey("adv_visitor_data") to "visitor",
+        stringPreferencesKey("search_history") to """["s"]""",
+        booleanPreferencesKey("has_update_available") to true,
+        stringPreferencesKey("hazel_update_version") to "9.9",
+        booleanPreferencesKey("update_notify_off_applied") to true
+    )
+
+    @Test
+    fun eachCategoryHoldsOnlyItsOwnKeys() {
+        val expected = mapOf(
+            BackupCategory.SETTINGS to setOf("wifi_only"),
+            BackupCategory.HISTORY to setOf("download_history"),
+            BackupCategory.QUEUE to setOf("download_queue", "download_queue_held"),
+            BackupCategory.FAILED to setOf("failed_downloads"),
+            BackupCategory.COOKIES to setOf("cookie_entries", "adv_po_tokens", "adv_visitor_data"),
+            BackupCategory.SEARCH to setOf("search_history")
+        )
+        expected.forEach { (category, keys) ->
+            assertEquals(keys, BackupRepository.export(everything, setOf(category)).getJSONObject("values").keys().asSequence().toSet(), category.id)
+        }
+        val chosen = setOf(BackupCategory.HISTORY, BackupCategory.COOKIES)
+        val contents = BackupRepository.parse(BackupRepository.export(everything, chosen).toString())
+        assertEquals(chosen, contents.categories)
+        val target = mutablePreferencesOf()
+        BackupRepository.apply(target, contents, setOf(BackupCategory.COOKIES))
+        assertEquals(setOf("cookie_entries", "adv_po_tokens", "adv_visitor_data"), target.asMap().keys.map { it.name }.toSet())
+    }
+
     @Test
     fun newerFormatIsBlocked() {
         val json = BackupRepository.export(source, BackupCategory.entries.toSet())

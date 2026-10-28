@@ -762,7 +762,7 @@
     <string name="backup_category_history">ダウンロード</string>
     <string name="backup_category_queue">キュー</string>
     <string name="backup_category_failed">失敗</string>
-    <string name="backup_category_cookies">Cookie</string>
+    <string name="backup_category_cookies">Cookie とトークン</string>
     <string name="backup_category_search">検索履歴</string>
     <string name="backup_auto_summary">アップデート前</string>
     <string name="backup_section_saved">保存済みのバックアップ</string>
@@ -796,6 +796,17 @@
     <string name="backup_offer_pick">設定とダウンロードを戻すには Hazel のバックアップファイルを選んでください。</string>
     <string name="backup_offer_choose">ファイルを選択</string>
     <string name="backup_not_now">後で</string>
+    <string name="backup_folder_body">バックアップの保存先です。自動バックアップと復元の案内はここを探します。</string>
+    <string name="backup_view">表示</string>
+    <string name="backup_show_folder">フォルダを表示</string>
+    <string name="backup_share_title">このバックアップを共有しますか？</string>
+    <string name="backup_share_body">バックアップには Cookie、ログイントークン、プロキシのユーザー名、ダウンロード履歴が含まれることがあります。信頼できる相手とアプリにだけ共有してください。</string>
+    <string name="backup_view_failed">開けるアプリがありません</string>
+    <string name="backup_section_contains">内容</string>
+    <string name="backup_included">含まれます</string>
+    <string name="backup_version">バージョン</string>
+    <string name="backup_entries_label">件数</string>
+    <string name="backup_categories_label">カテゴリ</string>
     <string name="search_no_results">%1$s の結果はありません</string>
     <string name="player_play">再生</string>
     <string name="player_pause">一時停止</string>

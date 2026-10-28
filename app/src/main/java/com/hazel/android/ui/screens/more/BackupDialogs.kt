@@ -54,7 +54,7 @@ internal fun backupDate(context: android.content.Context, millis: Long): String 
  * action that starts it from a file; [onDone] runs after a restore that went through.
  */
 @Composable
-internal fun rememberRestoreFlow(onDone: () -> Unit = {}): (Uri) -> Unit {
+internal fun rememberRestoreFlow(onDone: () -> Unit = {}, onCancel: () -> Unit = {}): (Uri) -> Unit {
     val context = LocalContext.current
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
@@ -67,14 +67,14 @@ internal fun rememberRestoreFlow(onDone: () -> Unit = {}): (Uri) -> Unit {
             contents = backup,
             onConfirm = { chosen ->
                 contents = null
-                if (chosen.isEmpty()) return@RestorePreviewDialog
+                if (chosen.isEmpty()) { onCancel(); return@RestorePreviewDialog }
                 scope.launch {
                     val ok = runCatching { BackupRepository.restore(context, backup, chosen) }.isSuccess
                     toast(resources.getString(if (ok) R.string.backup_restored else R.string.backup_restore_failed))
-                    if (ok) onDone()
+                    if (ok) onDone() else onCancel()
                 }
             },
-            onDismiss = { contents = null }
+            onDismiss = { contents = null; onCancel() }
         )
     }
 
@@ -82,10 +82,14 @@ internal fun rememberRestoreFlow(onDone: () -> Unit = {}): (Uri) -> Unit {
         scope.launch {
             try {
                 contents = BackupRepository.read(context, uri)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
             } catch (newer: BackupRepository.NewerBackup) {
                 toast(resources.getString(R.string.backup_newer, newer.appVersion))
+                onCancel()
             } catch (_: Exception) {
                 toast(resources.getString(R.string.backup_not_a_backup))
+                onCancel()
             }
         }
     }
@@ -151,12 +155,15 @@ fun BackupRestoreOffer() {
 
     val latest by produceState<BackupFile?>(null) { value = BackupRepository.list(context).firstOrNull() }
     val dismiss: () -> Unit = { scope.launch { BackupRepository.dismissRestoreOffer(context) } }
-    val restore = rememberRestoreFlow(onDone = dismiss)
+    // Out of the way while the file is picked or its preview is up, and back if that is cancelled.
+    var stepping by remember { mutableStateOf(false) }
+    val restore = rememberRestoreFlow(onDone = dismiss, onCancel = { stepping = false })
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
-        uri?.let(restore)
+        if (uri != null) restore(uri) else stepping = false
     }
 
     val found = latest
+    if (stepping) return
     ChoiceDialog(
         title = stringResource(R.string.backup_offer_title),
         onDismiss = dismiss,
@@ -166,8 +173,9 @@ fun BackupRestoreOffer() {
                 stringResource(if (found != null) R.string.backup_restore else R.string.backup_offer_choose),
                 filled = true,
                 onClick = {
+                    stepping = true
                     if (found != null) restore(found.uri)
-                    else runCatching { picker.launch(BACKUP_MIME_TYPES) }
+                    else runCatching { picker.launch(BACKUP_MIME_TYPES) }.onFailure { stepping = false }
                 },
                 modifier = Modifier.weight(1f)
             )
@@ -188,7 +196,7 @@ fun BackupRestoreOffer() {
                     Icon(Icons.Filled.Restore, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(22.dp))
                 }
                 Text(
-                    if (found != null) stringResource(R.string.backup_offer_found, backupDate(context, found.modified))
+                    if (found != null) stringResource(R.string.backup_offer_found, backupDate(context, found.madeAt))
                     else stringResource(R.string.backup_offer_pick),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

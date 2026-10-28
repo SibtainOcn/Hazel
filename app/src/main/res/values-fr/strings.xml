@@ -790,7 +790,7 @@
     <string name="backup_category_history">Téléchargements</string>
     <string name="backup_category_queue">En file d\'attente</string>
     <string name="backup_category_failed">Échoués</string>
-    <string name="backup_category_cookies">Cookies</string>
+    <string name="backup_category_cookies">Cookies et jetons</string>
     <string name="backup_category_search">Historique de recherche</string>
     <string name="backup_auto_summary">Avant les mises à jour</string>
     <string name="backup_section_saved">Sauvegardes enregistrées</string>
@@ -824,6 +824,17 @@
     <string name="backup_offer_pick">Choisissez un fichier de sauvegarde Hazel pour retrouver vos réglages et téléchargements.</string>
     <string name="backup_offer_choose">Choisir un fichier</string>
     <string name="backup_not_now">Plus tard</string>
+    <string name="backup_folder_body">Où les sauvegardes sont enregistrées. Les sauvegardes automatiques et la proposition de restauration regardent ici.</string>
+    <string name="backup_view">Voir</string>
+    <string name="backup_show_folder">Afficher le dossier</string>
+    <string name="backup_share_title">Partager cette sauvegarde ?</string>
+    <string name="backup_share_body">Une sauvegarde peut contenir vos cookies, jetons de connexion, nom d\'utilisateur du proxy et historique de téléchargements. Ne la partagez qu\'avec des personnes et apps de confiance.</string>
+    <string name="backup_view_failed">Aucune app ne peut l\'ouvrir</string>
+    <string name="backup_section_contains">Contient</string>
+    <string name="backup_included">Inclus</string>
+    <string name="backup_version">Version</string>
+    <string name="backup_entries_label">Entrées</string>
+    <string name="backup_categories_label">Catégories</string>
     <string name="search_no_results">Aucun résultat pour %1$s</string>
     <string name="player_play">Lire</string>
     <string name="player_pause">Pause</string>

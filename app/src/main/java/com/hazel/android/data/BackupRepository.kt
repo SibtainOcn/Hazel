@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -38,9 +40,9 @@ import java.util.concurrent.TimeUnit
 enum class BackupCategory(val id: String, @param:StringRes val label: Int, val keys: Set<String>) {
     SETTINGS("settings", R.string.backup_category_settings, emptySet()),
     HISTORY("history", R.string.backup_category_history, setOf("download_history")),
-    QUEUE("queue", R.string.backup_category_queue, setOf("download_queue")),
+    QUEUE("queue", R.string.backup_category_queue, setOf("download_queue", "download_queue_held")),
     FAILED("failed", R.string.backup_category_failed, setOf("failed_downloads")),
-    COOKIES("cookies", R.string.backup_category_cookies, setOf("cookie_entries", "use_cookies", "cookie_user_agent")),
+    COOKIES("cookies", R.string.backup_category_cookies, setOf("cookie_entries", "use_cookies", "cookie_user_agent", "adv_po_tokens", "adv_visitor_data")),
     SEARCH("search", R.string.backup_category_search, setOf("search_history"));
 
     companion object {
@@ -65,7 +67,23 @@ enum class BackupSchedule(val id: String, @param:StringRes val label: Int, val d
 /** A backup file found in the backup folder. */
 data class BackupFile(val uri: Uri, val name: String, val size: Long, val modified: Long) {
     val automatic: Boolean get() = name.startsWith(BackupRepository.AUTO_PREFIX)
+
+    /**
+     * When it was made: the stamp in its name, which survives copies and providers that
+     * report no modified time, else what the folder says.
+     */
+    val madeAt: Long by lazy {
+        NAME_STAMP.find(name)?.groupValues?.get(1)?.let { stamp ->
+            runCatching { SimpleDateFormat(STAMP_PATTERN, Locale.ROOT).parse(stamp)?.time }.getOrNull()
+        } ?: modified
+    }
+
+    private companion object {
+        val NAME_STAMP = Regex("""(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})(?:\s*\(\d+\))?\.json$""")
+    }
 }
+
+internal const val STAMP_PATTERN = "yyyy-MM-dd_HH-mm-ss"
 
 /** The backup screen's settings, read together. */
 data class BackupSettings(
@@ -74,6 +92,7 @@ data class BackupSettings(
     val keep: Int,
     val include: Set<BackupCategory>,
     val folderLabel: String,
+    val folderUri: String,
     val lastAt: Long,
     val lastSize: Long
 )
@@ -93,6 +112,10 @@ object BackupRepository {
     private const val MANUAL_PREFIX = "hazel_backup_"
     const val DEFAULT_FOLDER_LABEL = DEFAULT_FOLDER
 
+    /** The default folder on the built-in storage. */
+    @Suppress("DEPRECATION")
+    fun defaultFolder(): File = File(android.os.Environment.getExternalStorageDirectory(), DEFAULT_FOLDER)
+
     /** Choices for how many automatic backups are kept; 0 keeps them all. */
     val KEEP_CHOICES = listOf(3, 5, 10, 0)
     private const val DEFAULT_KEEP = 5
@@ -108,14 +131,21 @@ object BackupRepository {
     private val LAST_AUTO_AT_KEY = longPreferencesKey("backup_last_auto_at")
     private val LAST_VERSION_KEY = stringPreferencesKey("backup_last_version")
     private val OFFER_RESTORE_KEY = booleanPreferencesKey("backup_offer_restore")
+    private val AUTO_DONE_FOR_KEY = stringPreferencesKey("backup_auto_done_for")
 
     /** Keys that describe this device or this install, not the user's choices. */
     private const val PROXY_KEY = "adv_proxy"
 
     private fun isDeviceOnly(key: String) =
         key.startsWith("backup_") || key.startsWith("download_tree_") ||
-            key.endsWith("_update_available") || key == "adv_impersonate_available" ||
-            key == "whats_new_seen" || key == GlassDefaultMigration.SETTLED_NAME
+            key.endsWith("_update_available") ||
+            key in DEVICE_ONLY
+
+    /** Update checks, one-time marks and this install's own state. */
+    private val DEVICE_ONLY = setOf(
+        "adv_impersonate_available", "whats_new_seen", "has_update_available", "hazel_update_version",
+        "update_notify_off_applied", GlassDefaultMigration.SETTLED_NAME
+    )
 
     /** Which list entries are the same entry, per key; null compares whole values. */
     private val IDENTITY = mapOf(
@@ -135,6 +165,7 @@ object BackupRepository {
             keep = prefs[KEEP_KEY] ?: DEFAULT_KEEP,
             include = includeOf(prefs),
             folderLabel = if (prefs[TREE_URI_KEY].isNullOrBlank()) "" else prefs[TREE_LABEL_KEY].orEmpty(),
+            folderUri = prefs[TREE_URI_KEY].orEmpty(),
             lastAt = prefs[LAST_AT_KEY] ?: 0L,
             lastSize = prefs[LAST_SIZE_KEY] ?: 0L
         )
@@ -154,7 +185,7 @@ object BackupRepository {
 
     suspend fun setKeep(context: Context, keep: Int) {
         context.dataStore.edit { it[KEEP_KEY] = keep.coerceAtLeast(0) }
-        prune(context)
+        autoLock.withLock { prune(context) }
     }
 
     suspend fun setInclude(context: Context, categories: Set<BackupCategory>) {
@@ -179,16 +210,17 @@ object BackupRepository {
         automatic: Boolean = false
     ): String? = withContext(Dispatchers.IO) {
         if (categories.isEmpty()) return@withContext null
-        val staging = File(context.cacheDir, "backup-staging")
+        // Its own folder per backup, so one made at launch and one asked for at the same
+        // moment never clear each other's file.
+        val staging = File(context.cacheDir, "backup-staging-${System.nanoTime()}")
         runCatching {
             val prefs = context.dataStore.data.first()
             val text = export(prefs, categories, AppLocale.tag(context)).toString(2)
-            val stamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.ROOT).format(Date())
+            val stamp = SimpleDateFormat(STAMP_PATTERN, Locale.ROOT).format(Date())
             val name = if (automatic) "$AUTO_PREFIX${BuildConfig.VERSION_NAME}_$stamp.json"
             else "$MANUAL_PREFIX$stamp.json"
 
-            staging.deleteRecursively()
-            staging.mkdirs()
+            if (!staging.mkdirs()) return@runCatching null
             File(staging, name).writeText(text)
 
             val tree = prefs[TREE_URI_KEY].orEmpty()
@@ -207,18 +239,27 @@ object BackupRepository {
     }
 
     /** An automatic backup of the chosen categories, then the oldest automatic ones go. */
-    private suspend fun autoBackup(context: Context): Boolean {
+    private suspend fun autoBackup(context: Context): Boolean = autoLock.withLock {
         val prefs = context.dataStore.data.first()
-        if (backup(context, includeOf(prefs), automatic = true) == null) return false
+        val name = backup(context, includeOf(prefs), automatic = true) ?: return@withLock false
         context.dataStore.edit { it[LAST_AUTO_AT_KEY] = System.currentTimeMillis() }
-        prune(context)
-        return true
+        prune(context, justMade = name)
+        true
     }
 
-    /** Called when an update to the app is found, so the data from before it can come back. */
+    /** One automatic backup or prune at a time, so two never race over the same files. */
+    private val autoLock = Mutex()
+
+    /**
+     * Called when an update to the app is found, so the data from before it can come back.
+     * Once per installed version, however often the check finds the update again.
+     */
     suspend fun autoBackupBeforeUpdate(context: Context) {
-        if (context.dataStore.data.first()[AUTO_KEY] == false) return
-        runCatching { autoBackup(context) }
+        val prefs = context.dataStore.data.first()
+        if (prefs[AUTO_KEY] == false || prefs[AUTO_DONE_FOR_KEY] == BuildConfig.VERSION_NAME) return
+        if (runCatching { autoBackup(context) }.getOrDefault(false)) {
+            context.dataStore.edit { it[AUTO_DONE_FOR_KEY] = BuildConfig.VERSION_NAME }
+        }
     }
 
     /**
@@ -305,7 +346,7 @@ object BackupRepository {
             if (tree.isNotBlank()) listTree(context, Uri.parse(tree)) else listDefault(context)
         }.getOrDefault(emptyList())
             .filter { it.name.endsWith(".json") && (it.automatic || it.name.startsWith(MANUAL_PREFIX)) }
-            .sortedByDescending { it.modified }
+            .sortedByDescending { it.madeAt }
     }
 
     private fun listTree(context: Context, tree: Uri): List<BackupFile> {
@@ -364,15 +405,20 @@ object BackupRepository {
         }.getOrDefault(false)
     }
 
-    /** Deletes the oldest automatic backups past the number kept. Manual ones are never touched. */
-    suspend fun prune(context: Context) {
+    /**
+     * Deletes the oldest automatic backups past the number kept. Manual ones are never
+     * touched, nor is [justMade], and nothing goes when the folder could not be read.
+     */
+    suspend fun prune(context: Context, justMade: String? = null) {
         val keep = context.dataStore.data.first()[KEEP_KEY] ?: DEFAULT_KEEP
-        list(context).let { toPrune(it, keep) }.forEach { delete(context, it) }
+        toPrune(list(context), keep, justMade).forEach { delete(context, it) }
     }
 
-    internal fun toPrune(files: List<BackupFile>, keep: Int): List<BackupFile> =
+    internal fun toPrune(files: List<BackupFile>, keep: Int, justMade: String? = null): List<BackupFile> =
         if (keep <= 0) emptyList()
-        else files.filter { it.automatic }.sortedByDescending { it.modified }.drop(keep)
+        else files.filter { it.automatic && it.name != justMade }
+            .sortedByDescending { it.madeAt }
+            .drop(if (justMade != null && files.any { it.name == justMade }) keep - 1 else keep)
 
     // Restore.
 

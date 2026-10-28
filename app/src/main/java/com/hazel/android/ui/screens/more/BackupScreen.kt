@@ -18,19 +18,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -51,11 +47,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
@@ -67,12 +61,17 @@ import com.hazel.android.data.BackupSettings
 import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.SdCards
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.hazel.android.data.SaveDir
+import com.hazel.android.ui.screens.download.SaveDirDialog
 
 private enum class BackupDialog { BACKUP, SCHEDULE, KEEP, INCLUDE, FOLDER }
 
-private const val FOLDER_DEFAULT = "default"
-private const val FOLDER_OTHER = "other"
+private const val BACKUP_CARD_SUBFOLDER = "Backups"
+private const val BACKUP_CARD_FOLDER = "Hazel/$BACKUP_CARD_SUBFOLDER"
 
 /** Backs up the app's data, lists what is saved, and backs up by itself before updates. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -82,12 +81,14 @@ fun BackupScreen(onBack: () -> Unit) {
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val settings by remember(context) { BackupRepository.getSettings(context) }
-        .collectAsState(initial = BackupSettings(true, BackupSchedule.OFF, 5, BackupCategory.entries.toSet(), "", 0, 0))
+        .collectAsState(initial = BackupSettings(true, BackupSchedule.OFF, 5, BackupCategory.entries.toSet(), "", "", 0, 0))
 
     var dialog by remember { mutableStateOf<BackupDialog?>(null) }
     var busy by remember { mutableStateOf(false) }
     var actionsFor by remember { mutableStateOf<BackupFile?>(null) }
     var deleting by remember { mutableStateOf<BackupFile?>(null) }
+    var sharing by remember { mutableStateOf<BackupFile?>(null) }
+    var pickingCard by rememberSaveable { mutableStateOf(false) }
     var refresh by remember { mutableIntStateOf(0) }
     var saved by remember { mutableStateOf<List<BackupFile>?>(null) }
 
@@ -102,7 +103,14 @@ fun BackupScreen(onBack: () -> Unit) {
                 context.contentResolver.takePersistableUriPermission(
                     uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
-                scope.launch { BackupRepository.setFolder(context, uri.toString(), MediaStoreHelper.describeTree(uri)) }
+                val toCard = pickingCard
+                val app = context.applicationContext
+                scope.launch(Dispatchers.IO) {
+                    // A card's root gets Hazel/Backups rather than files piling up at its top.
+                    val folder = if (toCard) SdCards.hazelFolderIn(app, uri, BACKUP_CARD_SUBFOLDER) ?: uri else uri
+                    runCatching { BackupRepository.setFolder(app, folder.toString(), MediaStoreHelper.describeTree(folder)) }
+                        .onFailure { withContext(Dispatchers.Main) { toast(resources.getString(R.string.save_location_error_access)) } }
+                }
             } catch (_: SecurityException) {
                 toast(resources.getString(R.string.save_location_error_access))
             }
@@ -149,7 +157,7 @@ fun BackupScreen(onBack: () -> Unit) {
                 @Composable {
                     ActionSettingRow(
                         icon = if (file.automatic) Icons.Filled.Schedule else Icons.Filled.Backup,
-                        title = backupDate(context, file.modified),
+                        title = backupDate(context, file.madeAt),
                         summary = stringResource(
                             if (file.automatic) R.string.backup_kind_auto else R.string.backup_kind_manual,
                             Formatter.formatShortFileSize(context, file.size)
@@ -262,42 +270,58 @@ fun BackupScreen(onBack: () -> Unit) {
             },
             onDismiss = { dialog = null }
         )
-        BackupDialog.FOLDER -> {
-            val cards = remember { SdCards.list(context) }
-            SingleChoiceDialog(
-                title = stringResource(R.string.backup_folder),
-                choices = buildList {
-                    add(FOLDER_DEFAULT to stringResource(R.string.save_location_internal))
-                    cards.forEach { add(it.uuid to it.name) }
-                    add(FOLDER_OTHER to stringResource(R.string.save_location_other))
-                },
-                selected = if (settings.folderLabel.isBlank()) FOLDER_DEFAULT else FOLDER_OTHER,
-                describe = { if (it == FOLDER_DEFAULT) BackupRepository.DEFAULT_FOLDER_LABEL else null },
-                onSelect = { choice ->
-                    dialog = null
-                    val card = cards.firstOrNull { it.uuid == choice }
-                    when {
-                        choice == FOLDER_DEFAULT -> scope.launch { BackupRepository.setFolder(context, "", "") }
-                        card != null -> runCatching { cardPicker.launch(SdCards.pickerIntent(context, card)) }
-                            .onFailure { openPlainPicker() }
-                        else -> openPlainPicker()
-                    }
-                },
-                onDismiss = { dialog = null }
-            )
-        }
+        BackupDialog.FOLDER -> SaveDirDialog(
+            isVideo = false,
+            saveDir = SaveDir(settings.folderUri, settings.folderLabel),
+            label = settings.folderLabel,
+            title = stringResource(R.string.backup_folder),
+            body = stringResource(R.string.backup_folder_body),
+            internalPath = BackupRepository.DEFAULT_FOLDER_LABEL,
+            cardFolder = BACKUP_CARD_FOLDER,
+            onOpen = { openFolder(context, settings.folderUri) },
+            onPick = { card ->
+                dialog = null
+                pickingCard = card != null
+                if (card != null) {
+                    runCatching { cardPicker.launch(SdCards.pickerIntent(context, card)) }.onFailure { openPlainPicker() }
+                } else {
+                    openPlainPicker()
+                }
+            },
+            onReset = {
+                dialog = null
+                scope.launch { BackupRepository.setFolder(context, "", "") }
+            },
+            onDismiss = { dialog = null }
+        )
         null -> Unit
     }
 
     actionsFor?.let { file ->
-        BackupActionsDialog(
+        BackupFileSheet(
             file = file,
+            folderUri = settings.folderUri,
+            folderLabel = settings.folderLabel,
             onRestore = {
                 actionsFor = null
                 restore(file.uri)
             },
-            onShare = {
+            onShare = { sharing = file },
+            onDelete = {
                 actionsFor = null
+                deleting = file
+            },
+            onDismiss = { actionsFor = null }
+        )
+    }
+
+    sharing?.let { file ->
+        ConfirmSettingDialog(
+            title = stringResource(R.string.backup_share_title),
+            body = stringResource(R.string.backup_share_body),
+            confirm = stringResource(R.string.backup_share),
+            onConfirm = {
+                sharing = null
                 val send = Intent(Intent.ACTION_SEND)
                     .setType("application/json")
                     .putExtra(Intent.EXTRA_STREAM, file.uri)
@@ -305,11 +329,7 @@ fun BackupScreen(onBack: () -> Unit) {
                 runCatching { context.startActivity(Intent.createChooser(send, file.name)) }
                     .onFailure { toast(resources.getString(R.string.backup_share_failed)) }
             },
-            onDelete = {
-                actionsFor = null
-                deleting = file
-            },
-            onDismiss = { actionsFor = null }
+            onDismiss = { sharing = null }
         )
     }
 
@@ -385,36 +405,6 @@ private fun BackupStatusCard(settings: BackupSettings, busy: Boolean, onBackup: 
                     modifier = Modifier.weight(1f)
                 )
             }
-        }
-    }
-}
-
-/** Restore, share or delete one saved backup. */
-@Composable
-private fun BackupActionsDialog(
-    file: BackupFile,
-    onRestore: () -> Unit,
-    onShare: () -> Unit,
-    onDelete: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    val context = LocalContext.current
-    val actions: List<Triple<ImageVector, Int, () -> Unit>> = listOf(
-        Triple(Icons.Filled.Restore, R.string.backup_restore, onRestore),
-        Triple(Icons.Filled.Share, R.string.backup_share, onShare),
-        Triple(Icons.Filled.Delete, R.string.backup_delete, onDelete)
-    )
-    ChoiceDialog(title = backupDate(context, file.modified), onDismiss = onDismiss) {
-        itemsIndexed(actions) { index, (icon, label, action) ->
-            ChoiceRow(
-                label = stringResource(label),
-                description = null,
-                chosen = false,
-                role = Role.Button,
-                shape = groupShape(index, actions.size),
-                onClick = action,
-                leading = { Icon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-            )
         }
     }
 }

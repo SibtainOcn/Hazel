@@ -27,4 +27,21 @@ class BackupRetentionTest {
         assertTrue(BackupRepository.toPrune(files, 0).isEmpty())
         assertTrue(BackupRepository.toPrune(files, 5).isEmpty())
     }
+
+    @Test
+    fun theBackupJustMadeIsNeverPruned() {
+        // A provider that reports no modified time: the stamp in the name decides the order.
+        val files = listOf(
+            file("hazel_auto_backup_1.1_2026-10-01_10-00-00.json", 0),
+            file("hazel_auto_backup_1.2_2026-10-03_10-00-00.json", 0),
+            file("hazel_auto_backup_1.0_2026-10-02_10-00-00.json", 0),
+            file("hazel_backup_2026-09-01_10-00-00.json", 0)
+        )
+        val pruned = BackupRepository.toPrune(files, 2, justMade = "hazel_auto_backup_1.1_2026-10-01_10-00-00.json").map { it.name }
+        assertEquals(listOf("hazel_auto_backup_1.0_2026-10-02_10-00-00.json"), pruned)
+        assertEquals(
+            listOf("hazel_auto_backup_1.1_2026-10-01_10-00-00.json"),
+            BackupRepository.toPrune(files, 2).map { it.name }
+        )
+    }
 }

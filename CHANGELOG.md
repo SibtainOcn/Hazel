@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic backup now runs after every app update and on a schedule; old automatic backups are cleaned up.
 - Restore shows a preview, blocks backups from newer versions, and brings back the app language.
 - A fresh install offers to restore from a backup.
+- Each saved backup opens a sheet with restore, view, show folder and share; sharing warns that backups hold sensitive data.
+- The backup folder uses the storage dialog with SD cards and free space; a card gets its own Hazel/Backups folder.
+- Backups now cover sign-in tokens with cookies and the paused queue state; update-check markers stay on the device.
 - Format sheet skeleton uses the cookie badge, and the tune and refresh buttons sit on M3 shapes.
 - Glass is off by default on new installs. Existing users keep their current look.
 - New splash animation: the bolt draws itself, then a circle opens from it onto home. Replaces the static shimmer. Tap to skip; skipped when system animations are off.

@@ -803,7 +803,7 @@
     <string name="backup_category_history">Загрузки</string>
     <string name="backup_category_queue">В очереди</string>
     <string name="backup_category_failed">С ошибкой</string>
-    <string name="backup_category_cookies">Cookies</string>
+    <string name="backup_category_cookies">Cookie и токены</string>
     <string name="backup_category_search">История поиска</string>
     <string name="backup_auto_summary">Перед обновлениями</string>
     <string name="backup_section_saved">Сохранённые копии</string>
@@ -837,6 +837,17 @@
     <string name="backup_offer_pick">Выберите файл копии Hazel, чтобы вернуть настройки и загрузки.</string>
     <string name="backup_offer_choose">Выбрать файл</string>
     <string name="backup_not_now">Не сейчас</string>
+    <string name="backup_folder_body">Здесь хранятся копии. Автокопии и предложение восстановить ищут здесь.</string>
+    <string name="backup_view">Просмотр</string>
+    <string name="backup_show_folder">Показать папку</string>
+    <string name="backup_share_title">Поделиться этой копией?</string>
+    <string name="backup_share_body">Копия может содержать cookie, токены входа, имя пользователя прокси и историю загрузок. Делитесь ею только с теми людьми и приложениями, которым доверяете.</string>
+    <string name="backup_view_failed">Нет приложения, чтобы открыть</string>
+    <string name="backup_section_contains">Содержит</string>
+    <string name="backup_included">Включено</string>
+    <string name="backup_version">Версия</string>
+    <string name="backup_entries_label">Записи</string>
+    <string name="backup_categories_label">Категории</string>
     <string name="search_no_results">Нет результатов для %1$s</string>
     <string name="player_play">Воспроизвести</string>
     <string name="player_pause">Пауза</string>
