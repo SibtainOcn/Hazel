@@ -32,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -600,7 +601,7 @@ class DownloadViewModel : ViewModel() {
     private val instantReads = mutableSetOf<String>()
     private val instantReadSlots = Semaphore(FORMAT_READS_AT_ONCE)
 
-    /** The Instant reads in flight, by link, so a reading card's Cancel can stop its read. */
+    /** Reads in flight before a download exists (Instant, or a sheet waiting on formats), by link, so a reading card's Cancel can stop it. */
     private val instantJobs = java.util.concurrent.ConcurrentHashMap<String, Job>()
 
     /**
@@ -781,24 +782,45 @@ class DownloadViewModel : ViewModel() {
         saveDirs: com.hazel.android.data.SaveDirs
     ) {
         val app = context.applicationContext
-        viewModelScope.launch {
-            withTimeoutOrNull(FORMAT_WAIT_MS) { _formatsReading.first { info.url !in it } }
-            val read = _state.value.results.firstOrNull { it.url == info.url }
-                ?.takeIf { it.hasResolvedFormats }
-                ?: InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
-                ?: info
-            val chosen = GenericFormats.applyTo(read, format, audioLanguage) ?: format
-            startDownload(
-                context = app,
-                format = chosen,
-                options = options,
-                title = title.ifBlank { read.title },
-                author = author.ifBlank { read.uploader },
-                audioLanguage = audioLanguage,
-                info = read,
-                saveDirs = saveDirs
-            )
+        // On the Running tab as being read from the moment Download is pressed, and its
+        // Cancel stops the wait. Replaced by the real entry once the download starts. One
+        // wait per link, as with Instant, so pressing Download twice is one download.
+        val waiting = BatchItem(url = info.url, title = title.ifBlank { info.title.ifBlank { info.url } }, reading = true)
+        val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
+            val self = coroutineContext.job
+            var dropped = false
+            val dropWaiting = {
+                if (!dropped) {
+                    dropped = true
+                    instantJobs.remove(info.url, self)
+                    _state.update { s -> s.copy(batch = s.batch - waiting) }
+                }
+            }
+            try {
+                withTimeoutOrNull(FORMAT_WAIT_MS) { _formatsReading.first { info.url !in it } }
+                val read = _state.value.results.firstOrNull { it.url == info.url }
+                    ?.takeIf { it.hasResolvedFormats }
+                    ?: InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
+                    ?: info
+                val chosen = GenericFormats.applyTo(read, format, audioLanguage) ?: format
+                dropWaiting()
+                startDownload(
+                    context = app,
+                    format = chosen,
+                    options = options,
+                    title = title.ifBlank { read.title },
+                    author = author.ifBlank { read.uploader },
+                    audioLanguage = audioLanguage,
+                    info = read,
+                    saveDirs = saveDirs
+                )
+            } finally {
+                dropWaiting()
+            }
         }
+        if (instantJobs.putIfAbsent(info.url, job) != null) return
+        _state.update { it.copy(batch = it.batch + waiting) }
+        job.start()
     }
 
     // ── Metadata ──
@@ -1947,7 +1969,7 @@ class DownloadViewModel : ViewModel() {
      * and disk queue record, without disturbing the active download.
      */
     fun cancelItem(url: String) {
-        // A link Instant is still reading has nothing downloading yet: stopping the read is
+        // A link still being read has nothing downloading yet: stopping the read is
         // the whole of it.
         instantJobs[url]?.let { job ->
             job.cancel()

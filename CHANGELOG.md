@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Home: hold a card's thumbnail for Play, Download, and, for a saved copy, Open and Properties.
 - Support: a Developer card that opens the developer's GitHub profile.
 - Mini player: scrolling away or starting a download moves the video to a mini player instead of stopping it; tap it to open it large.
 - Player menu next to full screen: quality and audio track, to switch between a video's original audio and its dubs.
@@ -74,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Player: the seek bar flows as a wave while playing and lies flat on touch or pause, with a pill thumb. Play is a pentagon while paused and a slowly turning six-sided cookie while playing. Both stay still when system animations are off.
 
 ### Fixed
+- A download chosen while a link is still being read shows on the Running tab at once, instead of after the read.
 - yt-dlp release notes no longer open a missing page when the installed version is unknown.
 - Download all no longer shows on search results restored after a restart.
 - Player no longer starts on a dubbed track when playing through yt-dlp.

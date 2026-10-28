@@ -722,8 +722,8 @@ private fun runningItems(
             )
         }
     }
-    // Links Hazel Instant is still reading: shown from the moment they were shared, before
-    // they have a download or a place on the saved queue.
+    // Links still being read, by Instant or a sheet's Download: shown from the moment they
+    // were sent, before they have a download or a place on the saved queue.
     batch.forEach { item ->
         if (item.reading && shown.add(item.url)) {
             items += RunningItem(
