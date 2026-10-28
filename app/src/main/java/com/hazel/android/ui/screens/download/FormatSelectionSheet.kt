@@ -85,6 +85,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -153,7 +154,7 @@ enum class FormatSort(@param:StringRes val labelRes: Int) {
  * these formats belong to, where that is not [info]'s own address: NewPipe sends no cookies,
  * so picking it for a site with a saved sign-in in use explains that instead of reading.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FormatSelectionSheet(
     info: MediaInfo,
@@ -289,6 +290,7 @@ fun FormatSelectionSheet(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     HeaderIconButton(
                         icon = Icons.Outlined.Tune,
+                        shape = MaterialShapes.Pentagon.toShape(),
                         description = stringResource(R.string.format_filter_title),
                         onClick = { filterSheetOpen = true }
                     )
@@ -592,18 +594,20 @@ private fun RailStop(
 
 private const val STOP_FADE_MS = 160
 
-/** A round button in the sheet's header, drawn the way the sort button always was. */
+/** A shaped tonal button in the sheet's header. */
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun HeaderIconButton(
     icon: ImageVector,
     description: String,
     onClick: () -> Unit,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    shape: Shape = MaterialShapes.Cookie9Sided.toShape()
 ) {
     Box(
         modifier = Modifier
             .size(44.dp)
-            .clip(CircleShape)
+            .clip(shape)
             .background(MaterialTheme.colorScheme.primary.copy(alpha = if (enabled) 0.18f else 0.08f))
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center

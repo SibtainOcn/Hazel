@@ -407,6 +407,7 @@ fun MediaCardShimmer(modifier: Modifier = Modifier) {
  * grey bars: the container block in the accent, the codec badge neutral, and the size badge
  * in its own fixed blue.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FormatRowShimmer(modifier: Modifier = Modifier) {
     val accent = MaterialTheme.colorScheme.primary
@@ -417,8 +418,8 @@ fun FormatRowShimmer(modifier: Modifier = Modifier) {
     ) {
         Box(
             modifier = Modifier
-                .size(width = 56.dp, height = 52.dp)
-                .shimmerBlock(RoundedCornerShape(10.dp), color = accent)
+                .size(58.dp)
+                .shimmerBlock(MaterialShapes.Cookie6Sided.toShape(), color = accent)
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
