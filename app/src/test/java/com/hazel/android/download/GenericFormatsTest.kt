@@ -50,6 +50,19 @@ class GenericFormatsTest {
     }
 
     @Test
+    fun `a direct stream is taken over HLS at the same height and frame rate`() {
+        val hls = video("311", 720).copy(fps = 60, hls = true)
+        val direct = video("298", 720).copy(fps = 60)
+        val slower = video("136", 720)
+        val info = read.copy(videoFormats = listOf(hls, slower, direct))
+        assertEquals("298", GenericFormats.applyTo(info, GenericFormats.heightCeiling(720), null)?.formatId)
+        assertEquals("298", info.bestVideo?.formatId)
+        // HLS stays when it is the only stream at that height.
+        val only = read.copy(videoFormats = listOf(hls, video("360", 360)))
+        assertEquals("311", GenericFormats.applyTo(only, GenericFormats.heightCeiling(720), null)?.formatId)
+    }
+
+    @Test
     fun `best and worst become the link's own extremes`() {
         assertEquals("1080", GenericFormats.applyTo(read, MediaProbe.BEST_VIDEO, null)?.formatId)
         assertEquals("360", GenericFormats.applyTo(read, WORST_VIDEO, null)?.formatId)

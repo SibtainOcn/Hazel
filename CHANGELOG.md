@@ -77,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - A download chosen while a link is still being read shows on the Running tab at once, instead of after the read.
 - A quality chosen before a link is read, or by Instant, keeps the preferred video and audio codec once the formats arrive.
+- Quality picks take a direct stream over an HLS one of the same height and frame rate, which downloads faster.
 - yt-dlp release notes no longer open a missing page when the installed version is unknown.
 - Download all no longer shows on search results restored after a restart.
 - Player no longer starts on a dubbed track when playing through yt-dlp.

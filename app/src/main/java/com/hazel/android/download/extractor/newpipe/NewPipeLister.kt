@@ -18,6 +18,7 @@ import org.schabi.newpipe.extractor.channel.tabs.ChannelTabInfo
 import org.schabi.newpipe.extractor.channel.tabs.ChannelTabs
 import org.schabi.newpipe.extractor.linkhandler.ListLinkHandler
 import org.schabi.newpipe.extractor.playlist.PlaylistInfo
+import org.schabi.newpipe.extractor.stream.DeliveryMethod
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import org.schabi.newpipe.extractor.stream.StreamInfoItem
 import java.util.concurrent.atomic.AtomicBoolean
@@ -133,7 +134,8 @@ internal object NewPipeLister {
                         fileSizeBytes = exactSize ?: estimatedSize,
                         isEstimatedSize = exactSize == null,
                         hasVideo = true,
-                        hasAudio = isMuxed
+                        hasAudio = isMuxed,
+                        hls = stream.deliveryMethod == DeliveryMethod.HLS
                     )
                 )
             }
@@ -166,7 +168,8 @@ internal object NewPipeLister {
                         fileSizeBytes = exactSize ?: estimatedSize,
                         isEstimatedSize = exactSize == null,
                         hasVideo = false,
-                        hasAudio = true
+                        hasAudio = true,
+                        hls = stream.deliveryMethod == DeliveryMethod.HLS
                     )
                 )
             }

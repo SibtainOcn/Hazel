@@ -629,7 +629,8 @@ object MediaProbe {
             fileSizeBytes = exactSize ?: reportedApprox ?: estimatedSize,
             isEstimatedSize = exactSize == null,
             hasVideo = hasVideo,
-            hasAudio = hasAudio
+            hasAudio = hasAudio,
+            hls = json.optString("protocol").startsWith("m3u8")
         )
     }
 
