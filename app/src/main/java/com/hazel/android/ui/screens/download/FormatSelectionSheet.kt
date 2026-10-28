@@ -5,9 +5,9 @@ import com.hazel.android.ui.theme.sheetButtonColor
 import com.hazel.android.ui.theme.sheetRaisedColor
 import androidx.compose.ui.graphics.luminance
 import kotlin.math.roundToInt
-import androidx.compose.foundation.border
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.compositeOver
+import com.hazel.android.ui.theme.LocalDarkTheme
 import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.annotation.StringRes
@@ -61,7 +61,10 @@ import androidx.compose.material.icons.filled.UnfoldMore
 import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.toShape
 import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -899,7 +902,7 @@ fun FormatRow(
             .padding(horizontal = if (compact) 10.dp else 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ContainerBadge(text = badgeTextOf(format), compact = compact)
+        ContainerBadge(text = badgeTextOf(format), solid = format.isGeneric, compact = compact)
 
         Spacer(modifier = Modifier.width(if (compact) 10.dp else 12.dp))
 
@@ -1038,53 +1041,72 @@ internal fun badgeTextOf(format: MediaFormat): String {
     }
 }
 
-/** The lower end of the block's fill: up to 30% into the container tone, less where the label would fade. */
-internal fun badgeFillEnd(primary: Color, container: Color, onPrimary: Color): Color =
-    listOf(0.3f, 0.2f, 0.1f).map { lerp(primary, container, it) }
-        .firstOrNull { contrastOf(onPrimary, it) >= BADGE_MIN_CONTRAST } ?: primary
-
 internal fun contrastOf(a: Color, b: Color): Float {
     val hi = maxOf(a.luminance(), b.luminance())
     val lo = minOf(a.luminance(), b.luminance())
     return (hi + 0.05f) / (lo + 0.05f)
 }
 
-internal const val BADGE_MIN_CONTRAST = 3f
+/** Accent share of a container badge's see-through fill, on dark and on light. */
+internal const val TONAL_BADGE_ALPHA_DARK = 0.24f
+internal const val TONAL_BADGE_ALPHA_LIGHT = 0.16f
 
-/** The container block a row leads with, sized the same whatever the word inside it is. */
+/** A container badge's label: the accent, pushed away from the backdrop until it reads on its tint. */
+internal fun tonalBadgeInk(primary: Color, dark: Boolean): Color {
+    val alpha = if (dark) TONAL_BADGE_ALPHA_DARK else TONAL_BADGE_ALPHA_LIGHT
+    val backdrop = if (dark) Color.Black else Color.White
+    val away = if (dark) Color.White else Color.Black
+    val fill = primary.copy(alpha = alpha).compositeOver(backdrop)
+    return listOf(0f, 0.2f, 0.4f, 0.6f).map { lerp(primary, away, it) }
+        .firstOrNull { contrastOf(it, fill) >= TONAL_BADGE_MIN_CONTRAST } ?: away
+}
+
+internal const val TONAL_BADGE_MIN_CONTRAST = 4.5f
+
+/** A ladder rung's label: onPrimary where it reads on the accent, else black or white, whichever reads better. */
+internal fun solidBadgeInk(primary: Color, onPrimary: Color): Color =
+    if (contrastOf(onPrimary, primary) >= SOLID_BADGE_MIN_CONTRAST) onPrimary
+    else listOf(Color.Black, Color.White).maxBy { contrastOf(it, primary) }
+
+internal const val SOLID_BADGE_MIN_CONTRAST = 3f
+
+/**
+ * The block a row leads with, on a six-sided M3 cookie. A ladder rung (BEST, 1080, 128K) is
+ * the accent at full strength; a real container (MP4, WEBM) is a see-through accent tint with
+ * accent ink, so glass shows through it and the rows stay calm.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ContainerBadge(text: String, compact: Boolean = false) {
+private fun ContainerBadge(text: String, solid: Boolean, compact: Boolean = false) {
     val primary = MaterialTheme.colorScheme.primary
-    // A light fall from the accent into its container tone, with a faint top edge, so the
-    // block has some depth instead of a flat fill. Text contrast stays with onPrimary.
-    val container = MaterialTheme.colorScheme.primaryContainer
+    val dark = LocalDarkTheme.current
+    val fill = if (solid) primary
+        else primary.copy(alpha = if (dark) TONAL_BADGE_ALPHA_DARK else TONAL_BADGE_ALPHA_LIGHT)
     val onPrimary = MaterialTheme.colorScheme.onPrimary
-    val fill = remember(primary, container, onPrimary) {
-        Brush.verticalGradient(listOf(primary, badgeFillEnd(primary, container, onPrimary)))
-    }
-    val shape = RoundedCornerShape(10.dp)
+    val ink = if (solid) remember(primary, onPrimary) { solidBadgeInk(primary, onPrimary) }
+        else remember(primary, dark) { tonalBadgeInk(primary, dark) }
     Box(
         modifier = Modifier
-            .size(width = if (compact) 48.dp else 60.dp, height = if (compact) 44.dp else 52.dp)
-            .clip(shape)
-            .background(fill)
-            .border(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.35f), Color.Transparent)), shape),
+            .size(if (compact) 48.dp else 58.dp)
+            .clip(MaterialShapes.Cookie6Sided.toShape())
+            .background(fill),
         contentAlignment = Alignment.Center
     ) {
         val cleanText = text.trim().uppercase()
         val fontSize = when {
-            cleanText.length > 5 -> if (compact) 9.5.sp else 11.sp
-            cleanText.length >= 4 -> if (compact) 12.sp else 14.sp
-            else -> if (compact) 13.5.sp else 15.5.sp
+            cleanText.length > 4 -> if (compact) 9.sp else 10.5.sp
+            cleanText.length == 4 -> if (compact) 11.sp else 13.sp
+            else -> if (compact) 12.5.sp else 15.sp
         }
         Text(
             text = cleanText,
             style = MaterialTheme.typography.labelLarge,
             fontSize = fontSize,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 0.sp,
             maxLines = 1,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = ink,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 3.dp)
