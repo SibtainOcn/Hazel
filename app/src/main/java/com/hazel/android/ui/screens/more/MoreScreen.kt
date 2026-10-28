@@ -34,15 +34,16 @@ import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Update
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.toShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -63,6 +64,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
+import com.hazel.android.ui.components.ShapeIconButton
 import com.hazel.android.ui.screens.download.isIgnoringBatteryOptimizations
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.LifecycleEventObserver
@@ -76,6 +78,7 @@ import com.hazel.android.update.YtDlpUpdater
 import com.hazel.android.util.AppLocale
 import com.hazel.android.util.TempStorage
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MoreScreen(
     onNavigateToAppearance: () -> Unit = {},
@@ -186,9 +189,20 @@ fun MoreScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
             )
-            // Every setting, found by name, from its own screen.
-            IconButton(onClick = onNavigateToSettingsSearch) {
-                Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.settings_search))
+            // Every setting, found by name, from its own screen. Drawn the way the home
+            // search bar draws its icon: a seven-sided cookie in the solid accent. The
+            // padding keeps the row exactly as tall as the 48dp button it replaces.
+            ShapeIconButton(
+                onClick = onNavigateToSettingsSearch,
+                modifier = Modifier.padding(4.dp),
+                filled = true,
+                shape = MaterialShapes.Cookie7Sided.toShape()
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = stringResource(R.string.settings_search),
+                    modifier = Modifier.size(19.dp)
+                )
             }
         }
 

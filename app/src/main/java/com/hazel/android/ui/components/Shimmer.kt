@@ -43,6 +43,9 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.tan
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
 
 /**
  * Placeholder skeletons with one highlight travelling across them.
@@ -338,6 +341,7 @@ fun Modifier.refreshShine(progress: Float, shape: Shape = RoundedCornerShape(26.
  * title and author along the top, duration and state badges along the bottom, so nothing
  * moves when the real card takes its place.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MediaCardShimmer(modifier: Modifier = Modifier) {
     Box(
@@ -384,13 +388,13 @@ fun MediaCardShimmer(modifier: Modifier = Modifier) {
                 .shimmerBlock(RoundedCornerShape(5.dp))
         )
 
+        // Where the card's play button lands: the same six-sided cookie, size and inset.
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
-                .width(56.dp)
-                .height(18.dp)
-                .shimmerBlock(RoundedCornerShape(5.dp))
+                .padding(10.dp)
+                .size(44.dp)
+                .shimmerBlock(MaterialShapes.Cookie6Sided.toShape())
         )
     }
 }
@@ -403,6 +407,7 @@ fun MediaCardShimmer(modifier: Modifier = Modifier) {
  * grey bars: the container block in the accent, the codec badge neutral, and the size badge
  * in its own fixed blue.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FormatRowShimmer(modifier: Modifier = Modifier) {
     val accent = MaterialTheme.colorScheme.primary
@@ -413,8 +418,8 @@ fun FormatRowShimmer(modifier: Modifier = Modifier) {
     ) {
         Box(
             modifier = Modifier
-                .size(width = 56.dp, height = 52.dp)
-                .shimmerBlock(RoundedCornerShape(10.dp), color = accent)
+                .size(58.dp)
+                .shimmerBlock(MaterialShapes.Cookie6Sided.toShape(), color = accent)
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
