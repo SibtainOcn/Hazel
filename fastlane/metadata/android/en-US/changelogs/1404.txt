@@ -1,0 +1,8 @@
+* Mini player keeps videos playing while you browse or download
+* Pick the audio track: original or dubs, with a default language
+* Rebuilt backups: scheduled, automatic after updates, restore preview
+* New splash, faster start and smoother transitions
+* Expressive redesign across home, search, menus and player
+* Fixed YouTube playback stalling a few seconds in
+* Filename templates no longer break on long or odd names
+* Playlist sheet and Instant download only the right videos
