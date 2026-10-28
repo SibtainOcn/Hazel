@@ -20,6 +20,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Menus across the app: rounded panels on glass or the theme surface; each item leads with its icon on an accent shape chosen by what it does, and the current choice is tinted.
 - Home: Download all is a slimmer accent pill led by a seven-sided cookie; each result plays from a flat accent six-sided cookie.
 - Home and Search: the paste button is larger and folds down onto an M3 rounded square.
+- Home: the search bar's icon sits on a solid accent seven-sided cookie.
+- Home header: the logo and name share one tonal pill.
+- Paste button: a dark tile with the icon on an accent seven-sided cookie.
+- Search: back and menu sit on soft tiles, the field leads with an accent cookie, the chosen source is an accent tab, and recent searches form one rounded group.
+- Home: the search bar's menu is a connected end segment, and incognito is a tonal circle that fills with the accent when on.
+- Search: buttons, chips and rows squeeze and morph their corners when pressed.
+- Bottom bar: each tab has its own soft tonal shape behind its icon when chosen (cookie, pentagon, clover, gem), morphing in from a circle.
+- Home: the empty-screen download icon has a whole tray instead of a broken one.
+- Download queue: the tabs are a connected group; the chosen one rounds out into an accent pill, and the menu sits on a soft tile.
+- All Downloads: search, filter and menu form one connected group.
+- Download sheet: Download matches Download all with its arrow on a cookie; link and incognito form one connected pair.
+- Missing or loading thumbnails show the Hazel bolt on a soft accent pentagon instead of a blank area.
+- Open folder lists every installed file manager, not only the built-in Files app.
+- All Downloads: Properties opens at half height with the title first, quick figures, and Play, Open with, Show file and Share on cookies.
+- All Downloads: Properties can copy the file name or link, open the link in a browser, download again or fetch the link again.
 - More: the title and search stay pinned while the settings scroll.
 - Audio language: language codes sit on seven-sided cookies.
 - Format filter sheet: compact grouped lists with a cookie marking each choice.

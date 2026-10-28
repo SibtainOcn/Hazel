@@ -17,6 +17,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.clip
+import com.hazel.android.ui.components.pressScale
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -112,7 +116,8 @@ private const val PASTE_FOLD_MS = 450L
 
 /** The folded button is a square: the icon centred with equal room on every side. */
 private val PASTE_SIZE = 62.dp
-private val PASTE_ICON = 24.dp
+private val PASTE_ICON = 20.dp
+private val PASTE_COOKIE = 44.dp
 
 /**
  * The paste button: with its label when a new clip arrives, so it says what it is, then
@@ -139,37 +144,52 @@ fun PasteButton(
         square = true
     }
 
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val radius by com.hazel.android.ui.components.pressCorner(interaction, resting = if (square) 20.dp else 22.dp, pressed = 12.dp)
     Surface(
         onClick = onClick,
+        interactionSource = interaction,
         modifier = modifier
+            .then(Modifier.pressScale(interaction, pressed = 0.92f))
             .height(PASTE_SIZE)
             .animateContentSize(spring(stiffness = Spring.StiffnessMediumLow)),
-        shape = if (square) MaterialShapes.Square.toShape() else RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary
+        shape = RoundedCornerShape(radius),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        contentColor = MaterialTheme.colorScheme.onSurface
     ) {
+        // A dark tile with the icon on an accent cookie; folded, the cookie sits centred.
         Row(
-            modifier = Modifier.padding(horizontal = (PASTE_SIZE - PASTE_ICON) / 2),
+            modifier = Modifier.padding(horizontal = (PASTE_SIZE - PASTE_COOKIE) / 2),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                Icons.Filled.ContentPaste,
-                contentDescription = description,
-                modifier = Modifier.size(PASTE_ICON)
-            )
+            Box(
+                modifier = Modifier
+                    .size(PASTE_COOKIE)
+                    .clip(MaterialShapes.Cookie7Sided.toShape())
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Filled.ContentPaste,
+                    contentDescription = description,
+                    modifier = Modifier.size(PASTE_ICON),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
             AnimatedVisibility(
                 visible = showLabel,
                 enter = expandHorizontally() + fadeIn(),
                 exit = shrinkHorizontally() + fadeOut()
             ) {
                 Row {
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         stringResource(R.string.search_paste),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1
                     )
+                    Spacer(modifier = Modifier.width(12.dp))
                 }
             }
         }

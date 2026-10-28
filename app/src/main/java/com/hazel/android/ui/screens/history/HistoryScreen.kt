@@ -148,7 +148,10 @@ import com.hazel.android.util.MediaDeleter
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen() {
+fun HistoryScreen(
+    onDownloadAgain: ((com.hazel.android.data.HistoryEntry) -> Unit)? = null,
+    onFetchAgain: ((com.hazel.android.data.HistoryEntry) -> Unit)? = null
+) {
     val context = LocalContext.current
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
@@ -280,7 +283,7 @@ fun HistoryScreen() {
         } else Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 4.dp, top = 8.dp),
+                .padding(start = 20.dp, end = 16.dp, top = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -289,24 +292,42 @@ fun HistoryScreen() {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
             )
-            IconButton(onClick = { searchOpen = !searchOpen }) {
+            // Search, filter and the menu as one connected group.
+            com.hazel.android.ui.components.SegmentIconButton(
+                onClick = { searchOpen = !searchOpen },
+                position = com.hazel.android.ui.components.SegmentPosition.First
+            ) {
                 Icon(
                     Icons.Filled.Search,
                     contentDescription = stringResource(R.string.history_search_action),
+                    modifier = Modifier.size(22.dp),
                     tint = if (searchOpen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
-            IconButton(onClick = { statusDialogOpen = true }) {
+            Spacer(modifier = Modifier.width(3.dp))
+            com.hazel.android.ui.components.SegmentIconButton(
+                onClick = { statusDialogOpen = true },
+                position = com.hazel.android.ui.components.SegmentPosition.Middle
+            ) {
                 Icon(
                     Icons.Filled.FilterList,
                     contentDescription = stringResource(R.string.history_filter_action),
+                    modifier = Modifier.size(22.dp),
                     tint = if (status != HistoryStatus.ALL) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurface
                 )
             }
+            Spacer(modifier = Modifier.width(3.dp))
             Box {
-                IconButton(onClick = { menuOpen = true }) {
-                    Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.history_menu_action))
+                com.hazel.android.ui.components.SegmentIconButton(
+                    onClick = { menuOpen = true },
+                    position = com.hazel.android.ui.components.SegmentPosition.Last
+                ) {
+                    Icon(
+                        painterResource(R.drawable.ic_more_vert),
+                        contentDescription = stringResource(R.string.history_menu_action),
+                        modifier = Modifier.size(22.dp)
+                    )
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
@@ -572,7 +593,28 @@ fun HistoryScreen() {
         DownloadPropertiesSheet(
             entry = entry,
             present = presence[entry.id] ?: true,
-            onDismiss = { properties = null }
+            onDismiss = { properties = null },
+            onRemove = {
+                properties = null
+                scope.launch { DownloadHistoryRepository.remove(context, entry.id) }
+            },
+            onDelete = {
+                properties = null
+                confirmDelete = listOf(entry)
+            },
+            onDownloadAgain = onDownloadAgain?.let { again ->
+                {
+                    properties = null
+                    again(entry)
+                    toast(resources.getString(R.string.properties_queued))
+                }
+            },
+            onFetchAgain = onFetchAgain?.let { again ->
+                {
+                    properties = null
+                    again(entry)
+                }
+            }
         )
     }
 
@@ -1120,6 +1162,7 @@ private fun SelectMark(chosen: Boolean, modifier: Modifier = Modifier, onImage: 
 
 @Composable
 private fun Artwork(entry: HistoryEntry, present: Boolean, modifier: Modifier) {
+    com.hazel.android.ui.components.ArtworkPlaceholder(modifier)
     if (entry.thumbnail != null) {
         AsyncImage(
             model = entry.thumbnail,

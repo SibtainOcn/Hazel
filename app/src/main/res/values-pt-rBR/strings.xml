@@ -38,6 +38,7 @@
 
     <!-- SearchScreen -->
     <string name="search_hint">Pesquise ou insira uma URL</string>
+    <string name="search_recent">Recentes</string>
     <string name="search_back">Voltar</string>
     <string name="search_more">Mais</string>
     <string name="search_add_link">Adicionar outro link</string>
@@ -425,6 +426,17 @@
     <string name="properties_saved_to">Salvo em</string>
     <string name="properties_downloaded">Baixado</string>
     <string name="properties_source">Origem</string>
+    <string name="properties_name">Nome</string>
+    <string name="properties_section_media">Mídia</string>
+    <string name="properties_section_again">Obter de novo</string>
+    <string name="properties_show_file">Mostrar arquivo</string>
+    <string name="properties_share">Compartilhar</string>
+    <string name="properties_copied">Copiado</string>
+    <string name="properties_download_again">Baixar de novo</string>
+    <string name="properties_download_again_hint">Melhor qualidade com suas configurações atuais</string>
+    <string name="properties_fetch_again">Buscar de novo</string>
+    <string name="properties_fetch_again_hint">Ler o link de novo e escolher um formato</string>
+    <string name="properties_queued">Baixando de novo</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">Voltar</string>

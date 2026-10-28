@@ -36,6 +36,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
+import com.hazel.android.ui.components.pressScale
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -1045,35 +1047,52 @@ fun DownloadScreen(
  * It is drawn on the highest surface tone, with no outline: the tone alone gives it its edge
  * against the near-black background.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun UrlSearchBar(
+internal fun UrlSearchBar(
     url: String,
     onOpenSearch: () -> Unit,
     shineProgress: Float = 0f,
     onMenuOpen: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        onClick = onOpenSearch,
+    // The field and its menu as one connected group: round on the outside, tight where they meet.
+    val fieldShape = RoundedCornerShape(topStart = 26.dp, bottomStart = 26.dp, topEnd = 8.dp, bottomEnd = 8.dp)
+    Row(
         modifier = modifier
-            .refreshShine(shineProgress, RoundedCornerShape(26.dp))
             .fillMaxWidth()
             .height(52.dp),
-        shape = RoundedCornerShape(26.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
+    ) {
+    Surface(
+        onClick = onOpenSearch,
+        modifier = Modifier
+            .refreshShine(shineProgress, fieldShape)
+            .weight(1f)
+            .fillMaxHeight(),
+        shape = fieldShape,
         color = MaterialTheme.colorScheme.surfaceContainerHighest
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 6.dp),
+                .padding(start = 8.dp, end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_search),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(MaterialShapes.Cookie7Sided.toShape())
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = null,
+                    modifier = Modifier.size(19.dp),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 url.ifBlank { stringResource(R.string.download_search_hint) },
@@ -1084,18 +1103,31 @@ private fun UrlSearchBar(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-
-            // Opens the same search options sheet the search screen's own 3-dot does.
-            IconButton(onClick = onMenuOpen, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    painterResource(R.drawable.ic_more_vert),
-                    contentDescription = stringResource(R.string.search_more),
-                    // The same size and tone as the search screen's, so the two read as one.
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
         }
+    }
+
+    // Opens the same search options sheet the search screen's own 3-dot does. Pressed, its
+    // inner corners round out and it squeezes, the connected group's press.
+    val menuPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val inner by com.hazel.android.ui.components.pressCorner(menuPress, resting = 8.dp, pressed = 18.dp)
+    Surface(
+        onClick = onMenuOpen,
+        interactionSource = menuPress,
+        modifier = Modifier
+            .pressScale(menuPress, pressed = 0.92f)
+            .width(50.dp)
+            .fillMaxHeight(),
+        shape = RoundedCornerShape(topStart = inner, bottomStart = inner, topEnd = 26.dp, bottomEnd = 26.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                painterResource(R.drawable.ic_more_vert),
+                contentDescription = stringResource(R.string.search_more),
+                modifier = Modifier.size(22.dp)
+            )
+        }
+    }
     }
 }
 
@@ -1199,22 +1231,14 @@ private fun MediaCard(
                     onClick = if (inHand) onOpenQueue else onOpenSheet
                 )
         ) {
-            // Sources without artwork simply show the placeholder glyph.
+            // Under the picture, so it shows while it loads, when it fails and when there is none.
+            com.hazel.android.ui.components.ArtworkPlaceholder(Modifier.matchParentSize())
             if (info.thumbnail != null) {
                 AsyncImage(
                     model = info.thumbnail,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Icon(
-                    Icons.Filled.MusicNote,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Alignment.Center),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
                 )
             }
 

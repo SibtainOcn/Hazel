@@ -108,20 +108,13 @@ fun AlreadyDownloadedDialog(
                                 .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {
+                            com.hazel.android.ui.components.ArtworkPlaceholder(Modifier.matchParentSize())
                             if (entry.thumbnail != null) {
                                 AsyncImage(
                                     model = entry.thumbnail,
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()
-                                )
-                            } else {
-                                Icon(
-                                    if (entry.isVideo) Icons.Filled.Videocam
-                                    else Icons.Filled.MusicNote,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(22.dp),
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                                 )
                             }
 

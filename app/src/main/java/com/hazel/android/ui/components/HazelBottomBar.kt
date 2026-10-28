@@ -17,7 +17,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -29,6 +28,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
+import androidx.graphics.shapes.Morph
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.graphics.asComposePath
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.graphics.shapes.toPath
 
 /** One destination on the bottom bar. */
 data class BottomBarItem(
@@ -44,9 +54,11 @@ data class BottomBarItem(
  *
  * The destinations are few and their icons are the ones every app uses for them, so a
  * label under each only doubled the bar's height. The label is still the icon's name for
- * accessibility services. The chosen tab reads at full strength and the rest recede, which
- * is enough to say where the user is without a pill behind the icon.
+ * accessibility services. Each tab has its own M3 shape behind its icon when chosen (a
+ * cookie, a pentagon, a clover, a gem), morphing in from a circle with a spring, so moving
+ * between tabs reads as one shape becoming another.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HazelBottomBar(
     items: List<BottomBarItem>,
@@ -63,8 +75,19 @@ fun HazelBottomBar(
             .height(BAR_HEIGHT),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        items.forEach { item ->
+        items.forEachIndexed { index, item ->
             val selected = item.route == selectedRoute
+            val target = TabShapes[index % TabShapes.size]
+            val morph = remember(target) { Morph(MaterialShapes.Circle, target) }
+            // One calm spring, no bounce; read only while drawing, so the bar is never
+            // recomposed for it and a tap starts nothing else.
+            val grow = animateFloatAsState(
+                if (selected) 1f else 0f,
+                spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
+                label = "tabShape"
+            )
+            // The same soft tone as the logo pill in the header.
+            val tone = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -74,18 +97,28 @@ fun HazelBottomBar(
                         onClick = { onSelect(item) },
                         role = Role.Tab,
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple(bounded = false, radius = 28.dp)
+                        indication = null
                     ),
                 contentAlignment = Alignment.Center
             ) {
+                Box(
+                    modifier = Modifier
+                        .size(INDICATOR_SIZE)
+                        .drawBehind {
+                            val g = grow.value
+                            if (g <= 0.001f) return@drawBehind
+                            val path = morph.toPath(g.coerceIn(0f, 1f)).asComposePath()
+                            path.transform(Matrix().apply { scale(size.width * g, size.height * g) })
+                            val inset = size.width * (1f - g) / 2f
+                            translate(inset, size.height * (1f - g) / 2f) { drawPath(path, tone) }
+                        }
+                )
                 Box {
                     Icon(
                         painter = painterResource(item.icon),
                         contentDescription = stringResource(item.label),
                         modifier = Modifier.size(ICON_SIZE),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = if (selected) 1f else UNSELECTED_ALPHA
-                        )
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (selected) 1f else UNSELECTED_ALPHA)
                     )
                     if (item.showDot) {
                         Box(
@@ -104,5 +137,15 @@ fun HazelBottomBar(
 }
 
 private val BAR_HEIGHT = 56.dp
-private val ICON_SIZE = 26.dp
+private val ICON_SIZE = 24.dp
+private val INDICATOR_SIZE = 46.dp
+
+/** Home, History, Queue, More, in the bar's order. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private val TabShapes = listOf(
+    MaterialShapes.Cookie7Sided,
+    MaterialShapes.Pentagon,
+    MaterialShapes.Clover4Leaf,
+    MaterialShapes.Gem
+)
 private const val UNSELECTED_ALPHA = 0.55f
