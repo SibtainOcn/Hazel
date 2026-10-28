@@ -1,32 +1,39 @@
+### Player
+- **Mini player:** scroll away or start a download and the video keeps playing in a mini player; tap it to open it large.
+- **Pick an audio track:** switch between a video's original audio and its dubs from the player menu.
+- **Playback audio language:** set it in Fetch settings, original by default.
+- **Wavy seek bar:** flows while playing and lies flat on pause or touch.
+- No longer stalls a few seconds into YouTube videos or starts on a dubbed track.
+- Full screen turns to landscape or portrait to match the video.
+
+### Backup and restore
+- **Rebuilt backups:** saved backups with restore, share and delete, a schedule, retention and folder choice.
+- Automatic backup after every app update and on a schedule; old ones are cleaned up.
+- Restore shows a preview first and brings back the app language.
+- Backups now include sign-in tokens and the paused queue.
+- A fresh install offers to restore from a backup.
+
 ### Looks
-- **New glass look:** soft colour light behind see-through screens, sheets and dialogs, in dark and light. Turn it off under More, Appearance.
-- **Pick a glass style:** Forest, Aurora, Ocean, Accent, Wallpaper, Sunset, Nebula or Mono.
-- **Eleven more accents:** with White first in the list, and a Reset appearance row.
-- **Living empty screens:** faint drifting stars that twinkle and brighten at your touch on Home and empty queue tabs.
-- Getting started now lets you pick theme, accent and glass, and follows the theme.
-- A short What's new card after updates, shown once.
+- **New splash animation on app start**
+- **Redesign Search options screen**.
+- **Expressive redesign throughout the app**
+- Update screens redesigned with live progress, stat tiles and copyable device info.
+- Smoother screen transitions with no blank frame between screens.
+- Rounded text fields across the app.
+- Glass is off by default on new installs; existing users keep their look.
+
+### Faster
+- Faster cold start, with home prepared behind the splash.
+- More opens quicker, and cookie and file picks load in the background.
 
 ### Downloads
-- **Select and delete downloads:** pick many rows at once, remove them from the list or delete the files too.
-- **Fewer failed downloads:** if a chosen format is gone, Hazel takes the nearest one at the same quality.
-- Deleted files also leave your gallery.
-- One save location picker everywhere, with free space for internal storage and SD cards.
-
-### Playlist sheet
-- No longer stops responding to taps after swiping a link away.
-- The search field stays above the keyboard.
-- Quality and size labels fit on small screens and large fonts.
+- **Properties sheet:** play, share, copy the name or link, download again or fetch the link again.
+- **Filename template sheet:** presets and tap-to-insert fields.
+- Filename templates no longer break on slashes, stray % signs or long names.
+- Playlist sheet downloads only the ticked links.
+- Instant downloads a video shared from a playlist or Mix on its own, and each video of an X post once.
+- Open folder lists every installed file manager.
 
 ### Everyday
-- **Home screen shortcuts:** long-press the Hazel icon for Search, Downloads, Queue and More.
-- Hazel and Hazel Instant show up as direct share targets.
-- Player shows the time while you drag the seek bar.
-- Settings titles and back buttons stay at the top on long screens.
-- Clear everything in Temp files now clears everything.
-- Clearing search results or history confirms with a short message.
-- Search suggestions ask before turning on.
-- yt-dlp update notifications are off by default.
-
-### Website
-- Smoother scrolling on phones and desktop.
-- New Works with card on the home page.
+- Tap the Hazel logo on Home to open Support screen.
+- Choice dialogs fixed.
