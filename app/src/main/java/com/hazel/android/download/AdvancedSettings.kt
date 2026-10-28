@@ -231,6 +231,8 @@ data class AdvancedSettings(
                     skipValue = '=' !in arg
                     continue
                 }
+                // A short option may carry its value joined to it, as in "-ofile.%(ext)s".
+                if (!arg.startsWith("--") && arg.length > 2 && arg.take(2) in RESERVED) continue
                 out += arg
             }
             return out

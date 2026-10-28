@@ -2682,9 +2682,7 @@ class DownloadViewModel : ViewModel() {
      * are replaced first, and a substituted value is never allowed to be empty.
      */
     private fun outputTemplate(options: DownloadOptions, title: String, author: String): String {
-        var template = options.filenameTemplate.ifBlank {
-            SettingsRepository.DEFAULT_FILENAME_TEMPLATE
-        }
+        var template = FilenameTemplate.normalize(options.filenameTemplate)
         val info = _state.value.active ?: _state.value.info
 
         if (title.isNotBlank() && title != info?.title) {
@@ -2708,9 +2706,7 @@ class DownloadViewModel : ViewModel() {
      * leaving any field that already has a format of its own as it was written.
      */
     private fun limitNameFields(template: String): String =
-        NAME_FIELD_BYTES.entries.fold(template) { acc, (field, bytes) ->
-            acc.replace("%($field)s", "%($field).${bytes}B")
-        }
+        FilenameTemplate.limitBytes(template, NAME_FIELD_BYTES)
 
     /**
      * Strips path separators, characters Android's filesystems reject, and the percent sign
@@ -3234,7 +3230,13 @@ class DownloadViewModel : ViewModel() {
          */
         val NAME_FIELD_BYTES = mapOf(
             "title" to MAX_NAME_BYTES,
+            "fulltitle" to MAX_NAME_BYTES,
+            "alt_title" to MAX_NAME_BYTES,
+            "track" to MAX_NAME_BYTES,
             "album" to MAX_NAME_BYTES,
+            "playlist" to 60,
+            "series" to 60,
+            "creator" to 60,
             "uploader" to 60,
             "channel" to 60,
             "artist" to 60,

@@ -20,7 +20,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
+import com.hazel.android.ui.components.ExpressiveTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -118,7 +118,7 @@ fun ProxyScreen(onBack: () -> Unit) {
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
+                    ExpressiveTextField(
                         value = host,
                         onValueChange = { host = it },
                         label = { Text(stringResource(R.string.proxy_host)) },
@@ -132,7 +132,7 @@ fun ProxyScreen(onBack: () -> Unit) {
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
+                    ExpressiveTextField(
                         value = port,
                         onValueChange = { text -> port = text.filter { it.isDigit() }.take(5) },
                         label = { Text(stringResource(R.string.proxy_port)) },
@@ -153,7 +153,7 @@ fun ProxyScreen(onBack: () -> Unit) {
             title = stringResource(R.string.proxy_section_login),
             rows = listOf<@Composable () -> Unit>({
                 Column(modifier = Modifier.padding(16.dp)) {
-                    OutlinedTextField(
+                    ExpressiveTextField(
                         value = user,
                         onValueChange = { user = it },
                         label = { Text(stringResource(R.string.proxy_user)) },
@@ -163,7 +163,7 @@ fun ProxyScreen(onBack: () -> Unit) {
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
+                    ExpressiveTextField(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text(stringResource(R.string.proxy_password)) },

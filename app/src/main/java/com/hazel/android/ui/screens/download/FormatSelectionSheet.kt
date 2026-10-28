@@ -28,6 +28,10 @@ import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -642,24 +646,29 @@ private fun FormatFilterSheet(
                 .fillMaxWidth()
                 .keepFlingInSheet()
                 .verticalScroll(rememberScrollState())
-                .padding(top = 20.dp, bottom = 24.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 16.dp)
         ) {
-            FilterSection(stringResource(R.string.format_filter_title))
-            FormatFilter.entries.forEach { option ->
-                FilterOption(stringResource(option.labelRes), option == filter) { onFilter(option) }
-            }
-
-            FilterSection(stringResource(R.string.format_sort_title))
-            FormatSort.entries.forEach { option ->
-                FilterOption(stringResource(option.labelRes), option == sort) { onSort(option) }
-            }
-
+            FilterGroup(
+                title = stringResource(R.string.format_filter_title),
+                labels = FormatFilter.entries.map { stringResource(it.labelRes) },
+                selected = filter.ordinal,
+                onSelect = { onFilter(FormatFilter.entries[it]) }
+            )
+            FilterGroup(
+                title = stringResource(R.string.format_sort_title),
+                labels = FormatSort.entries.map { stringResource(it.labelRes) },
+                selected = sort.ordinal,
+                onSelect = { onSort(FormatSort.entries[it]) }
+            )
             if (source != null) {
-                FilterSection(stringResource(R.string.format_source_title))
                 // The reader that answers soonest first, as the reading settings list them.
-                listOf(ListingSource.NEWPIPE, ListingSource.YT_DLP).forEach { option ->
-                    FilterOption(stringResource(option.labelRes), option == source) { onSource(option) }
-                }
+                val readers = listOf(ListingSource.NEWPIPE, ListingSource.YT_DLP)
+                FilterGroup(
+                    title = stringResource(R.string.format_source_title),
+                    labels = readers.map { stringResource(it.labelRes) },
+                    selected = readers.indexOf(source),
+                    onSelect = { onSource(readers[it]) }
+                )
             }
 
             Spacer(modifier = Modifier.navigationBarsPadding())
@@ -667,36 +676,59 @@ private fun FormatFilterSheet(
     }
 }
 
+/**
+ * One section as a segmented list: rows joined by small gaps, the outer corners round and
+ * the inner ones tight, and a cookie marking the choice.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun FilterSection(title: String) {
+private fun FilterGroup(title: String, labels: List<String>, selected: Int, onSelect: (Int) -> Unit) {
     Text(
         title,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 4.dp)
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 4.dp, top = 10.dp, bottom = 8.dp)
     )
-}
-
-@Composable
-private fun FilterOption(label: String, selected: Boolean, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 24.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(modifier = Modifier.size(24.dp), contentAlignment = Alignment.Center) {
-            if (selected) {
-                Icon(
-                    Icons.Filled.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+    val outer = 20.dp
+    val inner = 6.dp
+    val mark = MaterialShapes.Cookie9Sided.toShape()
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        labels.forEachIndexed { index, label ->
+            val on = index == selected
+            val top = if (index == 0) outer else inner
+            val bottom = if (index == labels.lastIndex) outer else inner
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+                    .clip(RoundedCornerShape(topStart = top, topEnd = top, bottomStart = bottom, bottomEnd = bottom))
+                    .background(
+                        if (on) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+                    )
+                    .selectable(selected = on, role = Role.RadioButton, onClick = { onSelect(index) })
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
+                    color = if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .then(
+                            if (on) Modifier.clip(mark).background(MaterialTheme.colorScheme.primary)
+                            else Modifier.border(2.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                        )
                 )
             }
         }
-        Spacer(modifier = Modifier.width(24.dp))
-        Text(label, style = MaterialTheme.typography.bodyLarge)
     }
 }
 

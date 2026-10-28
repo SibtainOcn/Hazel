@@ -261,7 +261,17 @@
     <string name="options_subtitles_languages_title">Idiomas de los subtítulos</string>
     <string name="options_subtitles_languages_hint">Un selector de idioma de yt-dlp, p. ej. en,.*-orig. Usa all para todos los idiomas.</string>
     <string name="options_filename_title">Plantilla del nombre de archivo</string>
-    <string name="options_filename_hint" formatted="false">Plantilla de salida de yt-dlp. Usa %(title)s, %(uploader)s, %(id)s y %(ext)s.</string>
+    <string name="options_filename_presets">Plantillas</string>
+    <string name="options_filename_fields">Insertar un campo</string>
+    <string name="options_filename_subtitle">Cómo se nombran las descargas</string>
+    <string name="options_filename_clear">Borrar</string>
+    <string name="filename_preset_title">Título</string>
+    <string name="filename_preset_uploader_title">Autor – Título</string>
+    <string name="filename_preset_date_title">Fecha – Título</string>
+    <string name="filename_preset_playlist_title">Número en la lista – Título</string>
+    <string name="filename_preset_title_id">Título [ID]</string>
+    <string name="filename_preset_title_resolution">Título (resolución)</string>
+    <string name="filename_preset_artist_track">Artista – Pista</string>
     <string name="options_text_input_save">Guardar</string>
     <string name="options_text_input_cancel">Cancelar</string>
 
