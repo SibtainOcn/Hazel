@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Glass is off by default on new installs. Existing users keep their current look.
 - New splash animation: the bolt draws itself, then a circle opens from it onto home. Replaces the static shimmer. Tap to skip; skipped when system animations are off.
 - Splash background is pure black in all themes. The system launch screen no longer shows an icon.
 - Smoother start: home is prepared behind the splash, and the yt-dlp and FFmpeg setup runs after it.
