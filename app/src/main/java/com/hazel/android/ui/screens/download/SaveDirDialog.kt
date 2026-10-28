@@ -69,11 +69,14 @@ internal fun SaveDirDialog(
     /** Given the card to save to, or null to pick any folder. */
     onPick: (card: SdCard?) -> Unit,
     onReset: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    title: String = stringResource(R.string.format_sheet_save_location_title),
+    body: String = stringResource(R.string.format_sheet_save_location_body),
+    internalPath: String = StoragePaths.downloadsDisplay(isAudio = !isVideo),
+    cardFolder: String = "Hazel/" + SdCards.kindFolderName(isVideo)
 ) {
     val context = LocalContext.current
     val onCard = remember(saveDir.uri) { SdCards.cardOf(saveDir.uri, context) }
-    val kindFolder = "Hazel/" + SdCards.kindFolderName(isVideo)
     val folderBytes by produceState<Long?>(null, saveDir.uri, onCard) {
         if (saveDir.isCustom && onCard == null) {
             value = withContext(Dispatchers.IO) { FolderSize.of(context, saveDir.uri) }
@@ -90,14 +93,14 @@ internal fun SaveDirDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Filled.Folder, null) },
-        title = { Text(stringResource(R.string.format_sheet_save_location_title), fontWeight = FontWeight.Bold) },
+        title = { Text(title, fontWeight = FontWeight.Bold) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    stringResource(R.string.format_sheet_save_location_body),
+                    body,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -107,7 +110,7 @@ internal fun SaveDirDialog(
                 SaveDirOption(
                     icon = Icons.Filled.PhoneAndroid,
                     title = stringResource(R.string.save_location_internal),
-                    subtitle = StoragePaths.downloadsDisplay(isAudio = !isVideo),
+                    subtitle = internalPath,
                     detail = internal?.let { freeLabel(it) },
                     usedFraction = internal?.usedFraction,
                     selected = !saveDir.isCustom,
@@ -119,7 +122,7 @@ internal fun SaveDirDialog(
                         icon = Icons.Filled.SdCard,
                         title = card.name,
                         subtitle = if (selected) label
-                        else stringResource(R.string.save_location_card_hint, kindFolder),
+                        else stringResource(R.string.save_location_card_hint, cardFolder),
                         detail = space?.let { freeLabel(it) },
                         usedFraction = space?.usedFraction,
                         selected = selected,

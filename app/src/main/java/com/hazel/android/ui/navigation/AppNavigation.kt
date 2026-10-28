@@ -174,6 +174,8 @@ fun AppNavigation(
         )
     }
 
+    com.hazel.android.ui.screens.more.BackupRestoreOffer()
+
     Scaffold(
         topBar = {
             // Only over the home screen. The other two carry their own headings, and the
