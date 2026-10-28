@@ -42,6 +42,14 @@ class GenericFormatsTest {
     }
 
     @Test
+    fun `the preferred video codec is taken at the height the choice lands on`() {
+        val both = read.copy(videoFormats = read.videoFormats + video("720v", 720).copy(vcodec = "vp09.00.40.08"))
+        val ceiling = GenericFormats.heightCeiling(1000)
+        assertEquals("720v", GenericFormats.applyTo(both, ceiling, null, VideoCodec.VP9)?.formatId)
+        assertEquals("720", GenericFormats.applyTo(both, ceiling, null)?.formatId)
+    }
+
+    @Test
     fun `best and worst become the link's own extremes`() {
         assertEquals("1080", GenericFormats.applyTo(read, MediaProbe.BEST_VIDEO, null)?.formatId)
         assertEquals("360", GenericFormats.applyTo(read, WORST_VIDEO, null)?.formatId)

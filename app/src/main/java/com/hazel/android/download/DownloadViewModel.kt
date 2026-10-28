@@ -565,7 +565,7 @@ class DownloadViewModel : ViewModel() {
             when {
                 results.size > 1 -> {
                     val plans = results.mapNotNull { info ->
-                        GenericFormats.applyTo(info, format, audioLanguage)?.let {
+                        GenericFormats.applyTo(info, format, audioLanguage, options.videoCodecPreference, options.audioCodecPreference)?.let {
                             DownloadPlan(info, it, info.title, info.uploader, audioLanguage)
                         }
                     }
@@ -574,7 +574,7 @@ class DownloadViewModel : ViewModel() {
 
                 results.size == 1 -> {
                     val info = results.first()
-                    val chosen = GenericFormats.applyTo(info, format, audioLanguage) ?: format
+                    val chosen = GenericFormats.applyTo(info, format, audioLanguage, options.videoCodecPreference, options.audioCodecPreference) ?: format
                     startDownload(
                         context = app,
                         format = chosen,
@@ -670,7 +670,7 @@ class DownloadViewModel : ViewModel() {
                     val format = if (audioOnly) {
                         info.autoPick(false, 0, language, options.audioCodecPreference) ?: BatchAudioFormats.BEST
                     } else {
-                        GenericFormats.applyTo(info, step, null) ?: step
+                        GenericFormats.applyTo(info, step, null, options.videoCodecPreference) ?: step
                     }
                     DownloadPlan(info, format, info.title, info.uploader, language)
                 }
@@ -802,7 +802,7 @@ class DownloadViewModel : ViewModel() {
                     ?.takeIf { it.hasResolvedFormats }
                     ?: InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
                     ?: info
-                val chosen = GenericFormats.applyTo(read, format, audioLanguage) ?: format
+                val chosen = GenericFormats.applyTo(read, format, audioLanguage, options.videoCodecPreference, options.audioCodecPreference) ?: format
                 dropWaiting()
                 startDownload(
                     context = app,
