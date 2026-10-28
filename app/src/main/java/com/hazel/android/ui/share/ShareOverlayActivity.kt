@@ -177,7 +177,7 @@ class ShareOverlayActivity : ComponentActivity() {
         // Only on a first start: an activity brought back after its process was reclaimed
         // must not download the same link a second time.
         if (instant && savedInstanceState == null) {
-            DownloadViewModelHolder.get().instantDownload(this, firstUrl)
+            DownloadViewModelHolder.get().instantDownload(this, firstUrl, intent.audioOnlyOverride())
         }
 
         setContent {
@@ -391,7 +391,7 @@ class ShareOverlayActivity : ComponentActivity() {
         }
         instant = intent.isInstant()
         com.hazel.android.util.AppShortcuts.reportShared(this, instant)
-        if (instant) DownloadViewModelHolder.get().instantDownload(this, url)
+        if (instant) DownloadViewModelHolder.get().instantDownload(this, url, intent.audioOnlyOverride())
         sharedUrl = url
     }
 
@@ -399,9 +399,15 @@ class ShareOverlayActivity : ComponentActivity() {
         Toast.makeText(applicationContext, getString(R.string.share_overlay_download_started), Toast.LENGTH_SHORT).show()
     }
 
-    private companion object {
+    companion object {
         const val INSTANT_ALIAS = "InstantShareActivity"
+
+        /** Set by the widget's Audio button: Instant saves the link as audio. */
+        const val EXTRA_AUDIO_ONLY = "hazel.audio_only"
     }
+
+    private fun Intent.audioOnlyOverride(): Boolean? =
+        if (getBooleanExtra(EXTRA_AUDIO_ONLY, false)) true else null
 
     private fun closeOverlay() {
         finishAndRemoveTask()
