@@ -26,6 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.background
@@ -111,7 +113,7 @@ private fun androidx.compose.animation.AnimatedContentTransitionScope<androidx.n
 @Composable
 fun AppNavigation(
     pendingShares: List<com.hazel.android.MainActivity.SharedLink> = emptyList(),
-    pendingFailure: String? = null,
+    pendingFailure: com.hazel.android.download.FailureNotice? = null,
     pendingRoute: String? = null,
     onPendingRouteConsumed: () -> Unit = {},
     onPendingFailureConsumed: () -> Unit = {},
@@ -132,9 +134,15 @@ fun AppNavigation(
 
     val navController = rememberNavController()
 
-    // Handle deep navigation triggered from shortcuts or share overlay
+    // The queue tab a notification asked for, after the '#' of its route.
+    var queueTab by remember { mutableStateOf<String?>(null) }
+
+    // Handle deep navigation triggered from shortcuts, the share overlay and notifications
+
     LaunchedEffect(pendingRoute) {
-        pendingRoute?.let { route ->
+        pendingRoute?.let { target ->
+            val route = target.substringBefore('#')
+            target.substringAfter('#', "").takeIf { it.isNotEmpty() }?.let { queueTab = it }
             // A tab is opened the way the bottom bar opens it. Pushed as a plain screen, it
             // sat on top of Home, and Home's own button then restored that same stack with
             // the tab still on top of it, so pressing Home seemed to do nothing.
@@ -392,7 +400,11 @@ fun AppNavigation(
                 )
             }
             composable(Screen.Queue.route) {
-                QueueScreen(downloadViewModel = downloadViewModel)
+                QueueScreen(
+                    downloadViewModel = downloadViewModel,
+                    openTab = queueTab,
+                    onTabOpened = { queueTab = null }
+                )
             }
             composable(Screen.More.route) {
                 MoreScreen(

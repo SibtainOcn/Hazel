@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
     )
 
     /** A failure the user tapped a notification to come back to, or null. */
-    var pendingFailure by mutableStateOf<String?>(null)
+    var pendingFailure by mutableStateOf<com.hazel.android.download.FailureNotice?>(null)
         private set
 
     /** Direct navigation target requested by shortcuts or share overlay, or null. */
@@ -195,7 +195,11 @@ class MainActivity : ComponentActivity() {
 
         intent?.getStringExtra(DownloadNotificationHelper.EXTRA_FAILURE_MESSAGE)
             ?.takeIf { it.isNotBlank() }
-            ?.let { pendingFailure = it }
+            ?.let {
+                pendingFailure = com.hazel.android.download.FailureNotice(
+                    it, intent.getStringExtra(DownloadNotificationHelper.EXTRA_FAILURE_URL)
+                )
+            }
 
         intent?.getStringExtra(EXTRA_NAVIGATE_TO)
             ?.takeIf { it.isNotBlank() }

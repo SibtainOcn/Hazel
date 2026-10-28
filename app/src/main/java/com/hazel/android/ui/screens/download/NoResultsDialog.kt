@@ -22,8 +22,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -306,3 +311,34 @@ private val COOKIE_MARKERS = listOf(
     "members-only",
     "account"
 )
+
+/**
+ * The sign-in offer for a read the source refused, shown as the refusal happens rather than
+ * waiting to be noticed in the format list. Coming back signed in reads the link again.
+ */
+@Composable
+fun SignInPrompt(viewModel: com.hazel.android.download.DownloadViewModel) {
+    val needed by viewModel.signInNeeded.collectAsState()
+    val context = LocalContext.current
+    val signIn = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        viewModel.endSignIn(result.resultCode == android.app.Activity.RESULT_OK)
+    }
+    val current = needed ?: return
+    NoResultsDialog(
+        message = current.log,
+        canFetchCookies = true,
+        canContinue = false,
+        canAddCookies = true,
+        link = current.info.url,
+        onCopyLog = {
+            com.hazel.android.util.copyToClipboard(context, current.log)
+            android.widget.Toast.makeText(context, R.string.history_failed_log_copied, android.widget.Toast.LENGTH_SHORT).show()
+        },
+        onGetCookies = {
+            viewModel.beginSignIn(current)
+            signIn.launch(CookieWebViewActivity.intent(context, com.hazel.android.util.siteRootOf(current.info.url)))
+        },
+        onContinueAnyway = {},
+        onDismiss = viewModel::dismissSignIn
+    )
+}

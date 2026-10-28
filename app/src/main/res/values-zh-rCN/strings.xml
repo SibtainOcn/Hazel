@@ -509,6 +509,9 @@
     <string name="notification_action_resume">继续</string>
     <string name="notification_action_cancel">取消</string>
     <string name="notification_action_sign_in">登录</string>
+    <string name="notification_action_dismiss">关闭</string>
+    <string name="widget_quick_actions_label">Hazel 快捷操作</string>
+    <string name="widget_quick_actions_description">粘贴复制的链接、保存为音频或视频，或打开下载</string>
     <string name="notification_wifi_title">等待 Wi-Fi</string>
     <string name="notification_wifi_text">下载被限制为仅使用 Wi-Fi。回到 Wi-Fi 后就会开始。</string>
     <string name="notification_run_cancelled_title">下载已取消</string>
@@ -532,6 +535,7 @@
     <string name="format_selection_subtitle">选择格式</string>
     <string name="format_selection_confirm">确定</string>
     <string name="format_selection_loading">正在读取其余的格式</string>
+    <string name="format_selection_read_failed">无法读取此链接的画质：%1$s。这些选项仍可下载；刷新以重试。</string>
     <string name="format_audio_empty">此链接没有单独的音频流</string>
     <string name="format_generic_badge">自动</string>
     <string name="format_sheet_section_details">详细信息</string>

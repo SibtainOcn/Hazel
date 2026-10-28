@@ -45,6 +45,7 @@ object DownloadNotificationHelper {
     private const val REQUEST_PAUSE = 2001
     private const val REQUEST_RESUME = 2002
     private const val REQUEST_CANCEL = 2003
+    private const val REQUEST_DISMISS_FAILURE = 2004
 
     /**
      * Longest title the notification shows. A title past this length wraps onto a second
@@ -98,7 +99,7 @@ object DownloadNotificationHelper {
         }
     }
 
-    private fun isAppInForeground(): Boolean {
+    fun isAppInForeground(): Boolean {
         return try {
             ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
         } catch (_: Exception) { true }
@@ -109,7 +110,7 @@ object DownloadNotificationHelper {
      * opening the app when no location is known.
      */
     private fun openFileIntent(context: Context, fileUri: Uri?, isVideo: Boolean): PendingIntent {
-        if (fileUri == null) return launchPendingIntent(context)
+        if (fileUri == null) return launchPendingIntent(context, ROUTE_HISTORY)
 
         val view = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(fileUri, if (isVideo) "video/*" else "audio/*")
@@ -137,6 +138,8 @@ object DownloadNotificationHelper {
     ): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            // Home, where the failure dialog is shown, whichever tab the app was left on.
+            putExtra(MainActivity.EXTRA_NAVIGATE_TO, "download")
             putExtra(EXTRA_FAILURE_MESSAGE, message)
             signInUrl?.let { putExtra(EXTRA_FAILURE_URL, it) }
         }
@@ -150,15 +153,27 @@ object DownloadNotificationHelper {
     const val EXTRA_FAILURE_MESSAGE = "hazel.failure.message"
     const val EXTRA_FAILURE_URL = "hazel.failure.url"
 
-    private fun launchPendingIntent(context: Context): PendingIntent {
+    /**
+     * Opens the app on [route], the screen the notification is about. Each route has its
+     * own request code, so one notification's tap target never overwrites another's.
+     */
+    private fun launchPendingIntent(context: Context, route: String): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(MainActivity.EXTRA_NAVIGATE_TO, route)
         }
         return PendingIntent.getActivity(
-            context, 0, intent,
+            context, ROUTE_REQUEST_BASE + ROUTES.indexOf(route), intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
+
+    /** Where a notification tap lands: the queue on one of its tabs, or the history. */
+    const val ROUTE_RUNNING = "queue#running"
+    const val ROUTE_FAILED = "queue#failed"
+    const val ROUTE_HISTORY = "history"
+    private val ROUTES = listOf(ROUTE_RUNNING, ROUTE_FAILED, ROUTE_HISTORY)
+    private const val ROUTE_REQUEST_BASE = 3000
 
     /**
      * A notification button, wired to the receiver that hands it to the running download.
@@ -229,7 +244,7 @@ object DownloadNotificationHelper {
             .setOnlyAlertOnce(true)
             .setColorized(true)
             .setColor(0xFF000000.toInt())
-            .setContentIntent(launchPendingIntent(context))
+            .setContentIntent(launchPendingIntent(context, ROUTE_RUNNING))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
@@ -311,6 +326,11 @@ object DownloadNotificationHelper {
      * Both go, because every caller is a download that has ended. Leaving the paused entry
      * behind would offer a Resume button for a download that finished.
      */
+    /** Takes down a failure notification the user has acted on. */
+    fun cancelFailure(context: Context) {
+        context.getSystemService(NotificationManager::class.java).cancel(COMPLETE_NOTIFICATION_ID)
+    }
+
     fun cancelProgress(context: Context) {
         val mgr = context.getSystemService(NotificationManager::class.java)
         mgr.cancel(PROGRESS_NOTIFICATION_ID)
@@ -354,7 +374,7 @@ object DownloadNotificationHelper {
             .setOngoing(true)
             .setSilent(true)
             .setOnlyAlertOnce(true)
-            .setContentIntent(launchPendingIntent(context))
+            .setContentIntent(launchPendingIntent(context, ROUTE_RUNNING))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .addAction(
@@ -432,7 +452,7 @@ object DownloadNotificationHelper {
             .setSilent(true)
             .setColorized(true)
             .setColor(0xFF000000.toInt())
-            .setContentIntent(launchPendingIntent(context))
+            .setContentIntent(launchPendingIntent(context, ROUTE_RUNNING))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setTimeoutAfter(4000)
 
@@ -472,14 +492,8 @@ object DownloadNotificationHelper {
         val summary = context.getString(R.string.notification_run_summary, done, failed, cancelled)
         val loud = failed > 0 && !cancelledByUser && !isAppInForeground()
 
-        val open = PendingIntent.getActivity(
-            context, 4,
-            Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra(MainActivity.EXTRA_NAVIGATE_TO, QUEUE_ROUTE)
-            },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        // Failures are listed with their logs; a clean run's files are in the history.
+        val open = launchPendingIntent(context, if (failed > 0) ROUTE_FAILED else ROUTE_HISTORY)
 
         val builder = NotificationCompat.Builder(context, if (loud) CHANNEL_COMPLETE else CHANNEL_PROGRESS)
             .setSmallIcon(R.drawable.ic_notification)
@@ -503,9 +517,6 @@ object DownloadNotificationHelper {
         context.getSystemService(NotificationManager::class.java)
             .notify(COMPLETE_NOTIFICATION_ID, builder.build())
     }
-
-    /** The queue screen's route, which a run's summary opens on. */
-    private const val QUEUE_ROUTE = "queue"
 
     /**
      * Says a run is waiting for Wi-Fi, and only when there is nobody looking at the screen.
@@ -535,7 +546,7 @@ object DownloadNotificationHelper {
             .setSilent(true)
             .setColorized(true)
             .setColor(0xFF000000.toInt())
-            .setContentIntent(launchPendingIntent(context))
+            .setContentIntent(launchPendingIntent(context, ROUTE_RUNNING))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
 
@@ -556,25 +567,31 @@ object DownloadNotificationHelper {
      * @param signInUrl the site to sign in to, where the failure was one that signing in
      *   would fix. It becomes an action on the notification, because the alternative is
      *   asking the user to reopen the app and repeat the link to be told the same thing.
+     * @param heading replaces "Download failed" for a failure that was not a download, and
+     *   leaves any running download's progress up.
+     * @param recorded the failure is on the Failed tab, which the tap opens; otherwise the
+     *   tap opens the failure dialog.
      */
     fun showError(
         context: Context,
         errorMsg: String,
         title: String = "",
-        signInUrl: String? = null
+        signInUrl: String? = null,
+        heading: String? = null,
+        recorded: Boolean = false
     ) {
         createChannels(context)
-        cancelProgress(context)
+        if (heading == null) cancelProgress(context)
 
         val inForeground = isAppInForeground()
         val channelId = if (inForeground) CHANNEL_PROGRESS else CHANNEL_COMPLETE
 
-        val heading = if (title.isBlank()) "Download failed"
+        val headline = heading ?: if (title.isBlank()) "Download failed"
         else "Download failed: ${shortTitle(title)}"
 
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(heading)
+            .setContentTitle(headline)
             .setContentText(errorMsg)
             // The reason can run past one line, and truncating it leaves the user with a
             // failure they cannot act on.
@@ -582,7 +599,10 @@ object DownloadNotificationHelper {
             .setAutoCancel(true)
             .setColorized(true)
             .setColor(0xFF000000.toInt())
-            .setContentIntent(failurePendingIntent(context, errorMsg, signInUrl))
+            .setContentIntent(
+                if (recorded) launchPendingIntent(context, ROUTE_FAILED)
+                else failurePendingIntent(context, errorMsg, signInUrl)
+            )
             .setCategory(NotificationCompat.CATEGORY_ERROR)
 
         if (inForeground) {
@@ -601,9 +621,15 @@ object DownloadNotificationHelper {
                     context,
                     2,
                     CookieWebViewActivity.intent(context, signInUrl)
+                        .putExtra(CookieWebViewActivity.EXTRA_FROM_FAILURE, true)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
+            )
+            builder.addAction(
+                0,
+                context.getString(R.string.notification_action_dismiss),
+                actionIntent(context, DownloadActionReceiver.ACTION_DISMISS_FAILURE, REQUEST_DISMISS_FAILURE)
             )
         }
 
@@ -611,3 +637,6 @@ object DownloadNotificationHelper {
         mgr.notify(COMPLETE_NOTIFICATION_ID, builder.build())
     }
 }
+
+/** A failure notification the user tapped, with the site its sign-in is for, if any. */
+data class FailureNotice(val message: String, val signInSite: String?)

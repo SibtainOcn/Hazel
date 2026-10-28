@@ -177,7 +177,7 @@ class ShareOverlayActivity : ComponentActivity() {
         // Only on a first start: an activity brought back after its process was reclaimed
         // must not download the same link a second time.
         if (instant && savedInstanceState == null) {
-            DownloadViewModelHolder.get().instantDownload(this, firstUrl)
+            DownloadViewModelHolder.get().instantDownload(this, firstUrl, intent.audioOnlyOverride())
         }
 
         setContent {
@@ -189,6 +189,7 @@ class ShareOverlayActivity : ComponentActivity() {
                 val downloadViewModel = remember { DownloadViewModelHolder.get() }
                 val state by downloadViewModel.state.collectAsState()
                 val formatsReading by downloadViewModel.formatsReading.collectAsState()
+                val formatReadErrors by downloadViewModel.formatReadErrors.collectAsState()
 
                 val options by remember(this) { SettingsRepository.getDownloadOptions(this) }
                     .collectAsState(initial = DownloadOptions())
@@ -238,6 +239,7 @@ class ShareOverlayActivity : ComponentActivity() {
 
                 OverlayTheme(accentName, glass, GlassStyle.fromKey(glassStyle)) {
                     Box(modifier = Modifier.fillMaxSize()) {
+                        com.hazel.android.ui.screens.download.SignInPrompt(downloadViewModel)
                         val readHere = state.url == url
                         val results = if (readHere) state.results else emptyList()
                         val failure = state.errorLog?.takeIf { readHere && !state.isFetching }
@@ -333,6 +335,7 @@ class ShareOverlayActivity : ComponentActivity() {
                                     // stands under it; the header says the link is being read.
                                     isLoadingFormats = resolved != null && info.url in formatsReading,
                                     isReadingLink = resolved == null && state.isFetching,
+                                    formatsError = formatReadErrors[info.url],
                                     onRefreshFormats = resolved?.let { item ->
                                         { source, fresh -> downloadViewModel.refreshFormats(listOf(item), source, fresh) }
                                     },
@@ -388,7 +391,7 @@ class ShareOverlayActivity : ComponentActivity() {
         }
         instant = intent.isInstant()
         com.hazel.android.util.AppShortcuts.reportShared(this, instant)
-        if (instant) DownloadViewModelHolder.get().instantDownload(this, url)
+        if (instant) DownloadViewModelHolder.get().instantDownload(this, url, intent.audioOnlyOverride())
         sharedUrl = url
     }
 
@@ -396,9 +399,15 @@ class ShareOverlayActivity : ComponentActivity() {
         Toast.makeText(applicationContext, getString(R.string.share_overlay_download_started), Toast.LENGTH_SHORT).show()
     }
 
-    private companion object {
+    companion object {
         const val INSTANT_ALIAS = "InstantShareActivity"
+
+        /** Set by the widget's Audio and Video buttons: Instant saves the link as that kind. */
+        const val EXTRA_AUDIO_ONLY = "hazel.audio_only"
     }
+
+    private fun Intent.audioOnlyOverride(): Boolean? =
+        if (hasExtra(EXTRA_AUDIO_ONLY)) getBooleanExtra(EXTRA_AUDIO_ONLY, false) else null
 
     private fun closeOverlay() {
         finishAndRemoveTask()

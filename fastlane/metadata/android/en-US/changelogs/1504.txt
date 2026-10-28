@@ -5,4 +5,4 @@
 * Expressive redesign across home, search, menus and player
 * Fixed YouTube playback stalling a few seconds in
 * Filename templates no longer break on long or odd names
-* Playlist sheet and Instant download only the right videos
+* New home-screen widget: Paste, Audio, Video, Downloads

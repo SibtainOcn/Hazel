@@ -41,6 +41,7 @@ object SettingsRepository {
 
     suspend fun setDarkTheme(context: Context, isDark: Boolean) {
         context.dataStore.edit { prefs -> prefs[DARK_THEME_KEY] = isDark }
+        com.hazel.android.widget.QuickActionsWidget.refresh(context)
     }
 
     // Accent color
@@ -50,6 +51,7 @@ object SettingsRepository {
 
     suspend fun setAccentColor(context: Context, name: String) {
         context.dataStore.edit { prefs -> prefs[ACCENT_COLOR_KEY] = name }
+        com.hazel.android.widget.QuickActionsWidget.refresh(context)
     }
 
     fun isGlassEnabled(context: Context): Flow<Boolean> {

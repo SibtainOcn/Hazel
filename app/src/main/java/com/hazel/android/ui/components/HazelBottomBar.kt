@@ -86,8 +86,7 @@ fun HazelBottomBar(
                 spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
                 label = "tabShape"
             )
-            // The same soft tone as the logo pill in the header.
-            val tone = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+            val tone = MaterialTheme.colorScheme.onSurface.copy(alpha = INDICATOR_ALPHA)
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -149,3 +148,4 @@ private val TabShapes = listOf(
     MaterialShapes.Gem
 )
 private const val UNSELECTED_ALPHA = 0.55f
+private const val INDICATOR_ALPHA = 0.2f

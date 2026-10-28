@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.1.16] - 2026-10-29
+## [1.1.17] - 2026-10-29
 ### Added
+- Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
 - Home: hold a card's thumbnail for Play, Download, and, for a saved copy, Open and Properties.
 - Subtitles: the dialog lists the languages a video has, uploaded and auto, to pick with a tap.
 - Support: a Developer card that opens the developer's GitHub profile.
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Playback audio language setting in Fetch settings, set to the original by default.
 
 ### Changed
+- The bottom bar's selected-tab shape is easier to see.
 - Download sheet: Play is a pentagon accent button, shown for any video, and opens it in the large player.
 - Download sheet: while a link is being read, the full quality ladder shows at once with the preferred quality chosen; the real formats replace it when they arrive.
 - Home: tapping the Hazel logo in the header opens Support.
@@ -80,6 +82,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Player: the seek bar flows as a wave while playing and lies flat on touch or pause, with a pill thumb. Play is a pentagon while paused and a slowly turning six-sided cookie while playing. Both stay still when system animations are off.
 
 ### Fixed
+- Format list: a link whose qualities could not be read now says why, instead of leaving the quality ladder looking like its final list.
+- YouTube's "confirm you're not a bot" refusal is named as such, not as private content.
+- The quality ladder keeps its original look and side rail until the real qualities arrive.
+- A link refused until sign-in now opens the sign-in dialog right away; signing in reads it again.
+- Off screen, the same refusal posts a notification with Sign in and Dismiss.
+- Notification taps open the screen they are about: Running, Failed, History or the failure dialog.
+- The share sheet's format list now shows why a read failed.
 - A download chosen while a link is still being read shows on the Running tab at once, instead of after the read.
 - A quality chosen before a link is read, or by Instant, keeps the preferred video and audio codec once the formats arrive.
 - Quality picks take a direct stream over an HLS one of the same height and frame rate, which downloads faster.

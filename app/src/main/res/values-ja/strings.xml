@@ -509,6 +509,9 @@
     <string name="notification_action_resume">再開</string>
     <string name="notification_action_cancel">キャンセル</string>
     <string name="notification_action_sign_in">ログイン</string>
+    <string name="notification_action_dismiss">閉じる</string>
+    <string name="widget_quick_actions_label">Hazel クイック操作</string>
+    <string name="widget_quick_actions_description">コピーしたリンクを貼り付け、音声や動画として保存、またはダウンロードを開く</string>
     <string name="notification_wifi_title">Wi-Fi待機中</string>
     <string name="notification_wifi_text">ダウンロードはWi-Fi接続時のみに設定されています。Wi-Fi接続時に開始されます。</string>
     <string name="notification_run_cancelled_title">ダウンロードをキャンセルしました</string>
@@ -532,6 +535,7 @@
     <string name="format_selection_subtitle">形式を選択</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">残りの形式を読み込み中</string>
+    <string name="format_selection_read_failed">このリンクの画質を読み込めませんでした: %1$s。これらはそのままダウンロードできます。更新で再試行します。</string>
     <string name="format_audio_empty">このリンクには個別の音声ストリームがありません</string>
     <string name="format_generic_badge">自動</string>
     <string name="format_sheet_section_details">詳細</string>

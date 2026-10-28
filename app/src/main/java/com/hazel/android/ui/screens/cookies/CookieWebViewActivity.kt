@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.lifecycleScope
 import com.hazel.android.R
+import com.hazel.android.download.DownloadNotificationHelper
 import com.hazel.android.download.NetworkProxy
 import com.hazel.android.download.WebViewProxy
 import com.hazel.android.data.CookieEntry
@@ -89,6 +90,8 @@ class CookieWebViewActivity : ComponentActivity() {
         val url = intent.getStringExtra(EXTRA_URL)?.takeIf { it.isNotBlank() }
             ?: return finish()
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
+        // Opened from a failure notification's Sign in: that notification is answered.
+        if (intent.getBooleanExtra(EXTRA_FROM_FAILURE, false)) DownloadNotificationHelper.cancelFailure(this)
 
         // A fresh sign-in starts from no cookies; a screen rebuilt after a rotation keeps
         // the session it was in the middle of.
@@ -374,6 +377,7 @@ class CookieWebViewActivity : ComponentActivity() {
     companion object {
         const val EXTRA_URL = "url"
         const val EXTRA_TITLE = "title"
+        const val EXTRA_FROM_FAILURE = "from_failure"
 
         /** How long a proxy set a moment ago is given to reach web views: 20 x 100 ms. */
         private const val PROXY_WAIT_STEPS = 20

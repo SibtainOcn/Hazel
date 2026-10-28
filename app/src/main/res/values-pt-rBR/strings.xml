@@ -535,6 +535,9 @@
     <string name="notification_action_resume">Retomar</string>
     <string name="notification_action_cancel">Cancelar</string>
     <string name="notification_action_sign_in">Entrar</string>
+    <string name="notification_action_dismiss">Dispensar</string>
+    <string name="widget_quick_actions_label">Ações rápidas do Hazel</string>
+    <string name="widget_quick_actions_description">Cole um link copiado, salve como áudio ou vídeo, ou abra seus downloads</string>
     <string name="notification_wifi_title">Aguardando o Wi-Fi</string>
     <string name="notification_wifi_text">Os downloads estão limitados ao Wi-Fi. Eles começam quando você voltar para o Wi-Fi.</string>
     <string name="notification_run_cancelled_title">Downloads cancelados</string>
@@ -558,6 +561,7 @@
     <string name="format_selection_subtitle">Escolha o formato</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Lendo o resto dos formatos</string>
+    <string name="format_selection_read_failed">Não foi possível ler as qualidades deste link: %1$s. Estas ainda baixam; atualize para tentar de novo.</string>
     <string name="format_audio_empty">Este link não tem faixas de áudio separadas</string>
     <string name="format_generic_badge">Auto</string>
     <string name="format_sheet_section_details">Detalhes</string>

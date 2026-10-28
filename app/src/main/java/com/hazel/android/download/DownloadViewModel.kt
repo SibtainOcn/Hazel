@@ -143,6 +143,8 @@ data class DownloadState(
      * sanitized [error] is for inline messages; this is what the user can copy or act on.
      */
     val errorLog: String? = null,
+    /** The site to sign in to for [errorLog], where it came from somewhere other than [url]. */
+    val errorSignInSite: String? = null,
     /**
      * Set when a download could not be written to the folder it was meant for, usually an
      * SD card that was taken out, filled up or stopped granting access, and was saved
@@ -247,6 +249,26 @@ class DownloadViewModel : ViewModel() {
      */
     private val _formatsReading = MutableStateFlow<Set<String>>(emptySet())
     val formatsReading: StateFlow<Set<String>> = _formatsReading.asStateFlow()
+
+    /** Why a link's last format read failed, by link, until it is read again. */
+    private val _formatReadErrors = MutableStateFlow<Map<String, String>>(emptyMap())
+    val formatReadErrors: StateFlow<Map<String, String>> = _formatReadErrors.asStateFlow()
+
+    /**
+     * A read refused until the user signs in, put in front of them as it happens. One at a
+     * time, so links refused together ask once.
+     */
+    private val _signInNeeded = MutableStateFlow<SignInNeeded?>(null)
+    val signInNeeded: StateFlow<SignInNeeded?> = _signInNeeded.asStateFlow()
+
+    /** The link the user left to sign in for, read again when they come back. */
+    @Volatile private var signingInFor: MediaInfo? = null
+
+    /**
+     * When the sign-in was last turned down or taken. A read already running then does not
+     * ask again when it is refused too.
+     */
+    @Volatile private var signInAnsweredAt = 0L
 
     /**
      * A read asked for by name while another read of the same link was running: a switch
@@ -727,7 +749,7 @@ class DownloadViewModel : ViewModel() {
                     )
                 }
                 DownloadNotificationHelper.showError(
-                    app, sanitizeError(log), signInUrl = signInTargetFor(log, url)
+                    app, sanitizeError(log), signInUrl = signInTargetFor(log, url), recorded = true
                 )
             }
         }
@@ -1154,12 +1176,17 @@ class DownloadViewModel : ViewModel() {
     private fun startFormatRead(info: MediaInfo, fresh: Boolean, source: ListingSource?) {
         viewModelScope.launch(Dispatchers.IO) {
             var next: Pair<Boolean, ListingSource?>? = null
+            val startedAt = android.os.SystemClock.elapsedRealtime()
+            _formatReadErrors.update { it - info.url }
             val resolved = try {
                 formatReads.withPermit { readFormats(info.url, fresh, source) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Log.w("Hazel", "Format read failed for ${info.url}: ${e.message}")
+                val log = e.message?.trim().orEmpty()
+                Log.w("Hazel", "Format read failed for ${info.url}: $log")
+                _formatReadErrors.update { it + (info.url to sanitizeError(log)) }
+                askToSignIn(info, log, startedAt)
                 null
             } finally {
                 // A queued read takes over the claim rather than letting it go, so the list
@@ -1286,9 +1313,53 @@ class DownloadViewModel : ViewModel() {
      * Reopens the failure dialog on a reason that arrived from outside, which is how a tap
      * on a failure notification gets back to the log and the sign-in offer.
      */
-    fun showFailure(message: String) {
+    fun showFailure(message: String, signInSite: String? = null) {
         if (message.isBlank()) return
-        _state.update { s -> s.copy(isFetching = false, errorLog = message) }
+        _state.update { s -> s.copy(isFetching = false, errorLog = message, errorSignInSite = signInSite) }
+    }
+
+    /**
+     * Puts a refused read in front of the user: the sign-in dialog while the app is on
+     * screen, a notification offering the sign-in while it is not. Only for refusals that
+     * signing in fixes, so a dropped connection does not interrupt.
+     */
+    private fun askToSignIn(info: MediaInfo, log: String, startedAt: Long) {
+        val site = signInTargetFor(log, info.url) ?: return
+        if (startedAt < signInAnsweredAt) return
+        if (DownloadNotificationHelper.isAppInForeground()) {
+            _signInNeeded.compareAndSet(null, SignInNeeded(info, log))
+        } else {
+            val app = HazelApp.instance
+            DownloadNotificationHelper.showError(
+                app, sanitizeError(log),
+                heading = app.getString(R.string.no_results_error_title),
+                signInUrl = site
+            )
+        }
+    }
+
+    /** The sign-in dialog was turned down. */
+    fun dismissSignIn() {
+        signInAnsweredAt = android.os.SystemClock.elapsedRealtime()
+        _signInNeeded.value = null
+    }
+
+    /** The user went to sign in for [needed]; [endSignIn] picks it up on their return. */
+    fun beginSignIn(needed: SignInNeeded) {
+        signingInFor = needed.info
+        dismissSignIn()
+    }
+
+    /**
+     * Back from signing in. With new cookies saved, the link is read again, along with any
+     * other link refused meanwhile.
+     */
+    fun endSignIn(signedIn: Boolean) {
+        val info = signingInFor ?: return
+        signingInFor = null
+        if (!signedIn) return
+        val failed = _formatReadErrors.value.keys
+        refreshFormats((listOf(info) + _state.value.results.filter { it.url in failed }).distinctBy { it.url })
     }
 
     /** Dismisses the saved-elsewhere dialog. */
@@ -1298,7 +1369,7 @@ class DownloadViewModel : ViewModel() {
 
     /** Dismisses the failure dialog without changing anything else. */
     fun clearErrorLog() {
-        _state.update { s -> s.copy(errorLog = null) }
+        _state.update { s -> s.copy(errorLog = null, errorSignInSite = null) }
     }
 
     /**
@@ -1947,14 +2018,17 @@ class DownloadViewModel : ViewModel() {
                 DownloadNotificationHelper.showError(
                     context,
                     item?.error ?: "Download failed",
-                    item?.title.orEmpty()
+                    item?.title.orEmpty(),
+                    signInUrl = item?.let { signInTargetFor(it.error.orEmpty(), it.url) },
+                    recorded = true
                 )
             }
 
             trueFailed > 0 -> DownloadNotificationHelper.showError(
                 context,
                 "$trueFailed of ${current.batch.size} could not be downloaded",
-                ""
+                "",
+                recorded = true
             )
         }
     }
@@ -3206,6 +3280,9 @@ class DownloadViewModel : ViewModel() {
             "video unavailable" in lower || "this video is unavailable" in lower
                 -> "This video is unavailable"
 
+            isBotCheck(lower)
+                -> "YouTube wants this network to sign in. Add YouTube cookies or try again later"
+
             "private video" in lower || "sign in" in lower || "login required" in lower
                 -> "This content is private or requires login"
 
@@ -3245,6 +3322,9 @@ class DownloadViewModel : ViewModel() {
                 .ifBlank { "Download failed" }
         }
     }
+
+    /** YouTube refusing this network until it signs in, as opposed to the video being private. */
+    private fun isBotCheck(lower: String): Boolean = "not a bot" in lower
 
     private companion object {
         /** Cards stood in while a search runs. */
@@ -3354,6 +3434,9 @@ class DownloadViewModel : ViewModel() {
         const val CROP_TO_SQUARE = "crop=\"'if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\""
     }
 }
+
+/** A read of [info] the source refused until the user signs in, with yt-dlp's own [log]. */
+data class SignInNeeded(val info: MediaInfo, val log: String)
 
 /** Downloads that were saved somewhere other than the folder they were meant for. */
 data class SaveFallback(val wanted: String, val savedTo: String, val titles: List<String>) {

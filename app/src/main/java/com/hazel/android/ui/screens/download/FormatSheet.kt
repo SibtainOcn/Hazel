@@ -156,6 +156,8 @@ fun FormatSheet(
     isLoadingFormats: Boolean = false,
     /** The link itself is still being read, so its details are not in yet. */
     isReadingLink: Boolean = false,
+    /** Why the link's formats could not be read, if the last read failed. */
+    formatsError: String? = null,
     /** Reads this link's formats again, with the given reader or the setting's. */
     onRefreshFormats: ((source: ListingSource?, fresh: Boolean) -> Unit)? = null,
     initialFormat: MediaFormat? = null,
@@ -750,6 +752,7 @@ fun FormatSheet(
             onRefresh = onRefreshFormats,
             canChooseSource = remember(info.url) { NewPipeEngine.handlesStream(info.url) },
             preferredHeight = options.videoQuality,
+            readError = formatsError,
             onConfirm = { format ->
                 if (format.hasVideo) {
                     pickedVideo = format

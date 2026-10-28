@@ -509,6 +509,9 @@
     <string name="notification_action_resume">Lanjutkan</string>
     <string name="notification_action_cancel">Batal</string>
     <string name="notification_action_sign_in">Masuk</string>
+    <string name="notification_action_dismiss">Tutup</string>
+    <string name="widget_quick_actions_label">Aksi cepat Hazel</string>
+    <string name="widget_quick_actions_description">Tempel tautan yang disalin, simpan sebagai audio atau video, atau buka unduhan Anda</string>
     <string name="notification_wifi_title">Menunggu Wi-Fi</string>
     <string name="notification_wifi_text">Unduhan diatur hanya untuk Wi-Fi. Unduhan akan dimulai setelah terhubung kembali ke Wi-Fi.</string>
     <string name="notification_run_cancelled_title">Unduhan dibatalkan</string>
@@ -532,6 +535,7 @@
     <string name="format_selection_subtitle">Pilih format</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Membaca format lainnya</string>
+    <string name="format_selection_read_failed">Tidak dapat membaca kualitas tautan ini: %1$s. Pilihan ini tetap bisa diunduh; segarkan untuk mencoba lagi.</string>
     <string name="format_audio_empty">Tautan ini tidak memiliki aliran audio terpisah</string>
     <string name="format_generic_badge">Otomatis</string>
     <string name="format_sheet_section_details">Detail</string>

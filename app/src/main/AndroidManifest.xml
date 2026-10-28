@@ -137,6 +137,28 @@
             android:name=".download.DownloadActionReceiver"
             android:exported="false" />
 
+        <!-- Home-screen widget: Paste, Audio, Queue and Downloads. -->
+        <receiver
+            android:name=".widget.QuickActionsWidget"
+            android:exported="true"
+            android:label="@string/widget_quick_actions_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quick_actions_widget_info" />
+        </receiver>
+
+        <!-- Reads the copied link for the widget's Paste and Audio, then gets out of the way. -->
+        <activity
+            android:name=".widget.WidgetClipActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Hazel.Overlay" />
+
         <!-- Sign-in browser used to collect cookies for gated media -->
         <activity
             android:name=".ui.screens.cookies.CookieWebViewActivity"
