@@ -160,34 +160,34 @@ fun UpdateTopBar(
 @Composable
 fun UpdateSectionLabel(text: String, isFirst: Boolean = false) {
     Text(
-        text = text,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.SemiBold,
-        letterSpacing = 0.4.sp,
-        color = MaterialTheme.colorScheme.primary,
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        letterSpacing = 0.8.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                start = 4.dp,
-                end = 4.dp,
-                top = if (isFirst) 0.dp else 24.dp,
-                bottom = 8.dp
-            )
+            .padding(start = 8.dp, end = 8.dp, top = if (isFirst) 0.dp else 24.dp, bottom = 8.dp)
     )
 }
 
+/**
+ * Rows joined into one rounded block: the group rounds the outer corners and the rows sit
+ * 2dp apart with tight corners between them, the way the properties sheet groups its rows.
+ */
 @Composable
 fun UpdateListGroup(content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(UpdateTokens.Surface)
+            .clip(RoundedCornerShape(24.dp)),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         content()
     }
 }
 
+/** One row of a [UpdateListGroup]; its icon sits on a tonal accent shape. [showDivider] is kept for callers and ignored. */
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun UpdateListItem(
     icon: ImageVector? = null,
@@ -198,54 +198,43 @@ fun UpdateListItem(
     onClick: (() -> Unit)? = null,
     trailing: @Composable () -> Unit = {}
 ) {
-    if (showDivider) {
-        HorizontalDivider(
-            color = UpdateTokens.OutlineSoft,
-            thickness = 1.dp,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-    }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 64.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(start = 12.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = UpdateTokens.OnSurfaceVar,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-        } else if (painter != null) {
-            Icon(
-                painter = painter,
-                contentDescription = null,
-                tint = UpdateTokens.OnSurfaceVar,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
+        if (icon != null || painter != null) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                contentAlignment = Alignment.Center
+            ) {
+                val tint = MaterialTheme.colorScheme.primary
+                if (icon != null) Icon(icon, null, tint = tint, modifier = Modifier.size(20.dp))
+                else if (painter != null) Icon(painter, null, tint = tint, modifier = Modifier.size(20.dp))
+            }
+            Spacer(modifier = Modifier.width(14.dp))
         }
 
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = primary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = UpdateTokens.OnSurface,
-                lineHeight = 22.sp
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = UpdateTokens.OnSurface
             )
             if (!secondary.isNullOrBlank()) {
                 Text(
                     text = secondary,
-                    fontSize = 13.sp,
-                    color = UpdateTokens.OnSurfaceDim,
-                    lineHeight = 18.sp,
-                    modifier = Modifier.padding(top = 2.dp)
+                    style = MaterialTheme.typography.bodySmall,
+                    color = UpdateTokens.OnSurfaceVar
                 )
             }
         }
