@@ -210,7 +210,12 @@ private enum class QueueTab(val labelRes: Int) {
  * holds, so a failure is visible without opening it.
  */
 @Composable
-fun QueueScreen(downloadViewModel: DownloadViewModel) {
+fun QueueScreen(
+    downloadViewModel: DownloadViewModel,
+    /** A tab to open on, by name, as a notification tap asks; [onTabOpened] once it has. */
+    openTab: String? = null,
+    onTabOpened: () -> Unit = {}
+) {
     val context = LocalContext.current
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
@@ -276,6 +281,12 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
     }
 
     val pagerState = rememberPagerState(pageCount = { QueueTab.entries.size })
+    LaunchedEffect(openTab) {
+        openTab ?: return@LaunchedEffect
+        QueueTab.entries.firstOrNull { it.name.equals(openTab, ignoreCase = true) }
+            ?.let { pagerState.scrollToPage(it.ordinal) }
+        onTabOpened()
+    }
     var menuOpen by remember { mutableStateOf(false) }
     var confirmCancelAll by remember { mutableStateOf(false) }
     var confirmClearQueue by remember { mutableStateOf(false) }

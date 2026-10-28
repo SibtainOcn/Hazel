@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Format list: a link whose qualities could not be read now says why, instead of leaving the quality ladder looking like its final list.
 - YouTube's "confirm you're not a bot" refusal is named as such, not as private content.
 - The quality ladder keeps its original look and side rail until the real qualities arrive.
+- A link refused until sign-in now opens the sign-in dialog right away; signing in reads it again.
+- Off screen, the same refusal posts a notification with Sign in and Dismiss.
+- Notification taps open the screen they are about: Running, Failed, History or the failure dialog.
+- The share sheet's format list now shows why a read failed.
+
+### Changed
+- The bottom bar's selected-tab shape is easier to see.
 
 ## [1.1.16] - 2026-10-29
 ### Added

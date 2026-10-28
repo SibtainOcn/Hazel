@@ -535,6 +535,7 @@
     <string name="notification_action_resume">Reprendre</string>
     <string name="notification_action_cancel">Annuler</string>
     <string name="notification_action_sign_in">Se connecter</string>
+    <string name="notification_action_dismiss">Ignorer</string>
     <string name="notification_wifi_title">En attente du Wi-Fi</string>
     <string name="notification_wifi_text">Les téléchargements sont limités au Wi-Fi. Ils démarrent dès que vous y êtes de nouveau.</string>
     <string name="notification_run_cancelled_title">Téléchargements annulés</string>
