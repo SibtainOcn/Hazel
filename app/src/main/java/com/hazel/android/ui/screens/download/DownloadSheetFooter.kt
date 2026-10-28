@@ -59,12 +59,13 @@ import kotlinx.coroutines.launch
 fun SheetLinkButton(
     enabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    shape: androidx.compose.ui.graphics.Shape = CircleShape
 ) {
     Box(
         modifier = modifier
             .size(44.dp)
-            .clip(CircleShape)
+            .clip(shape)
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
@@ -85,7 +86,8 @@ fun SheetLinkButton(
 @Composable
 fun IncognitoButton(
     onFeedback: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    shape: androidx.compose.ui.graphics.Shape = CircleShape
 ) {
     val switch = rememberIncognitoSwitch(onFeedback)
     val incognito = switch.on
@@ -93,7 +95,7 @@ fun IncognitoButton(
     Box(
         modifier = modifier
             .size(44.dp)
-            .clip(CircleShape)
+            .clip(shape)
             .background(
                 if (incognito) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
                 else tonalFill(0.55f)
