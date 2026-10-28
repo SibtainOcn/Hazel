@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -298,7 +299,7 @@ internal fun <T> SingleChoiceDialog(
     describe: @Composable (T) -> String? = { null },
     leading: (@Composable (T) -> Unit)? = null
 ) {
-    ChoiceDialog(title = title, onDismiss = onDismiss) {
+    ChoiceDialog(title = title, onDismiss = onDismiss, chosenIndex = choices.indexOfFirst { it.first == selected }) {
         itemsIndexed(choices) { index, (value, label) ->
             ChoiceRow(
                 label = label,
@@ -326,6 +327,7 @@ internal fun <T> MultiChoiceDialog(
     ChoiceDialog(
         title = title,
         onDismiss = onDismiss,
+        chosenIndex = choices.indexOfFirst { it.first in selected },
         buttons = {
             DialogButton(stringResource(R.string.download_cancel), filled = false, onClick = onDismiss, modifier = Modifier.weight(1f))
             DialogButton(stringResource(R.string.format_sheet_ok), filled = true, onClick = { onConfirm(ticked) }, modifier = Modifier.weight(1f))
@@ -367,8 +369,11 @@ internal fun ChoiceDialog(
     title: String,
     onDismiss: () -> Unit,
     buttons: (@Composable RowScope.() -> Unit)? = null,
+    chosenIndex: Int = -1,
     choices: LazyListScope.() -> Unit
 ) {
+    // Opens on the chosen row, with two rows above it so the list reads as scrolled.
+    val list = rememberLazyListState(initialFirstVisibleItemIndex = (chosenIndex - 2).coerceAtLeast(0))
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             modifier = Modifier.glassBackdrop(RoundedCornerShape(28.dp)),
@@ -383,6 +388,7 @@ internal fun ChoiceDialog(
                     modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 16.dp)
                 )
                 LazyColumn(
+                    state = list,
                     modifier = Modifier.heightIn(max = 440.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp),

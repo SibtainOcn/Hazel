@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Player audio track picker: switch between a video's original audio and its dubs from the new menu next to full screen.
+- Player menu next to full screen: quality and audio track, to switch between a video's original audio and its dubs.
 - Playback audio language setting in Fetch settings, set to the original by default.
 
 ### Changed
@@ -72,6 +72,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - yt-dlp release notes no longer open a missing page when the installed version is unknown.
 - Player no longer starts on a dubbed track when playing through yt-dlp.
+- Player no longer stalls a few seconds into YouTube videos.
+- Choice dialogs open scrolled to the selected option.
 - Search options: the sheet opens at half height instead of full screen.
 - Filename template: a slash, a stray %, a leading dot or a missing extension no longer loses or breaks the saved file.
 - Filename template: long artist, track or playlist names no longer fail with "File name too long", and extra arguments can no longer override the name.
