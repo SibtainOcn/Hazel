@@ -836,6 +836,13 @@
     <string name="fetch_settings_playback">Pemutaran</string>
     <string name="fetch_settings_play_with">Putar dengan</string>
     <string name="fetch_settings_play_quality">Kualitas pemutaran</string>
+    <string name="fetch_settings_play_audio">Bahasa audio</string>
+    <string name="player_audio_original">Asli</string>
+    <string name="player_audio_app_language">Bahasa aplikasi</string>
+    <string name="player_audio_track">Trek audio</string>
+    <string name="player_more_options">Opsi lainnya</string>
+    <string name="player_audio_original_of">%1$s (asli)</string>
+    <string name="player_audio_descriptive">%1$s (deskripsi audio)</string>
     <string name="fetch_settings_play_quality_value">Hingga %1$dp</string>
     <string name="fetch_settings_engine_newpipe_summary">Tercepat di YouTube, SoundCloud, dan Bandcamp. yt-dlp menangani sisanya.</string>
     <string name="fetch_settings_engine_ytdlp_summary">Lebih lambat untuk mulai, dan berfungsi di semua situs yang didukung yt-dlp.</string>

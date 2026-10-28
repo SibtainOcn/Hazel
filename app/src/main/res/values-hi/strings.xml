@@ -850,6 +850,13 @@
     <string name="fetch_settings_playback">प्लेबैक</string>
     <string name="fetch_settings_play_with">इससे चलाएं</string>
     <string name="fetch_settings_play_quality">प्लेबैक गुणवत्ता</string>
+    <string name="fetch_settings_play_audio">ऑडियो भाषा</string>
+    <string name="player_audio_original">मूल</string>
+    <string name="player_audio_app_language">ऐप की भाषा</string>
+    <string name="player_audio_track">ऑडियो ट्रैक</string>
+    <string name="player_more_options">और विकल्प</string>
+    <string name="player_audio_original_of">%1$s (मूल)</string>
+    <string name="player_audio_descriptive">%1$s (ऑडियो विवरण)</string>
     <string name="fetch_settings_play_quality_value">%1$dp तक</string>
     <string name="fetch_settings_engine_newpipe_summary">YouTube, SoundCloud और Bandcamp पर सबसे तेज़। बाकी सब yt-dlp संभालता है।</string>
     <string name="fetch_settings_engine_ytdlp_summary">शुरू होने में धीमा, और yt-dlp की हर समर्थित साइट पर काम करता है।</string>

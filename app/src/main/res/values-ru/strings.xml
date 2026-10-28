@@ -877,6 +877,13 @@
     <string name="fetch_settings_playback">Воспроизведение</string>
     <string name="fetch_settings_play_with">Воспроизводить через</string>
     <string name="fetch_settings_play_quality">Качество воспроизведения</string>
+    <string name="fetch_settings_play_audio">Язык аудио</string>
+    <string name="player_audio_original">Оригинал</string>
+    <string name="player_audio_app_language">Язык приложения</string>
+    <string name="player_audio_track">Звуковая дорожка</string>
+    <string name="player_more_options">Другие параметры</string>
+    <string name="player_audio_original_of">%1$s (оригинал)</string>
+    <string name="player_audio_descriptive">%1$s (тифлокомментарий)</string>
     <string name="fetch_settings_play_quality_value">До %1$dp</string>
     <string name="fetch_settings_engine_newpipe_summary">Быстрее всего на YouTube, SoundCloud и Bandcamp. Остальное делает yt-dlp.</string>
     <string name="fetch_settings_engine_ytdlp_summary">Запускается медленнее и работает на всех сайтах, которые поддерживает yt-dlp.</string>

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Player audio track picker: switch between a video's original audio and its dubs from the new menu next to full screen.
+- Playback audio language setting in Fetch settings, set to the original by default.
+
 ### Changed
 - Software update and Hazel updates screens redesigned with stat tiles, shaped actions and copyable device info for bug reports.
 - Hazel updates: the status cookie shows live wavy progress while checking and downloading.
@@ -67,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - yt-dlp release notes no longer open a missing page when the installed version is unknown.
+- Player no longer starts on a dubbed track when playing through yt-dlp.
 - Search options: the sheet opens at half height instead of full screen.
 - Filename template: a slash, a stray %, a leading dot or a missing extension no longer loses or breaks the saved file.
 - Filename template: long artist, track or playlist names no longer fail with "File name too long", and extra arguments can no longer override the name.

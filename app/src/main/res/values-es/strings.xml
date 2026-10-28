@@ -864,6 +864,13 @@
     <string name="fetch_settings_playback">Reproducción</string>
     <string name="fetch_settings_play_with">Reproducir con</string>
     <string name="fetch_settings_play_quality">Calidad de reproducción</string>
+    <string name="fetch_settings_play_audio">Idioma del audio</string>
+    <string name="player_audio_original">Original</string>
+    <string name="player_audio_app_language">Idioma de la app</string>
+    <string name="player_audio_track">Pista de audio</string>
+    <string name="player_more_options">Más opciones</string>
+    <string name="player_audio_original_of">%1$s (original)</string>
+    <string name="player_audio_descriptive">%1$s (audiodescripción)</string>
     <string name="fetch_settings_play_quality_value">Hasta %1$dp</string>
     <string name="fetch_settings_engine_newpipe_summary">El más rápido en YouTube, SoundCloud y Bandcamp. yt-dlp se encarga del resto.</string>
     <string name="fetch_settings_engine_ytdlp_summary">Tarda más en empezar y funciona en todos los sitios que admite yt-dlp.</string>

@@ -928,6 +928,13 @@
     <string name="fetch_settings_playback">Playback</string>
     <string name="fetch_settings_play_with">Play with</string>
     <string name="fetch_settings_play_quality">Playback quality</string>
+    <string name="fetch_settings_play_audio">Audio language</string>
+    <string name="player_audio_original">Original</string>
+    <string name="player_audio_app_language">App language</string>
+    <string name="player_audio_track">Audio track</string>
+    <string name="player_more_options">More options</string>
+    <string name="player_audio_original_of">%1$s (original)</string>
+    <string name="player_audio_descriptive">%1$s (audio description)</string>
     <string name="fetch_settings_play_quality_value">Up to %1$dp</string>
     <string name="fetch_settings_engine_newpipe_summary">Fastest on YouTube, SoundCloud and Bandcamp. yt-dlp handles everything else.</string>
     <string name="fetch_settings_engine_ytdlp_summary">Slower to start, and works on every site yt-dlp supports.</string>

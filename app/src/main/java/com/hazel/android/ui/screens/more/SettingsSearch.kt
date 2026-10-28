@@ -171,7 +171,8 @@ internal val SETTINGS_INDEX: List<SettingEntry> = buildList {
         R.string.fetch_settings_search_results to null,
         R.string.fetch_settings_suggestions to R.string.fetch_settings_suggestions_summary,
         R.string.fetch_settings_play_with to null,
-        R.string.fetch_settings_play_quality to null
+        R.string.fetch_settings_play_quality to null,
+        R.string.fetch_settings_play_audio to null
     )
     on(R.string.cleanup_title, "storage_cleanup", R.string.cleanup_action_clear_everything to null)
     DocPage.entries.forEach { page ->

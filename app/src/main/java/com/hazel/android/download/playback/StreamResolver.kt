@@ -7,11 +7,13 @@ import com.hazel.android.download.InfoCache
 import com.hazel.android.download.MediaProbe
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.newpipe.NewPipeEngine
+import com.hazel.android.util.AppLocale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
+import java.util.Locale
 
 /**
  * Where to play a piece of media from. [url] carries the picture, or everything; [audioUrl]
@@ -35,8 +37,25 @@ data class PlayableStream(
     val audioHeaders: Map<String, String> = emptyMap(),
     val engine: ListingSource,
     /** Every picture quality this media can be played at, tallest first. */
-    val heights: List<Int> = emptyList()
-)
+    val heights: List<Int> = emptyList(),
+    /** The sound tracks to choose from, when there is more than one; empty otherwise. */
+    val audioTracks: List<AudioTrack> = emptyList(),
+    /** Which of [audioTracks] is playing. */
+    val audioTrackId: String? = null,
+    /** The language asked for in settings, which a manifest starts on when it has it. */
+    val preferredLanguage: String? = null
+) {
+    /** A manifest the player reads itself, holding any sound tracks inside it. */
+    val isAdaptive: Boolean get() = audioUrl == null && (isHls || isDash)
+
+    /** The same picture with [track] as its sound, or null when the sound cannot be swapped alone. */
+    fun withAudio(track: AudioTrack): PlayableStream? = when {
+        track.url.isBlank() -> null
+        audioUrl != null -> copy(audioUrl = track.url, audioHeaders = track.headers, audioTrackId = track.id)
+        !hasVideo && !isAdaptive -> copy(url = track.url, headers = track.headers, audioTrackId = track.id)
+        else -> null
+    }
+}
 
 /**
  * Finds a stream to play for a link, on any site either engine can read.
@@ -54,16 +73,23 @@ object StreamResolver {
     /**
      * @param attempt how many tries have already failed to play. Only the first may use
      *   NewPipe, and the last refuses a cached read whose addresses may have expired.
+     * @param picked the sound track picked for this video, kept across reloads. Its language
+     *   stands in when the other engine names its tracks differently.
      */
-    suspend fun resolve(url: String, attempt: Int = 0): PlayableStream =
+    suspend fun resolve(url: String, attempt: Int = 0, picked: AudioTrack? = null): PlayableStream =
         withContext(Dispatchers.IO) {
             val app = HazelApp.instance
             val engine = SettingsRepository.getPlayEngine(app).first()
             val maxHeight = SettingsRepository.getPlayQuality(app).first()
+            val wish = AudioWish(
+                trackId = picked?.id,
+                language = picked?.language ?: wantedLanguage(SettingsRepository.getPlayAudioLanguage(app).first())
+            )
             val access = CookieRepository.accessFor(app, url)
 
             if (attempt == 0 && engine == ListingSource.NEWPIPE && !access.hasCookies) {
-                NewPipeEngine.playable(url, maxHeight)?.let { return@withContext it }
+                NewPipeEngine.playable(url, maxHeight, wish)
+                    ?.let { return@withContext it.copy(preferredLanguage = wish.language) }
             }
             if (attempt >= LAST_ATTEMPT) InfoCache.invalidate(url)
 
@@ -78,14 +104,22 @@ object StreamResolver {
                 )
                 InfoCache.infoJsonFor(url)
             }
-            file?.let { pick(JSONObject(it.readText()), maxHeight) } ?: error("Nothing to play")
+            file?.let { pick(JSONObject(it.readText()), maxHeight, wish) }?.copy(preferredLanguage = wish.language)
+                ?: error("Nothing to play")
         }
+
+    /** The language a stored preference asks for, or null for the original. */
+    internal fun wantedLanguage(preference: String): String? = when (preference) {
+        AudioTracks.ORIGINAL -> null
+        AudioTracks.APP -> AppLocale.tag(HazelApp.instance).ifBlank { Locale.getDefault().toLanguageTag() }
+        else -> preference
+    }
 
     /**
      * Chooses from yt-dlp's reading of a link: the tallest file holding both streams within
      * [maxHeight], a taller picture paired with the best sound, or sound alone.
      */
-    internal fun pick(root: JSONObject, maxHeight: Int): PlayableStream? {
+    internal fun pick(root: JSONObject, maxHeight: Int, wish: AudioWish = AudioWish()): PlayableStream? {
         // A post holding several items reads as a list; its first item is the one shown.
         val media = root.optJSONArray("entries")?.optJSONObject(0) ?: root
         val formats = media.optJSONArray("formats")
@@ -105,8 +139,17 @@ object StreamResolver {
         val smallestBoth = if (both == null) {
             usable.filter { it.hasVideo() && it.hasAudio() && it.height() > 0 }.minByOrNull { it.height() }
         } else null
-        val sound = usable.filter { it.hasAudio() && !it.hasVideo() }
-            .maxWithOrNull(compareBy({ it.optString("ext") == "m4a" }, { it.optDouble("abr", 0.0) }))
+        val sounds = usable.filter { it.hasAudio() && !it.hasVideo() }
+        val soundOrder = compareBy<JSONObject>(
+            { it.optInt("language_preference", -1) }, { it.optString("ext") == "m4a" }, { it.optDouble("abr", 0.0) }
+        )
+        // One best stream per language; more than one means the listener can choose.
+        val byLanguage = sounds.groupBy { it.optString("language").ifBlank { null } }
+            .mapNotNull { (_, group) -> group.maxWithOrNull(soundOrder) }
+        val tracks = if (byLanguage.size > 1) byLanguage.map { it.toAudioTrack() } else emptyList()
+        val track = AudioTracks.choose(tracks, wish)
+        val sound = track?.let { t -> byLanguage.firstOrNull { it.optString("url") == t.url } }
+            ?: sounds.maxWithOrNull(soundOrder)
 
         // DASH formats come as segments of one manifest, which the player reads itself.
         val all = (0 until formats.length()).mapNotNull { formats.optJSONObject(it) }
@@ -130,7 +173,9 @@ object StreamResolver {
             .map { it.height() }.distinct().sortedDescending()
 
         val chosen = when {
-            picture != null && sound != null && (both == null || picture.height() > both.height()) ->
+            // With several languages the sound is kept apart, so it can be swapped alone.
+            picture != null && sound != null &&
+                (both == null || picture.height() > both.height() || tracks.isNotEmpty()) ->
                 PlayableStream(
                     url = picture.optString("url"),
                     audioUrl = sound.optString("url"),
@@ -152,7 +197,31 @@ object StreamResolver {
             !chosen.hasVideo && dashHasVideo -> dash
             else -> chosen
         }
-        return result?.copy(heights = heights)
+        val playingTrack = track?.takeIf { result != null && (result.audioUrl ?: result.url) == it.url }
+        return result?.copy(
+            heights = heights,
+            audioTracks = if (playingTrack != null) tracks else emptyList(),
+            audioTrackId = playingTrack?.id
+        )
+    }
+
+    /**
+     * A yt-dlp sound format as a track. YouTube marks the original 10 and audio description
+     * -10 in `language_preference`, and tags description with a "-desc" language.
+     */
+    private fun JSONObject.toAudioTrack(): AudioTrack {
+        val raw = optString("language").ifBlank { null }
+        val preference = optInt("language_preference", -1)
+        val descriptive = preference <= -10 || raw?.endsWith("-desc") == true
+        val language = raw?.removeSuffix("-desc")
+        return AudioTrack(
+            id = raw ?: optString("format_id"),
+            language = language,
+            original = preference >= 10 || optString("format_note").contains("original", ignoreCase = true),
+            descriptive = descriptive,
+            url = optString("url"),
+            headers = headers()
+        )
     }
 
     private fun single(format: JSONObject) = PlayableStream(

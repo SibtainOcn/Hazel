@@ -322,6 +322,7 @@ object SettingsRepository {
     private val SEARCH_RESULTS_KEY = intPreferencesKey("search_results")
     private val PLAY_ENGINE_KEY = stringPreferencesKey("play_engine")
     private val PLAY_QUALITY_KEY = intPreferencesKey("play_quality")
+    private val PLAY_AUDIO_KEY = stringPreferencesKey("play_audio_language")
     private val SEARCH_SUGGESTIONS_KEY = booleanPreferencesKey("search_suggestions")
 
     val SEARCH_RESULT_COUNTS = listOf(10, 25, 50)
@@ -369,6 +370,17 @@ object SettingsRepository {
 
     suspend fun setPlayQuality(context: Context, height: Int) {
         context.dataStore.edit { prefs -> prefs[PLAY_QUALITY_KEY] = height }
+    }
+
+    /**
+     * The sound track the player starts on: blank for the original, "app" for the app's
+     * language, or a language code. A video without it plays its original.
+     */
+    fun getPlayAudioLanguage(context: Context): Flow<String> =
+        context.dataStore.data.map { prefs -> prefs[PLAY_AUDIO_KEY].orEmpty() }
+
+    suspend fun setPlayAudioLanguage(context: Context, language: String) {
+        context.dataStore.edit { prefs -> prefs[PLAY_AUDIO_KEY] = language }
     }
 
     /** Completions from Google while typing a search. Off unless turned on. */

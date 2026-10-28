@@ -11,6 +11,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Translate
 import com.hazel.android.ui.components.DropdownMenu
 import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.runtime.collectAsState
@@ -54,6 +56,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.layout.Layout
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -91,7 +94,10 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.download.languageLabel
+import com.hazel.android.download.playback.AudioTrack
 import com.hazel.android.download.playback.PlaybackController
+import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import kotlinx.coroutines.delay
 
 /**
@@ -456,6 +462,7 @@ private fun SeekBar(
             if (controller.hasVideo && controller.heights.count { it <= MAX_PLAY_HEIGHT } > 1) {
                 QualityButton(controller = controller, onMenuChange = onMenuChange)
             }
+            MoreButton(controller = controller, onMenuChange = onMenuChange)
             GlassIcon(
                 icon = if (fullscreen) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen,
                 description = stringResource(
@@ -594,6 +601,86 @@ private fun QualityButton(controller: PlaybackController, onMenuChange: (Boolean
                 )
             }
         }
+    }
+}
+
+/**
+ * More choices for the playing video. Its audio track opens a list of the languages the video
+ * has; one with a single track lists it as the original.
+ */
+@Composable
+private fun MoreButton(controller: PlaybackController, onMenuChange: (Boolean) -> Unit) {
+    var menu by remember { mutableStateOf(false) }
+    var dialog by remember { mutableStateOf(false) }
+    val latestMenuChange by rememberUpdatedState(onMenuChange)
+    LaunchedEffect(menu, dialog) { latestMenuChange(menu || dialog) }
+    DisposableEffect(Unit) { onDispose { latestMenuChange(false) } }
+    val loading = controller.phase == PlaybackController.Phase.LOADING
+    val tracks = controller.audioTracks
+    val playing = tracks.firstOrNull { it.id == controller.audioTrackId }
+
+    Box {
+        GlassIcon(
+            icon = Icons.Filled.MoreVert,
+            description = stringResource(R.string.player_more_options),
+            onClick = { menu = true },
+            background = Color.Transparent
+        )
+        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.player_audio_track)) },
+                icon = Icons.Filled.Translate,
+                enabled = !loading,
+                trailingIcon = {
+                    if (loading) {
+                        LinearProgressIndicator(
+                            strokeCap = StrokeCap.Round,
+                            modifier = Modifier.width(36.dp)
+                        )
+                    } else {
+                        Text(
+                            playing?.let { audioTrackLabel(it) } ?: stringResource(R.string.player_audio_original),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
+                    }
+                },
+                onClick = {
+                    menu = false
+                    dialog = true
+                }
+            )
+        }
+    }
+
+    if (dialog) {
+        val choices = if (tracks.isEmpty()) {
+            listOf("" to stringResource(R.string.player_audio_original))
+        } else {
+            tracks.map { it.id to audioTrackLabel(it) }
+        }
+        SingleChoiceDialog(
+            title = stringResource(R.string.player_audio_track),
+            choices = choices,
+            selected = if (tracks.isEmpty()) "" else controller.audioTrackId.orEmpty(),
+            onSelect = { id ->
+                dialog = false
+                controller.selectAudio(id)
+            },
+            onDismiss = { dialog = false }
+        )
+    }
+}
+
+/** A track's language in the app's language, marked when it is the original or a description. */
+@Composable
+private fun audioTrackLabel(track: AudioTrack): String {
+    val name = track.language?.let(::languageLabel) ?: stringResource(R.string.player_audio_original)
+    return when {
+        track.descriptive -> stringResource(R.string.player_audio_descriptive, name)
+        track.original && track.language != null -> stringResource(R.string.player_audio_original_of, name)
+        else -> name
     }
 }
 
