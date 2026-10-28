@@ -195,7 +195,7 @@ class ShareOverlayActivity : ComponentActivity() {
                 val saveDirs by remember(this) { SettingsRepository.getSaveDirs(this) }.collectAsState(initial = SaveDirs())
                 // The kind whose folder the picker is choosing, set as it opens.
                 val accentName by remember(this) { SettingsRepository.getAccentColor(this) }.collectAsState(initial = "Cyan")
-                val glass by remember(this) { SettingsRepository.isGlassEnabled(this) }.collectAsState(initial = true)
+                val glass by remember(this) { SettingsRepository.isGlassEnabled(this) }.collectAsState(initial = false)
                 val glassStyle by remember(this) { SettingsRepository.getGlassStyle(this) }.collectAsState(initial = GlassStyle.DEFAULT.key)
 
                 LaunchedEffect(url) {
