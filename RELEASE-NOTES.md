@@ -1,3 +1,6 @@
+### Home screen widget
+- **Quick actions:** Paste a copied link, save it straight away as Audio or Video, or open Downloads, from your home screen.
+
 ### Player
 - **Mini player:** scroll away or start a download and the video keeps playing in a mini player; tap it to open it large.
 - **Pick an audio track:** switch between a video's original audio and its dubs from the player menu.
@@ -35,6 +38,8 @@
 - Open folder lists every installed file manager.
 
 ### Fixes
+- **Sign-in prompt:** a link YouTube refuses opens the sign-in dialog at once, or a notification with Sign in when Hazel is in the background.
+- Notification taps open the screen they are about: Running, Failed or Downloads.
 - **Force IPv4** now applies to downloads, not only to reading links.
 - **Certificate checks** setting in Advanced now takes effect.
 - **Audio quality** takes the nearest bitrate: 128 kbps no longer downloads a 65 kbps stream.
