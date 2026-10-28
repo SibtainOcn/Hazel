@@ -7,11 +7,14 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -37,19 +40,33 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.BatteryChargingFull
+import androidx.compose.material.icons.rounded.BlurOn
+import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.VideoSettings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -62,7 +79,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -193,7 +214,8 @@ fun GettingStartedDialog(
                     } else {
                         val data = stepData(step)
                         StepHeader(
-                            icon = painterResource(data.iconRes),
+                            icon = data.icon?.let { rememberVectorPainter(it) } ?: painterResource(data.iconRes),
+                            shape = data.shape,
                             title = stringResource(data.titleRes),
                             description = stringResource(data.descRes)
                         )
@@ -331,20 +353,30 @@ private fun DenyAllow(modifier: Modifier, onDeny: () -> Unit, onAllow: () -> Uni
 }
 
 @Composable
-private fun StepHeader(icon: Painter, title: String, description: String) {
+private fun StepHeader(icon: Painter, shape: Shape, title: String, description: String) {
     val colors = MaterialTheme.colorScheme
+    val settle = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        settle.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessLow))
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(26.dp))
-                .background(colors.primary.copy(alpha = 0.14f))
-        ) {
-            Icon(painter = icon, contentDescription = null, modifier = Modifier.size(40.dp), tint = colors.primary)
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(96.dp)) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        rotationZ = (1f - settle.value) * -60f
+                        val s = 0.7f + 0.3f * settle.value
+                        scaleX = s
+                        scaleY = s
+                    }
+                    .clip(shape)
+                    .background(colors.primary.copy(alpha = 0.16f))
+            )
+            Icon(painter = icon, contentDescription = null, modifier = Modifier.size(42.dp), tint = colors.primary)
         }
         Spacer(modifier = Modifier.height(20.dp))
         StepTitle(title)
@@ -437,6 +469,7 @@ internal fun rememberAppearanceState(): AppearanceState {
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 internal fun AppearanceStep(
     state: AppearanceState,
     title: String = stringResource(R.string.guide_step_appearance_title),
@@ -462,21 +495,23 @@ internal fun AppearanceStep(
                 .clip(RoundedCornerShape(20.dp))
                 .background(colors.surfaceContainerHighest)
         ) {
-            ToggleRow(stringResource(R.string.appearance_dark_theme), state.dark) { on ->
+            ToggleRow(stringResource(R.string.appearance_dark_theme), Icons.Rounded.DarkMode, MaterialShapes.Cookie9Sided.toShape(), state.dark) { on ->
                 state.dark = on
                 state.setDark(on)
             }
             RowDivider()
-            PickRow(stringResource(R.string.appearance_accent_color), enabled = true, onClick = { accentPicker = true }) {
+            PickRow(stringResource(R.string.appearance_accent_color), Icons.Rounded.Palette, MaterialShapes.Clover4Leaf.toShape(),
+                enabled = true, onClick = { accentPicker = true }) {
                 Box(Modifier.size(22.dp).clip(CircleShape).background(accentColor))
             }
             RowDivider()
-            ToggleRow(stringResource(R.string.appearance_glass), state.glass) { on ->
+            ToggleRow(stringResource(R.string.appearance_glass), Icons.Rounded.BlurOn, MaterialShapes.Sunny.toShape(), state.glass) { on ->
                 state.glass = on
                 state.setGlass(on)
             }
             RowDivider()
-            PickRow(stringResource(R.string.glass_style_title), enabled = state.glass, onClick = { stylePicker = true }) {
+            PickRow(stringResource(R.string.glass_style_title), Icons.Rounded.AutoAwesome, MaterialShapes.Cookie6Sided.toShape(),
+                enabled = state.glass, onClick = { stylePicker = true }) {
                 GlassStyleSwatch(style, accent)
             }
         }
@@ -500,31 +535,40 @@ internal fun AppearanceStep(
 }
 
 @Composable
-private fun ToggleRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+private fun ToggleRow(label: String, icon: ImageVector, shape: Shape, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .heightIn(min = 56.dp)
             .toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        RowIcon(icon, shape)
         RowLabel(label, Modifier.weight(1f))
         Switch(checked = checked, onCheckedChange = null)
     }
 }
 
 @Composable
-private fun PickRow(label: String, enabled: Boolean, onClick: () -> Unit, trailing: @Composable () -> Unit) {
+private fun PickRow(
+    label: String,
+    icon: ImageVector,
+    shape: Shape,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    trailing: @Composable () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .heightIn(min = 56.dp)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .alpha(if (enabled) 1f else 0.38f)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        RowIcon(icon, shape)
         RowLabel(label, Modifier.weight(1f))
         trailing()
         Spacer(modifier = Modifier.width(10.dp))
@@ -534,6 +578,21 @@ private fun PickRow(label: String, enabled: Boolean, onClick: () -> Unit, traili
             modifier = Modifier.size(14.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+private fun RowIcon(icon: ImageVector, shape: Shape) {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .padding(end = 12.dp)
+            .size(34.dp)
+            .clip(shape)
+            .background(colors.primary.copy(alpha = 0.16f))
+    ) {
+        Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp), tint = colors.primary)
     }
 }
 
@@ -559,42 +618,52 @@ private fun RowDivider() {
 private data class StepInfo(
     val titleRes: Int,
     val descRes: Int,
-    val iconRes: Int
+    val shape: Shape,
+    val icon: ImageVector? = null,
+    val iconRes: Int = 0
 )
 
 private const val APPEARANCE_STEP = 2
 private const val BATTERY_STEP = 6
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
 private fun stepData(step: Int): StepInfo = when (step) {
     1 -> StepInfo(
         titleRes = R.string.guide_step1_title,
         descRes = R.string.guide_step_paste_link,
-        iconRes = R.drawable.ic_link
+        shape = MaterialShapes.Cookie7Sided.toShape(),
+        icon = Icons.Rounded.Link
     )
     3 -> StepInfo(
         titleRes = R.string.guide_step2_title,
         descRes = R.string.guide_step_pick_format,
-        iconRes = R.drawable.more_tab
+        shape = MaterialShapes.Clover4Leaf.toShape(),
+        icon = Icons.Rounded.VideoSettings
     )
     4 -> StepInfo(
         titleRes = R.string.guide_step_share_title,
         descRes = R.string.guide_step_share_sheet,
-        iconRes = R.drawable.ic_share
+        shape = MaterialShapes.Sunny.toShape(),
+        icon = Icons.Rounded.Share
     )
     5 -> StepInfo(
         titleRes = R.string.guide_step3_title,
         descRes = R.string.guide_step_share_instant,
+        shape = MaterialShapes.Cookie9Sided.toShape(),
         iconRes = R.drawable.ic_hazel_bolt
     )
     6 -> StepInfo(
         titleRes = R.string.guide_step4_title,
         descRes = R.string.guide_step_battery_unrestricted,
-        iconRes = R.drawable.battery_charge
+        shape = MaterialShapes.Gem.toShape(),
+        icon = Icons.Rounded.BatteryChargingFull
     )
     7 -> StepInfo(
         titleRes = R.string.guide_step5_title,
         descRes = R.string.guide_step_notifications,
-        iconRes = R.drawable.ic_bell
+        shape = MaterialShapes.SoftBurst.toShape(),
+        icon = Icons.Rounded.NotificationsActive
     )
     else -> stepData(1)
 }

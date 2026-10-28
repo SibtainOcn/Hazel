@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update screens follow the theme and accent everywhere, including yt-dlp updates, which gets the same status cookie, tiles and shaped actions.
 - Channel pickers on the update screens are connected segments with the chosen one in the accent.
 - Changelog opens in the in-app viewer from the update screens.
+- What's new for an available stable update opens the release notes on the Hazel site.
+- Screen transitions: opening a screen slides along a shared axis and tabs crossfade, with no blank frame between screens.
+- Getting started steps and the Appearance screen use M3 shapes behind their icons.
+- The background downloads card on More follows the theme, with a shaped battery icon.
+- More opens without re-checking battery, language and temp size on the main thread every visit.
+- Cookie import and converter file picks read the file in the background.
 - Backup screen rebuilt: saved backups with restore, share and delete, a schedule, retention, category and folder choice.
 - Automatic backup now runs after every app update and on a schedule; old automatic backups are cleaned up.
 - Restore shows a preview, blocks backups from newer versions, and brings back the app language.
@@ -60,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Player: the seek bar flows as a wave while playing and lies flat on touch or pause, with a pill thumb. Play is a pentagon while paused and a slowly turning six-sided cookie while playing. Both stay still when system animations are off.
 
 ### Fixed
+- yt-dlp release notes no longer open a missing page when the installed version is unknown.
 - Search options: the sheet opens at half height instead of full screen.
 - Filename template: a slash, a stray %, a leading dot or a missing extension no longer loses or breaks the saved file.
 - Filename template: long artist, track or playlist names no longer fail with "File name too long", and extra arguments can no longer override the name.

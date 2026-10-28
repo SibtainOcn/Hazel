@@ -53,5 +53,6 @@ object DebugInfo {
     }.getOrDefault(false)
 
     const val NEW_ISSUE_URL = "https://github.com/${HazelUpdater.REPO_NAME}/issues/new"
+    const val WHATS_NEW_URL = "https://sibtainocn.github.io/Hazel/hazel/whats-new.html"
     const val RELEASES_URL = "https://github.com/${HazelUpdater.REPO_NAME}/releases"
 }
