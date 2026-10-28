@@ -55,6 +55,8 @@
     <string name="search_link_already_added">Already in the list</string>
     <string name="search_clear">Clear</string>
     <string name="search_clear_results">Clear results</string>
+    <string name="search_options_results">Results</string>
+    <string name="search_options_history">History</string>
     <string name="search_clear_history">Clear search history</string>
     <string name="search_under_maintenance">Under maintenance</string>
     <string name="search_options_title">Search options</string>
@@ -248,7 +250,6 @@
     <string name="sponsor_issues_subtitle">A site that stopped working is a fix nobody else can write.</string>
     <string name="sponsor_source_title">Read the source</string>
     <string name="sponsor_source_subtitle">Every line of it is public, and pull requests are welcome.</string>
-    <string name="sponsor_footer">No advertisements, nothing measured about what you download, and no feature held back for anyone. Support changes how much time goes into Hazel, not what it will do for you.</string>
 
 
     <!-- DownloadOptionDialogs -->
@@ -498,9 +499,9 @@
     <string name="audio_quality_128kbps" translatable="false">128 kbps</string>
     <string name="audio_quality_64kbps" translatable="false">64 kbps</string>
     <string name="batch_audio_quality_subtitle">Used when converting to another format</string>
-    <string name="batch_bar_hq_auto" translatable="false">HQ: AUTO</string>
-    <string name="batch_bar_hq_best" translatable="false">HQ: BEST</string>
-    <string name="batch_bar_hq_value" translatable="false">HQ: %1$s</string>
+    <string name="batch_bar_hq_auto" translatable="false">AUTO</string>
+    <string name="batch_bar_hq_best" translatable="false">BEST</string>
+    <string name="batch_bar_hq_value" translatable="false">%1$s</string>
     <string name="batch_type_sheet_title">Preferred download type</string>
     <string name="batch_type_sheet_subtitle">What these links download as</string>
     <string name="batch_type_audio">Audio</string>

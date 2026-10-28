@@ -1,5 +1,8 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.material3.toShape
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
@@ -104,41 +107,55 @@ private fun stampOf(clipboard: ClipboardManager): Long? {
 /** How long the button keeps its label after a new clip arrives, before it folds to an icon. */
 private const val PASTE_LABEL_MS = 1600L
 
+/** Time for the label to fold away before the button takes its square shape. */
+private const val PASTE_FOLD_MS = 450L
+
+/** The folded button is a square: the icon centred with equal room on every side. */
+private val PASTE_SIZE = 62.dp
+private val PASTE_ICON = 24.dp
+
 /**
  * The paste button: with its label when a new clip arrives, so it says what it is, then
- * folded down to its icon so it sits quietly over the list. [stamp] is the clip it is for,
- * and a new one opens it out again.
+ * folded down to its icon on an M3 rounded square so it sits quietly over the list. [stamp] is the clip
+ * it is for, and a new one opens it out again.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PasteButton(
     stamp: Long?,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    description: String = stringResource(R.string.search_paste)
 ) {
     var showLabel by remember { mutableStateOf(true) }
+    // The square waits until the fold has finished, so it is never drawn stretched over the label.
+    var square by remember { mutableStateOf(false) }
     LaunchedEffect(stamp) {
+        square = false
         showLabel = true
         delay(PASTE_LABEL_MS)
         showLabel = false
+        delay(PASTE_FOLD_MS)
+        square = true
     }
 
     Surface(
         onClick = onClick,
         modifier = modifier
-            .height(56.dp)
+            .height(PASTE_SIZE)
             .animateContentSize(spring(stiffness = Spring.StiffnessMediumLow)),
-        shape = RoundedCornerShape(18.dp),
+        shape = if (square) MaterialShapes.Square.toShape() else RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.padding(horizontal = (PASTE_SIZE - PASTE_ICON) / 2),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 Icons.Filled.ContentPaste,
-                contentDescription = stringResource(R.string.search_paste),
-                modifier = Modifier.size(22.dp)
+                contentDescription = description,
+                modifier = Modifier.size(PASTE_ICON)
             )
             AnimatedVisibility(
                 visible = showLabel,

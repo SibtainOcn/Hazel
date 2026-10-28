@@ -44,6 +44,8 @@
     <string name="search_link_already_added">已在列表中</string>
     <string name="search_clear">清除</string>
     <string name="search_clear_results">清空结果</string>
+    <string name="search_options_results">结果</string>
+    <string name="search_options_history">历史记录</string>
     <string name="search_clear_history">清除搜索记录</string>
     <string name="search_under_maintenance">维护中</string>
     <string name="search_options_title">搜索选项</string>
@@ -233,7 +235,6 @@
     <string name="sponsor_issues_subtitle">一个用不了的站点，别人写不出这个修复。</string>
     <string name="sponsor_source_title">阅读源代码</string>
     <string name="sponsor_source_subtitle">每一行都是公开的，也欢迎提交 pull request。</string>
-    <string name="sponsor_footer">没有广告，不统计你下载了什么，也没有任何功能被留给少数人。支持改变的是投入 Hazel 的时间，而不是它会为你做什么。</string>
 
 
     <!-- DownloadOptionDialogs -->

@@ -38,7 +38,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import com.hazel.android.ui.components.AlertDialog
@@ -557,25 +556,15 @@ fun SearchScreen(
             // Offered only with nothing entered, which is the moment it stands for, and
             // held clear of the keyboard that is up for as long as this screen is.
             if (text.isBlank() && queued.isEmpty()) {
-                Surface(
+                PasteButton(
+                    stamp = rememberClipStamp(),
                     onClick = { pasteAndSearch() },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .imePadding()
-                        .padding(20.dp)
-                        .size(56.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primary
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Filled.ContentPaste,
-                            contentDescription = stringResource(R.string.search_paste_and_fetch),
-                            modifier = Modifier.size(22.dp),
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
+                        .padding(20.dp),
+                    description = stringResource(R.string.search_paste_and_fetch)
+                )
             }
             StatusToastHost(
                 statusToast,

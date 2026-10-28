@@ -5,9 +5,6 @@ import com.hazel.android.ui.theme.sheetButtonColor
 import com.hazel.android.ui.theme.sheetRaisedColor
 import androidx.compose.ui.graphics.luminance
 import kotlin.math.roundToInt
-import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.compositeOver
-import com.hazel.android.ui.theme.LocalDarkTheme
 import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.annotation.StringRes
@@ -91,6 +88,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalDensity
 import com.hazel.android.R
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.FormatFilter
@@ -902,7 +900,7 @@ fun FormatRow(
             .padding(horizontal = if (compact) 10.dp else 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ContainerBadge(text = badgeTextOf(format), solid = format.isGeneric, compact = compact)
+        ContainerBadge(text = badgeTextOf(format), compact = compact)
 
         Spacer(modifier = Modifier.width(if (compact) 10.dp else 12.dp))
 
@@ -1047,21 +1045,8 @@ internal fun contrastOf(a: Color, b: Color): Float {
     return (hi + 0.05f) / (lo + 0.05f)
 }
 
-/** Accent share of a container badge's see-through fill, on dark and on light. */
-internal const val TONAL_BADGE_ALPHA_DARK = 0.24f
-internal const val TONAL_BADGE_ALPHA_LIGHT = 0.16f
-
-/** A container badge's label: the accent, pushed away from the backdrop until it reads on its tint. */
-internal fun tonalBadgeInk(primary: Color, dark: Boolean): Color {
-    val alpha = if (dark) TONAL_BADGE_ALPHA_DARK else TONAL_BADGE_ALPHA_LIGHT
-    val backdrop = if (dark) Color.Black else Color.White
-    val away = if (dark) Color.White else Color.Black
-    val fill = primary.copy(alpha = alpha).compositeOver(backdrop)
-    return listOf(0f, 0.2f, 0.4f, 0.6f).map { lerp(primary, away, it) }
-        .firstOrNull { contrastOf(it, fill) >= TONAL_BADGE_MIN_CONTRAST } ?: away
-}
-
-internal const val TONAL_BADGE_MIN_CONTRAST = 4.5f
+/** How far a badge label follows a larger system font before it would leave its cookie. */
+private const val BADGE_MAX_FONT_GROWTH = 1.15f
 
 /** A ladder rung's label: onPrimary where it reads on the accent, else black or white, whichever reads better. */
 internal fun solidBadgeInk(primary: Color, onPrimary: Color): Color =
@@ -1071,20 +1056,15 @@ internal fun solidBadgeInk(primary: Color, onPrimary: Color): Color =
 internal const val SOLID_BADGE_MIN_CONTRAST = 3f
 
 /**
- * The block a row leads with, on a six-sided M3 cookie. A ladder rung (BEST, 1080, 128K) is
- * the accent at full strength; a real container (MP4, WEBM) is a see-through accent tint with
- * accent ink, so glass shows through it and the rows stay calm.
+ * The block a row leads with (BEST, MP4, WEBM, 1080), on a six-sided M3 cookie in the solid
+ * accent, every row coloured alike.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ContainerBadge(text: String, solid: Boolean, compact: Boolean = false) {
-    val primary = MaterialTheme.colorScheme.primary
-    val dark = LocalDarkTheme.current
-    val fill = if (solid) primary
-        else primary.copy(alpha = if (dark) TONAL_BADGE_ALPHA_DARK else TONAL_BADGE_ALPHA_LIGHT)
+private fun ContainerBadge(text: String, compact: Boolean = false) {
+    val fill = MaterialTheme.colorScheme.primary
     val onPrimary = MaterialTheme.colorScheme.onPrimary
-    val ink = if (solid) remember(primary, onPrimary) { solidBadgeInk(primary, onPrimary) }
-        else remember(primary, dark) { tonalBadgeInk(primary, dark) }
+    val ink = remember(fill, onPrimary) { solidBadgeInk(fill, onPrimary) }
     Box(
         modifier = Modifier
             .size(if (compact) 48.dp else 58.dp)
@@ -1093,11 +1073,15 @@ private fun ContainerBadge(text: String, solid: Boolean, compact: Boolean = fals
         contentAlignment = Alignment.Center
     ) {
         val cleanText = text.trim().uppercase()
+        // The cookie keeps its size, so the label grows with the font only a little before
+        // it would run past the shape's edge.
+        val fontScale = LocalDensity.current.fontScale
+        val growth = fontScale.coerceAtMost(BADGE_MAX_FONT_GROWTH) / fontScale
         val fontSize = when {
             cleanText.length > 4 -> if (compact) 9.sp else 10.5.sp
             cleanText.length == 4 -> if (compact) 11.sp else 13.sp
             else -> if (compact) 12.5.sp else 15.sp
-        }
+        } * growth
         Text(
             text = cleanText,
             style = MaterialTheme.typography.labelLarge,

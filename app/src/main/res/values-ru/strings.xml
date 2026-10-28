@@ -44,6 +44,8 @@
     <string name="search_link_already_added">Уже в списке</string>
     <string name="search_clear">Очистить</string>
     <string name="search_clear_results">Очистить результаты</string>
+    <string name="search_options_results">Результаты</string>
+    <string name="search_options_history">История</string>
     <string name="search_clear_history">Очистить историю поиска</string>
     <string name="search_under_maintenance">На обслуживании</string>
     <string name="search_options_title">Параметры поиска</string>
@@ -245,7 +247,6 @@
     <string name="sponsor_issues_subtitle">Если сайт перестал работать, никто кроме вас не сможет об этом сообщить.</string>
     <string name="sponsor_source_title">Посмотреть исходный код</string>
     <string name="sponsor_source_subtitle">Каждая строка кода открыта, а предложения изменений приветствуются.</string>
-    <string name="sponsor_footer">Без рекламы, без сбора данных о загрузках и без ограничений функционала. Поддержка влияет лишь на то, сколько времени уделяется Hazel, но не меняет возможности приложения для вас.</string>
 
 
     <!-- DownloadOptionDialogs -->

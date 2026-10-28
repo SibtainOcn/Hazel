@@ -1,5 +1,11 @@
 package com.hazel.android.ui.screens.history
 
+import androidx.compose.material.icons.filled.CheckCircle
+import com.hazel.android.ui.components.ToneBadge
+import com.hazel.android.ui.components.MenuTone
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.DeleteSweep
 import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -33,7 +39,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -53,19 +58,16 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.ViewAgenda
 import com.hazel.android.ui.components.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.rememberBottomSheetState
-import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -167,7 +169,7 @@ fun HistoryScreen() {
 
     var sortMenuOpen by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
-    var statusSheetOpen by remember { mutableStateOf(false) }
+    var statusDialogOpen by remember { mutableStateOf(false) }
     var confirmRemoveAll by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf<List<HistoryEntry>?>(null) }
     var actionFor by remember { mutableStateOf<List<HistoryEntry>?>(null) }
@@ -294,7 +296,7 @@ fun HistoryScreen() {
                     tint = if (searchOpen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
-            IconButton(onClick = { statusSheetOpen = true }) {
+            IconButton(onClick = { statusDialogOpen = true }) {
                 Icon(
                     Icons.Filled.FilterList,
                     contentDescription = stringResource(R.string.history_filter_action),
@@ -309,6 +311,8 @@ fun HistoryScreen() {
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.history_menu_select)) },
+                        icon = Icons.Filled.Checklist,
+                        tone = MenuTone.Accent,
                         enabled = visible.isNotEmpty(),
                         onClick = {
                             menuOpen = false
@@ -319,6 +323,8 @@ fun HistoryScreen() {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.history_menu_select_all)) },
+                        icon = Icons.Filled.SelectAll,
+                        tone = MenuTone.Accent,
                         enabled = visible.isNotEmpty(),
                         onClick = {
                             menuOpen = false
@@ -329,6 +335,8 @@ fun HistoryScreen() {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.history_menu_remove_all)) },
+                        icon = Icons.Filled.DeleteSweep,
+                        tone = MenuTone.Danger,
                         enabled = history.isNotEmpty(),
                         onClick = {
                             menuOpen = false
@@ -337,6 +345,8 @@ fun HistoryScreen() {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.history_menu_remove_deleted)) },
+                        icon = Icons.Filled.RemoveCircleOutline,
+                        tone = MenuTone.Neutral,
                         enabled = history.any { presence[it.id] == false },
                         onClick = {
                             menuOpen = false
@@ -346,6 +356,8 @@ fun HistoryScreen() {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.history_menu_remove_duplicates)) },
+                        icon = Icons.Filled.ContentCopy,
+                        tone = MenuTone.Info,
                         enabled = history.size > 1,
                         onClick = {
                             menuOpen = false
@@ -403,6 +415,7 @@ fun HistoryScreen() {
                     HistorySort.entries.forEach { option ->
                         DropdownMenuItem(
                             text = { Text(stringResource(option.labelRes)) },
+                            selected = option == sort,
                             trailingIcon = if (option == sort) {
                                 {
                                     Icon(
@@ -528,40 +541,12 @@ fun HistoryScreen() {
         }
     }
 
-    if (statusSheetOpen) {
-        ModalBottomSheet(
-            onDismissRequest = { statusSheetOpen = false },
-            sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)),
-            dragHandle = null
-        ) {
-            Column(modifier = Modifier.padding(top = 20.dp).navigationBarsPadding()) {
-                Text(
-                    stringResource(R.string.history_filter_status),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-                )
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    HistoryStatus.entries.forEachIndexed { index, option ->
-                        ChoiceRow(
-                            label = stringResource(option.labelRes),
-                            description = null,
-                            chosen = option == status,
-                            role = Role.RadioButton,
-                            shape = groupShape(index, HistoryStatus.entries.size),
-                            onClick = {
-                                status = option
-                                statusSheetOpen = false
-                            }
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
+    if (statusDialogOpen) {
+        StatusFilterDialog(
+            current = status,
+            onPick = { status = it },
+            onDismiss = { statusDialogOpen = false }
+        )
     }
 
     if (confirmRemoveAll) {
@@ -692,6 +677,55 @@ private fun SelectionHeader(
     }
 }
 
+/** Which downloads the list shows by whether their file is still there, as a short dialog. */
+@Composable
+internal fun StatusFilterDialog(
+    current: HistoryStatus,
+    onPick: (HistoryStatus) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier.glassBackdrop(RoundedCornerShape(28.dp)),
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh
+        ) {
+            Column(modifier = Modifier.padding(top = 24.dp, bottom = 16.dp)) {
+                Text(
+                    stringResource(R.string.history_filter_status),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 16.dp)
+                )
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    HistoryStatus.entries.forEachIndexed { index, option ->
+                        val (icon, tone) = when (option) {
+                            HistoryStatus.ALL -> Icons.Filled.SelectAll to MenuTone.Accent
+                            HistoryStatus.PRESENT -> Icons.Filled.CheckCircle to MenuTone.Info
+                            HistoryStatus.DELETED -> Icons.Filled.DeleteForever to MenuTone.Danger
+                        }
+                        ChoiceRow(
+                            label = stringResource(option.labelRes),
+                            description = null,
+                            chosen = option == current,
+                            role = Role.RadioButton,
+                            shape = groupShape(index, HistoryStatus.entries.size),
+                            leading = { ToneBadge(icon, tone) },
+                            onClick = {
+                                onPick(option)
+                                onDismiss()
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 /** What a held row, or the picked rows, can do: leave the files and clear the list, or delete the files too. */
 @Composable
 private fun HistoryActionDialog(
@@ -741,11 +775,13 @@ private fun HistoryActionDialog(
                             role = Role.Button,
                             shape = groupShape(index, options.size),
                             leading = {
-                                Icon(
+                                ToneBadge(
                                     icon,
-                                    contentDescription = null,
-                                    tint = if (destructive) MaterialTheme.colorScheme.error
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                    when {
+                                        destructive -> MenuTone.Danger
+                                        label == R.string.history_card_properties -> MenuTone.Info
+                                        else -> MenuTone.Neutral
+                                    }
                                 )
                             },
                             onClick = {
@@ -847,6 +883,8 @@ private fun EntryMenu(
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuItem(
             text = { Text(stringResource(R.string.history_card_properties)) },
+            icon = Icons.Filled.Info,
+            tone = MenuTone.Info,
             onClick = {
                 onDismiss()
                 actions.onProperties()
@@ -854,6 +892,8 @@ private fun EntryMenu(
         )
         DropdownMenuItem(
             text = { Text(stringResource(R.string.history_card_remove)) },
+            icon = Icons.Filled.RemoveCircleOutline,
+            tone = MenuTone.Neutral,
             onClick = {
                 onDismiss()
                 actions.onRemove()
@@ -861,6 +901,8 @@ private fun EntryMenu(
         )
         DropdownMenuItem(
             text = { Text(stringResource(R.string.history_card_delete)) },
+            icon = Icons.Filled.DeleteForever,
+            tone = MenuTone.Danger,
             enabled = present,
             onClick = {
                 onDismiss()

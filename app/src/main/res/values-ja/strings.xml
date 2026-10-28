@@ -44,6 +44,8 @@
     <string name="search_link_already_added">すでにリストにあります</string>
     <string name="search_clear">消去</string>
     <string name="search_clear_results">検索結果を消去</string>
+    <string name="search_options_results">検索結果</string>
+    <string name="search_options_history">履歴</string>
     <string name="search_clear_history">検索履歴を削除</string>
     <string name="search_under_maintenance">メンテナンス中</string>
     <string name="search_options_title">検索オプション</string>
@@ -233,7 +235,6 @@
     <string name="sponsor_issues_subtitle">機能しなくなったサイトの報告は、問題解決のための貴重な情報です。</string>
     <string name="sponsor_source_title">ソースコードを見る</string>
     <string name="sponsor_source_subtitle">すべてのコードが公開されており、プルリクエストを歓迎しています。</string>
-    <string name="sponsor_footer">広告なし、ダウンロードデータの追跡なし、機能制限なし。支援の有無は開発時間に関わるものであり、アプリの機能が変わることはありません。</string>
 
 
     <!-- DownloadOptionDialogs -->

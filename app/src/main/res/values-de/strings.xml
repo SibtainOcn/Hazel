@@ -44,6 +44,8 @@
     <string name="search_link_already_added">Bereits in der Liste</string>
     <string name="search_clear">Löschen</string>
     <string name="search_clear_results">Ergebnisse leeren</string>
+    <string name="search_options_results">Ergebnisse</string>
+    <string name="search_options_history">Verlauf</string>
     <string name="search_clear_history">Suchverlauf löschen</string>
     <string name="search_under_maintenance">Wird gerade überarbeitet</string>
     <string name="search_options_title">Suchoptionen</string>
@@ -237,7 +239,6 @@
     <string name="sponsor_issues_subtitle">Eine Seite, die nicht mehr funktioniert, ist ein Fix, den sonst niemand schreiben kann.</string>
     <string name="sponsor_source_title">Lies den Quellcode</string>
     <string name="sponsor_source_subtitle">Jede Zeile davon ist öffentlich, und Pull Requests sind willkommen.</string>
-    <string name="sponsor_footer">Keine Werbung, nichts wird darüber gemessen, was du herunterlädst, und keine Funktion bleibt jemandem vorbehalten. Unterstützung ändert, wie viel Zeit in Hazel fließt, nicht was es für dich tut.</string>
 
 
     <!-- DownloadOptionDialogs -->

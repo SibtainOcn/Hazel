@@ -44,6 +44,8 @@
     <string name="search_link_already_added">पहले से सूची में है</string>
     <string name="search_clear">मिटाएँ</string>
     <string name="search_clear_results">परिणाम हटाएँ</string>
+    <string name="search_options_results">परिणाम</string>
+    <string name="search_options_history">इतिहास</string>
     <string name="search_clear_history">खोज इतिहास मिटाएँ</string>
     <string name="search_under_maintenance">रखरखाव जारी है</string>
     <string name="search_options_title">खोज विकल्प</string>
@@ -237,7 +239,6 @@
     <string name="sponsor_issues_subtitle">जो साइट काम करना बंद कर दे, उसका सुधार कोई और नहीं लिख सकता।</string>
     <string name="sponsor_source_title">कोड पढ़ें</string>
     <string name="sponsor_source_subtitle">इसकी हर पंक्ति सार्वजनिक है, और पुल रिक्वेस्ट का स्वागत है।</string>
-    <string name="sponsor_footer">कोई विज्ञापन नहीं, आप क्या डाउनलोड करते हैं इसका कोई हिसाब नहीं, और कोई सुविधा किसी के लिए रोकी नहीं गई। साथ देने से यह बदलता है कि Hazel में कितना समय लगता है, यह नहीं कि वह आपके लिए क्या करेगा।</string>
 
 
     <!-- DownloadOptionDialogs -->

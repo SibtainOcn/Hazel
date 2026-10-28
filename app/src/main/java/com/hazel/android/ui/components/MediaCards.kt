@@ -24,8 +24,8 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.WifiOff
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -289,7 +289,8 @@ fun MediaCard(
                         if (isPaused) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.download_resume)) },
-                                leadingIcon = { Icon(Icons.Filled.PlayArrow, contentDescription = null) },
+                                icon = Icons.Filled.PlayArrow,
+                                tone = MenuTone.Accent,
                                 onClick = {
                                     menuOpen = false
                                     onResume()
@@ -299,7 +300,8 @@ fun MediaCard(
                             // Nothing is left to hold once the file is being worked on.
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.download_pause)) },
-                                leadingIcon = { Icon(Icons.Filled.Pause, contentDescription = null) },
+                                icon = Icons.Filled.Pause,
+                                tone = MenuTone.Neutral,
                                 enabled = !isProcessing,
                                 onClick = {
                                     menuOpen = false
@@ -310,7 +312,8 @@ fun MediaCard(
                         onDetails?.let { open ->
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.format_sheet_section_details)) },
-                                leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null) },
+                                icon = Icons.Filled.Info,
+                                tone = MenuTone.Info,
                                 onClick = {
                                     menuOpen = false
                                     open()
@@ -319,7 +322,8 @@ fun MediaCard(
                         }
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.download_cancel)) },
-                            leadingIcon = { Icon(Icons.Filled.Close, contentDescription = null) },
+                            icon = Icons.Filled.Close,
+                            tone = MenuTone.Danger,
                             onClick = {
                                 menuOpen = false
                                 onCancel()

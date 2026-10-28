@@ -1,5 +1,8 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
 import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -1096,30 +1099,47 @@ private fun UrlSearchBar(
     }
 }
 
+/**
+ * Download all: an accent pill led by a filled seven-sided cookie in the inverted colour, the
+ * download arrow cut into it in the pill's own colour.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val fill = MaterialTheme.colorScheme.primary
+    val ink = MaterialTheme.colorScheme.onPrimary
     Surface(
         onClick = onClick,
-        modifier = modifier.height(52.dp),
-        shape = RoundedCornerShape(26.dp),
-        color = MaterialTheme.colorScheme.primary
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        color = fill
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 22.dp),
+            modifier = Modifier.padding(start = 5.dp, top = 5.dp, bottom = 5.dp, end = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                Icons.Filled.Download,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onPrimary
-            )
-            Spacer(modifier = Modifier.width(10.dp))
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(MaterialShapes.Cookie7Sided.toShape())
+                    .background(ink),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Filled.Download,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = fill
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
                 stringResource(R.string.download_download_all),
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -1136,6 +1156,7 @@ private fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifier
  * goes and the stage track takes the artwork over, so the card still reads as busy and says
  * which stage the file is at.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun MediaCard(
     info: MediaInfo,
@@ -1360,15 +1381,15 @@ private fun MediaCard(
                 }
             }
 
-            // Bottom right corner plays the link, for one not in hand.
+            // Bottom right corner plays the link, for one not in hand, on a flat accent cookie.
             if (!inHand) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(10.dp)
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.55f))
+                        .size(44.dp)
+                        .clip(MaterialShapes.Cookie6Sided.toShape())
+                        .background(MaterialTheme.colorScheme.primary)
                         .clickable(
                             onClickLabel = stringResource(R.string.player_play),
                             onClick = onPlay
@@ -1378,7 +1399,7 @@ private fun MediaCard(
                     Icon(
                         Icons.Filled.PlayArrow,
                         contentDescription = stringResource(R.string.player_play),
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
