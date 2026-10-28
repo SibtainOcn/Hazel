@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search: back and menu sit on soft tiles, the field leads with an accent cookie, the chosen source is an accent tab, and recent searches form one rounded group.
 - Home: the search bar's menu is a connected end segment, and incognito is a tonal circle that fills with the accent when on.
 - Search: buttons, chips and rows squeeze and morph their corners when pressed.
-- Bottom bar: each tab has its own shape behind its icon when chosen (cookie, pentagon, clover, gem), morphing in from a circle.
+- Bottom bar: each tab has its own soft tonal shape behind its icon when chosen (cookie, pentagon, clover, gem), morphing in from a circle.
 - Home: the empty-screen download icon has a whole tray instead of a broken one.
 - Missing or loading thumbnails show the Hazel bolt on a soft accent pentagon instead of a blank area.
 - Open folder lists every installed file manager, not only the built-in Files app.

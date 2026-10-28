@@ -108,7 +108,8 @@ fun HazelBottomBar(
                                 rotationZ = (1f - progress) * -45f
                             }
                             .clip(MorphShape(morph, progress))
-                            .background(MaterialTheme.colorScheme.primary)
+                            // The same soft tone as the logo pill in the header.
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
                     )
                 }
                 Box {
@@ -116,8 +117,7 @@ fun HazelBottomBar(
                         painter = painterResource(item.icon),
                         contentDescription = stringResource(item.label),
                         modifier = Modifier.size(ICON_SIZE),
-                        tint = if (selected) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurface.copy(alpha = UNSELECTED_ALPHA)
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (selected) 1f else UNSELECTED_ALPHA)
                     )
                     if (item.showDot) {
                         Box(
