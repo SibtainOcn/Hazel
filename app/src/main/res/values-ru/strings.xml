@@ -571,6 +571,7 @@
     <string name="format_selection_subtitle">Выберите формат</string>
     <string name="format_selection_confirm">ОК</string>
     <string name="format_selection_loading">Чтение остальных форматов</string>
+    <string name="format_selection_read_failed">Не удалось прочитать качества этой ссылки: %1$s. Эти варианты всё равно скачиваются; обновите, чтобы повторить.</string>
     <string name="format_audio_empty">У этой ссылки нет отдельных аудиопотоков</string>
     <string name="format_generic_badge">Авто</string>
     <string name="format_sheet_section_details">Подробности</string>

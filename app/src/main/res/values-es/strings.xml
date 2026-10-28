@@ -558,6 +558,7 @@
     <string name="format_selection_subtitle">Elige el formato</string>
     <string name="format_selection_confirm">Aceptar</string>
     <string name="format_selection_loading">Leyendo el resto de los formatos</string>
+    <string name="format_selection_read_failed">No se pudieron leer las calidades de este enlace: %1$s. Estas se descargan igual; actualiza para reintentar.</string>
     <string name="format_audio_empty">Este enlace no tiene pistas de audio separadas</string>
     <string name="format_generic_badge">Auto</string>
     <string name="format_sheet_section_details">Detalles</string>

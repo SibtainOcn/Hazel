@@ -532,6 +532,7 @@
     <string name="format_selection_subtitle">选择格式</string>
     <string name="format_selection_confirm">确定</string>
     <string name="format_selection_loading">正在读取其余的格式</string>
+    <string name="format_selection_read_failed">无法读取此链接的画质：%1$s。这些选项仍可下载；刷新以重试。</string>
     <string name="format_audio_empty">此链接没有单独的音频流</string>
     <string name="format_generic_badge">自动</string>
     <string name="format_sheet_section_details">详细信息</string>
