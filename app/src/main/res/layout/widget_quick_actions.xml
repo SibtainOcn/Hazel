@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_surface_dark"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="6dp">
+
+    <LinearLayout
+        android:id="@+id/action_paste"
+        style="@style/Widget.Hazel.QuickAction">
+        <FrameLayout style="@style/Widget.Hazel.QuickAction.Frame">
+            <ImageView android:id="@+id/shape_paste" style="@style/Widget.Hazel.QuickAction.Shape" />
+            <ImageView android:id="@+id/icon_paste" style="@style/Widget.Hazel.QuickAction.Icon" android:src="@drawable/ic_paste" />
+        </FrameLayout>
+        <TextView android:id="@+id/label_paste" style="@style/Widget.Hazel.QuickAction.Label" android:text="@string/search_paste" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/action_audio"
+        style="@style/Widget.Hazel.QuickAction">
+        <FrameLayout style="@style/Widget.Hazel.QuickAction.Frame">
+            <ImageView android:id="@+id/shape_audio" style="@style/Widget.Hazel.QuickAction.Shape" />
+            <ImageView android:id="@+id/icon_audio" style="@style/Widget.Hazel.QuickAction.Icon" android:src="@drawable/music" />
+        </FrameLayout>
+        <TextView android:id="@+id/label_audio" style="@style/Widget.Hazel.QuickAction.Label" android:text="@string/format_sheet_tab_audio" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/action_video"
+        style="@style/Widget.Hazel.QuickAction">
+        <FrameLayout style="@style/Widget.Hazel.QuickAction.Frame">
+            <ImageView android:id="@+id/shape_video" style="@style/Widget.Hazel.QuickAction.Shape" />
+            <ImageView android:id="@+id/icon_video" style="@style/Widget.Hazel.QuickAction.Icon" android:src="@drawable/ic_video" />
+        </FrameLayout>
+        <TextView android:id="@+id/label_video" style="@style/Widget.Hazel.QuickAction.Label" android:text="@string/format_sheet_tab_video" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/action_history"
+        style="@style/Widget.Hazel.QuickAction">
+        <FrameLayout style="@style/Widget.Hazel.QuickAction.Frame">
+            <ImageView android:id="@+id/shape_history" style="@style/Widget.Hazel.QuickAction.Shape" />
+            <ImageView android:id="@+id/icon_history" style="@style/Widget.Hazel.QuickAction.Icon" android:src="@drawable/downloads_tab" />
+        </FrameLayout>
+        <TextView android:id="@+id/label_history" style="@style/Widget.Hazel.QuickAction.Label" android:text="@string/nav_history" />
+    </LinearLayout>
+</LinearLayout>

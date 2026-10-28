@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
+
 ### Fixed
 - Format list: a link whose qualities could not be read now says why, instead of leaving the quality ladder looking like its final list.
 - YouTube's "confirm you're not a bot" refusal is named as such, not as private content.

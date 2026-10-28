@@ -523,6 +523,8 @@
     <string name="notification_action_cancel">Abbrechen</string>
     <string name="notification_action_sign_in">Anmelden</string>
     <string name="notification_action_dismiss">Schließen</string>
+    <string name="widget_quick_actions_label">Hazel-Schnellaktionen</string>
+    <string name="widget_quick_actions_description">Kopierten Link einfügen, als Audio oder Video speichern oder Downloads öffnen</string>
     <string name="notification_wifi_title">Wartet auf WLAN</string>
     <string name="notification_wifi_text">Downloads sind auf WLAN beschränkt. Sie starten, sobald du wieder im WLAN bist.</string>
     <string name="notification_run_cancelled_title">Downloads abgebrochen</string>
