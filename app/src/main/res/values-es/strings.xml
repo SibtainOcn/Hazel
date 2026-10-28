@@ -535,6 +535,7 @@
     <string name="notification_action_resume">Reanudar</string>
     <string name="notification_action_cancel">Cancelar</string>
     <string name="notification_action_sign_in">Iniciar sesión</string>
+    <string name="notification_action_dismiss">Descartar</string>
     <string name="notification_wifi_title">Esperando al Wi-Fi</string>
     <string name="notification_wifi_text">Las descargas están limitadas al Wi-Fi. Empiezan cuando vuelvas a estar en Wi-Fi.</string>
     <string name="notification_run_cancelled_title">Descargas canceladas</string>

@@ -50,6 +50,8 @@ class DownloadActionReceiver : BroadcastReceiver() {
         when (intent.action) {
             ACTION_PAUSE -> viewModel?.pauseAll()
 
+            ACTION_DISMISS_FAILURE -> DownloadNotificationHelper.cancelFailure(context)
+
             // With the app closed since the pause there is no view model yet, and one is made
             // for the resume: it reads the queue from disk and runs it in the background.
             // Opening the app instead did not resume anything (a paused download is kept
@@ -85,5 +87,6 @@ class DownloadActionReceiver : BroadcastReceiver() {
         const val ACTION_PAUSE = "com.hazel.android.action.PAUSE"
         const val ACTION_RESUME = "com.hazel.android.action.RESUME"
         const val ACTION_CANCEL = "com.hazel.android.action.CANCEL"
+        const val ACTION_DISMISS_FAILURE = "com.hazel.android.action.DISMISS_FAILURE"
     }
 }

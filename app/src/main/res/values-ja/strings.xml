@@ -509,6 +509,7 @@
     <string name="notification_action_resume">再開</string>
     <string name="notification_action_cancel">キャンセル</string>
     <string name="notification_action_sign_in">ログイン</string>
+    <string name="notification_action_dismiss">閉じる</string>
     <string name="notification_wifi_title">Wi-Fi待機中</string>
     <string name="notification_wifi_text">ダウンロードはWi-Fi接続時のみに設定されています。Wi-Fi接続時に開始されます。</string>
     <string name="notification_run_cancelled_title">ダウンロードをキャンセルしました</string>

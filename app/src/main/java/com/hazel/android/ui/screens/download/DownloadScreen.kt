@@ -153,7 +153,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 @Composable
 fun DownloadScreen(
     pendingShares: List<com.hazel.android.MainActivity.SharedLink> = emptyList(),
-    pendingFailure: String? = null,
+    pendingFailure: com.hazel.android.download.FailureNotice? = null,
     onPendingFailureConsumed: () -> Unit = {},
     onSharesConsumed: () -> Unit = {},
     downloadViewModel: DownloadViewModel = viewModel(),
@@ -1041,25 +1041,39 @@ fun DownloadScreen(
         )
     }
 
+    // A failure notification that was tapped opens on its dialog.
+    LaunchedEffect(pendingFailure) {
+        pendingFailure?.let {
+            downloadViewModel.showFailure(it.message, it.signInSite)
+            onPendingFailureConsumed()
+        }
+    }
+
     state.errorLog?.let { log ->
+        // A failure from a notification names its own site, and is not about the link in
+        // the search bar.
+        val notice = state.errorSignInSite
         NoResultsDialog(
             message = log,
-            canFetchCookies = isCookieRelated(log) && state.url.isNotBlank(),
-            canContinue = state.url.isNotBlank(),
-            canAddCookies = state.url.isNotBlank(),
-            link = state.url,
+            canFetchCookies = isCookieRelated(log) && (notice != null || state.url.isNotBlank()),
+            canContinue = notice == null && state.url.isNotBlank(),
+            canAddCookies = notice != null || state.url.isNotBlank(),
+            link = if (notice == null) state.url else null,
             onCopyLog = {
                 copyToClipboard(context, log)
                 downloadViewModel.clearErrorLog()
             },
             onGetCookies = {
                 downloadViewModel.clearErrorLog()
-                signInLauncher.launch(CookieWebViewActivity.intent(context, siteRootOf(state.url)))
+                if (notice != null) context.startActivity(CookieWebViewActivity.intent(context, notice))
+                else signInLauncher.launch(CookieWebViewActivity.intent(context, siteRootOf(state.url)))
             },
             onContinueAnyway = downloadViewModel::continueWithoutMetadata,
             onDismiss = downloadViewModel::clearErrorLog
         )
     }
+
+    SignInPrompt(downloadViewModel)
 
     val openSaveDirOf: (Boolean) -> Unit = { isVideo ->
         MediaOpener.openLocation(context, saveDirs.of(isVideo).uri, isVideo)

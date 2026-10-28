@@ -189,6 +189,7 @@ class ShareOverlayActivity : ComponentActivity() {
                 val downloadViewModel = remember { DownloadViewModelHolder.get() }
                 val state by downloadViewModel.state.collectAsState()
                 val formatsReading by downloadViewModel.formatsReading.collectAsState()
+                val formatReadErrors by downloadViewModel.formatReadErrors.collectAsState()
 
                 val options by remember(this) { SettingsRepository.getDownloadOptions(this) }
                     .collectAsState(initial = DownloadOptions())
@@ -238,6 +239,7 @@ class ShareOverlayActivity : ComponentActivity() {
 
                 OverlayTheme(accentName, glass, GlassStyle.fromKey(glassStyle)) {
                     Box(modifier = Modifier.fillMaxSize()) {
+                        com.hazel.android.ui.screens.download.SignInPrompt(downloadViewModel)
                         val readHere = state.url == url
                         val results = if (readHere) state.results else emptyList()
                         val failure = state.errorLog?.takeIf { readHere && !state.isFetching }
@@ -333,6 +335,7 @@ class ShareOverlayActivity : ComponentActivity() {
                                     // stands under it; the header says the link is being read.
                                     isLoadingFormats = resolved != null && info.url in formatsReading,
                                     isReadingLink = resolved == null && state.isFetching,
+                                    formatsError = formatReadErrors[info.url],
                                     onRefreshFormats = resolved?.let { item ->
                                         { source, fresh -> downloadViewModel.refreshFormats(listOf(item), source, fresh) }
                                     },

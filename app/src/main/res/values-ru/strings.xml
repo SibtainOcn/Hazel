@@ -548,6 +548,7 @@
     <string name="notification_action_resume">Продолжить</string>
     <string name="notification_action_cancel">Отмена</string>
     <string name="notification_action_sign_in">Войти</string>
+    <string name="notification_action_dismiss">Закрыть</string>
     <string name="notification_wifi_title">Ожидание Wi-Fi</string>
     <string name="notification_wifi_text">Загрузки настроены только по Wi-Fi. Они начнутся при подключении к Wi-Fi.</string>
     <string name="notification_run_cancelled_title">Загрузки отменены</string>
