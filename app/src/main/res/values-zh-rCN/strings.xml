@@ -922,6 +922,7 @@
     <string name="upd_tile_code">版本号</string>
     <string name="upd_tile_installed">安装于</string>
     <string name="upd_tile_source">来源</string>
+    <string name="upd_tile_version">版本</string>
     <string name="upd_action_changelog">更新日志</string>
     <string name="upd_action_copy_info">复制信息</string>
     <string name="upd_action_report">反馈</string>

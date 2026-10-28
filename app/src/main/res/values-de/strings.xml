@@ -938,6 +938,7 @@
     <string name="upd_tile_code">Code</string>
     <string name="upd_tile_installed">Installiert</string>
     <string name="upd_tile_source">Quelle</string>
+    <string name="upd_tile_version">Version</string>
     <string name="upd_action_changelog">Änderungen</string>
     <string name="upd_action_copy_info">Infos kopieren</string>
     <string name="upd_action_report">Melden</string>

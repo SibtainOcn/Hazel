@@ -954,6 +954,7 @@
     <string name="upd_tile_code">Code</string>
     <string name="upd_tile_installed">Installée</string>
     <string name="upd_tile_source">Source</string>
+    <string name="upd_tile_version">Version</string>
     <string name="upd_action_changelog">Nouveautés</string>
     <string name="upd_action_copy_info">Copier les infos</string>
     <string name="upd_action_report">Signaler</string>

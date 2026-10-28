@@ -922,6 +922,7 @@
     <string name="upd_tile_code">コード</string>
     <string name="upd_tile_installed">インストール</string>
     <string name="upd_tile_source">配布元</string>
+    <string name="upd_tile_version">バージョン</string>
     <string name="upd_action_changelog">変更履歴</string>
     <string name="upd_action_copy_info">情報をコピー</string>
     <string name="upd_action_report">報告</string>

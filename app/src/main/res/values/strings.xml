@@ -993,6 +993,7 @@
     <string name="upd_tile_code">Code</string>
     <string name="upd_tile_installed">Installed</string>
     <string name="upd_tile_source">Source</string>
+    <string name="upd_tile_version">Version</string>
     <string name="upd_action_changelog">Changelog</string>
     <string name="upd_action_copy_info">Copy info</string>
     <string name="upd_action_report">Report</string>

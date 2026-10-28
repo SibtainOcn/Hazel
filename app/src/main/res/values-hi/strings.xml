@@ -938,6 +938,7 @@
     <string name="upd_tile_code">कोड</string>
     <string name="upd_tile_installed">इंस्टॉल</string>
     <string name="upd_tile_source">स्रोत</string>
+    <string name="upd_tile_version">वर्शन</string>
     <string name="upd_action_changelog">बदलाव</string>
     <string name="upd_action_copy_info">जानकारी कॉपी करें</string>
     <string name="upd_action_report">रिपोर्ट</string>

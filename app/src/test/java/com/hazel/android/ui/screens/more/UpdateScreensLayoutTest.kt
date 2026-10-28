@@ -14,6 +14,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.hazel.android.R
 import com.hazel.android.ui.theme.HazelTheme
 import com.hazel.android.update.HazelUpdateViewModel.UiState
+import com.hazel.android.update.UpdateViewModel.UiState as EngineState
 import com.hazel.android.update.HazelUpdater
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -90,6 +91,34 @@ class UpdateScreensLayoutTest(private val qualifiers: String, private val fontSc
         }
     }
 
+    private fun everyEngineState() {
+        val engine = com.hazel.android.update.YtDlpUpdater.ReleaseInfo("2026.11.02", com.hazel.android.update.YtDlpUpdater.Channel.STABLE, 3_000_000)
+        val states = listOf(
+            EngineState.Idle, EngineState.Checking, EngineState.Available(engine),
+            EngineState.Updating(engine, progressBytes = 1_500_000, totalBytes = 3_000_000),
+            EngineState.Updating(engine), EngineState.Installed("2026.11.02"), EngineState.Error("Network unreachable")
+        )
+        var state by androidx.compose.runtime.mutableStateOf<EngineState>(EngineState.Idle)
+        show {
+            androidx.compose.foundation.layout.Column {
+                com.hazel.android.update.YtDlpStatusCard(state, "2026.10.26", com.hazel.android.update.YtDlpUpdater.Channel.STABLE, {}, {}, {}, {}) { _, _ -> }
+                com.hazel.android.update.UpdateSegmentedButton(listOf("Stable", "Nightly", "Master"), 0) {}
+            }
+        }
+        assertInside("Master")
+        states.forEach { next ->
+            compose.runOnIdle { state = next }
+            compose.waitForIdle()
+            if (next is EngineState.Updating && next.totalBytes > 0) {
+                val bars = compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)).fetchSemanticsNodes()
+                assertTrue("engine update shows the bar and the mark", bars.size >= 2)
+                assertInside("50%")
+            }
+        }
+    }
+
+    @Test @Config(sdk = [24]) fun `every engine state draws on the oldest android`() = everyEngineState()
+    @Test @Config(sdk = [35]) fun `every engine state draws on the newest android`() = everyEngineState()
     @Test @Config(sdk = [24]) fun `software screen fits on the oldest android`() = softwareScreen()
     @Test @Config(sdk = [35]) fun `software screen fits on the newest android`() = softwareScreen()
     @Test @Config(sdk = [24]) fun `every update state draws on the oldest android`() = everyState()

@@ -922,6 +922,7 @@
     <string name="upd_tile_code">Kode</string>
     <string name="upd_tile_installed">Dipasang</string>
     <string name="upd_tile_source">Sumber</string>
+    <string name="upd_tile_version">Versi</string>
     <string name="upd_action_changelog">Perubahan</string>
     <string name="upd_action_copy_info">Salin info</string>
     <string name="upd_action_report">Laporkan</string>

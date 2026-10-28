@@ -58,6 +58,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hazel.android.util.openInAppBrowser
 import java.util.Locale
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.res.stringResource
+import com.hazel.android.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,22 +86,7 @@ fun YtDlpUpdateScreen(
 
     Scaffold(
         topBar = {
-            UpdateTopBar(
-                title = "yt-dlp updates",
-                onBack = onBack,
-                actions = {
-                    IconButton(
-                        onClick = { viewModel.checkForUpdate() },
-                        enabled = uiState !is UpdateViewModel.UiState.Updating
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Refresh,
-                            contentDescription = "Refresh",
-                            tint = UpdateTokens.OnSurface
-                        )
-                    }
-                }
-            )
+            UpdateTopBar(title = "yt-dlp updates", onBack = onBack)
         },
         containerColor = UpdateTokens.Bg,
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
@@ -105,7 +96,7 @@ fun YtDlpUpdateScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 4.dp)
         ) {
             // ── Hero Status Card ──
             YtDlpStatusCard(
@@ -127,6 +118,31 @@ fun YtDlpUpdateScreen(
                     openInAppBrowser(context, url)
                 }
             )
+
+            Spacer(modifier = Modifier.height(20.dp))
+            com.hazel.android.ui.screens.more.JoinedTiles(
+                listOf(
+                    channel.label to stringResource(R.string.upd_tile_channel),
+                    displayInstalled to stringResource(R.string.upd_tile_version),
+                    DebugInfo.primaryAbi().substringBefore('-') to stringResource(R.string.upd_tile_cpu)
+                )
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            val busy = uiState is UpdateViewModel.UiState.Updating || uiState is UpdateViewModel.UiState.Checking
+            com.hazel.android.ui.screens.more.UpdateActionRow(
+                listOf(
+                    com.hazel.android.ui.screens.more.UpdateAction(Icons.Filled.Refresh, R.string.upd_action_check, enabled = !busy) {
+                        viewModel.checkForUpdate()
+                    },
+                    com.hazel.android.ui.screens.more.UpdateAction(Icons.Filled.NewReleases, R.string.upd_action_releases) {
+                        openInAppBrowser(context, channel.releasesUrl)
+                    },
+                    com.hazel.android.ui.screens.more.UpdateAction(Icons.Filled.ContentCopy, R.string.upd_action_copy) {
+                        com.hazel.android.ui.screens.more.copyAndTell(context, "yt-dlp $displayInstalled (${channel.label}, ${DebugInfo.primaryAbi()})")
+                    }
+                )
+            )
+            Spacer(modifier = Modifier.height(8.dp))
 
             // ── Update Channel ──
             UpdateSectionLabel(text = "Update channel", isFirst = true)
@@ -252,8 +268,9 @@ fun UpdateScreen(
     viewModel: UpdateViewModel = viewModel()
 ) = YtDlpUpdateScreen(onBack = onBack, viewModel = viewModel)
 
+/** What the engine update is doing, drawn the same way as Hazel's own update status. */
 @Composable
-private fun YtDlpStatusCard(
+internal fun YtDlpStatusCard(
     state: UpdateViewModel.UiState,
     installedVersion: String,
     channel: YtDlpUpdater.Channel,
@@ -263,381 +280,97 @@ private fun YtDlpStatusCard(
     onDismiss: () -> Unit,
     onViewChangelog: (version: String, repo: String) -> Unit
 ) {
-    val containerColor = when (state) {
-        is UpdateViewModel.UiState.Available -> UpdateTokens.UpdateContainer
-        is UpdateViewModel.UiState.Updating -> UpdateTokens.RunContainer
-        is UpdateViewModel.UiState.Installed -> UpdateTokens.AccentContainer
-        is UpdateViewModel.UiState.Idle -> UpdateTokens.AccentContainer
-        else -> UpdateTokens.Surface
+    val tone = when (state) {
+        is UpdateViewModel.UiState.Available -> UpdateTokens.Update
+        is UpdateViewModel.UiState.Updating, is UpdateViewModel.UiState.Checking -> UpdateTokens.RunStrong
+        is UpdateViewModel.UiState.Error -> UpdateTokens.Danger
+        else -> UpdateTokens.Accent
     }
+    val onTone = when (state) {
+        is UpdateViewModel.UiState.Available -> UpdateTokens.UpdateOn
+        is UpdateViewModel.UiState.Error -> MaterialTheme.colorScheme.onError
+        else -> UpdateTokens.AccentOn
+    }
+    val (title, line) = when (state) {
+        is UpdateViewModel.UiState.Idle -> "Version $installedVersion" to "Up to date on ${channel.label}"
+        is UpdateViewModel.UiState.Available -> "Version ${state.info.version}" to "Update available · you have $installedVersion"
+        is UpdateViewModel.UiState.Updating -> "Version ${state.info.version}" to "Swapping extractor binary…"
+        is UpdateViewModel.UiState.Installed -> "Version ${state.version}" to "Installed and live"
+        is UpdateViewModel.UiState.Checking -> "Checking for updates…" to "Reading the ${channel.label} release feed"
+        is UpdateViewModel.UiState.Error -> "Check couldn't finish" to state.message
+    }
+    val progress = (state as? UpdateViewModel.UiState.Updating)?.takeIf { it.totalBytes > 0 }
+        ?.let { (it.progressBytes.toFloat() / it.totalBytes).coerceIn(0f, 1f) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(containerColor)
-            .padding(horizontal = 16.dp, vertical = 14.dp)
-    ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    when (state) {
-                        is UpdateViewModel.UiState.Idle -> {
-                            Text(
-                                text = "Up to date",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.AccentStrong
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Version $installedVersion installed",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface,
-                                lineHeight = 26.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "No updates available on ${channel.label} channel",
-                                fontSize = 13.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                        is UpdateViewModel.UiState.Available -> {
-                            Text(
-                                text = "Update available",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.UpdateStrong
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Version ${state.info.version} is ready",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface,
-                                lineHeight = 26.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "You have $installedVersion",
-                                fontSize = 13.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                        is UpdateViewModel.UiState.Updating -> {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                PulsingDot(color = UpdateTokens.RunStrong)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Updating engine…",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = UpdateTokens.RunStrong
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Version ${state.info.version}",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface,
-                                lineHeight = 30.sp
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Swapping extractor binary",
-                                fontSize = 14.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                        is UpdateViewModel.UiState.Installed -> {
-                            Text(
-                                text = "Installed",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.AccentStrong
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Engine updated to ${state.version}",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface,
-                                lineHeight = 30.sp
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Binary swap completed successfully",
-                                fontSize = 14.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                        is UpdateViewModel.UiState.Checking -> {
-                            Text(
-                                text = "Checking for updates…",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.RunStrong
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Querying yt-dlp…",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface,
-                                lineHeight = 30.sp
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Contacting repository feeds",
-                                fontSize = 14.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                        is UpdateViewModel.UiState.Error -> {
-                            Text(
-                                text = "Notice",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.Danger
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Update check failed",
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = UpdateTokens.OnSurface
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = state.message,
-                                fontSize = 14.sp,
-                                color = UpdateTokens.OnSurfaceVar
-                            )
-                        }
-                    }
-                }
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        com.hazel.android.ui.screens.more.UpdateStatusHeader(
+            title = title,
+            line = line,
+            tone = tone,
+            onTone = onTone,
+            icon = when (state) {
+                is UpdateViewModel.UiState.Available, is UpdateViewModel.UiState.Updating -> Icons.Filled.Download
+                is UpdateViewModel.UiState.Error -> Icons.Filled.ErrorOutline
+                else -> Icons.Filled.VerifiedUser
+            },
+            working = state is UpdateViewModel.UiState.Updating || state is UpdateViewModel.UiState.Checking,
+            progress = progress
+        )
 
-                // Status Badge
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            when (state) {
-                                is UpdateViewModel.UiState.Available -> Color(0xFFFFCB80).copy(alpha = if (UpdateTokens.isDark) 0.14f else 0.35f)
-                                is UpdateViewModel.UiState.Updating -> Color(0xFFA8CDFF).copy(alpha = if (UpdateTokens.isDark) 0.14f else 0.35f)
-                                else -> Color(0xFF8FD6B8).copy(alpha = if (UpdateTokens.isDark) 0.14f else 0.35f)
-                            }
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    when (state) {
-                        is UpdateViewModel.UiState.Available -> {
-                            Icon(
-                                imageVector = Icons.Filled.Download,
-                                contentDescription = null,
-                                tint = UpdateTokens.Update,
-                                modifier = Modifier.size(26.dp)
-                            )
-                        }
-                        is UpdateViewModel.UiState.Updating -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(28.dp),
-                                color = UpdateTokens.RunStrong,
-                                strokeWidth = 2.5.dp
-                            )
-                        }
-                        else -> {
-                            Icon(
-                                imageVector = Icons.Filled.VerifiedUser,
-                                contentDescription = null,
-                                tint = UpdateTokens.Accent,
-                                modifier = Modifier.size(26.dp)
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Continuous progress indicator while updating
-            if (state is UpdateViewModel.UiState.Updating) {
-                Spacer(modifier = Modifier.height(20.dp))
+        if (state is UpdateViewModel.UiState.Updating) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 UpdateWavyProgress(
                     progress = when {
-                        state.totalBytes > 0 -> (state.progressBytes.toFloat() / state.totalBytes).coerceIn(0f, 1f)
+                        state.totalBytes > 0 -> progress
                         state.progressBytes > 0 -> null
                         else -> 0f
                     }
                 )
-                Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    val mb = 1024f * 1024f
                     Text(
-                        text = "Installing new binary",
-                        fontSize = 13.sp,
-                        color = UpdateTokens.OnSurfaceVar
+                        if (state.totalBytes > 0) String.format(Locale.US, "%.1f / %.1f MB", state.progressBytes / mb, state.totalBytes / mb)
+                        else "Installing new binary",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = UpdateTokens.OnSurfaceVar,
+                        modifier = Modifier.weight(1f)
                     )
                     Text(
-                        text = "In progress",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
+                        progress?.let { "${(it * 100).toInt()}%" } ?: "In progress",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
                         color = UpdateTokens.RunStrong
                     )
                 }
             }
+        }
 
-            // Actions row
-            Spacer(modifier = Modifier.height(14.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                when (state) {
-                    is UpdateViewModel.UiState.Idle -> {
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(UpdateTokens.Accent)
-                                .clickable(onClick = onCheckNow)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Check now",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.AccentOn
-                            )
-                        }
-                    }
-                    is UpdateViewModel.UiState.Available -> {
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(UpdateTokens.Update)
-                                .clickable(onClick = onUpdate)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Update engine",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.UpdateOn
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .clickable { onViewChangelog(state.info.version, state.info.channel.repo) }
-                                .padding(horizontal = 14.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "What's new",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.UpdateStrong
-                            )
-                        }
-                    }
-                    is UpdateViewModel.UiState.Updating -> {
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(UpdateTokens.Surface2)
-                                .clickable(onClick = onCancel)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Cancel",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.OnSurface
-                            )
-                        }
-                    }
-                    is UpdateViewModel.UiState.Installed -> {
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(UpdateTokens.Accent)
-                                .clickable(onClick = onDismiss)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Done",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.AccentOn
-                            )
-                        }
-                    }
-                    is UpdateViewModel.UiState.Error -> {
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(UpdateTokens.Surface2)
-                                .clickable(onClick = onCheckNow)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Retry",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = UpdateTokens.OnSurface
-                            )
-                        }
-                    }
-                    else -> {}
-                }
-            }
-
-            // Binary size when available
-            if (state is UpdateViewModel.UiState.Available && state.info.binarySize > 0) {
-                Spacer(modifier = Modifier.height(14.dp))
-                val mb = state.info.binarySize / (1024f * 1024f)
-                Text(
-                    text = String.format(Locale.US, "%.1f MB Binary size", mb),
-                    fontSize = 12.5.sp,
-                    color = UpdateTokens.OnSurfaceDim
+        com.hazel.android.ui.screens.more.UpdateStateButtons(
+            when (state) {
+                is UpdateViewModel.UiState.Idle -> listOf(
+                    Triple("Release notes", false) { onViewChangelog(installedVersion, channel.repo) },
+                    Triple("Check now", true, onCheckNow)
                 )
-            }
+                is UpdateViewModel.UiState.Available -> listOf(
+                    Triple("What's new", false) { onViewChangelog(state.info.version, state.info.channel.repo) },
+                    Triple("Update engine", true, onUpdate)
+                )
+                is UpdateViewModel.UiState.Updating -> listOf(Triple("Cancel", false, onCancel))
+                is UpdateViewModel.UiState.Installed -> listOf(Triple("Done", true, onDismiss))
+                is UpdateViewModel.UiState.Error -> listOf(Triple("Retry", true, onCheckNow))
+                is UpdateViewModel.UiState.Checking -> emptyList()
+            },
+            tone,
+            onTone
+        )
+
+        if (state is UpdateViewModel.UiState.Available && state.info.binarySize > 0) {
+            Text(
+                String.format(Locale.US, "%.1f MB binary", state.info.binarySize / (1024f * 1024f)),
+                style = MaterialTheme.typography.bodySmall,
+                color = UpdateTokens.OnSurfaceDim,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
         }
     }
-}
-
-@Composable
-private fun PulsingDot(color: Color) {
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 0.35f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 650, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulseAlpha"
-    )
-    Box(
-        modifier = Modifier
-            .size(6.dp)
-            .clip(CircleShape)
-            .background(color.copy(alpha = alpha))
-    )
 }

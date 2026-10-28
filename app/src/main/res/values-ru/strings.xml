@@ -969,6 +969,7 @@
     <string name="upd_tile_code">Код</string>
     <string name="upd_tile_installed">Установлено</string>
     <string name="upd_tile_source">Источник</string>
+    <string name="upd_tile_version">Версия</string>
     <string name="upd_action_changelog">Изменения</string>
     <string name="upd_action_copy_info">Копировать данные</string>
     <string name="upd_action_report">Сообщить</string>

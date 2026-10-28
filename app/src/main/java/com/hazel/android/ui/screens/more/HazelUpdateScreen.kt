@@ -326,15 +326,21 @@ internal fun HazelStatus(
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Row(modifier = Modifier.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            StatusMark(state, tone)
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = UpdateTokens.OnSurface)
-                Text(line, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = tone,
-                    maxLines = 3, overflow = TextOverflow.Ellipsis)
-            }
-        }
+        UpdateStatusHeader(
+            title = title,
+            line = line,
+            tone = tone,
+            onTone = onTone(state),
+            icon = when (state) {
+                is HazelUpdateViewModel.UiState.Available, is HazelUpdateViewModel.UiState.Downloading -> Icons.Filled.Download
+                is HazelUpdateViewModel.UiState.ReadyToInstall -> Icons.Filled.InstallMobile
+                is HazelUpdateViewModel.UiState.Error -> Icons.Filled.ErrorOutline
+                else -> Icons.Filled.VerifiedUser
+            },
+            working = state is HazelUpdateViewModel.UiState.Downloading || state is HazelUpdateViewModel.UiState.Checking,
+            progress = (state as? HazelUpdateViewModel.UiState.Downloading)?.takeIf { it.totalBytes > 0 }
+                ?.let { (it.progressBytes.toFloat() / it.totalBytes).coerceIn(0f, 1f) }
+        )
 
         if (state is HazelUpdateViewModel.UiState.Downloading) {
             val pct = if (state.totalBytes > 0) (state.progressBytes.toFloat() / state.totalBytes).coerceIn(0f, 1f) else 0f
@@ -374,31 +380,7 @@ internal fun HazelStatus(
             is HazelUpdateViewModel.UiState.Error -> listOf(Triple("Retry", true, onCheckNow))
             is HazelUpdateViewModel.UiState.Checking -> emptyList()
         }
-        if (buttons.isNotEmpty()) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                buttons.forEachIndexed { index, (text, filled, onClick) ->
-                    val first = index == 0
-                    val last = index == buttons.lastIndex
-                    Surface(
-                        onClick = onClick,
-                        shape = RoundedCornerShape(
-                            topStart = if (first) 26.dp else 8.dp, bottomStart = if (first) 26.dp else 8.dp,
-                            topEnd = if (last) 26.dp else 8.dp, bottomEnd = if (last) 26.dp else 8.dp
-                        ),
-                        color = if (filled) tone else MaterialTheme.colorScheme.surfaceContainerHighest,
-                        contentColor = if (filled) onTone(state) else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .weight(1f)
-                            .heightIn(min = 52.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp, vertical = 14.dp)) {
-                            Text(text, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold,
-                                maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-                    }
-                }
-            }
-        }
+        UpdateStateButtons(buttons, tone, onTone(state))
 
         if (state is HazelUpdateViewModel.UiState.Available && state.info.binarySize > 0) {
             Text(
@@ -418,47 +400,3 @@ private fun onTone(state: HazelUpdateViewModel.UiState): Color = when (state) {
     else -> UpdateTokens.AccentOn
 }
 
-/**
- * A soft nine-sided cookie in the state's colour. While checking or downloading it holds
- * the same wavy progress as the bar under it, live, or turning when the size is unknown.
- */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun StatusMark(state: HazelUpdateViewModel.UiState, tone: Color) {
-    val working = state is HazelUpdateViewModel.UiState.Downloading || state is HazelUpdateViewModel.UiState.Checking
-    Box(
-        modifier = Modifier
-            .size(64.dp)
-            .clip(MaterialShapes.Cookie9Sided.toShape())
-            .background(if (working) tone.copy(alpha = 0.18f) else tone),
-        contentAlignment = Alignment.Center
-    ) {
-        when {
-            state is HazelUpdateViewModel.UiState.Downloading && state.totalBytes > 0 -> {
-                val shown by animateFloatAsState(
-                    (state.progressBytes.toFloat() / state.totalBytes).coerceIn(0f, 1f),
-                    tween(600), label = "markProgress"
-                )
-                CircularWavyProgressIndicator(
-                    progress = { shown },
-                    modifier = Modifier.size(44.dp),
-                    color = tone,
-                    trackColor = tone.copy(alpha = 0.2f)
-                )
-                Icon(Icons.Filled.Download, null, tint = tone, modifier = Modifier.size(18.dp))
-            }
-            working -> CircularWavyProgressIndicator(modifier = Modifier.size(44.dp), color = tone, trackColor = tone.copy(alpha = 0.2f))
-            else -> Icon(
-                when (state) {
-                    is HazelUpdateViewModel.UiState.Available -> Icons.Filled.Download
-                    is HazelUpdateViewModel.UiState.ReadyToInstall -> Icons.Filled.InstallMobile
-                    is HazelUpdateViewModel.UiState.Error -> Icons.Filled.ErrorOutline
-                    else -> Icons.Filled.VerifiedUser
-                },
-                null,
-                tint = onTone(state),
-                modifier = Modifier.size(28.dp)
-            )
-        }
-    }
-}
