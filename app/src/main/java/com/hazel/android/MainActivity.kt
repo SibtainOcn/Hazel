@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
 
             // Plays once per cold launch; skipped when the system has animations turned off.
-            var splashDone by rememberSaveable { mutableStateOf(!ValueAnimator.areAnimatorsEnabled()) }
+            var splashDone by rememberSaveable { mutableStateOf(!animatorsEnabled()) }
             var homeWanted by rememberSaveable { mutableStateOf(false) }
             var homeShown by remember { mutableStateOf(false) }
 
@@ -233,3 +233,8 @@ class MainActivity : ComponentActivity() {
 private const val HOME_SMOOTH_FRAMES = 3
 private const val SMOOTH_FRAME_NS = 24_000_000L
 private const val HOME_SETTLE_LIMIT_NS = 700_000_000L
+
+/** Whether the system plays animations; Android 7 has no direct call, so its setting is read. */
+private fun android.content.Context.animatorsEnabled(): Boolean =
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) ValueAnimator.areAnimatorsEnabled()
+    else android.provider.Settings.Global.getFloat(contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
