@@ -558,6 +558,7 @@
     <string name="format_selection_subtitle">Escolha o formato</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Lendo o resto dos formatos</string>
+    <string name="format_selection_read_failed">Não foi possível ler as qualidades deste link: %1$s. Estas ainda baixam; atualize para tentar de novo.</string>
     <string name="format_audio_empty">Este link não tem faixas de áudio separadas</string>
     <string name="format_generic_badge">Auto</string>
     <string name="format_sheet_section_details">Detalhes</string>

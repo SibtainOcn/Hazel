@@ -532,6 +532,7 @@
     <string name="format_selection_subtitle">Pilih format</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Membaca format lainnya</string>
+    <string name="format_selection_read_failed">Tidak dapat membaca kualitas tautan ini: %1$s. Pilihan ini tetap bisa diunduh; segarkan untuk mencoba lagi.</string>
     <string name="format_audio_empty">Tautan ini tidak memiliki aliran audio terpisah</string>
     <string name="format_generic_badge">Otomatis</string>
     <string name="format_sheet_section_details">Detail</string>

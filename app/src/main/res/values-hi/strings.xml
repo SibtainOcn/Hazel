@@ -545,6 +545,7 @@
     <string name="format_selection_subtitle">फ़ॉर्मैट चुनें</string>
     <string name="format_selection_confirm">ठीक है</string>
     <string name="format_selection_loading">बाकी फ़ॉर्मैट पढ़े जा रहे हैं</string>
+    <string name="format_selection_read_failed">इस लिंक की क्वालिटी नहीं पढ़ी जा सकीं: %1$s. ये फिर भी डाउनलोड होंगी; दोबारा कोशिश के लिए रीफ़्रेश करें.</string>
     <string name="format_audio_empty">इस लिंक में अलग ऑडियो स्ट्रीम नहीं हैं</string>
     <string name="format_generic_badge">ऑटो</string>
     <string name="format_sheet_section_details">विवरण</string>

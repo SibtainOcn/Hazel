@@ -248,6 +248,10 @@ class DownloadViewModel : ViewModel() {
     private val _formatsReading = MutableStateFlow<Set<String>>(emptySet())
     val formatsReading: StateFlow<Set<String>> = _formatsReading.asStateFlow()
 
+    /** Why a link's last format read failed, by link, until it is read again. */
+    private val _formatReadErrors = MutableStateFlow<Map<String, String>>(emptyMap())
+    val formatReadErrors: StateFlow<Map<String, String>> = _formatReadErrors.asStateFlow()
+
     /**
      * A read asked for by name while another read of the same link was running: a switch
      * of reader or an update from the format list. It runs as soon as that read ends, and
@@ -1154,12 +1158,15 @@ class DownloadViewModel : ViewModel() {
     private fun startFormatRead(info: MediaInfo, fresh: Boolean, source: ListingSource?) {
         viewModelScope.launch(Dispatchers.IO) {
             var next: Pair<Boolean, ListingSource?>? = null
+            _formatReadErrors.update { it - info.url }
             val resolved = try {
                 formatReads.withPermit { readFormats(info.url, fresh, source) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.w("Hazel", "Format read failed for ${info.url}: ${e.message}")
+                val reason = sanitizeError(e.message.orEmpty())
+                _formatReadErrors.update { it + (info.url to reason) }
                 null
             } finally {
                 // A queued read takes over the claim rather than letting it go, so the list
@@ -3206,6 +3213,9 @@ class DownloadViewModel : ViewModel() {
             "video unavailable" in lower || "this video is unavailable" in lower
                 -> "This video is unavailable"
 
+            isBotCheck(lower)
+                -> "YouTube wants this network to sign in. Add YouTube cookies or try again later"
+
             "private video" in lower || "sign in" in lower || "login required" in lower
                 -> "This content is private or requires login"
 
@@ -3245,6 +3255,9 @@ class DownloadViewModel : ViewModel() {
                 .ifBlank { "Download failed" }
         }
     }
+
+    /** YouTube refusing this network until it signs in, as opposed to the video being private. */
+    private fun isBotCheck(lower: String): Boolean = "not a bot" in lower
 
     private companion object {
         /** Cards stood in while a search runs. */

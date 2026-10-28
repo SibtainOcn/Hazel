@@ -166,7 +166,9 @@ fun FormatSelectionSheet(
     onRefresh: ((source: ListingSource?, fresh: Boolean) -> Unit)? = null,
     canChooseSource: Boolean = false,
     linkUrls: List<String> = listOf(info.url),
-    preferredHeight: Int = 0
+    preferredHeight: Int = 0,
+    /** Why the last read of the link's formats failed, shown in place of the list's own. */
+    readError: String? = null
 ) {
     // Half height on open. The sheet is a list, and a list is readable from the top down,
     // so the whole screen is offered rather than demanded.
@@ -224,7 +226,10 @@ fun FormatSelectionSheet(
     // The rail earns its width only when it splits the list into more than one part. While
     // a link is still being read, a video list will have resolutions to split into shortly,
     // so the rail is there from the start rather than pushing the list aside as they land.
-    val showRail = stops.size > 2 || (isLoadingFormats && info.videoFormats.isNotEmpty())
+    // A video list not read yet, or whose read failed, keeps it too, so the ladder always
+    // looks like the ladder rather than switching to the wide single list.
+    val showRail = stops.size > 2 ||
+        (info.videoFormats.isNotEmpty() && (isLoadingFormats || !info.hasResolvedFormats))
 
     // Opens on the step of the preferred quality set in settings, or the nearest one below
     // it, so the list starts where the download would land. With no preference it opens on
@@ -338,6 +343,16 @@ fun FormatSelectionSheet(
                 ShimmerLabel(
                     stringResource(R.string.format_selection_loading),
                     style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            } else if (readError != null && !info.hasResolvedFormats) {
+                // The read failed: say so, so the ladder is not taken for the link's own list.
+                // Its rows still download, and refresh above reads again.
+                Text(
+                    stringResource(R.string.format_selection_read_failed, readError),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -965,7 +980,7 @@ fun FormatRow(
                 // Bounded, so a long DASH id ("dash-1234…") ellipsizes in its own corner
                 // rather than squeezing the headline down to nothing.
                 Text(
-                    "id: ${displayIdOf(format)}",
+                    "id: ${shortId(format.formatId)}",
                     style = MaterialTheme.typography.labelMedium,
                     fontSize = if (compact) 10.sp else MaterialTheme.typography.labelMedium.fontSize,
                     color = scheme.onSurface.copy(alpha = 0.45f),
@@ -1055,11 +1070,6 @@ internal fun shortId(id: String): String =
     if (id.length > MAX_ID_CHARS) id.take(MAX_ID_CHARS - 1) + "…" else id
 
 private const val MAX_ID_CHARS = 12
-
-/** A ladder rung's id is an internal key, so it reads as "auto", the stream picked for it on download. */
-internal fun displayIdOf(format: MediaFormat): String =
-    if (format.isGeneric && (format.formatId.startsWith("bv_") || format.formatId.startsWith("ba_"))) "auto"
-    else shortId(format.formatId)
 
 /** Past this many characters a headline is a sentence rather than a label. */
 private const val LONG_HEADLINE = 22

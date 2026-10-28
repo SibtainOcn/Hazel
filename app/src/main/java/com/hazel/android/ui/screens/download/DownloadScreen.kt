@@ -165,6 +165,7 @@ fun DownloadScreen(
     val scope = rememberCoroutineScope()
     val state by downloadViewModel.state.collectAsState()
     val formatsReading by downloadViewModel.formatsReading.collectAsState()
+    val formatReadErrors by downloadViewModel.formatReadErrors.collectAsState()
 
     val options by remember(context) { SettingsRepository.getDownloadOptions(context) }
         .collectAsState(initial = DownloadOptions())
@@ -1080,6 +1081,7 @@ fun DownloadScreen(
                 isLoadingFormats = state.isFetching || info.url in formatsReading,
                 // A search or playlist card opens before its details are read.
                 isReadingLink = !info.hasResolvedFormats && info.url in formatsReading,
+                formatsError = formatReadErrors[info.url],
                 onRefreshFormats = { source, fresh -> downloadViewModel.refreshFormats(listOf(info), source, fresh) },
                 onOpenSaveDir = openSaveDirOf,
                 onPickSaveDir = pickSaveDir,

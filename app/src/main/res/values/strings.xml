@@ -616,6 +616,7 @@
     <string name="format_selection_subtitle">Select format</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Reading the rest of the formats</string>
+    <string name="format_selection_read_failed">Couldn\'t read this link\'s qualities: %1$s. These still download; refresh to try again.</string>
     <string name="format_audio_empty">No separate audio streams for this link</string>
     <string name="format_generic_badge">Auto</string>
     <string name="format_sheet_section_details">Details</string>

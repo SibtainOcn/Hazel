@@ -545,6 +545,7 @@
     <string name="format_selection_subtitle">Format wählen</string>
     <string name="format_selection_confirm">OK</string>
     <string name="format_selection_loading">Die übrigen Formate werden gelesen</string>
+    <string name="format_selection_read_failed">Die Qualitäten dieses Links konnten nicht gelesen werden: %1$s. Diese laden trotzdem herunter; zum erneuten Versuch aktualisieren.</string>
     <string name="format_audio_empty">Für diesen Link gibt es keine separaten Audiospuren</string>
     <string name="format_generic_badge">Auto</string>
     <string name="format_sheet_section_details">Details</string>
