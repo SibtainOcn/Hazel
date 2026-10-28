@@ -29,13 +29,13 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/action_queue"
+        android:id="@+id/action_video"
         style="@style/Widget.Hazel.QuickAction">
         <FrameLayout style="@style/Widget.Hazel.QuickAction.Frame">
-            <ImageView android:id="@+id/shape_queue" style="@style/Widget.Hazel.QuickAction.Shape" />
-            <ImageView android:id="@+id/icon_queue" style="@style/Widget.Hazel.QuickAction.Icon" android:src="@drawable/queue_tab" />
+            <ImageView android:id="@+id/shape_video" style="@style/Widget.Hazel.QuickAction.Shape" />
+            <ImageView android:id="@+id/icon_video" style="@style/Widget.Hazel.QuickAction.Icon" android:src="@drawable/ic_video" />
         </FrameLayout>
-        <TextView android:id="@+id/label_queue" style="@style/Widget.Hazel.QuickAction.Label" android:text="@string/nav_queue" />
+        <TextView android:id="@+id/label_video" style="@style/Widget.Hazel.QuickAction.Label" android:text="@string/format_sheet_tab_video" />
     </LinearLayout>
 
     <LinearLayout

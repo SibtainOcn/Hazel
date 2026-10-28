@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Quick actions home-screen widget: Paste, Audio, Queue and Downloads on M3 Expressive shapes, in the app's accent and theme.
+- Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
 
 ### Fixed
 - Format list: a link whose qualities could not be read now says why, instead of leaving the quality ladder looking like its final list.

@@ -594,7 +594,7 @@
     <string name="notification_action_sign_in">Sign in</string>
     <string name="notification_action_dismiss">Dismiss</string>
     <string name="widget_quick_actions_label">Hazel quick actions</string>
-    <string name="widget_quick_actions_description">Paste a copied link, save it as audio, or open the queue or downloads</string>
+    <string name="widget_quick_actions_description">Paste a copied link, save it as audio or video, or open your downloads</string>
     <string name="notification_wifi_title">Waiting for Wi-Fi</string>
     <string name="notification_wifi_text">Downloads are set to Wi-Fi only. They start when you are back on Wi-Fi.</string>
     <string name="notification_run_cancelled_title">Downloads cancelled</string>

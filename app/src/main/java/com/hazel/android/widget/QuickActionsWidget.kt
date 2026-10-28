@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.min
 
 /**
- * The 4×1 home-screen widget: Paste, Audio, Queue and Downloads, each on its own M3
+ * The 4×1 home-screen widget: Paste, Audio, Video and Downloads, each on its own M3
  * Expressive shape in the app's accent, on a surface that follows the app's theme.
  */
 class QuickActionsWidget : AppWidgetProvider() {
@@ -116,10 +116,10 @@ class QuickActionsWidget : AppWidgetProvider() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-        private fun fromClipboard(context: Context, audio: Boolean, requestCode: Int): PendingIntent =
+        private fun fromClipboard(context: Context, mode: WidgetClipActivity.Mode, requestCode: Int): PendingIntent =
             PendingIntent.getActivity(
                 context, requestCode,
-                WidgetClipActivity.intent(context, audio),
+                WidgetClipActivity.intent(context, mode),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
@@ -135,13 +135,13 @@ class QuickActionsWidget : AppWidgetProvider() {
         @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         private val ACTIONS = listOf(
             Action(R.id.action_paste, R.id.shape_paste, R.id.icon_paste, R.id.label_paste, MaterialShapes.Pentagon) {
-                fromClipboard(it, audio = false, requestCode = 5001)
+                fromClipboard(it, WidgetClipActivity.Mode.SHEET, requestCode = 5001)
             },
             Action(R.id.action_audio, R.id.shape_audio, R.id.icon_audio, R.id.label_audio, MaterialShapes.Cookie6Sided) {
-                fromClipboard(it, audio = true, requestCode = 5002)
+                fromClipboard(it, WidgetClipActivity.Mode.AUDIO, requestCode = 5002)
             },
-            Action(R.id.action_queue, R.id.shape_queue, R.id.icon_queue, R.id.label_queue, MaterialShapes.Gem) {
-                openApp(it, "queue", 5003)
+            Action(R.id.action_video, R.id.shape_video, R.id.icon_video, R.id.label_video, MaterialShapes.Gem) {
+                fromClipboard(it, WidgetClipActivity.Mode.VIDEO, requestCode = 5003)
             },
             Action(R.id.action_history, R.id.shape_history, R.id.icon_history, R.id.label_history, MaterialShapes.Clover4Leaf) {
                 openApp(it, "history", 5004)

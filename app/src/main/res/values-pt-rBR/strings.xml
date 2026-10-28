@@ -537,7 +537,7 @@
     <string name="notification_action_sign_in">Entrar</string>
     <string name="notification_action_dismiss">Dispensar</string>
     <string name="widget_quick_actions_label">Ações rápidas do Hazel</string>
-    <string name="widget_quick_actions_description">Cole um link copiado, salve como áudio ou abra a fila ou os downloads</string>
+    <string name="widget_quick_actions_description">Cole um link copiado, salve como áudio ou vídeo, ou abra seus downloads</string>
     <string name="notification_wifi_title">Aguardando o Wi-Fi</string>
     <string name="notification_wifi_text">Os downloads estão limitados ao Wi-Fi. Eles começam quando você voltar para o Wi-Fi.</string>
     <string name="notification_run_cancelled_title">Downloads cancelados</string>

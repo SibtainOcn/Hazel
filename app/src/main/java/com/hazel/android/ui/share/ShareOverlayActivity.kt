@@ -402,12 +402,12 @@ class ShareOverlayActivity : ComponentActivity() {
     companion object {
         const val INSTANT_ALIAS = "InstantShareActivity"
 
-        /** Set by the widget's Audio button: Instant saves the link as audio. */
+        /** Set by the widget's Audio and Video buttons: Instant saves the link as that kind. */
         const val EXTRA_AUDIO_ONLY = "hazel.audio_only"
     }
 
     private fun Intent.audioOnlyOverride(): Boolean? =
-        if (getBooleanExtra(EXTRA_AUDIO_ONLY, false)) true else null
+        if (hasExtra(EXTRA_AUDIO_ONLY)) getBooleanExtra(EXTRA_AUDIO_ONLY, false) else null
 
     private fun closeOverlay() {
         finishAndRemoveTask()

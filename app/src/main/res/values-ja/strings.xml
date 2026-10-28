@@ -511,7 +511,7 @@
     <string name="notification_action_sign_in">ログイン</string>
     <string name="notification_action_dismiss">閉じる</string>
     <string name="widget_quick_actions_label">Hazel クイック操作</string>
-    <string name="widget_quick_actions_description">コピーしたリンクを貼り付け、音声として保存、またはキューやダウンロードを開く</string>
+    <string name="widget_quick_actions_description">コピーしたリンクを貼り付け、音声や動画として保存、またはダウンロードを開く</string>
     <string name="notification_wifi_title">Wi-Fi待機中</string>
     <string name="notification_wifi_text">ダウンロードはWi-Fi接続時のみに設定されています。Wi-Fi接続時に開始されます。</string>
     <string name="notification_run_cancelled_title">ダウンロードをキャンセルしました</string>
