@@ -50,7 +50,7 @@ import androidx.compose.material3.toShape
 /**
  * Placeholder skeletons with one highlight travelling across them.
  *
- * The skeleton is drawn as it is, then masked: everything sits at [fun MediaCardShimmer], and a
+ * The skeleton is drawn as it is, then masked: everything sits at [RESTING_ALPHA], and a
  * soft band as wide as the skeleton sweeps across it at full strength. Because the band
  * changes opacity rather than adding light, it shows the same in either theme and on any
  * colour of block, and the gaps between blocks stay empty since there is nothing there to
