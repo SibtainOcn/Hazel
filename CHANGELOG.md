@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Backup screen rebuilt: saved backups with restore, share and delete, a schedule, retention, category and folder choice.
+- Automatic backup now runs after every app update and on a schedule; old automatic backups are cleaned up.
+- Restore shows a preview, blocks backups from newer versions, and brings back the app language.
+- A fresh install offers to restore from a backup.
 - Format sheet skeleton uses the cookie badge, and the tune and refresh buttons sit on M3 shapes.
 - Glass is off by default on new installs. Existing users keep their current look.
 - New splash animation: the bolt draws itself, then a circle opens from it onto home. Replaces the static shimmer. Tap to skip; skipped when system animations are off.

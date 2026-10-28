@@ -86,4 +86,47 @@ class BackupRepositoryTest {
         assertFailsWith<BackupRepository.NotABackup> { BackupRepository.parse("""{"a":1}""") }
         assertFailsWith<BackupRepository.NotABackup> { BackupRepository.parse("not json") }
     }
+
+    @Test
+    fun newerFormatIsBlocked() {
+        val json = BackupRepository.export(source, BackupCategory.entries.toSet())
+            .put("formatVersion", BackupRepository.FORMAT_VERSION + 1)
+            .put("appVersion", "9.9.9")
+        val error = assertFailsWith<BackupRepository.NewerBackup> { BackupRepository.parse(json.toString()) }
+        assertEquals("9.9.9", error.appVersion)
+    }
+
+    @Test
+    fun unknownKeysAndFieldsAreIgnored() {
+        val json = BackupRepository.export(source, setOf(BackupCategory.SETTINGS)).put("future", 1)
+        json.getJSONObject("values").put("weird", org.json.JSONObject().put("t", "?").put("v", 1))
+        val target = mutablePreferencesOf()
+        BackupRepository.apply(target, BackupRepository.parse(json.toString()), setOf(BackupCategory.SETTINGS))
+        assertEquals("1M", target[stringPreferencesKey("speed_limit")])
+        assertFalse(target.asMap().keys.any { it.name == "weird" })
+    }
+
+    @Test
+    fun previewCountsAndLanguage() {
+        val contents = BackupRepository.parse(BackupRepository.export(source, BackupCategory.entries.toSet(), "de").toString())
+        assertEquals(1, contents.counts[BackupCategory.HISTORY])
+        assertEquals(1, contents.counts[BackupCategory.SEARCH])
+        assertEquals("de", contents.language)
+        val withoutSettings = BackupRepository.parse(BackupRepository.export(source, setOf(BackupCategory.HISTORY), "de").toString())
+        assertNull(withoutSettings.language)
+    }
+
+    @Test
+    fun scheduleAndFreshInstall() {
+        val day = java.util.concurrent.TimeUnit.DAYS.toMillis(1)
+        val daily = mutablePreferencesOf(stringPreferencesKey("backup_schedule") to "daily")
+        assertTrue(BackupRepository.isDue(daily, day))
+        daily[androidx.datastore.preferences.core.longPreferencesKey("backup_last_auto_at")] = day
+        assertFalse(BackupRepository.isDue(daily, day + day / 2))
+        assertTrue(BackupRepository.isDue(daily, day * 2))
+        assertFalse(BackupRepository.isDue(mutablePreferencesOf(), day * 100))
+
+        assertTrue(BackupRepository.looksFresh(mutablePreferencesOf(booleanPreferencesKey("backup_auto") to true)))
+        assertFalse(BackupRepository.looksFresh(source))
+    }
 }

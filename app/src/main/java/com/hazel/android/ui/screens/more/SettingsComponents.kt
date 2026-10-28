@@ -363,7 +363,7 @@ internal fun groupShape(index: Int, count: Int) = RoundedCornerShape(
  * AlertDialog, whose fixed padding and gap above the buttons left a short list mostly empty.
  */
 @Composable
-private fun ChoiceDialog(
+internal fun ChoiceDialog(
     title: String,
     onDismiss: () -> Unit,
     buttons: (@Composable RowScope.() -> Unit)? = null,

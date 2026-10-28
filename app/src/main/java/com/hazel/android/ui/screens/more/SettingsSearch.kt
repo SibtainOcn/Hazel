@@ -137,9 +137,13 @@ internal val SETTINGS_INDEX: List<SettingEntry> = buildList {
     )
     on(
         R.string.backup_title, "backup",
-        R.string.backup_backup to R.string.backup_backup_summary,
-        R.string.backup_restore to R.string.backup_restore_summary,
+        R.string.backup_backup to R.string.backup_choose,
+        R.string.backup_restore to null,
+        R.string.backup_section_saved to null,
         R.string.backup_auto to R.string.backup_auto_summary,
+        R.string.backup_schedule to null,
+        R.string.backup_keep to null,
+        R.string.backup_include to null,
         R.string.backup_folder to null
     )
     on(
