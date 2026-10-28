@@ -1022,21 +1022,19 @@ fun DownloadScreen(
 
     if (sheetVisible) {
         state.info?.let { info ->
-            // A link already downloaded and still on the device is one the user may have
-            // come back to in order to watch rather than to fetch again. The sheet says so
-            // by offering to play it, next to the action that would download it a second
-            // time. Checked only while the sheet is open, since it touches the filesystem.
-            var onDevice by remember(info.url) { mutableStateOf<HistoryEntry?>(null) }
-            LaunchedEffect(info.url, history) {
-                val entry = history.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
-                onDevice = entry?.takeIf { DownloadHistoryRepository.fileExists(context, it) }
-            }
+            // Any video streams here: the sheet closes and it opens in the large player.
+            val playable = !info.isUpcoming && (!info.hasResolvedFormats || info.videoFormats.isNotEmpty())
 
             FormatSheet(
                 info = info,
-                onPlay = onDevice?.let { entry ->
-                    { MediaOpener.play(context, entry.fileUri, entry.isVideo) }
-                },
+                onPlay = if (playable) {
+                    {
+                        sheetVisible = false
+                        playerFullscreen = false
+                        playingUrl = info.url
+                        dock.startLarge(info.url)
+                    }
+                } else null,
                 options = options,
                 onOptionsChange = {
                     scope.launch { SettingsRepository.setDownloadOptions(context, it) }

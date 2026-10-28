@@ -26,6 +26,8 @@ import kotlinx.coroutines.delay
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
@@ -33,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.util.SdCard
+import com.hazel.android.ui.components.FittedPolygonShape
 import com.hazel.android.ui.components.FlatChip
 import com.hazel.android.ui.components.KeyboardOverSheet
 import com.hazel.android.ui.components.keptAboveKeyboard
@@ -68,6 +71,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Folder
@@ -159,8 +163,8 @@ fun FormatSheet(
     initialAudioLanguage: String? = null,
     confirmAsApply: Boolean = false,
     /**
-     * Set when this media is already downloaded and still on the device, in which case the
-     * header offers to play it beside the action that would fetch it again.
+     * Set when this media can be streamed, in which case the header offers to play it
+     * beside the download action.
      */
     onPlay: (() -> Unit)? = null,
     /** Each is given the kind the sheet is on: true for video. */
@@ -368,26 +372,22 @@ fun FormatSheet(
                         )
                     }
                 }
-                // Left of the download action, and quieter than it. Playing what is already
-                // there is the smaller of the two things to do here, and it should not be
-                // possible to take it by aiming for the other.
+                // Left of the download action, in its accent, on a pentagon with the play
+                // triangle cut in.
                 if (onPlay != null) {
+                    val playLabel = stringResource(R.string.format_sheet_play)
+                    val pentagon = remember { FittedPolygonShape(MaterialShapes.Pentagon) }
                     Surface(
                         onClick = onPlay,
-                        shape = RoundedCornerShape(20.dp),
-                        color = tonalFill(0.55f),
-                        modifier = Modifier.height(44.dp)
+                        shape = pentagon,
+                        color = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier
+                            .size(width = 48.dp * pentagon.aspect, height = 48.dp)
+                            .semantics { contentDescription = playLabel }
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 18.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                stringResource(R.string.format_sheet_play),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.PlayArrow, null, modifier = Modifier.size(24.dp))
                         }
                     }
                 }

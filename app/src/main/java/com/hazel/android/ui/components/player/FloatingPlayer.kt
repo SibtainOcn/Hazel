@@ -132,6 +132,12 @@ class PlayerDock {
         largeReady = false
     }
 
+    /** A link starts straight in the large view; closing it leaves the mini player. */
+    fun startLarge(link: String) {
+        start(link)
+        place = PlayerPlace.LARGE
+    }
+
     fun onCardMoved(link: String, bounds: Rect, canDock: Boolean, fullscreen: Boolean) {
         if (link != url) return
         cardBounds = bounds
