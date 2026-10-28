@@ -119,7 +119,6 @@ import com.hazel.android.download.BatchItem
 import com.hazel.android.download.BatchState
 import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadViewModel
-import com.hazel.android.download.GenericFormats
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
 import com.hazel.android.ui.components.MediaCardShimmer
@@ -1069,14 +1068,7 @@ fun DownloadScreen(
     }
 
     if (sheetVisible) {
-        state.info?.let { current ->
-            // The quality ladder until the read lands, then the link's own formats.
-            val bestVideo = stringResource(R.string.batch_quality_best)
-            val bestAudio = stringResource(R.string.audio_quality_best)
-            val worst = stringResource(R.string.batch_quality_worst)
-            val info = remember(current, bestVideo, bestAudio, worst) {
-                GenericFormats.untilRead(current, bestVideo, bestAudio, worst)
-            }
+        state.info?.let { info ->
             FormatSheet(
                 info = info,
                 onPlay = if (info.canStream) { { playLarge(info) } } else null,

@@ -965,7 +965,7 @@ fun FormatRow(
                 // Bounded, so a long DASH id ("dash-1234…") ellipsizes in its own corner
                 // rather than squeezing the headline down to nothing.
                 Text(
-                    "id: ${shortId(format.formatId)}",
+                    "id: ${displayIdOf(format)}",
                     style = MaterialTheme.typography.labelMedium,
                     fontSize = if (compact) 10.sp else MaterialTheme.typography.labelMedium.fontSize,
                     color = scheme.onSurface.copy(alpha = 0.45f),
@@ -1055,6 +1055,11 @@ internal fun shortId(id: String): String =
     if (id.length > MAX_ID_CHARS) id.take(MAX_ID_CHARS - 1) + "…" else id
 
 private const val MAX_ID_CHARS = 12
+
+/** A ladder rung's id is an internal key, so it reads as "auto", the stream picked for it on download. */
+internal fun displayIdOf(format: MediaFormat): String =
+    if (format.isGeneric && (format.formatId.startsWith("bv_") || format.formatId.startsWith("ba_"))) "auto"
+    else shortId(format.formatId)
 
 /** Past this many characters a headline is a sentence rather than a label. */
 private const val LONG_HEADLINE = 22
