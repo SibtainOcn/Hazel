@@ -20,6 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import com.hazel.android.ui.components.ModalBottomSheet
@@ -123,6 +126,7 @@ private data class LanguageRow(
     val selected: Boolean
 )
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun LanguageRow(row: LanguageRow, onClick: () -> Unit) {
     Surface(
@@ -139,15 +143,20 @@ private fun LanguageRow(row: LanguageRow, onClick: () -> Unit) {
         ) {
             Box(
                 modifier = Modifier
-                    .size(width = 60.dp, height = 52.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .size(58.dp)
+                    .clip(MaterialShapes.Cookie7Sided.toShape())
                     .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
+                val code = row.code?.uppercase() ?: "AUTO"
                 Text(
-                    row.code?.uppercase() ?: "AUTO",
+                    code,
                     style = MaterialTheme.typography.labelLarge,
-                    fontSize = if ((row.code?.length ?: 4) > 4) 11.sp else 15.sp,
+                    fontSize = when {
+                        code.length > 4 -> 10.5.sp
+                        code.length == 4 -> 13.sp
+                        else -> 15.sp
+                    },
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     color = MaterialTheme.colorScheme.onPrimary
