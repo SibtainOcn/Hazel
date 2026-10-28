@@ -436,6 +436,17 @@
     <string name="properties_saved_to">Сохранено в</string>
     <string name="properties_downloaded">Загружено</string>
     <string name="properties_source">Источник</string>
+    <string name="properties_name">Имя</string>
+    <string name="properties_section_media">Медиа</string>
+    <string name="properties_section_again">Получить снова</string>
+    <string name="properties_show_file">Показать файл</string>
+    <string name="properties_share">Поделиться</string>
+    <string name="properties_copied">Скопировано</string>
+    <string name="properties_download_again">Скачать снова</string>
+    <string name="properties_download_again_hint">Лучшее качество с текущими настройками</string>
+    <string name="properties_fetch_again">Загрузить заново</string>
+    <string name="properties_fetch_again_hint">Прочитать ссылку заново и выбрать формат</string>
+    <string name="properties_queued">Скачивается снова</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">Назад</string>

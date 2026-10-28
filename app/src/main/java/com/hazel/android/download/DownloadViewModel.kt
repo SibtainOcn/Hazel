@@ -610,7 +610,8 @@ class DownloadViewModel : ViewModel() {
      * else needs it. A failure is reported by notification, with a sign-in button where the
      * site asked for one.
      */
-    fun instantDownload(context: Context, sharedUrl: String) {
+    /** [audioOnlyOverride] keeps a download taken again the kind it was, whatever Instant is set to. */
+    fun instantDownload(context: Context, sharedUrl: String, audioOnlyOverride: Boolean? = null) {
         val app = context.applicationContext
         // A video shared from inside a playlist or a Mix is that video: nobody is there to
         // choose from the list, and a Mix never ends.
@@ -629,7 +630,7 @@ class DownloadViewModel : ViewModel() {
             var failure: String? = null
             var cancelled = false
             // Read before anything can fail, so a failure is filed under the kind it was.
-            val audioOnly = SettingsRepository.getInstantAudioOnly(app).first()
+            val audioOnly = audioOnlyOverride ?: SettingsRepository.getInstantAudioOnly(app).first()
             try {
                 if (!SettingsRepository.getIncognito(app).first()) {
                     withContext(Dispatchers.IO) { SearchHistoryRepository.record(app, url) }

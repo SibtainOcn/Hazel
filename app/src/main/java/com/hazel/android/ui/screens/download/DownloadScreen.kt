@@ -1045,8 +1045,9 @@ fun DownloadScreen(
  * It is drawn on the highest surface tone, with no outline: the tone alone gives it its edge
  * against the near-black background.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun UrlSearchBar(
+internal fun UrlSearchBar(
     url: String,
     onOpenSearch: () -> Unit,
     shineProgress: Float = 0f,
@@ -1065,15 +1066,23 @@ private fun UrlSearchBar(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 6.dp),
+                .padding(start = 8.dp, end = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_search),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(MaterialShapes.Cookie7Sided.toShape())
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = null,
+                    modifier = Modifier.size(19.dp),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 url.ifBlank { stringResource(R.string.download_search_hint) },

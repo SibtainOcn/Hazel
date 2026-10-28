@@ -350,7 +350,21 @@ fun AppNavigation(
                 )
             }
             composable(Screen.History.route) {
-                HistoryScreen()
+                HistoryScreen(
+                    onDownloadAgain = { entry ->
+                        downloadViewModel.instantDownload(context, entry.url, audioOnlyOverride = !entry.isVideo)
+                    },
+                    onFetchAgain = { entry ->
+                        // Read the way a shared link is, then shown on Home, where its sheet opens.
+                        downloadViewModel.onUrlChange(entry.url)
+                        downloadViewModel.fetchAll(listOf(entry.url))
+                        navController.navigate(Screen.Download.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
             composable(Screen.Queue.route) {
                 QueueScreen(downloadViewModel = downloadViewModel)

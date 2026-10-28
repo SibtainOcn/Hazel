@@ -148,7 +148,10 @@ import com.hazel.android.util.MediaDeleter
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen() {
+fun HistoryScreen(
+    onDownloadAgain: ((com.hazel.android.data.HistoryEntry) -> Unit)? = null,
+    onFetchAgain: ((com.hazel.android.data.HistoryEntry) -> Unit)? = null
+) {
     val context = LocalContext.current
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
@@ -572,7 +575,28 @@ fun HistoryScreen() {
         DownloadPropertiesSheet(
             entry = entry,
             present = presence[entry.id] ?: true,
-            onDismiss = { properties = null }
+            onDismiss = { properties = null },
+            onRemove = {
+                properties = null
+                scope.launch { DownloadHistoryRepository.remove(context, entry.id) }
+            },
+            onDelete = {
+                properties = null
+                confirmDelete = listOf(entry)
+            },
+            onDownloadAgain = onDownloadAgain?.let { again ->
+                {
+                    properties = null
+                    again(entry)
+                    toast(resources.getString(R.string.properties_queued))
+                }
+            },
+            onFetchAgain = onFetchAgain?.let { again ->
+                {
+                    properties = null
+                    again(entry)
+                }
+            }
         )
     }
 

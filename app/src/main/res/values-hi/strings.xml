@@ -414,6 +414,17 @@
     <string name="properties_saved_to">यहाँ सहेजा गया</string>
     <string name="properties_downloaded">डाउनलोड किया</string>
     <string name="properties_source">स्रोत</string>
+    <string name="properties_name">नाम</string>
+    <string name="properties_section_media">मीडिया</string>
+    <string name="properties_section_again">फिर से पाएँ</string>
+    <string name="properties_show_file">फ़ाइल दिखाएँ</string>
+    <string name="properties_share">शेयर करें</string>
+    <string name="properties_copied">कॉपी किया गया</string>
+    <string name="properties_download_again">फिर से डाउनलोड करें</string>
+    <string name="properties_download_again_hint">आपकी मौजूदा सेटिंग्स के साथ सबसे अच्छी क्वालिटी</string>
+    <string name="properties_fetch_again">फिर से लाएँ</string>
+    <string name="properties_fetch_again_hint">लिंक को फिर से पढ़ें और फ़ॉर्मेट चुनें</string>
+    <string name="properties_queued">फिर से डाउनलोड हो रहा है</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">वापस</string>

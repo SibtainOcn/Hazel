@@ -403,6 +403,17 @@
     <string name="properties_saved_to">Disimpan ke</string>
     <string name="properties_downloaded">Waktu diunduh</string>
     <string name="properties_source">Sumber</string>
+    <string name="properties_name">Nama</string>
+    <string name="properties_section_media">Media</string>
+    <string name="properties_section_again">Ambil lagi</string>
+    <string name="properties_show_file">Tampilkan file</string>
+    <string name="properties_share">Bagikan</string>
+    <string name="properties_copied">Disalin</string>
+    <string name="properties_download_again">Unduh lagi</string>
+    <string name="properties_download_again_hint">Kualitas terbaik dengan pengaturan Anda saat ini</string>
+    <string name="properties_fetch_again">Ambil ulang</string>
+    <string name="properties_fetch_again_hint">Baca ulang tautan dan pilih format</string>
+    <string name="properties_queued">Mengunduh lagi</string>
 
     <!-- CookiesScreen -->
     <string name="cookies_back">Kembali</string>
