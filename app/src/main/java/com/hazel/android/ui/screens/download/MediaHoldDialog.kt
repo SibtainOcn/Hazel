@@ -2,7 +2,6 @@ package com.hazel.android.ui.screens.download
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.SmartDisplay
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
@@ -29,10 +28,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -45,7 +44,6 @@ import com.hazel.android.R
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.ui.components.ArtworkPlaceholder
 import com.hazel.android.ui.theme.glassBackdrop
-import com.hazel.android.ui.theme.tonalFill
 
 /**
  * What a long press on a home card offers for that link: play it in the large player,
@@ -106,25 +104,20 @@ fun MediaHoldDialog(
                         modifier = Modifier.padding(horizontal = 4.dp)
                     )
                 }
-                Spacer(Modifier.height(18.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    val accent = MaterialTheme.colorScheme.primary
-                    val onAccent = MaterialTheme.colorScheme.onPrimary
-                    val tonal = tonalFill(0.55f)
-                    val onTonal = MaterialTheme.colorScheme.onSurface
-                    onPlay?.let {
-                        HoldAction(MaterialShapes.Pentagon, Icons.Filled.PlayArrow, R.string.player_play, accent, onAccent, it)
-                    }
-                    HoldAction(MaterialShapes.Cookie7Sided, Icons.Filled.Download, R.string.format_sheet_download, tonal, onTonal, onDownload)
-                    onOpen?.let {
-                        HoldAction(MaterialShapes.Clover4Leaf, Icons.AutoMirrored.Filled.OpenInNew, R.string.sheet_link_open, tonal, onTonal, it)
-                    }
-                    onProperties?.let {
-                        HoldAction(MaterialShapes.Cookie4Sided, Icons.Filled.Info, R.string.history_card_properties, tonal, onTonal, it)
-                    }
+                Spacer(Modifier.height(24.dp))
+                // Each action an equal share of the width, so two to four sit evenly. Play
+                // keeps the sheet's pentagon; the rest take shapes from the set, varied by
+                // link but steady for it.
+                val shapes = remember(info.url) {
+                    val start = Math.floorMod(info.url.hashCode(), HOLD_SHAPES.size)
+                    List(3) { HOLD_SHAPES[(start + it) % HOLD_SHAPES.size] }
+                }
+                Row(modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
+                    val cell = Modifier.weight(1f)
+                    onPlay?.let { HoldAction(MaterialShapes.Pentagon, Icons.Filled.PlayArrow, R.string.player_play, it, cell) }
+                    HoldAction(shapes[0], Icons.Filled.Download, R.string.format_sheet_download, onDownload, cell)
+                    onOpen?.let { HoldAction(shapes[1], Icons.Filled.SmartDisplay, R.string.sheet_link_open, it, cell) }
+                    onProperties?.let { HoldAction(shapes[2], Icons.Filled.Info, R.string.history_card_properties, it, cell) }
                 }
             }
         }
@@ -132,28 +125,33 @@ fun MediaHoldDialog(
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private val HOLD_SHAPES = listOf(
+    MaterialShapes.Cookie9Sided, MaterialShapes.Clover4Leaf, MaterialShapes.Sunny,
+    MaterialShapes.Cookie6Sided, MaterialShapes.Gem, MaterialShapes.Flower
+)
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun HoldAction(
     polygon: RoundedPolygon,
     icon: ImageVector,
     @StringRes label: Int,
-    container: Color,
-    content: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Surface(
             onClick = onClick,
             shape = polygon.toShape(),
-            color = container,
-            contentColor = content,
-            modifier = Modifier.size(56.dp)
+            color = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.size(60.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp))
+                Icon(icon, contentDescription = null, modifier = Modifier.size(26.dp))
             }
         }
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(10.dp))
         Text(
             stringResource(label),
             style = MaterialTheme.typography.labelMedium,
