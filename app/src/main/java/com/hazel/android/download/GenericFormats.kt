@@ -67,6 +67,19 @@ object GenericFormats {
     )
 
     /**
+     * [info] as its sheet shows it before the read: the ladders in place of the bare best
+     * rows, for each kind the link offers, so a quality can be chosen and downloaded while
+     * the read runs. A read link is returned as it is, so the real list replaces the ladder.
+     */
+    fun untilRead(info: MediaInfo, bestVideo: String, bestAudio: String, worst: String): MediaInfo {
+        if (info.hasResolvedFormats) return info
+        return info.copy(
+            videoFormats = if (info.videoFormats.isEmpty()) emptyList() else videoLadder(bestVideo, worst),
+            audioFormats = if (info.audioFormats.isEmpty()) emptyList() else BatchAudioFormats.ladder(bestAudio, worst)
+        )
+    }
+
+    /**
      * [choice], made before [info] was read, as it applies to what [info] turned out to
      * offer: a height becomes the tallest stream under it, best and worst their concrete
      * streams, and a bitrate step stays the expression it is. A concrete format is kept

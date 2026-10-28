@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Download sheet: Play is a pentagon accent button, shown for any video, and opens it in the large player.
+- Download sheet: while a link is being read, the full quality ladder shows at once with the preferred quality chosen; the real formats replace it when they arrive.
 - Home: tapping the Hazel logo in the header opens Support.
 - Software update and Hazel updates screens redesigned with stat tiles, shaped actions and copyable device info for bug reports.
 - Hazel updates: the status cookie shows live wavy progress while checking and downloading.

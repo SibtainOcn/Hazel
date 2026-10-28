@@ -148,6 +148,8 @@ data class MediaInfo(
         }
         if (maxHeight <= 0) return bestVideo
         if (concrete.isEmpty()) {
+            // Before the read, the ladder row for that height, so the sheet shows it chosen.
+            videoFormats.firstOrNull { it.isGeneric && it.height == maxHeight }?.let { return it }
             return MediaFormat(
                 formatId = "bv*[height<=$maxHeight]",
                 selector = "bv*[height<=$maxHeight]+ba/b[height<=$maxHeight]/bv*+ba/b",
