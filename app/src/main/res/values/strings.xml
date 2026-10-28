@@ -251,6 +251,9 @@
     <string name="sponsor_issues_subtitle">A site that stopped working is a fix nobody else can write.</string>
     <string name="sponsor_source_title">Read the source</string>
     <string name="sponsor_source_subtitle">Every line of it is public, and pull requests are welcome.</string>
+    <string name="sponsor_section_developer">Developer</string>
+    <string name="sponsor_developer_subtitle">My GitHub profile and other projects.</string>
+    <string name="sponsor_developer_name" translatable="false">SibtainOcn</string>
 
 
     <!-- DownloadOptionDialogs -->

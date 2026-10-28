@@ -248,6 +248,8 @@
     <string name="sponsor_issues_subtitle">Если сайт перестал работать, никто кроме вас не сможет об этом сообщить.</string>
     <string name="sponsor_source_title">Посмотреть исходный код</string>
     <string name="sponsor_source_subtitle">Каждая строка кода открыта, а предложения изменений приветствуются.</string>
+    <string name="sponsor_section_developer">Разработчик</string>
+    <string name="sponsor_developer_subtitle">Мой профиль на GitHub и другие проекты.</string>
 
 
     <!-- DownloadOptionDialogs -->

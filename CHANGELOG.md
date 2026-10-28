@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Support: a Developer card that opens the developer's GitHub profile.
 - Mini player: scrolling away or starting a download moves the video to a mini player instead of stopping it; tap it to open it large.
 - Player menu next to full screen: quality and audio track, to switch between a video's original audio and its dubs.
 - Playback audio language setting in Fetch settings, set to the original by default.
