@@ -143,6 +143,6 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
          * Long enough that a normal launch always gets there first, short enough that a
          * start with no UI is not left waiting on it.
          */
-        private const val LIBRARY_INIT_FALLBACK_MS = 2_000L
+        private const val LIBRARY_INIT_FALLBACK_MS = 5_000L
     }
 }
