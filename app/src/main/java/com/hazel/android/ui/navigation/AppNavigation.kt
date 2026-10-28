@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
@@ -192,10 +193,13 @@ fun AppNavigation(
             if (currentRoute == Screen.Download.route) {
                 TopAppBar(
                     title = {
-                        // One tonal pill holding the bolt and the name.
+                        // One tonal pill holding the bolt and the name; a tap opens Support.
                         Row(
                             modifier = Modifier
                                 .clip(CircleShape)
+                                .clickable(role = Role.Button) {
+                                    navController.navigate("sponsor") { launchSingleTop = true }
+                                }
                                 .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
                                 .padding(start = 12.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
                             verticalAlignment = Alignment.CenterVertically

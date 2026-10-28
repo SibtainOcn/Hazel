@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Playback audio language setting in Fetch settings, set to the original by default.
 
 ### Changed
+- Home: tapping the Hazel logo in the header opens Support.
 - Software update and Hazel updates screens redesigned with stat tiles, shaped actions and copyable device info for bug reports.
 - Hazel updates: the status cookie shows live wavy progress while checking and downloading.
 - Update screens follow the theme and accent everywhere, including yt-dlp updates, which gets the same status cookie, tiles and shaped actions.
