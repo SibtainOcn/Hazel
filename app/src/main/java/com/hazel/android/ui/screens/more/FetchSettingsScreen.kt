@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,8 +24,10 @@ import androidx.compose.ui.res.stringResource
 import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.FetchMode
+import com.hazel.android.download.languageLabel
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.SearchSource
+import com.hazel.android.download.playback.AudioTracks
 import kotlinx.coroutines.launch
 
 /**
@@ -50,6 +53,8 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
     val playEngine by remember(context) { SettingsRepository.getPlayEngine(context) }.collectAsState(initial = ListingSource.NEWPIPE)
     val playQuality by remember(context) { SettingsRepository.getPlayQuality(context) }
         .collectAsState(initial = SettingsRepository.DEFAULT_PLAY_QUALITY)
+    val playAudio by remember(context) { SettingsRepository.getPlayAudioLanguage(context) }
+        .collectAsState(initial = AudioTracks.ORIGINAL)
 
     var open by remember { mutableStateOf(Choice.NONE) }
 
@@ -153,6 +158,14 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
                         value = stringResource(R.string.fetch_settings_play_quality_value, playQuality),
                         onClick = { open = Choice.PLAY_QUALITY }
                     )
+                },
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.Translate,
+                        title = stringResource(R.string.fetch_settings_play_audio),
+                        value = playAudioLabel(playAudio),
+                        onClick = { open = Choice.PLAY_AUDIO }
+                    )
                 }
             )
         )
@@ -220,7 +233,22 @@ fun FetchSettingsScreen(onBack: () -> Unit) {
             onSelect = { scope.launch { SettingsRepository.setPlayQuality(context, it) }; close() },
             onDismiss = close
         )
+        Choice.PLAY_AUDIO -> SingleChoiceDialog(
+            title = stringResource(R.string.fetch_settings_play_audio),
+            choices = (listOf(AudioTracks.ORIGINAL, AudioTracks.APP) + COMMON_LANGUAGES).map { it to playAudioLabel(it) },
+            selected = playAudio,
+            onSelect = { scope.launch { SettingsRepository.setPlayAudioLanguage(context, it) }; close() },
+            onDismiss = close
+        )
     }
+}
+
+/** How a stored playback audio preference reads. */
+@Composable
+private fun playAudioLabel(preference: String): String = when (preference) {
+    AudioTracks.ORIGINAL -> stringResource(R.string.player_audio_original)
+    AudioTracks.APP -> stringResource(R.string.player_audio_app_language)
+    else -> languageLabel(preference)
 }
 
 /** One line on what an engine is good at, shown under it wherever search or play engines are picked. */
@@ -231,5 +259,5 @@ internal fun engineSummary(engine: ListingSource): String = stringResource(
 )
 
 private enum class Choice {
-    NONE, READ_ENGINE, PATIENCE, SEARCH_SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, PLAY_QUALITY, SUGGESTIONS
+    NONE, READ_ENGINE, PATIENCE, SEARCH_SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, PLAY_QUALITY, PLAY_AUDIO, SUGGESTIONS
 }

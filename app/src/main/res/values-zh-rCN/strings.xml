@@ -836,6 +836,13 @@
     <string name="fetch_settings_playback">播放</string>
     <string name="fetch_settings_play_with">播放引擎</string>
     <string name="fetch_settings_play_quality">播放画质</string>
+    <string name="fetch_settings_play_audio">音频语言</string>
+    <string name="player_audio_original">原声</string>
+    <string name="player_audio_app_language">应用语言</string>
+    <string name="player_audio_track">音轨</string>
+    <string name="player_more_options">更多选项</string>
+    <string name="player_audio_original_of">%1$s（原声）</string>
+    <string name="player_audio_descriptive">%1$s（口述影像）</string>
     <string name="fetch_settings_play_quality_value">最高 %1$dp</string>
     <string name="fetch_settings_engine_newpipe_summary">在 YouTube、SoundCloud 和 Bandcamp 上最快，其余由 yt-dlp 处理。</string>
     <string name="fetch_settings_engine_ytdlp_summary">启动较慢，但适用于 yt-dlp 支持的所有网站。</string>

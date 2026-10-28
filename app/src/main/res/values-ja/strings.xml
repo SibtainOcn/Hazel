@@ -836,6 +836,13 @@
     <string name="fetch_settings_playback">再生</string>
     <string name="fetch_settings_play_with">再生エンジン</string>
     <string name="fetch_settings_play_quality">再生画質</string>
+    <string name="fetch_settings_play_audio">音声の言語</string>
+    <string name="player_audio_original">オリジナル</string>
+    <string name="player_audio_app_language">アプリの言語</string>
+    <string name="player_audio_track">音声トラック</string>
+    <string name="player_more_options">その他のオプション</string>
+    <string name="player_audio_original_of">%1$s（オリジナル）</string>
+    <string name="player_audio_descriptive">%1$s（音声解説）</string>
     <string name="fetch_settings_play_quality_value">最大 %1$dp</string>
     <string name="fetch_settings_engine_newpipe_summary">YouTube、SoundCloud、Bandcamp で最速。それ以外は yt-dlp が担当します。</string>
     <string name="fetch_settings_engine_ytdlp_summary">起動は遅めですが、yt-dlp が対応するすべてのサイトで使えます。</string>

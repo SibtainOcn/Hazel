@@ -462,7 +462,7 @@ private enum class ProcessingDialog {
  * Languages offered as a preference, as tags. Their names come from the device, in the
  * user's own language, so the list needs no text of its own.
  */
-private val COMMON_LANGUAGES = listOf(
+internal val COMMON_LANGUAGES = listOf(
     "en", "hi", "es", "pt", "fr", "de", "it", "ru", "ja", "ko", "zh", "ar", "bn", "ta", "te",
     "mr", "ur", "pa", "gu", "kn", "ml", "id", "tr", "vi", "th", "pl", "nl", "uk", "fa"
 )

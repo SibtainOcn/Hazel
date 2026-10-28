@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -63,6 +64,12 @@ class PlaybackController(
         private set
     var isMuted by mutableStateOf(false)
         private set
+    /** The sound tracks this video offers, when it has more than one; empty otherwise. */
+    var audioTracks by mutableStateOf(emptyList<AudioTrack>())
+        private set
+    /** Which of [audioTracks] is playing. */
+    var audioTrackId by mutableStateOf<String?>(null)
+        private set
 
     /** Called each time the position moves, for a caller that bounds playback to a range. */
     var onProgress: ((Long) -> Unit)? = null
@@ -71,6 +78,9 @@ class PlaybackController(
     private var loadJob: Job? = null
     private var ticker: Job? = null
     private var released = false
+    private var current: PlayableStream? = null
+    /** The track picked in the player for this video, kept through reloads and retries. */
+    private var pickedAudio: AudioTrack? = null
 
     private val listener = object : Player.Listener {
         override fun onIsPlayingChanged(playing: Boolean) {
@@ -89,6 +99,16 @@ class PlaybackController(
             if (size.width > 0 && size.height > 0) {
                 aspectRatio = size.width * size.pixelWidthHeightRatio / size.height
                 videoHeight = minOf(size.width, size.height)
+            }
+        }
+
+        override fun onTracksChanged(tracks: Tracks) {
+            if (current?.isAdaptive != true) return
+            audioTracks = PlayerFactory.manifestAudioTracks(tracks)
+            audioTrackId = PlayerFactory.selectedManifestAudio(tracks)
+            val picked = pickedAudio?.id
+            if (picked != null && picked != audioTrackId && audioTracks.any { it.id == picked }) {
+                PlayerFactory.selectManifestAudio(player, picked)
             }
         }
 
@@ -129,11 +149,15 @@ class PlaybackController(
         phase = Phase.LOADING
         loadJob = scope.launch {
             try {
-                val stream = StreamResolver.resolve(url, attempt)
+                val stream = StreamResolver.resolve(url, attempt, pickedAudio)
                 if (released) return@launch
+                current = stream
                 hasVideo = stream.hasVideo
                 heights = stream.heights
+                audioTracks = stream.audioTracks
+                audioTrackId = stream.audioTrackId
                 PlayerFactory.applyCap(player, stream)
+                PlayerFactory.applyAudio(player, stream)
                 player.setMediaSource(PlayerFactory.sourceFor(stream), resumeAt)
                 player.prepare()
             } catch (e: CancellationException) {
@@ -153,6 +177,35 @@ class PlaybackController(
 
     /** Finds the stream again, for a changed quality, and carries on from the same moment. */
     fun reload() = start(player.currentPosition.coerceAtLeast(0L), playWhenReady = player.playWhenReady)
+
+    /**
+     * Plays the sound track [id] from the same moment. Only the sound is swapped where it is
+     * kept apart from the picture; a manifest switches inside itself; anything else is found
+     * again with the track asked for.
+     */
+    fun selectAudio(id: String) {
+        if (released || id == audioTrackId) return
+        val track = audioTracks.firstOrNull { it.id == id } ?: return
+        pickedAudio = track
+        val stream = current
+        if (stream == null || loadJob?.isActive == true) {
+            reload()
+            return
+        }
+        if (stream.isAdaptive) {
+            if (!PlayerFactory.selectManifestAudio(player, id)) reload()
+            return
+        }
+        val swapped = stream.withAudio(track) ?: run {
+            reload()
+            return
+        }
+        current = swapped
+        audioTrackId = id
+        attempt = 0
+        player.setMediaSource(PlayerFactory.sourceFor(swapped), player.currentPosition.coerceAtLeast(0L))
+        player.prepare()
+    }
 
     fun play() {
         if (player.playbackState == Player.STATE_ENDED) player.seekTo(0L)

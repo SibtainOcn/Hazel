@@ -11,6 +11,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Translate
 import com.hazel.android.ui.components.DropdownMenu
 import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.runtime.collectAsState
@@ -54,6 +56,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.layout.Layout
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -91,7 +94,10 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.download.languageLabel
+import com.hazel.android.download.playback.AudioTrack
 import com.hazel.android.download.playback.PlaybackController
+import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import kotlinx.coroutines.delay
 
 /**
@@ -452,10 +458,7 @@ private fun SeekBar(
                 color = Color.White
             )
             Spacer(modifier = Modifier.weight(1f))
-            // Offered only when this video has more than one quality to choose from.
-            if (controller.hasVideo && controller.heights.count { it <= MAX_PLAY_HEIGHT } > 1) {
-                QualityButton(controller = controller, onMenuChange = onMenuChange)
-            }
+            MoreButton(controller = controller, onMenuChange = onMenuChange)
             GlassIcon(
                 icon = if (fullscreen) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen,
                 description = stringResource(
@@ -530,70 +533,132 @@ private fun ScrubTime(text: String, fraction: Float, modifier: Modifier = Modifi
     }
 }
 
+private enum class PlayerChoice { NONE, QUALITY, AUDIO }
+
 /**
- * The quality playing now, and a menu of the qualities this video has, from whichever
- * engine found it. The choice is saved as the playback quality, so later videos start at
- * it; a video without that quality plays the nearest one below, or its smallest.
+ * More choices for the playing video: its quality and its audio track, each opening a list.
+ * The quality is saved as the playback quality, so later videos start at it. A video with
+ * one sound track lists it as the original.
  */
 @Composable
-private fun QualityButton(controller: PlaybackController, onMenuChange: (Boolean) -> Unit) {
+private fun MoreButton(controller: PlaybackController, onMenuChange: (Boolean) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val cap by remember(context) { SettingsRepository.getPlayQuality(context) }
         .collectAsState(initial = SettingsRepository.DEFAULT_PLAY_QUALITY)
-    var open by remember { mutableStateOf(false) }
-    val setOpen = { value: Boolean ->
-        open = value
-        onMenuChange(value)
+    var menu by remember { mutableStateOf(false) }
+    var open by remember { mutableStateOf(PlayerChoice.NONE) }
+    val latestMenuChange by rememberUpdatedState(onMenuChange)
+    LaunchedEffect(menu, open) { latestMenuChange(menu || open != PlayerChoice.NONE) }
+    DisposableEffect(Unit) { onDispose { latestMenuChange(false) } }
+
+    val loading = controller.phase == PlaybackController.Phase.LOADING
+    val heights = controller.heights.filter { it <= MAX_PLAY_HEIGHT }
+    val playingHeight = controller.videoHeight.takeIf { it > 0 } ?: cap
+    val tracks = controller.audioTracks
+    val playingTrack = tracks.firstOrNull { it.id == controller.audioTrackId }
+
+    @Composable
+    fun Value(text: String) {
+        if (loading) {
+            LinearProgressIndicator(strokeCap = StrokeCap.Round, modifier = Modifier.width(36.dp))
+        } else {
+            Text(
+                text,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
+        }
     }
-    val playing = controller.videoHeight.takeIf { it > 0 } ?: cap
 
     Box {
-        Surface(
-            onClick = { setOpen(true) },
-            shape = RoundedCornerShape(8.dp),
-            color = Color.Transparent,
-            contentColor = Color.White
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Filled.HighQuality,
-                    contentDescription = stringResource(R.string.fetch_settings_play_quality),
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    stringResource(R.string.player_quality_value, playing),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        }
-        DropdownMenu(expanded = open, onDismissRequest = { setOpen(false) }) {
-            controller.heights.filter { it <= MAX_PLAY_HEIGHT }.forEach { height ->
+        GlassIcon(
+            icon = Icons.Filled.MoreVert,
+            description = stringResource(R.string.player_more_options),
+            onClick = { menu = true },
+            background = Color.Transparent
+        )
+        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+            // Offered only when this video has more than one quality to choose from.
+            if (controller.hasVideo && (loading || heights.size > 1)) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.player_quality_value, height)) },
-                    selected = height == playing,
-                    trailingIcon = if (height == playing) {
-                        { Icon(Icons.Filled.Check, contentDescription = null) }
-                    } else null,
+                    text = { Text(stringResource(R.string.fetch_settings_play_quality)) },
+                    icon = Icons.Filled.HighQuality,
+                    enabled = !loading,
+                    trailingIcon = { Value(stringResource(R.string.player_quality_value, playingHeight)) },
                     onClick = {
-                        setOpen(false)
-                        scope.launch {
-                            // Kept on the settings' own steps; the step at or above an odd
-                            // height still plays that height here.
-                            val step = SettingsRepository.PLAY_QUALITIES.firstOrNull { it >= height }
-                                ?: SettingsRepository.PLAY_QUALITIES.last()
-                            SettingsRepository.setPlayQuality(context, step)
-                            if (height != playing) controller.reload()
-                        }
+                        menu = false
+                        open = PlayerChoice.QUALITY
                     }
                 )
             }
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.player_audio_track)) },
+                icon = Icons.Filled.Translate,
+                enabled = !loading,
+                trailingIcon = {
+                    Value(playingTrack?.let { audioTrackLabel(it) } ?: stringResource(R.string.player_audio_original))
+                },
+                onClick = {
+                    menu = false
+                    open = PlayerChoice.AUDIO
+                }
+            )
         }
+    }
+
+    val close = { open = PlayerChoice.NONE }
+    when (open) {
+        PlayerChoice.NONE -> Unit
+        PlayerChoice.QUALITY -> SingleChoiceDialog(
+            title = stringResource(R.string.fetch_settings_play_quality),
+            choices = heights.map { it to stringResource(R.string.player_quality_value, it) },
+            selected = playingHeight,
+            onSelect = { height ->
+                close()
+                scope.launch {
+                    // Kept on the settings' own steps; the step at or above an odd height
+                    // still plays that height here.
+                    val step = SettingsRepository.PLAY_QUALITIES.firstOrNull { it >= height }
+                        ?: SettingsRepository.PLAY_QUALITIES.last()
+                    SettingsRepository.setPlayQuality(context, step)
+                    controller.reload()
+                }
+            },
+            onDismiss = close
+        )
+        PlayerChoice.AUDIO -> {
+            val labelled = tracks.map { it to audioTrackLabel(it) }
+            // The original first, audio description last, the rest by name.
+            val choices = if (labelled.isEmpty()) {
+                listOf("" to stringResource(R.string.player_audio_original))
+            } else {
+                labelled.sortedWith(compareBy({ !it.first.original }, { it.first.descriptive }, { it.second }))
+                    .map { (track, label) -> track.id to label }
+            }
+            SingleChoiceDialog(
+                title = stringResource(R.string.player_audio_track),
+                choices = choices,
+                selected = if (tracks.isEmpty()) "" else controller.audioTrackId.orEmpty(),
+                onSelect = { id ->
+                    close()
+                    controller.selectAudio(id)
+                },
+                onDismiss = close
+            )
+        }
+    }
+}
+
+/** A track's language in the app's language, marked when it is the original or a description. */
+@Composable
+private fun audioTrackLabel(track: AudioTrack): String {
+    val name = track.language?.let(::languageLabel) ?: stringResource(R.string.player_audio_original)
+    return when {
+        track.descriptive -> stringResource(R.string.player_audio_descriptive, name)
+        track.original && track.language != null -> stringResource(R.string.player_audio_original_of, name)
+        else -> name
     }
 }
 
