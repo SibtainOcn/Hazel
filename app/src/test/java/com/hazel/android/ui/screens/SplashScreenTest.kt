@@ -115,4 +115,13 @@ class SplashScreenTest {
         assertEquals(1f, SplashTimeline.reveal(SplashTimeline.TOTAL_MS), 0.001f)
         assertEquals(0f, SplashTimeline.exitAlpha(SplashTimeline.TOTAL_MS), 0.001f)
     }
+
+    @Test
+    fun logoHasLandedBeforeHomeIsBuilt() {
+        val home = SplashTimeline.HOME_AT_MS
+        assertEquals(1f, SplashTimeline.trace(home), 0.001f)
+        assertEquals(0f, SplashTimeline.spark(home), 0f)
+        for (i in 0 until 5) assertEquals(1f, SplashTimeline.letter(i, home), 0.001f)
+        assertTrue(home < SplashTimeline.REVEAL_AT_MS)
+    }
 }
