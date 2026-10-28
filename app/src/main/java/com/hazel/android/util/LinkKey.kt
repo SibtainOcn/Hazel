@@ -19,6 +19,8 @@ object LinkKey {
      * equal to the key of the same media written another way.
      */
     fun canonical(url: String): String {
+        // Items of one post share its address, so the item is part of what they are.
+        PostItem.indexOf(url)?.let { return "${canonical(PostItem.address(url))}#item=$it" }
         val trimmed = url.trim()
         val parsed = runCatching { java.net.URI(trimmed) }.getOrNull()
             ?: return trimmed.lowercase()

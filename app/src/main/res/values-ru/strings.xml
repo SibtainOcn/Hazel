@@ -22,6 +22,7 @@
     <string name="download_waiting_wifi">Ожидание Wi-Fi</string>
     <string name="download_saved">Сохранено</string>
     <string name="download_queued">В очереди</string>
+    <string name="download_reading_link">Чтение ссылки</string>
     <string name="download_downloaded">Загружено</string>
     <string name="download_failed">Ошибка</string>
     <string name="download_remove_link">Удалить ссылку</string>

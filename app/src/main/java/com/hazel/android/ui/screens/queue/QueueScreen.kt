@@ -604,6 +604,25 @@ private fun runningItems(
             )
         }
     }
+    // Links Hazel Instant is still reading: shown from the moment they were shared, before
+    // they have a download or a place on the saved queue.
+    batch.forEach { item ->
+        if (item.reading && shown.add(item.url)) {
+            items += RunningItem(
+                info = MediaInfo(
+                    url = item.url,
+                    title = item.title,
+                    uploader = "",
+                    thumbnail = null,
+                    durationSeconds = 0,
+                    videoFormats = emptyList(),
+                    audioFormats = emptyList()
+                ),
+                isDownloading = false,
+                batchItem = item
+            )
+        }
+    }
     return items
 }
 

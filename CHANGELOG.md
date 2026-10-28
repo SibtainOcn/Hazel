@@ -14,6 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Splash runs at the display's highest refresh rate on Android 15 and later.
 - Home header logo sits on an M3 Expressive cookie badge. Hazel Instant uses the same shape behind its bolt.
 
+### Fixed
+- Playlist sheet: Download takes only the ticked links (#126).
+- Instant: a YouTube video shared from a playlist or Mix downloads that video alone (#126).
+- Instant: each video of a multi-video X post downloads once, instead of every video per entry.
+- Instant: links are read in full before download, so the real best format is used instead of a guess.
+- Queue: a link shared to Instant shows on the Running tab while it is being read.
+
 ## [1.1.15] - 2026-10-23
 ### Added
 - Home and the empty Running, In queue and Failed tabs show faint stars in the glass colours (the accent without glass), toned so they stay visible on every theme, accent and glass style. They twinkle and drift slowly upward, fade out towards the edges, and brighten near your finger. They stay still when the system has animations turned off.

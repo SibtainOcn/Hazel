@@ -229,7 +229,7 @@ def test_code():
 def test_instant():
     print("\n--- Suite 3: Instant shares back to back ---")
     vm = VM.read_text(encoding="utf-8")
-    instant = block(vm, "    fun instantDownload(", 5000)
+    instant = block(vm, "    fun instantDownload(", 7000)
     check_true("The same link shared twice while read is one read",
                "val first = synchronized(instantReads) { instantReads.add(url) }" in instant
                and "if (!first) return" in instant)
@@ -237,8 +237,14 @@ def test_instant():
                '"${MediaProbe.PROBE_PROCESS_ID}_instant_${LinkKey.digest(url)}"' in instant)
     check_true("Instant reads apart from the home screen's read", "fetchJob" not in instant)
     check_true("Instant downloads through startBatch", "startBatch(app, plans, options, saveDirs = dirs)" in instant)
-    check_true("A failed read lets the service go only when nothing else needs it",
-               "if (failure != null && idle && synchronized(queue) { runOwner == null && queue.isEmpty() })" in instant)
+    check_true("A failed or cancelled read lets the service go only when nothing else needs it",
+               "if ((failure != null || cancelled) && idle && synchronized(queue) { runOwner == null && queue.isEmpty() })" in instant)
+    check_true("A video shared from a playlist or Mix is read as that video",
+               "UrlExtractor.youTubeVideoOnly(sharedUrl)" in instant)
+    check_true("The items Instant read are each downloaded once, read in full",
+               ".distinctBy { it.url }.let { readInFull(it) }" in instant)
+    check_true("Instant's link shows on the Running tab while it is read",
+               "BatchItem(url = url, title = url, reading = true)" in instant)
     check_true("Its read is let go of whatever happens",
                "instantReads.remove(url)" in instant and "} finally {" in instant)
 
