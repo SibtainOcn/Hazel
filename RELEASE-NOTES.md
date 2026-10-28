@@ -34,6 +34,18 @@
 - Instant downloads a video shared from a playlist or Mix on its own, and each video of an X post once.
 - Open folder lists every installed file manager.
 
+### Fixes
+- **Force IPv4** now applies to downloads, not only to reading links.
+- **Certificate checks** setting in Advanced now takes effect.
+- **Audio quality** takes the nearest bitrate: 128 kbps no longer downloads a 65 kbps stream.
+- **Subtitles:** embedding with auto captions on keeps the uploaded subtitles too.
+- **Extra download arguments** apply from the first download after the app starts.
+- Quality picks prefer a direct stream over HLS at the same quality, which downloads faster.
+- A quality chosen early or by Instant keeps your preferred video and audio codec.
+- A download started while a link is being read shows on Running at once.
+- Instant reads links in full first, so the real best format is used.
+- yt-dlp release notes no longer open a missing page.
+
 ### Everyday
 - Tap the Hazel logo on Home to open Support screen.
 - Choice dialogs fixed.
