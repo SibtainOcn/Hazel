@@ -1,5 +1,9 @@
 package com.hazel.android.ui.screens.cookies
 
+import com.hazel.android.ui.components.MenuTone
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.FileOpen
+import androidx.compose.material.icons.filled.IosShare
 import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.ActionsRow
 import android.content.ClipData
@@ -49,8 +53,8 @@ import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -192,6 +196,8 @@ fun CookiesScreen(onBack: () -> Unit) {
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.cookies_menu_import)) },
+                        icon = Icons.Filled.FileOpen,
+                        tone = MenuTone.Accent,
                         onClick = {
                             menuOpen = false
                             scope.launch {
@@ -211,6 +217,8 @@ fun CookiesScreen(onBack: () -> Unit) {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.cookies_menu_export)) },
+                        icon = Icons.Filled.IosShare,
+                        tone = MenuTone.Info,
                         enabled = !entries.isNullOrEmpty(),
                         onClick = {
                             menuOpen = false
@@ -232,6 +240,8 @@ fun CookiesScreen(onBack: () -> Unit) {
                                 color = MaterialTheme.colorScheme.error
                             )
                         },
+                        icon = Icons.Filled.DeleteForever,
+                        tone = MenuTone.Danger,
                         enabled = !entries.isNullOrEmpty(),
                         onClick = {
                             menuOpen = false
@@ -573,7 +583,6 @@ private fun AddSignInSheet(onContinue: (String) -> Unit, onDismiss: () -> Unit) 
                 value = url,
                 onValueChange = { url = it },
                 label = { Text(stringResource(R.string.cookies_field_url)) },
-                leadingIcon = { Icon(Icons.Filled.Link, contentDescription = null) },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
@@ -660,7 +669,6 @@ private fun CookieDetailSheet(
                 value = url,
                 onValueChange = { url = it },
                 label = { Text(stringResource(R.string.cookies_field_url)) },
-                leadingIcon = { Icon(Icons.Filled.Link, contentDescription = null) },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),

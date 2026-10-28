@@ -44,6 +44,8 @@
     <string name="search_link_already_added">Sudah ada di daftar</string>
     <string name="search_clear">Hapus</string>
     <string name="search_clear_results">Hapus hasil</string>
+    <string name="search_options_results">Hasil</string>
+    <string name="search_options_history">Riwayat</string>
     <string name="search_clear_history">Hapus riwayat pencarian</string>
     <string name="search_under_maintenance">Sedang dalam pemeliharaan</string>
     <string name="search_options_title">Opsi pencarian</string>
@@ -233,7 +235,6 @@
     <string name="sponsor_issues_subtitle">Situs yang berhenti berfungsi adalah masalah yang perlu Anda laporkan agar bisa diperbaiki.</string>
     <string name="sponsor_source_title">Lihat kode sumber</string>
     <string name="sponsor_source_subtitle">Setiap baris kode bersifat terbuka, dan kontribusi sangat disambut.</string>
-    <string name="sponsor_footer">Tanpa iklan, tanpa pelacakan unduhan Anda, dan tanpa fitur yang ditahan untuk siapa pun. Dukungan memengaruhi seberapa banyak waktu yang diberikan untuk Hazel, bukan apa yang dapat dilakukannya untuk Anda.</string>
 
 
     <!-- DownloadOptionDialogs -->

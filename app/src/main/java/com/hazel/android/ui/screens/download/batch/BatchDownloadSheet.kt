@@ -1,5 +1,10 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.ui.components.MenuTone
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.SwapVert
 import com.hazel.android.ui.theme.sheetRaisedColor
 import com.hazel.android.ui.theme.sheetButtonColor
 import com.hazel.android.ui.theme.sheetBlackColor
@@ -54,8 +59,9 @@ import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
+import com.hazel.android.ui.components.ShapeIconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -119,9 +125,7 @@ import com.hazel.android.ui.screens.download.ChaptersDialog
 import com.hazel.android.ui.screens.download.CookiesDialog
 import com.hazel.android.ui.screens.download.SaveDirDialog
 import com.hazel.android.ui.screens.download.rememberUseCookies
-import com.hazel.android.ui.screens.download.IncognitoButton
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
-import com.hazel.android.ui.screens.download.SheetLinkButton
 import com.hazel.android.ui.screens.download.FEEDBACK_MS
 import com.hazel.android.ui.screens.download.FeedbackToast
 import com.hazel.android.ui.screens.download.FilenameTemplateDialog
@@ -393,19 +397,21 @@ fun BatchDownloadSheet(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    IconButton(onClick = { searchOpen = true }) {
+                    ShapeIconButton(onClick = { searchOpen = true }) {
                         Icon(
                             Icons.Filled.Search,
                             contentDescription = stringResource(R.string.batch_search_open),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
 
-                IconButton(
+                Spacer(modifier = Modifier.width(6.dp))
+                ShapeIconButton(
                     onClick = {
                         if (state.selectionMode) state.endSelection() else state.startSelection()
-                    }
+                    },
+                    active = state.selectionMode
                 ) {
                     Icon(
                         Icons.Filled.SelectAll,
@@ -413,16 +419,17 @@ fun BatchDownloadSheet(
                             if (state.selectionMode) R.string.batch_stop_selecting
                             else R.string.batch_start_selecting
                         ),
-                        tint = if (state.selectionMode) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
+                Spacer(modifier = Modifier.width(6.dp))
                 Box {
-                    IconButton(onClick = { listMenuOpen = true }) {
+                    ShapeIconButton(onClick = { listMenuOpen = true }) {
                         Icon(
                             painterResource(R.drawable.ic_more_vert),
-                            contentDescription = stringResource(R.string.batch_list_options)
+                            contentDescription = stringResource(R.string.batch_list_options),
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                     DropdownMenu(
@@ -432,6 +439,8 @@ fun BatchDownloadSheet(
                         if (!state.selectionMode) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.batch_menu_select_links)) },
+                                icon = Icons.Filled.Checklist,
+                                tone = MenuTone.Accent,
                                 onClick = {
                                     listMenuOpen = false
                                     state.startSelection()
@@ -440,6 +449,8 @@ fun BatchDownloadSheet(
                         } else {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.batch_menu_select_all)) },
+                                icon = Icons.Filled.SelectAll,
+                                tone = MenuTone.Accent,
                                 onClick = {
                                     listMenuOpen = false
                                     state.selectAll()
@@ -447,6 +458,8 @@ fun BatchDownloadSheet(
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.batch_menu_invert)) },
+                                icon = Icons.Filled.SwapVert,
+                                tone = MenuTone.Info,
                                 onClick = {
                                     listMenuOpen = false
                                     state.invertSelection()
@@ -454,6 +467,8 @@ fun BatchDownloadSheet(
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.batch_menu_remove_selected)) },
+                                icon = Icons.Filled.Delete,
+                                tone = MenuTone.Danger,
                                 enabled = state.selected.isNotEmpty(),
                                 onClick = {
                                     listMenuOpen = false
@@ -463,6 +478,8 @@ fun BatchDownloadSheet(
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.batch_menu_done)) },
+                                icon = Icons.Filled.Done,
+                                tone = MenuTone.Neutral,
                                 onClick = {
                                     listMenuOpen = false
                                     state.endSelection()
@@ -698,19 +715,12 @@ fun BatchDownloadSheet(
                     openSheet = if (state.videoTab) BatchSheet.QUALITY else BatchSheet.AUDIO_FORMAT
                 },
                 onSaveDir = { openSheet = BatchSheet.SAVE_DIR },
-                modifier = Modifier.padding(horizontal = SIDE),
-                // The link and incognito sit at the end of the same row rather than on a
-                // line of their own. The link button copies the set's addresses, or offers
-                // to open the one link a set of one holds; incognito applies to the run.
-                trailing = {
-                    val say: (String) -> Unit = { message -> feedback = BatchFeedback(message) }
-                    SheetLinkButton(
-                        enabled = links.isNotEmpty(),
-                        onClick = { linkDialogOpen = true }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IncognitoButton(onFeedback = say)
-                }
+                // The link button copies the set's addresses, or offers to open the one link
+                // a set of one holds; incognito applies to the run.
+                linksEnabled = links.isNotEmpty(),
+                onLinks = { linkDialogOpen = true },
+                onFeedback = { message -> feedback = BatchFeedback(message) },
+                modifier = Modifier.padding(horizontal = SIDE)
             )
         }
 

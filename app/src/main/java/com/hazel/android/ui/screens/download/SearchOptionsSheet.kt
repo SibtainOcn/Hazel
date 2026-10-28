@@ -1,11 +1,20 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
+import com.hazel.android.ui.components.ShapeIconButton
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -40,7 +49,6 @@ import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.ui.theme.sheetBlackColor
-import com.hazel.android.ui.screens.more.ActionSettingRow
 import com.hazel.android.ui.screens.more.ConfirmSettingDialog
 import com.hazel.android.ui.screens.more.SuggestionsConsentDialog
 import com.hazel.android.ui.screens.more.SettingsSection
@@ -123,12 +131,37 @@ fun SearchOptionsSheet(
                 .padding(horizontal = 16.dp)
                 .navigationBarsPadding()
         ) {
-            Text(
-                stringResource(R.string.search_options_title),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
-            )
+            // The two clears sit beside the title, within reach of the thumb as the sheet opens.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    stringResource(R.string.search_options_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                ClearShape(
+                    icon = Icons.Filled.History,
+                    label = stringResource(R.string.search_options_history),
+                    description = stringResource(R.string.search_clear_history),
+                    filled = false,
+                    onClick = { open = SearchChoice.CLEAR_HISTORY }
+                )
+                ClearShape(
+                    icon = Icons.Filled.DeleteSweep,
+                    label = stringResource(R.string.search_options_results),
+                    description = stringResource(R.string.search_clear_results),
+                    filled = true,
+                    onClick = { open = SearchChoice.CLEAR_RESULTS }
+                )
+            }
 
             SettingsSection(
                 title = stringResource(R.string.fetch_settings_search),
@@ -180,26 +213,6 @@ fun SearchOptionsSheet(
                             title = stringResource(R.string.fetch_settings_play_with),
                             value = stringResource(current.playEngine.labelRes),
                             onClick = { open = SearchChoice.PLAY_ENGINE }
-                        )
-                    }
-                )
-            )
-
-            SettingsSection(
-                title = stringResource(R.string.backup_category_search),
-                rows = listOf(
-                    {
-                        ActionSettingRow(
-                            icon = Icons.Filled.DeleteSweep,
-                            title = stringResource(R.string.search_clear_results),
-                            onClick = { open = SearchChoice.CLEAR_RESULTS }
-                        )
-                    },
-                    {
-                        ActionSettingRow(
-                            icon = Icons.Filled.History,
-                            title = stringResource(R.string.search_clear_history),
-                            onClick = { open = SearchChoice.CLEAR_HISTORY }
                         )
                     }
                 )
@@ -287,3 +300,28 @@ private data class SearchPrefs(
 )
 
 private enum class SearchChoice { NONE, SOURCE, SEARCH_ENGINE, SEARCH_RESULTS, PLAY_ENGINE, SUGGESTIONS, CLEAR_RESULTS, CLEAR_HISTORY }
+
+/** A clear action on a six-sided cookie, named in a small line under it. */
+@Composable
+private fun ClearShape(
+    icon: ImageVector,
+    label: String,
+    description: String,
+    filled: Boolean,
+    onClick: () -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        ShapeIconButton(onClick = onClick, filled = filled, size = 52.dp) {
+            Icon(icon, contentDescription = description, modifier = Modifier.size(22.dp))
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.widthIn(max = 84.dp)
+        )
+    }
+}

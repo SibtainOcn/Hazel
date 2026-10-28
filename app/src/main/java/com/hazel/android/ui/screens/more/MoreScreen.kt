@@ -170,16 +170,14 @@ fun MoreScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(start = 20.dp, end = 20.dp, top = 16.dp)
     ) {
-        // The screen names itself, the way the downloads list does. The app's name used to
-        // sit above it in a bar of its own; with that gone this is what the screen opens
-        // on, rather than the first card arriving with no introduction.
+        // The screen names itself, the way the downloads list does, and stays pinned with
+        // its search while the settings below it scroll.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
+                .padding(bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -193,6 +191,13 @@ fun MoreScreen(
                 Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.settings_search))
             }
         }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 16.dp)
+        ) {
 
         // Android suspends a long network job shortly after the app leaves the foreground,
         // so without this exemption a download stops when the screen is turned off. It
@@ -523,6 +528,7 @@ fun MoreScreen(
                 modifier = Modifier.clickable { onNavigateToDocumentation() }
             )
           }
+        }
         }
     }
 }

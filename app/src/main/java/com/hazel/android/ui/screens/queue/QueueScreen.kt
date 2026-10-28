@@ -1,5 +1,12 @@
 package com.hazel.android.ui.screens.queue
 
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Pause
+import com.hazel.android.ui.components.MenuTone
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.ClearAll
+import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.hazel.android.ui.components.AmbientStarField
@@ -42,8 +49,8 @@ import androidx.compose.material.icons.filled.Download
 import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -250,6 +257,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             text = {
                                 Text(stringResource(if (isMulti) R.string.download_pause_all else R.string.download_pause))
                             },
+                            icon = Icons.Filled.Pause,
+                            tone = MenuTone.Neutral,
                             onClick = {
                                 menuOpen = false
                                 downloadViewModel.pauseAll()
@@ -260,6 +269,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                             text = {
                                 Text(stringResource(if (isMulti) R.string.download_resume_all else R.string.download_resume))
                             },
+                            icon = Icons.Filled.PlayArrow,
+                            tone = MenuTone.Accent,
                             onClick = {
                                 menuOpen = false
                                 downloadViewModel.resumeDownload()
@@ -270,6 +281,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                         text = {
                             Text(stringResource(if (isMulti) R.string.download_cancel_all else R.string.download_cancel_action))
                         },
+                        icon = Icons.Filled.Close,
+                        tone = MenuTone.Danger,
                         enabled = anythingInHand,
                         onClick = {
                             menuOpen = false
@@ -278,6 +291,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.history_queue_clear_all)) },
+                        icon = Icons.Filled.ClearAll,
+                        tone = MenuTone.Neutral,
                         enabled = waiting.isNotEmpty(),
                         onClick = {
                             menuOpen = false
@@ -286,6 +301,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.queue_failed_retry_all)) },
+                        icon = Icons.Filled.Refresh,
+                        tone = MenuTone.Accent,
                         enabled = failed.any { it.id !in retryingIds },
                         onClick = {
                             menuOpen = false
@@ -294,6 +311,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.queue_failed_select)) },
+                        icon = Icons.Filled.Checklist,
+                        tone = MenuTone.Info,
                         enabled = failed.isNotEmpty(),
                         onClick = {
                             menuOpen = false
@@ -303,6 +322,8 @@ fun QueueScreen(downloadViewModel: DownloadViewModel) {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.history_failed_clear_all)) },
+                        icon = Icons.Filled.DeleteSweep,
+                        tone = MenuTone.Danger,
                         enabled = failed.isNotEmpty(),
                         onClick = {
                             menuOpen = false

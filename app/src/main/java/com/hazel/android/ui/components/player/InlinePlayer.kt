@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.HighQuality
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.runtime.collectAsState
 import com.hazel.android.data.SettingsRepository
 import kotlinx.coroutines.launch
@@ -383,22 +383,19 @@ private fun PlayerArea(
                             strokeCap = StrokeCap.Round,
                             modifier = Modifier.size(44.dp)
                         )
-                        else -> Surface(
+                        else -> MorphingPlayButton(
+                            playing = controller.isPlaying,
                             onClick = controller::toggle,
-                            shape = CircleShape,
-                            color = Color.White,
-                            modifier = Modifier.size(52.dp)
+                            color = Color.White
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    if (controller.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                                    contentDescription = stringResource(
-                                        if (controller.isPlaying) R.string.player_pause else R.string.player_play
-                                    ),
-                                    tint = Color.Black,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
+                            Icon(
+                                if (controller.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                                contentDescription = stringResource(
+                                    if (controller.isPlaying) R.string.player_pause else R.string.player_play
+                                ),
+                                tint = Color.Black,
+                                modifier = Modifier.size(30.dp)
+                            )
                         }
                     }
                 }
@@ -421,9 +418,9 @@ private fun PlayerArea(
 }
 
 /**
- * Time on the left, full screen on the right, and a thin bar under them: played in the
- * accent, loaded in white, the rest faint. The dot on the bar grows while it is dragged,
- * and a tap anywhere on the bar jumps there.
+ * Time on the left, full screen on the right, and a bar under them: played in the accent
+ * as a flowing wave while the video plays, loaded in white, the rest faint. A finger on the
+ * bar lays the wave flat and lengthens its pill thumb, and a tap anywhere jumps there.
  */
 @Composable
 private fun SeekBar(
@@ -451,8 +448,10 @@ private fun SeekBar(
         else -> 0f
     }
     val buffered = if (enabled) (controller.bufferedMs.toFloat() / duration).coerceIn(0f, 1f) else 0f
-    val thumb by animateDpAsState(if (scrubbing) 8.dp else 6.dp, label = "seekThumb")
+    val thumb by animateDpAsState(if (scrubbing) 22.dp else 16.dp, label = "seekThumb")
     val accent = MaterialTheme.colorScheme.primary
+    // Flows while the video plays; a finger on the bar or a pause lays it flat.
+    val (wave, wavePhase) = rememberSeekWave(flowing = controller.isPlaying && !scrubbing)
 
     Column(modifier = modifier) {
         if (scrubbing) {
@@ -486,7 +485,7 @@ private fun SeekBar(
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(20.dp)
+                .height(28.dp)
                 .pointerInput(enabled) {
                     if (!enabled) return@pointerInput
                     detectTapGestures { offset ->
@@ -513,10 +512,11 @@ private fun SeekBar(
         ) {
             val y = size.height / 2f
             val stroke = if (scrubbing) 4.dp.toPx() else 3.dp.toPx()
-            drawSeekLine(y, stroke, 1f, Color.White.copy(alpha = 0.25f))
-            drawSeekLine(y, stroke, buffered, Color.White.copy(alpha = 0.45f))
-            drawSeekLine(y, stroke, played, accent)
-            drawCircle(accent, radius = thumb.toPx(), center = Offset(size.width * played, y))
+            // The track and the loaded part start at the thumb, so nothing runs under the wave.
+            drawSeekLine(y, stroke, 1f, Color.White.copy(alpha = 0.25f), from = played)
+            drawSeekLine(y, stroke, buffered, Color.White.copy(alpha = 0.45f), from = played)
+            drawWavyLine(y, stroke, played, accent, wave.value, wavePhase.value)
+            drawPillThumb(size.width * played, y, accent, height = thumb.toPx(), width = 5.dp.toPx())
         }
     }
 }
@@ -593,6 +593,7 @@ private fun QualityButton(controller: PlaybackController, onMenuChange: (Boolean
             controller.heights.filter { it <= MAX_PLAY_HEIGHT }.forEach { height ->
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.player_quality_value, height)) },
+                    selected = height == playing,
                     trailingIcon = if (height == playing) {
                         { Icon(Icons.Filled.Check, contentDescription = null) }
                     } else null,
@@ -624,11 +625,11 @@ private fun ProgressLine(played: Float, buffered: Float, modifier: Modifier = Mo
     }
 }
 
-private fun DrawScope.drawSeekLine(y: Float, stroke: Float, fraction: Float, color: Color) {
-    if (fraction <= 0f) return
+private fun DrawScope.drawSeekLine(y: Float, stroke: Float, fraction: Float, color: Color, from: Float = 0f) {
+    if (fraction <= from) return
     drawLine(
         color = color,
-        start = Offset(0f, y),
+        start = Offset(size.width * from, y),
         end = Offset(size.width * fraction, y),
         strokeWidth = stroke,
         cap = StrokeCap.Round

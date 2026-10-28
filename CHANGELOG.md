@@ -13,9 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Faster cold start with a bundled startup profile, also applied on GitHub and F-Droid installs.
 - Splash runs at the display's highest refresh rate on Android 15 and later.
 - Home header logo sits on an M3 Expressive cookie badge. Hazel Instant uses the same shape behind its bolt.
-- Format sheet: badges sit on six-sided cookies. BEST and other quality picks are solid accent; MP4, WEBM and other containers use a see-through accent tint.
+- Format sheet: badges sit on six-sided cookies. every badge is solid accent.
+- Playlist sheet: the bottom buttons form one connected group; the quality button shows the chosen quality alone (1080p, AUTO).
+- Playlist sheet: search, select and more buttons sit on six-sided cookies.
+- Menus across the app: rounded panels on glass or the theme surface; each item leads with its icon on an accent shape chosen by what it does, and the current choice is tinted.
+- Home: Download all is a slimmer accent pill led by a seven-sided cookie; each result plays from a flat accent six-sided cookie.
+- Home and Search: the paste button is larger and folds down onto an M3 rounded square.
+- More: the title and search stay pinned while the settings scroll.
+- Search options: Clear history and Clear results sit beside the title on six-sided cookies, so the sheet is shorter.
+- Hazel Instant: the bolt sits on a clearer cookie, and its shimmer is a faster, sharper sweep that shows on every accent in dark and light.
+- Sponsor: removed the closing paragraph.
+- All Downloads: the Status filter opens as a dialog instead of a sheet.
+- Player: the seek bar flows as a wave while playing and lies flat on touch or pause, with a pill thumb. Play is a pentagon while paused and a slowly turning six-sided cookie while playing. Both stay still when system animations are off.
 
 ### Fixed
+- Player: the seek bar wave and play button no longer animate while paused.
 - Playlist sheet: Download takes only the ticked links (#126).
 - Instant: a YouTube video shared from a playlist or Mix downloads that video alone (#126).
 - Instant: each video of a multi-video X post downloads once, instead of every video per entry.

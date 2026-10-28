@@ -77,7 +77,6 @@ fun SponsorScreen(onBack: () -> Unit) {
     }
     val textPrimary = if (isDark) Color(0xFFF9FAFB) else Color(0xFF0F172A)
     val textSecondary = if (isDark) Color(0xFFA0A7B5) else Color(0xFF475569)
-    val textMuted = if (isDark) Color(0xFF717784) else Color(0xFF94A3B8)
     val badgeBg = when {
         glass -> MaterialTheme.colorScheme.surfaceVariant
         isDark -> Color(0xFF1A1D24)
@@ -212,14 +211,6 @@ fun SponsorScreen(onBack: () -> Unit) {
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                stringResource(R.string.sponsor_footer),
-                style = MaterialTheme.typography.bodySmall,
-                color = textMuted
-            )
 
             Spacer(modifier = Modifier.height(40.dp))
         }

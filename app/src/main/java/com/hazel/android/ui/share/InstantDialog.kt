@@ -38,7 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
+import com.hazel.android.ui.screens.download.contrastOf
+import com.hazel.android.ui.theme.LocalDarkTheme
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -82,8 +86,13 @@ fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit, glass: Boolean = fa
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                CookieBadge(size = 64.dp, tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)) {
-                    ShimmeringBolt()
+                val accent = MaterialTheme.colorScheme.primary
+                val dark = LocalDarkTheme.current
+                val backdrop = if (glass) Color.White.copy(alpha = 0.05f).compositeOver(if (dark) Color.Black else Color.White)
+                    else MaterialTheme.colorScheme.surfaceContainerHigh
+                val tones = remember(accent, backdrop) { boltTones(accent, backdrop) }
+                CookieBadge(size = 64.dp, tint = tones.cookie) {
+                    ShimmeringBolt(tones)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -140,17 +149,39 @@ fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit, glass: Boolean = fa
     }
 }
 
+/** The badge's solid cookie, the bolt at rest, and the band that shines across it. */
+internal data class BoltTones(val cookie: Color, val dim: Color, val shine: Color)
+
 /**
- * The bolt with a band of light sweeping across it. One float animated, drawn over a 30dp
- * icon on its own layer, so each frame redraws only the icon; it stops with the dialog.
+ * Cookie, then bolt, then shine, each a clear step further from [backdrop]: the bolt rests a
+ * little toward the cookie and the shine goes past the accent, lighter on dark and darker on
+ * light, so even a white or gold accent has room to shine.
+ */
+internal fun boltTones(accent: Color, backdrop: Color): BoltTones {
+    val cookie = accent.copy(alpha = BOLT_COOKIE_ALPHA).compositeOver(backdrop)
+    val away = if (backdrop.luminance() < 0.5f) Color.White else Color.Black
+    val dim = listOf(lerp(accent, cookie, BOLT_DIM_TOWARD_COOKIE), accent, lerp(accent, away, 0.2f))
+        .firstOrNull { contrastOf(it, cookie) >= BOLT_MIN_REST_CONTRAST } ?: lerp(accent, away, 0.4f)
+    return BoltTones(cookie = cookie, dim = dim, shine = lerp(dim, away, BOLT_SHINE_PAST_REST))
+}
+
+private const val BOLT_COOKIE_ALPHA = 0.22f
+private const val BOLT_DIM_TOWARD_COOKIE = 0.3f
+private const val BOLT_SHINE_PAST_REST = 0.7f
+internal const val BOLT_MIN_REST_CONTRAST = 1.8f
+
+/**
+ * The bolt at rest with a narrow, sharp band of shine sweeping left to right, then a short
+ * rest. The sweep is read only while drawing, so frames never recompose.
  */
 @Composable
-private fun ShimmeringBolt() {
-    val accent = MaterialTheme.colorScheme.primary
-    val sweep by rememberInfiniteTransition(label = "bolt").animateFloat(
-        initialValue = -1f,
-        targetValue = 2f,
-        animationSpec = infiniteRepeatable(tween(1_400, easing = LinearEasing), RepeatMode.Restart),
+private fun ShimmeringBolt(tones: BoltTones) {
+    val accent = tones.shine
+    val dim = tones.dim
+    val sweep = rememberInfiniteTransition(label = "bolt").animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(BOLT_SHIMMER_MS, easing = LinearEasing), RepeatMode.Restart),
         label = "sweep"
     )
     Icon(
@@ -162,17 +193,27 @@ private fun ShimmeringBolt() {
             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
             .drawWithContent {
                 drawContent()
-                val x = size.width * sweep
+                val band = size.width * BOLT_BAND
+                val x = size.width * (sweep.value * BOLT_TRAVEL - (BOLT_TRAVEL - 1f) / 2f)
                 drawRect(
-                    brush = Brush.linearGradient(
-                        colors = listOf(Color.Transparent, Color.White.copy(alpha = 0.85f), Color.Transparent),
-                        start = Offset(x - size.width * 0.5f, 0f),
-                        end = Offset(x + size.width * 0.5f, size.height)
+                    brush = Brush.horizontalGradient(
+                        0f to dim, 0.5f to accent, 1f to dim,
+                        startX = x - band / 2f,
+                        endX = x + band / 2f
                     ),
                     blendMode = BlendMode.SrcAtop
                 )
             }
     )
 }
+
+/** One sweep and its rest; the band covers the bolt for about two thirds of it. */
+private const val BOLT_SHIMMER_MS = 1_500
+
+/** Band width as a share of the bolt, narrow so its edges read sharp. */
+private const val BOLT_BAND = 0.6f
+
+/** How far the band travels per cycle, in bolt widths; past the bolt it rests off its edge. */
+private const val BOLT_TRAVEL = 2.2f
 
 private const val AUTO_CLOSE_SECONDS = 3
