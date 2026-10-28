@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Screen transitions: opening a screen slides along a shared axis and tabs crossfade, with no blank frame between screens.
 - Getting started steps and the Appearance screen use M3 shapes behind their icons.
 - The background downloads card on More follows the theme, with a shaped battery icon.
+- More opens without re-checking battery, language and temp size on the main thread every visit.
+- Cookie import and converter file picks read the file in the background.
 - Backup screen rebuilt: saved backups with restore, share and delete, a schedule, retention, category and folder choice.
 - Automatic backup now runs after every app update and on a schedule; old automatic backups are cleaned up.
 - Restore shows a preview, blocks backups from newer versions, and brings back the app language.
