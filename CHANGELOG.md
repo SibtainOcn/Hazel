@@ -56,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search: back and menu sit on soft tiles, the field leads with an accent cookie, the chosen source is an accent tab, and recent searches form one rounded group.
 - Home: the search bar's menu is a connected end segment, and incognito is a tonal circle that fills with the accent when on.
 - Search: buttons, chips and rows squeeze and morph their corners when pressed.
+- Search: the chosen source chip's icon sits on a pentagon instead of a cookie.
 - Bottom bar: each tab has its own soft tonal shape behind its icon when chosen (cookie, pentagon, clover, gem), morphing in from a circle.
 - Home: the empty-screen download icon has a whole tray instead of a broken one.
 - Download queue: the tabs are a connected group; the chosen one rounds out into an accent pill, and the menu sits on a soft tile.
