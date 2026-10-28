@@ -39,14 +39,14 @@ object BatchAudioFormats {
     )
 
     /**
-     * The audio closest to [kbps] without going over, by format sort, so a source with
-     * nothing that low still gives its nearest stream. A source that labels no bitrate
-     * downloads its best audio.
+     * The audio nearest [kbps] either side, by format sort. Sources round their tiers up
+     * (YouTube's 128 kbps stream reports 129), so "not over" fell to the tier below, half
+     * the bitrate. A source that labels no bitrate downloads its best audio.
      */
     fun bitrateCeiling(kbps: Int) = MediaFormat(
         formatId = "ba_${kbps}k",
         selector = "ba/b",
-        sort = "abr:$kbps",
+        sort = "abr~$kbps",
         label = "~$kbps kbps",
         ext = "",
         vcodec = null,
@@ -102,10 +102,10 @@ object BatchAudioFormats {
      * A ladder row is handed on as it is and resolved by the engine at download time. A
      * concrete format lands on the same id; a link that lacks it takes its best audio.
      */
-    fun pick(info: MediaInfo, choice: MediaFormat?, language: String?): MediaFormat? = when {
-        choice == null || choice.formatId == BEST.formatId -> info.bestAudioFor(language)
+    fun pick(info: MediaInfo, choice: MediaFormat?, language: String?, codec: AudioCodec? = null): MediaFormat? = when {
+        choice == null || choice.formatId == BEST.formatId -> info.bestAudioFor(language, codec)
         choice.isGeneric -> choice
         else -> info.audioFormats.firstOrNull { !it.isGeneric && it.formatId == choice.formatId }
-            ?: info.bestAudioFor(language)
+            ?: info.bestAudioFor(language, codec)
     }
 }

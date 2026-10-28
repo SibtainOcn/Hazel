@@ -17,6 +17,12 @@ object GenericFormats {
      */
     val VIDEO_HEIGHTS = listOf(2160, 1440, 1080, 720, 480, 360, 240, 144)
 
+    /** The 16:9 frame each ladder height names, so a rung reads like a real stream's row. */
+    private val WIDE_WIDTHS = mapOf(
+        2160 to 3840, 1440 to 2560, 1080 to 1920, 720 to 1280,
+        480 to 854, 360 to 640, 240 to 426, 144 to 256
+    )
+
     /**
      * The quality ceiling a ladder row stands for, in the terms a set of links keeps it:
      * 0 for best, [WORST_HEIGHT] for the smallest, the height otherwise.
@@ -36,7 +42,7 @@ object GenericFormats {
         formatId = "bv_${height}p",
         selector = "bv*+ba/b",
         sort = "res:$height",
-        label = "~${height}p",
+        label = WIDE_WIDTHS[height]?.let { "${height}p (${it}x$height)" } ?: "${height}p",
         ext = "",
         vcodec = null,
         acodec = null,
@@ -67,19 +73,39 @@ object GenericFormats {
     )
 
     /**
+     * [info] as its sheet shows it before the read: the ladders in place of the bare best
+     * rows, for each kind the link offers, so a quality can be chosen and downloaded while
+     * the read runs. A read link is returned as it is, so the real list replaces the ladder.
+     */
+    fun untilRead(info: MediaInfo, bestVideo: String, bestAudio: String, worst: String): MediaInfo {
+        if (info.hasResolvedFormats) return info
+        return info.copy(
+            videoFormats = if (info.videoFormats.isEmpty()) emptyList() else videoLadder(bestVideo, worst),
+            audioFormats = if (info.audioFormats.isEmpty()) emptyList() else BatchAudioFormats.ladder(bestAudio, worst)
+        )
+    }
+
+    /**
      * [choice], made before [info] was read, as it applies to what [info] turned out to
      * offer: a height becomes the tallest stream under it, best and worst their concrete
      * streams, and a bitrate step stays the expression it is. A concrete format is kept
-     * where the link has it.
+     * where the link has it. The preferred codecs are taken where the link offers them,
+     * as the sheet does for a link read before it opened.
      */
-    fun applyTo(info: MediaInfo, choice: MediaFormat, language: String?): MediaFormat? = when {
+    fun applyTo(
+        info: MediaInfo,
+        choice: MediaFormat,
+        language: String?,
+        videoCodec: VideoCodec? = null,
+        audioCodec: AudioCodec? = null
+    ): MediaFormat? = when {
         !choice.isGeneric ->
             (info.videoFormats + info.audioFormats).firstOrNull { it.formatId == choice.formatId } ?: choice
         choice.hasVideo -> when (choice.formatId) {
-            MediaProbe.BEST_VIDEO.formatId -> info.autoPick(true, 0, language)
-            WORST_VIDEO.formatId -> info.autoPick(true, WORST_HEIGHT, language)
-            else -> info.autoPick(true, choice.height, language)
+            MediaProbe.BEST_VIDEO.formatId -> info.autoPick(true, 0, language, videoCodec = videoCodec)
+            WORST_VIDEO.formatId -> info.autoPick(true, WORST_HEIGHT, language, videoCodec = videoCodec)
+            else -> info.autoPick(true, choice.height, language, videoCodec = videoCodec)
         } ?: choice
-        else -> BatchAudioFormats.pick(info, choice, language) ?: choice
+        else -> BatchAudioFormats.pick(info, choice, language, audioCodec) ?: choice
     }
 }

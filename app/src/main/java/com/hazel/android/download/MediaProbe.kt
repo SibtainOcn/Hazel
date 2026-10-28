@@ -518,9 +518,23 @@ object MediaProbe {
             // first real entry does not, and it cannot show the size, codec and
             // resolution that entry can.
             videoFormats = video.ifEmpty { listOf(BEST_VIDEO) },
-            audioFormats = audio.ifEmpty { listOf(BEST_AUDIO) }
+            audioFormats = audio.ifEmpty { listOf(BEST_AUDIO) },
+            subtitles = media.optJSONObject("subtitles").keyList().filterNot { it == "live_chat" },
+            autoCaptions = spokenCaptions(media.optJSONObject("automatic_captions").keyList())
         )
     }
+
+    /**
+     * The auto captions in the spoken language. YouTube names that track "<lang>-orig" when it
+     * also offers machine translations; a short list with none is the spoken track itself.
+     */
+    private fun spokenCaptions(keys: List<String>): List<String> =
+        keys.filter { it.endsWith("-orig") }.ifEmpty { keys.takeIf { it.size <= SPOKEN_CAPTIONS_MAX }.orEmpty() }
+
+    private const val SPOKEN_CAPTIONS_MAX = 3
+
+    private fun JSONObject?.keyList(): List<String> =
+        this?.keys()?.asSequence()?.filter { it.isNotBlank() }?.toList().orEmpty()
 
     /**
      * Reads the `formats` array, or synthesises a single entry from the top-level fields
@@ -629,7 +643,8 @@ object MediaProbe {
             fileSizeBytes = exactSize ?: reportedApprox ?: estimatedSize,
             isEstimatedSize = exactSize == null,
             hasVideo = hasVideo,
-            hasAudio = hasAudio
+            hasAudio = hasAudio,
+            hls = json.optString("protocol").startsWith("m3u8")
         )
     }
 

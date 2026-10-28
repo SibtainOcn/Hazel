@@ -38,6 +38,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import com.hazel.android.ui.screens.history.DownloadPropertiesSheet
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -237,6 +241,16 @@ fun DownloadScreen(
         dock.start(null)
     }
     var sheetVisible by remember { mutableStateOf(false) }
+    // A card held down, for its action dialog, and the saved copy whose properties are open.
+    var heldInfo by remember { mutableStateOf<MediaInfo?>(null) }
+    var propertiesEntry by remember { mutableStateOf<HistoryEntry?>(null) }
+    // Starts a link straight in the large player, from the sheet or a held card.
+    val playLarge: (MediaInfo) -> Unit = { info ->
+        sheetVisible = false
+        playerFullscreen = false
+        playingUrl = info.url
+        dock.startLarge(info.url)
+    }
     var batchSheetVisible by remember { mutableStateOf(false) }
 
     // Picking a destination, any folder or an SD card, with the grant persisted so the
@@ -634,7 +648,8 @@ fun DownloadScreen(
                                     onPlayerGone = { dock.onCardGone(info.url, playerFullscreen) },
                                     onPlayerTakenOver = { dock.toMini(info.url) },
                                     onOpenSheet = openSheet,
-                                    onOpenQueue = onOpenQueue
+                                    onOpenQueue = onOpenQueue,
+                                    onHold = { heldInfo = info }
                                 )
                             }
                         }
@@ -958,6 +973,38 @@ fun DownloadScreen(
         )
     }
 
+    heldInfo?.let { info ->
+        // The saved copy, if its file is still there; presence is already read off the main thread.
+        val entry = listedEntries.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
+        val onDevice = entry?.takeIf { info.url in savedUrls }
+        MediaHoldDialog(
+            info = info,
+            onDismiss = { heldInfo = null },
+            onPlay = if (info.canStream) { { heldInfo = null; playLarge(info) } } else null,
+            onDownload = {
+                heldInfo = null
+                downloadViewModel.selectResult(info)
+                downloadViewModel.resolveFormats(info)
+                sheetVisible = true
+            },
+            onOpen = onDevice?.let { saved -> { heldInfo = null; MediaOpener.play(context, saved.fileUri, saved.isVideo) } },
+            onProperties = entry?.let { saved -> { heldInfo = null; propertiesEntry = saved } }
+        )
+    }
+
+    propertiesEntry?.let { entry ->
+        DownloadPropertiesSheet(
+            entry = entry,
+            present = presence[entry.id] ?: false,
+            onDismiss = { propertiesEntry = null },
+            onRemove = {
+                propertiesEntry = null
+                scope.launch { DownloadHistoryRepository.remove(context, entry.id) }
+            },
+            onDelete = null
+        )
+    }
+
     if (searchOpen) {
         SearchScreen(
             // Opened empty rather than prefilled: a prefilled field would filter the
@@ -1022,21 +1069,9 @@ fun DownloadScreen(
 
     if (sheetVisible) {
         state.info?.let { info ->
-            // A link already downloaded and still on the device is one the user may have
-            // come back to in order to watch rather than to fetch again. The sheet says so
-            // by offering to play it, next to the action that would download it a second
-            // time. Checked only while the sheet is open, since it touches the filesystem.
-            var onDevice by remember(info.url) { mutableStateOf<HistoryEntry?>(null) }
-            LaunchedEffect(info.url, history) {
-                val entry = history.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
-                onDevice = entry?.takeIf { DownloadHistoryRepository.fileExists(context, it) }
-            }
-
             FormatSheet(
                 info = info,
-                onPlay = onDevice?.let { entry ->
-                    { MediaOpener.play(context, entry.fileUri, entry.isVideo) }
-                },
+                onPlay = if (info.canStream) { { playLarge(info) } } else null,
                 options = options,
                 onOptionsChange = {
                     scope.launch { SettingsRepository.setDownloadOptions(context, it) }
@@ -1154,7 +1189,12 @@ internal fun UrlSearchBar(
                 modifier = Modifier
                     .size(38.dp)
                     .clip(MaterialShapes.Cookie7Sided.toShape())
-                    .background(MaterialTheme.colorScheme.primary),
+                    // The accent eased a quarter toward the bar, so it reads tonal beside it.
+                    .background(androidx.compose.ui.graphics.lerp(
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.surfaceContainerHighest,
+                        0.25f
+                    )),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -1285,13 +1325,15 @@ private fun MediaCard(
     onPlayerGone: () -> Unit = {},
     onPlayerTakenOver: () -> Unit = {},
     onOpenSheet: () -> Unit,
-    onOpenQueue: () -> Unit
+    onOpenQueue: () -> Unit,
+    onHold: () -> Unit = {}
 ) {
     val isPaused = batchItem?.state == BatchState.PAUSED
     val isQueued = batchItem?.state == BatchState.QUEUED
     // A download in hand is managed from the queue, so the card leads there instead of back
     // to the sheet that started it.
     val inHand = isDownloading || isPaused || isQueued
+    val haptics = LocalHapticFeedback.current
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -1308,8 +1350,12 @@ private fun MediaCard(
                     } else Modifier
                 )
                 .background(MaterialTheme.colorScheme.surfaceVariant)
-                .clickable(
+                .combinedClickable(
                     onClickLabel = if (inHand) stringResource(R.string.download_open_queue) else null,
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onHold()
+                    },
                     onClick = if (inHand) onOpenQueue else onOpenSheet
                 )
         ) {
@@ -1587,6 +1633,10 @@ private fun CornerTag(
         )
     }
 }
+
+/** A video the player can stream: not a premiere yet to start, and not read as audio only. */
+private val MediaInfo.canStream: Boolean
+    get() = !isUpcoming && (!hasResolvedFormats || videoFormats.isNotEmpty())
 
 /**
  * The site's front page, which is where a sign-in starts. Cookies are stored per site, so

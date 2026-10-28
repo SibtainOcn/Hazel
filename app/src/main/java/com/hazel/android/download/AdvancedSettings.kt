@@ -270,7 +270,7 @@ fun YoutubeDLRequest.applyAdvanced(
  * Adds the extra download arguments. Kept apart from [applyAdvanced] because they belong to
  * downloads only, and go last, so that one of them can change what the app set before it.
  */
-fun YoutubeDLRequest.applyExtraDownloadArguments(settings: AdvancedSettings = AdvancedSettingsStore.current) {
+fun YoutubeDLRequest.applyExtraDownloadArguments(settings: AdvancedSettings = AdvancedSettingsStore.ready()) {
     val args = settings.downloadArguments()
     var i = 0
     while (i < args.size) {

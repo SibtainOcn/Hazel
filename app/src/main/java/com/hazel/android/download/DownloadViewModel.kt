@@ -32,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -564,7 +565,7 @@ class DownloadViewModel : ViewModel() {
             when {
                 results.size > 1 -> {
                     val plans = results.mapNotNull { info ->
-                        GenericFormats.applyTo(info, format, audioLanguage)?.let {
+                        GenericFormats.applyTo(info, format, audioLanguage, options.videoCodecPreference, options.audioCodecPreference)?.let {
                             DownloadPlan(info, it, info.title, info.uploader, audioLanguage)
                         }
                     }
@@ -573,7 +574,7 @@ class DownloadViewModel : ViewModel() {
 
                 results.size == 1 -> {
                     val info = results.first()
-                    val chosen = GenericFormats.applyTo(info, format, audioLanguage) ?: format
+                    val chosen = GenericFormats.applyTo(info, format, audioLanguage, options.videoCodecPreference, options.audioCodecPreference) ?: format
                     startDownload(
                         context = app,
                         format = chosen,
@@ -600,7 +601,7 @@ class DownloadViewModel : ViewModel() {
     private val instantReads = mutableSetOf<String>()
     private val instantReadSlots = Semaphore(FORMAT_READS_AT_ONCE)
 
-    /** The Instant reads in flight, by link, so a reading card's Cancel can stop its read. */
+    /** Reads in flight before a download exists (Instant, or a sheet waiting on formats), by link, so a reading card's Cancel can stop it. */
     private val instantJobs = java.util.concurrent.ConcurrentHashMap<String, Job>()
 
     /**
@@ -669,7 +670,7 @@ class DownloadViewModel : ViewModel() {
                     val format = if (audioOnly) {
                         info.autoPick(false, 0, language, options.audioCodecPreference) ?: BatchAudioFormats.BEST
                     } else {
-                        GenericFormats.applyTo(info, step, null) ?: step
+                        GenericFormats.applyTo(info, step, null, options.videoCodecPreference) ?: step
                     }
                     DownloadPlan(info, format, info.title, info.uploader, language)
                 }
@@ -781,24 +782,45 @@ class DownloadViewModel : ViewModel() {
         saveDirs: com.hazel.android.data.SaveDirs
     ) {
         val app = context.applicationContext
-        viewModelScope.launch {
-            withTimeoutOrNull(FORMAT_WAIT_MS) { _formatsReading.first { info.url !in it } }
-            val read = _state.value.results.firstOrNull { it.url == info.url }
-                ?.takeIf { it.hasResolvedFormats }
-                ?: InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
-                ?: info
-            val chosen = GenericFormats.applyTo(read, format, audioLanguage) ?: format
-            startDownload(
-                context = app,
-                format = chosen,
-                options = options,
-                title = title.ifBlank { read.title },
-                author = author.ifBlank { read.uploader },
-                audioLanguage = audioLanguage,
-                info = read,
-                saveDirs = saveDirs
-            )
+        // On the Running tab as being read from the moment Download is pressed, and its
+        // Cancel stops the wait. Replaced by the real entry once the download starts. One
+        // wait per link, as with Instant, so pressing Download twice is one download.
+        val waiting = BatchItem(url = info.url, title = title.ifBlank { info.title.ifBlank { info.url } }, reading = true)
+        val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
+            val self = coroutineContext.job
+            var dropped = false
+            val dropWaiting = {
+                if (!dropped) {
+                    dropped = true
+                    instantJobs.remove(info.url, self)
+                    _state.update { s -> s.copy(batch = s.batch - waiting) }
+                }
+            }
+            try {
+                withTimeoutOrNull(FORMAT_WAIT_MS) { _formatsReading.first { info.url !in it } }
+                val read = _state.value.results.firstOrNull { it.url == info.url }
+                    ?.takeIf { it.hasResolvedFormats }
+                    ?: InfoCache.metadataFor(info.url)?.takeIf { it.hasResolvedFormats }
+                    ?: info
+                val chosen = GenericFormats.applyTo(read, format, audioLanguage, options.videoCodecPreference, options.audioCodecPreference) ?: format
+                dropWaiting()
+                startDownload(
+                    context = app,
+                    format = chosen,
+                    options = options,
+                    title = title.ifBlank { read.title },
+                    author = author.ifBlank { read.uploader },
+                    audioLanguage = audioLanguage,
+                    info = read,
+                    saveDirs = saveDirs
+                )
+            } finally {
+                dropWaiting()
+            }
         }
+        if (instantJobs.putIfAbsent(info.url, job) != null) return
+        _state.update { it.copy(batch = it.batch + waiting) }
+        job.start()
     }
 
     // ── Metadata ──
@@ -1488,7 +1510,8 @@ class DownloadViewModel : ViewModel() {
             val limits = TransferLimits(
                 speedLimit = SettingsRepository.getSpeedLimit(app).first(),
                 concurrentFragments = SettingsRepository.getConcurrentFragments(app).first(),
-                throttledRate = SettingsRepository.getThrottledRate(app).first()
+                throttledRate = SettingsRepository.getThrottledRate(app).first(),
+                forceIpv4 = SettingsRepository.getForceIpv4(app).first()
             )
 
             // Whether this run stopped for a pause, which is not the same as finishing.
@@ -1947,7 +1970,7 @@ class DownloadViewModel : ViewModel() {
      * and disk queue record, without disturbing the active download.
      */
     fun cancelItem(url: String) {
-        // A link Instant is still reading has nothing downloading yet: stopping the read is
+        // A link still being read has nothing downloading yet: stopping the read is
         // the whole of it.
         instantJobs[url]?.let { job ->
             job.cancel()
@@ -2424,7 +2447,8 @@ class DownloadViewModel : ViewModel() {
         }
         // Below this speed the links are taken to be throttled and fetched again.
         if (limits.throttledRate.isNotBlank()) addOption("--throttled-rate", limits.throttledRate)
-        addOption("--no-check-certificates")
+        if (limits.forceIpv4) addOption("--force-ipv4")
+        // Certificates are checked unless Advanced turns that off, which applyAdvanced adds.
         addOption("--cache-dir", ytDlpCacheDir.absolutePath)
 
         // Saved sign-ins, which are what make age-restricted and members-only media
@@ -2658,9 +2682,12 @@ class DownloadViewModel : ViewModel() {
     private fun YoutubeDLRequest.applySubtitles(options: DownloadOptions) {
         // yt-dlp keeps the subtitle files it embedded only when they were also asked for as
         // files, so keeping them after embedding is asking for them as files as well.
-        if (options.writeSubs || (options.embedSubs && !options.deleteSubsAfterEmbed)) {
-            addOption("--write-subs")
-        }
+        val keepFiles = options.writeSubs || (options.embedSubs && !options.deleteSubsAfterEmbed)
+        // Named outright: yt-dlp fetches the uploaded subtitles for --embed-subs only while
+        // auto captions are off, so with both on it embedded the auto ones alone. Files
+        // fetched only to embed are then removed with no-keep-subs.
+        if (keepFiles || options.embedSubs) addOption("--write-subs")
+        if (options.embedSubs && !keepFiles) addOption("--compat-options", "no-keep-subs")
         if (options.writeAutoSubs) addOption("--write-auto-subs")
         if (options.embedSubs) addOption("--embed-subs")
 
@@ -3370,7 +3397,9 @@ internal fun workDirName(url: String): String {
 internal data class TransferLimits(
     val speedLimit: String = "",
     val concurrentFragments: Int = 8,
-    val throttledRate: String = ""
+    val throttledRate: String = "",
+    /** Fetch settings' Force IPv4, which a network with broken IPv6 needs for the media too. */
+    val forceIpv4: Boolean = false
 )
 
 /** What a cancelled item's entry says, as opposed to a failure's reason. */

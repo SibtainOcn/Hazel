@@ -30,7 +30,11 @@ data class MediaInfo(
      * Which reader produced the formats. Kept so a format list reopened on this link names
      * the reader its rows came from, and so switching readers can find each one's last read.
      */
-    val readBy: ListingSource = ListingSource.YT_DLP
+    val readBy: ListingSource = ListingSource.YT_DLP,
+    /** Uploaded subtitle languages, as the `--sub-langs` keys the source names them by. */
+    val subtitles: List<String> = emptyList(),
+    /** Auto captions in the spoken language, by their `--sub-langs` key; translations are left out. */
+    val autoCaptions: List<String> = emptyList()
 ) {
     /** Streaming now. */
     val isLive: Boolean get() = liveStatus == "is_live"
@@ -47,17 +51,18 @@ data class MediaInfo(
      * there is nothing concrete to show.
      */
     val bestVideo: MediaFormat?
-        get() = videoFormats.firstOrNull { !it.isGeneric } ?: videoFormats.firstOrNull()
+        get() = videoFormats.firstOrNull { !it.isGeneric }?.let { videoFormats.directFor(it) }
+            ?: videoFormats.firstOrNull()
 
     val bestAudio: MediaFormat?
-        get() = audioFormats.firstOrNull { !it.isGeneric } ?: audioFormats.firstOrNull()
+        get() = audioFormats.firstDirect { !it.isGeneric } ?: audioFormats.firstOrNull()
 
     /**
      * Audio track paired with a video-only stream when the file is muxed. Naming the track
      * lets the sheet show its format id instead of leaving the merge unexplained.
      */
     val mergeAudio: MediaFormat?
-        get() = audioFormats.firstOrNull { !it.isGeneric }
+        get() = audioFormats.firstDirect { !it.isGeneric }
 
     /**
      * The soundtracks this media carries, in the order the source listed them, which puts
@@ -97,16 +102,16 @@ data class MediaInfo(
             if (concrete.isEmpty()) return codec.genericFormat()
             val inLanguage = if (language.isNullOrBlank()) concrete
             else concrete.filter { it.language == language }
-            inLanguage.firstOrNull { codec.matches(it) }?.let { return it }
+            inLanguage.firstDirect { codec.matches(it) }?.let { return it }
         }
         if (language.isNullOrBlank()) return bestAudio
-        return audioFormats.firstOrNull { !it.isGeneric && it.language == language } ?: bestAudio
+        return audioFormats.firstDirect { !it.isGeneric && it.language == language } ?: bestAudio
     }
 
     /** The track a muxed video download takes its sound from, in [language] where there is one. */
     fun mergeAudioFor(language: String?): MediaFormat? {
         if (language.isNullOrBlank()) return mergeAudio
-        return audioFormats.firstOrNull { !it.isGeneric && it.language == language } ?: mergeAudio
+        return audioFormats.firstDirect { !it.isGeneric && it.language == language } ?: mergeAudio
     }
 
     /** True once the source has reported at least one concrete format. */
@@ -137,7 +142,8 @@ data class MediaInfo(
         // up resolution for it: a sharper picture in another codec is the better answer.
         val chosen = pickVideo(concrete, maxHeight) ?: return null
         if (videoCodec == null || chosen.isGeneric) return chosen
-        return concrete.firstOrNull { it.height == chosen.height && videoCodec.matches(it) } ?: chosen
+        val inCodec = concrete.filter { it.height == chosen.height && videoCodec.matches(it) }
+        return inCodec.firstOrNull { !it.hls } ?: inCodec.firstOrNull() ?: chosen
     }
 
     private fun pickVideo(concrete: List<MediaFormat>, maxHeight: Int): MediaFormat? {
@@ -146,6 +152,8 @@ data class MediaInfo(
         }
         if (maxHeight <= 0) return bestVideo
         if (concrete.isEmpty()) {
+            // Before the read, the ladder row for that height, so the sheet shows it chosen.
+            videoFormats.firstOrNull { it.isGeneric && it.height == maxHeight }?.let { return it }
             return MediaFormat(
                 formatId = "bv*[height<=$maxHeight]",
                 selector = "bv*[height<=$maxHeight]+ba/b[height<=$maxHeight]/bv*+ba/b",
@@ -163,10 +171,24 @@ data class MediaInfo(
             )
         }
 
-        return concrete.firstOrNull { it.height in 1..maxHeight }
+        val first = concrete.firstOrNull { it.height in 1..maxHeight }
             ?: concrete.minByOrNull { it.height }
-            ?: bestVideo
+            ?: return bestVideo
+        return concrete.directFor(first)
     }
+}
+
+/**
+ * [picked], or a direct stream of the same height in its place when [picked] is HLS: the
+ * same frame rate where there is one, so a faster download never costs smoothness.
+ */
+internal inline fun List<MediaFormat>.firstDirect(match: (MediaFormat) -> Boolean): MediaFormat? =
+    firstOrNull { !it.hls && match(it) } ?: firstOrNull(match)
+
+internal fun List<MediaFormat>.directFor(picked: MediaFormat): MediaFormat {
+    if (!picked.hls || picked.isGeneric) return picked
+    val direct = filter { !it.hls && !it.isGeneric && it.height == picked.height }
+    return direct.firstOrNull { it.fps >= picked.fps } ?: direct.firstOrNull() ?: picked
 }
 
 /**
@@ -205,7 +227,12 @@ data class MediaFormat(
      * target rather than a stream: "res:720" prefers the resolution closest to 720 without
      * going over, and the closest above only where nothing is at or under it.
      */
-    val sort: String? = null
+    val sort: String? = null,
+    /**
+     * Served as an HLS playlist, fetched in many small pieces. Slower to download than a
+     * direct stream of the same picture, so picks take a direct one where there is one.
+     */
+    val hls: Boolean = false
 ) {
     /**
      * The headline without the measured resolution after it.

@@ -3,6 +3,8 @@ package com.hazel.android.ui.screens.download
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import com.hazel.android.ui.components.FlatChip
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -210,7 +212,11 @@ fun LiveStreamDialog(
 fun SubtitlesDialog(
     options: DownloadOptions,
     onChange: (DownloadOptions) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** The link's uploaded subtitle keys, offered as chips when it has been read. */
+    available: List<String> = emptyList(),
+    /** Its auto captions in the spoken language, by key ("en-orig", or "en" with no translations). */
+    availableAuto: List<String> = emptyList()
 ) {
     var languageDialog by remember { mutableStateOf(false) }
 
@@ -251,6 +257,35 @@ fun SubtitlesDialog(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                     )
                 }
+
+                // What this link has, to pick from rather than type. A tap adds or removes
+                // that key in the languages above.
+                if (available.isNotEmpty() || availableAuto.isNotEmpty()) {
+                    val tokens = subLanguageKeys(options.subLanguages)
+                    val chosen = (available + availableAuto).filter { key -> tokens.any { subLangMatches(it, key) } }.toSet()
+                    val toggle: (String) -> Unit = { key ->
+                        // Off also drops a pattern that takes it, such as ".*-orig".
+                        val next = if (key in chosen) tokens.filterNot { subLangMatches(it, key) } else tokens + key
+                        onChange(options.copy(subLanguages = next.joinToString(",").ifBlank { DownloadOptions.DEFAULT_SUB_LANGUAGES }))
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        available.forEach { key ->
+                            FlatChip(label = subtitleName(key), selected = key in chosen, compact = true, onClick = { toggle(key) })
+                        }
+                        availableAuto.filterNot { it in available }.forEach { key ->
+                            FlatChip(
+                                label = stringResource(R.string.options_subtitles_auto_caption, subtitleName(key.removeSuffix("-orig"))),
+                                selected = key in chosen,
+                                compact = true,
+                                onClick = { toggle(key) }
+                            )
+                        }
+                    }
+                }
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.options_subtitles_dismiss)) } }
@@ -273,6 +308,18 @@ fun SubtitlesDialog(
         )
     }
 }
+
+/** The keys and patterns of a `--sub-langs` value, the default when it is blank. */
+internal fun subLanguageKeys(value: String): List<String> =
+    value.ifBlank { DownloadOptions.DEFAULT_SUB_LANGUAGES }.split(',').map { it.trim() }.filter { it.isNotEmpty() }.distinct()
+
+/** Whether one `--sub-langs` entry takes [key]: by name, or as yt-dlp's regex. Exclusions ("-x") take nothing. */
+internal fun subLangMatches(entry: String, key: String): Boolean =
+    entry == key || (!entry.startsWith("-") && runCatching { Regex(entry).matches(key) }.getOrDefault(false))
+
+private fun subtitleName(key: String): String =
+    java.util.Locale.forLanguageTag(key).getDisplayName(java.util.Locale.getDefault())
+        .takeIf { it.isNotBlank() && !it.equals(key, ignoreCase = true) } ?: key
 
 @Composable
 internal fun ToggleRow(

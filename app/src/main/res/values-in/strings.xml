@@ -252,6 +252,7 @@
     <string name="options_subtitles_save">Simpan subtitel</string>
     <string name="options_subtitles_save_auto">Simpan subtitel otomatis</string>
     <string name="options_subtitles_languages_label">Bahasa subtitel</string>
+    <string name="options_subtitles_auto_caption">%1$s (otomatis)</string>
     <string name="options_subtitles_dismiss">Tutup</string>
     <string name="options_subtitles_languages_title">Bahasa subtitel</string>
     <string name="options_subtitles_languages_hint">Pemilih bahasa yt-dlp, mis. en,.*-orig. Gunakan all untuk semua bahasa.</string>
