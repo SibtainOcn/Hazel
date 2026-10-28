@@ -43,11 +43,14 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.tan
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
 
 /**
  * Placeholder skeletons with one highlight travelling across them.
  *
- * The skeleton is drawn as it is, then masked: everything sits at [RESTING_ALPHA], and a
+ * The skeleton is drawn as it is, then masked: everything sits at [fun MediaCardShimmer], and a
  * soft band as wide as the skeleton sweeps across it at full strength. Because the band
  * changes opacity rather than adding light, it shows the same in either theme and on any
  * colour of block, and the gaps between blocks stay empty since there is nothing there to
@@ -338,6 +341,7 @@ fun Modifier.refreshShine(progress: Float, shape: Shape = RoundedCornerShape(26.
  * title and author along the top, duration and state badges along the bottom, so nothing
  * moves when the real card takes its place.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MediaCardShimmer(modifier: Modifier = Modifier) {
     Box(
@@ -384,13 +388,13 @@ fun MediaCardShimmer(modifier: Modifier = Modifier) {
                 .shimmerBlock(RoundedCornerShape(5.dp))
         )
 
+        // Where the card's play button lands: the same six-sided cookie, size and inset.
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
-                .width(56.dp)
-                .height(18.dp)
-                .shimmerBlock(RoundedCornerShape(5.dp))
+                .padding(10.dp)
+                .size(44.dp)
+                .shimmerBlock(MaterialShapes.Cookie6Sided.toShape())
         )
     }
 }
