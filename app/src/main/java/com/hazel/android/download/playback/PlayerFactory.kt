@@ -66,7 +66,8 @@ object PlayerFactory {
         } else if (isHls || path.endsWith(".m3u8")) {
             HlsMediaSource.Factory(http).createMediaSource(item)
         } else {
-            ProgressiveMediaSource.Factory(http).createMediaSource(item)
+            val reader = if (ChunkedDataSource.needsChunks(url)) ChunkedDataSource.Factory(http) else http
+            ProgressiveMediaSource.Factory(reader).createMediaSource(item)
         }
     }
 
