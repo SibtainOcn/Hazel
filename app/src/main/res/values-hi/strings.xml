@@ -257,7 +257,17 @@
     <string name="options_subtitles_languages_title">उपशीर्षक की भाषाएँ</string>
     <string name="options_subtitles_languages_hint">yt-dlp भाषा चयनकर्ता, जैसे en,.*-orig। हर भाषा के लिए all लिखें।</string>
     <string name="options_filename_title">फ़ाइल नाम टेम्पलेट</string>
-    <string name="options_filename_hint" formatted="false">yt-dlp का आउटपुट टेम्पलेट। %(title)s, %(uploader)s, %(id)s और %(ext)s इस्तेमाल करें।</string>
+    <string name="options_filename_presets">प्रीसेट</string>
+    <string name="options_filename_fields">फ़ील्ड जोड़ें</string>
+    <string name="options_filename_subtitle">डाउनलोड की गई फ़ाइलों के नाम कैसे हों</string>
+    <string name="options_filename_clear">साफ़ करें</string>
+    <string name="filename_preset_title">शीर्षक</string>
+    <string name="filename_preset_uploader_title">अपलोडर – शीर्षक</string>
+    <string name="filename_preset_date_title">तारीख – शीर्षक</string>
+    <string name="filename_preset_playlist_title">प्लेलिस्ट क्रमांक – शीर्षक</string>
+    <string name="filename_preset_title_id">शीर्षक [ID]</string>
+    <string name="filename_preset_title_resolution">शीर्षक (रिज़ॉल्यूशन)</string>
+    <string name="filename_preset_artist_track">कलाकार – ट्रैक</string>
     <string name="options_text_input_save">सहेजें</string>
     <string name="options_text_input_cancel">रद्द करें</string>
 

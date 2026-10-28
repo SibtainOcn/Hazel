@@ -261,7 +261,17 @@
     <string name="options_subtitles_languages_title">Idiomas das legendas</string>
     <string name="options_subtitles_languages_hint">Um seletor de idioma do yt-dlp, ex. en,.*-orig. Use all para todos os idiomas.</string>
     <string name="options_filename_title">Modelo do nome do arquivo</string>
-    <string name="options_filename_hint" formatted="false">Modelo de saída do yt-dlp. Use %(title)s, %(uploader)s, %(id)s e %(ext)s.</string>
+    <string name="options_filename_presets">Predefinições</string>
+    <string name="options_filename_fields">Inserir um campo</string>
+    <string name="options_filename_subtitle">Como os arquivos baixados são nomeados</string>
+    <string name="options_filename_clear">Limpar</string>
+    <string name="filename_preset_title">Título</string>
+    <string name="filename_preset_uploader_title">Autor – Título</string>
+    <string name="filename_preset_date_title">Data – Título</string>
+    <string name="filename_preset_playlist_title">Número na playlist – Título</string>
+    <string name="filename_preset_title_id">Título [ID]</string>
+    <string name="filename_preset_title_resolution">Título (resolução)</string>
+    <string name="filename_preset_artist_track">Artista – Faixa</string>
     <string name="options_text_input_save">Salvar</string>
     <string name="options_text_input_cancel">Cancelar</string>
 

@@ -257,7 +257,17 @@
     <string name="options_subtitles_languages_title">Untertitelsprachen</string>
     <string name="options_subtitles_languages_hint">Ein yt-dlp-Sprachfilter, z. B. en,.*-orig. all wählt jede Sprache.</string>
     <string name="options_filename_title">Dateinamen-Vorlage</string>
-    <string name="options_filename_hint" formatted="false">yt-dlp-Ausgabevorlage. Nutze %(title)s, %(uploader)s, %(id)s und %(ext)s.</string>
+    <string name="options_filename_presets">Vorlagen</string>
+    <string name="options_filename_fields">Feld einfügen</string>
+    <string name="options_filename_subtitle">So werden Downloads benannt</string>
+    <string name="options_filename_clear">Leeren</string>
+    <string name="filename_preset_title">Titel</string>
+    <string name="filename_preset_uploader_title">Uploader – Titel</string>
+    <string name="filename_preset_date_title">Datum – Titel</string>
+    <string name="filename_preset_playlist_title">Playlist-Nummer – Titel</string>
+    <string name="filename_preset_title_id">Titel [ID]</string>
+    <string name="filename_preset_title_resolution">Titel (Auflösung)</string>
+    <string name="filename_preset_artist_track">Interpret – Titel</string>
     <string name="options_text_input_save">Speichern</string>
     <string name="options_text_input_cancel">Abbrechen</string>
 

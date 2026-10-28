@@ -253,7 +253,17 @@
     <string name="options_subtitles_languages_title">字幕の言語</string>
     <string name="options_subtitles_languages_hint">yt-dlp の言語指定。例：en,.*-orig。all ですべての言語。</string>
     <string name="options_filename_title">ファイル名テンプレート</string>
-    <string name="options_filename_hint" formatted="false">yt-dlp の出力テンプレート。%(title)s、%(uploader)s、%(id)s、%(ext)s が使用できます。</string>
+    <string name="options_filename_presets">プリセット</string>
+    <string name="options_filename_fields">フィールドを挿入</string>
+    <string name="options_filename_subtitle">ダウンロードしたファイルの名前の付け方</string>
+    <string name="options_filename_clear">クリア</string>
+    <string name="filename_preset_title">タイトル</string>
+    <string name="filename_preset_uploader_title">投稿者 – タイトル</string>
+    <string name="filename_preset_date_title">日付 – タイトル</string>
+    <string name="filename_preset_playlist_title">プレイリスト番号 – タイトル</string>
+    <string name="filename_preset_title_id">タイトル [ID]</string>
+    <string name="filename_preset_title_resolution">タイトル (解像度)</string>
+    <string name="filename_preset_artist_track">アーティスト – 曲名</string>
     <string name="options_text_input_save">保存</string>
     <string name="options_text_input_cancel">キャンセル</string>
 

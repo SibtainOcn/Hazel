@@ -61,7 +61,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import com.hazel.android.ui.components.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
+import com.hazel.android.ui.components.ExpressiveTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -579,7 +579,7 @@ private fun AddSignInSheet(onContinue: (String) -> Unit, onDismiss: () -> Unit) 
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
             )
             Spacer(modifier = Modifier.height(20.dp))
-            OutlinedTextField(
+            ExpressiveTextField(
                 value = url,
                 onValueChange = { url = it },
                 label = { Text(stringResource(R.string.cookies_field_url)) },
@@ -656,7 +656,7 @@ private fun CookieDetailSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            OutlinedTextField(
+            ExpressiveTextField(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text(stringResource(R.string.cookies_field_title)) },
@@ -665,7 +665,7 @@ private fun CookieDetailSheet(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
+            ExpressiveTextField(
                 value = url,
                 onValueChange = { url = it },
                 label = { Text(stringResource(R.string.cookies_field_url)) },

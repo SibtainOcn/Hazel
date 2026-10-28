@@ -128,7 +128,7 @@ import com.hazel.android.ui.screens.download.rememberUseCookies
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.ui.screens.download.FEEDBACK_MS
 import com.hazel.android.ui.screens.download.FeedbackToast
-import com.hazel.android.ui.screens.download.FilenameTemplateDialog
+import com.hazel.android.ui.screens.download.FilenameTemplateSheet
 import com.hazel.android.ui.screens.download.FormatSheet
 import com.hazel.android.ui.screens.download.OptionChip
 import com.hazel.android.ui.screens.download.SheetSection
@@ -1065,7 +1065,7 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
-        BatchSheet.FILENAME -> FilenameTemplateDialog(
+        BatchSheet.FILENAME -> FilenameTemplateSheet(
             template = options.filenameTemplate,
             onConfirm = {
                 onOptionsChange(options.copy(filenameTemplate = it))

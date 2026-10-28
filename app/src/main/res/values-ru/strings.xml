@@ -265,7 +265,17 @@
     <string name="options_subtitles_languages_title">Языки субтитров</string>
     <string name="options_subtitles_languages_hint">Выбор языков yt-dlp, напр. en,.*-orig. all — все языки.</string>
     <string name="options_filename_title">Шаблон имени файла</string>
-    <string name="options_filename_hint" formatted="false">Шаблон вывода yt-dlp. Используйте %(title)s, %(uploader)s, %(id)s и %(ext)s.</string>
+    <string name="options_filename_presets">Шаблоны</string>
+    <string name="options_filename_fields">Вставить поле</string>
+    <string name="options_filename_subtitle">Как называются скачанные файлы</string>
+    <string name="options_filename_clear">Очистить</string>
+    <string name="filename_preset_title">Название</string>
+    <string name="filename_preset_uploader_title">Автор – Название</string>
+    <string name="filename_preset_date_title">Дата – Название</string>
+    <string name="filename_preset_playlist_title">Номер в плейлисте – Название</string>
+    <string name="filename_preset_title_id">Название [ID]</string>
+    <string name="filename_preset_title_resolution">Название (разрешение)</string>
+    <string name="filename_preset_artist_track">Исполнитель – Трек</string>
     <string name="options_text_input_save">Сохранить</string>
     <string name="options_text_input_cancel">Отмена</string>
 

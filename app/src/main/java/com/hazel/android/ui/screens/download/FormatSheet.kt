@@ -807,7 +807,7 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
-        SheetDialog.FILENAME -> FilenameTemplateDialog(
+        SheetDialog.FILENAME -> FilenameTemplateSheet(
             template = options.filenameTemplate,
             onConfirm = {
                 onOptionsChange(options.copy(filenameTemplate = it))

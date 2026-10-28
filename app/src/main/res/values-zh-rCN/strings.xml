@@ -253,7 +253,17 @@
     <string name="options_subtitles_languages_title">字幕语言</string>
     <string name="options_subtitles_languages_hint">yt-dlp 语言选择器，例如 en,.*-orig。输入 all 选择全部语言。</string>
     <string name="options_filename_title">文件名模板</string>
-    <string name="options_filename_hint" formatted="false">yt-dlp 的输出模板。可以使用 %(title)s、%(uploader)s、%(id)s 和 %(ext)s。</string>
+    <string name="options_filename_presets">预设</string>
+    <string name="options_filename_fields">插入字段</string>
+    <string name="options_filename_subtitle">下载文件的命名方式</string>
+    <string name="options_filename_clear">清除</string>
+    <string name="filename_preset_title">标题</string>
+    <string name="filename_preset_uploader_title">上传者 – 标题</string>
+    <string name="filename_preset_date_title">日期 – 标题</string>
+    <string name="filename_preset_playlist_title">播放列表序号 – 标题</string>
+    <string name="filename_preset_title_id">标题 [ID]</string>
+    <string name="filename_preset_title_resolution">标题 (分辨率)</string>
+    <string name="filename_preset_artist_track">艺术家 – 曲目</string>
     <string name="options_text_input_save">保存</string>
     <string name="options_text_input_cancel">取消</string>
 

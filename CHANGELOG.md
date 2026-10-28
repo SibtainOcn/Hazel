@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Home and Search: the paste button is larger and folds down onto an M3 rounded square.
 - More: the title and search stay pinned while the settings scroll.
 - Audio language: language codes sit on seven-sided cookies.
+- Format filter sheet: compact grouped lists with a cookie marking each choice.
+- Text fields across the app are rounded tiles with a thin rim instead of outlined boxes.
+- Filename template opens in a sheet with presets and tap-to-insert fields, and stays above the keyboard.
 - Search options: Clear history and Clear results sit beside the title on six-sided cookies, so the sheet is shorter.
 - Hazel Instant: the bolt sits on a clearer cookie, and its shimmer is a faster, sharper sweep that shows on every accent in dark and light.
 - Sponsor: removed the closing paragraph.
@@ -30,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Search options: the sheet opens at half height instead of full screen.
+- Filename template: a slash, a stray %, a leading dot or a missing extension no longer loses or breaks the saved file.
+- Filename template: long artist, track or playlist names no longer fail with "File name too long", and extra arguments can no longer override the name.
 - Splash: opens onto home as soon as the logo finishes, without the extra pause.
 - Player: full screen turns the screen to landscape for wide videos and portrait for tall ones, so the status bar and quality menu turn with it.
 - Player: the seek bar wave and play button no longer animate while paused.
