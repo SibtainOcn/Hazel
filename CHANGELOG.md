@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Glass is off by default on new installs. Existing users keep their current look.
 - New splash animation: the bolt draws itself, then a circle opens from it onto home. Replaces the static shimmer. Tap to skip; skipped when system animations are off.
 - Splash background is pure black in all themes. The system launch screen no longer shows an icon.
 - Smoother start: home is prepared behind the splash, and the yt-dlp and FFmpeg setup runs after it.
@@ -27,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Player: the seek bar flows as a wave while playing and lies flat on touch or pause, with a pill thumb. Play is a pentagon while paused and a slowly turning six-sided cookie while playing. Both stay still when system animations are off.
 
 ### Fixed
+- Search options: the sheet opens at half height instead of full screen.
 - Player: the seek bar wave and play button no longer animate while paused.
 - Playlist sheet: Download takes only the ticked links (#126).
 - Instant: a YouTube video shared from a playlist or Mix downloads that video alone (#126).

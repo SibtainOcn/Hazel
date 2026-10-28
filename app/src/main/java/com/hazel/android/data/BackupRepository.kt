@@ -68,7 +68,7 @@ object BackupRepository {
     private fun isDeviceOnly(key: String) =
         key.startsWith("backup_") || key.startsWith("download_tree_") ||
             key.endsWith("_update_available") || key == "adv_impersonate_available" ||
-            key == "whats_new_seen"
+            key == "whats_new_seen" || key == GlassDefaultMigration.SETTLED_NAME
 
     /** Which list entries are the same entry, per key; null compares whole values. */
     private val IDENTITY = mapOf(

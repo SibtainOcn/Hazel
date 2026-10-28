@@ -83,10 +83,8 @@ fun SearchOptionsSheet(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    // Opens at half height like any other sheet, and drags up to full.
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
     val resultsCleared = stringResource(R.string.search_results_cleared)
     val historyCleared = stringResource(R.string.search_history_cleared)
     val historyFailed = stringResource(R.string.search_history_clear_failed)
@@ -102,8 +100,9 @@ fun SearchOptionsSheet(
         }
     }
 
-    // Read as one, and nothing is drawn until it has been: the rows then open on what is
-    // saved, never on a default that flips to the saved value a frame later.
+    // Read as one, and the sheet is not shown until it has been: the rows open on what is
+    // saved, and the sheet measures its full content, so it settles at half height rather
+    // than measuring empty and jumping to full.
     val prefs by remember(context) {
         combine(
             SettingsRepository.getSearchSource(context),
@@ -117,13 +116,13 @@ fun SearchOptionsSheet(
 
     var open by remember { mutableStateOf(SearchChoice.NONE) }
     val engineChoices = ListingSource.entries.map { it to stringResource(it.labelRes) }
+    val current = prefs ?: return
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = sheetBlackColor
     ) {
-        val current = prefs ?: return@ModalBottomSheet
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -152,14 +151,14 @@ fun SearchOptionsSheet(
                     label = stringResource(R.string.search_options_history),
                     description = stringResource(R.string.search_clear_history),
                     filled = false,
-                    onClick = { open = SearchChoice.CLEAR_HISTORY }
+                    onClick = { if (!finishing) open = SearchChoice.CLEAR_HISTORY }
                 )
                 ClearShape(
                     icon = Icons.Filled.DeleteSweep,
                     label = stringResource(R.string.search_options_results),
                     description = stringResource(R.string.search_clear_results),
                     filled = true,
-                    onClick = { open = SearchChoice.CLEAR_RESULTS }
+                    onClick = { if (!finishing) open = SearchChoice.CLEAR_RESULTS }
                 )
             }
 
@@ -222,7 +221,6 @@ fun SearchOptionsSheet(
         }
     }
 
-    val current = prefs ?: return
     val close = { open = SearchChoice.NONE }
     when (open) {
         SearchChoice.NONE -> Unit

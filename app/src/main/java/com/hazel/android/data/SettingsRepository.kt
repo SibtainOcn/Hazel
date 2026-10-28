@@ -18,7 +18,10 @@ import kotlinx.coroutines.flow.Flow
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.map
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "hazel_settings")
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "hazel_settings",
+    produceMigrations = { context -> listOf(GlassDefaultMigration { wasUpdated(context) }) }
+)
 
 object SettingsRepository {
     const val DEFAULT_ACCENT = "White"
@@ -26,7 +29,7 @@ object SettingsRepository {
 
     private val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
     private val ACCENT_COLOR_KEY = stringPreferencesKey("accent_color")
-    private val GLASS_KEY = booleanPreferencesKey("glass_theme")
+    internal val GLASS_KEY = booleanPreferencesKey("glass_theme")
     private val GLASS_STYLE_KEY = stringPreferencesKey("glass_style")
     private val FILENAME_TEMPLATE_KEY = stringPreferencesKey("filename_template")
     private val EMBED_THUMBNAIL_KEY = booleanPreferencesKey("embed_thumbnail")
@@ -50,7 +53,7 @@ object SettingsRepository {
     }
 
     fun isGlassEnabled(context: Context): Flow<Boolean> {
-        return context.dataStore.data.map { prefs -> prefs[GLASS_KEY] ?: true }
+        return context.dataStore.data.map { prefs -> prefs[GLASS_KEY] ?: false }
     }
 
     suspend fun setGlassEnabled(context: Context, enabled: Boolean) {
