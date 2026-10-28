@@ -22,6 +22,7 @@
     <string name="download_waiting_wifi">वाई-फ़ाई का इंतज़ार</string>
     <string name="download_saved">सहेजा गया</string>
     <string name="download_queued">कतार में</string>
+    <string name="download_reading_link">लिंक पढ़ा जा रहा है</string>
     <string name="download_downloaded">डाउनलोड हो चुका</string>
     <string name="download_failed">विफल</string>
     <string name="download_remove_link">लिंक हटाएँ</string>

@@ -22,6 +22,7 @@
     <string name="download_waiting_wifi">Menunggu Wi-Fi</string>
     <string name="download_saved">Tersimpan</string>
     <string name="download_queued">Dalam antrean</string>
+    <string name="download_reading_link">Membaca tautan</string>
     <string name="download_downloaded">Selesai diunduh</string>
     <string name="download_failed">Gagal</string>
     <string name="download_remove_link">Hapus tautan</string>

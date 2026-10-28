@@ -22,6 +22,7 @@
     <string name="download_waiting_wifi">Wi-Fi待機中</string>
     <string name="download_saved">保存済み</string>
     <string name="download_queued">待機中</string>
+    <string name="download_reading_link">リンクを読み込み中</string>
     <string name="download_downloaded">ダウンロード完了</string>
     <string name="download_failed">失敗</string>
     <string name="download_remove_link">リンクを削除</string>

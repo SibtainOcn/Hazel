@@ -22,6 +22,7 @@
     <string name="download_waiting_wifi">等待 Wi-Fi</string>
     <string name="download_saved">已保存</string>
     <string name="download_queued">排队中</string>
+    <string name="download_reading_link">正在读取链接</string>
     <string name="download_downloaded">已下载</string>
     <string name="download_failed">失败</string>
     <string name="download_remove_link">移除链接</string>

@@ -22,6 +22,7 @@
     <string name="download_waiting_wifi">En attente du Wi-Fi</string>
     <string name="download_saved">Enregistré</string>
     <string name="download_queued">En file d\'attente</string>
+    <string name="download_reading_link">Lecture du lien</string>
     <string name="download_downloaded">Téléchargé</string>
     <string name="download_failed">Échec</string>
     <string name="download_remove_link">Retirer le lien</string>

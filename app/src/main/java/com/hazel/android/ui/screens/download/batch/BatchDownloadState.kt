@@ -135,9 +135,8 @@ class BatchDownloadState {
         private set
 
     /**
-     * What an action bar change applies to: the ticked links, or every link when nothing
-     * is ticked. The download itself always covers the whole list, so ticking is a way of
-     * narrowing an edit rather than of choosing what gets downloaded.
+     * What an action bar change and the download apply to: the ticked links, or every link
+     * when nothing is ticked.
      */
     val targets: List<MediaInfo>
         get() = if (selectionMode && selected.isNotEmpty()) results.filter { it.url in selected }
@@ -184,7 +183,7 @@ class BatchDownloadState {
      * format list several times over on every recomposition.
      */
     private val plansState = derivedStateOf {
-        results.mapNotNull { info ->
+        targets.mapNotNull { info ->
             formatOf(info)?.let {
                 DownloadPlan(info, it, titleOf(info), authorOf(info), languageOf(info))
             }
@@ -203,7 +202,7 @@ class BatchDownloadState {
      * whole figure, and is marked as one.
      */
     val allSizesKnown: Boolean
-        get() = plans.size == results.size && plans.all { it.format.fileSizeBytes > 0L }
+        get() = plans.size == targets.size && plans.all { it.format.fileSizeBytes > 0L }
 
     // ── Changes from the action bar, which land on [targets] ──
 

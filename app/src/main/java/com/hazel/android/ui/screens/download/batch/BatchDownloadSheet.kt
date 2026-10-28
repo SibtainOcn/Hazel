@@ -376,7 +376,8 @@ fun BatchDownloadSheet(
                     )
                     if (totalBytes > 0) {
                         Spacer(modifier = Modifier.width(12.dp))
-                        // The whole set added up, not one link's share of it. A link whose
+                        // What Download will fetch added up: the ticked links, or the whole
+                        // set when none are ticked. A link whose
                         // formats have not been read yet reports no size, so while any are
                         // outstanding the figure is marked as a floor rather than the total.
                         Text(

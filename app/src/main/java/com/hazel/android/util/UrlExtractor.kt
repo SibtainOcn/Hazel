@@ -48,4 +48,24 @@ object UrlExtractor {
         val pattern = Regex("""(?:youtu\.be/|youtube\.com/(?:embed/|v/|watch\?v=|watch\?.+&v=|shorts/))([\w-]{11})""", RegexOption.IGNORE_CASE)
         return pattern.find(url.trim())?.groupValues?.get(1)
     }
+
+    /**
+     * [url] as the one video it names, when it is a YouTube video opened from inside a
+     * playlist or a Mix. Those carry `list=` beside the video, which the engine reads as the
+     * whole list; a Mix has no end. Any other link comes back as it was.
+     */
+    fun youTubeVideoOnly(url: String): String {
+        val trimmed = url.trim()
+        if (extractYouTubeId(trimmed) == null) return url
+        val queryStart = trimmed.indexOf('?').takeIf { it >= 0 } ?: return url
+        val fragmentStart = trimmed.indexOf('#', queryStart).takeIf { it >= 0 } ?: trimmed.length
+        val params = trimmed.substring(queryStart + 1, fragmentStart).split('&').filter { it.isNotEmpty() }
+        if (params.none { it.startsWith("list=") }) return url
+        val kept = params.filterNot { param -> PLAYLIST_PARAMS.any { param == it || param.startsWith("$it=") } }
+        return trimmed.substring(0, queryStart) +
+            (if (kept.isEmpty()) "" else "?" + kept.joinToString("&")) +
+            trimmed.substring(fragmentStart)
+    }
+
+    private val PLAYLIST_PARAMS = listOf("list", "index", "start_radio", "pp")
 }

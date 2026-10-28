@@ -33,6 +33,7 @@
     <string name="download_waiting_wifi">Waiting for Wi-Fi</string>
     <string name="download_saved">Saved</string>
     <string name="download_queued">Queued</string>
+    <string name="download_reading_link">Reading link</string>
     <string name="download_downloaded">Downloaded</string>
     <string name="download_failed">Failed</string>
     <string name="download_remove_link">Remove link</string>

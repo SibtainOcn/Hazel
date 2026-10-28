@@ -17,6 +17,7 @@ import com.hazel.android.data.HomeResultsRepository
 import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.LinkContents
+import com.hazel.android.download.extractor.LinkEntry
 import com.hazel.android.download.extractor.LinkResolver
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.MediaSearch
@@ -26,6 +27,7 @@ import com.hazel.android.util.StoragePaths
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.CoroutineScope
@@ -44,6 +46,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import com.hazel.android.util.LinkKey
+import com.hazel.android.util.PostItem
+import com.hazel.android.util.UrlExtractor
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.flow.update
@@ -60,7 +64,9 @@ data class BatchItem(
     val url: String,
     val title: String,
     val state: BatchState = BatchState.QUEUED,
-    val error: String? = null
+    val error: String? = null,
+    /** A link Hazel Instant is still reading, before it has a download of its own. */
+    val reading: Boolean = false
 )
 
 /**
@@ -589,6 +595,9 @@ class DownloadViewModel : ViewModel() {
     private val instantReads = mutableSetOf<String>()
     private val instantReadSlots = Semaphore(FORMAT_READS_AT_ONCE)
 
+    /** The Instant reads in flight, by link, so a reading card's Cancel can stop its read. */
+    private val instantJobs = java.util.concurrent.ConcurrentHashMap<String, Job>()
+
     /**
      * Hazel Instant: reads [url] and downloads it with the saved settings, without a sheet.
      *
@@ -601,20 +610,24 @@ class DownloadViewModel : ViewModel() {
      * else needs it. A failure is reported by notification, with a sign-in button where the
      * site asked for one.
      */
-    fun instantDownload(context: Context, url: String) {
+    fun instantDownload(context: Context, sharedUrl: String) {
         val app = context.applicationContext
+        // A video shared from inside a playlist or a Mix is that video: nobody is there to
+        // choose from the list, and a Mix never ends.
+        val url = UrlExtractor.youTubeVideoOnly(sharedUrl)
         val first = synchronized(instantReads) { instantReads.add(url) }
         if (!first) return
         DownloadService.start(app, url)
 
-        // On the queue as waiting while it is read, so the queue screen shows it from the
-        // moment it was shared. Replaced by its real entries once the download starts.
-        val waiting = BatchItem(url = url, title = url)
+        // On the Running tab as being read, so the queue screen shows it from the moment it
+        // was shared. Replaced by its real entries once the download starts.
+        val waiting = BatchItem(url = url, title = url, reading = true)
         _state.update { it.copy(batch = it.batch + waiting) }
         val dropWaiting = { _state.update { s -> s.copy(batch = s.batch - waiting) } }
 
-        viewModelScope.launch {
+        val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
             var failure: String? = null
+            var cancelled = false
             // Read before anything can fail, so a failure is filed under the kind it was.
             val audioOnly = SettingsRepository.getInstantAudioOnly(app).first()
             try {
@@ -641,7 +654,7 @@ class DownloadViewModel : ViewModel() {
                             "${MediaProbe.PROBE_PROCESS_ID}_instant_${LinkKey.digest(url)}"
                         )
                     }
-                }
+                }.distinctBy { it.url }.let { readInFull(it) }
                 // Audio only takes the sound alone, in the preferred language and codec where
                 // the source has them. Best audio stands in for a link read without its
                 // formats, and is extracted from a combined file if need be.
@@ -672,18 +685,20 @@ class DownloadViewModel : ViewModel() {
                     startBatch(app, plans, options, saveDirs = dirs)
                 }
             } catch (e: CancellationException) {
+                cancelled = true
                 throw e
             } catch (e: Exception) {
                 failure = e.message?.trim().orEmpty().ifBlank { app.getString(R.string.no_results_error_title) }
             } finally {
-                if (failure != null) dropWaiting()
+                instantJobs.remove(url)
+                if (failure != null || cancelled) dropWaiting()
                 val idle = synchronized(instantReads) {
                     instantReads.remove(url)
                     instantReads.isEmpty()
                 }
                 // Let go of the service only when nothing else is holding it: no other
                 // Instant read waiting and no download running or queued.
-                if (failure != null && idle && synchronized(queue) { runOwner == null && queue.isEmpty() }) {
+                if ((failure != null || cancelled) && idle && synchronized(queue) { runOwner == null && queue.isEmpty() }) {
                     DownloadService.stop(app)
                 }
             }
@@ -708,6 +723,37 @@ class DownloadViewModel : ViewModel() {
                     app, sanitizeError(log), signInUrl = signInTargetFor(log, url)
                 )
             }
+        }
+        instantJobs[url] = job
+        job.start()
+    }
+
+    /**
+     * [items] with their formats read, as the sheet reads a card before it is downloaded,
+     * so Instant picks from what each link really offers rather than a guess. A collection
+     * longer than [INSTANT_FULL_READS] keeps its listing: a read per entry would hold the
+     * first download back for minutes. An item whose read fails keeps what it had.
+     */
+    private suspend fun readInFull(items: List<MediaInfo>): List<MediaInfo> {
+        if (items.size > INSTANT_FULL_READS || items.all { it.hasResolvedFormats }) return items
+        return coroutineScope {
+            items.map { info ->
+                async(Dispatchers.IO) {
+                    if (info.hasResolvedFormats) return@async info
+                    val read = runCatching {
+                        instantReadSlots.withPermit { readFormats(info.url, fresh = false, source = null) }
+                    }.onFailure {
+                        if (it is CancellationException) throw it
+                        Log.w("Hazel", "Instant format read failed for ${info.url}: ${it.message}")
+                    }.getOrNull() ?: return@async info
+                    read.copy(
+                        url = info.url,
+                        title = info.title.ifBlank { read.title },
+                        thumbnail = read.thumbnail ?: info.thumbnail,
+                        durationSeconds = read.durationSeconds.takeIf { it > 0 } ?: info.durationSeconds
+                    )
+                }
+            }.awaitAll()
         }
     }
 
@@ -1005,8 +1051,11 @@ class DownloadViewModel : ViewModel() {
         // holds across restarts as well: what the last read wrote is still on disk.
         // The chosen reader's own read first, then whichever reader read it last.
         (InfoCache.metadataFor(url, source) ?: InfoCache.metadataFor(url))?.let { return listOf(it) }
+        // An entry listed with its formats, as the items of one post are, was kept as read.
+        fun cardFor(entry: LinkEntry) = InfoCache.metadataFor(entry.url) ?: MediaProbe.pendingFor(entry)
+
         InfoCache.listingFor(url)?.let { listing ->
-            return listing.entries.map(MediaProbe::pendingFor)
+            return listing.entries.map(::cardFor)
         }
 
         val contents = LinkResolver.resolve(
@@ -1015,7 +1064,7 @@ class DownloadViewModel : ViewModel() {
 
         return when (contents) {
             is LinkContents.Single -> listOf(contents.info)
-            is LinkContents.Many -> contents.entries.map(MediaProbe::pendingFor)
+            is LinkContents.Many -> contents.entries.map(::cardFor)
         }
     }
 
@@ -1892,6 +1941,15 @@ class DownloadViewModel : ViewModel() {
      * and disk queue record, without disturbing the active download.
      */
     fun cancelItem(url: String) {
+        // A link Instant is still reading has nothing downloading yet: stopping the read is
+        // the whole of it.
+        instantJobs[url]?.let { job ->
+            job.cancel()
+            runCatching {
+                YoutubeDL.getInstance().destroyProcessById("${MediaProbe.PROBE_PROCESS_ID}_instant_${LinkKey.digest(url)}")
+            }
+            return
+        }
         val activeInfo = _state.value.active
         if ((_state.value.isDownloading || isRunning()) && activeInfo?.url == url) {
             // Cancel ONLY this active download item (do NOT set isBatchCancelled)
@@ -2309,7 +2367,10 @@ class DownloadViewModel : ViewModel() {
      * link again rather than as a failed download.
      */
     private fun buildDownloadRequest(url: String): YoutubeDLRequest {
-        val cached = InfoCache.infoJsonFor(url) ?: return YoutubeDLRequest(url)
+        val cached = InfoCache.infoJsonFor(url) ?: return YoutubeDLRequest(PostItem.address(url)).apply {
+            // One item of a post, which --no-playlist alone would not narrow to.
+            PostItem.indexOf(url)?.let { addOption("--playlist-items", it.toString()) }
+        }
         return YoutubeDLRequest(emptyList()).apply {
             addOption("--load-info-json", cached.absolutePath)
         }
@@ -3216,6 +3277,9 @@ class DownloadViewModel : ViewModel() {
 
         /** Format reads allowed to run together; see [resolveFormats]. */
         private const val FORMAT_READS_AT_ONCE = 3
+
+        /** The most items Instant reads one by one before downloading a collection. */
+        private const val INSTANT_FULL_READS = 25
 
         /**
          * The last resort after a concrete format id. yt-dlp names a stream by which player

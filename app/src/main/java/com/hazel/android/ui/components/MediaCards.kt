@@ -450,6 +450,7 @@ fun MediaCard(
                             background = MaterialTheme.colorScheme.primary,
                             foreground = MaterialTheme.colorScheme.onPrimary
                         )
+                        batchItem?.reading == true -> CornerTag(text = stringResource(R.string.download_reading_link))
                         batchItem?.state == BatchState.QUEUED -> CornerTag(text = stringResource(R.string.download_queued))
                         alreadyDownloaded -> CornerTag(text = stringResource(R.string.download_downloaded))
                     }
