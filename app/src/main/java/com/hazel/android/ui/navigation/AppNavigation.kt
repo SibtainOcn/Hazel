@@ -52,6 +52,7 @@ import com.hazel.android.R
 import com.hazel.android.download.BatchState
 import com.hazel.android.data.DownloadQueueRepository
 import com.hazel.android.ui.screens.queue.QueueScreen
+import com.hazel.android.ui.components.CookieBadge
 import com.hazel.android.ui.components.HazelBottomBar
 import com.hazel.android.ui.components.BottomBarItem
 import com.hazel.android.update.HazelUpdater
@@ -182,18 +183,20 @@ fun AppNavigation(
                 TopAppBar(
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(R.drawable.update),
-                                contentDescription = null,
-                                modifier = Modifier.size(22.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            CookieBadge(size = 32.dp) {
+                                Icon(
+                                    painter = painterResource(R.drawable.update),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onBackground
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 text = stringResource(R.string.app_name),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                         }
                     },

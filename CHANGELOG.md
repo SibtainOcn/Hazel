@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- New splash animation: the bolt draws itself, then a circle opens from it onto home. Replaces the static shimmer. Tap to skip; skipped when system animations are off.
+- Splash background is pure black in all themes. The system launch screen no longer shows an icon.
+- Smoother start: home is prepared behind the splash, and the yt-dlp and FFmpeg setup runs after it.
+- Faster cold start with a bundled startup profile, also applied on GitHub and F-Droid installs.
+- Splash runs at the display's highest refresh rate on Android 15 and later.
+- Home header logo sits on an M3 Expressive cookie badge. Hazel Instant uses the same shape behind its bolt.
 
 ## [1.1.15] - 2026-10-23
 ### Added

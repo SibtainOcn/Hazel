@@ -97,6 +97,9 @@ val SizeBadgeContent = Color(0xFFD3E5FF)
 val ProgressTrackDark = Color(0xFF1A1A1A)
 val ProgressTrackLight = Color(0xFFE0E0E0)
 
+/** Brand spark colours for the splash and the header logo, the same in every theme and accent. */
+val HazelSpark = listOf(Color(0xFF16B8E6), Color(0xFF3D5BFF), Color(0xFFFF4FA8), Color(0xFFFFAE2C))
+
 // ── Accent Color Palette (ChatGPT-style picker) ──
 data class AccentColor(
     val name: String,
