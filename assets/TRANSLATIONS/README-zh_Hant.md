@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>支持從不是必須的，也不會解鎖任何內容。所有功能對所有人永久免費。沒有餘錢？<a href="https://github.com/SibtainOcn/Hazel/stargazers">給儲存庫按個 Star</a> 或 <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">回報問題</a>，同樣很有幫助。</sub>
+<sub>沒有餘錢？<a href="https://github.com/SibtainOcn/Hazel/stargazers">給儲存庫按個 Star</a> 或 <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">回報問題</a>，同樣很有幫助。</sub>
 </div>
 
 ---

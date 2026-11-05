@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>支持从不是必须的，也不会解锁任何内容。所有功能对所有人永久免费。没有余钱？<a href="https://github.com/SibtainOcn/Hazel/stargazers">给仓库点个 Star</a> 或 <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">反馈问题</a>，同样很有帮助。</sub>
+<sub>没有余钱？<a href="https://github.com/SibtainOcn/Hazel/stargazers">给仓库点个 Star</a> 或 <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">反馈问题</a>，同样很有帮助。</sub>
 </div>
 
 ---

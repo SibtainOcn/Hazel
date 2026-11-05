@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>Підтримка ніколи не обов'язкова й нічого не відкриває. Усі функції залишаються безкоштовними для всіх. Немає грошей? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Поставте зірку репозиторію</a> або <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">повідомте про проблему</a>, це допомагає не менше.</sub>
+<sub>Немає грошей? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Поставте зірку репозиторію</a> або <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">повідомте про проблему</a>, це допомагає не менше.</sub>
 </div>
 
 ---

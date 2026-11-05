@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>حمایت هرگز اجباری نیست و هیچ ویژگی خاصی را باز نمی‌کند. همه ویژگی‌ها برای همه رایگان باقی می‌مانند. پولی ندارید؟ <a href="https://github.com/SibtainOcn/Hazel/stargazers">به مخزن یک ستاره بدهید</a> یا <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">یک مشکل را گزارش دهید</a>، این کار هم به همان اندازه کمک می‌کند.</sub>
+<sub>پولی ندارید؟ <a href="https://github.com/SibtainOcn/Hazel/stargazers">به مخزن یک ستاره بدهید</a> یا <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">یک مشکل را گزارش دهید</a>، این کار هم به همان اندازه کمک می‌کند.</sub>
 </div>
 
 ---

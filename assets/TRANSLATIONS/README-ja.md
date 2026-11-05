@@ -81,7 +81,7 @@ Hazel が役に立ったら、開発の支援をご検討ください。皆さ�
   </tr>
 </table>
 
-<sub>支援は必須ではなく、何かが解放されることもありません。すべての機能は誰でも無料のままです。お金がなくても大丈夫。<a href="https://github.com/SibtainOcn/Hazel/stargazers">リポジトリにスター</a>を付けるか、<a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">問題を報告</a>するだけでも同じくらい助かります。</sub>
+<sub>お金がなくても大丈夫。<a href="https://github.com/SibtainOcn/Hazel/stargazers">リポジトリにスター</a>を付けるか、<a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">問題を報告</a>するだけでも同じくらい助かります。</sub>
 </div>
 
 ---

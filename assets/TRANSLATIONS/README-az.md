@@ -81,7 +81,7 @@ Hazel sizə faydalı olubsa, onun inkişafını dəstəkləməyi düşünün. D�
   </tr>
 </table>
 
-<sub>Dəstək heç vaxt məcburi deyil və heç nəyi açmır. Bütün funksiyalar hamı üçün pulsuz qalır. Pulunuz yoxdur? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Repoya ulduz verin</a> və ya <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">problem bildirin</a>, eyni dərəcədə kömək edir.</sub>
+<sub>Pulunuz yoxdur? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Repoya ulduz verin</a> və ya <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">problem bildirin</a>, eyni dərəcədə kömək edir.</sub>
 </div>
 
 ---

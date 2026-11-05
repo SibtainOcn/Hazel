@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>الدعم ليس إجباريًا أبدًا ولا يفتح أي ميزات خاصة. جميع الميزات تظل مجانية للجميع. لا تملك المال؟ <a href="https://github.com/SibtainOcn/Hazel/stargazers">امنح المستودع نجمة</a> أو <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">أبلغ عن مشكلة</a>، فذلك يساعد تمامًا.</sub>
+<sub>لا تملك المال؟ <a href="https://github.com/SibtainOcn/Hazel/stargazers">امنح المستودع نجمة</a> أو <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">أبلغ عن مشكلة</a>، فذلك يساعد تمامًا.</sub>
 </div>
 
 ---
