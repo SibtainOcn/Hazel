@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>Подршка никада није обавезна и никада ништа не откључава. Све функције остају бесплатне за све. Немате новца? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Дајте звездицу репозиторијуму</a> или <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">пријавите проблем</a>, помаже исто толико.</sub>
+<sub>Немате новца? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Дајте звездицу репозиторијуму</a> или <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">пријавите проблем</a>, помаже исто толико.</sub>
 </div>
 
 ---

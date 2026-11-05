@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>การสนับสนุนไม่ใช่สิ่งจำเป็นและไม่ได้ปลดล็อกอะไรเลย ทุกฟีเจอร์ฟรีสำหรับทุกคนตลอดไป ไม่มีเงิน? <a href="https://github.com/SibtainOcn/Hazel/stargazers">กดดาวให้รีโพ</a> หรือ <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">รายงานปัญหา</a> ก็ช่วยได้ไม่แพ้กัน</sub>
+<sub>ไม่มีเงิน? <a href="https://github.com/SibtainOcn/Hazel/stargazers">กดดาวให้รีโพ</a> หรือ <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">รายงานปัญหา</a> ก็ช่วยได้ไม่แพ้กัน</sub>
 </div>
 
 ---

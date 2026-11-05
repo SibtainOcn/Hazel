@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>समर्थन कभी भी अनिवार्य नहीं है और इससे कुछ भी अनलॉक नहीं होता है। सभी फीचर्स सभी के लिए मुफ़्त हैं। पैसे नहीं हैं? <a href="https://github.com/SibtainOcn/Hazel/stargazers">रिपॉजिटरी को स्टार दें</a> या <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">किसी समस्या की रिपोर्ट करें</a>, यह भी उतनी ही मदद करता है।</sub>
+<sub>पैसे नहीं हैं? <a href="https://github.com/SibtainOcn/Hazel/stargazers">रिपॉजिटरी को स्टार दें</a> या <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">किसी समस्या की रिपोर्ट करें</a>, यह भी उतनी ही मदद करता है।</sub>
 </div>
 
 ---

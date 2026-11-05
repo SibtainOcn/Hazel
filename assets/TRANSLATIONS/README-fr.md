@@ -81,7 +81,7 @@ Si Hazel vous a été utile, pensez à soutenir son développement. Votre soutie
   </tr>
 </table>
 
-<sub>Le soutien n'est jamais obligatoire et ne débloque jamais rien. Toutes les fonctionnalités restent gratuites pour tous. Pas d'argent ? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Mettez une étoile au dépôt</a> ou <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">signalez un problème</a>, ça aide tout autant.</sub>
+<sub>Pas d'argent ? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Mettez une étoile au dépôt</a> ou <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">signalez un problème</a>, ça aide tout autant.</sub>
 </div>
 
 ---

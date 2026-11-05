@@ -81,7 +81,7 @@ Jika Hazel bermanfaat bagimu, pertimbangkan untuk mendukung pengembangannya. Duk
   </tr>
 </table>
 
-<sub>Dukungan tidak pernah wajib dan tidak membuka apa pun. Semua fitur tetap gratis untuk semua orang. Tidak punya uang? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Beri bintang repo</a> atau <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">laporkan masalah</a>, itu sama membantunya.</sub>
+<sub>Tidak punya uang? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Beri bintang repo</a> atau <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">laporkan masalah</a>, itu sama membantunya.</sub>
 </div>
 
 ---

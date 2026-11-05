@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>تعاون کبھی بھی لازمی نہیں ہے اور اس سے کبھی کچھ انلاک نہیں ہوتا۔ تمام خصوصیات سب کے لیے مفت رہتی ہیں۔ پیسے نہیں ہیں؟ <a href="https://github.com/SibtainOcn/Hazel/stargazers">رپازیٹری کو ایک سٹار دیں</a> یا <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">کسی مسئلے کی رپورٹ کریں</a>، یہ بھی اتنی ہی مدد کرتا ہے۔</sub>
+<sub>پیسے نہیں ہیں؟ <a href="https://github.com/SibtainOcn/Hazel/stargazers">رپازیٹری کو ایک سٹار دیں</a> یا <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">کسی مسئلے کی رپورٹ کریں</a>، یہ بھی اتنی ہی مدد کرتا ہے۔</sub>
 </div>
 
 ---
