@@ -1,10 +1,12 @@
 package com.hazel.android.update
 
+import com.hazel.android.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.EOFException
+import java.io.File
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.ConnectException
@@ -12,6 +14,7 @@ import java.net.ProtocolException
 import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.security.cert.CertPathValidatorException
 import java.security.cert.CertificateException
 import javax.net.ssl.SSLException
 import javax.net.ssl.SSLHandshakeException
@@ -19,7 +22,9 @@ import javax.net.ssl.SSLHandshakeException
 /**
  * The yt-dlp update used to say "Update failed" whatever had gone wrong, so a full phone, a
  * dead connection and a build that would not start could not be told apart. These cases pin
- * each cause to its own message, and pin which of them are worth another try.
+ * each cause to its own message, and pin which of them are worth another try. The words
+ * themselves live in strings.xml, so what is checked here is which sentence is chosen and
+ * that every sentence can be filled in.
  */
 class UpdateFailureTest {
 
@@ -56,6 +61,11 @@ class UpdateFailureTest {
             UpdateFailure.Kind.CLOCK_OR_TLS,
             kind(SSLException("handshake failed", CertificateException("not yet valid")))
         )
+        // An expired or not-yet-valid chain on a phone with the wrong date surfaces this way.
+        assertEquals(
+            UpdateFailure.Kind.CLOCK_OR_TLS,
+            kind(SSLException("Chain validation failed", CertPathValidatorException("timestamp check failed")))
+        )
     }
 
     @Test
@@ -68,8 +78,11 @@ class UpdateFailureTest {
 
     @Test
     fun `an unknown error keeps its class and text for the bug report`() {
-        val message = UpdateFailure.from(IllegalStateException("boom")).message
-        assertTrue(message, message.contains("IllegalStateException: boom"))
+        val failure = UpdateFailure.from(IllegalStateException("boom"))
+        assertEquals(UpdateFailure.Kind.UNKNOWN, failure.kind)
+        assertTrue(failure.summary, failure.summary.contains("IllegalStateException: boom"))
+        // It is also what the unknown sentence shows, since nothing else names the cause.
+        assertEquals(listOf<Any>("IllegalStateException: boom"), failure.messageArgs.toList())
     }
 
     @Test
@@ -88,11 +101,24 @@ class UpdateFailureTest {
     }
 
     @Test
-    fun `a missing release is not retried but a busy GitHub is`() {
-        assertFalse(UpdateFailure.of(UpdateFailure.Kind.HTTP, "HTTP 404").retryable)
-        assertFalse(UpdateFailure.of(UpdateFailure.Kind.HTTP, "HTTP 403").retryable)
-        assertTrue(UpdateFailure.of(UpdateFailure.Kind.HTTP, "HTTP 429").retryable)
-        assertTrue(UpdateFailure.of(UpdateFailure.Kind.HTTP, "HTTP 503").retryable)
+    fun `a missing release is told apart and not retried`() {
+        for (code in listOf(404, 410)) {
+            val failure = UpdateFailure.http(code)
+            assertEquals(UpdateFailure.Kind.RELEASE_GONE, failure.kind)
+            assertFalse(failure.retryable)
+        }
+    }
+
+    @Test
+    fun `a busy GitHub is retried but a rate limit is left alone`() {
+        // A 429 or 403 is GitHub limiting the caller; asking again seconds later prolongs it.
+        for (code in listOf(403, 429)) {
+            assertEquals(UpdateFailure.Kind.HTTP, UpdateFailure.http(code).kind)
+            assertFalse("HTTP $code", UpdateFailure.http(code).retryable)
+        }
+        for (code in listOf(408, 500, 502, 503, 504)) {
+            assertTrue("HTTP $code", UpdateFailure.http(code).retryable)
+        }
     }
 
     @Test
@@ -131,9 +157,45 @@ class UpdateFailureTest {
     }
 
     @Test
-    fun `the message is the advice followed by the cause`() {
-        val failure = UpdateFailure.of(UpdateFailure.Kind.HTTP, "HTTP 404")
-        assertEquals("${UpdateFailure.Kind.HTTP.advice} (HTTP 404)", failure.message)
-        assertEquals(UpdateFailure.Kind.NO_SPACE.advice, UpdateFailure.of(UpdateFailure.Kind.NO_SPACE).message)
+    fun `every failure has its own sentence`() {
+        val sentences = UpdateFailure.Kind.entries.map { it.message }
+        assertEquals(UpdateFailure.Kind.entries.size, sentences.toSet().size)
+        assertEquals(R.string.upd_failure_no_space, UpdateFailure.of(UpdateFailure.Kind.NO_SPACE).messageRes)
+        assertEquals(R.string.upd_failure_release_gone, UpdateFailure.http(404).messageRes)
+        assertEquals(R.string.upd_failure_http, UpdateFailure.http(429).messageRes)
+    }
+
+    @Test
+    fun `a sentence is only ever given the arguments it has room for`() {
+        // The status fills the HTTP sentence, the cause fills the unknown one, nothing else has a slot.
+        assertEquals(listOf<Any>(429), UpdateFailure.http(429).messageArgs.toList())
+        assertEquals(listOf<Any>("?"), UpdateFailure.of(UpdateFailure.Kind.UNKNOWN).messageArgs.toList())
+        for (kind in UpdateFailure.Kind.entries) {
+            val expected = if (kind == UpdateFailure.Kind.HTTP || kind == UpdateFailure.Kind.UNKNOWN) 1 else 0
+            assertEquals(kind.name, expected, UpdateFailure.of(kind).messageArgs.size)
+        }
+    }
+
+    @Test
+    fun `the placeholders in every language match what the code supplies`() {
+        // A placeholder with no argument shows the raw token, and a missing one would crash the
+        // screen, so each language's sentence is held to the argument count of its failure.
+        val keyOf = R.string::class.java.fields
+            .filter { it.type == Int::class.javaPrimitiveType }
+            .associate { it.getInt(null) to it.name }
+        val files = File("src/main/res").listFiles { f -> f.name.startsWith("values") }
+            .orEmpty().map { File(it, "strings.xml") }.filter { it.isFile }
+        assertTrue("no strings.xml found", files.size >= 2)
+
+        for (kind in UpdateFailure.Kind.entries) {
+            val key = keyOf.getValue(kind.message)
+            val slots = UpdateFailure.of(kind).messageArgs.size
+            for (file in files) {
+                val text = Regex("""<string name="$key"[^>]*>(.*?)</string>""", RegexOption.DOT_MATCHES_ALL)
+                    .find(file.readText())?.groupValues?.get(1) ?: continue
+                val found = Regex("""%(\d+)\$[sd]""").findAll(text).map { it.groupValues[1] }.toSet()
+                assertEquals("$key in ${file.parentFile.name}", (1..slots).map { it.toString() }.toSet(), found)
+            }
+        }
     }
 }

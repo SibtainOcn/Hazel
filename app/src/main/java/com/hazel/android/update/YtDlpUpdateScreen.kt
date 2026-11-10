@@ -298,7 +298,9 @@ internal fun YtDlpStatusCard(
         is UpdateViewModel.UiState.Installed -> "Version ${state.version}" to "Installed and live"
         is UpdateViewModel.UiState.Checking -> "Checking for updates…" to "Reading the ${channel.label} release feed"
         is UpdateViewModel.UiState.Error ->
-            (if (state.info != null) "Update couldn't finish" else "Check couldn't finish") to state.message
+            stringResource(
+                if (state.info != null) R.string.upd_status_update_failed else R.string.upd_status_check_failed
+            ) to (state.failure?.let { stringResource(it.messageRes, *it.messageArgs) } ?: state.message)
     }
     val progress = (state as? UpdateViewModel.UiState.Updating)?.takeIf { it.totalBytes > 0 }
         ?.let { (it.progressBytes.toFloat() / it.totalBytes).coerceIn(0f, 1f) }

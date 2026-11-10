@@ -162,7 +162,8 @@ object YtDlpUpdater {
                     }
                     continue
                 }
-                onFailure(message)
+                // Never null: a null here would read as "the start never ran" to the caller.
+                onFailure(message.orEmpty())
                 return false
             } catch (e: Exception) {
                 return null
@@ -370,18 +371,23 @@ object YtDlpUpdater {
                 val runs = runsOnDevice(context) { startError = it } ?: isValidBinary(live)
                 if (!runs) {
                     Log.w("Hazel", "yt-dlp ${tag.ifBlank { "update" }} does not start here, keeping the previous build")
-                    // No output from a start that never ran means the file itself failed its zip check.
-                    refuse(
-                        context,
-                        if (startError == null) UpdateFailure.of(UpdateFailure.Kind.INCOMPLETE, "installed file failed its zip check")
-                        else UpdateFailure.forStartFailure(startError)
-                    )
+                    // A null here means the start never ran (the health check was undecided),
+                    // so the file itself failed its zip check. An empty string is a start that
+                    // ran and printed nothing, which is what a process killed for memory looks like.
+                    val failure = startError?.let { UpdateFailure.forStartFailure(it) }
+                        ?: UpdateFailure.of(UpdateFailure.Kind.INCOMPLETE, "installed file failed its zip check")
+                    refuse(context, failure)
                     live.delete()
                     if (!(keptPrevious && previous.renameTo(live))) {
                         ensureValidBinary(context, confirmedBroken = true)
                     }
                     live.setExecutable(true, false)
-                    if (tag.isNotBlank()) runCatching { rejectedTag(context).writeText(tag) }
+                    // A build the system stopped for lack of memory is not known to be bad, and
+                    // auto-update runs while the app is still starting, which is when memory is
+                    // tightest. Its tag is left unmarked so the next launch tries it again.
+                    if (tag.isNotBlank() && failure.kind != UpdateFailure.Kind.STOPPED_WHILE_STARTING) {
+                        runCatching { rejectedTag(context).writeText(tag) }
+                    }
                     stagedTag(context).delete()
                     notifyFailed(context, tag)
                     return@synchronized false
@@ -424,15 +430,11 @@ object YtDlpUpdater {
 
     /** Keeps the last failure where a bug report can find it, whichever path hit it. */
     private fun recordFailure(context: Context, failure: UpdateFailure) {
-        Log.w("Hazel", "yt-dlp update failed: ${failure.kind} ${failure.detail}")
+        Log.w("Hazel", "yt-dlp update failed: ${failure.summary}")
         runCatching {
             val stamp = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(Date())
-            val line = buildString {
-                append(failure.kind.name)
-                if (failure.detail.isNotBlank()) append(" (").append(failure.detail).append(')')
-                append(" at ").append(stamp)
-            }
-            context.getSharedPreferences(STATE_PREFS, Context.MODE_PRIVATE).edit().putString(FAILURE_KEY, line).apply()
+            context.getSharedPreferences(STATE_PREFS, Context.MODE_PRIVATE).edit()
+                .putString(FAILURE_KEY, "${failure.summary} at $stamp").apply()
         }
     }
 
@@ -600,9 +602,13 @@ object YtDlpUpdater {
      * total, the total being 0 when the server does not say.
      *
      * A connection that drops or times out is tried again, picking up where it stopped when
-     * GitHub allows it, so one bad moment on a weak connection does not fail the update. The
-     * result is checked as a whole zip before it is staged, so a splice gone wrong is never
-     * handed to the swap.
+     * GitHub allows it, so one bad moment on a weak connection does not fail the update.
+     *
+     * A file that arrived in one piece, at the length the server gave, is trusted on its size
+     * and left to the swap's start check, as it always was. One that was resumed, or whose
+     * length was never stated, is also checked as a zip before it is staged. That check reads
+     * the archive's structure, so it catches a cut-off or garbled file but cannot prove the
+     * bytes are the release's; the resume only continues from the offset it asked for.
      */
     private suspend fun stage(
         context: Context,
@@ -629,8 +635,9 @@ object YtDlpUpdater {
             while (true) {
                 attempt++
                 try {
-                    download(context, url, partial, onProgress)
-                    if (!isValidBinary(partial)) {
+                    val inOnePiece = download(context, url, partial, onProgress)
+                    val sound = if (inOnePiece) partial.length() >= MIN_BINARY_BYTES else isValidBinary(partial)
+                    if (!sound) {
                         // Starting over is the only safe way on from a file that is not a whole zip.
                         partial.delete()
                         throw UpdateFailureException(UpdateFailure.Kind.INCOMPLETE, "download failed its zip check")
@@ -661,13 +668,17 @@ object YtDlpUpdater {
     /**
      * One pass at fetching [url] into [partial], continuing the file when it already holds the
      * start of the same download and the server agrees to go on from there.
+     *
+     * Returns true when the file arrived in one piece at exactly the length the server stated,
+     * and false when it was resumed or the server gave no length, which is when it needs the
+     * stronger check in [stage].
      */
     private suspend fun download(
         context: Context,
         url: String,
         partial: File,
         onProgress: (Long, Long) -> Unit
-    ) {
+    ): Boolean {
         val resumeFrom = if (partial.isFile) partial.length() else 0L
         val request = Request.Builder()
             .url(url)
@@ -675,12 +686,12 @@ object YtDlpUpdater {
             .apply { if (resumeFrom > 0) header("Range", "bytes=$resumeFrom-") }
             .build()
 
-        downloadClient.newCall(request).execute().use { response ->
+        return downloadClient.newCall(request).execute().use { response ->
             if (resumeFrom > 0 && response.code == 416) {
                 partial.delete()
                 throw IOException("The saved part of the download was not accepted")
             }
-            if (!response.isSuccessful) throw UpdateFailureException(UpdateFailure.Kind.HTTP, "HTTP ${response.code}")
+            if (!response.isSuccessful) throw UpdateFailureException(UpdateFailure.http(response.code))
 
             val append = resumeFrom > 0 && response.code == 206
             if (append && !response.header("Content-Range").orEmpty().startsWith("bytes $resumeFrom-")) {
@@ -711,6 +722,7 @@ object YtDlpUpdater {
             if (total > 0 && done != total) {
                 throw UpdateFailureException(UpdateFailure.Kind.INCOMPLETE, "$done of $total bytes")
             }
+            offset == 0L && total > 0L
         }
     }
 
@@ -751,6 +763,8 @@ object YtDlpUpdater {
         onProgress: (Long, Long) -> Unit = { _, _ -> }
     ): YoutubeDL.UpdateStatus = withContext(Dispatchers.IO) {
         try {
+            // A refusal from an earlier swap must not be reported as this attempt's.
+            rejection = null
             val target = release ?: latestRelease(channel)
                 ?: throw UpdateFailureException(UpdateFailure.Kind.UNREACHABLE, "release lookup failed")
             stage(context, target, onProgress)

@@ -1,5 +1,7 @@
 package com.hazel.android.update
 
+import androidx.annotation.StringRes
+import com.hazel.android.R
 import java.io.EOFException
 import java.io.IOException
 import java.io.InterruptedIOException
@@ -9,6 +11,7 @@ import java.net.ProtocolException
 import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.security.cert.CertPathValidatorException
 import java.security.cert.CertificateException
 import javax.net.ssl.SSLException
 
@@ -18,49 +21,62 @@ import javax.net.ssl.SSLException
  * The update used to report every failure as "Update failed. Please try again.", which left
  * a full phone, a dead connection, a wrong clock and a build that would not start all
  * looking the same, both to the person and to anyone reading their bug report. Each is told
- * apart here, with the technical cause kept in brackets for the report.
+ * apart here.
  *
- * Kept free of Android classes so the classification can be tested on the JVM.
+ * What the person reads is a string resource, so it arrives in their language; the technical
+ * cause stays in [detail] and [summary], in English, for the log and the bug report. Only
+ * Android resource ids are used, no framework classes, so the classification is still tested
+ * on the JVM.
  */
-internal data class UpdateFailure(val kind: Kind, val detail: String) {
+data class UpdateFailure(val kind: Kind, val detail: String, val status: Int = 0) {
 
     enum class Kind(
-        /** What to tell the person, ending in what to try. */
-        val advice: String,
+        /** The sentence shown to the person: what happened, and what to try. */
+        @StringRes val message: Int,
         /** Whether a second attempt at the download could end differently. */
         val retryable: Boolean
     ) {
-        NO_SPACE("Not enough free storage on this phone. Free up some space, then try again.", false),
-        TIMEOUT("The connection to GitHub timed out. Try again on a stronger network.", true),
-        UNREACHABLE("Couldn't reach GitHub. Check the connection, and any VPN or Private DNS setting.", true),
-        CONNECTION_LOST("The connection dropped during the download. Try again on a steadier network.", true),
-        CLOCK_OR_TLS("A secure connection to GitHub couldn't be made. Check the phone's date and time.", false),
-        HTTP("GitHub refused the download.", false),
-        INCOMPLETE("The download came through incomplete. Try again on a steadier network.", true),
-        COULD_NOT_INSTALL("The new engine couldn't be moved into place. Try again.", false),
-        WOULD_NOT_START(
-            "The new yt-dlp didn't start on this phone, so the current one was kept. Downloads still work.",
-            false
-        ),
-        STOPPED_WHILE_STARTING(
-            "The new yt-dlp was stopped while starting, likely for lack of memory. " +
-                "The current one was kept. Close other apps and try again.",
-            false
-        ),
-        UNKNOWN("Update failed.", true)
+        NO_SPACE(R.string.upd_failure_no_space, false),
+        TIMEOUT(R.string.upd_failure_timeout, true),
+        UNREACHABLE(R.string.upd_failure_unreachable, true),
+        CONNECTION_LOST(R.string.upd_failure_connection_lost, true),
+        CLOCK_OR_TLS(R.string.upd_failure_clock_or_tls, false),
+        HTTP(R.string.upd_failure_http, false),
+        RELEASE_GONE(R.string.upd_failure_release_gone, false),
+        INCOMPLETE(R.string.upd_failure_incomplete, true),
+        COULD_NOT_INSTALL(R.string.upd_failure_could_not_install, false),
+        WOULD_NOT_START(R.string.upd_failure_would_not_start, false),
+        STOPPED_WHILE_STARTING(R.string.upd_failure_stopped_while_starting, false),
+        UNKNOWN(R.string.upd_failure_unknown, true)
     }
 
     /**
-     * Whether another try at the download could end differently. A refusal is retried only
-     * when GitHub says it is busy (429) or failing (5xx), not when the file is simply gone.
+     * Whether another try at the download could end differently. GitHub being down or slow
+     * (408, 5xx) is worth another go. A 429 or 403 is a rate limit, and asking again a few
+     * seconds later only prolongs it, so those are left for the person to retry later.
      */
     val retryable: Boolean
-        get() = kind.retryable || (kind == Kind.HTTP && detail.removePrefix("HTTP ").trim().toIntOrNull()
-            ?.let { it == 408 || it == 429 || it >= 500 } == true)
+        get() = kind.retryable || (kind == Kind.HTTP && (status == 408 || status >= 500))
 
-    /** The line shown to the person: the advice, then the cause for anyone reporting it. */
-    val message: String
-        get() = if (detail.isBlank()) kind.advice else "${kind.advice} ($detail)"
+    /** The string resource that words this failure for the person. */
+    @get:StringRes
+    val messageRes: Int
+        get() = kind.message
+
+    /**
+     * What fills the placeholder in [messageRes]: the HTTP status, or for a failure nothing
+     * else could name, the technical cause. The other sentences have no placeholder.
+     */
+    val messageArgs: Array<Any>
+        get() = when (kind) {
+            Kind.HTTP -> arrayOf<Any>(status)
+            Kind.UNKNOWN -> arrayOf<Any>(detail.ifBlank { "?" })
+            else -> emptyArray()
+        }
+
+    /** One technical line for the log, an exception and the bug report. Never shown as the reason. */
+    val summary: String
+        get() = if (detail.isBlank()) kind.name else "${kind.name} ($detail)"
 
     companion object {
 
@@ -69,6 +85,14 @@ internal data class UpdateFailure(val kind: Kind, val detail: String) {
 
         fun of(kind: Kind, detail: String = ""): UpdateFailure =
             UpdateFailure(kind, shorten(detail))
+
+        /** GitHub answered the download with [code]. A release that is gone is told apart. */
+        fun http(code: Int): UpdateFailure =
+            UpdateFailure(
+                if (code == 404 || code == 410) Kind.RELEASE_GONE else Kind.HTTP,
+                "HTTP $code",
+                code
+            )
 
         /** The failure behind [error], looking through whatever wrapped it. */
         fun from(error: Throwable): UpdateFailure {
@@ -79,11 +103,11 @@ internal data class UpdateFailure(val kind: Kind, val detail: String) {
             if (chain.any { isOutOfSpace(it) }) return of(Kind.NO_SPACE, "ENOSPC")
 
             // A certificate problem is the one connection error the person can fix themselves.
-            if (chain.any { it is CertificateException } ||
-                chain.any { it is SSLException && mentionsCertificate(it.message) }
-            ) {
-                return of(Kind.CLOCK_OR_TLS, describe(chain.first { it is CertificateException || it is SSLException }))
+            val certificate = chain.firstOrNull {
+                it is CertificateException || it is CertPathValidatorException ||
+                    (it is SSLException && mentionsCertificate(it.message))
             }
+            if (certificate != null) return of(Kind.CLOCK_OR_TLS, describe(certificate))
 
             chain.firstOrNull { it is SocketTimeoutException }?.let { return of(Kind.TIMEOUT, describe(it)) }
             chain.firstOrNull { it is UnknownHostException }?.let { return of(Kind.UNREACHABLE, describe(it)) }
@@ -130,7 +154,8 @@ internal data class UpdateFailure(val kind: Kind, val detail: String) {
 
         private fun mentionsCertificate(message: String?): Boolean {
             val text = message?.lowercase() ?: return false
-            return "trust anchor" in text || "certificate" in text || "not yet valid" in text
+            return "trust anchor" in text || "certificate" in text || "not yet valid" in text ||
+                "chain validation" in text
         }
 
         private fun describe(error: Throwable): String {
@@ -152,7 +177,7 @@ internal data class UpdateFailure(val kind: Kind, val detail: String) {
 
 /** An update failure whose cause is already known, thrown so callers can report it as is. */
 internal class UpdateFailureException(val failure: UpdateFailure, cause: Throwable? = null) :
-    IOException(failure.message, cause) {
+    IOException(failure.summary, cause) {
 
     constructor(kind: UpdateFailure.Kind, detail: String = "", cause: Throwable? = null) :
         this(UpdateFailure.of(kind, detail), cause)
