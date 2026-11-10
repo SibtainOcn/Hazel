@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hazel.android.data.SettingsRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -161,7 +162,7 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
 
         updateJob = viewModelScope.launch {
             try {
-                YtDlpUpdater.install(getApplication(), info.channel) { done, total ->
+                YtDlpUpdater.install(getApplication(), info.channel, info) { done, total ->
                     _uiState.value = UiState.Updating(
                         info,
                         progressBytes = done,
@@ -171,8 +172,12 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
                 refreshInstalledVersion()
                 SettingsRepository.setYtDlpUpdateAvailable(getApplication(), false)
                 _uiState.value = UiState.Installed(_installedVersion.value ?: info.version)
-            } catch (_: Exception) {
-                _uiState.value = UiState.Error("Update failed. Please try again.", info)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // The cause is shown, not hidden: a full phone, a bad connection and a build
+                // that will not start each need a different next step.
+                _uiState.value = UiState.Error(UpdateFailure.from(e).message, info)
             }
         }
     }

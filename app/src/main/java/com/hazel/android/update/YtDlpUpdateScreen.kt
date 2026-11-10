@@ -297,7 +297,8 @@ internal fun YtDlpStatusCard(
         is UpdateViewModel.UiState.Updating -> "Version ${state.info.version}" to "Swapping extractor binary…"
         is UpdateViewModel.UiState.Installed -> "Version ${state.version}" to "Installed and live"
         is UpdateViewModel.UiState.Checking -> "Checking for updates…" to "Reading the ${channel.label} release feed"
-        is UpdateViewModel.UiState.Error -> "Check couldn't finish" to state.message
+        is UpdateViewModel.UiState.Error ->
+            (if (state.info != null) "Update couldn't finish" else "Check couldn't finish") to state.message
     }
     val progress = (state as? UpdateViewModel.UiState.Updating)?.takeIf { it.totalBytes > 0 }
         ?.let { (it.progressBytes.toFloat() / it.totalBytes).coerceIn(0f, 1f) }
@@ -357,7 +358,8 @@ internal fun YtDlpStatusCard(
                 )
                 is UpdateViewModel.UiState.Updating -> listOf(Triple("Cancel", false, onCancel))
                 is UpdateViewModel.UiState.Installed -> listOf(Triple("Done", true, onDismiss))
-                is UpdateViewModel.UiState.Error -> listOf(Triple("Retry", true, onCheckNow))
+                // A failed install retries the install; a failed check retries the check.
+                is UpdateViewModel.UiState.Error -> listOf(Triple("Retry", true, if (state.info != null) onUpdate else onCheckNow))
                 is UpdateViewModel.UiState.Checking -> emptyList()
             },
             tone,

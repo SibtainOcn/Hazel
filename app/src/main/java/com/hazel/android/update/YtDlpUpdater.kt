@@ -3,12 +3,16 @@ package com.hazel.android.update
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Build
+import android.os.storage.StorageManager
 import android.util.Log
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.YtDlpEngine
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
@@ -18,10 +22,14 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -86,6 +94,17 @@ object YtDlpUpdater {
         .readTimeout(10, TimeUnit.SECONDS)
         .build()
 
+    /**
+     * For the binary itself. The checks above fail fast so the screen answers quickly; the
+     * download is allowed to be slow, because the phones that update this way are often on a
+     * weak mobile connection, where ten silent seconds is routine rather than a failure.
+     */
+    private val downloadClient = client.newBuilder()
+        .connectTimeout(20, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(true)
+        .build()
+
     private fun engineDir(context: Context) = File(context.noBackupFilesDir, YoutubeDL.baseName)
     private fun liveDir(context: Context) = File(engineDir(context), YoutubeDL.ytdlpDirName)
     private fun liveBinary(context: Context) = File(liveDir(context), YoutubeDL.ytdlpBin)
@@ -102,38 +121,60 @@ object YtDlpUpdater {
 
     /**
      * Whether the live binary starts on this device's Python; null when the library itself
-     * won't start. Bypasses [YtDlpEngine] so it can run while a swap holds the engine.
+     * won't start, or when the check ran out of time. Bypasses [YtDlpEngine] so it can run
+     * while a swap holds the engine.
+     *
+     * A start that fails with no error text, or with the system's words for lacking memory,
+     * is tried once more after a pause: on a phone with little free memory the process can
+     * be stopped by the system while Python is still reading yt-dlp's thousands of modules,
+     * which says nothing about whether the build itself is sound. [onFailure] receives what
+     * the last failed start printed, for telling the person why a build was refused.
      */
-    private fun runsOnDevice(context: Context): Boolean? {
+    private fun runsOnDevice(context: Context, onFailure: (String?) -> Unit = {}): Boolean? {
         try {
             YoutubeDL.getInstance().init(context)
         } catch (e: Exception) {
             Log.w("Hazel", "yt-dlp health check skipped, the engine did not start: ${e.message}")
             return null
         }
-        val processId = "ytdlp-health-${System.nanoTime()}"
-        val run = healthExecutor.submit<Boolean> {
-            val request = YoutubeDLRequest(emptyList<String>()).addOption("--version")
-            YoutubeDL.getInstance().execute(request, processId).out.isNotBlank()
+        for (attempt in 1..START_ATTEMPTS) {
+            val processId = "ytdlp-health-${System.nanoTime()}"
+            val run = healthExecutor.submit<Boolean> {
+                val request = YoutubeDLRequest(emptyList<String>()).addOption("--version")
+                YoutubeDL.getInstance().execute(request, processId).out.isNotBlank()
+            }
+            try {
+                return run.get(HEALTH_CHECK_TIMEOUT_S, TimeUnit.SECONDS)
+            } catch (e: TimeoutException) {
+                // Undecided rather than broken: a slow device must not lose a good build.
+                Log.w("Hazel", "yt-dlp health check timed out")
+                runCatching { YoutubeDL.getInstance().destroyProcessById(processId) }
+                return null
+            } catch (e: ExecutionException) {
+                if (e.cause is YoutubeDL.CanceledException) return null
+                val message = e.cause?.message
+                Log.w("Hazel", "yt-dlp health check failed (attempt $attempt): $message")
+                if (attempt < START_ATTEMPTS && UpdateFailure.isTransientStartFailure(message)) {
+                    try {
+                        Thread.sleep(START_RETRY_MS)
+                    } catch (_: InterruptedException) {
+                        return null
+                    }
+                    continue
+                }
+                onFailure(message)
+                return false
+            } catch (e: Exception) {
+                return null
+            }
         }
-        return try {
-            run.get(HEALTH_CHECK_TIMEOUT_S, TimeUnit.SECONDS)
-        } catch (e: TimeoutException) {
-            // Undecided rather than broken: a slow device must not lose a good build.
-            Log.w("Hazel", "yt-dlp health check timed out")
-            runCatching { YoutubeDL.getInstance().destroyProcessById(processId) }
-            null
-        } catch (e: ExecutionException) {
-            if (e.cause is YoutubeDL.CanceledException) return null
-            Log.w("Hazel", "yt-dlp health check failed: ${e.cause?.message}")
-            false
-        } catch (e: Exception) {
-            null
-        }
+        return null
     }
 
     private val healthExecutor = Executors.newCachedThreadPool()
     private const val HEALTH_CHECK_TIMEOUT_S = 60L
+    private const val START_ATTEMPTS = 2
+    private const val START_RETRY_MS = 3_000L
 
     /**
      * Whether [file] is a complete yt-dlp zip rather than a truncated or foreign file.
@@ -305,6 +346,7 @@ object YtDlpUpdater {
         return YtDlpEngine.whenIdle {
             synchronized(this) {
                 if (!staged.exists()) return@synchronized false
+                rejection = null
                 val tag = runCatching { stagedTag(context).readText().trim() }.getOrDefault("")
                 // Before the swap, so the library never finds the slot empty and unpacks its own copy.
                 runCatching { YoutubeDL.getInstance().init(context) }
@@ -316,6 +358,7 @@ object YtDlpUpdater {
                 if (!staged.renameTo(live)) {
                     if (keptPrevious) previous.renameTo(live)
                     Log.w("Hazel", "yt-dlp ${tag.ifBlank { "update" }} could not be moved into place")
+                    refuse(context, UpdateFailure.of(UpdateFailure.Kind.COULD_NOT_INSTALL, "rename failed"))
                     discardStaged(context)
                     notifyFailed(context, tag)
                     return@synchronized false
@@ -323,9 +366,16 @@ object YtDlpUpdater {
                 live.setExecutable(true, false)
 
                 // Starting is the test; the zip check only decides when the engine can't run one.
-                val runs = runsOnDevice(context) ?: isValidBinary(live)
+                var startError: String? = null
+                val runs = runsOnDevice(context) { startError = it } ?: isValidBinary(live)
                 if (!runs) {
                     Log.w("Hazel", "yt-dlp ${tag.ifBlank { "update" }} does not start here, keeping the previous build")
+                    // No output from a start that never ran means the file itself failed its zip check.
+                    refuse(
+                        context,
+                        if (startError == null) UpdateFailure.of(UpdateFailure.Kind.INCOMPLETE, "installed file failed its zip check")
+                        else UpdateFailure.forStartFailure(startError)
+                    )
                     live.delete()
                     if (!(keptPrevious && previous.renameTo(live))) {
                         ensureValidBinary(context, confirmedBroken = true)
@@ -344,6 +394,7 @@ object YtDlpUpdater {
                     if (tag.isNotBlank()) putString(VERSION_KEY, tag).putString(VERSION_NAME_KEY, tag)
                     else remove(VERSION_KEY).remove(VERSION_NAME_KEY)
                 }.apply()
+                clearFailure(context)
                 Log.i("Hazel", "yt-dlp ${tag.ifBlank { "update" }} is now live")
                 if (tag.isNotBlank()) YtDlpUpdateNotifier.post(context, YtDlpUpdateNotifier.Event.INSTALLED, tag)
                 true
@@ -358,6 +409,43 @@ object YtDlpUpdater {
         stagedBinary(context).delete()
         stagedTag(context).delete()
     }
+
+    /** Why the last staged build was refused, so a manual install can say so. */
+    @Volatile
+    private var rejection: UpdateFailure? = null
+
+    private fun refuse(context: Context, failure: UpdateFailure) {
+        rejection = failure
+        recordFailure(context, failure)
+    }
+
+    private const val STATE_PREFS = "ytdlp_update_state"
+    private const val FAILURE_KEY = "lastFailure"
+
+    /** Keeps the last failure where a bug report can find it, whichever path hit it. */
+    private fun recordFailure(context: Context, failure: UpdateFailure) {
+        Log.w("Hazel", "yt-dlp update failed: ${failure.kind} ${failure.detail}")
+        runCatching {
+            val stamp = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(Date())
+            val line = buildString {
+                append(failure.kind.name)
+                if (failure.detail.isNotBlank()) append(" (").append(failure.detail).append(')')
+                append(" at ").append(stamp)
+            }
+            context.getSharedPreferences(STATE_PREFS, Context.MODE_PRIVATE).edit().putString(FAILURE_KEY, line).apply()
+        }
+    }
+
+    private fun clearFailure(context: Context) {
+        runCatching {
+            context.getSharedPreferences(STATE_PREFS, Context.MODE_PRIVATE).edit().remove(FAILURE_KEY).apply()
+        }
+    }
+
+    /** The last update failure, as one line for a bug report; null when the last update worked. */
+    fun lastFailure(context: Context): String? = runCatching {
+        context.getSharedPreferences(STATE_PREFS, Context.MODE_PRIVATE).getString(FAILURE_KEY, null)
+    }.getOrNull()
 
     private fun notifyFailed(context: Context, tag: String) {
         if (tag.isNotBlank()) YtDlpUpdateNotifier.post(context, YtDlpUpdateNotifier.Event.FAILED, tag)
@@ -510,44 +598,59 @@ object YtDlpUpdater {
      * The asset is fetched by its release tag from github.com rather than through the API,
      * which rate limits unauthenticated callers. [onProgress] receives bytes done and the
      * total, the total being 0 when the server does not say.
+     *
+     * A connection that drops or times out is tried again, picking up where it stopped when
+     * GitHub allows it, so one bad moment on a weak connection does not fail the update. The
+     * result is checked as a whole zip before it is staged, so a splice gone wrong is never
+     * handed to the swap.
      */
     private suspend fun stage(
         context: Context,
         release: ReleaseInfo,
         onProgress: (Long, Long) -> Unit = { _, _ -> }
     ) = withContext(Dispatchers.IO) {
+        val dir = engineDir(context)
+        dir.mkdirs()
         val staged = stagedBinary(context)
-        val partial = File(engineDir(context), "yt-dlp.part")
-        val request = Request.Builder()
-            .url("https://github.com/${release.channel.repo}/releases/download/${release.version}/$BINARY_ASSET")
-            .header("User-Agent", "Hazel-App-Updater")
-            .build()
+        val partial = File(dir, "yt-dlp.part")
+        val url = "https://github.com/${release.channel.repo}/releases/download/${release.version}/$BINARY_ASSET"
+
+        // Leftovers hold space a nearly full phone may not have to spare. An earlier part-file
+        // belongs to an earlier try, possibly of another release, so it is never resumed.
+        synchronized(this@YtDlpUpdater) {
+            staged.delete()
+            stagedTag(context).delete()
+            if (isValidBinary(liveBinary(context))) previousBinary(context).delete()
+        }
+        partial.delete()
 
         try {
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) throw IOException("HTTP ${response.code}")
-                val total = response.body.contentLength().coerceAtLeast(0L)
-                var done = 0L
-                response.body.byteStream().use { input ->
-                    partial.outputStream().use { output ->
-                        val buffer = ByteArray(64 * 1024)
-                        while (true) {
-                            ensureActive()
-                            val read = input.read(buffer)
-                            if (read < 0) break
-                            output.write(buffer, 0, read)
-                            done += read
-                            onProgress(done, total)
-                        }
+            var attempt = 0
+            while (true) {
+                attempt++
+                try {
+                    download(context, url, partial, onProgress)
+                    if (!isValidBinary(partial)) {
+                        // Starting over is the only safe way on from a file that is not a whole zip.
+                        partial.delete()
+                        throw UpdateFailureException(UpdateFailure.Kind.INCOMPLETE, "download failed its zip check")
                     }
+                    break
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: IOException) {
+                    val failure = UpdateFailure.from(e)
+                    if (!failure.retryable || attempt >= DOWNLOAD_ATTEMPTS) throw e
+                    Log.w("Hazel", "yt-dlp download attempt $attempt failed (${failure.kind}), trying again: ${e.message}")
+                    delay(DOWNLOAD_RETRY_MS * attempt)
                 }
-                if (total > 0 && done != total) throw IOException("yt-dlp download ended at $done of $total bytes")
             }
-            if (partial.length() < MIN_BINARY_BYTES) throw IOException("Downloaded yt-dlp is too small to be a build")
 
             synchronized(this@YtDlpUpdater) {
                 staged.delete()
-                if (!partial.renameTo(staged)) throw IOException("Could not stage yt-dlp")
+                if (!partial.renameTo(staged)) {
+                    throw UpdateFailureException(UpdateFailure.Kind.COULD_NOT_INSTALL, "could not stage the download")
+                }
                 stagedTag(context).writeText(release.version)
             }
         } finally {
@@ -556,23 +659,118 @@ object YtDlpUpdater {
     }
 
     /**
+     * One pass at fetching [url] into [partial], continuing the file when it already holds the
+     * start of the same download and the server agrees to go on from there.
+     */
+    private suspend fun download(
+        context: Context,
+        url: String,
+        partial: File,
+        onProgress: (Long, Long) -> Unit
+    ) {
+        val resumeFrom = if (partial.isFile) partial.length() else 0L
+        val request = Request.Builder()
+            .url(url)
+            .header("User-Agent", "Hazel-App-Updater")
+            .apply { if (resumeFrom > 0) header("Range", "bytes=$resumeFrom-") }
+            .build()
+
+        downloadClient.newCall(request).execute().use { response ->
+            if (resumeFrom > 0 && response.code == 416) {
+                partial.delete()
+                throw IOException("The saved part of the download was not accepted")
+            }
+            if (!response.isSuccessful) throw UpdateFailureException(UpdateFailure.Kind.HTTP, "HTTP ${response.code}")
+
+            val append = resumeFrom > 0 && response.code == 206
+            if (append && !response.header("Content-Range").orEmpty().startsWith("bytes $resumeFrom-")) {
+                partial.delete()
+                throw IOException("The server went on from the wrong place")
+            }
+            // A plain 200 answers a ranged request when the server ignores it: start over.
+            val offset = if (append) resumeFrom else 0L
+            val length = response.body.contentLength()
+            val total = if (length > 0) offset + length else 0L
+
+            makeRoom(context, partial, if (length > 0) length else FALLBACK_SIZE_BYTES)
+
+            var done = offset
+            FileOutputStream(partial, append).use { output ->
+                response.body.byteStream().use { input ->
+                    val buffer = ByteArray(64 * 1024)
+                    while (true) {
+                        currentCoroutineContext().ensureActive()
+                        val read = input.read(buffer)
+                        if (read < 0) break
+                        output.write(buffer, 0, read)
+                        done += read
+                        onProgress(done, total)
+                    }
+                }
+            }
+            if (total > 0 && done != total) {
+                throw UpdateFailureException(UpdateFailure.Kind.INCOMPLETE, "$done of $total bytes")
+            }
+        }
+    }
+
+    /**
+     * Asks the system to clear other apps' cached files when the phone is too full for the
+     * download. Phones with little storage left are often the same ones this fails on, and
+     * the system can free what the app cannot. Best effort: if it cannot, the write itself
+     * reports the lack of space.
+     */
+    private fun makeRoom(context: Context, file: File, bytes: Long) {
+        val dir = file.parentFile ?: return
+        val needed = bytes + SPACE_SLACK_BYTES
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (dir.usableSpace >= needed) return
+        try {
+            val storage = context.getSystemService(StorageManager::class.java) ?: return
+            storage.allocateBytes(storage.getUuidForPath(dir), needed)
+        } catch (e: Exception) {
+            Log.w("Hazel", "Could not free space for the yt-dlp download: ${e.message}")
+        }
+    }
+
+    /**
      * Downloads and installs the latest yt-dlp binary of [channel].
      *
+     * Pass [release] when the caller has just looked it up, as the update screen has: asking
+     * GitHub again is a second chance to fail on a weak connection, and a slow one, as the
+     * lookup tries three routes in turn.
+     *
      * When a download is running the new build waits for it to finish before going live,
-     * so this can take as long as that download does. Throws when the download fails.
+     * so this can take as long as that download does. Throws when the download fails; the
+     * exception's cause is told apart by [UpdateFailure.from].
      */
     suspend fun install(
         context: Context,
         channel: Channel,
+        release: ReleaseInfo? = null,
         onProgress: (Long, Long) -> Unit = { _, _ -> }
     ): YoutubeDL.UpdateStatus = withContext(Dispatchers.IO) {
-        val release = latestRelease(channel) ?: throw IOException("Couldn't reach GitHub")
-        stage(context, release, onProgress)
-        while (!applyStagedUpdate(context)) {
-            if (!stagedBinary(context).exists()) throw IOException("Staged yt-dlp was rejected")
-            delay(APPLY_RETRY_MS)
+        try {
+            val target = release ?: latestRelease(channel)
+                ?: throw UpdateFailureException(UpdateFailure.Kind.UNREACHABLE, "release lookup failed")
+            stage(context, target, onProgress)
+            while (!applyStagedUpdate(context)) {
+                if (!stagedBinary(context).exists()) {
+                    throw UpdateFailureException(
+                        rejection ?: UpdateFailure.of(UpdateFailure.Kind.COULD_NOT_INSTALL, "update was rejected")
+                    )
+                }
+                delay(APPLY_RETRY_MS)
+            }
+            YoutubeDL.UpdateStatus.DONE
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // A refusal was already recorded where it happened; recording it again only
+            // refreshes the time, and it keeps the download's own failures from going unseen.
+            recordFailure(context, UpdateFailure.from(e))
+            throw e
         }
-        YoutubeDL.UpdateStatus.DONE
     }
 
     /**
@@ -629,8 +827,11 @@ object YtDlpUpdater {
             }
             if (applyStagedUpdate(context)) SettingsRepository.setYtDlpUpdateAvailable(context, false)
             true
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.w("Hazel", "yt-dlp auto-update failed: ${e.message}")
+            recordFailure(context, UpdateFailure.from(e))
             target?.let { notifyFailed(context, it) }
             false
         } finally {
@@ -647,4 +848,12 @@ object YtDlpUpdater {
 
     /** How often a manual install checks whether the engine has come free. */
     private const val APPLY_RETRY_MS = 1_000L
+
+    /** Tries at the download, and the pause before the second, which doubles for the third. */
+    private const val DOWNLOAD_ATTEMPTS = 3
+    private const val DOWNLOAD_RETRY_MS = 2_000L
+
+    /** Room kept beyond the file itself, and the size assumed when the server gives none. */
+    private const val SPACE_SLACK_BYTES = 2L * 1024 * 1024
+    private const val FALLBACK_SIZE_BYTES = 8L * 1024 * 1024
 }
