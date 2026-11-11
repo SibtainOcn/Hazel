@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Off screen, the same refusal posts a notification with Sign in and Dismiss.
 - Notification taps open the screen they are about: Running, Failed, History or the failure dialog.
 - The share sheet's format list now shows why a read failed.
+- Extra download arguments: `-o` is honoured again as a file name and folder template, so `-o "%(uploader)s/%(id)s.%(ext)s"` saves into a folder per uploader. Folders are made where the file is saved, in Downloads or in a picked folder; a template that points outside the download folder (absolute or `..`) is ignored. (#165)
 
 ### Changed
 - The bottom bar's selected-tab shape is easier to see.

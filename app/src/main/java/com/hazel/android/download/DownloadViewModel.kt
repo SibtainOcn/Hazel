@@ -2503,7 +2503,20 @@ class DownloadViewModel : ViewModel() {
         val isVideo = format.hasVideo
         val container = (if (isVideo) options.videoContainer else options.audioContainer).trim()
 
-        addOption("-o", "${downloadDir.absolutePath}/${outputTemplate(options, title, author)}")
+        val settings = AdvancedSettingsStore.ready()
+        val outputPath = resolveOutputPath(options, title, author, settings)
+        addOption("-o", "${downloadDir.absolutePath}/${outputPath.template}")
+        // Keeps a dots-only field (uploader "..") from writing above the work folder; names get the older ASCII look.
+        // One --compat-options for the user's and the app's values.
+        settings
+            .compatOptions(if (outputPath.folders.isNotEmpty()) listOf("filename-sanitization") else emptyList())
+            .takeIf { it.isNotEmpty() }
+            ?.let { addOption("--compat-options", it.joinToString(",")) }
+        // yt-dlp keeps ".." in id fields too, so a dots-only id used as a folder becomes "_".
+        // Three words, so they go through addCommands.
+        outputPath.idKeys.takeIf { it.isNotEmpty() }?.let { keys ->
+            addCommands(listOf("--replace-in-metadata", keys.joinToString(","), "^\\.+$", "_"))
+        }
         addOption("--no-playlist")
         addOption("--no-mtime")
         // A card is usually FAT or exFAT, which refuses names with characters such as : or ?
@@ -2653,7 +2666,7 @@ class DownloadViewModel : ViewModel() {
             }
         }
 
-        applyChapters(options, isVideo)
+        applyChapters(options, isVideo, outputPath.folderPrefix)
         applySponsorBlock(options, isVideo)
         applyOneOff(options)
         if (isVideo) applySubtitles(options)
@@ -2681,14 +2694,18 @@ class DownloadViewModel : ViewModel() {
         }
 
         // Last, so an extra argument from the advanced settings can change what was set above.
-        applyExtraDownloadArguments()
+        applyExtraDownloadArguments(settings)
     }
 
     /**
      * Chapter handling. Marking with SponsorBlock is paired with embedding, since the marks
      * are written as chapters and are invisible without it.
      */
-    private fun YoutubeDLRequest.applyChapters(options: DownloadOptions, isVideo: Boolean) {
+    private fun YoutubeDLRequest.applyChapters(
+        options: DownloadOptions,
+        isVideo: Boolean,
+        folderPrefix: String = ""
+    ) {
         if (isVideo && options.addChapters) {
             // The source's own chapters are embedded either way. SponsorBlock's segments
             // are added as chapters of their own only while SponsorBlock is in use, since
@@ -2704,7 +2721,7 @@ class DownloadViewModel : ViewModel() {
             // videos' "01 Intro" from overwriting each other.
             addOption(
                 "-o",
-                "chapter:${downloadDir.absolutePath}/" +
+                "chapter:${downloadDir.absolutePath}/$folderPrefix" +
                     limitNameFields("%(title)s - %(section_number)02d %(section_title)s.%(ext)s")
             )
         }
@@ -2787,25 +2804,48 @@ class DownloadViewModel : ViewModel() {
      * The user can edit both, so the fields they edited are substituted as literal text
      * rather than left for yt-dlp to fill from the source. Characters a filesystem rejects
      * are replaced first, and a substituted value is never allowed to be empty.
+     *
+     * A `-o` in the extra download arguments replaces the file name setting, folders included.
      */
-    private fun outputTemplate(options: DownloadOptions, title: String, author: String): String {
-        var template = FilenameTemplate.normalize(options.filenameTemplate)
+    private fun resolveOutputPath(
+        options: DownloadOptions,
+        title: String,
+        author: String,
+        settings: AdvancedSettings
+    ): OutputPath {
+        val custom = settings.outputPathOverride()
+        if (custom == null && settings.outputTemplateText() != null) {
+            Log.w("Hazel", "Ignored the -o in the extra download arguments: not a safe folder and name template")
+        }
+        val base = custom ?: OutputPath(emptyList(), FilenameTemplate.normalize(options.filenameTemplate))
         val info = _state.value.active ?: _state.value.info
 
-        if (title.isNotBlank() && title != info?.title) {
-            template = template.replace("%(title)s", sanitizeForFilename(title))
+        fun fill(part: String, folder: Boolean = false): String {
+            var template = part
+            if (title.isNotBlank() && title != info?.title) {
+                template = template.replace("%(title)s", sanitizeForFilename(title))
+            }
+            if (author.isNotBlank() && author != info?.uploader) {
+                val safe = sanitizeForFilename(author, NAME_FIELD_BYTES.getValue("uploader"))
+                template = template
+                    .replace("%(uploader)s", safe)
+                    .replace("%(channel)s", safe)
+            }
+            // yt-dlp does not shorten the site's text, so byte limits keep each name and folder under 255 bytes.
+            return if (folder) {
+                FilenameTemplate.limitFolderBytes(
+                    template, NAME_FIELD_BYTES, FOLDER_FIELD_BYTES, FOLDER_ID_BYTES
+                )
+            } else {
+                limitNameFields(template)
+            }
         }
-        if (author.isNotBlank() && author != info?.uploader) {
-            val safe = sanitizeForFilename(author, NAME_FIELD_BYTES.getValue("uploader"))
-            template = template
-                .replace("%(uploader)s", safe)
-                .replace("%(channel)s", safe)
-        }
-        // yt-dlp fills these with the text as the site gave it and does not shorten it, so a
-        // post whose caption is its title failed with "File name too long". Its byte limit
-        // on a field keeps the name inside the 255 bytes a file name may have, whatever the
-        // script.
-        return limitNameFields(template)
+
+        // App text in a folder name is not cleaned by yt-dlp; see FilenameTemplate.containFolder.
+        return OutputPath(
+            base.folders.map { FilenameTemplate.containFolder(fill(it, folder = true)) },
+            fill(base.fileTemplate)
+        )
     }
 
     /**
@@ -2917,8 +2957,10 @@ class DownloadViewModel : ViewModel() {
         // .part from a cancelled or failed run would otherwise land in Downloads.
         purgeFragments()
 
-        val latestFile = downloadDir.listFiles()?.filter { it.isFile }
-            ?.maxByOrNull { it.lastModified() }
+        val latestFile = com.hazel.android.util.StagedFiles.list(
+            downloadDir,
+            onSkipped = { Log.w("Hazel", "Not saved, it is a link: ${it.name}") }
+        ).maxByOrNull { it.file.lastModified() }?.file
         val fileName = latestFile?.name ?: "File saved"
 
         // Measured off the finished file rather than taken from the transfer figures. Those
@@ -2942,7 +2984,7 @@ class DownloadViewModel : ViewModel() {
         var savedUri: android.net.Uri? = null
 
         val movedToTree = tree != null && try {
-            com.hazel.android.util.MediaStoreHelper.moveToTree(context, downloadDir, tree) {
+            com.hazel.android.util.MediaStoreHelper.moveToTree(context, downloadDir, tree, keepFolders = true) {
                 savedUri = it
             }
         } catch (_: Exception) {
@@ -2960,7 +3002,7 @@ class DownloadViewModel : ViewModel() {
             finalDir = try {
                 com.hazel.android.util.MediaStoreHelper.moveToPublicStorage(
                     context, downloadDir, StoragePaths.downloadRelativePath(isAudio = isMusic),
-                    isMusic = isMusic
+                    isMusic = isMusic, keepFolders = true
                 ) { savedUri = it }
             } catch (_: Exception) {
                 // MediaStore move failed; the files stay in app storage and remain accessible.
@@ -2983,7 +3025,11 @@ class DownloadViewModel : ViewModel() {
         com.hazel.android.util.MediaStoreHelper.scanFiles(context, finalDir)
         // The download's own folder is empty once its file has moved, and goes. A file the
         // move could not publish stays in it, and a folder with anything in it is not deleted.
-        runCatching { downloadDir.delete() }
+        // Empty folders from the output template go first.
+        runCatching {
+            com.hazel.android.util.StagedFiles.pruneEmptyFolders(downloadDir)
+            downloadDir.delete()
+        }
 
         _state.update { s -> s.copy(
             progress = 1f,
@@ -3112,9 +3158,10 @@ class DownloadViewModel : ViewModel() {
 
     private fun purgeFragments() {
         try {
-            downloadDir.listFiles()?.forEach { f ->
-                if (f.isFile && (f.name.endsWith(".part") || f.name.endsWith(".ytdl")
-                            || f.name.endsWith(".temp") || f.name.startsWith("."))
+            com.hazel.android.util.StagedFiles.list(downloadDir).forEach { staged ->
+                val f = staged.file
+                if (f.name.endsWith(".part") || f.name.endsWith(".ytdl")
+                    || f.name.endsWith(".temp") || f.name.startsWith(".")
                 ) {
                     f.delete()
                 }
@@ -3336,6 +3383,10 @@ class DownloadViewModel : ViewModel() {
         /** The most a title may take of a file name, in UTF-8 bytes; 255 is the limit. */
         const val MAX_NAME_BYTES = 120
 
+        /** Byte limit for folder fields [NAME_FIELD_BYTES] does not list, and for ids. */
+        const val FOLDER_FIELD_BYTES = 60
+        const val FOLDER_ID_BYTES = 120
+
         /**
          * Template fields that carry whatever text the site gave, with the bytes each may
          * take. A title and a name together, plus the extension and the suffixes yt-dlp adds
@@ -3556,10 +3607,10 @@ internal data class RunCounts(val total: Int, val done: Int, val failed: Int, va
  * that is missing or cannot be read: a figure for a progress readout, never a reason to fail.
  */
 internal fun bytesIn(dir: File): Long = try {
-    dir.listFiles()
-        ?.filter { it.isFile && !it.name.endsWith(".ytdl") }
-        ?.sumOf { it.length() }
-        ?: 0L
+    // Runs about once a second, so it skips the per-entry link checks.
+    com.hazel.android.util.StagedFiles.list(dir, checkLinks = false)
+        .filter { !it.file.name.endsWith(".ytdl") }
+        .sumOf { it.file.length() }
 } catch (_: Exception) {
     0L
 }
@@ -3619,10 +3670,10 @@ internal object PausedShares {
  */
 internal fun pausedTotal(dir: File, reported: Long): Long {
     val finished = try {
-        dir.listFiles()
-            ?.filter { it.isFile && ".part" !in it.name && !it.name.endsWith(".ytdl") }
-            ?.sumOf { it.length() }
-            ?: 0L
+        // Includes files in output-template folders.
+        com.hazel.android.util.StagedFiles.list(dir, checkLinks = false)
+            .filter { ".part" !in it.file.name && !it.file.name.endsWith(".ytdl") }
+            .sumOf { it.file.length() }
     } catch (_: Exception) {
         0L
     }

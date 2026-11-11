@@ -160,6 +160,7 @@
     <string name="format_sheet_audio_language">Langue de l\'audio</string>
     <string name="format_sheet_change_audio_language">Changer la langue de l\'audio</string>
     <string name="format_sheet_filename_template">Modèle de nom de fichier</string>
+    <string name="format_sheet_extra_args">Arguments supplémentaires</string>
     <string name="format_sheet_change_field">Modifier</string>
     <string name="format_sheet_save_dir">Dossier</string>
     <string name="format_sheet_save_location">Emplacement</string>
@@ -733,7 +734,7 @@
     <string name="advanced_no_check_certificates">Ignorer la vérification des certificats</string>
     <string name="advanced_no_check_certificates_summary">Seulement pour un site auquel cet appareil ne fait pas confiance. Connexions moins sûres.</string>
     <string name="advanced_extra_args">Arguments de téléchargement supplémentaires</string>
-    <string name="advanced_extra_args_hint">Arguments yt-dlp ajoutés à chaque téléchargement. Les options gérées par Hazel sont ignorées.</string>
+    <string name="advanced_extra_args_hint">Arguments yt-dlp ajoutés à chaque téléchargement. -o définit le nom du fichier et ses dossiers. Les autres options gérées par Hazel sont ignorées.</string>
     <string name="advanced_reset">Réinitialiser les réglages avancés</string>
     <string name="advanced_reset_title">Réinitialiser les réglages avancés ?</string>
     <string name="advanced_reset_body">Chaque option de cet écran redevient désactivée ou vide.</string>

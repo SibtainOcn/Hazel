@@ -62,4 +62,38 @@ class FilenameTemplateTest {
             FilenameTemplate.limitBytes("%(upload_date>%Y-%m-%d)s %(title)s.%(ext)s", limits)
         )
     }
+
+    @Test
+    fun `a folder name made of substituted text cannot be dots or empty`() {
+        assertEquals("_", FilenameTemplate.containFolder(".."))
+        assertEquals("_", FilenameTemplate.containFolder("."))
+        assertEquals("_", FilenameTemplate.containFolder(" . . "))
+        assertEquals("_", FilenameTemplate.containFolder(""))
+        assertEquals("Name", FilenameTemplate.containFolder("  ..Name. "))
+        assertEquals("Fine Name", FilenameTemplate.containFolder("Fine Name"))
+        assertEquals("a.b", FilenameTemplate.containFolder("a.b"))
+    }
+
+    @Test
+    fun `identifier keys are the ones yt-dlp does not strip dots from`() {
+        for (k in listOf("id", "uploader_id", "channel_id", "playlist_id", "format_id")) {
+            assertEquals(k, true, FilenameTemplate.isIdKey(k))
+        }
+        for (k in listOf("title", "width", "video", "identity", "id_x", "uploader")) {
+            assertEquals(k, false, FilenameTemplate.isIdKey(k))
+        }
+    }
+
+    @Test
+    fun `a folder field is limited whether or not the name limits know it`() {
+        val limits = mapOf("uploader" to 60, "title" to 120)
+        fun f(t: String) = FilenameTemplate.limitFolderBytes(t, limits, 50, 100)
+        assertEquals("%(uploader).60B", f("%(uploader)s"))
+        assertEquals("%(playlist_title).50B", f("%(playlist_title)s"))
+        assertEquals("%(uploader_id).100B", f("%(uploader_id)s"))
+        assertEquals("%(album_artist,uploader).60B - %(series).50B", f("%(album_artist,uploader)s - %(series)s"))
+        assertEquals("%(upload_date>%Y)s", f("%(upload_date>%Y)s"))
+        assertEquals("%(title).30B", f("%(title).30B"))
+        assertEquals("Music", f("Music"))
+    }
 }
