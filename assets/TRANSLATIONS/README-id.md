@@ -81,7 +81,7 @@ Jika Hazel bermanfaat bagimu, pertimbangkan untuk mendukung pengembangannya. Duk
   </tr>
 </table>
 
-<sub>Dukungan tidak pernah wajib dan tidak membuka apa pun. Semua fitur tetap gratis untuk semua orang. Tidak punya uang? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Beri bintang repo</a> atau <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">laporkan masalah</a>, itu sama membantunya.</sub>
+<sub>Tidak punya uang? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Beri bintang repo</a> atau <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">laporkan masalah</a>, itu sama membantunya.</sub>
 </div>
 
 ---
@@ -109,22 +109,22 @@ Hazel adalah pengunduh gratis dan sumber terbuka untuk Android yang ditenagai **
 
 <table>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>▶️ Cari & Putar</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>📚 Semua Unduhan</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>🎬 Opsi Unduhan</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>🎚️ Pemilih Format</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>Cari & Putar</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>Semua Unduhan</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>Opsi Unduhan</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>Pemilih Format</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>⏳ Antrean Unduhan</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>🌐 Bahasa Audio</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>🔍 Pencarian Cerdas</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>📃 Playlist Massal</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>Antrean Unduhan</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>Bahasa Audio</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>Pencarian Cerdas</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>Playlist Massal</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>🗣️ Bahasa Aplikasi</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>✨ Beranda Kaca</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>⚙️ Pengaturan Lain</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>🎨 Tampilan</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>Bahasa Aplikasi</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>Beranda Kaca</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>Pengaturan Lain</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>Tampilan</b></td>
   </tr>
 </table>
 
@@ -189,7 +189,7 @@ Kontribusi sangat diterima! Lihat [CONTRIBUTING.md](https://github.com/SibtainOc
 [GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
 
 ## 🏆 Kredit
-**Pengembang & Arsitek:** [SibtainOcn](https://github.com/SibtainOcn)
+**Pengembang:** [SibtainOcn](https://github.com/SibtainOcn)
 
 **Terima kasih banyak kepada:**
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - Pengelolaan repositori F-Droid

@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>การสนับสนุนไม่ใช่สิ่งจำเป็นและไม่ได้ปลดล็อกอะไรเลย ทุกฟีเจอร์ฟรีสำหรับทุกคนตลอดไป ไม่มีเงิน? <a href="https://github.com/SibtainOcn/Hazel/stargazers">กดดาวให้รีโพ</a> หรือ <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">รายงานปัญหา</a> ก็ช่วยได้ไม่แพ้กัน</sub>
+<sub>ไม่มีเงิน? <a href="https://github.com/SibtainOcn/Hazel/stargazers">กดดาวให้รีโพ</a> หรือ <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">รายงานปัญหา</a> ก็ช่วยได้ไม่แพ้กัน</sub>
 </div>
 
 ---
@@ -109,22 +109,22 @@ Hazel คือโปรแกรมดาวน์โหลดฟรีแล�
 
 <table>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>▶️ ค้นหาและเล่น</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>📚 การดาวน์โหลดทั้งหมด</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>🎬 ตัวเลือกดาวน์โหลด</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>🎚️ ตัวเลือกรูปแบบ</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>ค้นหาและเล่น</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>การดาวน์โหลดทั้งหมด</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>ตัวเลือกดาวน์โหลด</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>ตัวเลือกรูปแบบ</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>⏳ คิวดาวน์โหลด</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>🌐 ภาษาเสียง</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>🔍 ค้นหาอัจฉริยะ</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>📃 เพลย์ลิสต์แบบกลุ่ม</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>คิวดาวน์โหลด</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>ภาษาเสียง</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>ค้นหาอัจฉริยะ</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>เพลย์ลิสต์แบบกลุ่ม</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>🗣️ ภาษาของแอป</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>✨ หน้าหลักกระจก</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>⚙️ การตั้งค่าเพิ่มเติม</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>🎨 รูปลักษณ์</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>ภาษาของแอป</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>หน้าหลักกระจก</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>การตั้งค่าเพิ่มเติม</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>รูปลักษณ์</b></td>
   </tr>
 </table>
 
@@ -189,7 +189,7 @@ MD5:        3bcce9e14c616a9087766563875978e6
 [GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
 
 ## 🏆 เครดิต
-**นักพัฒนาและสถาปนิก:** [SibtainOcn](https://github.com/SibtainOcn)
+**นักพัฒนา:** [SibtainOcn](https://github.com/SibtainOcn)
 
 **ขอบคุณอย่างยิ่งแด่:**
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - ดูแลคลัง F-Droid

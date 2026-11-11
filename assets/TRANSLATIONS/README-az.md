@@ -81,7 +81,7 @@ Hazel sizə faydalı olubsa, onun inkişafını dəstəkləməyi düşünün. D�
   </tr>
 </table>
 
-<sub>Dəstək heç vaxt məcburi deyil və heç nəyi açmır. Bütün funksiyalar hamı üçün pulsuz qalır. Pulunuz yoxdur? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Repoya ulduz verin</a> və ya <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">problem bildirin</a>, eyni dərəcədə kömək edir.</sub>
+<sub>Pulunuz yoxdur? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Repoya ulduz verin</a> və ya <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">problem bildirin</a>, eyni dərəcədə kömək edir.</sub>
 </div>
 
 ---
@@ -109,22 +109,22 @@ Hazel **yt-dlp** əsaslı pulsuz, açıq mənbəli Android yükləyicisidir. **1
 
 <table>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>▶️ Axtar və oxut</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>📚 Bütün yükləmələr</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>🎬 Yükləmə seçimləri</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>🎚️ Format seçimi</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>Axtar və oxut</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>Bütün yükləmələr</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>Yükləmə seçimləri</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>Format seçimi</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>⏳ Yükləmə növbəsi</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>🌐 Audio dili</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>🔍 Ağıllı axtarış</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>📃 Toplu pleylist</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>Yükləmə növbəsi</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>Audio dili</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>Ağıllı axtarış</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>Toplu pleylist</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>🗣️ Tətbiq dilləri</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>✨ Şüşə ana səhifə</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>⚙️ Digər ayarlar</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>🎨 Görünüş</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>Tətbiq dilləri</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>Şüşə ana səhifə</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>Digər ayarlar</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>Görünüş</b></td>
   </tr>
 </table>
 
@@ -189,7 +189,7 @@ Töhfələrə şadıq! Qaydalar üçün [CONTRIBUTING.md](https://github.com/Sib
 [GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
 
 ## 🏆 Təşəkkürlər
-**Tərtibatçı və memar:** [SibtainOcn](https://github.com/SibtainOcn)
+**Tərtibatçı:** [SibtainOcn](https://github.com/SibtainOcn)
 
 **Böyük təşəkkürlər:**
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - F-Droid repozitoriyasının idarəsi

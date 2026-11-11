@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>समर्थन कभी भी अनिवार्य नहीं है और इससे कुछ भी अनलॉक नहीं होता है। सभी फीचर्स सभी के लिए मुफ़्त हैं। पैसे नहीं हैं? <a href="https://github.com/SibtainOcn/Hazel/stargazers">रिपॉजिटरी को स्टार दें</a> या <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">किसी समस्या की रिपोर्ट करें</a>, यह भी उतनी ही मदद करता है।</sub>
+<sub>पैसे नहीं हैं? <a href="https://github.com/SibtainOcn/Hazel/stargazers">रिपॉजिटरी को स्टार दें</a> या <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">किसी समस्या की रिपोर्ट करें</a>, यह भी उतनी ही मदद करता है।</sub>
 </div>
 
 ---
@@ -109,22 +109,22 @@ Hazel Android के लिए **yt-dlp** द्वारा संचालि�
 
 <table>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>▶️ खोजें और चलाएं</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>📚 सभी डाउनलोड</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>🎬 डाउनलोड विकल्प</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>🎚️ फ़ॉर्मेट चयनकर्ता</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>खोजें और चलाएं</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>सभी डाउनलोड</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>डाउनलोड विकल्प</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>फ़ॉर्मेट चयनकर्ता</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>⏳ डाउनलोड कतार</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>🌐 ऑडियो भाषा</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>🔍 स्मार्ट खोज</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>📃 बैच प्लेलिस्ट</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>डाउनलोड कतार</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>ऑडियो भाषा</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>स्मार्ट खोज</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>बैच प्लेलिस्ट</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>🗣️ ऐप की भाषाएं</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>✨ ग्लास होम</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>⚙️ अधिक सेटिंग्स</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>🎨 दिखावट</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>ऐप की भाषाएं</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>ग्लास होम</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>अधिक सेटिंग्स</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>दिखावट</b></td>
   </tr>
 </table>
 
@@ -189,7 +189,7 @@ MD5:        3bcce9e14c616a9087766563875978e6
 [GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
 
 ## 🏆 क्रेडिट
-**डेवलपर और आर्किटेक्ट:** [SibtainOcn](https://github.com/SibtainOcn)
+**डेवलपर:** [SibtainOcn](https://github.com/SibtainOcn)
 
 **इनका सहृदय धन्यवाद:**
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - F-Droid रिपॉजिटरी प्रबंधन
