@@ -152,6 +152,7 @@
     <string name="format_sheet_audio_language">Bahasa audio</string>
     <string name="format_sheet_change_audio_language">Ubah bahasa audio</string>
     <string name="format_sheet_filename_template">Templat nama file</string>
+    <string name="format_sheet_extra_args">Argumen tambahan</string>
     <string name="format_sheet_change_field">Ubah</string>
     <string name="format_sheet_save_dir">Folder penyimpanan</string>
     <string name="format_sheet_save_location">Lokasi penyimpanan</string>
@@ -705,7 +706,7 @@
     <string name="advanced_no_check_certificates">Lewati pemeriksaan sertifikat</string>
     <string name="advanced_no_check_certificates_summary">Hanya untuk situs yang tidak dipercaya perangkat ini. Koneksi jadi kurang aman.</string>
     <string name="advanced_extra_args">Argumen unduhan tambahan</string>
-    <string name="advanced_extra_args_hint">Argumen yt-dlp untuk setiap unduhan. Opsi yang diatur Hazel sendiri dilewati.</string>
+    <string name="advanced_extra_args_hint">Argumen yt-dlp untuk setiap unduhan. -o menentukan nama file dan folder-nya. Opsi lain yang diatur Hazel sendiri dilewati.</string>
     <string name="advanced_reset">Atur ulang pengaturan lanjutan</string>
     <string name="advanced_reset_title">Atur ulang pengaturan lanjutan?</string>
     <string name="advanced_reset_body">Setiap opsi di layar ini kembali mati atau kosong.</string>

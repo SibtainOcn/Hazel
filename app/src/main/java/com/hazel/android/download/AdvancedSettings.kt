@@ -121,8 +121,23 @@ data class AdvancedSettings(
         poTokens.split(',', '\n').map { it.trim() }.filter { PO_TOKEN_FORMAT.matches(it) }
 
     /** The extra download arguments as a list, with the ones the app relies on removed. */
-    fun downloadArguments(): List<String> =
-        splitArguments(downloadExtraArgs).let(::withoutReservedOptions)
+    fun downloadArguments(): List<String> {
+        val args = splitArguments(downloadExtraArgs)
+        // With folders, --no-windows-filenames is dropped: it turns off the field cleaning that keeps a ".." value inside the work folder.
+        val folders = lastOutputTemplate(args)?.let(OutputPath::parse)?.folders.orEmpty().isNotEmpty()
+        return withoutReservedOptions(args, if (folders) RESERVED_WITH_FOLDERS else emptySet())
+    }
+
+    /** The user's `--compat-options` plus [required], merged into one option so neither replaces the other. */
+    fun compatOptions(required: List<String> = emptyList()): List<String> =
+        // The app's own options go last so a user's "-name" cannot remove them.
+        (allCompatOptions(splitArguments(downloadExtraArgs)).filter { it !in required } + required).distinct()
+
+    /** The user's last `-o`, as typed, or null. */
+    fun outputTemplateText(): String? = lastOutputTemplate(splitArguments(downloadExtraArgs))
+
+    /** The user's `-o` as folders and a name inside the work folder, or null (see [OutputPath.parse]). */
+    fun outputPathOverride(): OutputPath? = outputTemplateText()?.let(OutputPath::parse)
 
     companion object {
         /**
@@ -178,17 +193,43 @@ data class AdvancedSettings(
             return candidates.firstOrNull { it in YOUTUBE_LANGUAGES }
         }
 
+        /** Dropped too while the output template has folders. */
+        private val RESERVED_WITH_FOLDERS = setOf("--no-windows-filenames")
+
         /**
          * Options the app sets itself and reads the output of. Given again from here they
          * would move the file where the app cannot find it, or change the output the progress
          * is read from, so they are dropped with their values.
          */
-        private val RESERVED = setOf(
-            "-o", "--output", "-P", "--paths", "--load-info-json", "-a", "--batch-file",
+        /** Reserved options that take no value. */
+        private val RESERVED_FLAGS = setOf(
             "-q", "--quiet", "--no-progress", "-s", "--simulate", "--skip-download",
-            "-j", "--dump-json", "-J", "--dump-single-json", "-O", "--print", "--print-to-file",
-            "--newline", "--progress-template", "--cookies", "--cookies-from-browser"
+            "-j", "--dump-json", "-J", "--dump-single-json", "--newline"
         )
+
+        /** Reserved options with one value, which may start with a dash (`--compat-options -multistreams`). */
+        private val RESERVED_ONE_VALUE = setOf(
+            "-o", "--output", "-P", "--paths", "--load-info-json", "-a", "--batch-file",
+            "-O", "--print", "--progress-template", "--cookies", "--cookies-from-browser",
+            // Merged into one --compat-options instead; see [compatOptions].
+            "--compat-options"
+        )
+
+        /** `--print-to-file TEMPLATE FILE`: the only reserved option with two values. */
+        private val RESERVED_TWO_VALUES = setOf("--print-to-file")
+
+        /** Options the app sets itself and reads the output of; dropped with their values. */
+        private val RESERVED = RESERVED_FLAGS + RESERVED_ONE_VALUE + RESERVED_TWO_VALUES
+
+        /** yt-dlp takes the next word as the value even if it starts with `-`; a word starting with `--` is read as the next option instead. */
+        private fun isValueWord(word: String): Boolean = !word.startsWith("--")
+
+        /** How many words follow [name] as its values when it is written without an `=`. */
+        private fun valueCount(name: String): Int = when (name) {
+            in RESERVED_TWO_VALUES -> 2
+            in RESERVED_ONE_VALUE -> 1
+            else -> 0
+        }
 
         /**
          * Splits a line of arguments the way a shell would: on spaces, keeping quoted text
@@ -216,19 +257,67 @@ data class AdvancedSettings(
             return out
         }
 
-        private fun withoutReservedOptions(args: List<String>): List<String> {
+        /** Every value of every `--compat-options` in [args]; each takes a comma separated list. */
+        internal fun allCompatOptions(args: List<String>): List<String> {
             val out = mutableListOf<String>()
-            var skipValue = false
+            var i = 0
+            while (i < args.size) {
+                val arg = args[i]
+                if (arg.substringBefore('=') == "--compat-options") {
+                    val value = if ('=' in arg) {
+                        arg.substringAfter('=')
+                    } else {
+                        args.getOrNull(i + 1)?.takeIf(::isValueWord)?.also { i++ }
+                    }
+                    value?.split(',')?.map { it.trim() }?.filter { it.isNotEmpty() }?.let(out::addAll)
+                }
+                i++
+            }
+            return out
+        }
+
+        /** The last `-o` / `--output` for the media file, in any spelling; side-file templates are skipped. */
+        internal fun lastOutputTemplate(args: List<String>): String? {
+            var found: String? = null
+            fun take(value: String) {
+                if (!OutputPath.isSideFileTemplate(value)) found = value
+            }
+            var i = 0
+            while (i < args.size) {
+                val arg = args[i]
+                val name = arg.substringBefore('=')
+                when {
+                    name == "-o" || name == "--output" -> {
+                        if ('=' in arg) {
+                            take(arg.substringAfter('='))
+                        } else {
+                            args.getOrNull(i + 1)?.takeIf(::isValueWord)?.let { take(it); i++ }
+                        }
+                    }
+                    // Short option with its value joined, as in "-ofile.%(ext)s".
+                    !arg.startsWith("--") && arg.length > 2 && arg.startsWith("-o") -> take(arg.substring(2))
+                }
+                i++
+            }
+            return found
+        }
+
+        private fun withoutReservedOptions(args: List<String>, also: Set<String> = emptySet()): List<String> {
+            val out = mutableListOf<String>()
+            var skip = 0
             for (arg in args) {
-                if (skipValue) {
-                    skipValue = false
-                    if (!arg.startsWith("-")) continue
+                if (skip > 0) {
+                    if (isValueWord(arg)) {
+                        skip--
+                        continue
+                    }
+                    // Value missing: read this word as the next option.
+                    skip = 0
                 }
                 val name = arg.substringBefore('=')
-                if (name in RESERVED) {
-                    // The value is dropped with its option, whether it came as "--opt value"
-                    // or "--opt=value".
-                    skipValue = '=' !in arg
+                if (name in RESERVED || name in also) {
+                    // Drop the values with their option, in `--opt value` and `--opt=value` form.
+                    if ('=' !in arg) skip = valueCount(name)
                     continue
                 }
                 // A short option may carry its value joined to it, as in "-ofile.%(ext)s".

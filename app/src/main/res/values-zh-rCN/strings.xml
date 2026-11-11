@@ -152,6 +152,7 @@
     <string name="format_sheet_audio_language">音轨语言</string>
     <string name="format_sheet_change_audio_language">更改音轨语言</string>
     <string name="format_sheet_filename_template">文件名模板</string>
+    <string name="format_sheet_extra_args">额外参数</string>
     <string name="format_sheet_change_field">更改</string>
     <string name="format_sheet_save_dir">保存目录</string>
     <string name="format_sheet_save_location">保存位置</string>
@@ -705,7 +706,7 @@
     <string name="advanced_no_check_certificates">跳过证书检查</string>
     <string name="advanced_no_check_certificates_summary">仅用于本设备不信任其证书的网站。连接安全性会降低。</string>
     <string name="advanced_extra_args">额外下载参数</string>
-    <string name="advanced_extra_args_hint">添加到每次下载的 yt-dlp 参数。Hazel 自行设置的选项会被跳过。</string>
+    <string name="advanced_extra_args_hint">添加到每次下载的 yt-dlp 参数。-o 用于设置文件名及其文件夹。Hazel 自行设置的其他选项会被跳过。</string>
     <string name="advanced_reset">重置高级设置</string>
     <string name="advanced_reset_title">重置高级设置？</string>
     <string name="advanced_reset_body">此页面上的每个选项都将恢复为关闭或空白。</string>
