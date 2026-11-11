@@ -962,4 +962,18 @@
     <string name="upd_report_copied">Info perangkat disalin. Tempel ke laporan.</string>
     <string name="upd_channel_note">Beta dan Nightly mendapat perbaikan lebih dulu dan bisa kurang stabil.</string>
     <string name="upd_status_ok">Terbaru di %1$s</string>
+    <string name="upd_failure_no_space">Penyimpanan kosong di perangkat ini tidak cukup untuk memasang pembaruan. Kosongkan sebagian ruang lalu coba lagi.</string>
+    <string name="upd_failure_timeout">Koneksi ke GitHub habis waktu. Beralih ke jaringan yang lebih kuat lalu coba lagi.</string>
+    <string name="upd_failure_unreachable">Hazel tidak dapat menjangkau GitHub. Periksa koneksi internet serta pengaturan VPN dan DNS pribadi, lalu coba lagi.</string>
+    <string name="upd_failure_connection_lost">Koneksi terputus saat mengunduh. Coba lagi di jaringan yang lebih stabil.</string>
+    <string name="upd_failure_clock_or_tls">Sambungan aman ke GitHub tidak dapat dibuat. Pastikan tanggal dan waktu di perangkat ini sudah benar, lalu coba lagi.</string>
+    <string name="upd_failure_http">GitHub menolak unduhan (HTTP %1$s). Coba lagi dalam beberapa menit.</string>
+    <string name="upd_failure_release_gone">Versi ini sudah tidak tersedia di GitHub. Periksa pembaruan untuk mendapatkan versi terbaru.</string>
+    <string name="upd_failure_incomplete">Unduhan tidak selesai dengan benar. Coba lagi di jaringan yang lebih stabil.</string>
+    <string name="upd_failure_could_not_install">Pembaruan tidak dapat dipasang di perangkat ini. Silakan coba lagi.</string>
+    <string name="upd_failure_would_not_start">Versi baru yt-dlp tidak dapat dijalankan di perangkat ini, sehingga versi saat ini dipertahankan. Unduhan tetap berfungsi.</string>
+    <string name="upd_failure_stopped_while_starting">Sistem menghentikan yt-dlp versi baru saat dimulai, kemungkinan karena memori rendah. Versi saat ini dipertahankan. Tutup aplikasi lain lalu coba lagi.</string>
+    <string name="upd_failure_unknown">Pembaruan tidak dapat diselesaikan (%1$s). Coba lagi sebentar lagi.</string>
+    <string name="upd_status_update_failed">Pembaruan tidak selesai</string>
+    <string name="upd_status_check_failed">Pemeriksaan tidak selesai</string>
 </resources>

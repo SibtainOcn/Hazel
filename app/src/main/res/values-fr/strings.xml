@@ -994,4 +994,18 @@
     <string name="upd_report_copied">Infos copiées. Collez-les dans le signalement.</string>
     <string name="upd_channel_note">Beta et Nightly reçoivent les correctifs en premier et peuvent être moins stables.</string>
     <string name="upd_status_ok">À jour sur %1$s</string>
+    <string name="upd_failure_no_space">L\'espace de stockage libre est insuffisant sur cet appareil pour installer la mise à jour. Libérez de l\'espace et réessayez.</string>
+    <string name="upd_failure_timeout">La connexion à GitHub a expiré. Passez sur un réseau plus fiable et réessayez.</string>
+    <string name="upd_failure_unreachable">Hazel n\'a pas pu joindre GitHub. Vérifiez votre connexion internet ainsi que vos réglages VPN et DNS privé, puis réessayez.</string>
+    <string name="upd_failure_connection_lost">La connexion a été interrompue pendant le téléchargement. Réessayez sur un réseau plus stable.</string>
+    <string name="upd_failure_clock_or_tls">Impossible d\'établir une connexion sécurisée avec GitHub. Vérifiez que la date et l\'heure de cet appareil sont correctes, puis réessayez.</string>
+    <string name="upd_failure_http">GitHub a refusé le téléchargement (HTTP %1$s). Réessayez dans quelques minutes.</string>
+    <string name="upd_failure_release_gone">Cette version n\'est plus disponible sur GitHub. Recherchez les mises à jour pour obtenir la plus récente.</string>
+    <string name="upd_failure_incomplete">Le téléchargement ne s\'est pas terminé correctement. Réessayez sur un réseau plus stable.</string>
+    <string name="upd_failure_could_not_install">La mise à jour n\'a pas pu être installée sur cet appareil. Veuillez réessayer.</string>
+    <string name="upd_failure_would_not_start">La nouvelle version de yt-dlp n\'a pas pu démarrer sur cet appareil, votre version actuelle a donc été conservée. Les téléchargements continueront de fonctionner.</string>
+    <string name="upd_failure_stopped_while_starting">Le système a arrêté la nouvelle version de yt-dlp pendant son démarrage, probablement par manque de mémoire. Votre version actuelle a été conservée. Fermez les autres applications et réessayez.</string>
+    <string name="upd_failure_unknown">La mise à jour n\'a pas pu être terminée (%1$s). Réessayez dans un instant.</string>
+    <string name="upd_status_update_failed">La mise à jour n\'a pas abouti</string>
+    <string name="upd_status_check_failed">La vérification n\'a pas abouti</string>
 </resources>

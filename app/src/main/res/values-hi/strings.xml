@@ -978,4 +978,18 @@
     <string name="upd_report_copied">डिवाइस जानकारी कॉपी हुई। इसे इश्यू में पेस्ट करें।</string>
     <string name="upd_channel_note">Beta और Nightly को सुधार पहले मिलते हैं और ये कम स्थिर हो सकते हैं।</string>
     <string name="upd_status_ok">%1$s पर अप टू डेट</string>
+    <string name="upd_failure_no_space">इस डिवाइस पर अपडेट इंस्टॉल करने के लिए पर्याप्त खाली स्टोरेज नहीं है। कुछ जगह खाली करें और फिर कोशिश करें।</string>
+    <string name="upd_failure_timeout">GitHub से कनेक्शन का समय समाप्त हो गया। बेहतर नेटवर्क पर जाएँ और फिर कोशिश करें।</string>
+    <string name="upd_failure_unreachable">Hazel GitHub तक नहीं पहुँच सका। अपना इंटरनेट कनेक्शन, VPN और निजी DNS सेटिंग जाँचें, फिर कोशिश करें।</string>
+    <string name="upd_failure_connection_lost">डाउनलोड के दौरान कनेक्शन टूट गया। ज़्यादा स्थिर नेटवर्क पर फिर कोशिश करें।</string>
+    <string name="upd_failure_clock_or_tls">GitHub से सुरक्षित कनेक्शन नहीं बन सका। जाँचें कि इस डिवाइस की तारीख़ और समय सही हैं, फिर कोशिश करें।</string>
+    <string name="upd_failure_http">GitHub ने डाउनलोड अस्वीकार कर दिया (HTTP %1$s)। कुछ मिनट बाद फिर कोशिश करें।</string>
+    <string name="upd_failure_release_gone">यह वर्शन अब GitHub पर उपलब्ध नहीं है। नवीनतम वर्शन पाने के लिए अपडेट जाँचें।</string>
+    <string name="upd_failure_incomplete">डाउनलोड ठीक से पूरा नहीं हुआ। ज़्यादा स्थिर नेटवर्क पर फिर कोशिश करें।</string>
+    <string name="upd_failure_could_not_install">इस डिवाइस पर अपडेट इंस्टॉल नहीं हो सका। कृपया फिर कोशिश करें।</string>
+    <string name="upd_failure_would_not_start">yt-dlp का नया वर्शन इस डिवाइस पर शुरू नहीं हो सका, इसलिए आपका मौजूदा वर्शन रखा गया है। डाउनलोड पहले की तरह काम करते रहेंगे।</string>
+    <string name="upd_failure_stopped_while_starting">yt-dlp का नया वर्शन शुरू होते समय सिस्टम ने उसे रोक दिया, संभवतः मेमोरी कम होने के कारण। आपका मौजूदा वर्शन रखा गया है। दूसरे ऐप बंद करें और फिर कोशिश करें।</string>
+    <string name="upd_failure_unknown">अपडेट पूरा नहीं हो सका (%1$s)। थोड़ी देर में फिर कोशिश करें।</string>
+    <string name="upd_status_update_failed">अपडेट पूरा नहीं हुआ</string>
+    <string name="upd_status_check_failed">जाँच पूरी नहीं हुई</string>
 </resources>

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hazel.android.data.SettingsRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,8 +40,17 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
         ) : UiState()
         /** The new binary is installed and live */
         data class Installed(val version: String) : UiState()
-        /** Error while checking or installing */
-        data class Error(val message: String, val info: YtDlpUpdater.ReleaseInfo? = null) : UiState()
+        /**
+         * Error while checking or installing.
+         *
+         * [failure] is the cause, which the screen words in the person's language; [message]
+         * is the English fallback for when no cause was classified.
+         */
+        data class Error(
+            val message: String,
+            val info: YtDlpUpdater.ReleaseInfo? = null,
+            val failure: UpdateFailure? = null
+        ) : UiState()
     }
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Checking)
@@ -142,7 +152,10 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
                     _uiState.value = UiState.Idle
                 }
                 is YtDlpUpdater.CheckResult.NetworkError -> {
-                    _uiState.value = UiState.Error(result.message)
+                    _uiState.value = UiState.Error(
+                        result.message,
+                        failure = UpdateFailure.of(UpdateFailure.Kind.UNREACHABLE)
+                    )
                 }
             }
         }
@@ -161,7 +174,7 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
 
         updateJob = viewModelScope.launch {
             try {
-                YtDlpUpdater.install(getApplication(), info.channel) { done, total ->
+                YtDlpUpdater.install(getApplication(), info.channel, info) { done, total ->
                     _uiState.value = UiState.Updating(
                         info,
                         progressBytes = done,
@@ -171,8 +184,13 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
                 refreshInstalledVersion()
                 SettingsRepository.setYtDlpUpdateAvailable(getApplication(), false)
                 _uiState.value = UiState.Installed(_installedVersion.value ?: info.version)
-            } catch (_: Exception) {
-                _uiState.value = UiState.Error("Update failed. Please try again.", info)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // The cause is shown, not hidden: a full phone, a bad connection and a build
+                // that will not start each need a different next step.
+                val failure = UpdateFailure.from(e)
+                _uiState.value = UiState.Error(failure.summary, info, failure)
             }
         }
     }

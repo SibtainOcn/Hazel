@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Off screen, the same refusal posts a notification with Sign in and Dismiss.
 - Notification taps open the screen they are about: Running, Failed, History or the failure dialog.
 - The share sheet's format list now shows why a read failed.
+- yt-dlp update failing on older and low-memory phones (#166). The download is tried again when the connection drops or times out, picks up where it stopped, and waits longer on a weak network. A phone that is nearly out of storage asks the system to clear cached files first. A new build that is stopped by the system while starting is tried once more, and again at the next launch, rather than refused for good. A busy or rate-limited GitHub is not hammered with quick retries. The update no longer looks the release up a second time after the screen has already found it.
+- The yt-dlp update screen says why an update failed (storage full, connection timed out, GitHub unreachable, date and time wrong, release no longer available, new build would not start) instead of "Update failed", in every language the app ships. Retry after a failed install tries the install again. The last failure is included in the copied device info for bug reports.
 
 ### Changed
 - The bottom bar's selected-tab shape is easier to see.
