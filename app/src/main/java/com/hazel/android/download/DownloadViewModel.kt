@@ -53,6 +53,7 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.flow.update
 import java.io.File
+import kotlin.concurrent.thread
 
 /** What adjusting a queued link from its sheet came to. */
 enum class QueueAdjust { APPLIED, UNCHANGED, NEEDS_CONFIRM, GONE }
@@ -290,7 +291,8 @@ class DownloadViewModel : ViewModel() {
      * total is an estimate it refines upward as it goes, so a figure read off the output
      * climbs for the whole download and ends nowhere near where it started. The sheet
      * already showed the user a size, so that size is what the progress is measured
-     * against and it does not move.
+     * against and it does not move. For a cut it is scaled to the part that is kept: see
+     * [CutProgress].
      */
     @Volatile private var expectedTotalBytes: Long = 0L
 
@@ -308,6 +310,13 @@ class DownloadViewModel : ViewModel() {
      * runs, and the readout never falls below what those bytes are worth.
      */
     @Volatile private var progressFloor = 0f
+
+    /**
+     * Whether the run in hand keeps only a part of the link. ffmpeg takes that transfer, and
+     * its progress never reaches the engine's callback, so nothing but the file on disk says
+     * how far along it is: see [CutProgress] and [startCutWatcher].
+     */
+    @Volatile private var cutRun = false
 
     /** When the temp directory was last measured, so the floor is not re-read every line. */
     @Volatile private var lastFloorCheckAt = 0L
@@ -1617,9 +1626,10 @@ class DownloadViewModel : ViewModel() {
                 downloadIsVideo = plan.format.hasVideo
                 markBatch(plan.info.url, BatchState.DOWNLOADING, title = plan.title)
 
-                expectedTotalBytes = expectedTotalFor(plan)
+                cutRun = options.hasSection
+                expectedTotalBytes = expectedTotalFor(plan, options)
                 lastFloorCheckAt = 0L
-                progressFloor = fractionOnDisk()
+                progressFloor = fractionOnDisk(seeding = true)
 
                 val opening = if (progressFloor > 0f) "Resuming" else "Starting download"
                 // Only [DownloadState.active] follows the run. [DownloadState.info] is the
@@ -1641,7 +1651,10 @@ class DownloadViewModel : ViewModel() {
                     processingStep = 0
                 ) }
                 DownloadNotificationHelper.showProgress(
-                    app, (progressFloor * 100f).toInt(), opening, plan.title
+                    app,
+                    if (unmeasuredCut()) -1 else (progressFloor * 100f).toInt(),
+                    opening,
+                    plan.title
                 )
 
                 try {
@@ -2841,7 +2854,20 @@ class DownloadViewModel : ViewModel() {
         return out.toString().trim().ifBlank { "download" }
     }
 
+    /**
+     * Runs the request, and for a cut that can be measured, keeps its progress moving while
+     * the engine is silent: see [startCutWatcher].
+     */
     private fun executeYtDlp(request: YoutubeDLRequest) {
+        val watcher = if (cutRun && expectedTotalBytes > 0L) startCutWatcher() else null
+        try {
+            runYtDlp(request)
+        } finally {
+            watcher?.let { stopCutWatcher(it) }
+        }
+    }
+
+    private fun runYtDlp(request: YoutubeDLRequest) {
         lastNotifiedAt = 0L
         val steps = plannedSteps
         // Whether this run has moved on from transferring to working on the file. Held here
@@ -2891,7 +2917,7 @@ class DownloadViewModel : ViewModel() {
                     val total = _state.value.totalBytes
                     DownloadNotificationHelper.showProgress(
                         context = it,
-                        progress = percent.toInt(),
+                        progress = if (unmeasuredCut()) -1 else percent.toInt(),
                         statusLine = status,
                         mediaTitle = (_state.value.active ?: _state.value.info)?.title.orEmpty(),
                         doneBytes = (total * percent / 100f).toLong(),
@@ -3083,14 +3109,95 @@ class DownloadViewModel : ViewModel() {
      * nearly done. The directory holds one download's working files and nothing else, so
      * its whole weight is the honest answer.
      */
-    private fun fractionOnDisk(): Float {
+    private fun fractionOnDisk(seeding: Boolean = false): Float {
         if (expectedTotalBytes <= 0L) return 0f
-        val onDisk = bytesIn(downloadDir)
+        // A cut is measured by its media alone: see [CutProgress.mediaBytesIn]. An ordinary
+        // download is measured as it always was.
+        val onDisk = if (cutRun) {
+            CutProgress.mediaBytesIn(downloadDir, includePartFiles = !seeding)
+        } else {
+            bytesIn(downloadDir)
+        }
         if (onDisk <= 0L) return 0f
 
         // Capped short of the end: a floor of one would leave the bar full for the whole of
         // whatever is left to do, muxing included.
         return (onDisk.toFloat() / expectedTotalBytes).coerceIn(0f, 0.99f)
+    }
+
+    /**
+     * Whether the run is a cut with nothing to measure it against, so its progress is not
+     * known and the shade shows a bar that only moves, not a figure that never changes.
+     */
+    private fun unmeasuredCut(): Boolean = cutRun && expectedTotalBytes <= 0L
+
+    /**
+     * Follows a cut by the file it is writing, once a second, until stopped.
+     *
+     * The engine's callback runs on yt-dlp's lines, and a cut prints none while ffmpeg
+     * works, so left to it the bar stayed where it began until the file was done. A thread
+     * of its own does not wait for a line. It never throws: a failed read costs one tick.
+     */
+    private fun startCutWatcher(): Thread = thread(isDaemon = true, name = "hazel-cut-progress") {
+        try {
+            while (true) {
+                Thread.sleep(CUT_POLL_INTERVAL_MS)
+                try {
+                    publishCutProgress()
+                } catch (e: InterruptedException) {
+                    // The stop signal, not a failed read: let it end the loop.
+                    throw e
+                } catch (e: Exception) {
+                    Log.w("Hazel", "Cut progress read failed: ${e.message}")
+                }
+            }
+        } catch (_: InterruptedException) {
+            // Stopped: the run is over.
+        }
+    }
+
+    /**
+     * Stops the watcher and waits for it, so nothing of it lands after the run has ended
+     * and moved on to the next item or to the finish.
+     */
+    private fun stopCutWatcher(watcher: Thread) {
+        watcher.interrupt()
+        try {
+            watcher.join(CUT_WATCHER_JOIN_MS)
+        } catch (_: InterruptedException) {
+            Thread.currentThread().interrupt()
+        }
+    }
+
+    /**
+     * One tick of the watcher: weighs the file and moves the card and the shade up to it.
+     *
+     * Only ever forward, and only while bytes are being written: once the file is being
+     * worked on the card follows the stages, and the engine's own lines say so.
+     */
+    private fun publishCutProgress() {
+        val current = _state.value
+        if (!current.isDownloading || current.isProcessing) return
+        if (expectedTotalBytes <= 0L) return
+
+        refreshFloorFromDisk()
+        val share = progressFloor
+        _state.update { s -> if (share > s.progress) s.copy(progress = share) else s }
+
+        val now = System.currentTimeMillis()
+        if (now - lastNotifiedAt < NOTIFICATION_INTERVAL_MS) return
+        lastNotifiedAt = now
+        downloadContext?.let {
+            val state = _state.value
+            DownloadNotificationHelper.showProgress(
+                context = it,
+                progress = (share * 100f).toInt(),
+                statusLine = state.status,
+                mediaTitle = (state.active ?: state.info)?.title.orEmpty(),
+                doneBytes = (state.totalBytes * share).toLong(),
+                totalBytes = state.totalBytes
+            )
+        }
     }
 
     /**
@@ -3206,7 +3313,7 @@ class DownloadViewModel : ViewModel() {
      * format that reported no size at all leaves this at 0, and the progress line's own
      * figure is used instead, which is the best there is in that case.
      */
-    private fun expectedTotalFor(plan: DownloadPlan): Long {
+    private fun expectedTotalFor(plan: DownloadPlan, options: DownloadOptions): Long {
         val format = plan.format
         if (format.fileSizeBytes <= 0L) return 0L
 
@@ -3214,7 +3321,13 @@ class DownloadViewModel : ViewModel() {
             plan.info.mergeAudio?.fileSizeBytes ?: 0L
         } else 0L
 
-        return format.fileSizeBytes + mergedAudio
+        val whole = format.fileSizeBytes + mergedAudio
+        if (!options.hasSection) return whole
+
+        // A cut keeps a part of the link, so the size the sheet showed is not what lands.
+        return CutProgress.expectedBytes(
+            whole, plan.info.durationSeconds, options.sectionStart, options.sectionEnd
+        )
     }
 
     private fun parseTotalBytes(line: String): Long? {
@@ -3372,6 +3485,12 @@ class DownloadViewModel : ViewModel() {
 
         /** How often the temp directory is weighed while a transfer runs. */
         const val FLOOR_INTERVAL_MS = 1000L
+
+        /** How often a cut, which prints no progress of its own, is followed by its file. */
+        const val CUT_POLL_INTERVAL_MS = 1000L
+
+        /** How long a run waits for the cut watcher to stop before going on without it. */
+        const val CUT_WATCHER_JOIN_MS = 2000L
 
         /** Stages that run once the transfer itself has finished. */
         val POST_PROCESS_MARKERS = listOf(
