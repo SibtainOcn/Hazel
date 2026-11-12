@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.ui.res.vectorResource
 import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.ui.theme.sheetButtonColor
 import com.hazel.android.ui.theme.sheetRaisedColor
@@ -27,7 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.layout.layout
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.key
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -309,7 +309,7 @@ fun FormatSelectionSheet(
                     if (onRefresh != null) {
                         Spacer(modifier = Modifier.width(8.dp))
                         HeaderIconButton(
-                            icon = Icons.Filled.Refresh,
+                            icon = ImageVector.vectorResource(R.drawable.ic_refresh_minimal),
                             description = stringResource(R.string.format_update),
                             enabled = !isLoadingFormats,
                             onClick = { refresh(readSource, true) }
@@ -318,20 +318,40 @@ fun FormatSelectionSheet(
 
                     Spacer(modifier = Modifier.width(10.dp))
 
+                    // The accent pill with a six-sided cookie behind the tick, the way
+                    // "Download all" is led: the cookie takes the inverted colour and the
+                    // tick is cut into it in the pill's own. Without a choice it stays
+                    // flat and muted.
+                    val canConfirm = draft != null
+                    val okFill = if (canConfirm) MaterialTheme.colorScheme.primary else tonalFill(0.55f)
+                    val okInk = if (canConfirm) MaterialTheme.colorScheme.onPrimary
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     Surface(
                         onClick = { draft?.let(onConfirm) },
-                        enabled = draft != null,
+                        enabled = canConfirm,
                         shape = RoundedCornerShape(22.dp),
-                        color = if (draft != null) MaterialTheme.colorScheme.primary else tonalFill(0.55f),
-                        contentColor = if (draft != null) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        color = okFill,
+                        contentColor = okInk,
                         modifier = Modifier.height(44.dp)
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 20.dp),
+                            modifier = Modifier.padding(start = 5.dp, top = 5.dp, bottom = 5.dp, end = 18.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Filled.Check, null, modifier = Modifier.size(18.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .clip(MaterialShapes.Cookie6Sided.toShape())
+                                    .background(if (canConfirm) okInk else okInk.copy(alpha = 0.18f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Filled.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = if (canConfirm) okFill else okInk
+                                )
+                            }
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 stringResource(R.string.format_selection_confirm),
