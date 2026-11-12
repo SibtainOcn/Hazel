@@ -393,7 +393,12 @@ fun FormatSelectionSheet(
                         activeKey = active.key,
                         loading = isLoadingFormats,
                         bottomInset = bottomInset,
-                        onPick = { pickedStop = it },
+                        // The list is sent to its top in the same frame as the switch, so the
+                        // new rows are never drawn once at the old scroll position first.
+                        onPick = {
+                            listState.requestScrollToItem(0)
+                            pickedStop = it
+                        },
                         modifier = Modifier
                             .width(RAIL_WIDTH)
                             .fillMaxHeight()
@@ -412,18 +417,24 @@ fun FormatSelectionSheet(
                 ) {
                     items(
                         count = if (hidingRows) 0 else rows.size,
-                        key = { rows[it].key },
+                        // The stop is part of the key, so switching stops swaps the list
+                        // whole: the old rows are gone at once and the new ones fade in. Rows
+                        // that kept their key across stops used to slide from wherever they
+                        // were while the rest faded in and out beneath them, and the two sets
+                        // drew over each other. Inside one stop the keys hold, so rows still
+                        // slide into place as formats arrive or the order changes.
+                        key = { "${active.key}|${rows[it].key}" },
                         contentType = { if (rows[it] is FormatListRow.Header) 0 else 1 }
                     ) { index ->
-                        // Rows keep their keys across stops, so the one list moves between
-                        // them: rows that stay slide into place and the rest fade.
                         val motion = Modifier.animateItem(
                             fadeInSpec = tween(ROW_FADE_MS),
                             placementSpec = spring(
                                 stiffness = Spring.StiffnessMediumLow,
                                 visibilityThreshold = IntOffset.VisibilityThreshold
                             ),
-                            fadeOutSpec = tween(ROW_FADE_MS)
+                            // No fade out: a row fading out in place is the one that is
+                            // drawn under the next one's text.
+                            fadeOutSpec = null
                         )
                         when (val row = rows[index]) {
                             is FormatListRow.Header -> SectionHeader(
