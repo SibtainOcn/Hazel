@@ -9,6 +9,7 @@ import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.geometry.Size
@@ -21,8 +22,11 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.layout
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.key
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.foundation.verticalScroll
@@ -91,6 +95,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.coerceAtLeast
+import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalDensity
@@ -362,12 +368,23 @@ fun FormatSelectionSheet(
             // than sitting under it.
             val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 24.dp
 
+            // With a rail the two panes get a height of their own, worked out from the screen
+            // and not from what they hold. The rail and the list each scroll inside it, so
+            // the sheet is the same height while the link is read, when the formats arrive,
+            // and from one stop to the next, with no gap left under a short list.
+            // Never more than what is left once the header, the handle and the status bar
+            // are taken off, so a short window (landscape, split screen) shrinks the panes
+            // instead of pushing the last rows out of reach.
+            val screenHeight = LocalConfiguration.current.screenHeightDp
+            val paneHeight = minOf(
+                screenHeight * PANE_HEIGHT_FRACTION,
+                screenHeight - PANE_HEIGHT_RESERVED
+            ).dp.coerceIn(PANE_HEIGHT_MIN, PANE_HEIGHT_MAX)
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // With a rail the panes take the sheet's full height, so switching to a
-                    // stop with fewer rows does not make the sheet jump.
-                    .weight(1f, fill = showRail)
+                    .then(if (showRail) Modifier.height(paneHeight + bottomInset) else Modifier)
                     .padding(horizontal = if (showRail) 12.dp else 0.dp)
             ) {
                 if (showRail) {
@@ -502,6 +519,12 @@ fun FormatSelectionSheet(
 }
 
 private val RAIL_WIDTH = 76.dp
+
+/** The panes' share of the screen's height, and the least and most they are given. */
+private const val PANE_HEIGHT_FRACTION = 0.6f
+private const val PANE_HEIGHT_RESERVED = 260f
+private val PANE_HEIGHT_MIN = 120.dp
+private val PANE_HEIGHT_MAX = 560.dp
 private const val ROW_FADE_MS = 140
 private const val STOP_ALL = "all"
 private const val STOP_AUDIO = "audio"
@@ -531,29 +554,44 @@ private fun FormatRail(
                 .keepFlingInSheet()
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = bottomInset),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(RAIL_STOP_GAP)
         ) {
-            stops.forEach { stop ->
-                RailStop(
-                    label = stop.label,
-                    count = stop.count,
-                    icon = if (stop.key == STOP_AUDIO) Icons.Filled.MusicNote else null,
-                    selected = stop.key == activeKey,
-                    onClick = { onPick(stop.key) }
-                )
+            // One connected group: the outer ends of the column are round and the corners
+            // between stops are tight. The chosen stop rounds off on its own.
+            stops.forEachIndexed { index, stop ->
+                // Keyed, so a stop keeps its own animation state when others arrive above
+                // it while the formats are read, instead of inheriting its neighbour's.
+                key(stop.key) {
+                    RailStop(
+                        label = stop.label,
+                        count = stop.count,
+                        icon = if (stop.key == STOP_AUDIO) Icons.Filled.MusicNote else null,
+                        selected = stop.key == activeKey,
+                        first = index == 0,
+                        last = index == stops.lastIndex,
+                        onClick = { onPick(stop.key) }
+                    )
+                }
             }
         }
     }
 }
 
 private val RAIL_STOP_HEIGHT = 54.dp
+private val RAIL_STOP_GAP = 3.dp
+
+/** The corner on the outer ends of the group, and the one chosen: half the stop's height. */
+private val RAIL_STOP_ROUND = RAIL_STOP_HEIGHT / 2
+private val RAIL_STOP_TIGHT = 8.dp
+private val RAIL_STOP_LIFT = 3.dp
 
 /**
  * One stop on the rail: its label and how many formats it holds.
  *
- * Flat, as the rest of the sheet is: a step-up tone at rest and the accent's tint when
- * chosen, cross-faded rather than switched. The fill is read while drawing, so the fade
- * repaints the block without recomposing it.
+ * The stops read as one connected group. [first] and [last] get a round outer end, and the
+ * corners between stops are tight. The chosen stop fills with the accent, rounds off on all
+ * four corners and steps out of the group by a few dp, each on a spring. The fill and the
+ * corners are read while drawing, so the motion repaints the block without recomposing it.
  */
 @Composable
 private fun RailStop(
@@ -561,25 +599,63 @@ private fun RailStop(
     count: Int,
     icon: ImageVector?,
     selected: Boolean,
+    first: Boolean,
+    last: Boolean,
     onClick: () -> Unit
 ) {
     val scheme = MaterialTheme.colorScheme
     val fill by animateColorAsState(
-        if (selected) scheme.primary.copy(alpha = 0.16f) else sheetRaisedColor,
+        if (selected) scheme.primary else sheetRaisedColor,
         animationSpec = tween(STOP_FADE_MS),
         label = "railFill"
     )
     val content by animateColorAsState(
-        if (selected) scheme.primary else scheme.onSurface,
+        if (selected) scheme.onPrimary else scheme.onSurface,
         animationSpec = tween(STOP_FADE_MS),
         label = "railContent"
+    )
+    val cornerSpring = remember {
+        spring<androidx.compose.ui.unit.Dp>(
+            dampingRatio = 0.7f,
+            stiffness = Spring.StiffnessMediumLow
+        )
+    }
+    val topCorner = animateDpAsState(
+        if (selected || first) RAIL_STOP_ROUND else RAIL_STOP_TIGHT,
+        animationSpec = cornerSpring,
+        label = "railTop"
+    )
+    val bottomCorner = animateDpAsState(
+        if (selected || last) RAIL_STOP_ROUND else RAIL_STOP_TIGHT,
+        animationSpec = cornerSpring,
+        label = "railBottom"
+    )
+    val lift = animateDpAsState(
+        if (selected) RAIL_STOP_LIFT else 0.dp,
+        animationSpec = cornerSpring,
+        label = "railLift"
     )
 
     Column(
         modifier = Modifier
+            // Room above and below the chosen stop, taken while measuring so the stops
+            // around it are pushed aside smoothly.
+            .layout { measurable, constraints ->
+                val gap = lift.value.coerceAtLeast(0.dp).roundToPx()
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height + gap * 2) { placeable.place(0, gap) }
+            }
             .fillMaxWidth()
             .height(RAIL_STOP_HEIGHT)
-            .clip(RoundedCornerShape(16.dp))
+            .graphicsLayer {
+                val top = topCorner.value.coerceAtLeast(0.dp).toPx()
+                val bottom = bottomCorner.value.coerceAtLeast(0.dp).toPx()
+                shape = RoundedCornerShape(
+                    topStart = top.toDp(), topEnd = top.toDp(),
+                    bottomEnd = bottom.toDp(), bottomStart = bottom.toDp()
+                )
+                clip = true
+            }
             .drawBehind { drawRect(fill) }
             .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -601,7 +677,7 @@ private fun RailStop(
             Text(
                 count.toString(),
                 style = MaterialTheme.typography.labelSmall,
-                color = content.copy(alpha = 0.55f)
+                color = content.copy(alpha = 0.6f)
             )
         }
     }
