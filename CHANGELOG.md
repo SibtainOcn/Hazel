@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - The bottom bar's selected-tab shape is easier to see.
+- Audio options in the download sheets use a waveform icon in place of the HQ badge and the music note: the audio quality row and bitrate chip, the format rail's Audio stop and the batch type picker.
 
 ## [1.1.17] - 2026-10-29
 ### Added

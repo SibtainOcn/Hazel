@@ -75,12 +75,13 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.HighQuality
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -531,7 +532,7 @@ fun FormatSheet(
             val languageName = audioLanguage?.let(::languageLabel)
                 ?.takeIf { info.audioLanguages.size > 1 }
             SheetSection(
-                icon = Icons.Outlined.HighQuality,
+                icon = if (videoTab) Icons.Outlined.HighQuality else Icons.Outlined.GraphicEq,
                 title = if (videoTab) stringResource(R.string.format_sheet_video_quality)
                 else stringResource(R.string.format_sheet_audio_quality),
                 summary = current?.let { qualitySummary(it, languageName) } ?: noStream,
@@ -666,7 +667,7 @@ fun FormatSheet(
                     if (!videoTab) {
                         OptionChip(
                             label = bitrateLabel,
-                            icon = Icons.Filled.HighQuality,
+                            icon = Icons.Filled.GraphicEq,
                             active = bitrateOn,
                             onClick = { openDialog = SheetDialog.AUDIO_QUALITY }
                         )

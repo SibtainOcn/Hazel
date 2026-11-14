@@ -51,7 +51,7 @@ import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Search
@@ -646,7 +646,7 @@ fun BatchDownloadSheet(
                             OptionChip(
                                 label = bitrateLabel,
                                 compact = true,
-                                icon = Icons.Filled.HighQuality,
+                                icon = Icons.Filled.GraphicEq,
                                 active = bitrateOn,
                                 onClick = { openSheet = BatchSheet.BITRATE }
                             )
