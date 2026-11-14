@@ -240,8 +240,8 @@ def test_source_wiring():
     check("both run sites still call executeYtDlp", len(re.findall(r"\bexecuteYtDlp\(\s*\n?\s*buildRequest", vm)), 2)
     check("only the wrapper calls runYtDlp", len(re.findall(r"\brunYtDlp\(", vm)), 2)  # call + definition
     wrapper = function_body(vm, "private fun executeYtDlp(")
-    check_true("watcher starts only for a measurable cut",
-               "if (cutRun && expectedTotalBytes > 0L) startCutWatcher() else null" in wrapper)
+    check_true("watcher follows every trimmed or audio run, with or without an estimate",
+               "if (liveRun) startCutWatcher() else null" in wrapper)
     check_true("the run is inside try/finally", "try {" in wrapper and "finally {" in wrapper)
     check_true("the watcher is cancelled in finally", re.search(r"finally\s*\{\s*watcher\?\.cancel\(\)", wrapper))
     check_true("strays are cleared before a run, only when idle", "if (!YtDlpEngine.isBusy) YtDlpEngine.killStrayFfmpeg()" in wrapper)
@@ -260,11 +260,12 @@ def test_source_wiring():
     check_true("no thread join is left", "stopCutWatcher" not in vm and "CUT_WATCHER_JOIN_MS" not in vm)
 
     publish = function_body(vm, "private fun publishCutProgress(")
-    check_true("a tick does nothing once the run is over or processing",
-               "!current.isDownloading || current.isProcessing" in publish)
-    check_true("a tick does nothing without an estimate", "expectedTotalBytes <= 0L" in publish)
-    check_true("a tick only moves the bar forward",
-               "maxOf(share, s.progress)" in publish and "unmeasured = false" in publish)
+    check_true("a tick does nothing once the run is over or for an ordinary download",
+               "!current.isDownloading || !current.unmeasured" in publish)
+    check_true("a tick is not gated on the stage a line names", "isProcessing" not in publish)
+    check_true("a tick only moves the size forward",
+               "maxOf(liveBytesOnDisk(), current.liveBytes)" in publish)
+    check_true("a tick shows an indeterminate notification", "progress = -1" in publish)
     check_true("the shade keeps its pacing", "NOTIFICATION_INTERVAL_MS" in publish)
 
     # expected total
@@ -279,8 +280,9 @@ def test_source_wiring():
     check_true("the size is still 0 when the format has none", "if (format.fileSizeBytes <= 0L) return 0L" in total)
 
     # the opening notification and the callback agree on an unmeasured cut
-    check("isUnmeasured is used at the opening, in the callback and in the definition", vm.count("isUnmeasured("), 5)
-    check_true("a run that is not a cut is never unmeasured", "cutRun && fraction <= 0f" in vm)
+    check_true("a trimmed or audio run is live", "liveRun = cutRun || !plan.format.hasVideo" in vm)
+    check_true("a live run is never shown as processing", "isProcessing = postProcessing && !unmeasured" in vm)
+    check("the callback and the opening read liveRun the same way", vm.count("if (liveRun) -1"), 1)
     check_true("a cut has no merge stage of its own", "needsMerge && !options.hasSection" in vm)
     check_true("every stop goes through the engine", "destroyProcessById(processId)" not in vm and vm.count("YtDlpEngine.stop(processId)") == 4)
     check_true("the poll constant exists", "CUT_POLL_INTERVAL_MS = 1000L" in vm)

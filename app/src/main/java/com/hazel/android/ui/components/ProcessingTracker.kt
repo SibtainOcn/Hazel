@@ -12,6 +12,15 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -213,4 +222,25 @@ fun ProcessingTracker(
                 }
             }
     )
+}
+
+/**
+ * A line that only runs, for a trimmed or audio download: nothing says how far along it is,
+ * so none is claimed. It shades the artwork the way [ProcessingTracker] does, so the title
+ * and figures laid over it stay readable.
+ */
+@Composable
+fun LiveProgressLine(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.background(Color.Black.copy(alpha = 0.45f))) {
+        LinearProgressIndicator(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp)
+                .height(3.dp)
+                .clip(RoundedCornerShape(2.dp)),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = Color.White.copy(alpha = 0.25f)
+        )
+    }
 }

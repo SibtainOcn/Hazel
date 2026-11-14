@@ -108,10 +108,14 @@ data class DownloadState(
     val active: MediaInfo? = null,
     val progress: Float = 0f,
     /**
-     * True while a cut is running and nothing says how far along it is yet. The card and the
-     * shade then show a bar that only moves, instead of a 0% that never changes.
+     * True for the whole of a trimmed or audio download. yt-dlp's own lines say little about
+     * either (a cut prints no percentage at all, and the stage it names is often not the one
+     * running), so the card and the shade show a line that only moves, with the size written
+     * so far beside it, instead of a percentage and stages that cannot be trusted.
      */
     val unmeasured: Boolean = false,
+    /** What the run has written to disk so far, counted while [unmeasured]. */
+    val liveBytes: Long = 0L,
     /** Total transfer size reported by yt-dlp, 0 until its first progress line. */
     val totalBytes: Long = 0L,
     /**
@@ -323,6 +327,9 @@ class DownloadViewModel : ViewModel() {
      * how far along it is: see [CutProgress] and [startCutWatcher].
      */
     @Volatile private var cutRun = false
+
+    /** A trimmed or audio download, followed by its size on disk instead of by percentage. */
+    @Volatile private var liveRun = false
 
     /** When the temp directory was last measured, so the floor is not re-read every line. */
     @Volatile private var lastFloorCheckAt = 0L
@@ -1633,6 +1640,7 @@ class DownloadViewModel : ViewModel() {
                 markBatch(plan.info.url, BatchState.DOWNLOADING, title = plan.title)
 
                 cutRun = options.hasSection
+                liveRun = cutRun || !plan.format.hasVideo
                 expectedTotalBytes = expectedTotalFor(plan, options)
                 lastFloorCheckAt = 0L
                 progressFloor = fractionOnDisk(seeding = true)
@@ -1648,8 +1656,9 @@ class DownloadViewModel : ViewModel() {
                     isDownloading = true,
                     active = plan.info,
                     progress = progressFloor,
-                    unmeasured = isUnmeasured(progressFloor),
-                    totalBytes = if (isUnmeasured(progressFloor)) 0L else expectedTotalBytes,
+                    unmeasured = liveRun,
+                    liveBytes = 0L,
+                    totalBytes = if (liveRun) 0L else expectedTotalBytes,
                     eta = "",
                     status = opening,
                     isProcessing = false,
@@ -1659,7 +1668,7 @@ class DownloadViewModel : ViewModel() {
                 ) }
                 DownloadNotificationHelper.showProgress(
                     app,
-                    if (isUnmeasured(progressFloor)) -1 else (progressFloor * 100f).toInt(),
+                    if (liveRun) -1 else (progressFloor * 100f).toInt(),
                     opening,
                     plan.title
                 )
@@ -2870,7 +2879,7 @@ class DownloadViewModel : ViewModel() {
         // An ffmpeg left behind by an earlier stop would still be fetching, and holding the
         // network and the processor against this run: see [YtDlpEngine.stop].
         if (!YtDlpEngine.isBusy) YtDlpEngine.killStrayFfmpeg()
-        val watcher = if (cutRun && expectedTotalBytes > 0L) startCutWatcher() else null
+        val watcher = if (liveRun) startCutWatcher() else null
         try {
             runYtDlp(request)
         } finally {
@@ -2907,16 +2916,18 @@ class DownloadViewModel : ViewModel() {
             // the file is being worked on, fetching it is behind it.
             val announced = ProcessingStep.announcedBy(line)?.let { steps.indexOf(it) } ?: -1
             val fetched = if (postProcessing && steps.size > 1) 1 else 0
-            val unmeasured = isUnmeasured(percent / 100f) && !postProcessing
+            // A live run is followed by its size on disk and never by stages or percentages:
+            // see [DownloadState.unmeasured].
+            val unmeasured = liveRun
             _state.update { current -> current.copy(
-                progress = percent / 100f,
+                progress = if (unmeasured) 0f else percent / 100f,
                 unmeasured = unmeasured,
                 totalBytes = if (unmeasured) 0L
                 else if (expectedTotalBytes > 0) expectedTotalBytes
                 else parseTotalBytes(line) ?: current.totalBytes,
                 eta = if (postProcessing) "" else ProgressText.eta(line) ?: current.eta,
                 status = status,
-                isProcessing = postProcessing,
+                isProcessing = postProcessing && !unmeasured,
                 processingStep = maxOf(current.processingStep, announced, fetched)
             ) }
 
@@ -2934,7 +2945,7 @@ class DownloadViewModel : ViewModel() {
                         progress = if (unmeasured) -1 else percent.toInt(),
                         statusLine = status,
                         mediaTitle = (_state.value.active ?: _state.value.info)?.title.orEmpty(),
-                        doneBytes = (total * percent / 100f).toLong(),
+                        doneBytes = if (unmeasured) _state.value.liveBytes else (total * percent / 100f).toLong(),
                         totalBytes = total
                     )
                 }
@@ -2970,7 +2981,6 @@ class DownloadViewModel : ViewModel() {
 
         _state.update { s -> s.copy(
             status = "Saving",
-            unmeasured = false,
             isProcessing = true,
             eta = "",
             processingStep = s.processingSteps.indexOf(ProcessingStep.SAVE)
@@ -3141,14 +3151,15 @@ class DownloadViewModel : ViewModel() {
     }
 
     /**
-     * Whether a cut has nothing to show yet: it has no size to be measured against, or no
-     * byte has landed. A run that is not a cut is never unmeasured; its progress is the
-     * engine's own, as it always was.
+     * What the run has written so far. A cut is counted by its media alone (see
+     * [CutProgress.mediaBytesIn]); an audio download by everything in its folder.
      */
-    private fun isUnmeasured(fraction: Float): Boolean = cutRun && fraction <= 0f
+    private fun liveBytesOnDisk(): Long =
+        if (cutRun) CutProgress.mediaBytesIn(downloadDir) else bytesIn(downloadDir)
 
     /**
-     * Follows a cut by the file it is writing, once a second, until cancelled.
+     * Follows a trimmed or audio run by the file it is writing, once a second, until
+     * cancelled.
      *
      * The engine's callback runs on yt-dlp's lines, and a cut prints none while ffmpeg
      * works. A coroutine ticking on its own does not wait for a line, holds no thread of
@@ -3173,19 +3184,13 @@ class DownloadViewModel : ViewModel() {
      */
     private fun publishCutProgress() {
         val current = _state.value
-        if (!current.isDownloading || current.isProcessing) return
-        if (expectedTotalBytes <= 0L) return
+        // Not gated on the stage the lines name: a line that sounds like post-processing
+        // can arrive long before ffmpeg has finished the transfer.
+        if (!current.isDownloading || !current.unmeasured) return
 
-        refreshFloorFromDisk()
-        val share = progressFloor
-        if (share <= 0f) return
-        _state.update { s ->
-            if (share > s.progress || s.unmeasured) s.copy(
-                progress = maxOf(share, s.progress),
-                unmeasured = false,
-                totalBytes = expectedTotalBytes
-            ) else s
-        }
+        // Only ever forward: the part file is renamed and replaced as the run goes on.
+        val bytes = maxOf(liveBytesOnDisk(), current.liveBytes)
+        if (bytes != current.liveBytes) _state.update { it.copy(liveBytes = bytes) }
 
         val now = System.currentTimeMillis()
         if (now - lastNotifiedAt < NOTIFICATION_INTERVAL_MS) return
@@ -3194,11 +3199,11 @@ class DownloadViewModel : ViewModel() {
             val state = _state.value
             DownloadNotificationHelper.showProgress(
                 context = it,
-                progress = (state.progress * 100f).toInt(),
+                progress = -1,
                 statusLine = state.status,
                 mediaTitle = (state.active ?: state.info)?.title.orEmpty(),
-                doneBytes = (state.totalBytes * state.progress).toLong(),
-                totalBytes = state.totalBytes
+                doneBytes = state.liveBytes,
+                totalBytes = 0L
             )
         }
     }

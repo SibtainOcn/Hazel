@@ -108,6 +108,7 @@ import com.hazel.android.ui.components.FastScrollbar
 import com.hazel.android.ui.components.gridColumns
 import com.hazel.android.ui.components.gridItems
 import com.hazel.android.ui.components.FillingDownloadIcon
+import com.hazel.android.ui.components.LiveProgressLine
 import com.hazel.android.ui.components.ProcessingTracker
 import com.hazel.android.download.ProcessingStep
 import com.hazel.android.data.DownloadHistoryRepository
@@ -1413,10 +1414,12 @@ private fun MediaCard(
 
             // The stage track goes under the title and the readouts, so its shade dims the
             // artwork and not the words laid over it.
-            if ((isProcessing || unmeasured) && !isPaused && processingSteps.isNotEmpty()) {
+            if (unmeasured && !isPaused) {
+                LiveProgressLine(modifier = Modifier.fillMaxSize())
+            } else if (isProcessing && !isPaused && processingSteps.isNotEmpty()) {
                 ProcessingTracker(
                     steps = processingSteps,
-                    current = if (isProcessing) processingStep else 0,
+                    current = processingStep,
                     modifier = Modifier.fillMaxSize()
                 )
             }

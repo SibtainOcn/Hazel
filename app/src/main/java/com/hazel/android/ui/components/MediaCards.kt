@@ -112,6 +112,8 @@ fun MediaCard(
     progress: Float = 0f,
     /** A cut with nothing to measure it by yet: the track runs on its own, with no figure. */
     unmeasured: Boolean = false,
+    /** What a trimmed or audio download has written so far, shown in place of a fraction. */
+    liveBytes: Long = 0L,
     totalBytes: Long = 0L,
     eta: String = "",
     isComplete: Boolean = false,
@@ -213,11 +215,13 @@ fun MediaCard(
             // The stage track goes under the title and the readouts, so its shade dims the
             // artwork and not the words laid over it. Fetch is the stage until the transfer is
             // over, and its line fills with it.
-            if (isDownloading && processingSteps.isNotEmpty()) {
+            if (isDownloading && unmeasured) {
+                LiveProgressLine(modifier = Modifier.fillMaxSize())
+            } else if (isDownloading && processingSteps.isNotEmpty()) {
                 ProcessingTracker(
                     steps = processingSteps,
                     current = if (isProcessing) processingStep else 0,
-                    fill = if (isProcessing || unmeasured) null else animatedProgress,
+                    fill = if (isProcessing) null else animatedProgress,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -338,7 +342,9 @@ fun MediaCard(
                         val percent = (progress * 100f).toInt().coerceIn(0, 99)
                         if (percent >= 1) add(stringResource(R.string.download_percent_downloaded, percent))
                     }
-                    if (totalBytes > 0 && !unmeasured) {
+                    if (unmeasured) {
+                        if (liveBytes > 0) add(formatFileSize(liveBytes))
+                    } else if (totalBytes > 0) {
                         // A paused figure stands still, so it is shown as it is rather than
                         // counted up to each time the card is drawn again.
                         val shown = if (isPaused) progress else animatedProgress
