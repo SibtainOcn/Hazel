@@ -441,7 +441,7 @@ def test_paused_card_and_sheet():
     check_true("A paused link starts over only for a change to its streams",
                "val startsOver = running || (current.paused && streamsChange)" in adjust)
     check_true("The download in progress is stopped and taken again first",
-               "restartUrl = url" in adjust and "destroyProcessById(processId)" in adjust and "queue.addFirst(fresh)" in adjust)
+               "restartUrl = url" in adjust and "YtDlpEngine.stop(processId)" in adjust and "queue.addFirst(fresh)" in adjust)
     run = function(vm, "private fun runQueue(")
     check("Every stop in the run asks about a restart first",
           run.count("if (restartUrl == plan.info.url && !isBatchCancelled) {"), 3)

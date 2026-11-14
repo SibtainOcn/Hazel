@@ -302,6 +302,10 @@ object DownloadNotificationHelper {
 
         if (totalBytes > 0) {
             parts += "${formatSize(doneBytes)} / ${formatSize(totalBytes)}"
+        } else if (doneBytes > 0) {
+            // A run with no total to measure against: the size written so far, which still
+            // moves while the bar only runs.
+            parts += formatSize(doneBytes)
         }
 
         ProgressText.rate(statusLine)?.let { parts += it }

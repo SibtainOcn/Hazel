@@ -210,6 +210,7 @@ def main():
         ("Back-to-Back Downloads Harness", [py, "tools/tests/test_queue_back_to_back.py"]),
         ("Queue Run State & Summary Harness", [py, "tools/tests/test_queue_run_state.py"]),
         ("Software Update & Flavors Harness", [py, "tools/tests/test_software_update_and_flavors.py"]),
+        ("Cut Download Progress Harness", [py, "tools/tests/test_cut_progress.py"]),
         ("Gradle JVM Unit Tests", GRADLE_CMD + [":app:test", "--console=plain"]),
     ]
 

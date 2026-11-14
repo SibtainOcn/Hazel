@@ -44,6 +44,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import com.hazel.android.util.LinkKey
@@ -105,6 +107,15 @@ data class DownloadState(
      */
     val active: MediaInfo? = null,
     val progress: Float = 0f,
+    /**
+     * True for the whole of a trimmed or audio download. yt-dlp's own lines say little about
+     * either (a cut prints no percentage at all, and the stage it names is often not the one
+     * running), so the card and the shade show a line that only moves, with the size written
+     * so far beside it, instead of a percentage and stages that cannot be trusted.
+     */
+    val unmeasured: Boolean = false,
+    /** What the run has written to disk so far, counted while [unmeasured]. */
+    val liveBytes: Long = 0L,
     /** Total transfer size reported by yt-dlp, 0 until its first progress line. */
     val totalBytes: Long = 0L,
     /**
@@ -290,7 +301,8 @@ class DownloadViewModel : ViewModel() {
      * total is an estimate it refines upward as it goes, so a figure read off the output
      * climbs for the whole download and ends nowhere near where it started. The sheet
      * already showed the user a size, so that size is what the progress is measured
-     * against and it does not move.
+     * against and it does not move. For a cut it is scaled to the part that is kept: see
+     * [CutProgress].
      */
     @Volatile private var expectedTotalBytes: Long = 0L
 
@@ -308,6 +320,16 @@ class DownloadViewModel : ViewModel() {
      * runs, and the readout never falls below what those bytes are worth.
      */
     @Volatile private var progressFloor = 0f
+
+    /**
+     * Whether the run in hand keeps only a part of the link. ffmpeg takes that transfer, and
+     * its progress never reaches the engine's callback, so nothing but the file on disk says
+     * how far along it is: see [CutProgress] and [startCutWatcher].
+     */
+    @Volatile private var cutRun = false
+
+    /** A trimmed or audio download, followed by its size on disk instead of by percentage. */
+    @Volatile private var liveRun = false
 
     /** When the temp directory was last measured, so the floor is not re-read every line. */
     @Volatile private var lastFloorCheckAt = 0L
@@ -1617,9 +1639,15 @@ class DownloadViewModel : ViewModel() {
                 downloadIsVideo = plan.format.hasVideo
                 markBatch(plan.info.url, BatchState.DOWNLOADING, title = plan.title)
 
-                expectedTotalBytes = expectedTotalFor(plan)
+                cutRun = options.hasSection
+                liveRun = cutRun || !plan.format.hasVideo
+                // ffmpeg writes a cut from the beginning every time and never continues a part
+                // file, so the one left by a pause is not progress, only a size that would be
+                // shown until the new run climbed past it.
+                if (cutRun) purgeFragments()
+                expectedTotalBytes = expectedTotalFor(plan, options)
                 lastFloorCheckAt = 0L
-                progressFloor = fractionOnDisk()
+                progressFloor = fractionOnDisk(seeding = true)
 
                 val opening = if (progressFloor > 0f) "Resuming" else "Starting download"
                 // Only [DownloadState.active] follows the run. [DownloadState.info] is the
@@ -1632,7 +1660,9 @@ class DownloadViewModel : ViewModel() {
                     isDownloading = true,
                     active = plan.info,
                     progress = progressFloor,
-                    totalBytes = expectedTotalBytes,
+                    unmeasured = liveRun,
+                    liveBytes = 0L,
+                    totalBytes = if (liveRun) 0L else expectedTotalBytes,
                     eta = "",
                     status = opening,
                     isProcessing = false,
@@ -1641,7 +1671,10 @@ class DownloadViewModel : ViewModel() {
                     processingStep = 0
                 ) }
                 DownloadNotificationHelper.showProgress(
-                    app, (progressFloor * 100f).toInt(), opening, plan.title
+                    app,
+                    if (liveRun) -1 else (progressFloor * 100f).toInt(),
+                    opening,
+                    plan.title
                 )
 
                 try {
@@ -2059,7 +2092,7 @@ class DownloadViewModel : ViewModel() {
             isCancelled = true
             viewModelScope.launch(Dispatchers.IO) {
                 try {
-                    YoutubeDL.getInstance().destroyProcessById(processId)
+                    YtDlpEngine.stop(processId)
                 } catch (_: Exception) { /* process may already be done */ }
             }
         } else {
@@ -2125,7 +2158,7 @@ class DownloadViewModel : ViewModel() {
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                YoutubeDL.getInstance().destroyProcessById(processId)
+                YtDlpEngine.stop(processId)
             } catch (_: Exception) { /* process may already be done */ }
         }
     }
@@ -2147,7 +2180,7 @@ class DownloadViewModel : ViewModel() {
         isPaused = true
         downloadScope.launch {
             try {
-                YoutubeDL.getInstance().destroyProcessById(processId)
+                YtDlpEngine.stop(processId)
             } catch (_: Exception) { /* process may already be done */ }
         }
     }
@@ -2256,7 +2289,7 @@ class DownloadViewModel : ViewModel() {
             restartUrl = url
             withContext(Dispatchers.IO) {
                 try {
-                    YoutubeDL.getInstance().destroyProcessById(processId)
+                    YtDlpEngine.stop(processId)
                 } catch (_: Exception) { /* finished meanwhile: it is taken again all the same */ }
             }
         } else {
@@ -2667,7 +2700,8 @@ class DownloadViewModel : ViewModel() {
         // The stages this request sets in motion, in the order yt-dlp runs them.
         plannedSteps = buildList {
             add(ProcessingStep.FETCH)
-            if (isVideo && needsMerge) add(ProcessingStep.MERGE)
+            // A cut is fetched and joined by ffmpeg in one go, so yt-dlp announces no merge.
+            if (isVideo && needsMerge && !options.hasSection) add(ProcessingStep.MERGE)
             if (!isVideo) add(ProcessingStep.EXTRACT)
             if (isVideo && wantsCover) add(ProcessingStep.REMUX)
             if (isVideo && options.embedSubs) add(ProcessingStep.SUBTITLES)
@@ -2841,7 +2875,23 @@ class DownloadViewModel : ViewModel() {
         return out.toString().trim().ifBlank { "download" }
     }
 
+    /**
+     * Runs the request, and for a cut that can be measured, keeps its progress moving while
+     * the engine is silent: see [startCutWatcher].
+     */
     private fun executeYtDlp(request: YoutubeDLRequest) {
+        // An ffmpeg left behind by an earlier stop would still be fetching, and holding the
+        // network and the processor against this run: see [YtDlpEngine.stop].
+        if (!YtDlpEngine.isBusy) YtDlpEngine.killStrayFfmpeg()
+        val watcher = if (liveRun) startCutWatcher() else null
+        try {
+            runYtDlp(request)
+        } finally {
+            watcher?.cancel()
+        }
+    }
+
+    private fun runYtDlp(request: YoutubeDLRequest) {
         lastNotifiedAt = 0L
         val steps = plannedSteps
         // Whether this run has moved on from transferring to working on the file. Held here
@@ -2870,13 +2920,18 @@ class DownloadViewModel : ViewModel() {
             // the file is being worked on, fetching it is behind it.
             val announced = ProcessingStep.announcedBy(line)?.let { steps.indexOf(it) } ?: -1
             val fetched = if (postProcessing && steps.size > 1) 1 else 0
+            // A live run is followed by its size on disk and never by stages or percentages:
+            // see [DownloadState.unmeasured].
+            val unmeasured = liveRun
             _state.update { current -> current.copy(
-                progress = percent / 100f,
-                totalBytes = if (expectedTotalBytes > 0) expectedTotalBytes
+                progress = if (unmeasured) 0f else percent / 100f,
+                unmeasured = unmeasured,
+                totalBytes = if (unmeasured) 0L
+                else if (expectedTotalBytes > 0) expectedTotalBytes
                 else parseTotalBytes(line) ?: current.totalBytes,
                 eta = if (postProcessing) "" else ProgressText.eta(line) ?: current.eta,
                 status = status,
-                isProcessing = postProcessing,
+                isProcessing = postProcessing && !unmeasured,
                 processingStep = maxOf(current.processingStep, announced, fetched)
             ) }
 
@@ -2891,10 +2946,10 @@ class DownloadViewModel : ViewModel() {
                     val total = _state.value.totalBytes
                     DownloadNotificationHelper.showProgress(
                         context = it,
-                        progress = percent.toInt(),
+                        progress = if (unmeasured) -1 else percent.toInt(),
                         statusLine = status,
                         mediaTitle = (_state.value.active ?: _state.value.info)?.title.orEmpty(),
-                        doneBytes = (total * percent / 100f).toLong(),
+                        doneBytes = if (unmeasured) _state.value.liveBytes else (total * percent / 100f).toLong(),
                         totalBytes = total
                     )
                 }
@@ -3083,14 +3138,78 @@ class DownloadViewModel : ViewModel() {
      * nearly done. The directory holds one download's working files and nothing else, so
      * its whole weight is the honest answer.
      */
-    private fun fractionOnDisk(): Float {
+    private fun fractionOnDisk(seeding: Boolean = false): Float {
         if (expectedTotalBytes <= 0L) return 0f
-        val onDisk = bytesIn(downloadDir)
+        // A cut is measured by its media alone: see [CutProgress.mediaBytesIn]. An ordinary
+        // download is measured as it always was.
+        val onDisk = if (cutRun) {
+            CutProgress.mediaBytesIn(downloadDir, includePartFiles = !seeding)
+        } else {
+            bytesIn(downloadDir)
+        }
         if (onDisk <= 0L) return 0f
 
         // Capped short of the end: a floor of one would leave the bar full for the whole of
         // whatever is left to do, muxing included.
         return (onDisk.toFloat() / expectedTotalBytes).coerceIn(0f, 0.99f)
+    }
+
+    /**
+     * What the run has written so far. A cut is counted by its media alone (see
+     * [CutProgress.mediaBytesIn]); an audio download by everything in its folder.
+     */
+    private fun liveBytesOnDisk(): Long =
+        if (cutRun) CutProgress.mediaBytesIn(downloadDir) else bytesIn(downloadDir)
+
+    /**
+     * Follows a trimmed or audio run by the file it is writing, once a second, until
+     * cancelled.
+     *
+     * The engine's callback runs on yt-dlp's lines, and a cut prints none while ffmpeg
+     * works. A coroutine ticking on its own does not wait for a line, holds no thread of
+     * its own and needs no stop signal beyond cancel.
+     */
+    private fun startCutWatcher(): Job = downloadScope.launch {
+        while (isActive) {
+            delay(CUT_POLL_INTERVAL_MS)
+            try {
+                publishCutProgress()
+            } catch (e: Exception) {
+                Log.w("Hazel", "Cut progress read failed: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * One tick of the watcher: weighs the file and moves the card and the shade up to it.
+     *
+     * Only ever forward, and only while bytes are being written: once the file is being
+     * worked on the card follows the stages, and the engine's own lines say so.
+     */
+    private fun publishCutProgress() {
+        val current = _state.value
+        // Not gated on the stage the lines name: a line that sounds like post-processing
+        // can arrive long before ffmpeg has finished the transfer.
+        if (!current.isDownloading || !current.unmeasured) return
+
+        // Only ever forward: the part file is renamed and replaced as the run goes on.
+        val bytes = maxOf(liveBytesOnDisk(), current.liveBytes)
+        if (bytes != current.liveBytes) _state.update { it.copy(liveBytes = bytes) }
+
+        val now = System.currentTimeMillis()
+        if (now - lastNotifiedAt < NOTIFICATION_INTERVAL_MS) return
+        lastNotifiedAt = now
+        downloadContext?.let {
+            val state = _state.value
+            DownloadNotificationHelper.showProgress(
+                context = it,
+                progress = -1,
+                statusLine = state.status,
+                mediaTitle = (state.active ?: state.info)?.title.orEmpty(),
+                doneBytes = state.liveBytes,
+                totalBytes = 0L
+            )
+        }
     }
 
     /**
@@ -3206,7 +3325,7 @@ class DownloadViewModel : ViewModel() {
      * format that reported no size at all leaves this at 0, and the progress line's own
      * figure is used instead, which is the best there is in that case.
      */
-    private fun expectedTotalFor(plan: DownloadPlan): Long {
+    private fun expectedTotalFor(plan: DownloadPlan, options: DownloadOptions): Long {
         val format = plan.format
         if (format.fileSizeBytes <= 0L) return 0L
 
@@ -3214,7 +3333,13 @@ class DownloadViewModel : ViewModel() {
             plan.info.mergeAudio?.fileSizeBytes ?: 0L
         } else 0L
 
-        return format.fileSizeBytes + mergedAudio
+        val whole = format.fileSizeBytes + mergedAudio
+        if (!options.hasSection) return whole
+
+        // A cut keeps a part of the link, so the size the sheet showed is not what lands.
+        return CutProgress.expectedBytes(
+            whole, plan.info.durationSeconds, options.sectionStart, options.sectionEnd
+        )
     }
 
     private fun parseTotalBytes(line: String): Long? {
@@ -3372,6 +3497,9 @@ class DownloadViewModel : ViewModel() {
 
         /** How often the temp directory is weighed while a transfer runs. */
         const val FLOOR_INTERVAL_MS = 1000L
+
+        /** How often a cut, which prints no progress of its own, is followed by its file. */
+        const val CUT_POLL_INTERVAL_MS = 1000L
 
         /** Stages that run once the transfer itself has finished. */
         val POST_PROCESS_MARKERS = listOf(
