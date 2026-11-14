@@ -281,6 +281,9 @@ def test_source_wiring():
 
     # the opening notification and the callback agree on an unmeasured cut
     check_true("a trimmed or audio run is live", "liveRun = cutRun || !plan.format.hasVideo" in vm)
+    check_true("a cut drops the part file a pause left, as ffmpeg starts over",
+               "if (cutRun) purgeFragments()" in vm
+               and vm.index("liveRun = cutRun") < vm.index("if (cutRun) purgeFragments()"))
     check_true("a live run is never shown as processing", "isProcessing = postProcessing && !unmeasured" in vm)
     check("the callback and the opening read liveRun the same way", vm.count("if (liveRun) -1"), 1)
     check_true("a cut has no merge stage of its own", "needsMerge && !options.hasSection" in vm)

@@ -1641,6 +1641,10 @@ class DownloadViewModel : ViewModel() {
 
                 cutRun = options.hasSection
                 liveRun = cutRun || !plan.format.hasVideo
+                // ffmpeg writes a cut from the beginning every time and never continues a part
+                // file, so the one left by a pause is not progress, only a size that would be
+                // shown until the new run climbed past it.
+                if (cutRun) purgeFragments()
                 expectedTotalBytes = expectedTotalFor(plan, options)
                 lastFloorCheckAt = 0L
                 progressFloor = fractionOnDisk(seeding = true)
