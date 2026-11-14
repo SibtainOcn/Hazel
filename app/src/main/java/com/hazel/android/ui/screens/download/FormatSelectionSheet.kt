@@ -61,6 +61,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.UnfoldMore
 import com.hazel.android.ui.components.AlertDialog
@@ -596,7 +597,7 @@ private fun FormatRail(
                     RailStop(
                         label = stop.label,
                         count = stop.count,
-                        icon = if (stop.key == STOP_AUDIO) Icons.Filled.MusicNote else null,
+                        icon = if (stop.key == STOP_AUDIO) Icons.Filled.GraphicEq else null,
                         selected = stop.key == activeKey,
                         first = index == 0,
                         last = index == stops.lastIndex,

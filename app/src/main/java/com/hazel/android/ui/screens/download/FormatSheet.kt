@@ -24,6 +24,7 @@ import androidx.compose.animation.slideOutVertically
 import com.hazel.android.ui.screens.download.batch.BatchContainerSheet
 import kotlinx.coroutines.delay
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -71,16 +72,16 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.HighQuality
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -100,6 +101,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -107,6 +112,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.download.OneOffOptions
@@ -380,22 +386,22 @@ fun FormatSheet(
                         )
                     }
                 }
-                // Left of the download action, in its accent, on a pentagon with the play
-                // triangle cut in.
+               
                 if (onPlay != null) {
                     val playLabel = stringResource(R.string.format_sheet_play)
-                    val pentagon = remember { FittedPolygonShape(MaterialShapes.Pentagon) }
+                    val gem = remember { FittedPolygonShape(MaterialShapes.Gem, rotationDegrees = 20f) }
+                    val accent = MaterialTheme.colorScheme.primary
                     Surface(
                         onClick = onPlay,
-                        shape = pentagon,
-                        color = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        shape = gem,
+                        color = accent.copy(alpha = 0.2f).compositeOver(MaterialTheme.colorScheme.surface),
+                        contentColor = accent,
                         modifier = Modifier
-                            .size(width = 48.dp * pentagon.aspect, height = 48.dp)
+                            .size(width = 48.dp * gem.aspect, height = 48.dp)
                             .semantics { contentDescription = playLabel }
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.PlayArrow, null, modifier = Modifier.size(24.dp))
+                            PlayTriangle(size = 20.dp, color = accent)
                         }
                     }
                 }
@@ -531,7 +537,7 @@ fun FormatSheet(
             val languageName = audioLanguage?.let(::languageLabel)
                 ?.takeIf { info.audioLanguages.size > 1 }
             SheetSection(
-                icon = Icons.Outlined.HighQuality,
+                icon = if (videoTab) Icons.Outlined.HighQuality else Icons.Outlined.GraphicEq,
                 title = if (videoTab) stringResource(R.string.format_sheet_video_quality)
                 else stringResource(R.string.format_sheet_audio_quality),
                 summary = current?.let { qualitySummary(it, languageName) } ?: noStream,
@@ -666,7 +672,7 @@ fun FormatSheet(
                     if (!videoTab) {
                         OptionChip(
                             label = bitrateLabel,
-                            icon = Icons.Filled.HighQuality,
+                            icon = Icons.Filled.GraphicEq,
                             active = bitrateOn,
                             onClick = { openDialog = SheetDialog.AUDIO_QUALITY }
                         )
@@ -924,6 +930,25 @@ private fun qualitySummary(format: MediaFormat, language: String?): String =
  * turns with it; the turn is applied while drawing, so it repaints the arrow rather than
  * recomposing the header. A closed section composes nothing below its header.
  */
+/**
+ * A play triangle with softly rounded corners, [size] tall, centred in its box. Filled and
+ * stroked in one colour so the corners round off without the triangle losing its point.
+ */
+@Composable
+private fun PlayTriangle(size: Dp, color: Color) {
+    Canvas(Modifier.size(size)) {
+        val s = this.size.minDimension
+        val triangle = Path().apply {
+            moveTo(center.x - 0.32f * s, center.y - 0.5f * s)
+            lineTo(center.x + 0.56f * s, center.y)
+            lineTo(center.x - 0.32f * s, center.y + 0.5f * s)
+            close()
+        }
+        drawPath(triangle, color)
+        drawPath(triangle, color, style = Stroke(width = 0.16f * s, join = StrokeJoin.Round))
+    }
+}
+
 @Composable
 internal fun SheetSection(
     icon: ImageVector,

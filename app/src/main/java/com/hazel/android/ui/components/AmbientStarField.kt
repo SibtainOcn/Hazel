@@ -26,6 +26,9 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
 import com.hazel.android.ui.theme.LocalDarkTheme
 import com.hazel.android.ui.theme.LocalGlass
 import com.hazel.android.ui.theme.LocalGlassPalette
@@ -51,6 +54,11 @@ fun AmbientStarField(
     /** True while something covers the field, so it stops instead of moving unseen. */
     paused: Boolean = false
 ) {
+    // The screen this field is on, as its own lifecycle sees it: anything short of resumed
+    // means another screen or app is in front, or the screen is leaving, so no frames are
+    // spent on stars nobody can see.
+    val onScreen = LocalLifecycleOwner.current.lifecycle.currentStateAsState().value
+        .isAtLeast(Lifecycle.State.RESUMED)
     val dark = LocalDarkTheme.current
     val accent = MaterialTheme.colorScheme.primary
     val ink = MaterialTheme.colorScheme.onBackground
@@ -66,7 +74,7 @@ fun AmbientStarField(
     val lift = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
     val clock = remember { mutableFloatStateOf(0f) }
-    if (ambient && !paused) {
+    if (ambient && !paused && onScreen) {
         LaunchedEffect(Unit) {
             var last = withFrameNanos { it }
             while (true) {
