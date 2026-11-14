@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The bottom bar's selected-tab shape is easier to see.
 - Audio options in the download sheets use a waveform icon in place of the HQ badge and the music note: the audio quality row and bitrate chip, the format rail's Audio stop and the batch type picker.
 - Download sheet: Play is a tilted gem in a soft tint of the accent with a rounded play triangle, so Download is the only solid button.
+- The drifting stars on empty screens stop whenever another screen or app is in front, saving battery.
 
 ## [1.1.17] - 2026-10-29
 ### Added
