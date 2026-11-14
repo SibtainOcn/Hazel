@@ -110,6 +110,8 @@ fun MediaCard(
     processingSteps: List<ProcessingStep> = emptyList(),
     processingStep: Int = 0,
     progress: Float = 0f,
+    /** A cut with nothing to measure it by yet: the track runs on its own, with no figure. */
+    unmeasured: Boolean = false,
     totalBytes: Long = 0L,
     eta: String = "",
     isComplete: Boolean = false,
@@ -215,7 +217,7 @@ fun MediaCard(
                 ProcessingTracker(
                     steps = processingSteps,
                     current = if (isProcessing) processingStep else 0,
-                    fill = if (isProcessing) null else animatedProgress,
+                    fill = if (isProcessing || unmeasured) null else animatedProgress,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -336,7 +338,7 @@ fun MediaCard(
                         val percent = (progress * 100f).toInt().coerceIn(0, 99)
                         if (percent >= 1) add(stringResource(R.string.download_percent_downloaded, percent))
                     }
-                    if (totalBytes > 0) {
+                    if (totalBytes > 0 && !unmeasured) {
                         // A paused figure stands still, so it is shown as it is rather than
                         // counted up to each time the card is drawn again.
                         val shown = if (isPaused) progress else animatedProgress

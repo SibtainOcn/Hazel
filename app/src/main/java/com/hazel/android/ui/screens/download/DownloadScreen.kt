@@ -629,6 +629,7 @@ fun DownloadScreen(
                                     processingSteps = if (isActive) state.processingSteps else emptyList(),
                                     processingStep = state.processingStep,
                                     progress = state.progress,
+                                    unmeasured = isActive && state.unmeasured,
                                     isComplete = batchItem?.state == BatchState.DONE ||
                                             (!state.isMultiple && state.isComplete),
                                     batchItem = batchItem,
@@ -1324,6 +1325,8 @@ private fun MediaCard(
     processingSteps: List<ProcessingStep> = emptyList(),
     processingStep: Int = 0,
     progress: Float,
+    /** A cut with nothing to measure it by yet: the stage track runs on its own. */
+    unmeasured: Boolean = false,
     isComplete: Boolean,
     batchItem: BatchItem?,
     waitingForWifi: Boolean = false,
@@ -1410,10 +1413,10 @@ private fun MediaCard(
 
             // The stage track goes under the title and the readouts, so its shade dims the
             // artwork and not the words laid over it.
-            if (isProcessing && !isPaused && processingSteps.isNotEmpty()) {
+            if ((isProcessing || unmeasured) && !isPaused && processingSteps.isNotEmpty()) {
                 ProcessingTracker(
                     steps = processingSteps,
-                    current = processingStep,
+                    current = if (isProcessing) processingStep else 0,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -1452,7 +1455,7 @@ private fun MediaCard(
             // A paused download is still a download in hand, so the artwork keeps the
             // treatment that says so. The glyph in the middle holds where it stopped.
             if (isDownloading || isPaused) {
-                if (!isProcessing || isPaused) {
+                if ((!isProcessing && !unmeasured) || isPaused) {
                     // The download glyph fills as the download does, straight on the artwork.
                     // Stopping or pausing it is done from the queue, which a tap on the card
                     // opens.

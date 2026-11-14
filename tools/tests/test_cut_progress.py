@@ -243,7 +243,8 @@ def test_source_wiring():
     check_true("watcher starts only for a measurable cut",
                "if (cutRun && expectedTotalBytes > 0L) startCutWatcher() else null" in wrapper)
     check_true("the run is inside try/finally", "try {" in wrapper and "finally {" in wrapper)
-    check_true("the watcher is stopped in finally", re.search(r"finally\s*\{\s*watcher\?\.let \{ stopCutWatcher\(it\) \}", wrapper))
+    check_true("the watcher is cancelled in finally", re.search(r"finally\s*\{\s*watcher\?\.cancel\(\)", wrapper))
+    check_true("strays are cleared before a run, only when idle", "if (!YtDlpEngine.isBusy) YtDlpEngine.killStrayFfmpeg()" in wrapper)
     check_true("the wrapper runs the original body", "runYtDlp(request)" in wrapper)
 
     run = function_body(vm, "private fun runYtDlp(")
@@ -253,21 +254,17 @@ def test_source_wiring():
 
     # watcher lifecycle
     start = function_body(vm, "private fun startCutWatcher(")
-    check_true("watcher is a daemon thread", "isDaemon = true" in start)
-    check_true("watcher sleeps between ticks", "Thread.sleep(CUT_POLL_INTERVAL_MS)" in start)
-    check_true("a failed tick cannot kill the thread or the app", "catch (e: Exception)" in start)
-    check_true("interrupt ends the loop quietly", "catch (_: InterruptedException)" in start)
-    stop = function_body(vm, "private fun stopCutWatcher(")
-    check_true("stop interrupts then joins with a timeout",
-               "watcher.interrupt()" in stop and "watcher.join(CUT_WATCHER_JOIN_MS)" in stop)
-    check_true("stop keeps the caller's interrupt flag", "Thread.currentThread().interrupt()" in stop)
+    check_true("watcher is a coroutine, not a thread of its own", "downloadScope.launch" in start and "thread(" not in start)
+    check_true("watcher waits between ticks", "delay(CUT_POLL_INTERVAL_MS)" in start and "while (isActive)" in start)
+    check_true("a failed tick cannot kill the watcher or the app", "catch (e: Exception)" in start)
+    check_true("no thread join is left", "stopCutWatcher" not in vm and "CUT_WATCHER_JOIN_MS" not in vm)
 
     publish = function_body(vm, "private fun publishCutProgress(")
     check_true("a tick does nothing once the run is over or processing",
                "!current.isDownloading || current.isProcessing" in publish)
     check_true("a tick does nothing without an estimate", "expectedTotalBytes <= 0L" in publish)
     check_true("a tick only moves the bar forward",
-               "if (share > s.progress) s.copy(progress = share) else s" in publish)
+               "maxOf(share, s.progress)" in publish and "unmeasured = false" in publish)
     check_true("the shade keeps its pacing", "NOTIFICATION_INTERVAL_MS" in publish)
 
     # expected total
@@ -282,12 +279,14 @@ def test_source_wiring():
     check_true("the size is still 0 when the format has none", "if (format.fileSizeBytes <= 0L) return 0L" in total)
 
     # the opening notification and the callback agree on an unmeasured cut
-    check("unmeasuredCut is used at the opening notification and in the callback", vm.count("unmeasuredCut()"), 3)  # 2 uses + definition
-    check_true("the watcher import is present", "import kotlin.concurrent.thread" in vm)
-    check_true("the poll constants exist", "CUT_POLL_INTERVAL_MS = 1000L" in vm and "CUT_WATCHER_JOIN_MS = 2000L" in vm)
+    check("isUnmeasured is used at the opening, in the callback and in the definition", vm.count("isUnmeasured("), 5)
+    check_true("a run that is not a cut is never unmeasured", "cutRun && fraction <= 0f" in vm)
+    check_true("a cut has no merge stage of its own", "needsMerge && !options.hasSection" in vm)
+    check_true("every stop goes through the engine", "destroyProcessById(processId)" not in vm and vm.count("YtDlpEngine.stop(processId)") == 4)
+    check_true("the poll constant exists", "CUT_POLL_INTERVAL_MS = 1000L" in vm)
 
     # no user-facing text added in Kotlin (strings live in strings.xml)
-    added_literals = re.findall(r'"([^"\n]{12,})"', publish + start + stop)
+    added_literals = re.findall(r'"([^"\n]{12,})"', publish + start)
     check_true("no new on-screen text in the watcher", all("Cut progress read failed" in s or "hazel-cut-progress" in s or s == "Hazel" for s in added_literals))
 
 
@@ -377,9 +376,8 @@ def test_side_files():
     check_true("the per-tick refresh still reads everything the media has written",
                "progressFloor = maxOf(progressFloor, fractionOnDisk())" in vm)
     start = function_body(vm, "private fun startCutWatcher(")
-    check_true("a failed tick cannot swallow the stop signal",
-               start.find("catch (e: InterruptedException)") != -1
-               and start.find("catch (e: InterruptedException)") < start.find("catch (e: Exception)"))
+    check_true("the tick's try block holds no suspension point, so cancel is never swallowed",
+               start.index("delay(CUT_POLL_INTERVAL_MS)") < start.index("try {"))
     check_true("mediaBytesIn exists in CutProgress", "fun mediaBytesIn(dir: File, includePartFiles: Boolean = true)" in cut)
 
 

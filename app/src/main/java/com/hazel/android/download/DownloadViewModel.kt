@@ -44,6 +44,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import com.hazel.android.util.LinkKey
@@ -53,7 +55,6 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.flow.update
 import java.io.File
-import kotlin.concurrent.thread
 
 /** What adjusting a queued link from its sheet came to. */
 enum class QueueAdjust { APPLIED, UNCHANGED, NEEDS_CONFIRM, GONE }
@@ -106,6 +107,11 @@ data class DownloadState(
      */
     val active: MediaInfo? = null,
     val progress: Float = 0f,
+    /**
+     * True while a cut is running and nothing says how far along it is yet. The card and the
+     * shade then show a bar that only moves, instead of a 0% that never changes.
+     */
+    val unmeasured: Boolean = false,
     /** Total transfer size reported by yt-dlp, 0 until its first progress line. */
     val totalBytes: Long = 0L,
     /**
@@ -1642,7 +1648,8 @@ class DownloadViewModel : ViewModel() {
                     isDownloading = true,
                     active = plan.info,
                     progress = progressFloor,
-                    totalBytes = expectedTotalBytes,
+                    unmeasured = isUnmeasured(progressFloor),
+                    totalBytes = if (isUnmeasured(progressFloor)) 0L else expectedTotalBytes,
                     eta = "",
                     status = opening,
                     isProcessing = false,
@@ -1652,7 +1659,7 @@ class DownloadViewModel : ViewModel() {
                 ) }
                 DownloadNotificationHelper.showProgress(
                     app,
-                    if (unmeasuredCut()) -1 else (progressFloor * 100f).toInt(),
+                    if (isUnmeasured(progressFloor)) -1 else (progressFloor * 100f).toInt(),
                     opening,
                     plan.title
                 )
@@ -2072,7 +2079,7 @@ class DownloadViewModel : ViewModel() {
             isCancelled = true
             viewModelScope.launch(Dispatchers.IO) {
                 try {
-                    YoutubeDL.getInstance().destroyProcessById(processId)
+                    YtDlpEngine.stop(processId)
                 } catch (_: Exception) { /* process may already be done */ }
             }
         } else {
@@ -2138,7 +2145,7 @@ class DownloadViewModel : ViewModel() {
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                YoutubeDL.getInstance().destroyProcessById(processId)
+                YtDlpEngine.stop(processId)
             } catch (_: Exception) { /* process may already be done */ }
         }
     }
@@ -2160,7 +2167,7 @@ class DownloadViewModel : ViewModel() {
         isPaused = true
         downloadScope.launch {
             try {
-                YoutubeDL.getInstance().destroyProcessById(processId)
+                YtDlpEngine.stop(processId)
             } catch (_: Exception) { /* process may already be done */ }
         }
     }
@@ -2269,7 +2276,7 @@ class DownloadViewModel : ViewModel() {
             restartUrl = url
             withContext(Dispatchers.IO) {
                 try {
-                    YoutubeDL.getInstance().destroyProcessById(processId)
+                    YtDlpEngine.stop(processId)
                 } catch (_: Exception) { /* finished meanwhile: it is taken again all the same */ }
             }
         } else {
@@ -2680,7 +2687,8 @@ class DownloadViewModel : ViewModel() {
         // The stages this request sets in motion, in the order yt-dlp runs them.
         plannedSteps = buildList {
             add(ProcessingStep.FETCH)
-            if (isVideo && needsMerge) add(ProcessingStep.MERGE)
+            // A cut is fetched and joined by ffmpeg in one go, so yt-dlp announces no merge.
+            if (isVideo && needsMerge && !options.hasSection) add(ProcessingStep.MERGE)
             if (!isVideo) add(ProcessingStep.EXTRACT)
             if (isVideo && wantsCover) add(ProcessingStep.REMUX)
             if (isVideo && options.embedSubs) add(ProcessingStep.SUBTITLES)
@@ -2859,11 +2867,14 @@ class DownloadViewModel : ViewModel() {
      * the engine is silent: see [startCutWatcher].
      */
     private fun executeYtDlp(request: YoutubeDLRequest) {
+        // An ffmpeg left behind by an earlier stop would still be fetching, and holding the
+        // network and the processor against this run: see [YtDlpEngine.stop].
+        if (!YtDlpEngine.isBusy) YtDlpEngine.killStrayFfmpeg()
         val watcher = if (cutRun && expectedTotalBytes > 0L) startCutWatcher() else null
         try {
             runYtDlp(request)
         } finally {
-            watcher?.let { stopCutWatcher(it) }
+            watcher?.cancel()
         }
     }
 
@@ -2896,9 +2907,12 @@ class DownloadViewModel : ViewModel() {
             // the file is being worked on, fetching it is behind it.
             val announced = ProcessingStep.announcedBy(line)?.let { steps.indexOf(it) } ?: -1
             val fetched = if (postProcessing && steps.size > 1) 1 else 0
+            val unmeasured = isUnmeasured(percent / 100f) && !postProcessing
             _state.update { current -> current.copy(
                 progress = percent / 100f,
-                totalBytes = if (expectedTotalBytes > 0) expectedTotalBytes
+                unmeasured = unmeasured,
+                totalBytes = if (unmeasured) 0L
+                else if (expectedTotalBytes > 0) expectedTotalBytes
                 else parseTotalBytes(line) ?: current.totalBytes,
                 eta = if (postProcessing) "" else ProgressText.eta(line) ?: current.eta,
                 status = status,
@@ -2917,7 +2931,7 @@ class DownloadViewModel : ViewModel() {
                     val total = _state.value.totalBytes
                     DownloadNotificationHelper.showProgress(
                         context = it,
-                        progress = if (unmeasuredCut()) -1 else percent.toInt(),
+                        progress = if (unmeasured) -1 else percent.toInt(),
                         statusLine = status,
                         mediaTitle = (_state.value.active ?: _state.value.info)?.title.orEmpty(),
                         doneBytes = (total * percent / 100f).toLong(),
@@ -2956,6 +2970,7 @@ class DownloadViewModel : ViewModel() {
 
         _state.update { s -> s.copy(
             status = "Saving",
+            unmeasured = false,
             isProcessing = true,
             eta = "",
             processingStep = s.processingSteps.indexOf(ProcessingStep.SAVE)
@@ -3126,46 +3141,27 @@ class DownloadViewModel : ViewModel() {
     }
 
     /**
-     * Whether the run is a cut with nothing to measure it against, so its progress is not
-     * known and the shade shows a bar that only moves, not a figure that never changes.
+     * Whether a cut has nothing to show yet: it has no size to be measured against, or no
+     * byte has landed. A run that is not a cut is never unmeasured; its progress is the
+     * engine's own, as it always was.
      */
-    private fun unmeasuredCut(): Boolean = cutRun && expectedTotalBytes <= 0L
+    private fun isUnmeasured(fraction: Float): Boolean = cutRun && fraction <= 0f
 
     /**
-     * Follows a cut by the file it is writing, once a second, until stopped.
+     * Follows a cut by the file it is writing, once a second, until cancelled.
      *
      * The engine's callback runs on yt-dlp's lines, and a cut prints none while ffmpeg
-     * works, so left to it the bar stayed where it began until the file was done. A thread
-     * of its own does not wait for a line. It never throws: a failed read costs one tick.
+     * works. A coroutine ticking on its own does not wait for a line, holds no thread of
+     * its own and needs no stop signal beyond cancel.
      */
-    private fun startCutWatcher(): Thread = thread(isDaemon = true, name = "hazel-cut-progress") {
-        try {
-            while (true) {
-                Thread.sleep(CUT_POLL_INTERVAL_MS)
-                try {
-                    publishCutProgress()
-                } catch (e: InterruptedException) {
-                    // The stop signal, not a failed read: let it end the loop.
-                    throw e
-                } catch (e: Exception) {
-                    Log.w("Hazel", "Cut progress read failed: ${e.message}")
-                }
+    private fun startCutWatcher(): Job = downloadScope.launch {
+        while (isActive) {
+            delay(CUT_POLL_INTERVAL_MS)
+            try {
+                publishCutProgress()
+            } catch (e: Exception) {
+                Log.w("Hazel", "Cut progress read failed: ${e.message}")
             }
-        } catch (_: InterruptedException) {
-            // Stopped: the run is over.
-        }
-    }
-
-    /**
-     * Stops the watcher and waits for it, so nothing of it lands after the run has ended
-     * and moved on to the next item or to the finish.
-     */
-    private fun stopCutWatcher(watcher: Thread) {
-        watcher.interrupt()
-        try {
-            watcher.join(CUT_WATCHER_JOIN_MS)
-        } catch (_: InterruptedException) {
-            Thread.currentThread().interrupt()
         }
     }
 
@@ -3182,7 +3178,14 @@ class DownloadViewModel : ViewModel() {
 
         refreshFloorFromDisk()
         val share = progressFloor
-        _state.update { s -> if (share > s.progress) s.copy(progress = share) else s }
+        if (share <= 0f) return
+        _state.update { s ->
+            if (share > s.progress || s.unmeasured) s.copy(
+                progress = maxOf(share, s.progress),
+                unmeasured = false,
+                totalBytes = expectedTotalBytes
+            ) else s
+        }
 
         val now = System.currentTimeMillis()
         if (now - lastNotifiedAt < NOTIFICATION_INTERVAL_MS) return
@@ -3191,10 +3194,10 @@ class DownloadViewModel : ViewModel() {
             val state = _state.value
             DownloadNotificationHelper.showProgress(
                 context = it,
-                progress = (share * 100f).toInt(),
+                progress = (state.progress * 100f).toInt(),
                 statusLine = state.status,
                 mediaTitle = (state.active ?: state.info)?.title.orEmpty(),
-                doneBytes = (state.totalBytes * share).toLong(),
+                doneBytes = (state.totalBytes * state.progress).toLong(),
                 totalBytes = state.totalBytes
             )
         }
@@ -3488,9 +3491,6 @@ class DownloadViewModel : ViewModel() {
 
         /** How often a cut, which prints no progress of its own, is followed by its file. */
         const val CUT_POLL_INTERVAL_MS = 1000L
-
-        /** How long a run waits for the cut watcher to stop before going on without it. */
-        const val CUT_WATCHER_JOIN_MS = 2000L
 
         /** Stages that run once the transfer itself has finished. */
         val POST_PROCESS_MARKERS = listOf(
