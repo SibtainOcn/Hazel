@@ -83,6 +83,8 @@ object YtDlpEngine {
      * every stop left one more ffmpeg burning the processor and the network.
      */
     fun stop(processId: String): Boolean {
+        trimStopped = true
+        trimProcess?.destroy()
         val stopped = try {
             YoutubeDL.getInstance().destroyProcessById(processId)
         } catch (_: Exception) {
@@ -90,6 +92,188 @@ object YtDlpEngine {
         }
         killStrayFfmpeg()
         return stopped
+    }
+
+    @Volatile private var trimProcess: Process? = null
+    @Volatile private var trimStopped = false
+
+    class TrimOutcome(val ok: Boolean, val stopped: Boolean, val message: String)
+
+    fun trim(
+        context: android.content.Context,
+        input: File,
+        output: File,
+        startSeconds: Double,
+        endSeconds: Double,
+        precise: Boolean
+    ): TrimOutcome {
+        val ffmpeg = File(context.applicationInfo.nativeLibraryDir, "libffmpeg.so")
+        if (!ffmpeg.exists()) return TrimOutcome(false, false, "ffmpeg is not installed")
+        val libs = ffmpegLibraryPath(context)
+
+        val start = "%.3f".format(java.util.Locale.ROOT, startSeconds)
+        val length = "%.3f".format(java.util.Locale.ROOT, endSeconds - startSeconds)
+        val quiet = listOf(ffmpeg.absolutePath, "-y", "-hide_banner", "-loglevel", "error")
+        val streams = listOf("-map", "0:V?", "-map", "0:a?", "-map", "0:s?", "-map", "0:t?")
+        val keep = listOf("-map_metadata", "0", "-map_chapters", "0")
+        val ext = input.extension
+
+        trimStopped = false
+        val tuning = if (precise) preciseArgs(ext, encodersOf(ffmpeg, libs)) else null
+        if (precise && tuning == null) {
+            Log.w("Hazel", "No precise trim plan for .$ext here, copying the cut instead")
+        }
+
+        if (tuning == null) {
+            return runFfmpeg(
+                quiet + listOf("-ss", start, "-i", input.absolutePath, "-t", length) +
+                    listOf("-map", "0:v?", "-map", "0:a?", "-map", "0:s?", "-map", "0:t?") + keep +
+                    listOf("-c", "copy", "-avoid_negative_ts", "make_zero", output.absolutePath),
+                libs,
+                output
+            )
+        }
+
+        val reencoded = File(output.parentFile, "hazel.pre.$ext")
+        try {
+            val first = runFfmpeg(
+                quiet + listOf("-ss", start, "-i", input.absolutePath, "-t", length) +
+                    streams + keep + tuning + reencoded.absolutePath,
+                libs,
+                reencoded
+            )
+            if (!first.ok) return first
+            return runFfmpeg(
+                quiet + listOf("-i", reencoded.absolutePath, "-i", input.absolutePath) +
+                    streams + listOf("-map", "1:v?", "-map", "-1:V") + keep +
+                    listOf("-c", "copy", output.absolutePath),
+                libs,
+                output
+            )
+        } finally {
+            reencoded.delete()
+        }
+    }
+
+    private fun ffmpegLibraryPath(context: android.content.Context): String {
+        val packages = File(context.noBackupFilesDir, "${YoutubeDL.baseName}/packages")
+        val dirs = listOf("ffmpeg", "python", "aria2c")
+            .map { File(packages, "$it/usr/lib") }
+            .filter { it.isDirectory }
+            .map { it.absolutePath }
+        return (dirs + context.applicationInfo.nativeLibraryDir).joinToString(":")
+    }
+
+    private const val TRIM_STALL_MS = 5 * 60_000L
+
+    private const val TRIM_WATCH_MS = 15_000L
+
+    private fun runFfmpeg(command: List<String>, libs: String, writes: File): TrimOutcome {
+        if (trimStopped) return TrimOutcome(false, true, "")
+        val process = try {
+            ProcessBuilder(command)
+                .redirectErrorStream(true)
+                .apply { environment()["LD_LIBRARY_PATH"] = libs }
+                .start()
+        } catch (e: Exception) {
+            return TrimOutcome(false, false, e.message ?: "ffmpeg did not start")
+        }
+        trimProcess = process
+        if (trimStopped) process.destroy()
+
+        val stalled = java.util.concurrent.atomic.AtomicBoolean(false)
+        val watchdog = Thread {
+            var lastSize = -1L
+            var lastChange = System.currentTimeMillis()
+            try {
+                while (true) {
+                    Thread.sleep(TRIM_WATCH_MS)
+                    val size = writes.length()
+                    val now = System.currentTimeMillis()
+                    if (size != lastSize) {
+                        lastSize = size
+                        lastChange = now
+                    } else if (now - lastChange > TRIM_STALL_MS) {
+                        stalled.set(true)
+                        process.destroy()
+                        return@Thread
+                    }
+                }
+            } catch (_: InterruptedException) { }
+        }.apply { isDaemon = true; start() }
+
+        return try {
+            val tail = StringBuilder()
+            process.inputStream.bufferedReader().useLines { lines ->
+                lines.forEach { line ->
+                    tail.append(line).append('\n')
+                    if (tail.length > 2000) tail.delete(0, tail.length - 2000)
+                }
+            }
+            val code = process.waitFor()
+            val said = if (stalled.get()) "ffmpeg stopped making progress"
+            else tail.toString().trim().replace(Regex("(?:/[^/\\s:]+)+/"), "")
+            TrimOutcome(code == 0 && !trimStopped && !stalled.get(), trimStopped, said)
+        } catch (e: Exception) {
+            TrimOutcome(false, trimStopped, e.message ?: "ffmpeg stopped")
+        } finally {
+            watchdog.interrupt()
+            trimProcess = null
+        }
+    }
+
+    private fun encodersOf(ffmpeg: File, libs: String): Set<String> = try {
+        val process = ProcessBuilder(ffmpeg.absolutePath, "-hide_banner", "-encoders")
+            .redirectErrorStream(true)
+            .apply { environment()["LD_LIBRARY_PATH"] = libs }
+            .start()
+        val names = process.inputStream.bufferedReader().readLines()
+            .mapNotNull { it.trim().split(Regex("\\s+")).getOrNull(1) }
+            .toSet()
+        process.waitFor()
+        names
+    } catch (_: Exception) {
+        emptySet()
+    }
+
+    private fun preciseArgs(extension: String, have: Set<String>): List<String>? {
+        fun pick(vararg names: String) = names.firstOrNull { it in have }
+        val video: String?
+        val audio: String?
+        when (extension.lowercase()) {
+            "mp4", "m4v", "mov", "mkv" -> {
+                video = pick("libx264", "mpeg4") ?: return null
+                audio = pick("aac")
+            }
+            "webm" -> {
+                video = pick("libvpx-vp9", "libvpx") ?: return null
+                audio = pick("libopus", "libvorbis")
+            }
+            "m4a", "aac" -> { video = null; audio = pick("aac") }
+            "mp3" -> { video = null; audio = pick("libmp3lame") }
+            "opus", "ogg" -> { video = null; audio = pick("libopus", "libvorbis") }
+            "flac" -> { video = null; audio = pick("flac") }
+            "wav" -> { video = null; audio = pick("pcm_s16le") }
+            else -> return null
+        }
+        if (audio == null) return null
+
+        val args = mutableListOf("-c", "copy")
+        if (video != null) {
+            args += listOf("-c:V", video)
+            when {
+                video == "libx264" ->
+                    args += listOf("-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p")
+                video.startsWith("libvpx") ->
+                    args += listOf("-deadline", "realtime", "-cpu-used", "6", "-crf", "30", "-b:v", "0")
+            }
+        }
+        args += listOf("-c:a", audio)
+        when (audio) {
+            "aac" -> args += listOf("-b:a", "192k")
+            "libmp3lame" -> args += listOf("-q:a", "2")
+        }
+        return args
     }
 
     /**

@@ -23,6 +23,8 @@ enum class ProcessingStep(@param:StringRes val label: Int, val marker: String?) 
     TAGS(R.string.processing_step_tags, "[metadata]"),
     COVER(R.string.processing_step_cover, "[embedthumbnail]"),
     SPLIT(R.string.processing_step_split, "[splitchapters]"),
+    TRIM(R.string.processing_step_trim, null),
+    TIDY(R.string.processing_step_tidy, null),
     SAVE(R.string.processing_step_save, null);
 
     companion object {

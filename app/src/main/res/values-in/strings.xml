@@ -721,12 +721,16 @@
     <string name="processing_step_tags">Tag</string>
     <string name="processing_step_cover">Sampul</string>
     <string name="processing_step_split">Pisah</string>
+    <string name="processing_step_trim">Potong</string>
+    <string name="processing_step_tidy">Bersihkan</string>
     <string name="processing_step_save">Simpan</string>
     <string name="options_cut_title">Potong</string>
     <string name="options_cut_start">Mulai</string>
     <string name="options_cut_end">Selesai</string>
     <string name="options_cut_precise">Potongan presisi</string>
     <string name="options_cut_precise_summary">Memotong tepat dengan mengenkode ulang ujungnya. Lebih lambat. Mati: potong di keyframe terdekat.</string>
+    <string name="options_cut_local">Potong setelah unduh</string>
+    <string name="options_cut_local_summary">Mengunduh seluruh berkas dengan kecepatan penuh, lalu memotong bagian itu dan menghapus sisanya. Perlu ruang untuk seluruh berkas. Mati: bagian dipotong saat diunduh, yang bisa lambat.</string>
     <string name="options_cut_invalid">Akhir harus setelah awal, dalam durasi</string>
     <string name="options_cut_apply">Potong</string>
     <string name="options_cut_clear">Hapus</string>

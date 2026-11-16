@@ -52,6 +52,22 @@ object CutProgress {
         "json", "description", "txt"
     )
 
+    fun mainMedia(dir: File): File? = try {
+        dir.listFiles()
+            ?.filter { f ->
+                f.isFile && !f.name.startsWith(".") &&
+                    !f.name.endsWith(".part") && !f.name.endsWith(".ytdl") &&
+                    !f.name.endsWith(".temp") && !f.nameWithoutExtension.endsWith(".trim") && !f.nameWithoutExtension.endsWith(".pre") &&
+                    f.extension.lowercase() !in SIDE_FILE_EXTENSIONS
+            }
+            ?.let { files ->
+                val whole = files.filterNot { Regex("""\.f\d+[\w-]*\.\w+$""").containsMatchIn(it.name) }
+                whole.ifEmpty { files }.maxByOrNull { it.length() }
+            }
+    } catch (_: Exception) {
+        null
+    }
+
     /**
      * What the media of a cut weighs in [dir], the engine's bookkeeping and the files beside
      * the media aside. Zero for a folder that is missing or cannot be read.

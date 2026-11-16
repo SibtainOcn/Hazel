@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
+- Cut: a Trim after download option. It downloads the whole file at full speed, cuts the part out and deletes the rest, with Trim and Tidy stages on the card and in the notification. Off, yt-dlp cuts while it downloads, which some sources throttle.
 
 ### Fixed
 - A trimmed download's history entry shows the length of the part that was kept, not of the whole video.

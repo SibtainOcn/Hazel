@@ -69,6 +69,7 @@ data class DownloadOptions(
     val sectionEnd: Double = -1.0,
     /** `--force-keyframes-at-cuts`: exact cut points, at the cost of re-encoding around them. */
     val preciseCuts: Boolean = false,
+    val trimAfterDownload: Boolean = false,
     /** `--live-from-start`: a stream already live is taken from its beginning, not from now. */
     val liveFromStart: Boolean = false,
     /** `--wait-for-video`: a stream not started yet is waited for, then downloaded. */
@@ -77,6 +78,12 @@ data class DownloadOptions(
     /** True when only part of the media is to be downloaded. */
     val hasSection: Boolean
         get() = sectionStart >= 0.0 && sectionEnd > sectionStart
+
+    val trimsAfterDownload: Boolean
+        get() = hasSection && trimAfterDownload && !splitByChapters
+
+    val cutsWhileDownloading: Boolean
+        get() = hasSection && !trimsAfterDownload
 
     val audioCodecPreference: AudioCodec?
         get() = AudioCodec.entries.firstOrNull { it.name == preferredAudioCodec }
@@ -112,6 +119,7 @@ data class DownloadOptions(
         sectionStart = if (oneOff.hasSection) oneOff.sectionStart else -1.0,
         sectionEnd = if (oneOff.hasSection) oneOff.sectionEnd else -1.0,
         preciseCuts = oneOff.hasSection && oneOff.preciseCuts,
+        trimAfterDownload = oneOff.hasSection && oneOff.trimAfterDownload,
         liveFromStart = oneOff.liveFromStart,
         waitForVideo = oneOff.waitForVideo
     )
@@ -139,6 +147,7 @@ data class OneOffOptions(
     val sectionStart: Double = -1.0,
     val sectionEnd: Double = -1.0,
     val preciseCuts: Boolean = false,
+    val trimAfterDownload: Boolean = false,
     val liveFromStart: Boolean = false,
     val waitForVideo: Boolean = false
 ) {

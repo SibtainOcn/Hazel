@@ -749,12 +749,16 @@
     <string name="processing_step_tags">Tags</string>
     <string name="processing_step_cover">Pochette</string>
     <string name="processing_step_split">Diviser</string>
+    <string name="processing_step_trim">Couper</string>
+    <string name="processing_step_tidy">Nettoyer</string>
     <string name="processing_step_save">Enregistrer</string>
     <string name="options_cut_title">Découper</string>
     <string name="options_cut_start">Début</string>
     <string name="options_cut_end">Fin</string>
     <string name="options_cut_precise">Coupes précises</string>
     <string name="options_cut_precise_summary">Coupe exactement en réencodant les extrémités. Plus lent. Désactivé, coupe à l’image clé la plus proche.</string>
+    <string name="options_cut_local">Couper après le téléchargement</string>
+    <string name="options_cut_local_summary">Télécharge tout le fichier à pleine vitesse, puis découpe la partie et supprime le reste. Demande de la place pour le fichier entier. Désactivé, la partie est coupée pendant le téléchargement, ce qui peut être lent.</string>
     <string name="options_cut_invalid">La fin doit venir après le début, dans la durée</string>
     <string name="options_cut_apply">Découper</string>
     <string name="options_cut_clear">Effacer</string>

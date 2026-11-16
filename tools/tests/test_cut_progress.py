@@ -272,10 +272,10 @@ def test_source_wiring():
     check_true("the run's expected total uses the cut",
                "expectedTotalBytes = expectedTotalFor(plan, options)" in vm)
     check_true("cutRun is set before the expected total is worked out",
-               vm.find("cutRun = options.hasSection") != -1
-               and vm.find("cutRun = options.hasSection") < vm.find("expectedTotalBytes = expectedTotalFor(plan, options)"))
+               vm.find("cutRun = options.cutsWhileDownloading") != -1
+               and vm.find("cutRun = options.cutsWhileDownloading") < vm.find("expectedTotalBytes = expectedTotalFor(plan, options)"))
     total = function_body(vm, "private fun expectedTotalFor(")
-    check_true("an uncut download returns the whole size as before", "if (!options.hasSection) return whole" in total)
+    check_true("an uncut download returns the whole size as before", "if (!options.cutsWhileDownloading) return whole" in total)
     check_true("a cut is scaled by CutProgress", "CutProgress.expectedBytes(" in total)
     check_true("the size is still 0 when the format has none", "if (format.fileSizeBytes <= 0L) return 0L" in total)
 
@@ -286,7 +286,7 @@ def test_source_wiring():
                and vm.index("liveRun = cutRun") < vm.index("if (cutRun) purgeFragments()"))
     check_true("a live run is never shown as processing", "isProcessing = postProcessing && !unmeasured" in vm)
     check("the callback and the opening read liveRun the same way", vm.count("if (liveRun) -1"), 1)
-    check_true("a cut has no merge stage of its own", "needsMerge && !options.hasSection" in vm)
+    check_true("a cut has no merge stage of its own", "needsMerge && !options.cutsWhileDownloading" in vm)
     check_true("every stop goes through the engine", "destroyProcessById(processId)" not in vm and vm.count("YtDlpEngine.stop(processId)") == 4)
     check_true("the poll constant exists", "CUT_POLL_INTERVAL_MS = 1000L" in vm)
 
@@ -422,6 +422,181 @@ def test_real_ffmpeg():
             check_true(f"cut {start}-{end}: lands within 20% of the estimate (ratio {ratio:.2f})", 0.8 <= ratio <= 1.2)
 
 
+def test_trim_after_download():
+    print("\n[7] Trim after download")
+    vm = VM.read_text(encoding="utf-8")
+    eng = (VM.parent / "YtDlpEngine.kt").read_text(encoding="utf-8")
+    opt = (VM.parent / "DownloadOptions.kt").read_text(encoding="utf-8")
+    steps = (VM.parent / "ProcessingStep.kt").read_text(encoding="utf-8")
+
+    check_true("the option exists and is carried from the sheet",
+               "val trimAfterDownload: Boolean = false" in opt
+               and "trimAfterDownload = oneOff.hasSection && oneOff.trimAfterDownload" in opt)
+    check_true("yt-dlp cuts only when the app is not going to",
+               "get() = hasSection && !trimsAfterDownload" in opt and "hasSection && trimAfterDownload && !splitByChapters" in opt
+               and "if (options.cutsWhileDownloading) {" in vm
+               and "cutRun = options.cutsWhileDownloading" in vm
+               and "if (!options.cutsWhileDownloading) return whole" in vm)
+    check_true("a trim after download is an ordinary download until its last stages",
+               "liveRun = cutRun || !plan.format.hasVideo" in vm)
+    check_true("two stages are planned before Save, only for a local trim",
+               "add(ProcessingStep.TRIM)" in vm and "add(ProcessingStep.TIDY)" in vm
+               and steps.index("TRIM(") < steps.index("TIDY(") < steps.index("SAVE("))
+    run = vm.index("trimLocally(app, plan, options)")
+    check_true("the trim runs after every stop check and before the save",
+               vm.index("if (isCancelled) {", vm.index("if (isBatchCancelled) {", vm.index("restartUrl = null"))) < run
+               < vm.index("finishDownload(app, plan, options)\n                    markBatch"))
+    body = function_body(vm, "private fun trimLocally(")
+    check_true("the cut is written beside the original", ".trim." in body and "YtDlpEngine.trim(" in body)
+    check_true("the original goes only after a complete cut",
+               body.index("outcome.ok") < body.index("source.delete()") < body.index("renameTo(source)"))
+    failure = function_body(vm, "private fun trimFailure(")
+    check_true("a stopped trim is a cancel, a failed one is a failure",
+               "throw CancellationException" in body and "throw trimFailure(" in body
+               and "throw IllegalStateException" not in body and "IllegalStateException(" in failure)
+    check_true("a failed trim keeps the detail for the log and ends on a plain reason for the card",
+               '"Trim failed"' in failure and '"\\nERROR: " + sanitizeError(raw)' in failure)
+    libpath = function_body(eng, "private fun ffmpegLibraryPath(")
+    check_true("ffmpeg gets the same library folders the engine gives yt-dlp's ffmpeg, its own first",
+               '"ffmpeg", "python", "aria2c"' in libpath and "nativeLibraryDir" in libpath
+               and "YoutubeDL.baseName" in libpath and '"$it/usr/lib"' in libpath)
+    check_true("both ffmpeg launches use that path",
+               eng.count("ffmpegLibraryPath(context)") == 1 and eng.count('environment()["LD_LIBRARY_PATH"] = libs }') == 2
+               and "libs.absolutePath" not in eng)
+    check_true("a stop ends the trim as well as the download",
+               "trimProcess?.destroy()" in eng and "trimStopped = true" in eng)
+    check_true("the trim copies streams unless precise",
+               '"-c", "copy", "-avoid_negative_ts", "make_zero"' in eng and "preciseArgs(ext" in eng)
+    check_true("precise re-encodes only the main streams and puts the cover back from the original",
+               '"-c:V"' in eng and '"-map", "1:v?", "-map", "-1:V"' in eng)
+    check_true("precise falls back to copy for a container it has no plan for",
+               "copying the cut instead" in eng and "else -> return null" in eng)
+    check_true("the cut has a short name of its own", '"hazel.trim.${source.extension}"' in vm)
+    check_true("the saved duration is the kept part", "(options.sectionEnd - options.sectionStart)" in vm)
+
+    check_true("a failed trim says so plainly, and a full disk is named",
+               'lower.startsWith("trim failed")' in vm and '"no space left" in lower' in vm
+               and vm.index('"no space left" in lower') < vm.index('"is not a valid url" in lower'))
+    check_true("what a killed trim left is cleared before the next one",
+               'it.name.startsWith("hazel.trim.") || it.name.startsWith("hazel.pre.")' in body)
+    cut_src = (VM.parent / "CutProgress.kt").read_text(encoding="utf-8")
+    check_true("a first-step file is never taken for the download", 'endsWith(".pre")' in cut_src and 'endsWith(".trim")' in cut_src)
+    check_true("a stuck ffmpeg is stopped, and only one that is not growing",
+               "TRIM_STALL_MS = 5 * 60_000L" in eng and "val size = writes.length()" in eng
+               and "ffmpeg stopped making progress" in eng and "watchdog.interrupt()" in eng)
+    check_true("folders are dropped from what ffmpeg says", '.replace(Regex("(?:/[^/\\\\s:]+)+/"), "")' in eng)
+    check_true("every ffmpeg run names the file it writes",
+               eng.count("libs,\n                output") + eng.count("libs,\n                reencoded") == 3)
+
+    ffmpeg = shutil.which("ffmpeg")
+    ffprobe = shutil.which("ffprobe")
+    if not (ffmpeg and ffprobe):
+        skip("real ffmpeg trim", "ffmpeg or ffprobe not available")
+        return
+
+    import json
+
+    def run(cmd):
+        try:
+            return subprocess.run(cmd, capture_output=True, text=True, timeout=90)
+        except subprocess.TimeoutExpired:
+            class Hung:
+                returncode = 124
+                stderr = "timed out"
+                stdout = ""
+            return Hung()
+
+    def probe(path):
+        out = run([ffprobe, "-v", "error", "-show_streams", "-show_format", "-show_chapters", "-of", "json", path]).stdout
+        return json.loads(out or "{}")
+
+    encoders = {l.split()[1] for l in run([ffmpeg, "-hide_banner", "-encoders"]).stdout.splitlines() if len(l.split()) > 1}
+
+    def tuning(ext):
+        video = "libx264" if "libx264" in encoders else None
+        if ext in ("mp4", "mkv"):
+            return None if video is None else ["-c", "copy", "-c:V", video, "-preset", "veryfast", "-crf", "20",
+                                               "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k"]
+        if ext == "m4a":
+            return ["-c", "copy", "-c:a", "aac", "-b:a", "192k"]
+        if ext == "mp3" and "libmp3lame" in encoders:
+            return ["-c", "copy", "-c:a", "libmp3lame", "-q:a", "2"]
+        return None
+
+    with tempfile.TemporaryDirectory() as tmp:
+        cover = os.path.join(tmp, "cover.jpg")
+        run([ffmpeg, "-v", "error", "-y", "-f", "lavfi", "-i", "color=c=red:s=300x300", "-frames:v", "1", cover])
+        sub = os.path.join(tmp, "s.srt")
+        open(sub, "w").write("1\n00:00:01,000 --> 00:00:05,000\nhello\n\n2\n00:00:12,000 --> 00:00:18,000\nworld\n")
+        meta = os.path.join(tmp, "m.txt")
+        open(meta, "w").write(";FFMETADATA1\ntitle=Kept\n[CHAPTER]\nTIMEBASE=1/1000\nSTART=0\nEND=10000\ntitle=A\n"
+                              "[CHAPTER]\nTIMEBASE=1/1000\nSTART=10000\nEND=24000\ntitle=B\n")
+        V = ["-f", "lavfi", "-i", "testsrc2=size=320x180:rate=30"]
+        A = ["-f", "lavfi", "-i", "sine=frequency=440"]
+        sources = {
+            "video_cover_subs_chapters.mp4": V + A + ["-i", cover, "-i", sub, "-i", meta, "-t", "24",
+                "-map", "0:v", "-map", "1:a", "-map", "2:v", "-map", "3:s", "-map_metadata", "4", "-map_chapters", "4",
+                "-c:v:0", "libx264", "-preset", "ultrafast", "-g", "30", "-c:a", "aac", "-c:v:1", "mjpeg",
+                "-disposition:v:1", "attached_pic", "-c:s", "mov_text"],
+            "audio_cover.m4a": A + ["-i", cover, "-t", "24", "-map", "0:a", "-map", "1:v", "-c:a", "aac",
+                "-c:v", "mjpeg", "-disposition:v", "attached_pic", "-metadata", "title=Kept"],
+            "audio_cover.mp3": A + ["-i", cover, "-t", "24", "-map", "0:a", "-map", "1:v", "-c:a", "libmp3lame",
+                "-c:v", "mjpeg", "-id3v2_version", "3", "-metadata", "title=Kept"],
+            "plain.mkv": V + A + ["-t", "24", "-c:v", "libx264", "-preset", "ultrafast", "-g", "30", "-c:a", "aac"],
+            "unicode_हिंदी 😀 a:b%d 'q'.mp4": V + A + ["-t", "24", "-c:v", "libx264", "-preset", "ultrafast",
+                "-g", "30", "-c:a", "aac"],
+        }
+        streams = ["-map", "0:V?", "-map", "0:a?", "-map", "0:s?", "-map", "0:t?"]
+        keep = ["-map_metadata", "0", "-map_chapters", "0"]
+        quiet = [ffmpeg, "-y", "-hide_banner", "-loglevel", "error"]
+        for name, args in sources.items():
+            src = os.path.join(tmp, name)
+            if run([ffmpeg, "-v", "error", "-y"] + args + [src]).returncode != 0:
+                skip(f"real ffmpeg trim of {name}", "could not make a test file")
+                continue
+            ext = name.rsplit(".", 1)[1]
+            before = probe(src)
+            kinds = sorted((x["codec_type"], x.get("disposition", {}).get("attached_pic", 0)) for x in before["streams"])
+            for precise in (False, True):
+                label = f"{name} {'precise' if precise else 'copy'}"
+                out = os.path.join(tmp, "hazel.trim." + ext)
+                if os.path.exists(out):
+                    os.remove(out)
+                plan = tuning(ext) if precise else None
+                if precise and plan is None:
+                    skip(label, "no encoder for it in this ffmpeg")
+                    continue
+                if plan is None:
+                    done = run(quiet + ["-ss", "5.000", "-i", src, "-t", "10.000", "-map", "0:v?", "-map", "0:a?",
+                                        "-map", "0:s?", "-map", "0:t?"] + keep +
+                               ["-c", "copy", "-avoid_negative_ts", "make_zero", out])
+                else:
+                    pre = os.path.join(tmp, "hazel.pre." + ext)
+                    done = run(quiet + ["-ss", "5.000", "-i", src, "-t", "10.000"] + streams + keep + plan + [pre])
+                    if done.returncode == 0:
+                        done = run(quiet + ["-i", pre, "-i", src] + streams +
+                                   ["-map", "1:v?", "-map", "-1:V"] + keep + ["-c", "copy", out])
+                    if os.path.exists(pre):
+                        os.remove(pre)
+                check(f"{label}: succeeds", done.returncode, 0)
+                if done.returncode != 0 or not os.path.exists(out):
+                    continue
+                after = probe(out)
+                length = float(after["format"].get("duration", 0))
+                check_true(f"{label}: about as long as asked ({length:.1f}s for 10s)", 8.5 <= length <= 11.5)
+                has_art = lambda doc: any(x.get("disposition", {}).get("attached_pic") for x in doc["streams"])
+                check_true(f"{label}: cover art kept", has_art(before) == has_art(after))
+                check_true(f"{label}: audio kept", any(x["codec_type"] == "audio" for x in after["streams"]))
+                check_true(f"{label}: subtitles kept",
+                           any(x["codec_type"] == "subtitle" for x in before["streams"]) ==
+                           any(x["codec_type"] == "subtitle" for x in after["streams"]))
+                if before.get("chapters"):
+                    check_true(f"{label}: chapters kept", len(after.get("chapters", [])) >= 1)
+                if "Kept" in json.dumps(before["format"].get("tags", {})):
+                    check_true(f"{label}: tags kept", "Kept" in json.dumps(after["format"].get("tags", {})))
+                check_true(f"{label}: no leftover first-step file", not os.path.exists(os.path.join(tmp, "hazel.pre." + ext)))
+
+
 def main():
     print("=" * 70)
     print("  Cut download progress harness (issue #161)")
@@ -432,6 +607,7 @@ def main():
     test_structure()
     test_side_files()
     test_real_ffmpeg()
+    test_trim_after_download()
     print("\n" + "=" * 70)
     print(f"  {PASS_COUNT} passed, {FAIL_COUNT} failed, {SKIP_COUNT} skipped")
     print("=" * 70)

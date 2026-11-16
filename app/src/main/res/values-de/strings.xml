@@ -735,12 +735,16 @@
     <string name="processing_step_tags">Tags</string>
     <string name="processing_step_cover">Cover</string>
     <string name="processing_step_split">Teilen</string>
+    <string name="processing_step_trim">Kürzen</string>
+    <string name="processing_step_tidy">Aufräumen</string>
     <string name="processing_step_save">Speichern</string>
     <string name="options_cut_title">Schneiden</string>
     <string name="options_cut_start">Start</string>
     <string name="options_cut_end">Ende</string>
     <string name="options_cut_precise">Genaue Schnitte</string>
     <string name="options_cut_precise_summary">Schneidet exakt durch Neukodieren der Enden. Langsamer. Aus: Schnitt am nächsten Keyframe.</string>
+    <string name="options_cut_local">Nach dem Download kürzen</string>
+    <string name="options_cut_local_summary">Lädt die ganze Datei mit voller Geschwindigkeit, schneidet dann den Teil heraus und löscht den Rest. Braucht Platz für die ganze Datei. Aus: Der Teil wird schon beim Download geschnitten, was langsam sein kann.</string>
     <string name="options_cut_invalid">Das Ende muss nach dem Start liegen, innerhalb der Länge</string>
     <string name="options_cut_apply">Schneiden</string>
     <string name="options_cut_clear">Löschen</string>

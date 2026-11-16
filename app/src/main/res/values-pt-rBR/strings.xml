@@ -749,12 +749,16 @@
     <string name="processing_step_tags">Tags</string>
     <string name="processing_step_cover">Capa</string>
     <string name="processing_step_split">Dividir</string>
+    <string name="processing_step_trim">Cortar</string>
+    <string name="processing_step_tidy">Limpar</string>
     <string name="processing_step_save">Salvar</string>
     <string name="options_cut_title">Cortar</string>
     <string name="options_cut_start">Início</string>
     <string name="options_cut_end">Fim</string>
     <string name="options_cut_precise">Cortes precisos</string>
     <string name="options_cut_precise_summary">Corta no ponto exato recodificando as pontas. Mais lento. Desligado, corta no quadro-chave mais próximo.</string>
+    <string name="options_cut_local">Cortar após o download</string>
+    <string name="options_cut_local_summary">Baixa o arquivo inteiro na velocidade máxima, depois corta a parte e apaga o resto. Precisa de espaço para o arquivo inteiro. Desativado, a parte é cortada durante o download, o que pode ser lento.</string>
     <string name="options_cut_invalid">O fim deve vir depois do início, dentro da duração</string>
     <string name="options_cut_apply">Cortar</string>
     <string name="options_cut_clear">Limpar</string>
