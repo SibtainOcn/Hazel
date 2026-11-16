@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
 
 ### Fixed
+- A trimmed download's history entry shows the length of the part that was kept, not of the whole video.
+- Trimmed downloads no longer sit at 0%: the card and the notification show a line that keeps moving, with the size written so far beside it.
+- Audio downloads are followed the same way, by size on disk, instead of a stage list that did not match what was running.
+- A trimmed download no longer shows a Merge stage, which yt-dlp never runs for one.
+- Cancelling, pausing or re-adding a trimmed download no longer leaves it stuck on "downloading" with ffmpeg still running in the background, using the network and the processor.
+- Resuming a paused trimmed download starts its size from zero again instead of from the size where it stopped.
+- The notification for a download with no known size shows the size so far, not "0% · 0 MB / total".
 - Format list: a link whose qualities could not be read now says why, instead of leaving the quality ladder looking like its final list.
 - YouTube's "confirm you're not a bot" refusal is named as such, not as private content.
 - The quality ladder keeps its original look and side rail until the real qualities arrive.
@@ -19,9 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The share sheet's format list now shows why a read failed.
 - yt-dlp update failing on older and low-memory phones (#166). The download is tried again when the connection drops or times out, picks up where it stopped, and waits longer on a weak network. A phone that is nearly out of storage asks the system to clear cached files first. A new build that is stopped by the system while starting is tried once more, and again at the next launch, rather than refused for good. A busy or rate-limited GitHub is not hammered with quick retries. The update no longer looks the release up a second time after the screen has already found it.
 - The yt-dlp update screen says why an update failed (storage full, connection timed out, GitHub unreachable, date and time wrong, release no longer available, new build would not start) instead of "Update failed", in every language the app ships. Retry after a failed install tries the install again. The last failure is included in the copied device info for bug reports.
+- Format sheet: rows no longer draw over each other when switching between quality stops, and the list starts from the top on each switch.
 
 ### Changed
 - The bottom bar's selected-tab shape is easier to see.
+- Format sheet: the quality rail is one connected group with round outer ends and tight inner corners; the chosen stop fills with the accent and lifts out of the group on a spring.
+- Format sheet: the panes keep one height while a link is read, when the formats arrive and between stops, and the rail and list scroll on their own.
+- Audio options in the download sheets use a waveform icon in place of the HQ badge and the music note: the audio quality row and bitrate chip, the format rail's Audio stop and the batch type picker.
+- Download sheet: Play is a tilted gem in a soft tint of the accent with a rounded play triangle, so Download is the only solid button.
+- The drifting stars on empty screens stop whenever another screen or app is in front, saving battery.
 
 ## [1.1.17] - 2026-10-29
 ### Added

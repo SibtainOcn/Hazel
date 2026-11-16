@@ -15,10 +15,16 @@ import kotlin.math.min
 /**
  * A polygon drawn by its own bounds rather than its unit square, so a shape that is wider
  * than tall fills the full height it is given. Size the box as [aspect] wide per unit tall.
+ *
+ * [rotationDegrees] turns the outline clockwise before it is measured, so the box still
+ * hugs the turned shape. Only the outline turns; whatever is drawn inside the box stays upright.
  */
-class FittedPolygonShape(polygon: RoundedPolygon) : Shape {
-    private val bounds = polygon.calculateBounds()
-    private val path = polygon.toPath().asComposePath()
+class FittedPolygonShape(polygon: RoundedPolygon, rotationDegrees: Float = 0f) : Shape {
+    private val path = polygon.toPath().asComposePath().apply {
+        if (rotationDegrees != 0f) transform(Matrix().apply { rotateZ(rotationDegrees) })
+    }
+    private val bounds = if (rotationDegrees == 0f) polygon.calculateBounds()
+    else path.getBounds().let { floatArrayOf(it.left, it.top, it.right, it.bottom) }
     private val width = bounds[2] - bounds[0]
     private val height = bounds[3] - bounds[1]
 

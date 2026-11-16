@@ -518,6 +518,8 @@ fun QueueScreen(
                             // A paused item keeps the figures it stopped at, so its card
                             // says how much is already in hand.
                             progress = if (inRun) state.progress else onDisk,
+                            unmeasured = item.isDownloading && state.unmeasured,
+                            liveBytes = if (inRun) state.liveBytes else 0L,
                             totalBytes = if (inRun) state.totalBytes
                             else queued?.let { it.fileSizeBytes + it.mergeAudioSizeBytes } ?: 0L,
                             eta = if (item.isDownloading) state.eta else "",
