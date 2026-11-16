@@ -81,7 +81,7 @@ If Hazel has been useful to you, consider supporting its development. Your suppo
   </tr>
 </table>
 
-<sub>Support is never required and never unlocks anything. Every feature stays free for everyone. No money? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Star the repo</a> or <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">report a problem</a>, it helps just as much.</sub>
+<sub>No money? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Star the repo</a> or <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">report a problem</a>, it helps just as much.</sub>
 </div>
 
 ---
@@ -109,22 +109,22 @@ Hazel is a free, open-source downloader for Android powered by **yt-dlp**. Save 
 
 <table>
   <tr>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>▶️ Search & Play</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>📚 All Downloads</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>🎬 Download Options</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>🎚️ Format Picker</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>Search & Play</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>All Downloads</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>Download Options</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>Format Picker</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>⏳ Download Queue</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>🌐 Audio Language</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>🔍 Smart Search</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>📃 Playlist Batch</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>Download Queue</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>Audio Language</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>Smart Search</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>Playlist Batch</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>🗣️ App Languages</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>✨ Glass Home</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>⚙️ More Settings</b></td>
-    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>🎨 Appearance</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>App Languages</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>Glass Home</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>More Settings</b></td>
+    <td align="center" width="25%"><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>Appearance</b></td>
   </tr>
 </table>
 
@@ -189,7 +189,7 @@ We welcome contributions! See our [CONTRIBUTING.md](https://github.com/SibtainOc
 [GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
 
 ## 🏆 Credits
-**Developer & Architect:** [SibtainOcn](https://github.com/SibtainOcn)
+**Developer:** [SibtainOcn](https://github.com/SibtainOcn)
 
 **Huge Thanks To:**
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - F-Droid repository management

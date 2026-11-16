@@ -24,7 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
-import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -95,7 +95,7 @@ fun BatchDownloadTypeSheet(
     ) { close ->
         ChoiceRow(
             label = stringResource(R.string.batch_type_audio),
-            icon = Icons.Filled.MusicNote,
+            icon = Icons.Filled.GraphicEq,
             selected = !isVideo,
             onClick = { close { onSelect(false) } }
         )

@@ -81,7 +81,7 @@
   </tr>
 </table>
 
-<sub>حمایت هرگز اجباری نیست و هیچ ویژگی خاصی را باز نمی‌کند. همه ویژگی‌ها برای همه رایگان باقی می‌مانند. پولی ندارید؟ <a href="https://github.com/SibtainOcn/Hazel/stargazers">به مخزن یک ستاره بدهید</a> یا <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">یک مشکل را گزارش دهید</a>، این کار هم به همان اندازه کمک می‌کند.</sub>
+<sub>پولی ندارید؟ <a href="https://github.com/SibtainOcn/Hazel/stargazers">به مخزن یک ستاره بدهید</a> یا <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">یک مشکل را گزارش دهید</a>، این کار هم به همان اندازه کمک می‌کند.</sub>
 </div>
 
 ---
@@ -109,22 +109,22 @@
 
 <table>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>▶️ جستجو و پخش</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>📚 همه دانلودها</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>🎬 گزینه‌های دانلود</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>🎚️ انتخاب‌گر فرمت</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>جستجو و پخش</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>همه دانلودها</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>گزینه‌های دانلود</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>انتخاب‌گر فرمت</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>⏳ صف دانلود</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>🌐 زبان صوت</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>🔍 جستجوی هوشمند</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>📃 لیست پخش دسته‌ای</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>صف دانلود</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>زبان صوت</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>جستجوی هوشمند</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>لیست پخش دسته‌ای</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>🗣️ زبان‌های برنامه</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>✨ خانه شیشه‌ای</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>⚙️ تنظیمات بیشتر</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>🎨 ظاهر</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>زبان‌های برنامه</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>خانه شیشه‌ای</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>تنظیمات بیشتر</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>ظاهر</b></td>
   </tr>
 </table>
 
@@ -189,7 +189,7 @@ MD5:        3bcce9e14c616a9087766563875978e6
 [GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
 
 ## 🏆 قدردانی
-**توسعه‌دهنده و معمار:** [SibtainOcn](https://github.com/SibtainOcn)
+**توسعه‌دهنده:** [SibtainOcn](https://github.com/SibtainOcn)
 
 **با تشکر فراوان از:**
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - مدیریت مخزن F-Droid

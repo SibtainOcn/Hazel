@@ -81,7 +81,7 @@ Si Hazel vous a été utile, pensez à soutenir son développement. Votre soutie
   </tr>
 </table>
 
-<sub>Le soutien n'est jamais obligatoire et ne débloque jamais rien. Toutes les fonctionnalités restent gratuites pour tous. Pas d'argent ? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Mettez une étoile au dépôt</a> ou <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">signalez un problème</a>, ça aide tout autant.</sub>
+<sub>Pas d'argent ? <a href="https://github.com/SibtainOcn/Hazel/stargazers">Mettez une étoile au dépôt</a> ou <a href="https://github.com/SibtainOcn/Hazel/issues/new/choose">signalez un problème</a>, ça aide tout autant.</sub>
 </div>
 
 ---
@@ -109,22 +109,22 @@ Hazel est un téléchargeur Android gratuit et open source propulsé par **yt-dl
 
 <table>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>▶️ Recherche et lecture</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>📚 Tous les téléchargements</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>🎬 Options de téléchargement</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>🎚️ Choix du format</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" width="100%" /><br><b>Recherche et lecture</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" width="100%" /><br><b>Tous les téléchargements</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg" width="100%" /><br><b>Options de téléchargement</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg" width="100%" /><br><b>Choix du format</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>⏳ File de téléchargement</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>🌐 Langue audio</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>🔍 Recherche intelligente</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>📃 Playlist par lots</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg" width="100%" /><br><b>File de téléchargement</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg" width="100%" /><br><b>Langue audio</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/08.jpg" width="100%" /><br><b>Recherche intelligente</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg" width="100%" /><br><b>Playlist par lots</b></td>
   </tr>
   <tr>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>🗣️ Langues de l'app</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>✨ Accueil verre</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>⚙️ Plus de paramètres</b></td>
-    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>🎨 Apparence</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg" width="100%" /><br><b>Langues de l'app</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/12.jpg" width="100%" /><br><b>Accueil verre</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/11.jpg" width="100%" /><br><b>Plus de paramètres</b></td>
+    <td align="center" width="25%"><img src="../../fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="100%" /><br><b>Apparence</b></td>
   </tr>
 </table>
 
@@ -189,7 +189,7 @@ Les contributions sont les bienvenues ! Consultez notre [CONTRIBUTING.md](https:
 [GNU GPL v3.0 or later](https://github.com/SibtainOcn/Hazel/blob/main/LICENSE) &nbsp;·&nbsp; `SPDX-License-Identifier: GPL-3.0-or-later`
 
 ## 🏆 Crédits
-**Développeur et architecte:** [SibtainOcn](https://github.com/SibtainOcn)
+**Développeur:** [SibtainOcn](https://github.com/SibtainOcn)
 
 **Un grand merci à:**
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - Gestion du dépôt F-Droid
