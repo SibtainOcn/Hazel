@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
 
 ### Fixed
+- A trimmed download's history entry shows the length of the part that was kept, not of the whole video.
 - Trimmed downloads no longer sit at 0%: the card and the notification show a line that keeps moving, with the size written so far beside it.
 - Audio downloads are followed the same way, by size on disk, instead of a stage list that did not match what was running.
 - A trimmed download no longer shows a Merge stage, which yt-dlp never runs for one.

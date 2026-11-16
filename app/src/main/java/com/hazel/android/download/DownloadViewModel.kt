@@ -26,6 +26,7 @@ import com.hazel.android.download.extractor.newpipe.NewPipeEngine
 import com.hazel.android.util.StoragePaths
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -3091,7 +3092,10 @@ class DownloadViewModel : ViewModel() {
                     title = info.title,
                     author = info.uploader,
                     thumbnail = info.thumbnail,
-                    durationSeconds = info.durationSeconds,
+                    // The part that was kept, not the length of the whole source.
+                    durationSeconds = if (options.hasSection) {
+                        (options.sectionEnd - options.sectionStart).roundToInt().coerceAtLeast(1)
+                    } else info.durationSeconds,
                     fileName = fileName,
                     fileUri = savedUri?.toString().orEmpty(),
                     savedPath = savedPath,
