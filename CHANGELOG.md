@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
 
 ### Fixed
+- A trimmed download's history entry shows the length of the part that was kept, not of the whole video.
+- Trimmed downloads no longer sit at 0%: the card and the notification show a line that keeps moving, with the size written so far beside it.
+- Audio downloads are followed the same way, by size on disk, instead of a stage list that did not match what was running.
+- A trimmed download no longer shows a Merge stage, which yt-dlp never runs for one.
+- Cancelling, pausing or re-adding a trimmed download no longer leaves it stuck on "downloading" with ffmpeg still running in the background, using the network and the processor.
+- Resuming a paused trimmed download starts its size from zero again instead of from the size where it stopped.
+- The notification for a download with no known size shows the size so far, not "0% · 0 MB / total".
 - Format list: a link whose qualities could not be read now says why, instead of leaving the quality ladder looking like its final list.
 - YouTube's "confirm you're not a bot" refusal is named as such, not as private content.
 - The quality ladder keeps its original look and side rail until the real qualities arrive.
