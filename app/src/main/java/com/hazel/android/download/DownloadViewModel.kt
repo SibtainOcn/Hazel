@@ -109,10 +109,11 @@ data class DownloadState(
     val active: MediaInfo? = null,
     val progress: Float = 0f,
     /**
-     * True for the whole of a trimmed or audio download. yt-dlp's own lines say little about
-     * either (a cut prints no percentage at all, and the stage it names is often not the one
-     * running), so the card and the shade show a line that only moves, with the size written
-     * so far beside it, instead of a percentage and stages that cannot be trusted.
+     * True for the whole of a cut that yt-dlp makes while it downloads. It prints no
+     * percentage for one, and the stage its lines name is often not the one running, so the
+     * card and the shade show a line that only moves, with the size written so far beside it,
+     * instead of a percentage and stages that cannot be trusted. Never true for a download
+     * that has a percentage of its own.
      */
     val unmeasured: Boolean = false,
     /** What the run has written to disk so far, counted while [unmeasured]. */
@@ -329,7 +330,10 @@ class DownloadViewModel : ViewModel() {
      */
     @Volatile private var cutRun = false
 
-    /** A trimmed or audio download, followed by its size on disk instead of by percentage. */
+    /**
+     * A cut made by yt-dlp while it downloads, followed by its size on disk instead of by
+     * percentage. Nothing else: every other download has a percentage of its own.
+     */
     @Volatile private var liveRun = false
 
     /** When the temp directory was last measured, so the floor is not re-read every line. */
@@ -1641,7 +1645,7 @@ class DownloadViewModel : ViewModel() {
                 markBatch(plan.info.url, BatchState.DOWNLOADING, title = plan.title)
 
                 cutRun = options.hasSection
-                liveRun = cutRun || !plan.format.hasVideo
+                liveRun = cutRun
                 // ffmpeg writes a cut from the beginning every time and never continues a part
                 // file, so the one left by a pause is not progress, only a size that would be
                 // shown until the new run climbed past it.
@@ -3159,11 +3163,10 @@ class DownloadViewModel : ViewModel() {
     }
 
     /**
-     * What the run has written so far. A cut is counted by its media alone (see
-     * [CutProgress.mediaBytesIn]); an audio download by everything in its folder.
+     * What the cut has written so far, counted by its media alone: see
+     * [CutProgress.mediaBytesIn].
      */
-    private fun liveBytesOnDisk(): Long =
-        if (cutRun) CutProgress.mediaBytesIn(downloadDir) else bytesIn(downloadDir)
+    private fun liveBytesOnDisk(): Long = CutProgress.mediaBytesIn(downloadDir)
 
     /**
      * Follows a trimmed or audio run by the file it is writing, once a second, until
