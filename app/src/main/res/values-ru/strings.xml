@@ -1009,4 +1009,18 @@
     <string name="upd_report_copied">Данные устройства скопированы. Вставьте их в отчёт.</string>
     <string name="upd_channel_note">Beta и Nightly получают исправления раньше и могут быть менее стабильны.</string>
     <string name="upd_status_ok">Актуально на %1$s</string>
+    <string name="upd_failure_no_space">На этом устройстве недостаточно свободной памяти для установки обновления. Освободите место и попробуйте снова.</string>
+    <string name="upd_failure_timeout">Время подключения к GitHub истекло. Перейдите на более стабильную сеть и попробуйте снова.</string>
+    <string name="upd_failure_unreachable">Hazel не удалось подключиться к GitHub. Проверьте подключение к интернету, а также настройки VPN и персонального DNS-сервера, затем попробуйте снова.</string>
+    <string name="upd_failure_connection_lost">Соединение прервалось во время загрузки. Попробуйте снова в более стабильной сети.</string>
+    <string name="upd_failure_clock_or_tls">Не удалось установить защищённое соединение с GitHub. Убедитесь, что дата и время на этом устройстве указаны верно, и попробуйте снова.</string>
+    <string name="upd_failure_http">GitHub отклонил загрузку (HTTP %1$s). Попробуйте снова через несколько минут.</string>
+    <string name="upd_failure_release_gone">Эта версия больше не доступна на GitHub. Проверьте обновления, чтобы получить последнюю.</string>
+    <string name="upd_failure_incomplete">Загрузка завершилась некорректно. Попробуйте снова в более стабильной сети.</string>
+    <string name="upd_failure_could_not_install">Не удалось установить обновление на этом устройстве. Попробуйте снова.</string>
+    <string name="upd_failure_would_not_start">Новая версия yt-dlp не смогла запуститься на этом устройстве, поэтому осталась текущая версия. Загрузки продолжат работать.</string>
+    <string name="upd_failure_stopped_while_starting">Система остановила новую версию yt-dlp во время запуска, вероятно из-за нехватки оперативной памяти. Осталась текущая версия. Закройте другие приложения и попробуйте снова.</string>
+    <string name="upd_failure_unknown">Не удалось завершить обновление (%1$s). Попробуйте снова чуть позже.</string>
+    <string name="upd_status_update_failed">Обновление не завершено</string>
+    <string name="upd_status_check_failed">Проверка не завершена</string>
 </resources>

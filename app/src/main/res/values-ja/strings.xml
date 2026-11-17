@@ -962,4 +962,18 @@
     <string name="upd_report_copied">デバイス情報をコピーしました。報告に貼り付けてください。</string>
     <string name="upd_channel_note">Beta と Nightly は修正が早く届きますが、安定性が低い場合があります。</string>
     <string name="upd_status_ok">%1$s で最新</string>
+    <string name="upd_failure_no_space">このデバイスにはアップデートをインストールするための空き容量が足りません。容量を空けてから、もう一度お試しください。</string>
+    <string name="upd_failure_timeout">GitHub への接続がタイムアウトしました。より安定した通信環境でもう一度お試しください。</string>
+    <string name="upd_failure_unreachable">Hazel は GitHub に接続できませんでした。インターネット接続と、VPN およびプライベート DNS の設定を確認してから、もう一度お試しください。</string>
+    <string name="upd_failure_connection_lost">ダウンロード中に接続が切断されました。より安定した通信環境でもう一度お試しください。</string>
+    <string name="upd_failure_clock_or_tls">GitHub との安全な接続を確立できませんでした。このデバイスの日付と時刻が正しいか確認してから、もう一度お試しください。</string>
+    <string name="upd_failure_http">GitHub がダウンロードを拒否しました（HTTP %1$s）。数分後にもう一度お試しください。</string>
+    <string name="upd_failure_release_gone">このバージョンは GitHub で提供されなくなりました。アップデートを確認して最新バージョンを入手してください。</string>
+    <string name="upd_failure_incomplete">ダウンロードが正常に完了しませんでした。より安定した通信環境でもう一度お試しください。</string>
+    <string name="upd_failure_could_not_install">このデバイスにアップデートをインストールできませんでした。もう一度お試しください。</string>
+    <string name="upd_failure_would_not_start">yt-dlp の新しいバージョンをこのデバイスで起動できなかったため、現在のバージョンを維持しました。ダウンロードは引き続き利用できます。</string>
+    <string name="upd_failure_stopped_while_starting">yt-dlp の新しいバージョンの起動中にシステムが停止させました。メモリ不足が原因と考えられます。現在のバージョンを維持しました。他のアプリを終了してから、もう一度お試しください。</string>
+    <string name="upd_failure_unknown">アップデートを完了できませんでした（%1$s）。しばらくしてからもう一度お試しください。</string>
+    <string name="upd_status_update_failed">アップデートが完了しませんでした</string>
+    <string name="upd_status_check_failed">確認が完了しませんでした</string>
 </resources>

@@ -978,4 +978,18 @@
     <string name="upd_report_copied">Geräteinfos kopiert. Füge sie in das Issue ein.</string>
     <string name="upd_channel_note">Beta und Nightly bekommen Korrekturen zuerst und können weniger stabil sein.</string>
     <string name="upd_status_ok">Aktuell auf %1$s</string>
+    <string name="upd_failure_no_space">Auf diesem Gerät ist nicht genug freier Speicher vorhanden, um das Update zu installieren. Gib etwas Speicherplatz frei und versuche es erneut.</string>
+    <string name="upd_failure_timeout">Die Verbindung zu GitHub hat zu lange gedauert. Wechsle zu einem stärkeren Netzwerk und versuche es erneut.</string>
+    <string name="upd_failure_unreachable">Hazel konnte GitHub nicht erreichen. Prüfe deine Internetverbindung sowie die Einstellungen für VPN und Privates DNS und versuche es dann erneut.</string>
+    <string name="upd_failure_connection_lost">Die Verbindung wurde während des Downloads unterbrochen. Versuche es in einem stabileren Netzwerk erneut.</string>
+    <string name="upd_failure_clock_or_tls">Es konnte keine sichere Verbindung zu GitHub hergestellt werden. Prüfe, ob Datum und Uhrzeit auf diesem Gerät stimmen, und versuche es dann erneut.</string>
+    <string name="upd_failure_http">GitHub hat den Download abgelehnt (HTTP %1$s). Versuche es in ein paar Minuten erneut.</string>
+    <string name="upd_failure_release_gone">Diese Version ist auf GitHub nicht mehr verfügbar. Suche nach Updates, um die neueste Version zu erhalten.</string>
+    <string name="upd_failure_incomplete">Der Download wurde nicht korrekt abgeschlossen. Versuche es in einem stabileren Netzwerk erneut.</string>
+    <string name="upd_failure_could_not_install">Das Update konnte auf diesem Gerät nicht installiert werden. Versuche es bitte erneut.</string>
+    <string name="upd_failure_would_not_start">Die neue yt-dlp-Version konnte auf diesem Gerät nicht gestartet werden, daher wurde deine aktuelle Version beibehalten. Downloads funktionieren weiterhin.</string>
+    <string name="upd_failure_stopped_while_starting">Das System hat die neue yt-dlp-Version beim Start beendet, vermutlich wegen zu wenig Arbeitsspeicher. Deine aktuelle Version wurde beibehalten. Schließe andere Apps und versuche es erneut.</string>
+    <string name="upd_failure_unknown">Das Update konnte nicht abgeschlossen werden (%1$s). Versuche es gleich noch einmal.</string>
+    <string name="upd_status_update_failed">Update nicht abgeschlossen</string>
+    <string name="upd_status_check_failed">Prüfung nicht abgeschlossen</string>
 </resources>

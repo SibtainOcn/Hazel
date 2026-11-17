@@ -43,6 +43,7 @@ object DebugInfo {
         appendLine("ABI ${abis()}")
         append("Locale ${Locale.getDefault().toLanguageTag()}")
         installedLabel(context)?.let { append("\nInstalled $it") }
+        YtDlpUpdater.lastFailure(context)?.let { append("\nLast yt-dlp update failure: $it") }
     }
 
     /** Puts [text] on the clipboard; false when the system refused. */

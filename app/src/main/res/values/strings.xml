@@ -1034,4 +1034,18 @@
     <string name="upd_report_copied">Device info copied. Paste it into the issue.</string>
     <string name="upd_channel_note">Beta and Nightly get fixes first and can be less stable.</string>
     <string name="upd_status_ok">Up to date on %1$s</string>
+    <string name="upd_failure_no_space">There isn\'t enough free storage on this device to install the update. Free up some space and try again.</string>
+    <string name="upd_failure_timeout">The connection to GitHub timed out. Switch to a stronger network and try again.</string>
+    <string name="upd_failure_unreachable">Hazel couldn\'t reach GitHub. Check your internet connection, VPN and Private DNS settings, then try again.</string>
+    <string name="upd_failure_connection_lost">The connection dropped during the download. Try again on a more stable network.</string>
+    <string name="upd_failure_clock_or_tls">A secure connection to GitHub couldn\'t be established. Check that the date and time on this device are correct, then try again.</string>
+    <string name="upd_failure_http">GitHub declined the download (HTTP %1$s). Please try again in a few minutes.</string>
+    <string name="upd_failure_release_gone">This version is no longer available on GitHub. Check for updates to get the latest one.</string>
+    <string name="upd_failure_incomplete">The download didn\'t finish correctly. Try again on a more stable network.</string>
+    <string name="upd_failure_could_not_install">The update couldn\'t be installed on this device. Please try again.</string>
+    <string name="upd_failure_would_not_start">The new yt-dlp version couldn\'t start on this device, so your current version was kept. Downloads will keep working.</string>
+    <string name="upd_failure_stopped_while_starting">The system stopped the new yt-dlp version while it was starting, most likely because memory was low. Your current version was kept. Close other apps and try again.</string>
+    <string name="upd_failure_unknown">The update couldn\'t be completed (%1$s). Please try again in a moment.</string>
+    <string name="upd_status_update_failed">Update couldn\'t finish</string>
+    <string name="upd_status_check_failed">Check couldn\'t finish</string>
 </resources>
