@@ -156,6 +156,7 @@
     <string name="format_sheet_audio_language">ऑडियो की भाषा</string>
     <string name="format_sheet_change_audio_language">ऑडियो की भाषा बदलें</string>
     <string name="format_sheet_filename_template">फ़ाइल नाम टेम्पलेट</string>
+    <string name="format_sheet_extra_args">अतिरिक्त आर्ग्युमेंट</string>
     <string name="format_sheet_change_field">बदलें</string>
     <string name="format_sheet_save_dir">फ़ोल्डर</string>
     <string name="format_sheet_save_location">सहेजने की जगह</string>
@@ -719,7 +720,7 @@
     <string name="advanced_no_check_certificates">सर्टिफ़िकेट जाँच छोड़ें</string>
     <string name="advanced_no_check_certificates_summary">सिर्फ़ उन साइटों के लिए जिन पर यह डिवाइस भरोसा नहीं करता। कनेक्शन कम सुरक्षित होते हैं।</string>
     <string name="advanced_extra_args">अतिरिक्त डाउनलोड आर्ग्युमेंट</string>
-    <string name="advanced_extra_args_hint">हर डाउनलोड में जोड़े जाने वाले yt-dlp आर्ग्युमेंट। Hazel के अपने विकल्प छोड़ दिए जाते हैं।</string>
+    <string name="advanced_extra_args_hint">हर डाउनलोड में जोड़े जाने वाले yt-dlp आर्ग्युमेंट। -o फ़ाइल नाम और उसके फ़ोल्डर तय करता है। Hazel के अपने बाकी विकल्प छोड़ दिए जाते हैं।</string>
     <string name="advanced_reset">एडवांस्ड सेटिंग्स रीसेट करें</string>
     <string name="advanced_reset_title">एडवांस्ड सेटिंग्स रीसेट करें?</string>
     <string name="advanced_reset_body">इस स्क्रीन का हर विकल्प फिर से बंद या खाली हो जाएगा।</string>

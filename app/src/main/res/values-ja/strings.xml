@@ -152,6 +152,7 @@
     <string name="format_sheet_audio_language">音声の言語</string>
     <string name="format_sheet_change_audio_language">音声の言語を変更</string>
     <string name="format_sheet_filename_template">ファイル名テンプレート</string>
+    <string name="format_sheet_extra_args">追加の引数</string>
     <string name="format_sheet_change_field">変更</string>
     <string name="format_sheet_save_dir">保存フォルダ</string>
     <string name="format_sheet_save_location">保存場所</string>
@@ -705,7 +706,7 @@
     <string name="advanced_no_check_certificates">証明書の確認をスキップ</string>
     <string name="advanced_no_check_certificates_summary">この端末が証明書を信頼しないサイト専用。接続の安全性が下がります。</string>
     <string name="advanced_extra_args">追加のダウンロード引数</string>
-    <string name="advanced_extra_args_hint">すべてのダウンロードに追加する yt-dlp 引数。Hazel が設定するオプションは除外されます。</string>
+    <string name="advanced_extra_args_hint">すべてのダウンロードに追加する yt-dlp 引数。-o でファイル名とそのフォルダーを指定できます。Hazel が設定するその他のオプションは除外されます。</string>
     <string name="advanced_reset">詳細設定をリセット</string>
     <string name="advanced_reset_title">詳細設定をリセットしますか？</string>
     <string name="advanced_reset_body">この画面のすべての項目がオフまたは空に戻ります。</string>

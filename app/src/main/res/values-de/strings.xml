@@ -156,6 +156,7 @@
     <string name="format_sheet_audio_language">Audiosprache</string>
     <string name="format_sheet_change_audio_language">Audiosprache ändern</string>
     <string name="format_sheet_filename_template">Dateinamen-Vorlage</string>
+    <string name="format_sheet_extra_args">Zusätzliche Argumente</string>
     <string name="format_sheet_change_field">Ändern</string>
     <string name="format_sheet_save_dir">Ordner</string>
     <string name="format_sheet_save_location">Speicherort</string>
@@ -719,7 +720,7 @@
     <string name="advanced_no_check_certificates">Zertifikatsprüfung überspringen</string>
     <string name="advanced_no_check_certificates_summary">Nur für Seiten, denen dieses Gerät nicht vertraut. Verbindungen werden unsicherer.</string>
     <string name="advanced_extra_args">Zusätzliche Download-Argumente</string>
-    <string name="advanced_extra_args_hint">yt-dlp-Argumente für jeden Download. Optionen, die Hazel selbst setzt, entfallen.</string>
+    <string name="advanced_extra_args_hint">yt-dlp-Argumente für jeden Download. -o legt den Dateinamen und seine Ordner fest. Andere Optionen, die Hazel selbst setzt, entfallen.</string>
     <string name="advanced_reset">Erweiterte Einstellungen zurücksetzen</string>
     <string name="advanced_reset_title">Erweiterte Einstellungen zurücksetzen?</string>
     <string name="advanced_reset_body">Jede Option auf dieser Seite wird wieder aus oder leer.</string>

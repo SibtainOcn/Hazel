@@ -34,6 +34,7 @@ object MediaStoreHelper {
      * @param tempDir    The temp directory (e.g., StoragePaths.tempDownloads or a subfolder)
      * @param relativePath  MediaStore relative path (e.g., "Download/Hazel" or "Download/Hazel/PlaylistName")
      * @param isMusic    true for audio files (uses MediaStore.Audio), false for downloads
+     * @param keepFolders also publish subfolders of [tempDir]; off for the converter and backup
      * @return the final public directory where files were moved
      */
     fun moveToPublicStorage(
@@ -41,13 +42,25 @@ object MediaStoreHelper {
         tempDir: File,
         relativePath: String,
         isMusic: Boolean = false,
+        keepFolders: Boolean = false,
         onMoved: (Uri) -> Unit = {}
     ): File {
-        val files = tempDir.listFiles()?.filter { it.isFile } ?: return tempDir
+        if (tempDir.listFiles() == null) return tempDir
+        // With keepFolders, a file in tempDir/a/b is published under relativePath/a/b.
+        var skipped = false
+        val files = StagedFiles.list(
+            tempDir,
+            maxDepth = if (keepFolders) StagedFiles.MAX_DEPTH else 0,
+            onSkipped = { skipped = true; Log.w(TAG, "Not published, it is a link: ${it.name}") }
+        )
 
-        var leftBehind = false
-        for (file in files) {
-            val moved = movedUri(context, file, relativePath, isMusic)
+        // A skipped link stays in the work folder, so the run is not clean.
+        var leftBehind = skipped
+        for (staged in files) {
+            val file = staged.file
+            val sub = StagedFiles.publishSubPath(staged.subPath)
+            val target = if (sub.isEmpty()) relativePath else "$relativePath/$sub"
+            val moved = movedUri(context, file, target, isMusic)
             if (moved != null) {
                 onMoved(moved)
                 continue
@@ -250,17 +263,31 @@ object MediaStoreHelper {
         context: Context,
         tempDir: File,
         treeUri: Uri,
+        keepFolders: Boolean = false,
         onMoved: (Uri) -> Unit = {}
     ): Boolean {
-        val files = tempDir.listFiles()?.filter { it.isFile } ?: return true
+        if (tempDir.listFiles() == null) return true
+        var skipped = false
+        val files = StagedFiles.list(
+            tempDir,
+            maxDepth = if (keepFolders) StagedFiles.MAX_DEPTH else 0,
+            onSkipped = { skipped = true; Log.w(TAG, "Not published, it is a link: ${it.name}") }
+        )
         val resolver = context.contentResolver
         val parent = folderDocument(treeUri)
+        // Folders found or made in this run, by path below the picked folder.
+        val folders = HashMap<String, Uri>()
 
-        var allMoved = true
-        for (file in files) {
+        // A skipped link stays in the work folder: not every file was moved.
+        var allMoved = !skipped
+        for (staged in files) {
+            val file = staged.file
             try {
+                val folder = treeFolder(
+                    resolver, treeUri, parent, StagedFiles.publishSubPath(staged.subPath), folders
+                )
                 val target = DocumentsContract.createDocument(
-                    resolver, parent, getMimeType(file), file.name
+                    resolver, folder, getMimeType(file), file.name
                 ) ?: throw Exception("Provider refused to create ${file.name}")
 
                 resolver.openOutputStream(target)?.use { os ->
@@ -277,6 +304,61 @@ object MediaStoreHelper {
         }
         return allMoved
     }
+
+    /** The folder [subPath] (`a/b`) names inside [root]: reused if it exists, else made. Throws if the provider refuses. */
+    private fun treeFolder(
+        resolver: android.content.ContentResolver,
+        treeUri: Uri,
+        root: Uri,
+        subPath: String,
+        known: MutableMap<String, Uri>
+    ): Uri {
+        if (subPath.isEmpty()) return root
+        var current = root
+        var path = ""
+        for (name in subPath.split('/')) {
+            path = if (path.isEmpty()) name else "$path/$name"
+            current = known[path] ?: (
+                findTreeFolder(resolver, treeUri, current, name)
+                    ?: DocumentsContract.createDocument(
+                        resolver, current, DocumentsContract.Document.MIME_TYPE_DIR, name
+                    )
+                    ?: throw Exception("Provider refused to create folder $name")
+                ).also { known[path] = it }
+        }
+        return current
+    }
+
+    /** The folder called [name] in [parent], or null. A case-only match counts, as FAT/exFAT cards don't tell `Foo` from `foo`. */
+    private fun findTreeFolder(
+        resolver: android.content.ContentResolver,
+        treeUri: Uri,
+        parent: Uri,
+        name: String
+    ): Uri? = runCatching {
+        val children = DocumentsContract.buildChildDocumentsUriUsingTree(
+            treeUri, DocumentsContract.getDocumentId(parent)
+        )
+        val columns = arrayOf(
+            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+            DocumentsContract.Document.COLUMN_MIME_TYPE
+        )
+        var sameIgnoringCase: String? = null
+        resolver.query(children, columns, null, null, null)?.use { cursor ->
+            while (cursor.moveToNext()) {
+                if (cursor.getString(2) != DocumentsContract.Document.MIME_TYPE_DIR) continue
+                val display = cursor.getString(1) ?: continue
+                if (display == name) {
+                    return@runCatching DocumentsContract.buildDocumentUriUsingTree(treeUri, cursor.getString(0))
+                }
+                if (sameIgnoringCase == null && display.equals(name, ignoreCase = true)) {
+                    sameIgnoringCase = cursor.getString(0)
+                }
+            }
+        }
+        sameIgnoringCase?.let { DocumentsContract.buildDocumentUriUsingTree(treeUri, it) }
+    }.onFailure { Log.w(TAG, "Could not list folders to find $name: ${it.message}") }.getOrNull()
 
     /**
      * Human-readable name for a picked tree, e.g. "Movies/Clips" on primary storage.
