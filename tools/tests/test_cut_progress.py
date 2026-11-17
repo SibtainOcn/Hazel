@@ -280,7 +280,8 @@ def test_source_wiring():
     check_true("the size is still 0 when the format has none", "if (format.fileSizeBytes <= 0L) return 0L" in total)
 
     # the opening notification and the callback agree on an unmeasured cut
-    check_true("a trimmed or audio run is live", "liveRun = cutRun || !plan.format.hasVideo" in vm)
+    check_true("only a cut made while downloading is live: audio and video keep their percentage",
+               "liveRun = cutRun\n" in vm and "liveRun = cutRun ||" not in vm)
     check_true("a cut drops the part file a pause left, as ffmpeg starts over",
                "if (cutRun) purgeFragments()" in vm
                and vm.index("liveRun = cutRun") < vm.index("if (cutRun) purgeFragments()"))
