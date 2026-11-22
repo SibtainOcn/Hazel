@@ -290,6 +290,8 @@
     <string name="cleanup_category_other_cache_description">थंबनेल और लिंक देखते समय कैश हुआ बाकी सब कुछ।</string>
     <string name="cleanup_category_link_reads_label">सहेजी गई लिंक जानकारी</string>
     <string name="cleanup_category_link_reads_description">पिछले 50 लिंक के फ़ॉर्मेट, ताकि दोबारा तुरंत खुलें। 6 घंटे तक, इनकॉग्निटो में कभी नहीं।</string>
+    <string name="cleanup_category_history_thumbs_label">डाउनलोड थंबनेल</string>
+    <string name="cleanup_category_history_thumbs_description">डाउनलोड सूची के लिए रखी गई थंबनेल की प्रतियाँ। हटाने पर वे लिंक या सहेजी गई फ़ाइल से दोबारा बन जाती हैं।</string>
     <string name="cleanup_confirm_category_title">ये फ़ाइलें मिटाएँ?</string>
     <string name="cleanup_confirm_category_safe">%1$s खाली हो जाएगा। आपकी सहेजी हुई किसी चीज़ पर असर नहीं पड़ेगा।</string>
     <string name="cleanup_confirm_category_unsafe">%1$s खाली हो जाएगा, और अगला डाउनलोड इन्हें फिर से खोलने में ज़्यादा समय लेगा।</string>

@@ -298,6 +298,8 @@
     <string name="cleanup_category_other_cache_description">Обложки и другие файлы, кэшированные при просмотре ссылок.</string>
     <string name="cleanup_category_link_reads_label">Сохранённые данные ссылок</string>
     <string name="cleanup_category_link_reads_description">Форматы последних 50 ссылок для мгновенного открытия. Хранятся 6 ч, не в инкогнито.</string>
+    <string name="cleanup_category_history_thumbs_label">Обложки загрузок</string>
+    <string name="cleanup_category_history_thumbs_description">Копии обложек для списка загрузок. После очистки они пересоздаются из ссылки или сохранённого файла при показе строк.</string>
     <string name="cleanup_confirm_category_title">Очистить эти файлы?</string>
     <string name="cleanup_confirm_category_safe">Будет освобождено %1$s. Сохранённые файлы не будут затронуты.</string>
     <string name="cleanup_confirm_category_unsafe">Будет освобождено %1$s; следующая загрузка займёт больше времени из-за повторной распаковки.</string>

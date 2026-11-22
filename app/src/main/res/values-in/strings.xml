@@ -286,6 +286,8 @@
     <string name="cleanup_category_other_cache_description">Gambar mini dan file lain yang di-cache saat menjelajahi tautan.</string>
     <string name="cleanup_category_link_reads_label">Bacaan tautan tersimpan</string>
     <string name="cleanup_category_link_reads_description">Format 50 tautan terakhir agar langsung terbuka lagi. Disimpan 6 jam, tidak di mode penyamaran.</string>
+    <string name="cleanup_category_history_thumbs_label">Gambar mini unduhan</string>
+    <string name="cleanup_category_history_thumbs_description">Salinan gambar mini untuk daftar unduhan. Jika dihapus, akan dibuat ulang dari tautan atau file tersimpan saat baris ditampilkan.</string>
     <string name="cleanup_confirm_category_title">Hapus file-file ini?</string>
     <string name="cleanup_confirm_category_safe">%1$s ruang akan dikosongkan. File yang telah disimpan tidak akan terpengaruh.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s ruang akan dikosongkan, dan unduhan berikutnya akan membutuhkan waktu lebih lama karena komponen harus diekstrak ulang.</string>

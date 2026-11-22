@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
 
 ### Fixed
+- Downloads: older items no longer lose their thumbnail when the source link expires while the file is still saved. A copy is kept, and the file's own thumbnail is used when there is none.
 - A trimmed download's history entry shows the length of the part that was kept, not of the whole video.
 - Trimmed downloads no longer sit at 0%: the card and the notification show a line that keeps moving, with the size written so far beside it.
 - A trimmed download no longer shows a Merge stage, which yt-dlp never runs for one.
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Format sheet: rows no longer draw over each other when switching between quality stops, and the list starts from the top on each switch.
 
 ### Changed
+- Storage cleanup lists the saved download thumbnails as "Downloads artwork", so they can be cleared.
 - The bottom bar's selected-tab shape is easier to see.
 - Format sheet: the quality rail is one connected group with round outer ends and tight inner corners; the chosen stop fills with the accent and lifts out of the group on a spring.
 - Format sheet: the panes keep one height while a link is read, when the formats arrive and between stops, and the rail and list scroll on their own.
