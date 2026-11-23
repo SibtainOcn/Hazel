@@ -36,9 +36,8 @@ import kotlinx.coroutines.withContext
  *
  * The same sheet a link is downloaded from, on the same terms as a link adjusted inside a
  * set: its current choice is selected, and the action hands the choice back rather than
- * starting a second download. Nothing is read again: the sheet shows the link's last read
- * where the cache still holds it, and otherwise what the queue wrote down, which is the
- * choice itself.
+ * starting a second download. The sheet shows the link's last read where the cache still
+ * holds its formats, and reads them again otherwise, so the whole list is offered.
  *
  * Its settings are its own while the sheet is open, so changing a field here changes this
  * link and not the defaults every other download starts from.
@@ -53,12 +52,20 @@ fun QueuedItemSheet(
     val scope = rememberCoroutineScope()
     val record = remember(item) { item.toPlan() }
 
-    // The cache keeps its reads on disk as well, so it is asked off the main thread. Until it
-    // answers, the sheet stands on the record, which already holds the choice.
+    // The record holds the choice alone, so the sheet stands on it only until the link's whole
+    // list is in: from the cache where its last read has formats, otherwise read again.
+    var reading by remember(item.url) { mutableStateOf(true) }
     val cached by produceState(initialValue = record.info, item.url) {
-        value = withContext(Dispatchers.IO) {
+        val held = withContext(Dispatchers.IO) {
             runCatching { InfoCache.metadataFor(item.url) }.getOrNull()
-        } ?: record.info
+        }?.takeIf { it.hasResolvedFormats }
+        value = held ?: downloadViewModel.formatsFor(item.url) ?: record.info
+        reading = false
+    }
+    // The queued choice as the list names it, so its row is the one shown picked.
+    val initialFormat = remember(cached, record) {
+        (cached.videoFormats + cached.audioFormats).firstOrNull { it.formatId == record.format.formatId }
+            ?: record.format
     }
 
     var options by remember(item) { mutableStateOf(item.options) }
@@ -76,7 +83,8 @@ fun QueuedItemSheet(
         options = options,
         onOptionsChange = { options = it },
         saveDirs = saveDirs,
-        initialFormat = record.format,
+        initialFormat = initialFormat,
+        isLoadingFormats = reading,
         initialAudioLanguage = item.audioLanguage,
         confirmAsApply = true,
         onOpenSaveDir = { isVideo -> MediaOpener.openLocation(context, saveDirs.of(isVideo).uri, isVideo) },

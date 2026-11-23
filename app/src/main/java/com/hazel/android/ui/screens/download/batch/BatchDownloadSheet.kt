@@ -523,7 +523,7 @@ fun BatchDownloadSheet(
                     BatchDownloadCard(
                         info = info,
                         formatLabel = format?.shortLabel.orEmpty(),
-                        sizeLabel = format?.sizeLabel.orEmpty(),
+                        sizeLabel = format?.sizeLabelWith(info.mergeAudioFor(state.languageOf(info))).orEmpty(),
                         isVideo = state.isVideo(info),
                         isAdjusted = state.isAdjusted(info),
                         selectionMode = state.selectionMode,

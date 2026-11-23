@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The player's quality change takes effect again.
 
 ### Fixed
+- Video sizes in the download sheet, format list and queue now include the audio track, matching the download card.
+- The download card counts the picked audio language's track, not the default one.
+- A queued, paused or running link's sheet lists every quality again, not only the one picked.
+- The picked row in the format list is easy to see on every accent, and its badge turns into a pentagon.
+- Multi-link sheet: a quality picked for a link while it is still being read is kept (#157).
 - Trimmed downloads show a real percentage and time left instead of sitting at 0%.
 - A trimmed download's history entry shows the kept length, not the whole video's.
 - A trimmed download no longer shows a Merge stage.

@@ -540,7 +540,7 @@ fun FormatSheet(
                 icon = if (videoTab) Icons.Outlined.HighQuality else Icons.Outlined.GraphicEq,
                 title = if (videoTab) stringResource(R.string.format_sheet_video_quality)
                 else stringResource(R.string.format_sheet_audio_quality),
-                summary = current?.let { qualitySummary(it, languageName) } ?: noStream,
+                summary = current?.let { qualitySummary(it, languageName, info.mergeAudioFor(audioLanguage)) } ?: noStream,
                 expanded = qualityOpen,
                 onToggle = { toggle(SECTION_QUALITY) }
             ) {
@@ -568,9 +568,8 @@ fun FormatSheet(
                         showChevron = true,
                         // A video-only stream is muxed with an audio track, so the track
                         // that will be used is named alongside it.
-                        mergeAudioId = info.mergeAudioFor(audioLanguage)
-                            ?.formatId
-                            ?.takeIf { videoTab && current.hasVideo && !current.hasAudio },
+                        mergeAudio = info.mergeAudioFor(audioLanguage)?.takeIf { videoTab },
+                        showMergeId = true,
                         pendingBadges = formatsPending,
                         popBadges = waitedForFormats
                     )
@@ -759,6 +758,7 @@ fun FormatSheet(
             canChooseSource = remember(info.url) { NewPipeEngine.handlesStream(info.url) },
             preferredHeight = options.videoQuality,
             readError = formatsError,
+            mergeAudio = info.mergeAudioFor(audioLanguage),
             onConfirm = { format ->
                 if (format.hasVideo) {
                     pickedVideo = format
@@ -920,8 +920,8 @@ fun FormatSheet(
  * The quality section's line while it is closed: the step, the codec, the size, and the
  * soundtrack where the source has more than one.
  */
-private fun qualitySummary(format: MediaFormat, language: String?): String =
-    listOf(format.shortLabel.uppercase(), format.codecLabel, format.sizeLabel, language.orEmpty())
+private fun qualitySummary(format: MediaFormat, language: String?, mergeAudio: MediaFormat?): String =
+    listOf(format.shortLabel.uppercase(), format.codecLabel, format.sizeLabelWith(mergeAudio), language.orEmpty())
         .filter { it.isNotBlank() }
         .joinToString(" · ")
 
