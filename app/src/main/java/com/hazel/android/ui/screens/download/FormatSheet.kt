@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.data.SettingsRepository
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
 import androidx.graphics.shapes.RoundedPolygon
@@ -338,6 +340,7 @@ fun FormatSheet(
 
     // One step up from the section, so a field reads as a field inside it.
     val fieldColor = sheetButtonColor
+    val appContext = LocalContext.current.applicationContext
 
     // Editing the title or author opens the keyboard over the sheet rather than lifting it,
     // unless the keyboard would cover the field; then the sheet rises by that much only.
@@ -908,7 +911,7 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
-        SheetDialog.SAVE_DIR -> SaveDirDialog(
+        SheetDialog.SAVE_DIR -> SaveLocationScreen(
             isVideo = videoTab,
             saveDir = saveDirs.of(videoTab),
             label = saveDirs.labelOf(videoTab),
@@ -920,6 +923,7 @@ fun FormatSheet(
                 openDialog = SheetDialog.NONE
                 onPickSaveDir(videoTab, card)
             },
+            onUseRecent = { SettingsRepository.setSaveDir(appContext, videoTab, it.uri, it.label) },
             onReset = {
                 openDialog = SheetDialog.NONE
                 onResetSaveDir(videoTab)

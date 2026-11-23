@@ -199,6 +199,7 @@ object BackupRepository {
             it[TREE_URI_KEY] = treeUri
             it[TREE_LABEL_KEY] = label
         }
+        SettingsRepository.addRecentFolder(context, treeUri, label)
     }
 
     // Backup.

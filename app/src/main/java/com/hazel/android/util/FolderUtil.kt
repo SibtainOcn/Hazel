@@ -106,6 +106,26 @@ object FolderUtil {
         Toast.makeText(context, MediaStoreHelper.describeTree(treeUri), Toast.LENGTH_LONG).show()
     }
 
+    /** Opens the top of a removable volume, such as an SD card, by its UUID. */
+    fun openVolume(context: Context, uuid: String) {
+        val documentUri = runCatching {
+            DocumentsContract.buildDocumentUri(EXTERNAL_STORAGE_PROVIDER, "$uuid:")
+        }.getOrNull()
+        if (chooseManager(context, documentUri, null)) return
+        if (documentUri != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val opened = runCatching {
+                context.startActivity(
+                    Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                        putExtra(DocumentsContract.EXTRA_INITIAL_URI, documentUri)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                )
+            }.isSuccess
+            if (opened) return
+        }
+        Toast.makeText(context, "/storage/$uuid", Toast.LENGTH_LONG).show()
+    }
+
     /** The folder types file managers register for, most specific first. */
     private val FOLDER_TYPES = listOf("vnd.android.document/directory", "resource/folder", "inode/directory")
 

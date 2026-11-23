@@ -66,7 +66,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.hazel.android.data.SaveDir
-import com.hazel.android.ui.screens.download.SaveDirDialog
+import com.hazel.android.ui.screens.download.SaveLocationScreen
 
 private enum class BackupDialog { BACKUP, SCHEDULE, KEEP, INCLUDE, FOLDER }
 
@@ -270,13 +270,14 @@ fun BackupScreen(onBack: () -> Unit) {
             },
             onDismiss = { dialog = null }
         )
-        BackupDialog.FOLDER -> SaveDirDialog(
+        BackupDialog.FOLDER -> SaveLocationScreen(
             isVideo = false,
             saveDir = SaveDir(settings.folderUri, settings.folderLabel),
             label = settings.folderLabel,
             title = stringResource(R.string.backup_folder),
             body = stringResource(R.string.backup_folder_body),
             internalPath = BackupRepository.DEFAULT_FOLDER_LABEL,
+            internalFolder = { BackupRepository.defaultFolder() },
             cardFolder = BACKUP_CARD_FOLDER,
             onOpen = { openFolder(context, settings.folderUri) },
             onPick = { card ->
@@ -292,6 +293,7 @@ fun BackupScreen(onBack: () -> Unit) {
                 dialog = null
                 scope.launch { BackupRepository.setFolder(context, "", "") }
             },
+            onUseRecent = { BackupRepository.setFolder(context, it.uri, it.label) },
             onDismiss = { dialog = null }
         )
         null -> Unit

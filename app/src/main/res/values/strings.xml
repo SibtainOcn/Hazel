@@ -171,7 +171,6 @@
     <string name="format_sheet_save_dir">Save dir</string>
     <string name="format_sheet_save_location">Save location</string>
     <string name="format_sheet_save_location_title">Save location</string>
-    <string name="format_sheet_save_location_body">Open this folder in your file manager, or pick a different one to save downloads into.</string>
     <string name="format_sheet_open_folder">Open folder</string>
     <string name="format_sheet_reset">Reset</string>
 
@@ -973,6 +972,12 @@
     <string name="save_location_other">Other folder</string>
     <string name="save_location_other_hint">Any folder on this device or a card</string>
     <string name="save_location_close">Close</string>
+    <string name="save_location_hold_hint">Hold a location to open it in your file manager</string>
+    <string name="save_location_recent">Recent locations</string>
+    <string name="save_location_recent_clear">Clear</string>
+    <string name="save_location_tag_internal">Internal</string>
+    <string name="save_location_tag_card">SD card</string>
+    <string name="save_location_recent_missing">That folder is gone or Hazel can no longer write to it, so it was taken off the list.</string>
     <string name="save_location_error_title">Couldn\'t use that folder</string>
     <string name="save_location_error_access">Android didn\'t let Hazel keep access to that folder. Try again, or pick a different one.</string>
     <string name="save_location_error_no_picker">No app on this device can pick folders.</string>

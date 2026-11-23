@@ -160,7 +160,6 @@
     <string name="format_sheet_save_dir">फ़ोल्डर</string>
     <string name="format_sheet_save_location">सहेजने की जगह</string>
     <string name="format_sheet_save_location_title">सहेजने की जगह</string>
-    <string name="format_sheet_save_location_body">इस फ़ोल्डर को अपने फ़ाइल मैनेजर में खोलें, या डाउनलोड सहेजने के लिए दूसरा चुनें।</string>
     <string name="format_sheet_open_folder">फ़ोल्डर खोलें</string>
     <string name="format_sheet_reset">रीसेट करें</string>
 
@@ -889,6 +888,12 @@
     <string name="save_location_other">दूसरा फ़ोल्डर</string>
     <string name="save_location_other_hint">इस डिवाइस या कार्ड का कोई भी फ़ोल्डर</string>
     <string name="save_location_close">बंद करें</string>
+    <string name="save_location_hold_hint">फ़ाइल मैनेजर में खोलने के लिए किसी लोकेशन को दबाए रखें</string>
+    <string name="save_location_recent">हाल की लोकेशन</string>
+    <string name="save_location_recent_clear">साफ़ करें</string>
+    <string name="save_location_tag_internal">इंटरनल</string>
+    <string name="save_location_tag_card">SD कार्ड</string>
+    <string name="save_location_recent_missing">वह फ़ोल्डर अब नहीं है या Hazel उसमें लिख नहीं सकता, इसलिए उसे सूची से हटा दिया गया।</string>
     <string name="save_location_error_title">वह फ़ोल्डर इस्तेमाल नहीं हो सका</string>
     <string name="save_location_error_access">Android ने Hazel को उस फ़ोल्डर की पहुँच बनाए रखने नहीं दी। फिर कोशिश करें या कोई दूसरा चुनें।</string>
     <string name="save_location_error_no_picker">इस डिवाइस पर कोई ऐप फ़ोल्डर नहीं चुन सकता।</string>

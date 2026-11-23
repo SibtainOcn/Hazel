@@ -164,7 +164,6 @@
     <string name="format_sheet_save_dir">Pasta</string>
     <string name="format_sheet_save_location">Onde salvar</string>
     <string name="format_sheet_save_location_title">Onde salvar</string>
-    <string name="format_sheet_save_location_body">Abra esta pasta no seu gerenciador de arquivos, ou escolha outra para salvar os downloads.</string>
     <string name="format_sheet_open_folder">Abrir a pasta</string>
     <string name="format_sheet_reset">Redefinir</string>
 
@@ -904,6 +903,12 @@
     <string name="save_location_other">Outra pasta</string>
     <string name="save_location_other_hint">Qualquer pasta deste aparelho ou de um cartão</string>
     <string name="save_location_close">Fechar</string>
+    <string name="save_location_hold_hint">Toque e segure um local para abri-lo no gerenciador de arquivos</string>
+    <string name="save_location_recent">Locais recentes</string>
+    <string name="save_location_recent_clear">Limpar</string>
+    <string name="save_location_tag_internal">Interno</string>
+    <string name="save_location_tag_card">Cartão SD</string>
+    <string name="save_location_recent_missing">Essa pasta não existe mais ou o Hazel não pode mais gravar nela, então ela foi removida da lista.</string>
     <string name="save_location_error_title">Não foi possível usar essa pasta</string>
     <string name="save_location_error_access">O Android não deixou o Hazel manter o acesso a essa pasta. Tente de novo ou escolha outra.</string>
     <string name="save_location_error_no_picker">Nenhum app deste aparelho consegue escolher pastas.</string>

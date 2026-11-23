@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.data.SettingsRepository
+import androidx.compose.ui.platform.LocalContext
 import com.hazel.android.ui.components.MenuTone
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Delete
@@ -123,7 +125,7 @@ import com.hazel.android.download.languageLabel
 import com.hazel.android.ui.screens.download.AudioLanguageSheet
 import com.hazel.android.ui.screens.download.ChaptersDialog
 import com.hazel.android.ui.screens.download.CookiesDialog
-import com.hazel.android.ui.screens.download.SaveDirDialog
+import com.hazel.android.ui.screens.download.SaveLocationScreen
 import com.hazel.android.ui.screens.download.rememberUseCookies
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.ui.screens.download.FEEDBACK_MS
@@ -897,6 +899,7 @@ fun BatchDownloadSheet(
         )
     }
 
+    val appContext = LocalContext.current.applicationContext
     when (openSheet) {
         BatchSheet.NONE -> Unit
 
@@ -1017,7 +1020,7 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
-        BatchSheet.SAVE_DIR -> SaveDirDialog(
+        BatchSheet.SAVE_DIR -> SaveLocationScreen(
             isVideo = state.videoTab,
             saveDir = saveDirs.of(state.videoTab),
             label = saveDirs.labelOf(state.videoTab),
@@ -1033,6 +1036,7 @@ fun BatchDownloadSheet(
                 openSheet = BatchSheet.NONE
                 onResetSaveDir(state.videoTab)
             },
+            onUseRecent = { SettingsRepository.setSaveDir(appContext, state.videoTab, it.uri, it.label) },
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 

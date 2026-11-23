@@ -164,7 +164,6 @@
     <string name="format_sheet_save_dir">Dossier</string>
     <string name="format_sheet_save_location">Emplacement</string>
     <string name="format_sheet_save_location_title">Emplacement</string>
-    <string name="format_sheet_save_location_body">Ouvrez ce dossier dans votre gestionnaire de fichiers, ou choisissez-en un autre où enregistrer les téléchargements.</string>
     <string name="format_sheet_open_folder">Ouvrir le dossier</string>
     <string name="format_sheet_reset">Réinitialiser</string>
 
@@ -904,6 +903,12 @@
     <string name="save_location_other">Autre dossier</string>
     <string name="save_location_other_hint">N\'importe quel dossier de l\'appareil ou d\'une carte</string>
     <string name="save_location_close">Fermer</string>
+    <string name="save_location_hold_hint">Maintenez un emplacement pour l\'ouvrir dans votre gestionnaire de fichiers</string>
+    <string name="save_location_recent">Emplacements récents</string>
+    <string name="save_location_recent_clear">Effacer</string>
+    <string name="save_location_tag_internal">Interne</string>
+    <string name="save_location_tag_card">Carte SD</string>
+    <string name="save_location_recent_missing">Ce dossier n\'existe plus ou Hazel ne peut plus y écrire, il a donc été retiré de la liste.</string>
     <string name="save_location_error_title">Impossible d\'utiliser ce dossier</string>
     <string name="save_location_error_access">Android n\'a pas laissé Hazel garder l\'accès à ce dossier. Réessayez ou choisissez-en un autre.</string>
     <string name="save_location_error_no_picker">Aucune app de cet appareil ne peut choisir de dossier.</string>

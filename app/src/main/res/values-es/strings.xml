@@ -164,7 +164,6 @@
     <string name="format_sheet_save_dir">Carpeta</string>
     <string name="format_sheet_save_location">Dónde guardar</string>
     <string name="format_sheet_save_location_title">Dónde guardar</string>
-    <string name="format_sheet_save_location_body">Abre esta carpeta en tu gestor de archivos, o elige otra donde guardar las descargas.</string>
     <string name="format_sheet_open_folder">Abrir la carpeta</string>
     <string name="format_sheet_reset">Restablecer</string>
 
@@ -904,6 +903,12 @@
     <string name="save_location_other">Otra carpeta</string>
     <string name="save_location_other_hint">Cualquier carpeta de este dispositivo o de una tarjeta</string>
     <string name="save_location_close">Cerrar</string>
+    <string name="save_location_hold_hint">Mantén pulsada una ubicación para abrirla en tu gestor de archivos</string>
+    <string name="save_location_recent">Ubicaciones recientes</string>
+    <string name="save_location_recent_clear">Borrar</string>
+    <string name="save_location_tag_internal">Interno</string>
+    <string name="save_location_tag_card">Tarjeta SD</string>
+    <string name="save_location_recent_missing">Esa carpeta ya no existe o Hazel ya no puede escribir en ella, así que se quitó de la lista.</string>
     <string name="save_location_error_title">No se pudo usar esa carpeta</string>
     <string name="save_location_error_access">Android no permitió que Hazel conservara el acceso a esa carpeta. Inténtalo de nuevo o elige otra.</string>
     <string name="save_location_error_no_picker">Ninguna app de este dispositivo puede elegir carpetas.</string>

@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.sp
 import com.hazel.android.R
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.data.SettingsRepository
-import com.hazel.android.ui.screens.download.SaveDirDialog
+import com.hazel.android.ui.screens.download.SaveLocationScreen
 import com.hazel.android.ui.screens.download.rememberSaveDirPicker
 import com.hazel.android.util.MediaOpener
 import kotlinx.coroutines.launch
@@ -201,7 +201,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
     }
 
     dirDialogFor?.let { isVideo ->
-        SaveDirDialog(
+        SaveLocationScreen(
             isVideo = isVideo,
             saveDir = saveDirs.of(isVideo),
             label = saveDirs.labelOf(isVideo),
@@ -217,6 +217,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                 dirDialogFor = null
                 scope.launch { SettingsRepository.resetSaveDir(context, isVideo) }
             },
+            onUseRecent = { SettingsRepository.setSaveDir(context, isVideo, it.uri, it.label) },
             onDismiss = { dirDialogFor = null }
         )
     }

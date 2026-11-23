@@ -160,7 +160,6 @@
     <string name="format_sheet_save_dir">Ordner</string>
     <string name="format_sheet_save_location">Speicherort</string>
     <string name="format_sheet_save_location_title">Speicherort</string>
-    <string name="format_sheet_save_location_body">Öffne diesen Ordner in deinem Dateimanager, oder wähle einen anderen für deine Downloads.</string>
     <string name="format_sheet_open_folder">Ordner öffnen</string>
     <string name="format_sheet_reset">Zurücksetzen</string>
 
@@ -889,6 +888,12 @@
     <string name="save_location_other">Anderer Ordner</string>
     <string name="save_location_other_hint">Beliebiger Ordner auf diesem Gerät oder einer Karte</string>
     <string name="save_location_close">Schließen</string>
+    <string name="save_location_hold_hint">Halte einen Ort gedrückt, um ihn im Dateimanager zu öffnen</string>
+    <string name="save_location_recent">Zuletzt verwendete Orte</string>
+    <string name="save_location_recent_clear">Leeren</string>
+    <string name="save_location_tag_internal">Intern</string>
+    <string name="save_location_tag_card">SD-Karte</string>
+    <string name="save_location_recent_missing">Dieser Ordner ist weg oder Hazel kann nicht mehr hineinschreiben, daher wurde er aus der Liste entfernt.</string>
     <string name="save_location_error_title">Ordner nicht verwendbar</string>
     <string name="save_location_error_access">Android hat Hazel keinen dauerhaften Zugriff auf diesen Ordner gegeben. Versuche es erneut oder wähle einen anderen.</string>
     <string name="save_location_error_no_picker">Keine App auf diesem Gerät kann Ordner auswählen.</string>

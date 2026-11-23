@@ -156,7 +156,6 @@
     <string name="format_sheet_save_dir">保存フォルダ</string>
     <string name="format_sheet_save_location">保存場所</string>
     <string name="format_sheet_save_location_title">保存場所</string>
-    <string name="format_sheet_save_location_body">ファイルマネージャーでこのフォルダを開くか、ダウンロードを保存する別のフォルダを選択してください。</string>
     <string name="format_sheet_open_folder">フォルダを開く</string>
     <string name="format_sheet_reset">リセット</string>
 
@@ -874,6 +873,12 @@
     <string name="save_location_other">その他のフォルダ</string>
     <string name="save_location_other_hint">この端末またはカード上の任意のフォルダ</string>
     <string name="save_location_close">閉じる</string>
+    <string name="save_location_hold_hint">場所を長押しするとファイルマネージャーで開きます</string>
+    <string name="save_location_recent">最近の保存先</string>
+    <string name="save_location_recent_clear">クリア</string>
+    <string name="save_location_tag_internal">内部</string>
+    <string name="save_location_tag_card">SDカード</string>
+    <string name="save_location_recent_missing">そのフォルダは見つからないか、Hazel が書き込めなくなったため、一覧から削除しました。</string>
     <string name="save_location_error_title">そのフォルダを使用できません</string>
     <string name="save_location_error_access">Android により、Hazel はそのフォルダへのアクセスを保持できませんでした。もう一度試すか、別のフォルダを選んでください。</string>
     <string name="save_location_error_no_picker">この端末にはフォルダを選択できるアプリがありません。</string>
