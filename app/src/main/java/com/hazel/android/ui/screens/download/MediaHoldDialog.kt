@@ -209,6 +209,9 @@ private fun HoldActions(
                         }
                     }
                 } else {
+                    // A lone second action pairs with the main one at its full size, so the two
+                    // read as an even pair rather than a button and a footnote.
+                    val pair = tiles.size == 1
                     Column(verticalArrangement = Arrangement.spacedBy(GROUP_GAP)) {
                         tiles.forEachIndexed { index, item ->
                             val bottom = if (index == tiles.lastIndex) OUTER else INNER
@@ -218,7 +221,8 @@ private fun HoldActions(
                                 color = tone,
                                 contentColor = scheme.onSurface,
                                 wide = true,
-                                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
+                                large = pair,
+                                modifier = Modifier.fillMaxWidth().heightIn(min = if (pair) 64.dp else 52.dp)
                             )
                         }
                     }
@@ -240,7 +244,8 @@ private fun HoldButton(
     contentColor: Color,
     wide: Boolean,
     modifier: Modifier = Modifier,
-    main: Boolean = false
+    main: Boolean = false,
+    large: Boolean = main
 ) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
@@ -267,12 +272,12 @@ private fun HoldButton(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(horizontal = 16.dp)
             ) {
-                ShapedIcon(item, if (main) 38.dp else 32.dp, main, pressed)
+                ShapedIcon(item, if (large) 38.dp else 32.dp, main, pressed)
                 Spacer(Modifier.width(12.dp))
                 Text(
                     label,
-                    style = if (main) MaterialTheme.typography.titleMedium else MaterialTheme.typography.labelLarge,
-                    fontWeight = if (main) FontWeight.Bold else FontWeight.Medium,
+                    style = if (large) MaterialTheme.typography.titleMedium else MaterialTheme.typography.labelLarge,
+                    fontWeight = if (large) FontWeight.Bold else FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
