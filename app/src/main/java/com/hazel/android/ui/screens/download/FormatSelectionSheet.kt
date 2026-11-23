@@ -121,6 +121,8 @@ import com.hazel.android.ui.components.GlintHost
 import com.hazel.android.ui.components.ShimmerLabel
 import com.hazel.android.download.qualityRung
 import com.hazel.android.ui.theme.SizeBadgeContainer
+import com.hazel.android.ui.theme.IdBadgeContainer
+import com.hazel.android.ui.theme.IdBadgeContent
 import com.hazel.android.ui.theme.SizeBadgeContent
 import com.hazel.android.ui.components.keepFlingInSheet
 
@@ -1096,18 +1098,6 @@ fun FormatRow(
                     color = if (selected) scheme.primary else scheme.onSurface,
                     modifier = Modifier.weight(1f, fill = false)
                 )
-                Spacer(modifier = Modifier.width(if (compact) 6.dp else 8.dp))
-                // Bounded, so a long DASH id ("dash-1234…") ellipsizes in its own corner
-                // rather than squeezing the headline down to nothing.
-                Text(
-                    "id: ${shortId(format.formatId)}",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontSize = if (compact) 10.sp else MaterialTheme.typography.labelMedium.fontSize,
-                    color = scheme.onSurface.copy(alpha = if (selected) 0.72f else 0.62f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.widthIn(max = if (compact) 64.dp else 96.dp)
-                )
             }
 
             // Badges are omitted entirely when the extractor did not report them,
@@ -1137,10 +1127,15 @@ fun FormatRow(
 
             // A ladder row while the formats are read holds the places the real badges will
             // take, rather than saying it will be matched later.
+            // The format's own id closes the row of tags, so the headline keeps the width.
+            val idTag = "id: ${shortId(format.formatId)}"
             if (pendingBadges && (generic || !hasBadges)) {
                 Spacer(modifier = Modifier.height(6.dp))
-                FillingBadges()
-            } else if (hasBadges) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    FillingBadges()
+                    MetaBadge(idTag, tone = BadgeTone.ID)
+                }
+            } else {
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier
@@ -1167,6 +1162,7 @@ fun FormatRow(
                     if (codec.isNotBlank()) MetaBadge(codec)
                     if (size.isNotBlank()) MetaBadge(size, tone = BadgeTone.SIZE)
                     if (bitrate.isNotBlank()) MetaBadge(bitrate, tone = BadgeTone.ACCENT)
+                    MetaBadge(idTag, tone = BadgeTone.ID)
                 }
             }
         }
@@ -1383,7 +1379,10 @@ enum class BadgeTone {
     ACCENT,
 
     /** The audio track that will be muxed in, which is the one thing here that is a choice. */
-    SOLID
+    SOLID,
+
+    /** The format's own id, in a colour of its own beside the facts about it. */
+    ID
 }
 
 /** Small pill under a format's headline. */
@@ -1396,12 +1395,14 @@ fun MetaBadge(
     val container = when (tone) {
         BadgeTone.SOLID -> MaterialTheme.colorScheme.primary
         BadgeTone.SIZE -> SizeBadgeContainer
+        BadgeTone.ID -> IdBadgeContainer
         BadgeTone.ACCENT -> MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
         BadgeTone.NEUTRAL -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f)
     }
     val content = when (tone) {
         BadgeTone.SOLID -> MaterialTheme.colorScheme.onPrimary
         BadgeTone.SIZE -> SizeBadgeContent
+        BadgeTone.ID -> IdBadgeContent
         else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
     }
 
