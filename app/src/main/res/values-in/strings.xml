@@ -730,6 +730,7 @@
     <string name="options_cut_precise_summary">Frame tepat, dengan encode ulang. Lebih lambat.</string>
     <string name="options_cut_local">Potong setelah unduh</string>
     <string name="options_cut_local_summary">Mengunduh seluruh file dengan kecepatan penuh, lalu memotongnya. Butuh ruang untuk seluruh file.</string>
+    <string name="options_cut_local_unavailable">Nonaktif saat SponsorBlock menghapus bagian, bab dipisah, atau siaran langsung diambil dari awal.</string>
     <string name="options_cut_invalid">Akhir harus setelah awal, dalam durasi</string>
     <string name="options_cut_apply">Potong</string>
     <string name="options_cut_clear">Hapus</string>

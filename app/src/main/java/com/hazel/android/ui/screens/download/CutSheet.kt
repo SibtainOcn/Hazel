@@ -87,6 +87,7 @@ fun CutSheet(
     thumbnail: String?,
     durationSeconds: Int,
     current: OneOffOptions,
+    canTrimAfterDownload: Boolean = true,
     onApply: (start: Double, end: Double, precise: Boolean, trimAfter: Boolean) -> Unit,
     onClear: () -> Unit,
     onDismiss: () -> Unit
@@ -108,7 +109,7 @@ fun CutSheet(
         )
     }
     var precise by remember { mutableStateOf(current.preciseCuts) }
-    var trimAfter by remember { mutableStateOf(current.trimAfterDownload) }
+    var trimAfter by remember { mutableStateOf(current.trimAfterDownload && !current.preciseCuts) }
 
     // Media whose length was unknown until the player read it gets its end filled in then.
     LaunchedEffect(duration) {
@@ -254,17 +255,28 @@ fun CutSheet(
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
+            // One mode at a time: turning either on turns the other off.
             ToggleRow(
                 label = stringResource(R.string.options_cut_precise),
                 checked = precise,
-                onCheckedChange = { precise = it },
+                onCheckedChange = { on ->
+                    precise = on
+                    if (on) trimAfter = false
+                },
                 summary = stringResource(R.string.options_cut_precise_summary)
             )
             ToggleRow(
                 label = stringResource(R.string.options_cut_local),
-                checked = trimAfter,
-                onCheckedChange = { trimAfter = it },
-                summary = stringResource(R.string.options_cut_local_summary)
+                checked = trimAfter && canTrimAfterDownload,
+                onCheckedChange = { on ->
+                    trimAfter = on
+                    if (on) precise = false
+                },
+                enabled = canTrimAfterDownload,
+                summary = stringResource(
+                    if (canTrimAfterDownload) R.string.options_cut_local_summary
+                    else R.string.options_cut_local_unavailable
+                )
             )
             Spacer(modifier = Modifier.height(16.dp))
             // Clear at the start, Cancel and Apply at the end; they move under Clear, and Apply

@@ -823,6 +823,7 @@
     <string name="options_cut_precise_summary">Exact frames, by re-encoding. Slower.</string>
     <string name="options_cut_local">Trim after download</string>
     <string name="options_cut_local_summary">Downloads the whole file at full speed, then cuts it. Needs room for the whole file.</string>
+    <string name="options_cut_local_unavailable">Off while SponsorBlock removes parts, chapters are split or a live stream is taken from the start.</string>
     <string name="options_cut_invalid">The end must come after the start, within the length</string>
     <string name="options_cut_apply">Cut</string>
     <string name="options_cut_clear">Clear</string>

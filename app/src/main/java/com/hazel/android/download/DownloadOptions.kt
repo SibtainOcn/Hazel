@@ -79,9 +79,17 @@ data class DownloadOptions(
     val hasSection: Boolean
         get() = sectionStart >= 0.0 && sectionEnd > sectionStart
 
-    /** The whole file is downloaded, then cut by [LocalTrim]. Chapter splits keep yt-dlp's cut. */
+    /**
+     * Whether the whole file may be downloaded and cut afterwards. Not when SponsorBlock removes
+     * segments (the timeline shifts), chapters are split, or a live stream is taken from its start.
+     */
+    val canTrimAfterDownload: Boolean
+        get() = !splitByChapters && !liveFromStart &&
+            !(useSponsorBlock && sponsorBlockFilters.any { it.isNotBlank() })
+
+    /** The whole file is downloaded, then cut by [LocalTrim]; otherwise yt-dlp cuts while downloading. */
     val trimsAfterDownload: Boolean
-        get() = hasSection && trimAfterDownload && !splitByChapters
+        get() = hasSection && trimAfterDownload && !preciseCuts && canTrimAfterDownload
 
     val cutsWhileDownloading: Boolean
         get() = hasSection && !trimsAfterDownload
@@ -120,7 +128,7 @@ data class DownloadOptions(
         sectionStart = if (oneOff.hasSection) oneOff.sectionStart else -1.0,
         sectionEnd = if (oneOff.hasSection) oneOff.sectionEnd else -1.0,
         preciseCuts = oneOff.hasSection && oneOff.preciseCuts,
-        trimAfterDownload = oneOff.hasSection && oneOff.trimAfterDownload,
+        trimAfterDownload = oneOff.hasSection && oneOff.trimAfterDownload && !oneOff.preciseCuts,
         liveFromStart = oneOff.liveFromStart,
         waitForVideo = oneOff.waitForVideo
     )
@@ -148,7 +156,8 @@ data class OneOffOptions(
     val sectionStart: Double = -1.0,
     val sectionEnd: Double = -1.0,
     val preciseCuts: Boolean = false,
-    val trimAfterDownload: Boolean = false,
+    /** On by default; Precise cuts and this are never on together. */
+    val trimAfterDownload: Boolean = true,
     val liveFromStart: Boolean = false,
     val waitForVideo: Boolean = false
 ) {

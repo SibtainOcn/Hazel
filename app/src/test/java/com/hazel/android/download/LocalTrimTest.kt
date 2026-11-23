@@ -1,5 +1,6 @@
 package com.hazel.android.download
 
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -45,7 +46,7 @@ class LocalTrimTest {
         val streams = LocalTrim.parseStreams(
             "Stream #0:0: Video: h264\nStream #0:1: Video: mjpeg (attached pic)\nStream #0:2: Audio: aac\n"
         )
-        val cmd = LocalTrim.trimCommand("ffmpeg", "in.mp4", "out.mp4", streams, 7.0, 17.0, null)
+        val cmd = LocalTrim.trimCommand("ffmpeg", "in.mp4", "out.mp4", streams, 7.0, 17.0)
         assertEquals(
             listOf(
                 "ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-ss", "7.000", "-t", "10.000", "-i", "in.mp4",
@@ -57,13 +58,26 @@ class LocalTrimTest {
     }
 
     @Test
-    fun `a precise trim re-encodes video and audio and reads chapters from a second copy`() {
-        val streams = LocalTrim.parseStreams("Stream #0:0: Video: vp9\nStream #0:1: Audio: opus\n")
-        val cmd = LocalTrim.trimCommand(
-            "ffmpeg", "in.mkv", "out.mkv", streams, 7.0, 17.0, LocalTrim.Encoders("libx264", "aac")
+    fun `an mkv attachment is kept and nothing is re-encoded`() {
+        val streams = LocalTrim.parseStreams(
+            "Stream #0:0: Video: vp9\nStream #0:1: Audio: opus\nStream #0:2: Attachment: mjpeg\n"
         )
-        assertEquals(2, cmd.count { it == "-i" })
-        assertTrue(cmd.containsAll(listOf("-c:v:0", "libx264", "-c:a", "aac", "-map_chapters", "1")))
-        assertTrue("-disposition:v:0" !in cmd)
+        val cmd = LocalTrim.trimCommand("ffmpeg", "in.mkv", "out.mkv", streams, 7.0, 17.0)
+        assertTrue(cmd.containsAll(listOf("0:0", "0:1", "0:2")))
+        assertTrue(cmd.none { it.startsWith("-c:") || it.startsWith("-disposition") })
+    }
+
+    @Test
+    fun `the newest media file is the one trimmed, as the save picks it`() {
+        val dir = kotlin.io.path.createTempDirectory("trim").toFile()
+        try {
+            File(dir, "clip.webm").apply { writeBytes(ByteArray(500)); setLastModified(1_000_000L) }
+            File(dir, "clip.mp3").apply { writeBytes(ByteArray(100)); setLastModified(2_000_000L) }
+            File(dir, "clip.jpg").apply { writeBytes(ByteArray(900)); setLastModified(3_000_000L) }
+            File(dir, LocalTrim.DONE_MARKER).writeText("x")
+            assertEquals("clip.mp3", LocalTrim.mainMedia(dir)?.name)
+        } finally {
+            dir.deleteRecursively()
+        }
     }
 }

@@ -744,6 +744,7 @@
     <string name="options_cut_precise_summary">Bildgenau, durch Neukodierung. Langsamer.</string>
     <string name="options_cut_local">Nach dem Download kürzen</string>
     <string name="options_cut_local_summary">Lädt die ganze Datei mit voller Geschwindigkeit und schneidet danach. Braucht Platz für die ganze Datei.</string>
+    <string name="options_cut_local_unavailable">Aus, solange SponsorBlock Teile entfernt, Kapitel geteilt werden oder ein Livestream von Anfang an geladen wird.</string>
     <string name="options_cut_invalid">Das Ende muss nach dem Start liegen, innerhalb der Länge</string>
     <string name="options_cut_apply">Schneiden</string>
     <string name="options_cut_clear">Löschen</string>

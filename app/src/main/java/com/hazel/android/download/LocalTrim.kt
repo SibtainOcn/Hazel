@@ -8,8 +8,9 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
- * Trim after download: cuts the finished file in the work folder with the bundled ffmpeg,
- * replacing it in place. Sidecar subtitles are cut to match.
+ * Trim after download: cuts the finished file in the work folder with the bundled ffmpeg by
+ * stream copy, replacing it in place. Sidecar subtitles are cut to match. Precise cuts are
+ * left to yt-dlp, so this never re-encodes.
  */
 object LocalTrim {
 
@@ -18,12 +19,14 @@ object LocalTrim {
     private const val WATCH_MS = 15_000L
     private const val STALL_MS = 5 * 60_000L
     private const val TRIM_PREFIX = "hazel.trim."
+
+    /** Written once the file is cut, so a resumed run never cuts it twice. A dot file: the save purges it. */
+    internal const val DONE_MARKER = ".hazel.trimmed"
     private val TEXT_SUBTITLES = setOf("srt", "vtt")
     private val FORMAT_FRAGMENT = Regex("""\.f\d+[\w-]*\.\w+$""")
 
     @Volatile private var stopped = false
     @Volatile private var process: Process? = null
-    @Volatile private var encoders: Set<String>? = null
 
     /** Called as each download starts, so a stop during it is never lost. */
     fun arm() {
@@ -35,8 +38,12 @@ object LocalTrim {
         process?.destroy()
     }
 
-    fun trim(context: Context, dir: File, startSeconds: Double, endSeconds: Double, precise: Boolean): Result {
+    fun trim(context: Context, dir: File, startSeconds: Double, endSeconds: Double): Result {
         if (stopped) return Result(false, true)
+        val range = rangeKey(startSeconds, endSeconds)
+        val marker = File(dir, DONE_MARKER)
+        if (runCatching { marker.readText() == range }.getOrDefault(false)) return Result(true, false)
+
         val ffmpeg = File(context.applicationInfo.nativeLibraryDir, "libffmpeg.so")
         if (!ffmpeg.exists()) return Result(false, false, "ffmpeg is missing")
 
@@ -48,11 +55,12 @@ object LocalTrim {
         val streams = streamsOf(ffmpeg, env, source)
         if (streams.isEmpty()) return Result(false, false, "the downloaded file could not be read")
         val output = File(dir, TRIM_PREFIX + source.extension)
-        val command = trimCommand(
-            ffmpeg.absolutePath, source.absolutePath, output.absolutePath, streams, startSeconds, endSeconds,
-            if (precise) encodersFor(source.extension, ffmpeg, env) else null
+        val result = run(
+            context,
+            trimCommand(ffmpeg.absolutePath, source.absolutePath, output.absolutePath, streams, startSeconds, endSeconds),
+            env,
+            output
         )
-        val result = run(context, command, env, output)
         if (!result.ok || output.length() <= 0L) {
             output.delete()
             return if (result.ok) Result(false, false, "ffmpeg wrote nothing") else result
@@ -61,13 +69,16 @@ object LocalTrim {
             output.delete()
             return Result(false, false, "could not replace the downloaded file")
         }
-
+        runCatching { marker.writeText(range) }
         trimSidecarSubtitles(dir, startSeconds, endSeconds)
+        // The save takes the newest file as the download's name and size.
+        source.setLastModified(System.currentTimeMillis())
         return Result(true, false)
     }
 
+    private fun rangeKey(start: Double, end: Double) = "%.3f-%.3f".format(Locale.ROOT, start, end)
+
     internal class Stream(val index: Int, val type: String, val cover: Boolean)
-    internal class Encoders(val video: String, val audio: String)
 
     private val STREAM_LINE = Regex("""Stream #0:(\d+)\S*: (Video|Audio|Subtitle|Attachment|Data):""")
 
@@ -79,9 +90,8 @@ object LocalTrim {
 
     /**
      * Streams are mapped by index, covers last with their flag set again: a remux drops it,
-     * turning the cover into a second video track. Precise re-encodes video and audio (copied
-     * audio would start at the keyframe before the cut) and takes chapters from a second,
-     * copied read of the source, since ffmpeg mangles them while encoding.
+     * turning the cover into a second video track. Data tracks (mp4 chapter text) are rebuilt
+     * by the muxer.
      */
     internal fun trimCommand(
         ffmpeg: String,
@@ -89,29 +99,18 @@ object LocalTrim {
         output: String,
         streams: List<Stream>,
         startSeconds: Double,
-        endSeconds: Double,
-        encoders: Encoders?
+        endSeconds: Double
     ): List<String> {
-        val cut = listOf(
-            "-ss", "%.3f".format(Locale.ROOT, startSeconds),
-            "-t", "%.3f".format(Locale.ROOT, endSeconds - startSeconds),
-            "-i", source
-        )
         val main = streams.filter { !it.cover && it.type != "Data" }
         val covers = streams.filter { it.cover }
         val videos = main.count { it.type == "Video" }
-        val meta = if (encoders != null) "1" else "0"
         return buildList {
             addAll(listOf(ffmpeg, "-y", "-hide_banner", "-loglevel", "error"))
-            addAll(cut)
-            if (encoders != null) addAll(cut)
+            addAll(listOf("-ss", "%.3f".format(Locale.ROOT, startSeconds)))
+            addAll(listOf("-t", "%.3f".format(Locale.ROOT, endSeconds - startSeconds)))
+            addAll(listOf("-i", source))
             (main + covers).forEach { addAll(listOf("-map", "0:${it.index}")) }
-            addAll(listOf("-map_metadata", meta, "-map_chapters", meta, "-c", "copy"))
-            if (encoders != null) {
-                repeat(videos) { addAll(listOf("-c:v:$it", encoders.video)) }
-                if (videos > 0) addAll(videoTuning(encoders.video))
-                addAll(listOf("-c:a", encoders.audio) + audioTuning(encoders.audio))
-            }
+            addAll(listOf("-map_metadata", "0", "-map_chapters", "0", "-c", "copy"))
             covers.indices.forEach { addAll(listOf("-disposition:v:${videos + it}", "attached_pic")) }
             add(output)
         }
@@ -123,13 +122,16 @@ object LocalTrim {
             .apply { environment()["LD_LIBRARY_PATH"] = env }
             .start()
         val listing = p.inputStream.bufferedReader().use { it.readText() }
-        p.waitFor(30, TimeUnit.SECONDS)
+        if (!p.waitFor(30, TimeUnit.SECONDS)) p.destroy()
         parseStreams(listing)
     } catch (_: Exception) {
         emptyList()
     }
 
-    /** The finished media file: the largest that is not a fragment, part or side file. */
+    /**
+     * The finished media file: the newest that is not a fragment, part or side file, as the
+     * save picks it. With "keep video" and audio extraction, the extracted audio is newest.
+     */
     fun mainMedia(dir: File): File? = try {
         dir.listFiles()
             ?.filter { f ->
@@ -138,7 +140,7 @@ object LocalTrim {
                     f.extension.lowercase() !in CutProgress.SIDE_FILE_EXTENSIONS
             }
             ?.let { files -> files.filterNot { FORMAT_FRAGMENT.containsMatchIn(it.name) }.ifEmpty { files } }
-            ?.maxByOrNull { it.length() }
+            ?.maxWithOrNull(compareBy<File>({ it.lastModified() }, { it.length() }))
     } catch (_: Exception) {
         null
     }
@@ -272,50 +274,5 @@ object LocalTrim {
             .filter { it.isDirectory }
             .map { it.absolutePath } + context.applicationInfo.nativeLibraryDir)
             .joinToString(":")
-    }
-
-    /** Encoders for a precise trim of a video container; null copies instead (audio cuts are exact anyway). */
-    private fun encodersFor(extension: String, ffmpeg: File, env: String): Encoders? {
-        val (videos, audios) = when (extension.lowercase()) {
-            "mp4", "m4v", "mov", "mkv" -> listOf("libx264", "mpeg4") to listOf("aac")
-            "webm" -> listOf("libvpx-vp9", "libvpx") to listOf("libopus", "libvorbis")
-            else -> return null
-        }
-        val have = encoders ?: listEncoders(ffmpeg, env).also { if (it.isNotEmpty()) encoders = it }
-        val video = videos.firstOrNull { it in have }
-        val audio = audios.firstOrNull { it in have }
-        if (video == null || audio == null) {
-            Log.w("Hazel", "No encoder for a precise .$extension trim, copying")
-            return null
-        }
-        return Encoders(video, audio)
-    }
-
-    private fun videoTuning(encoder: String): List<String> = when {
-        encoder == "libx264" -> listOf("-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p")
-        encoder == "mpeg4" -> listOf("-q:v", "2")
-        encoder.startsWith("libvpx") -> listOf("-deadline", "realtime", "-cpu-used", "6", "-crf", "30", "-b:v", "0")
-        else -> emptyList()
-    }
-
-    private fun audioTuning(encoder: String): List<String> = when (encoder) {
-        "aac" -> listOf("-b:a", "192k")
-        "libopus" -> listOf("-b:a", "160k")
-        "libvorbis" -> listOf("-q:a", "6")
-        else -> emptyList()
-    }
-
-    private fun listEncoders(ffmpeg: File, env: String): Set<String> = try {
-        val p = ProcessBuilder(ffmpeg.absolutePath, "-hide_banner", "-encoders")
-            .redirectErrorStream(true)
-            .apply { environment()["LD_LIBRARY_PATH"] = env }
-            .start()
-        val names = p.inputStream.bufferedReader().useLines { lines ->
-            lines.mapNotNull { it.trim().split(Regex("\\s+")).getOrNull(1) }.toSet()
-        }
-        p.waitFor()
-        names
-    } catch (_: Exception) {
-        emptySet()
     }
 }

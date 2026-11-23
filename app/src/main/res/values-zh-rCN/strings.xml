@@ -730,6 +730,7 @@
     <string name="options_cut_precise_summary">重新编码，精确到帧。较慢。</string>
     <string name="options_cut_local">下载后裁剪</string>
     <string name="options_cut_local_summary">先全速下载整个文件，再剪出片段。需要能容纳整个文件的空间。</string>
+    <string name="options_cut_local_unavailable">在 SponsorBlock 移除片段、按章节拆分或从头录制直播时不可用。</string>
     <string name="options_cut_invalid">结束时间必须晚于开始时间，且在时长之内</string>
     <string name="options_cut_apply">剪切</string>
     <string name="options_cut_clear">清除</string>

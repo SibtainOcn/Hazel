@@ -2995,9 +2995,7 @@ class DownloadViewModel : ViewModel() {
     /** Throws [CancellationException] when stopped, so the loop's pause/cancel handling applies. */
     private fun trimLocally(app: Context, plan: DownloadPlan, options: DownloadOptions) {
         enterStage(app, ProcessingStep.TRIM, "Trimming", plan.title)
-        val result = LocalTrim.trim(
-            app, downloadDir, options.sectionStart, options.sectionEnd, options.preciseCuts
-        )
+        val result = LocalTrim.trim(app, downloadDir, options.sectionStart, options.sectionEnd)
         if (result.stopped) throw CancellationException("Trim stopped")
         if (!result.ok) {
             val raw = "Trim failed" + result.message.trim().takeIf { it.isNotEmpty() }?.let { ": $it" }.orEmpty()

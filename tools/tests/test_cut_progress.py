@@ -603,9 +603,6 @@ LOCAL_TRIM = DL / "LocalTrim.kt"
 
 
 STREAM_LINE = re.compile(r"Stream #0:(\d+)\S*: (Video|Audio|Subtitle|Attachment|Data):")
-VIDEO_TUNING = {"libx264": ["-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p"], "mpeg4": ["-q:v", "2"],
-                "libvpx-vp9": ["-deadline", "realtime", "-cpu-used", "6", "-crf", "30", "-b:v", "0"]}
-AUDIO_TUNING = {"aac": ["-b:a", "192k"], "libopus": ["-b:a", "160k"]}
 
 
 def parse_streams(listing):
@@ -618,23 +615,16 @@ def parse_streams(listing):
     return out
 
 
-def trim_command(ffmpeg, src, out, streams, start, end, encoders):
-    """Port of LocalTrim.trimCommand; encoders is (video, audio) or None."""
-    cut = ["-ss", f"{start:.3f}", "-t", f"{end - start:.3f}", "-i", src]
+def trim_command(ffmpeg, src, out, streams, start, end):
+    """Port of LocalTrim.trimCommand."""
     main = [s for s in streams if not s[2] and s[1] != "Data"]
     covers = [s for s in streams if s[2]]
     videos = sum(1 for s in main if s[1] == "Video")
-    meta = "1" if encoders else "0"
-    cmd = [ffmpeg, "-y", "-hide_banner", "-loglevel", "error"] + cut + (cut if encoders else [])
+    cmd = [ffmpeg, "-y", "-hide_banner", "-loglevel", "error",
+           "-ss", f"{start:.3f}", "-t", f"{end - start:.3f}", "-i", src]
     for s in main + covers:
         cmd += ["-map", f"0:{s[0]}"]
-    cmd += ["-map_metadata", meta, "-map_chapters", meta, "-c", "copy"]
-    if encoders:
-        for k in range(videos):
-            cmd += [f"-c:v:{k}", encoders[0]]
-        if videos:
-            cmd += VIDEO_TUNING.get(encoders[0], [])
-        cmd += ["-c:a", encoders[1]] + AUDIO_TUNING.get(encoders[1], [])
+    cmd += ["-map_metadata", "0", "-map_chapters", "0", "-c", "copy"]
     for j in range(len(covers)):
         cmd += [f"-disposition:v:{videos + j}", "attached_pic"]
     return cmd + [out]
@@ -646,9 +636,7 @@ def test_trim_command_port():
     body = function_body(trim, "internal fun trimCommand(")
     check_true("covers are mapped last and flagged again",
                "(main + covers).forEach" in body and '"-disposition:v:${videos + it}", "attached_pic"' in body)
-    check_true("precise re-encodes audio and reads chapters from a second copy",
-               '"-c:a", encoders.audio' in body and "if (encoders != null) addAll(cut)" in body
-               and 'val meta = if (encoders != null) "1" else "0"' in body)
+    check_true("the trim never re-encodes", "-c:v" not in body and "-c:a" not in body)
     check_true("data streams are left to the muxer", 'it.type != "Data"' in body)
     listing = ("  Stream #0:0[0x1](und): Video: h264 (avc1), yuv420p, 320x180 (default)\n"
                "  Stream #0:1[0x2](eng): Audio: aac (mp4a), 44100 Hz (default)\n"
@@ -658,7 +646,7 @@ def test_trim_command_port():
     streams = parse_streams(listing)
     check("the listing is read stream by stream", streams,
           [(0, "Video", False), (1, "Audio", False), (2, "Subtitle", False), (3, "Video", True), (4, "Data", False)])
-    cmd = trim_command("ffmpeg", "in.mp4", "out.mp4", streams, 7.0, 17.0, None)
+    cmd = trim_command("ffmpeg", "in.mp4", "out.mp4", streams, 7.0, 17.0)
     check("a copy trim maps the cover last and flags it", cmd[cmd.index("-map"):],
           ["-map", "0:0", "-map", "0:1", "-map", "0:2", "-map", "0:3", "-map_metadata", "0", "-map_chapters", "0",
            "-c", "copy", "-disposition:v:1", "attached_pic", "out.mp4"])
@@ -703,7 +691,15 @@ def test_trim_after_download():
     check_true("a copy trim does not shift its timestamps", "avoid_negative_ts" not in trim)
     check_true("a stalled ffmpeg is stopped without a thread of its own",
                "waitFor(WATCH_MS, TimeUnit.MILLISECONDS)" in trim and "Thread {" not in trim)
-    check_true("the encoder list is read once", "encoders ?: listEncoders(" in trim)
+    check_true("a finished trim is never cut again on resume",
+               "marker.readText() == range" in body and "marker.writeText(range)" in body
+               and 'DONE_MARKER = ".hazel.trimmed"' in trim)
+    check_true("the trimmed file is the newest, so the save records it",
+               body.index("trimSidecarSubtitles(") < body.index("source.setLastModified("))
+    check_true("Precise cuts or any setting that shifts the timeline leave the cut to yt-dlp",
+               "hasSection && trimAfterDownload && !preciseCuts && canTrimAfterDownload" in opt
+               and "!splitByChapters && !liveFromStart" in opt and "sponsorBlockFilters.any" in opt)
+    check_true("Trim after download is on by default", "val trimAfterDownload: Boolean = true" in opt)
     check_true("a trim leftover is never taken for the download",
                "!f.name.startsWith(TRIM_PREFIX)" in function_body(trim, "fun mainMedia("))
 
@@ -730,7 +726,6 @@ def test_trim_after_download():
                        "-read_intervals", "%+#1", "-of", "csv=p=0", path]).stdout.strip().split("\n")[0]
         return float(out.strip(",") or 0)
 
-    encoders = {l.split()[1] for l in run_cmd([ffmpeg, "-hide_banner", "-encoders"]).stdout.splitlines() if len(l.split()) > 1}
 
     with tempfile.TemporaryDirectory() as tmp:
         cover = os.path.join(tmp, "cover.jpg")
@@ -765,15 +760,9 @@ def test_trim_after_download():
             ext = name.rsplit(".", 1)[1]
             before = probe(src)
             streams = parse_streams(run_cmd([ffmpeg, "-hide_banner", "-i", src]).stderr)
-            plans = [None]
-            if ext in ("mp4", "mkv") and "audio" not in name:
-                plans += [p for p in (("libx264", "aac"), ("mpeg4", "aac")) if p[0] in encoders]
-            if ext == "webm" and "libvpx-vp9" in encoders and "libopus" in encoders:
-                plans.append(("libvpx-vp9", "libopus"))
-            for plan in plans:
-                label = f"{name} {plan[0] if plan else 'copy'}"
+            for label in (name,):
                 out = os.path.join(tmp, "hazel.trim." + ext)
-                done = run_cmd(trim_command(ffmpeg, src, out, streams, 7.0, 17.0, plan))
+                done = run_cmd(trim_command(ffmpeg, src, out, streams, 7.0, 17.0))
                 check(f"{label}: succeeds", done.returncode, 0)
                 if done.returncode != 0 or not os.path.exists(out):
                     continue

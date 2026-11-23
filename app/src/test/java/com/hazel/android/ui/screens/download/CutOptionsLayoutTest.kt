@@ -70,6 +70,13 @@ class CutOptionsLayoutTest(private val locale: String) {
                             onCheckedChange = { trimAfter = it },
                             summary = context.getString(R.string.options_cut_local_summary)
                         )
+                        ToggleRow(
+                            label = context.getString(R.string.options_cut_local),
+                            checked = false,
+                            onCheckedChange = {},
+                            enabled = false,
+                            summary = context.getString(R.string.options_cut_local_unavailable)
+                        )
                     }
                 }
             }
@@ -80,7 +87,7 @@ class CutOptionsLayoutTest(private val locale: String) {
         val screen = context.resources.displayMetrics
         listOf(
             R.string.options_cut_precise, R.string.options_cut_precise_summary,
-            R.string.options_cut_local, R.string.options_cut_local_summary
+            R.string.options_cut_local_summary, R.string.options_cut_local_unavailable
         ).forEach { id ->
             val node = compose.onNodeWithText(context.getString(id)).assertIsDisplayed().fetchSemanticsNode()
             assertTrue("${context.getString(id)} runs off the right edge",
