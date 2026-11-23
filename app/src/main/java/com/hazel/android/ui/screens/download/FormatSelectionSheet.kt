@@ -1098,6 +1098,23 @@ fun FormatRow(
                     color = if (selected) scheme.primary else scheme.onSurface,
                     modifier = Modifier.weight(1f, fill = false)
                 )
+                // The plain ladder (no rail) carries the id as a tag after its Auto tag; the
+                // sorted list keeps it beside the headline.
+                val idAsTag = format.isGeneric && !compact
+                if (!idAsTag) {
+                    Spacer(modifier = Modifier.width(if (compact) 6.dp else 8.dp))
+                    // Bounded, so a long DASH id ("dash-1234…") ellipsizes in its own corner
+                    // rather than squeezing the headline down to nothing.
+                    Text(
+                        "id: ${shortId(format.formatId)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = if (compact) 10.sp else MaterialTheme.typography.labelMedium.fontSize,
+                        color = scheme.onSurface.copy(alpha = if (selected) 0.6f else 0.45f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.widthIn(max = if (compact) 64.dp else 96.dp)
+                    )
+                }
             }
 
             // Badges are omitted entirely when the extractor did not report them,
@@ -1127,15 +1144,14 @@ fun FormatRow(
 
             // A ladder row while the formats are read holds the places the real badges will
             // take, rather than saying it will be matched later.
-            // The format's own id closes the row of tags, so the headline keeps the width.
-            val idTag = "id: ${shortId(format.formatId)}"
+            val idTag = "id: ${shortId(format.formatId)}".takeIf { generic && !compact }
             if (pendingBadges && (generic || !hasBadges)) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                     FillingBadges()
-                    MetaBadge(idTag, tone = BadgeTone.ID)
+                    idTag?.let { MetaBadge(it, tone = BadgeTone.ID) }
                 }
-            } else {
+            } else if (hasBadges) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier
@@ -1158,11 +1174,14 @@ fun FormatRow(
                     }
                     // Said once, on the ladder's rows: the step is matched to a real stream
                     // when the download starts, so there is no codec or size to show yet.
-                    if (generic) MetaBadge(stringResource(R.string.format_generic_badge), tone = BadgeTone.SIZE)
+                    if (generic) MetaBadge(
+                        stringResource(R.string.format_generic_badge),
+                        tone = if (compact) BadgeTone.ACCENT else BadgeTone.SIZE
+                    )
                     if (codec.isNotBlank()) MetaBadge(codec)
                     if (size.isNotBlank()) MetaBadge(size, tone = BadgeTone.SIZE)
                     if (bitrate.isNotBlank()) MetaBadge(bitrate, tone = BadgeTone.ACCENT)
-                    MetaBadge(idTag, tone = BadgeTone.ID)
+                    idTag?.let { MetaBadge(it, tone = BadgeTone.ID) }
                 }
             }
         }
