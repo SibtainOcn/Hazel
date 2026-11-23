@@ -444,3 +444,33 @@ tasks.withType<Test>().configureEach {
         progress.start(totals.get().file("$name-${Integer.toHexString(filters.hashCode())}.total").asFile)
     }
 }
+
+// ── Robolectric's Android jars on CI ──
+// Robolectric's own Maven fetch has no retry and failed on CI runners, so on CI Gradle
+// resolves the jars (API 24 and 35 for Robolectric 4.17) and Robolectric reads them offline.
+// A Robolectric update or a new test API level needs its jar added here.
+// One configuration per jar, or Gradle keeps only the newer version.
+val robolectricAndroidAll = listOf(
+    "7.0.0_r1-robolectric-r1-i7",
+    "15-robolectric-13954326-i7"
+).map { version ->
+    configurations.create("robolectricAndroidAll_" + version.replace(Regex("[^A-Za-z0-9]"), "_")) {
+        isCanBeConsumed = false
+        isCanBeResolved = true
+        isTransitive = false
+    }.also { dependencies.add(it.name, "org.robolectric:android-all-instrumented:$version") }
+}
+
+val robolectricJarDir = layout.buildDirectory.dir("robolectric-jars")
+
+val syncRobolectricJars by tasks.registering(Sync::class) {
+    from(robolectricAndroidAll)
+    into(robolectricJarDir)
+}
+
+if (System.getenv("CI") == "true") {
+    tasks.withType<Test>().configureEach {
+        dependsOn(syncRobolectricJars)
+        systemProperty("robolectric.dependency.dir", robolectricJarDir.get().asFile.absolutePath)
+    }
+}
