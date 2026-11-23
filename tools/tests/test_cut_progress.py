@@ -1,27 +1,9 @@
 #!/usr/bin/env python3
 """
-Test Harness: a cut (trimmed) download shows real progress, in the card and the shade.
+Test Harness: trimmed (cut) download progress, pause, stop and size.
 
-Background (issue #161): a cut is passed to yt-dlp as `--download-sections`, which hands the
-transfer to ffmpeg. ffmpeg's progress is on stderr, which the engine does not forward, and yt-dlp
-prints no `[download]  42.5%` line for it, so the percentage never arrived and the bar sat at its
-start while the file was being written. The fix measures the file ffmpeg is writing against the
-size the kept part should come to, on a small watcher thread.
-
-Verifies:
-1. The size estimate (a Python port of CutProgress.expectedBytes, case for case with
-   CutProgressTest.kt): scales by the kept share, clamps a cut past the end, and returns 0 for
-   anything it cannot know (so nothing is ever guessed).
-2. A simulated run, using the same tick rules as the watcher: the bar only moves forward, stays
-   short of whole, never throws on odd input, and is left unmeasured (-1 in the shade) when there
-   is no estimate.
-3. The Kotlin source is wired as designed: the watcher starts only for a measurable cut, is
-   stopped and joined in a `finally`, both run sites still go through `executeYtDlp`, the uncut
-   path is untouched, and the estimate is used for the run's expected total.
-4. The Kotlin source parses structurally (balanced braces) and the Kotlin unit test exists.
-5. Side files / stale part files: the media-only measure, tested on a real temp folder.
-6. Real ffmpeg (skipped when ffmpeg is not installed): a stream-copy cut written the way
-   yt-dlp's ffmpeg downloader writes it grows steadily, and lands near the estimate.
+Python ports of CutProgress checked case for case, source wiring checks on the Kotlin,
+and a real ffmpeg run (skipped when ffmpeg is not installed).
 
 Run:
     python tools/tests/test_cut_progress.py
@@ -255,7 +237,7 @@ def test_source_wiring():
     # watcher lifecycle
     start = function_body(vm, "private fun startCutWatcher(")
     check_true("watcher is a coroutine, not a thread of its own", "downloadScope.launch" in start and "thread(" not in start)
-    check_true("watcher waits between ticks", "delay(CUT_POLL_INTERVAL_MS)" in start and "while (isActive)" in start)
+    check_true("watcher waits between ticks", "delay(CUT_POLL_INTERVAL_MS)" in start and "while (isActive && liveRun)" in start)
     check_true("a failed tick cannot kill the watcher or the app", "catch (e: Exception)" in start)
     check_true("no thread join is left", "stopCutWatcher" not in vm and "CUT_WATCHER_JOIN_MS" not in vm)
 
@@ -264,7 +246,7 @@ def test_source_wiring():
                "!current.isDownloading || !current.unmeasured" in publish)
     check_true("a tick is not gated on the stage a line names", "isProcessing" not in publish)
     check_true("a tick only moves the size forward",
-               "maxOf(liveBytesOnDisk(), current.liveBytes)" in publish)
+               "maxOf(CutProgress.mediaBytesIn(downloadDir), current.liveBytes)" in publish)
     check_true("a tick shows an indeterminate notification", "progress = -1" in publish)
     check_true("the shade keeps its pacing", "NOTIFICATION_INTERVAL_MS" in publish)
 
@@ -325,20 +307,18 @@ SIDE_FILE_EXTENSIONS = {
 }
 
 
-def media_bytes_in(directory, include_part_files=True):
-    """Port of CutProgress.mediaBytesIn."""
+def media_bytes_in(directory):
+    """Port of CutProgress.mediaBytesIn: the largest media file."""
     try:
-        total = 0
+        largest = 0
         for f in Path(directory).iterdir():
             if not f.is_file() or f.name.endswith(".ytdl"):
                 continue
             ext = f.suffix[1:].lower() if f.suffix else ""
             if ext in SIDE_FILE_EXTENSIONS:
                 continue
-            if not include_part_files and f.name.endswith(".part"):
-                continue
-            total += f.stat().st_size
-        return total
+            largest = max(largest, f.stat().st_size)
+        return largest
     except OSError:
         return 0
 
@@ -355,10 +335,14 @@ def test_side_files():
         check("engine bookkeeping never counts", media_bytes_in(d), 30)
     with tempfile.TemporaryDirectory() as tmp:
         d = Path(tmp)
-        (d / "clip.f137.mp4").write_bytes(b"0" * 200)
-        (d / "clip.f140.m4a.part").write_bytes(b"0" * 10)
-        check("a finished stream and the part file in hand both count", media_bytes_in(d), 210)
-        check("part files are left out when a run starts", media_bytes_in(d, include_part_files=False), 200)
+        (d / "clip.mp4").write_bytes(b"0" * 200)
+        (d / "clip.temp.mp4").write_bytes(b"0" * 190)
+        check("a copy written while the cover or tags go in does not double the cut", media_bytes_in(d), 200)
+    with tempfile.TemporaryDirectory() as tmp:
+        d = Path(tmp)
+        (d / "clip.webm").write_bytes(b"0" * 120)
+        (d / "clip.mp3").write_bytes(b"0" * 150)
+        check("an audio cut being converted is not counted twice", media_bytes_in(d), 150)
     check("a folder that is missing weighs nothing", media_bytes_in("/no/such/cut/folder"), 0)
 
     # What the fix is for: a 3 s audio clip (about 52 KB) beside a 100 KB thumbnail.
@@ -373,18 +357,22 @@ def test_side_files():
 
     vm = VM.read_text(encoding="utf-8")
     cut = CUT.read_text(encoding="utf-8")
-    body = function_body(vm, "private fun fractionOnDisk(")
-    check_true("a cut is measured by its media, an ordinary download as before",
-               "if (cutRun) {" in body and "CutProgress.mediaBytesIn(downloadDir, includePartFiles = !seeding)" in body
-               and "bytesIn(downloadDir)" in body)
-    check_true("the run start seeds the floor without part files",
-               "progressFloor = fractionOnDisk(seeding = true)" in vm)
-    check_true("the per-tick refresh still reads everything the media has written",
-               "progressFloor = maxOf(progressFloor, fractionOnDisk())" in vm)
+    check_true("a cut starts from zero, an ordinary download from what is on disk",
+               "progressFloor = if (cutRun) 0f else fractionOnDisk()" in vm)
+    check_true("a cut skips the per-line disk floor",
+               "if (!cutRun) refreshFloorFromDisk()" in vm)
+    check_true("the live size is the cut's largest media file",
+               "CutProgress.mediaBytesIn(downloadDir)" in function_body(vm, "private fun publishCutProgress("))
+    check_true("a stale-link retry shows the cut as unmeasured again",
+               "liveRun = true" in vm and "unmeasured = true, liveBytes = 0L" in vm)
+    check_true("history keeps the kept length clamped to the source",
+               "CutProgress.keptSeconds(info.durationSeconds, options.sectionStart, options.sectionEnd)" in vm)
     start = function_body(vm, "private fun startCutWatcher(")
     check_true("the tick's try block holds no suspension point, so cancel is never swallowed",
                start.index("delay(CUT_POLL_INTERVAL_MS)") < start.index("try {"))
-    check_true("mediaBytesIn exists in CutProgress", "fun mediaBytesIn(dir: File, includePartFiles: Boolean = true)" in cut)
+    check_true("mediaBytesIn exists in CutProgress", "fun mediaBytesIn(dir: File)" in cut)
+    check_true("a cut is weighed by its largest media file, not the sum",
+               ".maxOfOrNull { it.length() }" in function_body(cut, "fun mediaBytesIn(") and ".sumOf" not in function_body(cut, "fun mediaBytesIn("))
 
 
 def test_real_ffmpeg():
@@ -423,6 +411,194 @@ def test_real_ffmpeg():
             check_true(f"cut {start}-{end}: lands within 20% of the estimate (ratio {ratio:.2f})", 0.8 <= ratio <= 1.2)
 
 
+ENGINE = DL / "YtDlpEngine.kt"
+
+
+def is_download_ffmpeg(args, roots):
+    """Port of the filter in YtDlpEngine.killStrayFfmpeg."""
+    if not args or not args[0].endswith("libffmpeg.so"):
+        return False
+    return any(root in arg for arg in args for root in roots)
+
+
+def test_stop_spares_converter():
+    print("\n[7] Stopping a download ends only a download's ffmpeg")
+    roots = ["/storage/emulated/0/Android/data/com.hazel.android/files/Hazel/"]
+    ffmpeg = "/data/app/lib/arm64/libffmpeg.so"
+    cut = [ffmpeg, "-y", "-ss", "12.0", "-t", "13.5", "-i", "https://cdn/v.mp4", "-c", "copy", "-f", "mp4",
+           "file:" + roots[0] + "dl_0123456789abcdef/Clip.mp4.part"]
+    embed = [ffmpeg, "-y", "-i", "file:" + roots[0] + "dl_0123456789abcdef/Clip.mp4",
+             "file:" + roots[0] + "dl_0123456789abcdef/Clip.temp.mp4"]
+    convert = [ffmpeg, "-y", "-i", "file:/data/user/0/com.hazel.android/cache/convert_input_1.m4a",
+               "-vn", "-acodec", "libmp3lame",
+               "file:/storage/emulated/0/Android/data/com.hazel.android/files/Music/Song.mp3"]
+    probe = ["/data/app/lib/arm64/libffprobe.so", "file:" + roots[0] + "dl_0123456789abcdef/Clip.mp4"]
+    check_true("a cut being written is ended", is_download_ffmpeg(cut, roots))
+    check_true("a post-processing step on a download is ended", is_download_ffmpeg(embed, roots))
+    check_true("a conversion running beside the download is left alone", not is_download_ffmpeg(convert, roots))
+    check_true("ffprobe is never touched", not is_download_ffmpeg(probe, roots))
+    check_true("an empty command line is skipped", not is_download_ffmpeg([""], roots))
+
+    engine = ENGINE.read_text(encoding="utf-8")
+    body = function_body(engine, "fun killStrayFfmpeg(")
+    check_true("the filter reads the download work roots", "SdCards.workRoots()" in body)
+    check_true("only ffmpeg naming a work root is ended", "args.none { arg -> roots.any { root -> root in arg } }" in body)
+    check_true("no roots means nothing is ended", "if (roots.isEmpty()) return" in body)
+    check_true("every stop still ends a download's ffmpeg", "killStrayFfmpeg()" in function_body(engine, "fun stop("))
+
+
+QUEUE_SCREEN = REPO_ROOT / "app/src/main/java/com/hazel/android/ui/screens/queue/QueueScreen.kt"
+
+
+def test_paused_cut():
+    print("\n[8] A paused cut shows no stale size, and a retry starts its size over")
+    vm = VM.read_text(encoding="utf-8")
+    queue = QUEUE_SCREEN.read_text(encoding="utf-8")
+    fraction = function_body(vm, "internal fun pausedFraction(")
+    check_true("a paused cut has no share on disk", "if (item.options.hasSection) return 0f" in fraction)
+    check_true("an ordinary paused download is still measured", "workDirsFor(item.url).sumOf { bytesIn(it) }" in fraction)
+    hold = function_body(vm, "private fun holdForResume(")
+    check_true("a paused cut drops its useless part file", "val cut = item.options.hasSection" in hold and "if (cut) purgeFragments()" in hold)
+    check_true("a paused cut card shows no size against the whole link",
+               "queued?.takeUnless { it.options.hasSection }" in queue)
+    check_true("a retry starts a cut's size over",
+               "unmeasured = true, liveBytes = 0L, progress = 0f" in vm
+               and vm.index("InfoCache.invalidate(plan.info.url)") < vm.index("unmeasured = true, liveBytes = 0L, progress = 0f"))
+    check_true("a paused cut shows nothing in hand, on the card and in the shade",
+               "progress = if (cut) 0f else s.progress" in hold and "val total = if (cut) 0L else _state.value.totalBytes" in hold)
+    check_true("a paused cut's figure is never kept as the link's size", "val held = if (!cut &&" in hold)
+
+
+PROGRESS_LINE = re.compile(
+    r"^(frame|fps|stream_\d+_\d+_q|bitrate|total_size|out_time_us|out_time_ms|out_time|"
+    r"dup_frames|drop_frames|speed|progress)=")
+
+
+def out_time_seconds(line):
+    """Port of CutProgress.outTimeSeconds."""
+    text = line.strip()
+    if text.startswith(("out_time_us=", "out_time_ms=")):
+        try:
+            micros = int(text.split("=", 1)[1])
+        except ValueError:
+            return None
+        return micros / 1_000_000 if micros >= 0 else None
+    if text.startswith("out_time="):
+        clock = text.split("=", 1)[1].strip()
+        parts = clock.split(":")
+        if len(parts) != 3 or clock.startswith("-"):
+            return None
+        try:
+            return int(parts[0]) * 3600 + int(parts[1]) * 60 + float(parts[2])
+        except ValueError:
+            return None
+    return None
+
+
+def speed_factor(line):
+    """Port of CutProgress.speedFactor."""
+    text = line.strip()
+    if not text.startswith("speed="):
+        return None
+    try:
+        v = float(text.split("=", 1)[1].strip().removesuffix("x").strip())
+    except ValueError:
+        return None
+    return v if math.isfinite(v) and v > 0 else None
+
+
+def kept_seconds(duration, start, end):
+    """Port of CutProgress.keptSeconds."""
+    if not (math.isfinite(start) and math.isfinite(end)) or start < 0 or end <= start:
+        return 0.0
+    if duration <= 0:
+        return end - start
+    return max(0.0, min(end, duration) - min(start, duration))
+
+
+def cut_fraction(written, kept):
+    """Port of CutProgress.fraction."""
+    if kept <= 0 or not math.isfinite(written):
+        return 0.0
+    return min(max(written / kept, 0.0), 0.99)
+
+
+def test_real_percentage():
+    print("\n[9] A cut shows a real percentage, read from ffmpeg's own report")
+    check("out_time_us is read in microseconds", out_time_seconds("out_time_us=2283537"), 2.283537)
+    check("out_time_ms is microseconds too, as ffmpeg writes it", out_time_seconds("out_time_ms=4744853"), 4.744853)
+    check("out_time clock form is read", out_time_seconds("out_time=00:01:02.500000"), 62.5)
+    check("the below-zero figure before the first packet is ignored", out_time_seconds("out_time_us=-15238"), None)
+    check("N/A is ignored", out_time_seconds("out_time_us=N/A"), None)
+    check("a negative clock is ignored", out_time_seconds("out_time=-00:00:00.015238"), None)
+    check("a yt-dlp line is not a report", out_time_seconds("[download] Destination: clip.mp4"), None)
+    check("speed with padding is read", speed_factor("speed=   1.49x"), 1.49)
+    check("speed 0x is no speed", speed_factor("speed=   0x"), None)
+    check("speed N/A is no speed", speed_factor("speed=N/A"), None)
+    check("a cut's length is clamped to the end of the link", kept_seconds(120, 90.0, 400.0), 30.0)
+    check("with no running time the cut is taken as asked", kept_seconds(0, 40.0, 70.0), 30.0)
+    check("a cut that is not a part of the link has no length", kept_seconds(120, 30.0, 10.0), 0.0)
+    check("the share stays short of whole", cut_fraction(31.0, 30.0), 0.99)
+    check("nothing is measured with no length", cut_fraction(10.0, 0.0), 0.0)
+    for line in ("progress=continue", "out_time_us=1", "stream_0_0_q=-1.0", "total_size=48", "speed=N/A"):
+        check_true(f"report line recognised: {line}", PROGRESS_LINE.search(line) is not None)
+    for line in ("[download] Destination: /x/clip.mp4", "[info] src: Downloading 1 time ranges: 40.0-70.0",
+                 "[download] 100% of    7.55MiB in 00:00:14 at 543.34KiB/s", "ERROR: unable to download"):
+        check_true(f"yt-dlp line not taken for a report: {line[:40]}", PROGRESS_LINE.search(line) is None)
+
+    vm = VM.read_text(encoding="utf-8")
+    cut = CUT.read_text(encoding="utf-8")
+    check_true("the ffmpeg downloader is asked for its report, as output options only",
+               'const val FFMPEG_PROGRESS_ARGS = "ffmpeg_o:-progress pipe:1 -nostats"' in cut)
+    one_off = function_body(vm, "private fun YoutubeDLRequest.applyOneOff(")
+    check_true("only a cut asks for the report",
+               'addOption("--downloader-args", CutProgress.FFMPEG_PROGRESS_ARGS)' in one_off
+               and one_off.index("if (options.hasSection)") < one_off.index("CutProgress.FFMPEG_PROGRESS_ARGS"))
+    run = function_body(vm, "private fun runYtDlp(")
+    check_true("a report line is read on its own and never becomes the status",
+               "if (cutRun && CutProgress.isProgressLine(line))" in run and "return@execute" in run
+               and run.index("return@execute") < run.index("cleanProgressLine(line)"))
+    check_true("a cut's percentage is ffmpeg's alone", "val percent = if (cutRun) cutFraction * 100f" in run)
+    report = function_body(vm, "private fun onCutReport(")
+    check_true("the first report turns the moving line into a percentage",
+               "liveRun = false" in report and "unmeasured = false" in report)
+    check_true("the percentage only moves forward", "maxOf(cutFraction, CutProgress.fraction(written, kept))" in report)
+    check_true("a cut of unknown length stays on the moving line", "if (kept <= 0.0) return" in report)
+    check_true("the shade keeps its pacing", "NOTIFICATION_INTERVAL_MS" in report)
+    check_true("every run starts its report afresh",
+               "cutFraction = 0f\n                cutSpeed = 0.0" in vm)
+
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        skip("real ffmpeg -progress report", "ffmpeg not installed")
+        return
+    with tempfile.TemporaryDirectory() as tmp:
+        src = os.path.join(tmp, "src.mp4")
+        gen = subprocess.run(
+            [ffmpeg, "-v", "error", "-y", "-f", "lavfi", "-i", "testsrc2=size=320x240:rate=30",
+             "-f", "lavfi", "-i", "sine=frequency=440", "-t", "40", "-c:v", "libx264", "-preset", "ultrafast",
+             "-g", "30", "-c:a", "aac", src], capture_output=True)
+        if gen.returncode != 0:
+            skip("real ffmpeg -progress report", "could not make a test video")
+            return
+        # Laid out as yt-dlp's ffmpeg downloader lays it out: input options, the input, the
+        # output format, then the `_o` downloader args, then the output file.
+        out = os.path.join(tmp, "clip.mp4.part")
+        proc = subprocess.run(
+            [ffmpeg, "-y", "-hide_banner", "-ss", "10", "-t", "20", "-i", "file:" + src, "-c", "copy", "-f", "mp4",
+             "-progress", "pipe:1", "-nostats", "file:" + out], capture_output=True, text=True)
+        lines = proc.stdout.splitlines()
+        seen = [s for s in (out_time_seconds(l) for l in lines) if s is not None]
+        fractions = [cut_fraction(s, kept_seconds(40, 10.0, 30.0)) for s in seen]
+        check_true("ffmpeg accepts the report options in the downloader's place", proc.returncode == 0)
+        check_true("the report comes on standard output, which yt-dlp's output carries", len(seen) > 0)
+        check_true("every report line is recognised as one",
+                   all(PROGRESS_LINE.search(l) for l in lines if l.strip()))
+        check_true("the share climbs and ends near whole",
+                   all(b >= a for a, b in zip(fractions, fractions[1:])) and fractions and fractions[-1] >= 0.9)
+        check_true("-nostats keeps the periodic statistics off stderr", "speed=" not in proc.stderr.split("\n")[0])
+
+
 def main():
     print("=" * 70)
     print("  Cut download progress harness (issue #161)")
@@ -433,6 +609,9 @@ def main():
     test_structure()
     test_side_files()
     test_real_ffmpeg()
+    test_stop_spares_converter()
+    test_paused_cut()
+    test_real_percentage()
     print("\n" + "=" * 70)
     print(f"  {PASS_COUNT} passed, {FAIL_COUNT} failed, {SKIP_COUNT} skipped")
     print("=" * 70)

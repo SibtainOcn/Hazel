@@ -1326,7 +1326,6 @@ private fun MediaCard(
     processingSteps: List<ProcessingStep> = emptyList(),
     processingStep: Int = 0,
     progress: Float,
-    /** A cut with nothing to measure it by yet: the stage track runs on its own. */
     unmeasured: Boolean = false,
     isComplete: Boolean,
     batchItem: BatchItem?,
