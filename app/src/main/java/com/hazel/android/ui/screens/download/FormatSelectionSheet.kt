@@ -237,13 +237,11 @@ fun FormatSelectionSheet(
         buildStops(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel, ends)
     }
 
-    // The rail earns its width only when it splits the list into more than one part. While
-    // a link is still being read, a video list will have resolutions to split into shortly,
-    // so the rail is there from the start rather than pushing the list aside as they land.
-    // A video list not read yet, or whose read failed, keeps it too, so the ladder always
-    // looks like the ladder rather than switching to the wide single list.
-    val showRail = stops.size > 2 ||
-        (info.videoFormats.isNotEmpty() && (isLoadingFormats || !info.hasResolvedFormats))
+    // The rail earns its width only when it splits a real list into more than one part.
+    // The ladder a link offers before it is read, and the set's own ladder, are one short
+    // list with nothing to split, so they fill the sheet; the rail comes in once the read
+    // lands with resolutions to sort into.
+    val showRail = info.hasResolvedFormats && stops.size > 2
 
     // Opens on the step of the preferred quality set in settings, or the nearest one below
     // it, so the list starts where the download would land. With no preference it opens on
@@ -1105,7 +1103,7 @@ fun FormatRow(
                     "id: ${shortId(format.formatId)}",
                     style = MaterialTheme.typography.labelMedium,
                     fontSize = if (compact) 10.sp else MaterialTheme.typography.labelMedium.fontSize,
-                    color = scheme.onSurface.copy(alpha = if (selected) 0.6f else 0.45f),
+                    color = scheme.onSurface.copy(alpha = if (selected) 0.72f else 0.62f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.widthIn(max = if (compact) 64.dp else 96.dp)
@@ -1165,7 +1163,7 @@ fun FormatRow(
                     }
                     // Said once, on the ladder's rows: the step is matched to a real stream
                     // when the download starts, so there is no codec or size to show yet.
-                    if (generic) MetaBadge(stringResource(R.string.format_generic_badge), tone = BadgeTone.ACCENT)
+                    if (generic) MetaBadge(stringResource(R.string.format_generic_badge), tone = BadgeTone.SIZE)
                     if (codec.isNotBlank()) MetaBadge(codec)
                     if (size.isNotBlank()) MetaBadge(size, tone = BadgeTone.SIZE)
                     if (bitrate.isNotBlank()) MetaBadge(bitrate, tone = BadgeTone.ACCENT)
