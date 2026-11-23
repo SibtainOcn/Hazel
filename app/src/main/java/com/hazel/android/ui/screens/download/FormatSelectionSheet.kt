@@ -72,6 +72,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.toShape
 import com.hazel.android.ui.components.ModalBottomSheet
 import com.hazel.android.ui.components.loadingPhase
+import com.hazel.android.ui.screens.more.groupShape
 import com.hazel.android.ui.components.FormatRailShimmer
 import kotlinx.coroutines.delay
 import androidx.compose.material3.Surface
@@ -279,6 +280,8 @@ fun FormatSelectionSheet(
             ?: stops.first()
     }
     val rows = active.rows
+    // Each entry's place in its section, for the connected group shapes of the plain list.
+    val groupPlaces = remember(rows) { groupPlacesOf(rows) }
 
     val listState = rememberLazyListState()
 
@@ -466,7 +469,7 @@ fun FormatSelectionSheet(
                         .weight(1f)
                         .then(if (showRail) Modifier.fillMaxHeight() else Modifier)
                         .keepFlingInSheet(),
-                    verticalArrangement = Arrangement.spacedBy(if (showRail) 6.dp else 0.dp),
+                    verticalArrangement = Arrangement.spacedBy(if (showRail) 6.dp else PLAIN_LIST_GAP),
                     contentPadding = PaddingValues(bottom = bottomInset)
                 ) {
                     items(
@@ -496,7 +499,12 @@ fun FormatSelectionSheet(
                                 compact = showRail,
                                 modifier = motion
                             )
-                            is FormatListRow.Entry -> Box(modifier = motion) {
+                            is FormatListRow.Entry -> Box(
+                                modifier = if (showRail) motion else motion.padding(horizontal = PLAIN_LIST_GUTTER)
+                            ) {
+                                // Without the rail the rows sit as one connected group per
+                                // section, the way settings lists do, at the rail list's height.
+                                val (position, count) = groupPlaces[index] ?: (0 to 1)
                                 FormatRow(
                                     format = row.format,
                                     // By id: a list rebuilt while formats arrive holds new
@@ -504,7 +512,9 @@ fun FormatSelectionSheet(
                                     selected = row.format.formatId == draft?.formatId,
                                     onClick = { draft = row.format },
                                     mergeAudio = mergeAudio,
-                                    compact = showRail
+                                    compact = true,
+                                    shape = if (showRail) RoundedCornerShape(14.dp) else groupShape(position, count),
+                                    tagId = !showRail
                                 )
                             }
                         }
@@ -1074,7 +1084,10 @@ fun FormatRow(
     pendingBadges: Boolean = false,
     popBadges: Boolean = false,
     /** Whether a picked row's badge turns into the pentagon, which only the list's rows do. */
-    pickedShape: Boolean = true
+    pickedShape: Boolean = true,
+    shape: Shape = RoundedCornerShape(14.dp),
+    /** A ladder step's id as a tag after its Auto tag, in the list without the side rail. */
+    tagId: Boolean = !compact
 ) {
     val scheme = MaterialTheme.colorScheme
     val fill by animateColorAsState(
@@ -1093,7 +1106,7 @@ fun FormatRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(shape)
             .drawBehind { drawRect(fill) }
             .clickable(onClick = onClick)
             .padding(horizontal = if (compact) 10.dp else 14.dp, vertical = 8.dp),
@@ -1126,7 +1139,7 @@ fun FormatRow(
                 )
                 // The plain ladder (no rail) carries the id as a tag after its Auto tag; the
                 // sorted list keeps it beside the headline.
-                val idAsTag = format.isGeneric && !compact
+                val idAsTag = format.isGeneric && tagId
                 if (!idAsTag) {
                     Spacer(modifier = Modifier.width(if (compact) 6.dp else 8.dp))
                     // Bounded, so a long DASH id ("dash-1234…") ellipsizes in its own corner
@@ -1170,7 +1183,7 @@ fun FormatRow(
 
             // A ladder row while the formats are read holds the places the real badges will
             // take, rather than saying it will be matched later.
-            val idTag = "id: ${shortId(format.formatId)}".takeIf { generic && !compact }
+            val idTag = "id: ${shortId(format.formatId)}".takeIf { generic && tagId }
             if (pendingBadges && (generic || !hasBadges)) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -1202,7 +1215,7 @@ fun FormatRow(
                     // when the download starts, so there is no codec or size to show yet.
                     if (generic) MetaBadge(
                         stringResource(R.string.format_generic_badge),
-                        tone = if (compact) BadgeTone.ACCENT else BadgeTone.SIZE
+                        tone = if (tagId) BadgeTone.SIZE else BadgeTone.ACCENT
                     )
                     if (codec.isNotBlank()) MetaBadge(codec)
                     if (size.isNotBlank()) MetaBadge(size, tone = BadgeTone.SIZE)
@@ -1330,6 +1343,23 @@ private val badgeMorph by lazy { Morph(MaterialShapes.Cookie6Sided, MaterialShap
 private const val BADGE_TURN_DEGREES = 72f
 
 private const val PICKED_TINT = 0.18f
+
+/** Each entry's index within the run of entries between two headers, and that run's size. */
+private fun groupPlacesOf(rows: List<FormatListRow>): Map<Int, Pair<Int, Int>> {
+    val places = HashMap<Int, Pair<Int, Int>>(rows.size)
+    var start = 0
+    while (start < rows.size) {
+        if (rows[start] !is FormatListRow.Entry) { start++; continue }
+        var end = start
+        while (end < rows.size && rows[end] is FormatListRow.Entry) end++
+        for (i in start until end) places[i] = (i - start) to (end - start)
+        start = end
+    }
+    return places
+}
+
+private val PLAIN_LIST_GUTTER = 14.dp
+private val PLAIN_LIST_GAP = 3.dp
 
 /** How long the skeleton stands in when the real formats replace the plain ladder. */
 private const val REVEAL_SKELETON_MS = 1000L
