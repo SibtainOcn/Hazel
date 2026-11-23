@@ -495,7 +495,6 @@
     <string name="batch_type_audio">Аудио</string>
     <string name="batch_type_video">Видео</string>
     <string name="batch_container_title">Контейнер</string>
-    <string name="batch_container_subtitle">Формат файла для сохранения ссылок</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Обложка</string>

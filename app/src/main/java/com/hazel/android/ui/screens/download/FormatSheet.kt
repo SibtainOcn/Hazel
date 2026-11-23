@@ -21,7 +21,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import com.hazel.android.ui.screens.download.batch.BatchContainerSheet
+import com.hazel.android.ui.screens.download.batch.ContainerDialog
 import kotlinx.coroutines.delay
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
@@ -570,6 +570,8 @@ fun FormatSheet(
                         // that will be used is named alongside it.
                         mergeAudio = info.mergeAudioFor(audioLanguage)?.takeIf { videoTab },
                         showMergeId = true,
+                        // The list's own pick is the pentagon; this row only says what is set.
+                        pickedShape = false,
                         pendingBadges = formatsPending,
                         popBadges = waitedForFormats
                     )
@@ -868,10 +870,8 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
-        // A sheet of its own rather than a menu: nine audio containers are more than a menu
-        // anchored to a field shows comfortably, and the set-of-links sheet already picks
-        // the container this way.
-        SheetDialog.CONTAINER -> BatchContainerSheet(
+        // The app's choice dialog, the same one settings use; nine audio containers scroll in it.
+        SheetDialog.CONTAINER -> ContainerDialog(
             isVideo = videoTab,
             current = container,
             onSelect = { stored ->

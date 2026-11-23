@@ -47,6 +47,7 @@ import com.hazel.android.R
 import com.hazel.android.download.AUDIO_CONTAINERS
 import com.hazel.android.download.AUDIO_QUALITY_STEPS
 import com.hazel.android.download.VIDEO_CONTAINERS
+import com.hazel.android.ui.screens.more.SingleChoiceDialog
 import com.hazel.android.download.WORST_HEIGHT
 import com.hazel.android.ui.components.keepFlingInSheet
 
@@ -148,30 +149,23 @@ fun BatchBitrateSheet(
     }
 }
 
-/** Output container, which is the same choice the single download sheet offers. */
+/** Output container, the same choice in the single download sheet and the set's sheet. */
 @Composable
-fun BatchContainerSheet(
+fun ContainerDialog(
     isVideo: Boolean,
     current: String,
     onSelect: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
     val choices = if (isVideo) VIDEO_CONTAINERS else AUDIO_CONTAINERS
-
-    ChoiceSheet(
+    // "Default" is stored as blank: it means "add no container option".
+    SingleChoiceDialog(
         title = stringResource(R.string.batch_container_title),
-        subtitle = stringResource(R.string.batch_container_subtitle),
+        choices = choices.map { (if (it == "Default") "" else it) to it },
+        selected = current,
+        onSelect = onSelect,
         onDismiss = onDismiss
-    ) { close ->
-        choices.forEach { choice ->
-            ChoiceRow(
-                label = choice,
-                selected = choice == current.ifBlank { "Default" },
-                // "Default" is stored as blank: it means "add no container option".
-                onClick = { close { onSelect(if (choice == "Default") "" else choice) } }
-            )
-        }
-    }
+    )
 }
 
 /**

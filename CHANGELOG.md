@@ -19,6 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The download card counts the picked audio language's track, not the default one.
 - A queued, paused or running link's sheet lists every quality again, not only the one picked.
 - The picked row in the format list is easy to see on every accent, and its badge turns into a pentagon.
+- The download sheet and format list open faster the first time.
+- Format list: before a link is read, and in the multi-link quality list, the ladder fills the sheet without the side rail, which appears once real formats arrive (#159).
+- Format list without the side rail: the Auto tag uses the size badge's blue, and each step's id is shown as its own tag.
+- The container choice opens in the app's choice dialog instead of a bottom sheet.
+- Format sheets: loading placeholders move together on one slower loop.
+- Format list: when real formats arrive, the list and rail show the loading skeleton for a moment before the rail appears.
+- Loading skeletons are easier to see on light and light glass themes.
+- Format list without the side rail: shorter rows, grouped on connected cards like the settings lists.
 - Multi-link sheet: a quality picked for a link while it is still being read is kept (#157).
 - Trimmed downloads show a real percentage and time left instead of sitting at 0%.
 - A trimmed download's history entry shows the kept length, not the whole video's.

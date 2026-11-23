@@ -996,7 +996,7 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
-        BatchSheet.CONTAINER -> BatchContainerSheet(
+        BatchSheet.CONTAINER -> ContainerDialog(
             isVideo = state.videoTab,
             current = if (state.videoTab) options.videoContainer else options.audioContainer,
             onSelect = { choice ->
