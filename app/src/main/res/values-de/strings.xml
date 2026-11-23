@@ -894,6 +894,10 @@
     <string name="save_location_tag_internal">Intern</string>
     <string name="save_location_tag_card">SD-Karte</string>
     <string name="save_location_recent_missing">Dieser Ordner ist weg oder Hazel kann nicht mehr hineinschreiben, daher wurde er aus der Liste entfernt.</string>
+    <string name="save_location_open_title">Ort konnte nicht geöffnet werden</string>
+    <string name="save_location_open_missing">%1$s ist nicht mehr da oder Hazel kommt nicht heran. Wähle ihn erneut oder einen anderen Ort.</string>
+    <string name="save_location_open_no_app">Keine App auf diesem Gerät konnte %1$s öffnen.</string>
+    <string name="save_location_current_missing">%1$s ist nicht mehr da oder Hazel kann nicht hineinschreiben. Wähle ihn erneut oder einen anderen Ort.</string>
     <string name="save_location_error_title">Ordner nicht verwendbar</string>
     <string name="save_location_error_access">Android hat Hazel keinen dauerhaften Zugriff auf diesen Ordner gegeben. Versuche es erneut oder wähle einen anderen.</string>
     <string name="save_location_error_no_picker">Keine App auf diesem Gerät kann Ordner auswählen.</string>

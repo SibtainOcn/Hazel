@@ -71,7 +71,6 @@ class SaveLocationScreenLayoutTest(
                         isVideo = true,
                         saveDir = SaveDir(MOVIES, "Movies/Cartoons"),
                         label = "Movies/Cartoons",
-                        onOpen = {},
                         onPick = {},
                         onReset = {},
                         onUseRecent = { used = it },
@@ -118,7 +117,6 @@ class SaveLocationScreenLayoutTest(
                     isVideo = true,
                     saveDir = SaveDir(),
                     label = "",
-                    onOpen = {},
                     onPick = {},
                     onReset = {},
                     onUseRecent = { used = it },
@@ -138,5 +136,31 @@ class SaveLocationScreenLayoutTest(
         }
         assertEquals(null, used)
         assertTrue(runBlocking { SettingsRepository.getRecentFolders(context).first() }.isEmpty())
+    }
+
+    @Test
+    fun `a saved folder that was deleted is pointed out in the dialog`() {
+        RuntimeEnvironment.setQualifiers("$locale-w320dp-h640dp")
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        runBlocking { SettingsRepository.clearRecentFolders(context) }
+        compose.setContent {
+            HazelTheme(darkTheme = dark, glass = glass) {
+                SaveLocationScreen(
+                    isVideo = true,
+                    saveDir = SaveDir(OGGY, "Documents/Oggy"),
+                    label = "Documents/Oggy",
+                    onPick = {},
+                    onReset = {},
+                    onUseRecent = {},
+                    onDismiss = {},
+                    usable = { _, _ -> false }
+                )
+            }
+        }
+        val message = context.getString(R.string.save_location_current_missing, "Documents/Oggy")
+        compose.waitUntil(5_000) {
+            compose.onAllNodesWithText(message, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+        }
+        saveScreen("save-location-missing-$look")
     }
 }

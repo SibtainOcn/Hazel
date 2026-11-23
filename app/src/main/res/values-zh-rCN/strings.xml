@@ -879,6 +879,10 @@
     <string name="save_location_tag_internal">内部</string>
     <string name="save_location_tag_card">SD 卡</string>
     <string name="save_location_recent_missing">该文件夹已不存在或 Hazel 无法再写入，已从列表中移除。</string>
+    <string name="save_location_open_title">无法打开该位置</string>
+    <string name="save_location_open_missing">%1$s 已不存在，或 Hazel 无法访问。请重新选择或选择其他位置。</string>
+    <string name="save_location_open_no_app">此设备上没有应用能打开 %1$s。</string>
+    <string name="save_location_current_missing">%1$s 已不存在，或 Hazel 无法写入。请重新选择或选择其他位置。</string>
     <string name="save_location_error_title">无法使用该文件夹</string>
     <string name="save_location_error_access">Android 未允许 Hazel 保留对该文件夹的访问权限。请重试或选择其他文件夹。</string>
     <string name="save_location_error_no_picker">此设备上没有可选择文件夹的应用。</string>

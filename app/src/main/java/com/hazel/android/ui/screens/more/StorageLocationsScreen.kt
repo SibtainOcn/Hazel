@@ -59,7 +59,6 @@ import com.hazel.android.data.SaveDirs
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.ui.screens.download.SaveLocationScreen
 import com.hazel.android.ui.screens.download.rememberSaveDirPicker
-import com.hazel.android.util.MediaOpener
 import kotlinx.coroutines.launch
 
 /**
@@ -205,10 +204,6 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
             isVideo = isVideo,
             saveDir = saveDirs.of(isVideo),
             label = saveDirs.labelOf(isVideo),
-            onOpen = {
-                dirDialogFor = null
-                MediaOpener.openLocation(context, saveDirs.of(isVideo).uri, isVideo)
-            },
             onPick = { card ->
                 dirDialogFor = null
                 pickSaveDir(isVideo, card)

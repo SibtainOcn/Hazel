@@ -2,6 +2,9 @@ package com.hazel.android.ui.screens.download
 
 import android.content.Context
 import android.text.format.Formatter
+import androidx.compose.runtime.LaunchedEffect
+import androidx.annotation.StringRes
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -104,7 +107,6 @@ internal fun SaveLocationScreen(
     isVideo: Boolean,
     saveDir: SaveDir,
     label: String,
-    onOpen: () -> Unit,
     /** Given the card to save to, or null to pick any folder. */
     onPick: (card: SdCard?) -> Unit,
     onReset: () -> Unit,
@@ -122,7 +124,7 @@ internal fun SaveLocationScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
-    var problem by remember { mutableStateOf<Int?>(null) }
+    var problem by remember { mutableStateOf<Problem?>(null) }
 
     val onCard = remember(saveDir.uri) { SdCards.cardOf(saveDir.uri, context) }
     val folderBytes by produceState<Long?>(null, saveDir.uri, onCard) {
@@ -147,6 +149,14 @@ internal fun SaveLocationScreen(
         }
     }
 
+    // The folder in use is checked once as the screen opens, so a deleted or unreachable
+    // folder is pointed out before anything is saved there.
+    LaunchedEffect(saveDir.uri) {
+        if (saveDir.isCustom && !withContext(Dispatchers.IO) { usable(context, saveDir.uri) }) {
+            problem = Problem(R.string.save_location_error_title, R.string.save_location_current_missing, label)
+        }
+    }
+
     // Checks the folder is still usable before acting on it; when it is not, says so and
     // takes it off the list.
     fun withRecent(dir: SaveDir, action: suspend () -> Unit) {
@@ -156,10 +166,31 @@ internal fun SaveLocationScreen(
                 action()
             } else {
                 runCatching { SettingsRepository.removeRecentFolders(context, setOf(dir.uri)) }
-                problem = R.string.save_location_recent_missing
+                problem = Problem(R.string.save_location_error_title, R.string.save_location_recent_missing)
             }
         }
     }
+
+    // Opens a location in a file manager once it is known to be there; a folder that is gone
+    // and a device with nothing to open it are each said in the screen's own dialog.
+    fun reveal(path: String, there: () -> Boolean, open: () -> Boolean) {
+        scope.launch {
+            val found = withContext(Dispatchers.IO) { runCatching(there).getOrDefault(false) }
+            problem = when {
+                !found -> Problem(R.string.save_location_open_title, R.string.save_location_open_missing, path)
+                !runCatching(open).getOrDefault(false) ->
+                    Problem(R.string.save_location_open_title, R.string.save_location_open_no_app, path)
+                else -> return@launch
+            }
+        }
+    }
+    fun revealInternal() = internalFolder().let { folder ->
+        // The built-in folder is always offered: it is made on the way if it is missing.
+        reveal(internalPath, { true }, { FolderUtil.tryOpen(context, folder) })
+    }
+    fun revealTree(uri: String, path: String) =
+        reveal(path, { usable(context, uri) }, { FolderUtil.tryOpenTree(context, Uri.parse(uri)) })
+    fun revealCurrent() = if (saveDir.isCustom) revealTree(saveDir.uri, label) else revealInternal()
     fun hold(open: () -> Unit) {
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         open()
@@ -171,65 +202,63 @@ internal fun SaveLocationScreen(
     ) {
         Surface(modifier = Modifier.fillMaxSize().glassScreen(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SoftIconButton(onClick = onDismiss, corner = 22.dp, modifier = Modifier.padding(start = 8.dp)) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBackIos,
-                            contentDescription = stringResource(R.string.settings_back),
-                            modifier = Modifier.size(20.dp).padding(start = 4.dp)
-                        )
-                    }
-                }
-
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 20.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .clip(MaterialShapes.Cookie7Sided.toShape())
-                                .background(MaterialTheme.colorScheme.onSurface),
-                            contentAlignment = Alignment.Center
-                        ) {
+                    // The back button shares the top line with the folder badge, so the screen
+                    // starts with its content rather than with a bar of its own.
+                    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                        SoftIconButton(onClick = onDismiss, corner = 22.dp, modifier = Modifier.align(Alignment.TopStart)) {
                             Icon(
-                                Icons.Filled.Folder,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.inverseOnSurface,
-                                modifier = Modifier.size(28.dp)
+                                Icons.AutoMirrored.Filled.ArrowBackIos,
+                                contentDescription = stringResource(R.string.settings_back),
+                                modifier = Modifier.size(20.dp).padding(start = 4.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.height(14.dp))
-                        Text(
-                            title,
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            stringResource(R.string.save_location_hold_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            textAlign = TextAlign.Center
-                        )
-                        if (body != null) {
-                            Spacer(modifier = Modifier.height(4.dp))
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(MaterialShapes.Cookie7Sided.toShape())
+                                    .background(MaterialTheme.colorScheme.onSurface),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Filled.Folder,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.inverseOnSurface,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(14.dp))
                             Text(
-                                body,
+                                title,
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                stringResource(R.string.save_location_hold_hint),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 textAlign = TextAlign.Center
                             )
+                            if (body != null) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    body,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
                     }
 
@@ -245,7 +274,7 @@ internal fun SaveLocationScreen(
                             selected = !saveDir.isCustom,
                             shape = locationShape(0, places),
                             onClick = onReset,
-                            onLongClick = { hold { FolderUtil.open(context, internalFolder()) } }
+                            onLongClick = { hold { revealInternal() } }
                         )
                         volumes.cards.forEachIndexed { index, (card, space) ->
                             val selected = onCard?.uuid == card.uuid
@@ -261,8 +290,10 @@ internal fun SaveLocationScreen(
                                 onClick = { onPick(card) },
                                 onLongClick = {
                                     hold {
-                                        if (selected) FolderUtil.openTree(context, android.net.Uri.parse(saveDir.uri))
-                                        else FolderUtil.openVolume(context, card.uuid)
+                                        if (selected) revealTree(saveDir.uri, label)
+                                        else reveal(card.name, { SdCards.list(context).any { it.uuid == card.uuid } }) {
+                                            FolderUtil.tryOpenVolume(context, card.uuid)
+                                        }
                                     }
                                 }
                             )
@@ -279,7 +310,7 @@ internal fun SaveLocationScreen(
                             shape = locationShape(places - 1, places),
                             onClick = { onPick(null) },
                             onLongClick = if (other) {
-                                { hold { FolderUtil.openTree(context, android.net.Uri.parse(saveDir.uri)) } }
+                                { hold { revealTree(saveDir.uri, label) } }
                             } else null
                         )
                     }
@@ -316,11 +347,21 @@ internal fun SaveLocationScreen(
                                         withRecent(dir) {
                                             runCatching { onUseRecent(dir) }
                                                 .onSuccess { onDismiss() }
-                                                .onFailure { problem = R.string.save_location_error_access }
+                                                .onFailure { problem = Problem(R.string.save_location_error_title, R.string.save_location_error_access) }
                                         }
                                     },
                                     onLongClick = {
-                                        hold { withRecent(dir) { FolderUtil.openTree(context, android.net.Uri.parse(dir.uri)) } }
+                                        hold {
+                                            withRecent(dir) {
+                                                if (!runCatching { FolderUtil.tryOpenTree(context, Uri.parse(dir.uri)) }.getOrDefault(false)) {
+                                                    problem = Problem(
+                                                        R.string.save_location_open_title,
+                                                        R.string.save_location_open_no_app,
+                                                        dir.label.ifBlank { dir.uri }
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 )
                             }
@@ -340,7 +381,7 @@ internal fun SaveLocationScreen(
                     TextButton(onClick = onDismiss) {
                         Text(stringResource(R.string.save_location_close), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
-                    Button(onClick = onOpen) {
+                    Button(onClick = ::revealCurrent) {
                         Text(
                             stringResource(R.string.format_sheet_open_folder),
                             fontWeight = FontWeight.SemiBold,
@@ -352,12 +393,12 @@ internal fun SaveLocationScreen(
             }
         }
 
-        problem?.let { message ->
+        problem?.let { shown ->
             AlertDialog(
                 onDismissRequest = { problem = null },
                 icon = { Icon(Icons.Filled.ErrorOutline, null) },
-                title = { Text(stringResource(R.string.save_location_error_title), fontWeight = FontWeight.Bold) },
-                text = { Text(stringResource(message)) },
+                title = { Text(stringResource(shown.title), fontWeight = FontWeight.Bold) },
+                text = { Text(if (shown.path != null) stringResource(shown.message, shown.path) else stringResource(shown.message)) },
                 confirmButton = {
                     TextButton(onClick = { problem = null }) { Text(stringResource(R.string.save_location_close)) }
                 }
@@ -367,6 +408,9 @@ internal fun SaveLocationScreen(
 }
 
 private class Recent(val dir: SaveDir, val onCard: Boolean)
+
+/** What went wrong, for the screen's dialog; [path] fills the message's placeholder when it has one. */
+private class Problem(@StringRes val title: Int, @StringRes val message: Int, val path: String? = null)
 
 /** Internal storage and the cards that are in right now, each with how much room it has. */
 private class Volumes(val internal: StorageSpace?, val cards: List<Pair<SdCard, StorageSpace?>>) {

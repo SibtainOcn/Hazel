@@ -894,6 +894,10 @@
     <string name="save_location_tag_internal">इंटरनल</string>
     <string name="save_location_tag_card">SD कार्ड</string>
     <string name="save_location_recent_missing">वह फ़ोल्डर अब नहीं है या Hazel उसमें लिख नहीं सकता, इसलिए उसे सूची से हटा दिया गया।</string>
+    <string name="save_location_open_title">वह लोकेशन खुल नहीं सकी</string>
+    <string name="save_location_open_missing">%1$s अब नहीं है या Hazel उस तक नहीं पहुँच सकता। उसे फिर से चुनें या कोई दूसरी लोकेशन चुनें।</string>
+    <string name="save_location_open_no_app">इस डिवाइस पर कोई ऐप %1$s नहीं खोल सका।</string>
+    <string name="save_location_current_missing">%1$s अब नहीं है या Hazel उसमें लिख नहीं सकता। उसे फिर से चुनें या कोई दूसरी लोकेशन चुनें।</string>
     <string name="save_location_error_title">वह फ़ोल्डर इस्तेमाल नहीं हो सका</string>
     <string name="save_location_error_access">Android ने Hazel को उस फ़ोल्डर की पहुँच बनाए रखने नहीं दी। फिर कोशिश करें या कोई दूसरा चुनें।</string>
     <string name="save_location_error_no_picker">इस डिवाइस पर कोई ऐप फ़ोल्डर नहीं चुन सकता।</string>

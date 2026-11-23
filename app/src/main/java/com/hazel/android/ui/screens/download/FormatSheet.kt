@@ -182,7 +182,6 @@ fun FormatSheet(
      */
     onPlay: (() -> Unit)? = null,
     /** Each is given the kind the sheet is on: true for video. */
-    onOpenSaveDir: (isVideo: Boolean) -> Unit,
     /** Given the card to save to, or null to pick any folder. */
     onPickSaveDir: (isVideo: Boolean, card: SdCard?) -> Unit,
     onResetSaveDir: (isVideo: Boolean) -> Unit,
@@ -915,10 +914,6 @@ fun FormatSheet(
             isVideo = videoTab,
             saveDir = saveDirs.of(videoTab),
             label = saveDirs.labelOf(videoTab),
-            onOpen = {
-                openDialog = SheetDialog.NONE
-                onOpenSaveDir(videoTab)
-            },
             onPick = { card ->
                 openDialog = SheetDialog.NONE
                 onPickSaveDir(videoTab, card)

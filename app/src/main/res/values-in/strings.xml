@@ -879,6 +879,10 @@
     <string name="save_location_tag_internal">Internal</string>
     <string name="save_location_tag_card">Kartu SD</string>
     <string name="save_location_recent_missing">Folder itu sudah tidak ada atau Hazel tidak bisa lagi menulis ke sana, jadi dihapus dari daftar.</string>
+    <string name="save_location_open_title">Tidak bisa membuka lokasi itu</string>
+    <string name="save_location_open_missing">%1$s sudah tidak ada atau tidak bisa dijangkau Hazel. Pilih lagi atau pilih lokasi lain.</string>
+    <string name="save_location_open_no_app">Tidak ada aplikasi di perangkat ini yang bisa membuka %1$s.</string>
+    <string name="save_location_current_missing">%1$s sudah tidak ada atau Hazel tidak bisa menulis ke sana. Pilih lagi atau pilih lokasi lain.</string>
     <string name="save_location_error_title">Folder itu tidak bisa dipakai</string>
     <string name="save_location_error_access">Android tidak mengizinkan Hazel mempertahankan akses ke folder itu. Coba lagi atau pilih folder lain.</string>
     <string name="save_location_error_no_picker">Tidak ada aplikasi di perangkat ini yang bisa memilih folder.</string>

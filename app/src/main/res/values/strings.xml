@@ -978,6 +978,10 @@
     <string name="save_location_tag_internal">Internal</string>
     <string name="save_location_tag_card">SD card</string>
     <string name="save_location_recent_missing">That folder is gone or Hazel can no longer write to it, so it was taken off the list.</string>
+    <string name="save_location_open_title">Couldn\'t open that location</string>
+    <string name="save_location_open_missing">%1$s is no longer there, or Hazel can\'t reach it. Pick it again or choose another location.</string>
+    <string name="save_location_open_no_app">No app on this device could open %1$s.</string>
+    <string name="save_location_current_missing">%1$s is no longer there, or Hazel can\'t write to it. Pick it again or choose another location.</string>
     <string name="save_location_error_title">Couldn\'t use that folder</string>
     <string name="save_location_error_access">Android didn\'t let Hazel keep access to that folder. Try again, or pick a different one.</string>
     <string name="save_location_error_no_picker">No app on this device can pick folders.</string>

@@ -25,7 +25,6 @@ import com.hazel.android.download.InfoCache
 import com.hazel.android.download.QueueAdjust
 import com.hazel.android.ui.screens.download.FormatSheet
 import com.hazel.android.ui.screens.download.rememberSaveDirPicker
-import com.hazel.android.util.MediaOpener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -87,7 +86,6 @@ fun QueuedItemSheet(
         isLoadingFormats = reading,
         initialAudioLanguage = item.audioLanguage,
         confirmAsApply = true,
-        onOpenSaveDir = { isVideo -> MediaOpener.openLocation(context, saveDirs.of(isVideo).uri, isVideo) },
         onPickSaveDir = pickSaveDir,
         onResetSaveDir = { isVideo -> scope.launch { SettingsRepository.resetSaveDir(context, isVideo) } },
         // The one-off fields are not offered when adjusting, so the link's own cut and live

@@ -909,6 +909,10 @@
     <string name="save_location_tag_internal">Interno</string>
     <string name="save_location_tag_card">Cartão SD</string>
     <string name="save_location_recent_missing">Essa pasta não existe mais ou o Hazel não pode mais gravar nela, então ela foi removida da lista.</string>
+    <string name="save_location_open_title">Não foi possível abrir esse local</string>
+    <string name="save_location_open_missing">%1$s não existe mais ou o Hazel não consegue acessá-lo. Escolha de novo ou outro local.</string>
+    <string name="save_location_open_no_app">Nenhum app deste dispositivo conseguiu abrir %1$s.</string>
+    <string name="save_location_current_missing">%1$s não existe mais ou o Hazel não consegue gravar nele. Escolha de novo ou outro local.</string>
     <string name="save_location_error_title">Não foi possível usar essa pasta</string>
     <string name="save_location_error_access">O Android não deixou o Hazel manter o acesso a essa pasta. Tente de novo ou escolha outra.</string>
     <string name="save_location_error_no_picker">Nenhum app deste aparelho consegue escolher pastas.</string>

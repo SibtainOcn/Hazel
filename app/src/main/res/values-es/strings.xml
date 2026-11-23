@@ -909,6 +909,10 @@
     <string name="save_location_tag_internal">Interno</string>
     <string name="save_location_tag_card">Tarjeta SD</string>
     <string name="save_location_recent_missing">Esa carpeta ya no existe o Hazel ya no puede escribir en ella, así que se quitó de la lista.</string>
+    <string name="save_location_open_title">No se pudo abrir esa ubicación</string>
+    <string name="save_location_open_missing">%1$s ya no está o Hazel no puede acceder. Vuelve a elegirla o elige otra ubicación.</string>
+    <string name="save_location_open_no_app">Ninguna app de este dispositivo pudo abrir %1$s.</string>
+    <string name="save_location_current_missing">%1$s ya no está o Hazel no puede escribir en ella. Vuelve a elegirla o elige otra ubicación.</string>
     <string name="save_location_error_title">No se pudo usar esa carpeta</string>
     <string name="save_location_error_access">Android no permitió que Hazel conservara el acceso a esa carpeta. Inténtalo de nuevo o elige otra.</string>
     <string name="save_location_error_no_picker">Ninguna app de este dispositivo puede elegir carpetas.</string>

@@ -879,6 +879,10 @@
     <string name="save_location_tag_internal">内部</string>
     <string name="save_location_tag_card">SDカード</string>
     <string name="save_location_recent_missing">そのフォルダは見つからないか、Hazel が書き込めなくなったため、一覧から削除しました。</string>
+    <string name="save_location_open_title">その場所を開けませんでした</string>
+    <string name="save_location_open_missing">%1$s が見つからないか、Hazel からアクセスできません。もう一度選ぶか、別の場所を選んでください。</string>
+    <string name="save_location_open_no_app">この端末には %1$s を開けるアプリがありません。</string>
+    <string name="save_location_current_missing">%1$s が見つからないか、Hazel が書き込めません。もう一度選ぶか、別の場所を選んでください。</string>
     <string name="save_location_error_title">そのフォルダを使用できません</string>
     <string name="save_location_error_access">Android により、Hazel はそのフォルダへのアクセスを保持できませんでした。もう一度試すか、別のフォルダを選んでください。</string>
     <string name="save_location_error_no_picker">この端末にはフォルダを選択できるアプリがありません。</string>

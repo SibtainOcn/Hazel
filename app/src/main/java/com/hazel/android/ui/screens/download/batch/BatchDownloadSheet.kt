@@ -179,7 +179,6 @@ fun BatchDownloadSheet(
     /** Where audio and video are saved; the set shows the one for its current kind. */
     saveDirs: SaveDirs,
     /** Each is given the kind in question: true for video. */
-    onOpenSaveDir: (isVideo: Boolean) -> Unit,
     onPickSaveDir: (isVideo: Boolean, card: SdCard?) -> Unit,
     onResetSaveDir: (isVideo: Boolean) -> Unit,
     onResolveFormats: (MediaInfo) -> Unit,
@@ -888,7 +887,6 @@ fun BatchDownloadSheet(
             initialFormat = state.formatOf(focused),
             initialAudioLanguage = state.languageOf(focused),
             confirmAsApply = true,
-            onOpenSaveDir = onOpenSaveDir,
             onPickSaveDir = onPickSaveDir,
             onResetSaveDir = onResetSaveDir,
             onDownload = { format, audioLanguage, title, author, _ ->
@@ -1024,10 +1022,6 @@ fun BatchDownloadSheet(
             isVideo = state.videoTab,
             saveDir = saveDirs.of(state.videoTab),
             label = saveDirs.labelOf(state.videoTab),
-            onOpen = {
-                openSheet = BatchSheet.NONE
-                onOpenSaveDir(state.videoTab)
-            },
             onPick = { card ->
                 openSheet = BatchSheet.NONE
                 onPickSaveDir(state.videoTab, card)
