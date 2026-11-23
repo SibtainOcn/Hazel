@@ -292,6 +292,7 @@ object DownloadQueueRepository {
         put("sectionStart", options.sectionStart)
         put("sectionEnd", options.sectionEnd)
         put("preciseCuts", options.preciseCuts)
+        put("trimAfterDownload", options.trimAfterDownload)
         put("liveFromStart", options.liveFromStart)
         put("waitForVideo", options.waitForVideo)
     }
@@ -327,6 +328,7 @@ object DownloadQueueRepository {
             sectionStart = json.optDouble("sectionStart", -1.0),
             sectionEnd = json.optDouble("sectionEnd", -1.0),
             preciseCuts = json.optBoolean("preciseCuts"),
+            trimAfterDownload = json.optBoolean("trimAfterDownload"),
             liveFromStart = json.optBoolean("liveFromStart"),
             waitForVideo = json.optBoolean("waitForVideo")
         )

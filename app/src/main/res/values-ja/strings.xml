@@ -721,12 +721,15 @@
     <string name="processing_step_tags">タグ</string>
     <string name="processing_step_cover">カバー</string>
     <string name="processing_step_split">分割</string>
+    <string name="processing_step_trim">トリム</string>
     <string name="processing_step_save">保存</string>
     <string name="options_cut_title">カット</string>
     <string name="options_cut_start">開始</string>
     <string name="options_cut_end">終了</string>
     <string name="options_cut_precise">正確なカット</string>
-    <string name="options_cut_precise_summary">端を再エンコードして正確にカット。遅め。オフでは最寄りのキーフレームでカット。</string>
+    <string name="options_cut_precise_summary">再エンコードでフレーム単位に正確。時間がかかります。</string>
+    <string name="options_cut_local">ダウンロード後にトリミング</string>
+    <string name="options_cut_local_summary">ファイル全体を全速でダウンロードしてから切り出します。ファイル全体の空き容量が必要です。</string>
     <string name="options_cut_invalid">終了は開始より後で、長さの範囲内にしてください</string>
     <string name="options_cut_apply">カット</string>
     <string name="options_cut_clear">クリア</string>

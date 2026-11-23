@@ -522,7 +522,7 @@ fun QueueScreen(
                             liveBytes = if (inRun) state.liveBytes else 0L,
                             // A paused cut restarts on resume, so it shows no size.
                             totalBytes = if (inRun) state.totalBytes
-                            else queued?.takeUnless { it.options.hasSection }
+                            else queued?.takeUnless { it.options.cutsWhileDownloading }
                                 ?.let { it.fileSizeBytes + it.mergeAudioSizeBytes } ?: 0L,
                             eta = if (item.isDownloading) state.eta else "",
                             batchItem = item.batchItem,

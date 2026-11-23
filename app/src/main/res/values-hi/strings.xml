@@ -735,12 +735,15 @@
     <string name="processing_step_tags">टैग</string>
     <string name="processing_step_cover">कवर</string>
     <string name="processing_step_split">बाँटना</string>
+    <string name="processing_step_trim">ट्रिम</string>
     <string name="processing_step_save">सहेजना</string>
     <string name="options_cut_title">काटें</string>
     <string name="options_cut_start">शुरुआत</string>
     <string name="options_cut_end">अंत</string>
     <string name="options_cut_precise">सटीक कट</string>
-    <string name="options_cut_precise_summary">सिरों को फिर से एन्कोड करके सटीक काटता है। धीमा। बंद होने पर कट नज़दीकी कीफ़्रेम पर जाता है।</string>
+    <string name="options_cut_precise_summary">री-एन्कोड करके सटीक फ़्रेम पर। धीमा।</string>
+    <string name="options_cut_local">डाउनलोड के बाद ट्रिम करें</string>
+    <string name="options_cut_local_summary">पूरी फ़ाइल पूरी रफ़्तार से डाउनलोड करता है, फिर काटता है। पूरी फ़ाइल जितनी जगह चाहिए।</string>
     <string name="options_cut_invalid">अंत शुरुआत के बाद और लंबाई के भीतर होना चाहिए</string>
     <string name="options_cut_apply">काटें</string>
     <string name="options_cut_clear">साफ़ करें</string>

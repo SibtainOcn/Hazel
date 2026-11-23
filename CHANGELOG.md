@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
+- Cut: Trim after download, which downloads the whole file at full speed and cuts it on the device. Covers, tags, chapters and subtitle files stay in step.
 
 ### Fixed
 - Trimmed downloads show a real percentage and time left instead of sitting at 0%.

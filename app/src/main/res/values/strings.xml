@@ -814,12 +814,15 @@
     <string name="processing_step_tags">Tags</string>
     <string name="processing_step_cover">Cover</string>
     <string name="processing_step_split">Split</string>
+    <string name="processing_step_trim">Trim</string>
     <string name="processing_step_save">Save</string>
     <string name="options_cut_title">Cut</string>
     <string name="options_cut_start">Start</string>
     <string name="options_cut_end">End</string>
     <string name="options_cut_precise">Precise cuts</string>
-    <string name="options_cut_precise_summary">Cuts exactly by re-encoding the ends. Slower. Off, cuts snap to the nearest keyframe.</string>
+    <string name="options_cut_precise_summary">Exact frames, by re-encoding. Slower.</string>
+    <string name="options_cut_local">Trim after download</string>
+    <string name="options_cut_local_summary">Downloads the whole file at full speed, then cuts it. Needs room for the whole file.</string>
     <string name="options_cut_invalid">The end must come after the start, within the length</string>
     <string name="options_cut_apply">Cut</string>
     <string name="options_cut_clear">Clear</string>

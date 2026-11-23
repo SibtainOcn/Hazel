@@ -749,12 +749,15 @@
     <string name="processing_step_tags">Etiquetas</string>
     <string name="processing_step_cover">Portada</string>
     <string name="processing_step_split">Dividir</string>
+    <string name="processing_step_trim">Recortar</string>
     <string name="processing_step_save">Guardar</string>
     <string name="options_cut_title">Recortar</string>
     <string name="options_cut_start">Inicio</string>
     <string name="options_cut_end">Fin</string>
     <string name="options_cut_precise">Cortes precisos</string>
-    <string name="options_cut_precise_summary">Corta exacto recodificando los extremos. Más lento. Desactivado, corta en el fotograma clave más cercano.</string>
+    <string name="options_cut_precise_summary">Fotogramas exactos, recodificando. Más lento.</string>
+    <string name="options_cut_local">Recortar tras descargar</string>
+    <string name="options_cut_local_summary">Descarga el archivo completo a toda velocidad y luego lo corta. Necesita espacio para todo el archivo.</string>
     <string name="options_cut_invalid">El fin debe ir después del inicio, dentro de la duración</string>
     <string name="options_cut_apply">Recortar</string>
     <string name="options_cut_clear">Borrar</string>

@@ -87,7 +87,7 @@ fun CutSheet(
     thumbnail: String?,
     durationSeconds: Int,
     current: OneOffOptions,
-    onApply: (start: Double, end: Double, precise: Boolean) -> Unit,
+    onApply: (start: Double, end: Double, precise: Boolean, trimAfter: Boolean) -> Unit,
     onClear: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -108,6 +108,7 @@ fun CutSheet(
         )
     }
     var precise by remember { mutableStateOf(current.preciseCuts) }
+    var trimAfter by remember { mutableStateOf(current.trimAfterDownload) }
 
     // Media whose length was unknown until the player read it gets its end filled in then.
     LaunchedEffect(duration) {
@@ -256,12 +257,14 @@ fun CutSheet(
             ToggleRow(
                 label = stringResource(R.string.options_cut_precise),
                 checked = precise,
-                onCheckedChange = { precise = it }
+                onCheckedChange = { precise = it },
+                summary = stringResource(R.string.options_cut_precise_summary)
             )
-            Text(
-                stringResource(R.string.options_cut_precise_summary),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+            ToggleRow(
+                label = stringResource(R.string.options_cut_local),
+                checked = trimAfter,
+                onCheckedChange = { trimAfter = it },
+                summary = stringResource(R.string.options_cut_local_summary)
             )
             Spacer(modifier = Modifier.height(16.dp))
             // Clear at the start, Cancel and Apply at the end; they move under Clear, and Apply
@@ -278,7 +281,7 @@ fun CutSheet(
                     onClick = {
                         if (start != null && end != null) {
                             val whole = duration > 0 && start <= 0.05 && end >= duration - 0.05
-                            if (whole) onClear() else onApply(start, end, precise)
+                            if (whole) onClear() else onApply(start, end, precise, trimAfter)
                         }
                     },
                     enabled = valid,

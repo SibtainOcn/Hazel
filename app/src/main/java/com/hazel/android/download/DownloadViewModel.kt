@@ -1634,7 +1634,8 @@ class DownloadViewModel : ViewModel() {
                 downloadIsVideo = plan.format.hasVideo
                 markBatch(plan.info.url, BatchState.DOWNLOADING, title = plan.title)
 
-                cutRun = options.hasSection
+                // Trim after download is an ordinary download until its Trim stage.
+                cutRun = options.cutsWhileDownloading
                 liveRun = cutRun
                 cutSeconds = if (cutRun) {
                     CutProgress.keptSeconds(
@@ -1643,6 +1644,7 @@ class DownloadViewModel : ViewModel() {
                 } else 0.0
                 cutFraction = 0f
                 cutSpeed = 0.0
+                LocalTrim.arm()
                 // ffmpeg never continues a cut, so a part file left by a pause is not progress.
                 if (cutRun) purgeFragments()
                 expectedTotalBytes = expectedTotalFor(plan, options)
@@ -1763,6 +1765,7 @@ class DownloadViewModel : ViewModel() {
                         continue
                     }
 
+                    if (options.trimsAfterDownload) trimLocally(app, plan, options)
                     finishDownload(app, plan, options)
                     markBatch(plan.info.url, BatchState.DONE)
                     downloadScope.launch {
@@ -1923,7 +1926,7 @@ class DownloadViewModel : ViewModel() {
      */
     private fun holdForResume(item: QueuedDownload) {
         // Resume restarts a cut, so its part file is dead weight. A finished cut file is kept.
-        val cut = item.options.hasSection
+        val cut = item.options.cutsWhileDownloading
         if (cut) purgeFragments()
         // A link queued as a generic "best" has no size on its record. The engine reported
         // one while it ran, and it is kept with the pause, so the card can say how much is
@@ -2721,7 +2724,7 @@ class DownloadViewModel : ViewModel() {
         plannedSteps = buildList {
             add(ProcessingStep.FETCH)
             // A cut is fetched and joined by ffmpeg in one go, so yt-dlp announces no merge.
-            if (isVideo && needsMerge && !options.hasSection) add(ProcessingStep.MERGE)
+            if (isVideo && needsMerge && !options.cutsWhileDownloading) add(ProcessingStep.MERGE)
             if (!isVideo) add(ProcessingStep.EXTRACT)
             if (isVideo && wantsCover) add(ProcessingStep.REMUX)
             if (isVideo && options.embedSubs) add(ProcessingStep.SUBTITLES)
@@ -2731,6 +2734,7 @@ class DownloadViewModel : ViewModel() {
             }
             if (wantsCover) add(ProcessingStep.COVER)
             if (options.splitByChapters) add(ProcessingStep.SPLIT)
+            if (options.trimsAfterDownload) add(ProcessingStep.TRIM)
             add(ProcessingStep.SAVE)
         }
 
@@ -2793,7 +2797,7 @@ class DownloadViewModel : ViewModel() {
      * and the parts around the cut points are encoded again, which takes longer.
      */
     private fun YoutubeDLRequest.applyOneOff(options: DownloadOptions) {
-        if (options.hasSection) {
+        if (options.cutsWhileDownloading) {
             addOption(
                 "--download-sections",
                 "*%.3f-%.3f".format(java.util.Locale.ROOT, options.sectionStart, options.sectionEnd)
@@ -2973,6 +2977,31 @@ class DownloadViewModel : ViewModel() {
                     )
                 }
             }
+        }
+    }
+
+    private fun enterStage(app: Context, step: ProcessingStep, status: String, title: String) {
+        val index = _state.value.processingSteps.indexOf(step)
+        _state.update { s -> s.copy(
+            status = status,
+            isProcessing = true,
+            unmeasured = false,
+            eta = "",
+            processingStep = if (index >= 0) maxOf(s.processingStep, index) else s.processingStep
+        ) }
+        DownloadNotificationHelper.showProgress(app, -1, status, title)
+    }
+
+    /** Throws [CancellationException] when stopped, so the loop's pause/cancel handling applies. */
+    private fun trimLocally(app: Context, plan: DownloadPlan, options: DownloadOptions) {
+        enterStage(app, ProcessingStep.TRIM, "Trimming", plan.title)
+        val result = LocalTrim.trim(
+            app, downloadDir, options.sectionStart, options.sectionEnd, options.preciseCuts
+        )
+        if (result.stopped) throw CancellationException("Trim stopped")
+        if (!result.ok) {
+            val raw = "Trim failed" + result.message.trim().takeIf { it.isNotEmpty() }?.let { ": $it" }.orEmpty()
+            throw IllegalStateException(raw + "\nERROR: " + sanitizeError(raw))
         }
     }
 
@@ -3365,7 +3394,7 @@ class DownloadViewModel : ViewModel() {
         } else 0L
 
         val whole = format.fileSizeBytes + mergedAudio
-        if (!options.hasSection) return whole
+        if (!options.cutsWhileDownloading) return whole
 
         return CutProgress.expectedBytes(
             whole, plan.info.durationSeconds, options.sectionStart, options.sectionEnd
@@ -3428,6 +3457,12 @@ class DownloadViewModel : ViewModel() {
     private fun sanitizeError(raw: String): String {
         val lower = raw.lowercase()
         return when {
+            "no space left" in lower
+                -> "Not enough storage space"
+
+            lower.startsWith("trim failed")
+                -> "Trimming failed. Try again, or turn off Trim after download"
+
             "is not a valid url" in lower || "unsupported url" in lower ||
                     "no suitable infoextractor" in lower
                 -> "Invalid or unsupported URL"
@@ -3730,7 +3765,7 @@ internal fun bytesIn(dir: File): Long = try {
  * Always zero for a cut, which resumes from the beginning.
  */
 internal fun pausedFraction(item: QueuedDownload): Float {
-    if (item.options.hasSection) return 0f
+    if (item.options.cutsWhileDownloading) return 0f
     val expected = item.fileSizeBytes + item.mergeAudioSizeBytes
     if (expected <= 0L) return 0f
     val onDisk = workDirsFor(item.url).sumOf { bytesIn(it) }
