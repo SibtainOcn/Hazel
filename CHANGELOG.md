@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cut mode is saved, and set from either the Cut sheet or Processing settings. Trim after download is unavailable while SponsorBlock removes parts, chapters are split or a live stream is taken from the start.
 - Cut: opens full screen, shows every mode's hint at once, and the preview's quality can be changed from its corner.
 - The player's quality change takes effect again.
+- Home long-press card: a full-width Play button above connected Download, Open and Properties tiles, each icon on its own M3 shape.
 
 ### Fixed
 - Video sizes in the download sheet, format list and queue now include the audio track, matching the download card.
