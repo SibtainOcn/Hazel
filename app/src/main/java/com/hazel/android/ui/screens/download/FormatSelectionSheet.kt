@@ -16,9 +16,6 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.geometry.Size
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
@@ -74,6 +71,9 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.toShape
 import com.hazel.android.ui.components.ModalBottomSheet
+import com.hazel.android.ui.components.loadingPhase
+import com.hazel.android.ui.components.FormatRailShimmer
+import kotlinx.coroutines.delay
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -216,7 +216,25 @@ fun FormatSelectionSheet(
     // hidden behind it.
     var refreshing by remember { mutableStateOf(false) }
     LaunchedEffect(isLoadingFormats) { if (!isLoadingFormats) refreshing = false }
-    val hidingRows = refreshing && isLoadingFormats
+    // When the real formats land on a sheet that was showing the plain ladder, the list is
+    // swapped out behind the same skeleton as a refresh for a moment, so the change reads
+    // as the sheet refreshing rather than jumping.
+    val resolved = info.hasResolvedFormats
+    var wasResolved by remember { mutableStateOf(resolved) }
+    var revealing by remember { mutableStateOf(false) }
+    LaunchedEffect(resolved) {
+        val arrived = resolved && !wasResolved
+        wasResolved = resolved
+        if (arrived) {
+            try {
+                revealing = true
+                delay(REVEAL_SKELETON_MS)
+            } finally {
+                revealing = false
+            }
+        }
+    }
+    val hidingRows = (refreshing && isLoadingFormats) || revealing
     val source = (if (hidingRows) chosenSource else null) ?: readSource
     val refresh: (ListingSource?, Boolean) -> Unit = { picked, fresh ->
         refreshing = true
@@ -268,7 +286,9 @@ fun FormatSelectionSheet(
     // above coming along for context. A stop that does not hold it opens at its top. Rows
     // rebuilt while formats arrive leave the scroll where it is.
     var shownStop by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(active.key, rows) {
+    // Held while the skeleton stands in, so the scroll lands on the rows once they are shown.
+    LaunchedEffect(active.key, rows, hidingRows) {
+        if (hidingRows) return@LaunchedEffect
         val index = rows.indexOfFirst { it is FormatListRow.Entry && it.format.formatId == draft?.formatId }
         when {
             index > 0 -> listState.scrollToItem(index - 1)
@@ -415,7 +435,13 @@ fun FormatSelectionSheet(
                     .then(if (showRail) Modifier.height(paneHeight + bottomInset) else Modifier)
                     .padding(horizontal = if (showRail) 12.dp else 0.dp)
             ) {
-                if (showRail) {
+                if (showRail && hidingRows) {
+                    FormatRailShimmer(
+                        stops = stops.size.coerceIn(3, RAIL_SKELETON_MAX),
+                        modifier = Modifier.width(RAIL_WIDTH)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                } else if (showRail) {
                     FormatRail(
                         stops = stops,
                         activeKey = active.key,
@@ -502,7 +528,7 @@ fun FormatSelectionSheet(
                     // that are already there (the ladder a link opens with, while the link
                     // is read) they would only look like rows that never arrive; the line
                     // under the title and the rail's glint say the read is running.
-                    if (isLoadingFormats && (hidingRows || rows.isEmpty())) {
+                    if (hidingRows || (isLoadingFormats && rows.isEmpty())) {
                         item(key = "loading", contentType = 2) {
                             FormatListShimmer(
                                 rows = if (hidingRows) 6 else 4,
@@ -1305,11 +1331,14 @@ private const val BADGE_TURN_DEGREES = 72f
 
 private const val PICKED_TINT = 0.18f
 
+/** How long the skeleton stands in when the real formats replace the plain ladder. */
+private const val REVEAL_SKELETON_MS = 1000L
+
+/** Most stop blocks the rail's skeleton draws; more would only run under the fold. */
+private const val RAIL_SKELETON_MAX = 9
+
 /** How small the badges start when they spring in. */
 private const val BADGE_POP_FROM = 0.6f
-
-/** One fill of a waiting pill, from empty through full to faded. */
-private const val BADGE_FILL_MS = 1300
 
 /** Share of a fill spent growing; the rest is spent full and fading out. */
 private const val BADGE_FILL_GROW = 0.7f
@@ -1317,18 +1346,12 @@ private const val BADGE_FILL_GROW = 0.7f
 /**
  * The two pills that stand where the codec and the size will be, filling with colour while
  * the formats are read: the codec's in the accent, the size's in its own blue, a beat
- * behind. One loop drives both, and it is read while drawing, so the fill repaints the
+ * behind. The shared loading loop drives them, read while drawing, so the fill repaints the
  * pills without recomposing them; it stops as soon as the row has real badges to show.
  */
 @Composable
 private fun FillingBadges() {
-    val transition = rememberInfiniteTransition(label = "fillingBadges")
-    val progress = transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(BADGE_FILL_MS, easing = LinearEasing)),
-        label = "fillingBadgesFill"
-    )
+    val progress = loadingPhase()
     val accent = MaterialTheme.colorScheme.primary
     // layout-safe: placeholder pills of fixed width, no text
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {

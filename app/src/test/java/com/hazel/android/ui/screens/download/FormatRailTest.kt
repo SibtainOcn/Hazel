@@ -30,7 +30,7 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * Issue 159: the ladder a link offers before it is read fills the sheet with no rail, and the
- * rail comes in once the read lands with resolutions to sort into.
+ * rail comes in once the read lands, after a moment of skeleton.
  */
 @RunWith(ParameterizedRobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -72,6 +72,11 @@ class FormatRailTest(private val locale: String) {
         saveScreen("ladder-no-rail-$locale")
 
         info = MediaInfo("u", "t", "a", null, 0, listOf(video("137", 1080), video("136", 720), video("133", 240)), emptyList())
+        compose.waitForIdle()
+        // The skeleton stands in for a moment when the real formats land, then the rail shows.
+        assertEquals(0, compose.onAllNodesWithText(all).fetchSemanticsNodes().size)
+        assertEquals(0, compose.onAllNodesWithText("1080p").fetchSemanticsNodes().size)
+        compose.mainClock.advanceTimeBy(1_100)
         compose.waitForIdle()
         assertTrue(compose.onAllNodesWithText(all).fetchSemanticsNodes().isNotEmpty())
     }
