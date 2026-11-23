@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.ContentCut
+import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
@@ -58,12 +59,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.download.CutMode
 import com.hazel.android.download.OneOffOptions
 import com.hazel.android.download.formatTimestamp
 import com.hazel.android.download.parseTimestamp
 import com.hazel.android.download.playback.PlaybackController
 import com.hazel.android.ui.components.FlatChip
+import com.hazel.android.ui.components.player.PlayQualityDialog
 import com.hazel.android.ui.components.player.PlayerSurface
+import com.hazel.android.ui.components.player.playHeights
 import com.hazel.android.ui.components.player.rememberPlaybackController
 import com.hazel.android.ui.components.keepFlingInSheet
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -71,8 +75,7 @@ import kotlinx.coroutines.flow.drop
 
 /**
  * A sheet that keeps only part of the media: a range picked on a slider over its length, or typed
- * exactly, with the choice of exact cut points (slower, as the ends are encoded again) or
- * cut points at the nearest keyframe.
+ * exactly, and one of three ways to cut it ([CutModePicker]).
  *
  * A preview plays the range on a loop above the slider. Moving the start plays from the new
  * start; moving the end plays the last moments before it, so each cut can be judged by eye.
@@ -87,8 +90,10 @@ fun CutSheet(
     thumbnail: String?,
     durationSeconds: Int,
     current: OneOffOptions,
+    mode: CutMode,
+    onModeChange: (CutMode) -> Unit,
     canTrimAfterDownload: Boolean = true,
-    onApply: (start: Double, end: Double, precise: Boolean, trimAfter: Boolean) -> Unit,
+    onApply: (start: Double, end: Double) -> Unit,
     onClear: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -108,8 +113,6 @@ fun CutSheet(
             }
         )
     }
-    var precise by remember { mutableStateOf(current.preciseCuts) }
-    var trimAfter by remember { mutableStateOf(current.trimAfterDownload && !current.preciseCuts) }
 
     // Media whose length was unknown until the player read it gets its end filled in then.
     LaunchedEffect(duration) {
@@ -254,29 +257,12 @@ fun CutSheet(
                     color = MaterialTheme.colorScheme.error
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            // One mode at a time: turning either on turns the other off.
-            ToggleRow(
-                label = stringResource(R.string.options_cut_precise),
-                checked = precise,
-                onCheckedChange = { on ->
-                    precise = on
-                    if (on) trimAfter = false
-                },
-                summary = stringResource(R.string.options_cut_precise_summary)
-            )
-            ToggleRow(
-                label = stringResource(R.string.options_cut_local),
-                checked = trimAfter && canTrimAfterDownload,
-                onCheckedChange = { on ->
-                    trimAfter = on
-                    if (on) precise = false
-                },
-                enabled = canTrimAfterDownload,
-                summary = stringResource(
-                    if (canTrimAfterDownload) R.string.options_cut_local_summary
-                    else R.string.options_cut_local_unavailable
-                )
+            Spacer(modifier = Modifier.height(16.dp))
+            // The saved mode; while trim after download can't run here the download cuts quickly instead.
+            CutModePicker(
+                selected = if (mode == CutMode.AFTER && !canTrimAfterDownload) CutMode.QUICK else mode,
+                afterAvailable = canTrimAfterDownload,
+                onSelect = onModeChange
             )
             Spacer(modifier = Modifier.height(16.dp))
             // Clear at the start, Cancel and Apply at the end; they move under Clear, and Apply
@@ -293,7 +279,7 @@ fun CutSheet(
                     onClick = {
                         if (start != null && end != null) {
                             val whole = duration > 0 && start <= 0.05 && end >= duration - 0.05
-                            if (whole) onClear() else onApply(start, end, precise, trimAfter)
+                            if (whole) onClear() else onApply(start, end)
                         }
                     },
                     enabled = valid,
@@ -343,6 +329,9 @@ private fun CutPreview(controller: PlaybackController, thumbnail: String?) {
         if (controller.hasVideo) {
             PlayerSurface(player = controller.player, modifier = Modifier.fillMaxSize())
         }
+        if (controller.hasVideo && playHeights(controller).size > 1) {
+            PreviewQuality(controller, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
+        }
         when {
             controller.phase == PlaybackController.Phase.FAILED -> Text(
                 stringResource(R.string.player_failed),
@@ -356,6 +345,32 @@ private fun CutPreview(controller: PlaybackController, thumbnail: String?) {
             )
         }
     }
+}
+
+/** The preview's quality, over the picture's corner; it changes what plays here, not the download. */
+@Composable
+private fun PreviewQuality(controller: PlaybackController, modifier: Modifier = Modifier) {
+    var open by remember { mutableStateOf(false) }
+    val label = stringResource(R.string.options_cut_preview_quality)
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(Color.Black.copy(alpha = 0.6f))
+            .clickable(onClickLabel = label) { open = true }
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Filled.HighQuality, contentDescription = label, tint = Color.White, modifier = Modifier.size(16.dp))
+        if (controller.videoHeight > 0) {
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                stringResource(R.string.player_quality_value, controller.videoHeight),
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White
+            )
+        }
+    }
+    if (open) PlayQualityDialog(controller = controller, title = label, onDismiss = { open = false })
 }
 
 /** Jump to the start, play or pause, jump to the end, the time now, and sound on or off. */

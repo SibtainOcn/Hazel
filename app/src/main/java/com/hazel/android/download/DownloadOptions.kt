@@ -9,6 +9,12 @@ import com.hazel.android.R
  * These are the knobs yt-dlp is given on top of the chosen format. They persist between
  * downloads, so the sheet always reopens on the settings that were last used.
  */
+/**
+ * How a cut is made: [QUICK] has yt-dlp fetch only the part, cut at keyframes; [PRECISE] also
+ * re-encodes the ends; [AFTER] downloads the whole file and trims it on the phone.
+ */
+enum class CutMode { QUICK, PRECISE, AFTER }
+
 data class DownloadOptions(
     /** Output container. Blank means "Default": whatever the source already provides. */
     val videoContainer: String = "",
@@ -58,6 +64,8 @@ data class DownloadOptions(
     val videoQuality: Int = 0,
     /** The download sheet opens on its Audio tab rather than Video, where the link has audio. */
     val sheetOpensOnAudio: Boolean = false,
+    /** How a cut is made, the same choice in the Cut sheet and in Processing. */
+    val cutMode: CutMode = CutMode.QUICK,
 
     // ── For one download only. Set from the sheet as the download starts, carried with it
     // in the queue, and never saved as a setting, so the next download does not inherit a
@@ -127,8 +135,8 @@ data class DownloadOptions(
     fun with(oneOff: OneOffOptions): DownloadOptions = copy(
         sectionStart = if (oneOff.hasSection) oneOff.sectionStart else -1.0,
         sectionEnd = if (oneOff.hasSection) oneOff.sectionEnd else -1.0,
-        preciseCuts = oneOff.hasSection && oneOff.preciseCuts,
-        trimAfterDownload = oneOff.hasSection && oneOff.trimAfterDownload && !oneOff.preciseCuts,
+        preciseCuts = oneOff.hasSection && cutMode == CutMode.PRECISE,
+        trimAfterDownload = oneOff.hasSection && cutMode == CutMode.AFTER,
         liveFromStart = oneOff.liveFromStart,
         waitForVideo = oneOff.waitForVideo
     )
@@ -155,9 +163,6 @@ data class DownloadOptions(
 data class OneOffOptions(
     val sectionStart: Double = -1.0,
     val sectionEnd: Double = -1.0,
-    val preciseCuts: Boolean = false,
-    /** On by default; Precise cuts and this are never on together. */
-    val trimAfterDownload: Boolean = true,
     val liveFromStart: Boolean = false,
     val waitForVideo: Boolean = false
 ) {

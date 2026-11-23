@@ -660,8 +660,9 @@ def test_trim_after_download():
     opt = (DL / "DownloadOptions.kt").read_text(encoding="utf-8")
     queue = QUEUE_SCREEN.read_text(encoding="utf-8")
 
-    check_true("the option is carried from the sheet",
-               "trimAfterDownload = oneOff.hasSection && oneOff.trimAfterDownload" in opt)
+    check_true("the saved cut mode picks the cut",
+               "preciseCuts = oneOff.hasSection && cutMode == CutMode.PRECISE" in opt
+               and "trimAfterDownload = oneOff.hasSection && cutMode == CutMode.AFTER" in opt)
     check_true("yt-dlp cuts only when the app is not going to",
                "get() = hasSection && !trimsAfterDownload" in opt
                and "if (options.cutsWhileDownloading) {" in vm
@@ -699,7 +700,11 @@ def test_trim_after_download():
     check_true("Precise cuts or any setting that shifts the timeline leave the cut to yt-dlp",
                "hasSection && trimAfterDownload && !preciseCuts && canTrimAfterDownload" in opt
                and "!splitByChapters && !liveFromStart" in opt and "sponsorBlockFilters.any" in opt)
-    check_true("Trim after download is on by default", "val trimAfterDownload: Boolean = true" in opt)
+    check_true("a quick cut is the default", "val cutMode: CutMode = CutMode.QUICK" in opt)
+    settings = (REPO_ROOT / "app/src/main/java/com/hazel/android/data/SettingsRepository.kt").read_text(encoding="utf-8")
+    check_true("the cut mode is saved with the other download settings",
+               'stringPreferencesKey("${prefix}cut_mode")' in settings
+               and "this[keys.cutMode] = options.cutMode.name" in settings)
     check_true("a trim leftover is never taken for the download",
                "!f.name.startsWith(TRIM_PREFIX)" in function_body(trim, "fun mainMedia("))
 

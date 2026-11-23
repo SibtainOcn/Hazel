@@ -552,7 +552,6 @@ private enum class PlayerChoice { NONE, QUALITY, AUDIO }
 @Composable
 private fun MoreButton(controller: PlaybackController, onMenuChange: (Boolean) -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val cap by remember(context) { SettingsRepository.getPlayQuality(context) }
         .collectAsState(initial = SettingsRepository.DEFAULT_PLAY_QUALITY)
     var menu by remember { mutableStateOf(false) }
@@ -562,7 +561,7 @@ private fun MoreButton(controller: PlaybackController, onMenuChange: (Boolean) -
     DisposableEffect(Unit) { onDispose { latestMenuChange(false) } }
 
     val loading = controller.phase == PlaybackController.Phase.LOADING
-    val heights = controller.heights.filter { it <= MAX_PLAY_HEIGHT }
+    val heights = playHeights(controller)
     val playingHeight = controller.videoHeight.takeIf { it > 0 } ?: cap
     val tracks = controller.audioTracks
     val playingTrack = tracks.firstOrNull { it.id == controller.audioTrackId }
@@ -622,21 +621,9 @@ private fun MoreButton(controller: PlaybackController, onMenuChange: (Boolean) -
     val close = { open = PlayerChoice.NONE }
     when (open) {
         PlayerChoice.NONE -> Unit
-        PlayerChoice.QUALITY -> SingleChoiceDialog(
+        PlayerChoice.QUALITY -> PlayQualityDialog(
+            controller = controller,
             title = stringResource(R.string.fetch_settings_play_quality),
-            choices = heights.map { it to stringResource(R.string.player_quality_value, it) },
-            selected = playingHeight,
-            onSelect = { height ->
-                close()
-                scope.launch {
-                    // Kept on the settings' own steps; the step at or above an odd height
-                    // still plays that height here.
-                    val step = SettingsRepository.PLAY_QUALITIES.firstOrNull { it >= height }
-                        ?: SettingsRepository.PLAY_QUALITIES.last()
-                    SettingsRepository.setPlayQuality(context, step)
-                    controller.reload()
-                }
-            },
             onDismiss = close
         )
         PlayerChoice.AUDIO -> {
@@ -661,6 +648,33 @@ private fun MoreButton(controller: PlaybackController, onMenuChange: (Boolean) -
         }
     }
 }
+
+/** The heights this video plays at, as a list; the one picked is saved as the playback quality. */
+@Composable
+internal fun PlayQualityDialog(controller: PlaybackController, title: String, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val cap by remember(context) { SettingsRepository.getPlayQuality(context) }
+        .collectAsState(initial = SettingsRepository.DEFAULT_PLAY_QUALITY)
+    SingleChoiceDialog(
+        title = title,
+        choices = playHeights(controller).map { it to stringResource(R.string.player_quality_value, it) },
+        selected = controller.videoHeight.takeIf { it > 0 } ?: cap,
+        onSelect = { height ->
+            onDismiss()
+            scope.launch {
+                // Kept on the settings' own steps; the step at or above an odd height still plays that height here.
+                val step = SettingsRepository.PLAY_QUALITIES.firstOrNull { it >= height }
+                    ?: SettingsRepository.PLAY_QUALITIES.last()
+                SettingsRepository.setPlayQuality(context, step)
+                controller.reload()
+            }
+        },
+        onDismiss = onDismiss
+    )
+}
+
+internal fun playHeights(controller: PlaybackController): List<Int> = controller.heights.filter { it <= MAX_PLAY_HEIGHT }
 
 /** A track's language in the app's language, marked when it is the original or a description. */
 @Composable

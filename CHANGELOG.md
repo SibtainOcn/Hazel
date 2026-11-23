@@ -8,8 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
-- Cut: Trim after download, on by default, which downloads the whole file at full speed and cuts it on the device. Covers, tags, chapters and subtitle files stay in step.
-- Cut: Precise cuts and Trim after download are never on together. Trim after download is unavailable while SponsorBlock removes parts, chapters are split or a live stream is taken from the start.
+- Cut: three modes, Quick cut (default), Precise cuts and Trim after download, which downloads the whole file and cuts it on the device. Covers, tags, chapters and subtitle files stay in step.
+- Cut mode is saved, and set from either the Cut sheet or Processing settings. Trim after download is unavailable while SponsorBlock removes parts, chapters are split or a live stream is taken from the start.
+- Cut: the preview's quality can be changed from its corner.
 
 ### Fixed
 - Trimmed downloads show a real percentage and time left instead of sitting at 0%.
