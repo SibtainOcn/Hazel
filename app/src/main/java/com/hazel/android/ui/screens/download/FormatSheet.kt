@@ -606,6 +606,7 @@ fun FormatSheet(
             SheetSection(
                 icon = Icons.Outlined.FolderOpen,
                 iconShape = MaterialShapes.Pentagon,
+                iconTurn = SAVE_ICON_TURN,
                 title = stringResource(R.string.format_sheet_save_dir),
                 summary = "${saveDirs.labelOf(videoTab)} · $containerLabel",
                 expanded = saveOpen,
@@ -658,8 +659,7 @@ fun FormatSheet(
 
             SheetSection(
                 icon = Icons.Outlined.Tune,
-                iconShape = MaterialShapes.Cookie4Sided,
-                iconTurn = ADJUST_ICON_TURN,
+                iconPill = true,
                 title = if (videoTab) stringResource(R.string.format_sheet_adjust_video)
                 else stringResource(R.string.format_sheet_adjust_audio),
                 summary = listOfNotNull(
@@ -980,10 +980,12 @@ internal fun SheetSection(
     onToggle: () -> Unit,
     color: Color = sheetRaisedColor,
     iconShape: RoundedPolygon? = null,
+    iconPill: Boolean = false,
     iconTurn: Float = 0f,
     content: @Composable () -> Unit
 ) {
-    val badge = remember(iconShape, iconTurn) { iconShape?.let { FittedPolygonShape(it, iconTurn) } }
+    val badge: Shape? = if (iconPill) CircleShape
+    else remember(iconShape, iconTurn) { iconShape?.let { FittedPolygonShape(it, iconTurn) } }
     val turn by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
@@ -1008,7 +1010,7 @@ internal fun SheetSection(
                 if (badge != null) {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(width = 36.dp, height = if (iconPill) 26.dp else 36.dp)
                             .clip(badge)
                             .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f).compositeOver(color)),
                         contentAlignment = Alignment.Center
@@ -1073,8 +1075,8 @@ internal fun SheetSection(
 
 private const val SECTION_FADE_MS = 150
 
-/** The adjust section's four-sided cookie, set on its side. */
-internal const val ADJUST_ICON_TURN = 45f
+/** The save section's pentagon, set on a slant. */
+internal const val SAVE_ICON_TURN = 18f
 
 /** How many sections can be open at once before the oldest closes. */
 private const val MAX_OPEN_SECTIONS = 2

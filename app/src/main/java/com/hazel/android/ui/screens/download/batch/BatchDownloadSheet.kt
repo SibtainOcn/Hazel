@@ -168,7 +168,7 @@ import kotlin.math.roundToInt
  * The choices themselves live in [BatchDownloadState], which is what keeps a change from
  * one row and a change from the buttons from treading on each other.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class, androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun BatchDownloadSheet(
     results: List<MediaInfo>,
@@ -588,8 +588,7 @@ fun BatchDownloadSheet(
             Box(modifier = Modifier.padding(horizontal = SIDE)) {
                 SheetSection(
                     icon = Icons.Outlined.Tune,
-                    iconShape = androidx.compose.material3.MaterialShapes.Cookie4Sided,
-                    iconTurn = com.hazel.android.ui.screens.download.ADJUST_ICON_TURN,
+                    iconPill = true,
                     title = if (isVideo) stringResource(R.string.format_sheet_adjust_video)
                     else stringResource(R.string.format_sheet_adjust_audio),
                     summary = listOfNotNull(

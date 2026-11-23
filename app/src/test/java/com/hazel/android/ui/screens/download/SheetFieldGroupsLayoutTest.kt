@@ -70,7 +70,7 @@ class SheetFieldGroupsLayoutTest(
         val field = sheetButtonColor
         Column(Modifier.padding(16.dp)) {
             SheetSection(Icons.Outlined.HighQuality, "Video quality", "1080p", expanded = false, onToggle = {}, iconShape = MaterialShapes.Cookie7Sided) {}
-            SheetSection(Icons.Outlined.Tune, "Adjust video", "Thumbnail", expanded = false, onToggle = {}, iconShape = MaterialShapes.Cookie4Sided, iconTurn = ADJUST_ICON_TURN) {}
+            SheetSection(Icons.Outlined.Tune, "Adjust video", "Thumbnail", expanded = false, onToggle = {}, iconPill = true) {}
             SheetSection(Icons.Outlined.Description, "Details", "Title", expanded = true, onToggle = {}, iconShape = MaterialShapes.Cookie6Sided) {
                 Column(verticalArrangement = Arrangement.spacedBy(FIELD_GROUP_GAP)) {
                     EditableField(
@@ -85,7 +85,7 @@ class SheetFieldGroupsLayoutTest(
                     )
                 }
             }
-            SheetSection(Icons.Outlined.FolderOpen, "Save", "Download/Hazel/Video", expanded = true, onToggle = {}, iconShape = MaterialShapes.Pentagon) {
+            SheetSection(Icons.Outlined.FolderOpen, "Save", "Download/Hazel/Video", expanded = true, onToggle = {}, iconShape = MaterialShapes.Pentagon, iconTurn = SAVE_ICON_TURN) {
                 Column(verticalArrangement = Arrangement.spacedBy(FIELD_GROUP_GAP)) {
                     SaveDirField(label = "Download/Hazel/Video", onClick = {}, color = field, shape = fieldGroupShape(0, 2))
                     PickerField(
