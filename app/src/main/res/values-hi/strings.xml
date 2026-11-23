@@ -473,7 +473,6 @@
     <string name="batch_type_audio">ऑडियो</string>
     <string name="batch_type_video">वीडियो</string>
     <string name="batch_container_title">कंटेनर</string>
-    <string name="batch_container_subtitle">ये लिंक जिस फ़ाइल के रूप में सहेजे जाएँगे</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">थंबनेल</string>

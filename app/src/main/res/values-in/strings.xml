@@ -462,7 +462,6 @@
     <string name="batch_type_audio">Audio</string>
     <string name="batch_type_video">Video</string>
     <string name="batch_container_title">Wadah</string>
-    <string name="batch_container_subtitle">Format file penyimpanan tautan-tautan ini</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Gambar mini</string>

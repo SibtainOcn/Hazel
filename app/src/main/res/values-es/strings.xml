@@ -484,7 +484,6 @@
     <string name="batch_type_audio">Audio</string>
     <string name="batch_type_video">Vídeo</string>
     <string name="batch_container_title">Contenedor</string>
-    <string name="batch_container_subtitle">El archivo en el que se guardan estos enlaces</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Miniatura</string>

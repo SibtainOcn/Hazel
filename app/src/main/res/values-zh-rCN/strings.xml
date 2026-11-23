@@ -462,7 +462,6 @@
     <string name="batch_type_audio">音频</string>
     <string name="batch_type_video">视频</string>
     <string name="batch_container_title">封装格式</string>
-    <string name="batch_container_subtitle">这些链接会保存成哪种文件</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">缩略图</string>

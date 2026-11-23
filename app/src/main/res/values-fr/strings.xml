@@ -484,7 +484,6 @@
     <string name="batch_type_audio">Audio</string>
     <string name="batch_type_video">Vidéo</string>
     <string name="batch_container_title">Conteneur</string>
-    <string name="batch_container_subtitle">Le fichier dans lequel ces liens sont enregistrés</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Miniature</string>

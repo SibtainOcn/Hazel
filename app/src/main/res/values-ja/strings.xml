@@ -462,7 +462,6 @@
     <string name="batch_type_audio">音声</string>
     <string name="batch_type_video">動画</string>
     <string name="batch_container_title">コンテナ</string>
-    <string name="batch_container_subtitle">これらのリンクを保存するファイル形式</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">サムネイル</string>
