@@ -1,15 +1,10 @@
 package com.hazel.android.ui.screens.download
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,9 +19,9 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.CenterFocusStrong
-import androidx.compose.material.icons.filled.DownloadDone
+import androidx.compose.material.icons.rounded.DownloadForOffline
+import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material.icons.rounded.Straighten
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
@@ -49,7 +44,7 @@ import com.hazel.android.download.CutMode
 
 /**
  * The three cut modes as one connected group: one is always chosen, its card rounds out, fills
- * with the accent and spins its shape, and only it shows its hint.
+ * with the accent and spins its shape. Every hint stays visible so the modes can be compared.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -67,15 +62,15 @@ internal fun CutModePicker(
             val enabled = mode != CutMode.AFTER || afterAvailable
             val spec = when (mode) {
                 CutMode.QUICK -> ModeSpec(
-                    Icons.Filled.Bolt, MaterialShapes.Cookie6Sided.toShape(),
+                    Icons.Rounded.Speed, MaterialShapes.Cookie6Sided.toShape(),
                     R.string.options_cut_quick, R.string.options_cut_quick_summary
                 )
                 CutMode.PRECISE -> ModeSpec(
-                    Icons.Filled.CenterFocusStrong, MaterialShapes.Pentagon.toShape(),
+                    Icons.Rounded.Straighten, MaterialShapes.Pentagon.toShape(),
                     R.string.options_cut_precise, R.string.options_cut_precise_summary
                 )
                 CutMode.AFTER -> ModeSpec(
-                    Icons.Filled.DownloadDone, MaterialShapes.Clover4Leaf.toShape(),
+                    Icons.Rounded.DownloadForOffline, MaterialShapes.Sunny.toShape(),
                     R.string.options_cut_local,
                     if (afterAvailable) R.string.options_cut_local_summary else R.string.options_cut_local_unavailable
                 )
@@ -150,20 +145,13 @@ private fun ModeCard(
                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
                 color = ink.copy(alpha = alpha)
             )
-            // The chosen mode says what it does; a mode that cannot be chosen says why.
-            AnimatedVisibility(
-                visible = selected || !enabled,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
-                Text(
-                    stringResource(spec.hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = (if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant)
-                        .copy(alpha = if (selected) 0.8f else alpha),
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-            }
+            Text(
+                stringResource(spec.hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = (if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant)
+                    .copy(alpha = if (selected) 0.85f else alpha),
+                modifier = Modifier.padding(top = 2.dp)
+            )
         }
     }
 }

@@ -653,7 +653,6 @@ private fun MoreButton(controller: PlaybackController, onMenuChange: (Boolean) -
 @Composable
 internal fun PlayQualityDialog(controller: PlaybackController, title: String, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val cap by remember(context) { SettingsRepository.getPlayQuality(context) }
         .collectAsState(initial = SettingsRepository.DEFAULT_PLAY_QUALITY)
     SingleChoiceDialog(
@@ -661,14 +660,8 @@ internal fun PlayQualityDialog(controller: PlaybackController, title: String, on
         choices = playHeights(controller).map { it to stringResource(R.string.player_quality_value, it) },
         selected = controller.videoHeight.takeIf { it > 0 } ?: cap,
         onSelect = { height ->
+            controller.changeQuality(height)
             onDismiss()
-            scope.launch {
-                // Kept on the settings' own steps; the step at or above an odd height still plays that height here.
-                val step = SettingsRepository.PLAY_QUALITIES.firstOrNull { it >= height }
-                    ?: SettingsRepository.PLAY_QUALITIES.last()
-                SettingsRepository.setPlayQuality(context, step)
-                controller.reload()
-            }
         },
         onDismiss = onDismiss
     )

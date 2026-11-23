@@ -7,6 +7,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.ContentCut
@@ -34,10 +38,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import com.hazel.android.ui.components.ModalBottomSheet
 import androidx.compose.material3.Surface
-import androidx.compose.material3.rememberBottomSheetState
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -57,6 +58,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.download.CutMode
@@ -65,16 +68,16 @@ import com.hazel.android.download.formatTimestamp
 import com.hazel.android.download.parseTimestamp
 import com.hazel.android.download.playback.PlaybackController
 import com.hazel.android.ui.components.FlatChip
+import com.hazel.android.ui.components.SoftIconButton
 import com.hazel.android.ui.components.player.PlayQualityDialog
 import com.hazel.android.ui.components.player.PlayerSurface
 import com.hazel.android.ui.components.player.playHeights
 import com.hazel.android.ui.components.player.rememberPlaybackController
-import com.hazel.android.ui.components.keepFlingInSheet
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 
 /**
- * A sheet that keeps only part of the media: a range picked on a slider over its length, or typed
+ * A full screen that keeps only part of the media: a range picked on a slider over its length, or typed
  * exactly, and one of three ways to cut it ([CutModePicker]).
  *
  * A preview plays the range on a loop above the slider. Moving the start plays from the new
@@ -147,153 +150,159 @@ fun CutSheet(
         }
     }
 
-    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
-
-    ModalBottomSheet(
+    // Full screen rather than a sheet: a sheet as tall as the screen fought the slider's drags.
+    Dialog(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
     ) {
-        Column(
-            modifier = Modifier
-                .keepFlingInSheet()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 16.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Filled.ContentCut,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(22.dp)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    stringResource(R.string.options_cut_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            CutPreview(controller = controller, thumbnail = thumbnail)
-            Spacer(modifier = Modifier.height(6.dp))
-            PreviewControls(
-                controller = controller,
-                onJumpStart = { start?.let { controller.seekTo((it * 1000).toLong()) } },
-                onJumpEnd = {
-                    end?.let { controller.seekTo((maxOf(start ?: 0.0, it - END_PREVIEW_SECONDS) * 1000).toLong()) }
-                }
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-
-            if (duration > 0) {
-                val from = (start ?: 0.0).coerceIn(0.0, duration).toFloat()
-                val to = (end ?: duration).coerceIn(0.0, duration).toFloat()
-                RangeSlider(
-                    value = minOf(from, to)..maxOf(from, to),
-                    onValueChange = { range ->
-                        startText = formatTimestamp(range.start.toDouble())
-                        endText = formatTimestamp(range.endInclusive.toDouble())
-                    },
-                    valueRange = 0f..duration.toFloat()
-                )
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        formatTimestamp(0.0),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        formatTimestamp(duration),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
-                    )
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-            } else {
-                Text(
-                    stringResource(R.string.options_cut_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            // Half the width each while both labels fit; one above the other when not.
-            EqualWidthActions(spacing = 8.dp) {
-                FlatChip(
-                    label = stringResource(R.string.options_cut_start_here),
-                    onClick = { startText = formatTimestamp(controller.positionMs / 1000.0) }
-                )
-                FlatChip(
-                    label = stringResource(R.string.options_cut_end_here),
-                    onClick = { endText = formatTimestamp(controller.positionMs / 1000.0) }
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                EditableField(
-                    label = stringResource(R.string.options_cut_start),
-                    value = startText,
-                    onValueChange = { startText = it },
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                EditableField(
-                    label = stringResource(R.string.options_cut_end),
-                    value = endText,
-                    onValueChange = { endText = it },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            if (!valid && startText.isNotBlank() && endText.isNotBlank()) {
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    stringResource(R.string.options_cut_invalid),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            // The saved mode; while trim after download can't run here the download cuts quickly instead.
-            CutModePicker(
-                selected = if (mode == CutMode.AFTER && !canTrimAfterDownload) CutMode.QUICK else mode,
-                afterAvailable = canTrimAfterDownload,
-                onSelect = onModeChange
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            // Clear at the start, Cancel and Apply at the end; they move under Clear, and Apply
-            // under Cancel, only when they do not fit one line.
-            ActionsRow(
-                modifier = Modifier.fillMaxWidth(),
-                spacing = 8.dp,
-                start = if (current.hasSection) {
-                    { TextButton(onClick = onClear) { Text(stringResource(R.string.options_cut_clear)) } }
-                } else null
-            ) {
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.download_cancel)) }
-                Surface(
-                    onClick = {
-                        if (start != null && end != null) {
-                            val whole = duration > 0 && start <= 0.05 && end >= duration - 0.05
-                            if (whole) onClear() else onApply(start, end)
-                        }
-                    },
-                    enabled = valid,
-                    shape = RoundedCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = if (valid) 1f else 0.38f),
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+            Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    SoftIconButton(onClick = onDismiss, corner = 22.dp, modifier = Modifier.padding(start = 8.dp)) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBackIos,
+                            contentDescription = stringResource(R.string.settings_back),
+                            // The glyph sits left in its box; nudged so it reads centred.
+                            modifier = Modifier.size(20.dp).padding(start = 4.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        stringResource(R.string.options_cut_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp)
+                        .padding(bottom = 16.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    CutPreview(controller = controller, thumbnail = thumbnail)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    PreviewControls(
+                        controller = controller,
+                        onJumpStart = { start?.let { controller.seekTo((it * 1000).toLong()) } },
+                        onJumpEnd = {
+                            end?.let { controller.seekTo((maxOf(start ?: 0.0, it - END_PREVIEW_SECONDS) * 1000).toLong()) }
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    if (duration > 0) {
+                        val from = (start ?: 0.0).coerceIn(0.0, duration).toFloat()
+                        val to = (end ?: duration).coerceIn(0.0, duration).toFloat()
+                        RangeSlider(
+                            value = minOf(from, to)..maxOf(from, to),
+                            onValueChange = { range ->
+                                startText = formatTimestamp(range.start.toDouble())
+                                endText = formatTimestamp(range.endInclusive.toDouble())
+                            },
+                            valueRange = 0f..duration.toFloat()
+                        )
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                formatTimestamp(0.0),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                formatTimestamp(duration),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    } else {
+                        Text(
+                            stringResource(R.string.options_cut_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    // Half the width each while both labels fit; one above the other when not.
+                    EqualWidthActions(spacing = 8.dp) {
+                        FlatChip(
+                            label = stringResource(R.string.options_cut_start_here),
+                            onClick = { startText = formatTimestamp(controller.positionMs / 1000.0) }
+                        )
+                        FlatChip(
+                            label = stringResource(R.string.options_cut_end_here),
+                            onClick = { endText = formatTimestamp(controller.positionMs / 1000.0) }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        EditableField(
+                            label = stringResource(R.string.options_cut_start),
+                            value = startText,
+                            onValueChange = { startText = it },
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        EditableField(
+                            label = stringResource(R.string.options_cut_end),
+                            value = endText,
+                            onValueChange = { endText = it },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    if (!valid && startText.isNotBlank() && endText.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            stringResource(R.string.options_cut_invalid),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    // The saved mode; while trim after download can't run here the download cuts quickly instead.
+                    CutModePicker(
+                        selected = if (mode == CutMode.AFTER && !canTrimAfterDownload) CutMode.QUICK else mode,
+                        afterAvailable = canTrimAfterDownload,
+                        onSelect = onModeChange
+                    )
+                }
+                // Clear at the start, Cancel and Apply at the end; they move under Clear, and Apply
+                // under Cancel, only when they do not fit one line.
+                ActionsRow(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
+                    spacing = 8.dp,
+                    start = if (current.hasSection) {
+                        { TextButton(onClick = onClear) { Text(stringResource(R.string.options_cut_clear)) } }
+                    } else null
+                ) {
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.download_cancel)) }
+                    Surface(
+                        onClick = {
+                            if (start != null && end != null) {
+                                val whole = duration > 0 && start <= 0.05 && end >= duration - 0.05
+                                if (whole) onClear() else onApply(start, end)
+                            }
+                        },
+                        enabled = valid,
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = if (valid) 1f else 0.38f),
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ) {
-                        Icon(Icons.Filled.ContentCut, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.options_cut_apply), fontWeight = FontWeight.SemiBold)
+                        Row(
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Filled.ContentCut, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.options_cut_apply), fontWeight = FontWeight.SemiBold)
+                        }
                     }
                 }
             }

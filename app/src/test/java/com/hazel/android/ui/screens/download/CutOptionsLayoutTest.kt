@@ -13,7 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
@@ -85,12 +84,13 @@ class CutOptionsLayoutTest(private val locale: String) {
     }
 
     @Test
-    fun `quick is chosen first, and a tap moves the choice and its hint`() {
+    fun `quick is chosen first, every hint shows, and a tap moves the choice`() {
         show(afterAvailable = true)
         saveScreen("cut-modes-$locale")
         assertInside(
             R.string.options_cut_quick, R.string.options_cut_quick_summary,
-            R.string.options_cut_precise, R.string.options_cut_local
+            R.string.options_cut_precise, R.string.options_cut_precise_summary,
+            R.string.options_cut_local, R.string.options_cut_local_summary
         )
         compose.onNode(isSelectable() and hasText(context.getString(R.string.options_cut_quick), substring = true))
             .assertIsSelected()
@@ -98,10 +98,9 @@ class CutOptionsLayoutTest(private val locale: String) {
         compose.onNodeWithText(context.getString(R.string.options_cut_local)).performClick()
         compose.waitForIdle()
         saveScreen("cut-modes-after-$locale")
-        assertInside(R.string.options_cut_local_summary)
+        assertInside(R.string.options_cut_quick_summary, R.string.options_cut_local_summary)
         compose.onNode(isSelectable() and hasText(context.getString(R.string.options_cut_local), substring = true))
             .assertIsSelected()
-        compose.onAllNodes(hasText(context.getString(R.string.options_cut_quick_summary))).assertCountEquals(0)
     }
 
     @Test
