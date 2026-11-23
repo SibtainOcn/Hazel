@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -35,9 +34,6 @@ import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.QuestionAnswer
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -149,18 +145,8 @@ fun DocumentationScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                DocPage.entries.forEachIndexed { index, page ->
-                    if (index > 0) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    }
+            ConnectedRows(DocPage.entries.map { page ->
+                {
                     ListItem(
                         headlineContent = { Text(stringResource(page.labelRes)) },
                         leadingContent = { Icon(page.icon, null, tint = MaterialTheme.colorScheme.primary) },
@@ -175,7 +161,7 @@ fun DocumentationScreen(
                         modifier = Modifier.clickable { onOpen(page) }
                     )
                 }
-            }
+            })
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
