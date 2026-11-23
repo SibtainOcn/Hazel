@@ -728,7 +728,7 @@
     <string name="options_cut_end">Selesai</string>
     <string name="options_cut_mode">Mode potong</string>
     <string name="options_cut_quick">Potong cepat</string>
-    <string name="options_cut_quick_summary">Hanya mengunduh bagian ini. Memotong di keyframe terdekat.</string>
+    <string name="options_cut_quick_summary">Hanya mengunduh bagian ini, lebih lambat. Memotong di keyframe terdekat.</string>
     <string name="options_cut_precise">Potongan presisi</string>
     <string name="options_cut_precise_summary">Frame tepat, dengan encode ulang. Lebih lambat.</string>
     <string name="options_cut_local">Potong setelah unduh</string>

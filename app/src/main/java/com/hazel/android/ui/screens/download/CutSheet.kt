@@ -69,6 +69,7 @@ import com.hazel.android.download.parseTimestamp
 import com.hazel.android.download.playback.PlaybackController
 import com.hazel.android.ui.components.FlatChip
 import com.hazel.android.ui.components.SoftIconButton
+import com.hazel.android.ui.theme.glassScreen
 import com.hazel.android.ui.components.player.PlayQualityDialog
 import com.hazel.android.ui.components.player.PlayerSurface
 import com.hazel.android.ui.components.player.playHeights
@@ -155,7 +156,7 @@ fun CutSheet(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
     ) {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+        Surface(modifier = Modifier.fillMaxSize().glassScreen(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),

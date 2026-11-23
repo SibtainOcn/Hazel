@@ -756,7 +756,7 @@
     <string name="options_cut_end">Fim</string>
     <string name="options_cut_mode">Modo de corte</string>
     <string name="options_cut_quick">Corte rápido</string>
-    <string name="options_cut_quick_summary">Baixa só esta parte. Corta no quadro-chave mais próximo.</string>
+    <string name="options_cut_quick_summary">Baixa só esta parte, mais devagar. Corta no quadro-chave mais próximo.</string>
     <string name="options_cut_precise">Cortes precisos</string>
     <string name="options_cut_precise_summary">Quadros exatos, recodificando. Mais lento.</string>
     <string name="options_cut_local">Cortar após o download</string>

@@ -756,7 +756,7 @@
     <string name="options_cut_end">Fin</string>
     <string name="options_cut_mode">Modo de corte</string>
     <string name="options_cut_quick">Corte rápido</string>
-    <string name="options_cut_quick_summary">Descarga solo esta parte. Corta en el fotograma clave más cercano.</string>
+    <string name="options_cut_quick_summary">Descarga solo esta parte, más despacio. Corta en el fotograma clave más cercano.</string>
     <string name="options_cut_precise">Cortes precisos</string>
     <string name="options_cut_precise_summary">Fotogramas exactos, recodificando. Más lento.</string>
     <string name="options_cut_local">Recortar tras descargar</string>

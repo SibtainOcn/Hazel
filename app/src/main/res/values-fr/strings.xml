@@ -756,7 +756,7 @@
     <string name="options_cut_end">Fin</string>
     <string name="options_cut_mode">Mode de coupe</string>
     <string name="options_cut_quick">Coupe rapide</string>
-    <string name="options_cut_quick_summary">Télécharge seulement cette partie. Coupe à l\'image clé la plus proche.</string>
+    <string name="options_cut_quick_summary">Télécharge seulement cette partie, plus lentement. Coupe à l\'image clé la plus proche.</string>
     <string name="options_cut_precise">Coupes précises</string>
     <string name="options_cut_precise_summary">Images exactes, par réencodage. Plus lent.</string>
     <string name="options_cut_local">Couper après le téléchargement</string>

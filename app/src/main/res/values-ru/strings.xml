@@ -769,7 +769,7 @@
     <string name="options_cut_end">Конец</string>
     <string name="options_cut_mode">Режим обрезки</string>
     <string name="options_cut_quick">Быстрая обрезка</string>
-    <string name="options_cut_quick_summary">Скачивает только этот фрагмент. Режет по ближайшему ключевому кадру.</string>
+    <string name="options_cut_quick_summary">Скачивает только этот фрагмент, но медленнее. Режет по ближайшему ключевому кадру.</string>
     <string name="options_cut_precise">Точная обрезка</string>
     <string name="options_cut_precise_summary">Точно по кадрам, с перекодированием. Медленнее.</string>
     <string name="options_cut_local">Обрезать после загрузки</string>

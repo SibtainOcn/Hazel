@@ -728,7 +728,7 @@
     <string name="options_cut_end">结束</string>
     <string name="options_cut_mode">剪切方式</string>
     <string name="options_cut_quick">快速剪切</string>
-    <string name="options_cut_quick_summary">只下载这一段，在最近的关键帧处剪切。</string>
+    <string name="options_cut_quick_summary">只下载这一段，速度较慢，在最近的关键帧处剪切。</string>
     <string name="options_cut_precise">精确剪切</string>
     <string name="options_cut_precise_summary">重新编码，精确到帧。较慢。</string>
     <string name="options_cut_local">下载后裁剪</string>

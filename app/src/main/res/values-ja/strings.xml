@@ -728,7 +728,7 @@
     <string name="options_cut_end">終了</string>
     <string name="options_cut_mode">カット方法</string>
     <string name="options_cut_quick">クイックカット</string>
-    <string name="options_cut_quick_summary">この部分だけをダウンロードし、最も近いキーフレームで切ります。</string>
+    <string name="options_cut_quick_summary">この部分だけを低速でダウンロードし、最も近いキーフレームで切ります。</string>
     <string name="options_cut_precise">正確なカット</string>
     <string name="options_cut_precise_summary">再エンコードでフレーム単位に正確。時間がかかります。</string>
     <string name="options_cut_local">ダウンロード後にトリミング</string>

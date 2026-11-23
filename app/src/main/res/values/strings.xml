@@ -821,7 +821,7 @@
     <string name="options_cut_end">End</string>
     <string name="options_cut_mode">Cut mode</string>
     <string name="options_cut_quick">Quick cut</string>
-    <string name="options_cut_quick_summary">Downloads only this part. Cuts at the nearest keyframe.</string>
+    <string name="options_cut_quick_summary">Downloads only this part, more slowly. Cuts at the nearest keyframe.</string>
     <string name="options_cut_precise">Precise cuts</string>
     <string name="options_cut_precise_summary">Exact frames, by re-encoding. Slower.</string>
     <string name="options_cut_local">Trim after download</string>
