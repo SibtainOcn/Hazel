@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hazel.android.ui.theme.SizeBadgeContainer
 import com.hazel.android.ui.theme.LocalDarkTheme
+import com.hazel.android.ui.theme.sheetRaisedColor
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
@@ -437,32 +439,64 @@ fun FormatRowShimmer(modifier: Modifier = Modifier) {
 }
 
 /**
- * The format list's side rail while its stops are being read: one connected column of stop
- * blocks, round at the outer ends and tight between, with the first one picked out the way
- * the chosen stop is. Same sweep and colours as [FormatListShimmer] beside it.
+ * The format list's side rail while its stops are being read. The stops sit as one quiet
+ * connected column in the rail's own raised colour, round at the outer ends and tight
+ * between, and only a short label and a count line inside each one shimmer, the way the
+ * rows beside it are drawn as small blocks rather than solid slabs. The first stop is
+ * tinted and its lines take the accent, as the chosen stop does.
  */
 @Composable
 fun FormatRailShimmer(stops: Int, modifier: Modifier = Modifier) {
-    val picked = MaterialTheme.colorScheme.primary
-    ShimmerHost(modifier = modifier, fast = true) {
-        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+    val accent = MaterialTheme.colorScheme.primary
+    val raised = sheetRaisedColor
+    val pickedTrack = accent.copy(alpha = RAIL_PICKED_TINT).compositeOver(raised)
+    Box(modifier = modifier) {
+        // The stops themselves stay still; only the lines on them catch the sweep.
+        Column(verticalArrangement = Arrangement.spacedBy(RAIL_GAP)) {
             repeat(stops) { index ->
-                val round = 27.dp
-                val tight = 8.dp
-                val shape = if (index == 0) RoundedCornerShape(round) else RoundedCornerShape(
-                    topStart = tight, topEnd = tight,
-                    bottomStart = if (index == stops - 1) round else tight,
-                    bottomEnd = if (index == stops - 1) round else tight
-                )
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp)
-                        .shimmerBlock(shape, color = if (index == 0) picked else BLOCK_GREY)
+                        .height(RAIL_STOP)
+                        .clip(railStopShape(index, stops))
+                        .background(if (index == 0) pickedTrack else raised)
                 )
             }
         }
+        ShimmerHost(modifier = Modifier.matchParentSize(), fast = true) {
+            Column(verticalArrangement = Arrangement.spacedBy(RAIL_GAP)) {
+                repeat(stops) { index ->
+                    val line = if (index == 0) accent else BLOCK_GREY
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(RAIL_STOP),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Box(Modifier.width(34.dp).height(12.dp).shimmerBlock(RoundedCornerShape(6.dp), line))
+                        Spacer(Modifier.height(6.dp))
+                        Box(Modifier.width(16.dp).height(8.dp).shimmerBlock(RoundedCornerShape(4.dp), line))
+                    }
+                }
+            }
+        }
     }
+}
+
+private val RAIL_STOP = 54.dp
+private val RAIL_GAP = 3.dp
+private const val RAIL_PICKED_TINT = 0.18f
+
+private fun railStopShape(index: Int, count: Int): Shape {
+    val round = RAIL_STOP / 2
+    val tight = 8.dp
+    return RoundedCornerShape(
+        topStart = if (index == 0) round else tight,
+        topEnd = if (index == 0) round else tight,
+        bottomStart = if (index == count - 1) round else tight,
+        bottomEnd = if (index == count - 1) round else tight
+    )
 }
 
 /** A stack of [FormatRowShimmer]s sharing one quick, sharp sweep. */
