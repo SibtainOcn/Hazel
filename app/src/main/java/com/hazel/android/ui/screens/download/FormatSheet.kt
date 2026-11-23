@@ -2,6 +2,7 @@ package com.hazel.android.ui.screens.download
 
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
+import androidx.graphics.shapes.RoundedPolygon
 import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.ui.theme.sheetButtonColor
 import com.hazel.android.ui.theme.sheetRaisedColor
@@ -508,6 +509,7 @@ fun FormatSheet(
             // ── Details: what the file is called ──
             SheetSection(
                 icon = Icons.Outlined.Description,
+                iconShape = MaterialShapes.Cookie6Sided,
                 title = stringResource(R.string.format_sheet_section_details),
                 summary = listOf(title.trim(), author.trim()).filter { it.isNotBlank() }.joinToString(" · "),
                 expanded = detailsOpen,
@@ -547,6 +549,7 @@ fun FormatSheet(
                 ?.takeIf { info.audioLanguages.size > 1 }
             SheetSection(
                 icon = if (videoTab) Icons.Outlined.HighQuality else Icons.Outlined.GraphicEq,
+                iconShape = MaterialShapes.Cookie7Sided,
                 title = if (videoTab) stringResource(R.string.format_sheet_video_quality)
                 else stringResource(R.string.format_sheet_audio_quality),
                 summary = current?.let { qualitySummary(it, languageName, info.mergeAudioFor(audioLanguage)) } ?: noStream,
@@ -602,6 +605,7 @@ fun FormatSheet(
             val containerLabel = container.ifBlank { "Default" }
             SheetSection(
                 icon = Icons.Outlined.FolderOpen,
+                iconShape = MaterialShapes.Pentagon,
                 title = stringResource(R.string.format_sheet_save_dir),
                 summary = "${saveDirs.labelOf(videoTab)} · $containerLabel",
                 expanded = saveOpen,
@@ -654,6 +658,8 @@ fun FormatSheet(
 
             SheetSection(
                 icon = Icons.Outlined.Tune,
+                iconShape = MaterialShapes.Cookie4Sided,
+                iconTurn = ADJUST_ICON_TURN,
                 title = if (videoTab) stringResource(R.string.format_sheet_adjust_video)
                 else stringResource(R.string.format_sheet_adjust_audio),
                 summary = listOfNotNull(
@@ -973,8 +979,11 @@ internal fun SheetSection(
     expanded: Boolean,
     onToggle: () -> Unit,
     color: Color = sheetRaisedColor,
+    iconShape: RoundedPolygon? = null,
+    iconTurn: Float = 0f,
     content: @Composable () -> Unit
 ) {
+    val badge = remember(iconShape, iconTurn) { iconShape?.let { FittedPolygonShape(it, iconTurn) } }
     val turn by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
@@ -996,13 +1005,26 @@ internal fun SheetSection(
                     .padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.width(14.dp))
+                if (badge != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(badge)
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f).compositeOver(color)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                } else {
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(14.dp))
+                }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         title,
@@ -1050,6 +1072,9 @@ internal fun SheetSection(
 }
 
 private const val SECTION_FADE_MS = 150
+
+/** The adjust section's four-sided cookie, set on its side. */
+internal const val ADJUST_ICON_TURN = 45f
 
 /** How many sections can be open at once before the oldest closes. */
 private const val MAX_OPEN_SECTIONS = 2

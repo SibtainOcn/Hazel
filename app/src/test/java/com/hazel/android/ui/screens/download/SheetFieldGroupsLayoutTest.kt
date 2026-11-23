@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.HighQuality
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -38,6 +42,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /** The download sheet's Details and Save rows as connected groups, in long languages, the largest font and every look. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @RunWith(ParameterizedRobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35])
@@ -64,7 +69,9 @@ class SheetFieldGroupsLayoutTest(
     private fun Sections() {
         val field = sheetButtonColor
         Column(Modifier.padding(16.dp)) {
-            SheetSection(Icons.Outlined.Description, "Details", "Title", expanded = true, onToggle = {}) {
+            SheetSection(Icons.Outlined.HighQuality, "Video quality", "1080p", expanded = false, onToggle = {}, iconShape = MaterialShapes.Cookie7Sided) {}
+            SheetSection(Icons.Outlined.Tune, "Adjust video", "Thumbnail", expanded = false, onToggle = {}, iconShape = MaterialShapes.Cookie4Sided, iconTurn = ADJUST_ICON_TURN) {}
+            SheetSection(Icons.Outlined.Description, "Details", "Title", expanded = true, onToggle = {}, iconShape = MaterialShapes.Cookie6Sided) {
                 Column(verticalArrangement = Arrangement.spacedBy(FIELD_GROUP_GAP)) {
                     EditableField(
                         label = androidx.compose.ui.res.stringResource(R.string.format_sheet_label_title),
@@ -78,7 +85,7 @@ class SheetFieldGroupsLayoutTest(
                     )
                 }
             }
-            SheetSection(Icons.Outlined.FolderOpen, "Save", "Download/Hazel/Video", expanded = true, onToggle = {}) {
+            SheetSection(Icons.Outlined.FolderOpen, "Save", "Download/Hazel/Video", expanded = true, onToggle = {}, iconShape = MaterialShapes.Pentagon) {
                 Column(verticalArrangement = Arrangement.spacedBy(FIELD_GROUP_GAP)) {
                     SaveDirField(label = "Download/Hazel/Video", onClick = {}, color = field, shape = fieldGroupShape(0, 2))
                     PickerField(
