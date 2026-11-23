@@ -1046,7 +1046,9 @@ fun FormatRow(
     showMergeId: Boolean = false,
     compact: Boolean = false,
     pendingBadges: Boolean = false,
-    popBadges: Boolean = false
+    popBadges: Boolean = false,
+    /** Whether a picked row's badge turns into the pentagon, which only the list's rows do. */
+    pickedShape: Boolean = true
 ) {
     val scheme = MaterialTheme.colorScheme
     val fill by animateColorAsState(
@@ -1071,7 +1073,7 @@ fun FormatRow(
             .padding(horizontal = if (compact) 10.dp else 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ContainerBadge(text = badgeTextOf(format), compact = compact, selected = selected)
+        ContainerBadge(text = badgeTextOf(format), compact = compact, selected = selected && pickedShape)
 
         Spacer(modifier = Modifier.width(if (compact) 10.dp else 12.dp))
 

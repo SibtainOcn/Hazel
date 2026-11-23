@@ -6,9 +6,13 @@ HSPLcom/hazel/android/ui/screens/SplashHandoff;->**(**)**
 HSPLcom/hazel/android/ui/theme/**;->**(**)**
 HSPLcom/hazel/android/ui/navigation/**;->**(**)**
 HSPLcom/hazel/android/data/SettingsRepository**;->**(**)**
-HSPLcom/hazel/android/ui/screens/download/DownloadScreenKt**;->**(**)**
-HSPLcom/hazel/android/ui/screens/download/SearchScreenKt**;->**(**)**
 HSPLcom/hazel/android/util/AppLocale**;->**(**)**
+HSPLcom/hazel/android/ui/screens/download/**;->**(**)**
+HSPLcom/hazel/android/ui/components/**;->**(**)**
+HSPLcom/hazel/android/download/MediaInfo**;->**(**)**
+HSPLcom/hazel/android/download/MediaFormat**;->**(**)**
+HSPLcom/hazel/android/download/GenericFormats**;->**(**)**
+HSPLcom/hazel/android/download/FormatFilter**;->**(**)**
 Lcom/hazel/android/HazelApp;
 Lcom/hazel/android/MainActivity;
 Lcom/hazel/android/MainActivity$**;
@@ -17,4 +21,9 @@ Lcom/hazel/android/ui/screens/SplashHandoff;
 Lcom/hazel/android/ui/theme/**;
 Lcom/hazel/android/ui/navigation/**;
 Lcom/hazel/android/data/SettingsRepository**;
-Lcom/hazel/android/ui/screens/download/DownloadScreenKt**;
+Lcom/hazel/android/ui/screens/download/**;
+Lcom/hazel/android/ui/components/**;
+Lcom/hazel/android/download/MediaInfo**;
+Lcom/hazel/android/download/MediaFormat**;
+Lcom/hazel/android/download/GenericFormats**;
+Lcom/hazel/android/download/FormatFilter**;

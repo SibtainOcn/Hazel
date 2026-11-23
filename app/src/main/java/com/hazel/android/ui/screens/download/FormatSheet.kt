@@ -570,6 +570,8 @@ fun FormatSheet(
                         // that will be used is named alongside it.
                         mergeAudio = info.mergeAudioFor(audioLanguage)?.takeIf { videoTab },
                         showMergeId = true,
+                        // The list's own pick is the pentagon; this row only says what is set.
+                        pickedShape = false,
                         pendingBadges = formatsPending,
                         popBadges = waitedForFormats
                     )
