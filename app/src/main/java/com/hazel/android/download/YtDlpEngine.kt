@@ -78,6 +78,7 @@ object YtDlpEngine {
      * children, so a cut's ffmpeg kept the output pipe open and the stopped run never returned.
      */
     fun stop(processId: String): Boolean {
+        LocalTrim.stop()
         val stopped = try {
             YoutubeDL.getInstance().destroyProcessById(processId)
         } catch (_: Exception) {

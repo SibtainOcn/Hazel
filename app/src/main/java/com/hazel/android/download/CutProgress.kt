@@ -92,7 +92,7 @@ object CutProgress {
     }
 
     /** Thumbnails, subtitles and metadata: sized for the whole link, not the cut. */
-    private val SIDE_FILE_EXTENSIONS = setOf(
+    internal val SIDE_FILE_EXTENSIONS = setOf(
         "jpg", "jpeg", "png", "webp", "gif",
         "vtt", "srt", "ass", "ssa", "ttml", "srv1", "srv2", "srv3", "json3", "lrc", "sbv",
         "json", "description", "txt"

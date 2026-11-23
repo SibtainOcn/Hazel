@@ -93,7 +93,7 @@ Hazel è un downloader gratuito e open source per Android basato su **yt-dlp**. 
   <tr><th width="50%" align="left">📥 Download</th><th width="50%" align="left">🔍 Cerca e riproduci</th></tr>
   <tr><td><b>Oltre 1500 siti:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud e <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">altri</a>.</td><td><b>Ricerca:</b> YouTube, YouTube Music, SoundCloud o Bandcamp, con suggerimenti facoltativi.</td></tr>
   <tr><td><b>In blocco:</b> un link, molti insieme o un'intera playlist / canale.</td><td><b>Prima riproduci:</b> guarda qualsiasi risultato sulla sua scheda con barra di avanzamento, doppio tocco per saltare e schermo intero.</td></tr>
-  <tr><td><b>Hazel Instant:</b> condividi un link da qualsiasi app e parte alla qualità salvata.</td><td><b>Taglia:</b> salva solo la parte che vuoi, scelta su un'anteprima dal vivo.</td></tr>
+  <tr><td><b>Hazel Instant:</b> condividi un link da qualsiasi app e parte alla qualità salvata.</td><td><b>Taglia:</b> salva solo la parte che vuoi, scelta su un'anteprima dal vivo. Veloce, preciso o taglia dopo il download: l'intero file alla massima velocità, tagliato sul telefono.</td></tr>
   <tr><td><b>Il tuo formato:</b> scegli qualità, contenitore, traccia audio e modifica titolo / metadati.</td><td><b>Dirette:</b> registra dall'inizio o attendi una premiere.</td></tr>
 </table>
 

@@ -254,10 +254,10 @@ def test_source_wiring():
     check_true("the run's expected total uses the cut",
                "expectedTotalBytes = expectedTotalFor(plan, options)" in vm)
     check_true("cutRun is set before the expected total is worked out",
-               vm.find("cutRun = options.hasSection") != -1
-               and vm.find("cutRun = options.hasSection") < vm.find("expectedTotalBytes = expectedTotalFor(plan, options)"))
+               vm.find("cutRun = options.cutsWhileDownloading") != -1
+               and vm.find("cutRun = options.cutsWhileDownloading") < vm.find("expectedTotalBytes = expectedTotalFor(plan, options)"))
     total = function_body(vm, "private fun expectedTotalFor(")
-    check_true("an uncut download returns the whole size as before", "if (!options.hasSection) return whole" in total)
+    check_true("an uncut download returns the whole size as before", "if (!options.cutsWhileDownloading) return whole" in total)
     check_true("a cut is scaled by CutProgress", "CutProgress.expectedBytes(" in total)
     check_true("the size is still 0 when the format has none", "if (format.fileSizeBytes <= 0L) return 0L" in total)
 
@@ -269,7 +269,7 @@ def test_source_wiring():
                and vm.index("liveRun = cutRun") < vm.index("if (cutRun) purgeFragments()"))
     check_true("a live run is never shown as processing", "isProcessing = postProcessing && !unmeasured" in vm)
     check("the callback and the opening read liveRun the same way", vm.count("if (liveRun) -1"), 1)
-    check_true("a cut has no merge stage of its own", "needsMerge && !options.hasSection" in vm)
+    check_true("a cut has no merge stage of its own", "needsMerge && !options.cutsWhileDownloading" in vm)
     check_true("every stop goes through the engine", "destroyProcessById(processId)" not in vm and vm.count("YtDlpEngine.stop(processId)") == 4)
     check_true("the poll constant exists", "CUT_POLL_INTERVAL_MS = 1000L" in vm)
 
@@ -455,12 +455,12 @@ def test_paused_cut():
     vm = VM.read_text(encoding="utf-8")
     queue = QUEUE_SCREEN.read_text(encoding="utf-8")
     fraction = function_body(vm, "internal fun pausedFraction(")
-    check_true("a paused cut has no share on disk", "if (item.options.hasSection) return 0f" in fraction)
+    check_true("a paused cut has no share on disk", "if (item.options.cutsWhileDownloading) return 0f" in fraction)
     check_true("an ordinary paused download is still measured", "workDirsFor(item.url).sumOf { bytesIn(it) }" in fraction)
     hold = function_body(vm, "private fun holdForResume(")
-    check_true("a paused cut drops its useless part file", "val cut = item.options.hasSection" in hold and "if (cut) purgeFragments()" in hold)
+    check_true("a paused cut drops its useless part file", "val cut = item.options.cutsWhileDownloading" in hold and "if (cut) purgeFragments()" in hold)
     check_true("a paused cut card shows no size against the whole link",
-               "queued?.takeUnless { it.options.hasSection }" in queue)
+               "queued?.takeUnless { it.options.cutsWhileDownloading }" in queue)
     check_true("a retry starts a cut's size over",
                "unmeasured = true, liveBytes = 0L, progress = 0f" in vm
                and vm.index("InfoCache.invalidate(plan.info.url)") < vm.index("unmeasured = true, liveBytes = 0L, progress = 0f"))
@@ -553,7 +553,7 @@ def test_real_percentage():
     one_off = function_body(vm, "private fun YoutubeDLRequest.applyOneOff(")
     check_true("only a cut asks for the report",
                'addOption("--downloader-args", CutProgress.FFMPEG_PROGRESS_ARGS)' in one_off
-               and one_off.index("if (options.hasSection)") < one_off.index("CutProgress.FFMPEG_PROGRESS_ARGS"))
+               and one_off.index("if (options.cutsWhileDownloading)") < one_off.index("CutProgress.FFMPEG_PROGRESS_ARGS"))
     run = function_body(vm, "private fun runYtDlp(")
     check_true("a report line is read on its own and never becomes the status",
                "if (cutRun && CutProgress.isProgressLine(line))" in run and "return@execute" in run
@@ -599,6 +599,196 @@ def test_real_percentage():
         check_true("-nostats keeps the periodic statistics off stderr", "speed=" not in proc.stderr.split("\n")[0])
 
 
+LOCAL_TRIM = DL / "LocalTrim.kt"
+
+
+STREAM_LINE = re.compile(r"Stream #0:(\d+)\S*: (Video|Audio|Subtitle|Attachment|Data):")
+
+
+def parse_streams(listing):
+    """Port of LocalTrim.parseStreams."""
+    out = []
+    for line in listing.splitlines():
+        m = STREAM_LINE.search(line)
+        if m:
+            out.append((int(m.group(1)), m.group(2), "(attached pic)" in line))
+    return out
+
+
+def trim_command(ffmpeg, src, out, streams, start, end):
+    """Port of LocalTrim.trimCommand."""
+    main = [s for s in streams if not s[2] and s[1] != "Data"]
+    covers = [s for s in streams if s[2]]
+    videos = sum(1 for s in main if s[1] == "Video")
+    cmd = [ffmpeg, "-y", "-hide_banner", "-loglevel", "error",
+           "-ss", f"{start:.3f}", "-t", f"{end - start:.3f}", "-i", src]
+    for s in main + covers:
+        cmd += ["-map", f"0:{s[0]}"]
+    cmd += ["-map_metadata", "0", "-map_chapters", "0", "-c", "copy"]
+    for j in range(len(covers)):
+        cmd += [f"-disposition:v:{videos + j}", "attached_pic"]
+    return cmd + [out]
+
+
+def test_trim_command_port():
+    print("\n[11] LocalTrim's command line matches its port")
+    trim = LOCAL_TRIM.read_text(encoding="utf-8")
+    body = function_body(trim, "internal fun trimCommand(")
+    check_true("covers are mapped last and flagged again",
+               "(main + covers).forEach" in body and '"-disposition:v:${videos + it}", "attached_pic"' in body)
+    check_true("the trim never re-encodes", "-c:v" not in body and "-c:a" not in body)
+    check_true("data streams are left to the muxer", 'it.type != "Data"' in body)
+    listing = ("  Stream #0:0[0x1](und): Video: h264 (avc1), yuv420p, 320x180 (default)\n"
+               "  Stream #0:1[0x2](eng): Audio: aac (mp4a), 44100 Hz (default)\n"
+               "  Stream #0:2[0x4](und): Subtitle: mov_text (tx3g)\n"
+               "  Stream #0:3[0x0]: Video: mjpeg (Baseline), 300x300, 90k tbn (attached pic) (timed thumbnails)\n"
+               "  Stream #0:4: Data: bin_data (text / 0x74786574)\n")
+    streams = parse_streams(listing)
+    check("the listing is read stream by stream", streams,
+          [(0, "Video", False), (1, "Audio", False), (2, "Subtitle", False), (3, "Video", True), (4, "Data", False)])
+    cmd = trim_command("ffmpeg", "in.mp4", "out.mp4", streams, 7.0, 17.0)
+    check("a copy trim maps the cover last and flags it", cmd[cmd.index("-map"):],
+          ["-map", "0:0", "-map", "0:1", "-map", "0:2", "-map", "0:3", "-map_metadata", "0", "-map_chapters", "0",
+           "-c", "copy", "-disposition:v:1", "attached_pic", "out.mp4"])
+
+
+def test_trim_after_download():
+    print("\n[10] Trim after download")
+    vm = VM.read_text(encoding="utf-8")
+    trim = LOCAL_TRIM.read_text(encoding="utf-8")
+    engine = ENGINE.read_text(encoding="utf-8")
+    opt = (DL / "DownloadOptions.kt").read_text(encoding="utf-8")
+    queue = QUEUE_SCREEN.read_text(encoding="utf-8")
+
+    check_true("the saved cut mode picks the cut",
+               "preciseCuts = oneOff.hasSection && cutMode == CutMode.PRECISE" in opt
+               and "trimAfterDownload = oneOff.hasSection && cutMode == CutMode.AFTER" in opt)
+    check_true("yt-dlp cuts only when the app is not going to",
+               "get() = hasSection && !trimsAfterDownload" in opt
+               and "if (options.cutsWhileDownloading) {" in vm
+               and "cutRun = options.cutsWhileDownloading" in vm
+               and "if (!options.cutsWhileDownloading) return whole" in vm)
+    hold = function_body(vm, "private fun holdForResume(")
+    check_true("pausing a trim after download keeps its resumable part file",
+               "val cut = item.options.cutsWhileDownloading" in hold)
+    check_true("a paused trim after download still shows what it has",
+               "if (item.options.cutsWhileDownloading) return 0f" in function_body(vm, "internal fun pausedFraction(")
+               and "queued?.takeUnless { it.options.cutsWhileDownloading }" in queue)
+    check_true("one Trim stage, before Save", "if (options.trimsAfterDownload) add(ProcessingStep.TRIM)" in vm
+               and "TIDY" not in vm)
+    run = vm.index("trimLocally(app, plan, options)")
+    check_true("the trim runs after every stop check and before the save",
+               vm.index("if (isCancelled) {", vm.index("if (isBatchCancelled) {", vm.index("restartUrl = null"))) < run
+               < vm.index("finishDownload(app, plan, options)\n                    markBatch"))
+    check_true("every download arms the trim's stop flag", "LocalTrim.arm()" in vm)
+    body = function_body(vm, "private fun trimLocally(")
+    check_true("a stopped trim is a cancel, a failed one a failure with a plain reason",
+               'throw CancellationException("Trim stopped")' in body and '"\\nERROR: " + sanitizeError(raw)' in body)
+    check_true("a stop ends the trim as well as the download", "LocalTrim.stop()" in function_body(engine, "fun stop("))
+    body = function_body(trim, "fun trim(")
+    check_true("the source is replaced only after a complete cut",
+               body.index("output.length() <= 0L") < body.index("output.renameTo(source)"))
+    check_true("an unreadable download fails before ffmpeg runs", "if (streams.isEmpty()) return Result(false, false" in body)
+    check_true("a copy trim does not shift its timestamps", "avoid_negative_ts" not in trim)
+    check_true("a stalled ffmpeg is stopped without a thread of its own",
+               "waitFor(WATCH_MS, TimeUnit.MILLISECONDS)" in trim and "Thread {" not in trim)
+    check_true("a finished trim is never cut again on resume",
+               "marker.readText() == range" in body and "marker.writeText(range)" in body
+               and 'DONE_MARKER = ".hazel.trimmed"' in trim)
+    check_true("the trimmed file is the newest, so the save records it",
+               body.index("trimSidecarSubtitles(") < body.index("source.setLastModified("))
+    check_true("Precise cuts or any setting that shifts the timeline leave the cut to yt-dlp",
+               "hasSection && trimAfterDownload && !preciseCuts && canTrimAfterDownload" in opt
+               and "!splitByChapters && !liveFromStart" in opt and "sponsorBlockFilters.any" in opt)
+    check_true("a quick cut is the default", "val cutMode: CutMode = CutMode.QUICK" in opt)
+    settings = (REPO_ROOT / "app/src/main/java/com/hazel/android/data/SettingsRepository.kt").read_text(encoding="utf-8")
+    check_true("the cut mode is saved with the other download settings",
+               'stringPreferencesKey("${prefix}cut_mode")' in settings
+               and "this[keys.cutMode] = options.cutMode.name" in settings)
+    check_true("a trim leftover is never taken for the download",
+               "!f.name.startsWith(TRIM_PREFIX)" in function_body(trim, "fun mainMedia("))
+
+    ffmpeg = shutil.which("ffmpeg")
+    ffprobe = shutil.which("ffprobe")
+    if not (ffmpeg and ffprobe):
+        skip("real ffmpeg trim", "ffmpeg or ffprobe not available")
+        return
+
+    import json
+
+    def run_cmd(cmd):
+        try:
+            return subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+        except subprocess.TimeoutExpired:
+            return subprocess.CompletedProcess(cmd, 124, "", "timed out")
+
+    def probe(path):
+        out = run_cmd([ffprobe, "-v", "error", "-show_streams", "-show_format", "-show_chapters", "-of", "json", path]).stdout
+        return json.loads(out or "{}")
+
+    def first_video_pts(path):
+        out = run_cmd([ffprobe, "-v", "error", "-select_streams", "V:0", "-show_entries", "frame=pts_time",
+                       "-read_intervals", "%+#1", "-of", "csv=p=0", path]).stdout.strip().split("\n")[0]
+        return float(out.strip(",") or 0)
+
+
+    with tempfile.TemporaryDirectory() as tmp:
+        cover = os.path.join(tmp, "cover.jpg")
+        run_cmd([ffmpeg, "-v", "error", "-y", "-f", "lavfi", "-i", "color=c=red:s=300x300", "-frames:v", "1", cover])
+        sub = os.path.join(tmp, "s.srt")
+        with open(sub, "w", encoding="utf-8") as fh:
+            fh.write("1\n00:00:00,000 --> 00:00:23,000\nspans\n\n2\n00:00:07,000 --> 00:00:09,000\ninside\n")
+        meta = os.path.join(tmp, "m.txt")
+        with open(meta, "w", encoding="utf-8") as fh:
+            fh.write(";FFMETADATA1\ntitle=Kept\n[CHAPTER]\nTIMEBASE=1/1000\nSTART=0\nEND=12000\ntitle=A\n"
+                     "[CHAPTER]\nTIMEBASE=1/1000\nSTART=12000\nEND=24000\ntitle=B\n")
+        V = ["-f", "lavfi", "-i", "testsrc2=size=320x180:rate=30"]
+        A = ["-f", "lavfi", "-i", "sine=frequency=440"]
+        sources = {
+            "video_cover_subs_chapters.mp4": V + A + ["-i", cover, "-i", sub, "-i", meta, "-t", "24",
+                "-map", "0:v", "-map", "1:a", "-map", "2:v", "-map", "3:s", "-map_metadata", "4", "-map_chapters", "4",
+                "-c:v:0", "libx264", "-preset", "ultrafast", "-g", "60", "-c:a", "aac", "-c:v:1", "mjpeg",
+                "-disposition:v:1", "attached_pic", "-c:s", "mov_text"],
+            "audio_cover.m4a": A + ["-i", cover, "-t", "24", "-map", "0:a", "-map", "1:v", "-c:a", "aac",
+                "-c:v", "mjpeg", "-disposition:v", "attached_pic", "-metadata", "title=Kept"],
+            "plain.mkv": V + A + ["-t", "24", "-c:v", "libx264", "-preset", "ultrafast", "-g", "60", "-c:a", "aac"],
+            "plain.webm": V + A + ["-t", "24", "-c:v", "libvpx-vp9", "-deadline", "realtime", "-cpu-used", "8", "-g", "60",
+                "-c:a", "libopus"],
+            "unicode_हिंदी 😀 a:b%d 'q'.mp4": V + A + ["-t", "24", "-c:v", "libx264", "-preset", "ultrafast",
+                "-g", "60", "-c:a", "aac"],
+        }
+        for name, args in sources.items():
+            src = os.path.join(tmp, name)
+            if run_cmd([ffmpeg, "-v", "error", "-y"] + args + [src]).returncode != 0:
+                skip(f"real ffmpeg trim of {name}", "could not make a test file")
+                continue
+            ext = name.rsplit(".", 1)[1]
+            before = probe(src)
+            streams = parse_streams(run_cmd([ffmpeg, "-hide_banner", "-i", src]).stderr)
+            for label in (name,):
+                out = os.path.join(tmp, "hazel.trim." + ext)
+                done = run_cmd(trim_command(ffmpeg, src, out, streams, 7.0, 17.0))
+                check(f"{label}: succeeds", done.returncode, 0)
+                if done.returncode != 0 or not os.path.exists(out):
+                    continue
+                after = probe(out)
+                length = float(after["format"].get("duration", 0))
+                check_true(f"{label}: about as long as asked ({length:.1f}s for 10s)", 9.0 <= length <= 12.5)
+                has_art = lambda doc: any(x.get("disposition", {}).get("attached_pic") for x in doc["streams"])
+                check_true(f"{label}: cover art kept", has_art(before) == has_art(after))
+                check_true(f"{label}: audio kept", any(x["codec_type"] == "audio" for x in after["streams"]))
+                kinds = lambda doc, kind: any(x["codec_type"] == kind for x in doc["streams"])
+                check_true(f"{label}: subtitles kept", kinds(before, "subtitle") == kinds(after, "subtitle"))
+                if kinds(before, "video") and not "audio" in name:
+                    check_true(f"{label}: video starts at zero", first_video_pts(out) < 0.5)
+                if before.get("chapters"):
+                    first = (after.get("chapters") or [{}])[0].get("tags", {}).get("title")
+                    check(f"{label}: the chapter the cut starts in comes first", first, "A")
+                if "Kept" in json.dumps(before["format"].get("tags", {})):
+                    check_true(f"{label}: tags kept", "Kept" in json.dumps(after["format"].get("tags", {})))
+                os.remove(out)
+
+
 def main():
     print("=" * 70)
     print("  Cut download progress harness (issue #161)")
@@ -612,6 +802,8 @@ def main():
     test_stop_spares_converter()
     test_paused_cut()
     test_real_percentage()
+    test_trim_after_download()
+    test_trim_command_port()
     print("\n" + "=" * 70)
     print(f"  {PASS_COUNT} passed, {FAIL_COUNT} failed, {SKIP_COUNT} skipped")
     print("=" * 70)
