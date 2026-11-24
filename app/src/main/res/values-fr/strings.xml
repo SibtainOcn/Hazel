@@ -294,6 +294,8 @@
     <string name="cleanup_category_other_cache_description">Les miniatures et tout ce qui a été mis en cache pendant la consultation des liens.</string>
     <string name="cleanup_category_link_reads_label">Lectures de liens enregistrées</string>
     <string name="cleanup_category_link_reads_description">Formats des 50 derniers liens, pour les rouvrir aussitôt. Gardés 6 h, jamais en navigation privée.</string>
+    <string name="cleanup_category_history_thumbs_label">Miniatures des téléchargements</string>
+    <string name="cleanup_category_history_thumbs_description">Copies des miniatures utilisées par la liste des téléchargements. Si elles sont effacées, elles sont recréées depuis le lien ou le fichier enregistré à l’affichage.</string>
     <string name="cleanup_confirm_category_title">Effacer ces fichiers ?</string>
     <string name="cleanup_confirm_category_safe">%1$s seront libérés. Rien de ce que vous avez enregistré n\'est touché.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s seront libérés, et le prochain téléchargement prendra plus de temps pendant leur décompression.</string>

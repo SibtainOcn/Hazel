@@ -35,9 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notification taps open the screen they are about: Running, Failed, History or the failure dialog.
 - The share sheet's format list now shows why a read failed.
 - Format sheet: rows no longer draw over each other when switching between quality stops, and the list starts from the top on each switch.
+- Downloads list keeps each item's artwork after its source link expires.
 - Trim after download no longer crashes on Android 7.
 
 ### Changed
+- Storage cleanup lists the saved download thumbnails as "Downloads artwork", so they can be cleared.
 - The bottom bar's selected-tab shape is easier to see.
 - Format sheet: the quality rail is one connected group with round outer ends and tight inner corners; the chosen stop fills with the accent and lifts out of the group on a spring.
 - Format sheet: the panes keep one height while a link is read, when the formats arrive and between stops, and the rail and list scroll on their own.

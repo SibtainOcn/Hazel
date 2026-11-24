@@ -302,6 +302,8 @@
     <string name="cleanup_category_other_cache_description">Thumbnails and anything else cached while browsing links.</string>
     <string name="cleanup_category_link_reads_label">Saved link reads</string>
     <string name="cleanup_category_link_reads_description">Formats of the last 50 links, so reopening is instant. Kept 6 hours, never in incognito.</string>
+    <string name="cleanup_category_history_thumbs_label">Downloads artwork</string>
+    <string name="cleanup_category_history_thumbs_description">Copies of thumbnails kept for the downloads list. If cleared, they are rebuilt from the link or the saved file as rows are shown.</string>
     <!--
          Deliberately does not name the category. The row the user just tapped is still on
          screen behind the dialog, and dropping a translated noun into a sentence slot

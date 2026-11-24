@@ -286,6 +286,8 @@
     <string name="cleanup_category_other_cache_description">缩略图，以及浏览链接时缓存下来的其他内容。</string>
     <string name="cleanup_category_link_reads_label">已保存的链接读取结果</string>
     <string name="cleanup_category_link_reads_description">最近 50 个链接的格式，再次打开即刻可用。保留 6 小时，无痕模式下不保存。</string>
+    <string name="cleanup_category_history_thumbs_label">下载缩略图</string>
+    <string name="cleanup_category_history_thumbs_description">为下载列表保存的缩略图副本。清除后，显示时会根据链接或已保存的文件重新生成。</string>
     <string name="cleanup_confirm_category_title">清除这些文件？</string>
     <string name="cleanup_confirm_category_safe">将腾出 %1$s。你保存过的任何东西都不受影响。</string>
     <string name="cleanup_confirm_category_unsafe">将腾出 %1$s，下次下载会因为要重新解包而变慢。</string>

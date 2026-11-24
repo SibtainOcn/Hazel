@@ -294,6 +294,8 @@
     <string name="cleanup_category_other_cache_description">Miniaturas e tudo o mais guardado em cache enquanto você navega pelos links.</string>
     <string name="cleanup_category_link_reads_label">Leituras de links salvas</string>
     <string name="cleanup_category_link_reads_description">Formatos dos últimos 50 links, para reabrir na hora. Guardados por 6 h, nunca no anônimo.</string>
+    <string name="cleanup_category_history_thumbs_label">Miniaturas dos downloads</string>
+    <string name="cleanup_category_history_thumbs_description">Cópias das miniaturas usadas na lista de downloads. Se forem limpas, são recriadas a partir do link ou do arquivo salvo ao exibir cada linha.</string>
     <string name="cleanup_confirm_category_title">Limpar estes arquivos?</string>
     <string name="cleanup_confirm_category_safe">%1$s serão liberados. Nada do que você salvou é afetado.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s serão liberados, e o próximo download vai demorar mais enquanto eles são descompactados de novo.</string>

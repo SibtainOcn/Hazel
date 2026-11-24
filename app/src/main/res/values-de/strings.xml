@@ -290,6 +290,8 @@
     <string name="cleanup_category_other_cache_description">Vorschaubilder und alles andere, was beim Durchsehen von Links zwischengespeichert wurde.</string>
     <string name="cleanup_category_link_reads_label">Gespeicherte Link-Abfragen</string>
     <string name="cleanup_category_link_reads_description">Formate der letzten 50 Links für sofortiges Öffnen. 6 Stunden lang, nie im Inkognito-Modus.</string>
+    <string name="cleanup_category_history_thumbs_label">Download-Vorschaubilder</string>
+    <string name="cleanup_category_history_thumbs_description">Kopien der Vorschaubilder für die Download-Liste. Nach dem Löschen werden sie beim Anzeigen aus dem Link oder der gespeicherten Datei neu erstellt.</string>
     <string name="cleanup_confirm_category_title">Diese Dateien löschen?</string>
     <string name="cleanup_confirm_category_safe">%1$s werden frei. Nichts von dem, was du gespeichert hast, ist betroffen.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s werden frei, und der nächste Download dauert länger, während sie erneut entpackt werden.</string>

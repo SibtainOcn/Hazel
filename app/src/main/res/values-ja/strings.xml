@@ -286,6 +286,8 @@
     <string name="cleanup_category_other_cache_description">リンク閲覧時にキャッシュされたサムネイルなどです。</string>
     <string name="cleanup_category_link_reads_label">保存済みのリンク情報</string>
     <string name="cleanup_category_link_reads_description">直近 50 件のリンクの形式。すぐ開き直せます。6 時間保持、シークレットでは保存しません。</string>
+    <string name="cleanup_category_history_thumbs_label">ダウンロードのサムネイル</string>
+    <string name="cleanup_category_history_thumbs_description">ダウンロード一覧用に保存したサムネイルのコピーです。消去しても、表示時にリンクまたは保存済みファイルから作り直されます。</string>
     <string name="cleanup_confirm_category_title">これらの一時ファイルを削除しますか？</string>
     <string name="cleanup_confirm_category_safe">%1$s が解放されます。保存済みのファイルには影響ありません。</string>
     <string name="cleanup_confirm_category_unsafe">%1$s が解放されます。次回ダウンロード時に再展開するため時間がかかります。</string>
