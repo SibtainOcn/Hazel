@@ -68,6 +68,19 @@ class LocalTrimTest {
     }
 
     @Test
+    fun `a file in output template folders is found`() {
+        val dir = kotlin.io.path.createTempDirectory("trim").toFile()
+        try {
+            File(dir, "Uploader/2024").mkdirs()
+            File(dir, "Uploader/2024/abc.mp4").writeBytes(ByteArray(100))
+            File(dir, LocalTrim.DONE_MARKER).writeText("x")
+            assertEquals("abc.mp4", LocalTrim.mainMedia(dir)?.name)
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `the newest media file is the one trimmed, as the save picks it`() {
         val dir = kotlin.io.path.createTempDirectory("trim").toFile()
         try {
@@ -76,19 +89,6 @@ class LocalTrimTest {
             File(dir, "clip.jpg").apply { writeBytes(ByteArray(900)); setLastModified(3_000_000L) }
             File(dir, LocalTrim.DONE_MARKER).writeText("x")
             assertEquals("clip.mp3", LocalTrim.mainMedia(dir)?.name)
-        } finally {
-            dir.deleteRecursively()
-        }
-    }
-
-    @Test
-    fun `a file in output template folders is found`() {
-        val dir = kotlin.io.path.createTempDirectory("trim").toFile()
-        try {
-            File(dir, "Uploader/2024").mkdirs()
-            File(dir, "Uploader/2024/abc.mp4").writeBytes(ByteArray(100))
-            File(dir, LocalTrim.DONE_MARKER).writeText("x")
-            assertEquals("abc.mp4", LocalTrim.mainMedia(dir)?.name)
         } finally {
             dir.deleteRecursively()
         }

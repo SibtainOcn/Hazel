@@ -850,6 +850,26 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
+        SheetDialog.EXTRA_ARGS -> {
+            val settings = AdvancedSettingsStore.current
+            TextInputDialog(
+                title = stringResource(R.string.advanced_extra_args),
+                hint = stringResource(R.string.advanced_extra_args_hint),
+                value = settings.downloadExtraArgs,
+                onConfirm = { text ->
+                    // Saved like the Advanced screen saves it, on top of what is stored now.
+                    advancedScope.launch {
+                        SettingsRepository.setAdvancedSettings(
+                            advancedContext,
+                            AdvancedSettingsStore.current.copy(downloadExtraArgs = text)
+                        )
+                    }
+                    openDialog = SheetDialog.NONE
+                },
+                onDismiss = { openDialog = SheetDialog.NONE }
+            )
+        }
+
         SheetDialog.THUMBNAIL -> ThumbnailDialog(
             options = options,
             onChange = onOptionsChange,
@@ -909,26 +929,6 @@ fun FormatSheet(
             url = info.url,
             onDismiss = { openDialog = SheetDialog.NONE }
         )
-
-        SheetDialog.EXTRA_ARGS -> {
-            val settings = AdvancedSettingsStore.current
-            TextInputDialog(
-                title = stringResource(R.string.advanced_extra_args),
-                hint = stringResource(R.string.advanced_extra_args_hint),
-                value = settings.downloadExtraArgs,
-                onConfirm = { text ->
-                    // Saved like the Advanced screen saves it, on top of what is stored now.
-                    advancedScope.launch {
-                        SettingsRepository.setAdvancedSettings(
-                            advancedContext,
-                            AdvancedSettingsStore.current.copy(downloadExtraArgs = text)
-                        )
-                    }
-                    openDialog = SheetDialog.NONE
-                },
-                onDismiss = { openDialog = SheetDialog.NONE }
-            )
-        }
 
         SheetDialog.SAVE_DIR -> SaveDirDialog(
             isVideo = videoTab,
