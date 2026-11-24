@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The player's quality change takes effect again.
 - Home long-press card: a full-width Play button above connected Download, Open and Properties tiles, each icon on its own M3 shape.
 - Settings screens and the search options sheet group their rows as connected M3 lists, like the update screen.
-- Download sheet: Title/Author and Save dir/Container rows are connected groups with tag labels, and each section icon sits on its own M3 shape.
+- Download sheet: Title/Author and Save dir/Container rows are connected groups, and each section icon sits on its own M3 shape.
 - Format list: the rail's loading skeleton shows small label lines on quiet steps instead of solid blocks.
 
 ### Fixed

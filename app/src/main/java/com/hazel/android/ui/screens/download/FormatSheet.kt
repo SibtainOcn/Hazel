@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -526,8 +525,7 @@ fun FormatSheet(
                         onValueChange = { title = it },
                         color = fieldColor,
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                        shape = fieldGroupShape(0, 2),
-                        tagLabel = true
+                        shape = fieldGroupShape(0, 2)
                     )
                     EditableField(
                         label = stringResource(R.string.format_sheet_label_author),
@@ -535,8 +533,7 @@ fun FormatSheet(
                         onValueChange = { author = it },
                         color = fieldColor,
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
-                        shape = fieldGroupShape(1, 2),
-                        tagLabel = true
+                        shape = fieldGroupShape(1, 2)
                     )
                 }
             }
@@ -624,8 +621,7 @@ fun FormatSheet(
                         value = containerLabel,
                         onClick = { openDialog = SheetDialog.CONTAINER },
                         color = fieldColor,
-                        shape = fieldGroupShape(1, 2),
-                        tagLabel = true
+                        shape = fieldGroupShape(1, 2)
                     )
                 }
             }
@@ -1158,38 +1154,16 @@ internal fun fieldGroupShape(index: Int, count: Int) = RoundedCornerShape(
     bottomEnd = if (index == count - 1) FIELD_GROUP_OUTER else FIELD_GROUP_INNER
 )
 
-private val FIELD_GROUP_OUTER = 14.dp
-private val FIELD_GROUP_INNER = 4.dp
+private val FIELD_GROUP_OUTER = 18.dp
+private val FIELD_GROUP_INNER = 6.dp
 internal val FIELD_GROUP_GAP = 2.dp
 
-/**
- * A field's name: a small line of text, or with [tag] a pill on the section's own colour,
- * so it sits a step down from the field the way the group sits on the section.
- */
+/** A field's name, the small line above its value. */
 @Composable
-private fun FieldLabel(text: String, tag: Boolean, color: Color) {
-    if (!tag) {
-        Text(text, style = MaterialTheme.typography.labelSmall, color = color)
-        Spacer(modifier = Modifier.height(2.dp))
-        return
-    }
-    Text(
-        text,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(sheetRaisedColor)
-            .padding(horizontal = 10.dp, vertical = 4.dp)
-    )
-    Spacer(modifier = Modifier.height(6.dp))
+private fun FieldLabel(text: String, color: Color) {
+    Text(text, style = MaterialTheme.typography.labelSmall, color = color)
+    Spacer(modifier = Modifier.height(2.dp))
 }
-
-@Composable
-private fun fieldValueStyle(tag: Boolean): TextStyle =
-    if (tag) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium
 
 /**
  * Labelled box whose value the user can type into, matching the read-only fields' look.
@@ -1206,8 +1180,7 @@ internal fun EditableField(
     modifier: Modifier = Modifier,
     color: Color = defaultFieldColor(),
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    shape: Shape = RoundedCornerShape(10.dp),
-    tagLabel: Boolean = false
+    shape: Shape = RoundedCornerShape(10.dp)
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -1225,16 +1198,16 @@ internal fun EditableField(
                     focusRequester.requestFocus()
                     keyboardController?.show()
                 }
-                .padding(horizontal = 14.dp, vertical = if (tagLabel) 12.dp else 10.dp)
+                .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
-            FieldLabel(label, tagLabel, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+            FieldLabel(label, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
                 singleLine = true,
                 keyboardOptions = keyboardOptions,
                 textStyle = LocalTextStyle.current
-                    .merge(if (tagLabel) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium)
+                    .merge(MaterialTheme.typography.bodyMedium)
                     .copy(color = MaterialTheme.colorScheme.onSurface),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
@@ -1256,10 +1229,9 @@ internal fun PickerField(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     color: Color = defaultFieldColor(),
-    shape: Shape = RoundedCornerShape(10.dp),
-    tagLabel: Boolean = false
+    shape: Shape = RoundedCornerShape(10.dp)
 ) {
-    val vertical = if (tagLabel) 12.dp else 10.dp
+    val vertical = 10.dp
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = shape,
@@ -1272,8 +1244,8 @@ internal fun PickerField(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                FieldLabel(label, tagLabel, MaterialTheme.colorScheme.primary)
-                Text(value, style = fieldValueStyle(tagLabel), maxLines = 1)
+                FieldLabel(label, MaterialTheme.colorScheme.primary)
+                Text(value, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
             }
             Icon(
                 Icons.Filled.ArrowDropDown,
@@ -1334,12 +1306,12 @@ internal fun SaveDirField(
         Row(
             modifier = Modifier
                 .clickable(onClick = onClick)
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                FieldLabel(stringResource(R.string.format_sheet_save_dir), tag = true, color = MaterialTheme.colorScheme.onSurface)
-                Text(label, style = fieldValueStyle(true), maxLines = 2)
+                FieldLabel(stringResource(R.string.format_sheet_save_dir), MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                Text(label, style = MaterialTheme.typography.bodyMedium, maxLines = 2)
             }
             Spacer(modifier = Modifier.width(8.dp))
             Icon(

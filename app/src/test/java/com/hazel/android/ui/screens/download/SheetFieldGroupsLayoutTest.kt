@@ -76,12 +76,12 @@ class SheetFieldGroupsLayoutTest(
                     EditableField(
                         label = androidx.compose.ui.res.stringResource(R.string.format_sheet_label_title),
                         value = "The Lighthouse Keepers | a long title that runs past the edge",
-                        onValueChange = {}, color = field, shape = fieldGroupShape(0, 2), tagLabel = true
+                        onValueChange = {}, color = field, shape = fieldGroupShape(0, 2)
                     )
                     EditableField(
                         label = androidx.compose.ui.res.stringResource(R.string.format_sheet_label_author),
                         value = "Author name",
-                        onValueChange = {}, color = field, shape = fieldGroupShape(1, 2), tagLabel = true
+                        onValueChange = {}, color = field, shape = fieldGroupShape(1, 2)
                     )
                 }
             }
@@ -90,7 +90,7 @@ class SheetFieldGroupsLayoutTest(
                     SaveDirField(label = "Download/Hazel/Video", onClick = {}, color = field, shape = fieldGroupShape(0, 2))
                     PickerField(
                         label = androidx.compose.ui.res.stringResource(R.string.format_sheet_label_container),
-                        value = "Default", onClick = {}, color = field, shape = fieldGroupShape(1, 2), tagLabel = true
+                        value = "Default", onClick = {}, color = field, shape = fieldGroupShape(1, 2)
                     )
                 }
             }
