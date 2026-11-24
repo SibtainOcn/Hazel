@@ -972,4 +972,24 @@
     <string name="upd_report_copied">已复制设备信息，请粘贴到问题中。</string>
     <string name="upd_channel_note">Beta 和 Nightly 会更早获得修复，但可能不太稳定。</string>
     <string name="upd_status_ok">%1$s 渠道已是最新</string>
+    <string name="upd_section_automatic">自动更新</string>
+    <string name="upd_notify_new_title">新版本通知</string>
+    <string name="upd_notify_new_summary">有更新时，通知会打开此页面</string>
+    <string name="upd_auto_download_title">自动下载更新</string>
+    <string name="upd_auto_download_summary">获取新版本，随时可以安装</string>
+    <string name="hazel_update_channel_name">Hazel 更新</string>
+    <string name="hazel_update_channel_description">Hazel 新版本</string>
+    <string name="hazel_update_available_title">Hazel %1$s 已发布</string>
+    <string name="hazel_update_available_text">点按查看新内容并更新。</string>
+    <string name="hazel_update_ready_text">已下载完成，点按即可安装。</string>
+    <string name="guide_step_updates_title">保持最新</string>
+    <string name="guide_step_updates_desc">选择 Hazel 和 yt-dlp 的更新方式。可随时在软件更新中更改。</string>
+    <string name="guide_updates_notify">通知我</string>
+    <string name="upd_wifi_only_title">仅限 Wi-Fi</string>
+    <string name="upd_wifi_only_summary">不使用移动数据下载</string>
+    <string name="upd_install_failed">无法打开安装程序，请重试。</string>
+    <string name="guide_updates_ytdlp">yt-dlp 自动</string>
+    <string name="guide_updates_hazel">Hazel 自动</string>
+    <string name="guide_updates_wifi">仅限 Wi-Fi</string>
+    <string name="guide_updates_more">更多</string>
 </resources>

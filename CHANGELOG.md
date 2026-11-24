@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Hazel updates: optional notification for new versions, opening the Hazel update screen.
+- Hazel updates: optional background download, with a Wi-Fi only switch, so the update screen opens on Install. Off by default.
+- Getting started: a third step to set update notifications, yt-dlp and Hazel auto-updates and Wi-Fi only.
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
 - Download sheet: an Extra arguments chip in Adjust opens the same setting as Settings > Advanced.
 - Cut: three modes, Quick cut (default), Precise cuts and Trim after download, which downloads the whole file and cuts it on the device. Covers, tags, chapters and subtitle files stay in step.

@@ -1044,4 +1044,24 @@
     <string name="upd_report_copied">Device info copied. Paste it into the issue.</string>
     <string name="upd_channel_note">Beta and Nightly get fixes first and can be less stable.</string>
     <string name="upd_status_ok">Up to date on %1$s</string>
+    <string name="upd_section_automatic">Automatic updates</string>
+    <string name="upd_notify_new_title">Notify about new versions</string>
+    <string name="upd_notify_new_summary">A notice opens this screen when an update is out</string>
+    <string name="upd_auto_download_title">Download updates automatically</string>
+    <string name="upd_auto_download_summary">Fetch new versions so they are ready to install</string>
+    <string name="hazel_update_channel_name">Hazel updates</string>
+    <string name="hazel_update_channel_description">New Hazel versions</string>
+    <string name="hazel_update_available_title">Hazel %1$s is available</string>
+    <string name="hazel_update_available_text">Tap to see what\'s new and update.</string>
+    <string name="hazel_update_ready_text">Downloaded and ready. Tap to install.</string>
+    <string name="guide_step_updates_title">Stay up to date</string>
+    <string name="guide_step_updates_desc">Choose how Hazel and yt-dlp update. Change it any time in Software update.</string>
+    <string name="guide_updates_notify">Notify me</string>
+    <string name="upd_wifi_only_title">Download on Wi-Fi only</string>
+    <string name="upd_wifi_only_summary">Skip downloads on mobile data</string>
+    <string name="upd_install_failed">The installer could not be opened. Please try again.</string>
+    <string name="guide_updates_ytdlp">Auto yt-dlp</string>
+    <string name="guide_updates_hazel">Auto Hazel</string>
+    <string name="guide_updates_wifi">Wi-Fi only</string>
+    <string name="guide_updates_more">More</string>
 </resources>

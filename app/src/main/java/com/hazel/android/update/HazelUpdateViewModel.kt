@@ -3,6 +3,7 @@ package com.hazel.android.update
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -12,7 +13,11 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -45,6 +50,26 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
 
     private var downloadJob: Job? = null
 
+    val notifyNew: StateFlow<Boolean> = SettingsRepository.getHazelUpdateNotify(application)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+    val autoDownload: StateFlow<Boolean> = SettingsRepository.getHazelUpdateAutoDownload(application)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    fun setNotifyNew(enabled: Boolean) {
+        viewModelScope.launch { SettingsRepository.setHazelUpdateNotify(getApplication(), enabled) }
+    }
+
+    val wifiOnly: StateFlow<Boolean> = SettingsRepository.getHazelUpdateWifiOnly(application)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    fun setWifiOnly(enabled: Boolean) {
+        viewModelScope.launch { SettingsRepository.setHazelUpdateWifiOnly(getApplication(), enabled) }
+    }
+
+    fun setAutoDownload(enabled: Boolean) {
+        viewModelScope.launch { SettingsRepository.setHazelUpdateAutoDownload(getApplication(), enabled) }
+    }
+
     init {
         viewModelScope.launch {
             _channel.value = HazelUpdater.Channel.fromLabel(
@@ -75,15 +100,12 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
                     val info = result.info
                     val isAvailable = HazelUpdater.isNewer(info.version)
                     SettingsRepository.setHazelUpdateAvailable(getApplication(), isAvailable, info.version)
-                    _uiState.value = if (isAvailable) {
-                        val cachedApk = HazelUpdater.getCachedApk(getApplication(), info)
-                        if (cachedApk != null) {
-                            UiState.ReadyToInstall(info, cachedApk)
-                        } else {
-                            UiState.Available(info)
-                        }
-                    } else {
-                        UiState.Idle
+                    val cachedApk = if (isAvailable) HazelUpdater.getCachedApk(getApplication(), info) else null
+                    when {
+                        !isAvailable -> _uiState.value = UiState.Idle
+                        cachedApk != null -> _uiState.value = UiState.ReadyToInstall(info, cachedApk)
+                        HazelUpdater.background.value?.version == info.version -> follow(info)
+                        else -> _uiState.value = UiState.Available(info)
                     }
                 }
                 is HazelUpdater.CheckResult.NoReleaseFound -> {
@@ -105,6 +127,11 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
             is UiState.Available -> s.info
             is UiState.Error -> s.info ?: return
             else -> return
+        }
+
+        if (HazelUpdater.background.value?.version == info.version) {
+            follow(info)
+            return
         }
 
         downloadJob?.cancel()
@@ -129,6 +156,19 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    /** Shows a download already running in the background, then its result, instead of starting another. */
+    private fun follow(info: HazelUpdater.ReleaseInfo) {
+        downloadJob?.cancel()
+        _uiState.value = UiState.Downloading(info, 0L, info.binarySize, 0L, 0L)
+        downloadJob = viewModelScope.launch {
+            HazelUpdater.background.takeWhile { it != null }.filterNotNull().collect { bg ->
+                _uiState.value = UiState.Downloading(info, bg.bytes, bg.total, bg.speedBps, bg.etaSeconds)
+            }
+            val apk = HazelUpdater.getCachedApk(getApplication(), info)
+            _uiState.value = if (apk != null) UiState.ReadyToInstall(info, apk) else UiState.Available(info)
+        }
+    }
+
     fun cancelDownload() {
         val info = when (val s = _uiState.value) {
             is UiState.Downloading -> s.info
@@ -143,12 +183,23 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
     fun installUpdate(customContext: android.content.Context? = null) {
         val ready = _uiState.value as? UiState.ReadyToInstall ?: return
         val targetContext = customContext ?: getApplication()
+        // Phone cleaners can empty the cache while the screen waits on Install.
+        if (!ready.apkFile.isFile) {
+            _uiState.value = UiState.Available(ready.info)
+            return
+        }
+        try {
+            HazelUpdater.installApk(targetContext, ready.apkFile)
+        } catch (e: Exception) {
+            android.util.Log.w("Hazel", "Hazel installer could not be opened: ${e.javaClass.simpleName}")
+            _uiState.value = UiState.Error(getApplication<Application>().getString(R.string.upd_install_failed), ready.info)
+            return
+        }
         if (HazelUpdater.canInstallApks(targetContext)) {
             viewModelScope.launch {
                 SettingsRepository.setHazelUpdateAvailable(getApplication(), false)
             }
         }
-        HazelUpdater.installApk(targetContext, ready.apkFile)
     }
 
     fun dismiss() {

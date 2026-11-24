@@ -300,7 +300,7 @@ fun SettingsSearchScreen(
     var languageOpen by remember { mutableStateOf(false) }
     var languageChanged by rememberSaveable { mutableStateOf(false) }
     var languageTag by remember { mutableStateOf(AppLocale.tag(context)) }
-    var guideOpen by remember { mutableStateOf(false) }
+    var guideOpen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
 
