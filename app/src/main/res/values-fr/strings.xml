@@ -734,7 +734,7 @@
     <string name="advanced_no_check_certificates">Ignorer la vérification des certificats</string>
     <string name="advanced_no_check_certificates_summary">Seulement pour un site auquel cet appareil ne fait pas confiance. Connexions moins sûres.</string>
     <string name="advanced_extra_args">Arguments de téléchargement supplémentaires</string>
-    <string name="advanced_extra_args_hint">Arguments yt-dlp ajoutés à chaque téléchargement. -o définit le nom du fichier et ses dossiers. Les autres options gérées par Hazel sont ignorées.</string>
+    <string name="advanced_extra_args_hint">Arguments yt-dlp ajoutés à chaque téléchargement. Les options gérées par Hazel sont ignorées.</string>
     <string name="advanced_reset">Réinitialiser les réglages avancés</string>
     <string name="advanced_reset_title">Réinitialiser les réglages avancés ?</string>
     <string name="advanced_reset_body">Chaque option de cet écran redevient désactivée ou vide.</string>

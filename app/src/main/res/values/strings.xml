@@ -799,7 +799,7 @@
     <string name="advanced_no_check_certificates">Skip certificate checks</string>
     <string name="advanced_no_check_certificates_summary">Only for sites this device doesn\'t trust. Connections become less safe.</string>
     <string name="advanced_extra_args">Extra download arguments</string>
-    <string name="advanced_extra_args_hint">yt-dlp arguments added to every download. -o sets the file name and its folders. Other options Hazel sets itself are skipped.</string>
+    <string name="advanced_extra_args_hint">yt-dlp arguments added to every download. Options Hazel sets itself are skipped.</string>
     <string name="advanced_reset">Reset advanced settings</string>
     <string name="advanced_reset_title">Reset advanced settings?</string>
     <string name="advanced_reset_body">Every option on this screen goes back to off or empty.</string>

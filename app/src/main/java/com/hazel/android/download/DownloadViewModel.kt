@@ -3058,11 +3058,15 @@ class DownloadViewModel : ViewModel() {
         // .part from a cancelled or failed run would otherwise land in Downloads.
         purgeFragments()
 
-        val latestFile = com.hazel.android.util.StagedFiles.list(
+        val latest = com.hazel.android.util.StagedFiles.list(
             downloadDir,
             onSkipped = { Log.w("Hazel", "Not saved, it is a link: ${it.name}") }
-        ).maxByOrNull { it.file.lastModified() }?.file
+        ).maxByOrNull { it.file.lastModified() }
+        val latestFile = latest?.file
         val fileName = latestFile?.name ?: "File saved"
+        // Folders from the output template, as the save names them, so "Saved to" points at the file's own folder.
+        val subFolders = latest?.subPath?.let(com.hazel.android.util.StagedFiles::publishSubPath).orEmpty()
+        fun withSubFolders(base: String) = if (subFolders.isEmpty()) base else "$base/$subFolders"
 
         // Measured off the finished file rather than taken from the transfer figures. Those
         // count one stream at a time, so a video muxed from separate video and audio streams
@@ -3097,7 +3101,7 @@ class DownloadViewModel : ViewModel() {
         val finalDir: File
 
         if (tree != null && movedToTree) {
-            savedPath = com.hazel.android.util.MediaStoreHelper.describeTree(tree)
+            savedPath = withSubFolders(com.hazel.android.util.MediaStoreHelper.describeTree(tree))
             finalDir = downloadDir
         } else {
             finalDir = try {
@@ -3109,7 +3113,7 @@ class DownloadViewModel : ViewModel() {
                 // MediaStore move failed; the files stay in app storage and remain accessible.
                 downloadDir
             }
-            savedPath = StoragePaths.downloadsDisplay(isAudio = isMusic)
+            savedPath = withSubFolders(StoragePaths.downloadsDisplay(isAudio = isMusic))
 
             // The picked folder refused the file. It was kept rather than lost, and the
             // user is told where, once per run however many downloads it happened to.
@@ -3123,7 +3127,6 @@ class DownloadViewModel : ViewModel() {
             }
         }
 
-        com.hazel.android.util.MediaStoreHelper.scanFiles(context, finalDir)
         // The download's own folder is empty once its file has moved, and goes. A file the
         // move could not publish stays in it, and a folder with anything in it is not deleted.
         // Empty folders from the output template go first.

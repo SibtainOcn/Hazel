@@ -280,6 +280,7 @@ object MediaStoreHelper {
 
         // A skipped link stays in the work folder: not every file was moved.
         var allMoved = !skipped
+        val published = ArrayList<File>(files.size)
         for (staged in files) {
             val file = staged.file
             try {
@@ -296,13 +297,57 @@ object MediaStoreHelper {
 
                 file.delete()
                 onMoved(target)
+                treeFilePath(target)?.let(published::add)
                 Log.d(TAG, "Moved ${file.name} to $treeUri")
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to move ${file.name} to picked folder: ${e.message}")
                 allMoved = false
             }
         }
+        // A file written through a document provider is not indexed by itself, so galleries would not list it.
+        if (published.isNotEmpty()) {
+            runCatching {
+                MediaScannerConnection.scanFile(
+                    context,
+                    published.map { it.absolutePath }.toTypedArray(),
+                    published.map { getMimeType(it) }.toTypedArray(),
+                    null
+                )
+            }.onFailure { Log.w(TAG, "Media scan of picked folder failed: ${it.message}") }
+        }
         return allMoved
+    }
+
+    /** The file path of a document made in a picked tree, or null when its provider has none to give. */
+    private fun treeFilePath(document: Uri): File? = runCatching {
+        if (document.authority !in PATH_AUTHORITIES) return@runCatching null
+        documentIdPath(
+            DocumentsContract.getDocumentId(document),
+            Environment.getExternalStorageDirectory().absolutePath
+        )?.let(::File)
+    }.getOrNull()
+
+    private val PATH_AUTHORITIES = setOf(
+        "com.android.externalstorage.documents",
+        "com.android.providers.downloads.documents"
+    )
+
+    private val CARD_VOLUME = Regex("[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}")
+
+    /**
+     * A storage document id as a path: `primary:a/b` under [primaryRoot], `1234-ABCD:a/b` on that card,
+     * `raw:/storage/...` as written. Null for ids that are not paths (`msf:12`, `home:`).
+     */
+    internal fun documentIdPath(id: String, primaryRoot: String): String? {
+        val volume = id.substringBefore(':', "")
+        val path = id.substringAfter(':', "").trimStart('/')
+        return when {
+            volume == "raw" -> id.substringAfter(':').takeIf { it.startsWith("/") }
+            path.isEmpty() -> null
+            volume == "primary" -> "${primaryRoot.trimEnd('/')}/$path"
+            CARD_VOLUME.matches(volume) -> "/storage/$volume/$path"
+            else -> null
+        }
     }
 
     /** The folder [subPath] (`a/b`) names inside [root]: reused if it exists, else made. Throws if the provider refuses. */
@@ -382,10 +427,29 @@ object MediaStoreHelper {
         val path = id.substringAfter(':', "")
         return when {
             path.isBlank() && volume.isBlank() -> id
+            // The Downloads provider names a picked folder by its path, as "raw:/storage/emulated/0/Download/x".
+            volume == "raw" -> describeRawPath(path, cardName)
             volume == "primary" -> path.ifBlank { "Internal storage" }
             path.isBlank() -> cardName(volume) ?: volume
             else -> "${cardName(volume) ?: volume}/$path"
         }
+    }
+
+    private val USER_STORAGE = Regex("""^/storage/emulated/\d+/?""")
+    private val CARD_STORAGE = Regex("^/storage/([^/]+)/?")
+
+    /** A `raw:` path as [describeDocumentId] shows other ids: relative on internal storage, card name in front on a card. */
+    private fun describeRawPath(path: String, cardName: (String) -> String?): String {
+        USER_STORAGE.find(path)?.let { m ->
+            return path.substring(m.range.last + 1).trimEnd('/').ifBlank { "Internal storage" }
+        }
+        CARD_STORAGE.find(path)?.let { m ->
+            val volume = m.groupValues[1]
+            val rest = path.substring(m.range.last + 1).trimEnd('/')
+            val card = cardName(volume) ?: volume
+            return if (rest.isBlank()) card else "$card/$rest"
+        }
+        return path
     }
 
     /**
@@ -408,15 +472,6 @@ object MediaStoreHelper {
     fun isDocumentInTree(segments: List<String>): Boolean =
         segments.size >= 4 && segments[0] == "tree" && segments[2] == "document"
 
-    /**
-     * Scan files with MediaScanner so they appear in gallery/music apps.
-     */
-    fun scanFiles(context: Context, dir: File) {
-        val files = dir.listFiles()?.filter { it.isFile } ?: return
-        val paths = files.map { it.absolutePath }.toTypedArray()
-        val mimeTypes = files.map { getMimeType(it) }.toTypedArray()
-        MediaScannerConnection.scanFile(context, paths, mimeTypes, null)
-    }
 
     private fun getMimeType(file: File): String {
         return when (file.extension.lowercase()) {

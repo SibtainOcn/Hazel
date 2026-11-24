@@ -3,6 +3,7 @@ package com.hazel.android.download
 import android.content.Context
 import android.util.Log
 import com.yausername.youtubedl_android.YoutubeDL
+import com.hazel.android.util.StagedFiles
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -133,23 +134,24 @@ object LocalTrim {
      * save picks it. With "keep video" and audio extraction, the extracted audio is newest.
      */
     fun mainMedia(dir: File): File? = try {
-        dir.listFiles()
-            ?.filter { f ->
-                f.isFile && !f.name.startsWith(".") && !f.name.startsWith(TRIM_PREFIX) &&
+        // Includes files in folders from the user's output template.
+        StagedFiles.list(dir).map { it.file }
+            .filter { f ->
+                !f.name.startsWith(".") && !f.name.startsWith(TRIM_PREFIX) &&
                     !f.name.endsWith(".part") && !f.name.endsWith(".ytdl") && !f.name.endsWith(".temp") &&
                     f.extension.lowercase() !in CutProgress.SIDE_FILE_EXTENSIONS
             }
-            ?.let { files -> files.filterNot { FORMAT_FRAGMENT.containsMatchIn(it.name) }.ifEmpty { files } }
-            ?.maxWithOrNull(compareBy<File>({ it.lastModified() }, { it.length() }))
+            .let { files -> files.filterNot { FORMAT_FRAGMENT.containsMatchIn(it.name) }.ifEmpty { files } }
+            .maxWithOrNull(compareBy<File>({ it.lastModified() }, { it.length() }))
     } catch (_: Exception) {
         null
     }
 
     /** Best effort: a sidecar left uncut is only out of step, never a failed download. */
     private fun trimSidecarSubtitles(dir: File, start: Double, end: Double) {
-        dir.listFiles()
-            ?.filter { it.isFile && it.extension.lowercase() in TEXT_SUBTITLES }
-            ?.forEach { sub ->
+        StagedFiles.list(dir).map { it.file }
+            .filter { it.extension.lowercase() in TEXT_SUBTITLES }
+            .forEach { sub ->
                 try {
                     sub.writeText(cutSubtitles(sub.readText(), sub.extension.lowercase() == "srt", start, end))
                 } catch (e: Exception) {

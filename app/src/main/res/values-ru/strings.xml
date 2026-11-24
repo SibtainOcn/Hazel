@@ -747,7 +747,7 @@
     <string name="advanced_no_check_certificates">Пропускать проверку сертификатов</string>
     <string name="advanced_no_check_certificates_summary">Только для сайтов, которым это устройство не доверяет. Соединение становится менее безопасным.</string>
     <string name="advanced_extra_args">Дополнительные аргументы загрузки</string>
-    <string name="advanced_extra_args_hint">Аргументы yt-dlp для каждой загрузки. -o задаёт имя файла и его папки. Остальные параметры, которые задаёт Hazel, пропускаются.</string>
+    <string name="advanced_extra_args_hint">Аргументы yt-dlp для каждой загрузки. Параметры, которые задаёт Hazel, пропускаются.</string>
     <string name="advanced_reset">Сбросить расширенные настройки</string>
     <string name="advanced_reset_title">Сбросить расширенные настройки?</string>
     <string name="advanced_reset_body">Все параметры на этом экране снова станут выключенными или пустыми.</string>
