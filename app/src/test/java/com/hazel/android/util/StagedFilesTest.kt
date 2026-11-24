@@ -176,4 +176,31 @@ class StagedFilesTest {
         assertEquals(listOf("" to "top.mp4"), StagedFiles.list(root, maxDepth = 0).map { it.subPath to it.file.name })
         assertEquals(3, StagedFiles.list(root).size)
     }
+
+    @Test
+    fun `leading dots leave the title, not the extension`() {
+        kotlin.test.assertEquals("And Justice for All.mp4", StagedFiles.visibleName("...And Justice for All.mp4"))
+        kotlin.test.assertEquals("And.en.vtt", StagedFiles.visibleName("...And.en.vtt"))
+        kotlin.test.assertEquals("_.mp4", StagedFiles.visibleName(".mp4"))
+    }
+
+    @Test
+    fun `hidden files are renamed in place, also in folders, without overwriting`() {
+        val root = kotlin.io.path.createTempDirectory("unhide").toFile()
+        try {
+            java.io.File(root, "Uploader").mkdirs()
+            java.io.File(root, "...Song.mp3").writeText("a")
+            java.io.File(root, "Uploader/.Clip.mp4").writeText("b")
+            java.io.File(root, "Uploader/Clip.mp4").writeText("taken")
+            java.io.File(root, "plain.mp4").writeText("c")
+            StagedFiles.unhideFiles(root)
+            kotlin.test.assertEquals("a", java.io.File(root, "Song.mp3").readText())
+            kotlin.test.assertEquals("b", java.io.File(root, "Uploader/_Clip.mp4").readText())
+            kotlin.test.assertEquals("taken", java.io.File(root, "Uploader/Clip.mp4").readText())
+            kotlin.test.assertTrue(java.io.File(root, "plain.mp4").exists())
+            kotlin.test.assertTrue(StagedFiles.list(root).none { it.file.name.startsWith(".") })
+        } finally {
+            root.deleteRecursively()
+        }
+    }
 }

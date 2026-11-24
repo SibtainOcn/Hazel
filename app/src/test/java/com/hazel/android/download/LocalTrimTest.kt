@@ -81,6 +81,18 @@ class LocalTrimTest {
     }
 
     @Test
+    fun `a title starting with a dot is still the file trimmed`() {
+        val dir = kotlin.io.path.createTempDirectory("trim").toFile()
+        try {
+            File(dir, "...And Justice for All.mp4").writeBytes(ByteArray(100))
+            File(dir, LocalTrim.DONE_MARKER).writeText("x")
+            assertEquals("...And Justice for All.mp4", LocalTrim.mainMedia(dir)?.name)
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `the newest media file is the one trimmed, as the save picks it`() {
         val dir = kotlin.io.path.createTempDirectory("trim").toFile()
         try {

@@ -62,6 +62,28 @@ object StagedFiles {
         }
     }
 
+    /**
+     * Renames finished files whose names start with "." so they are not hidden once saved:
+     * `...And Justice.mp4` becomes `And Justice.mp4`, `_And Justice.mp4` when that is taken.
+     */
+    fun unhideFiles(root: File, onFailed: (File) -> Unit = {}) {
+        for (staged in list(root)) {
+            val file = staged.file
+            if (!file.name.startsWith(".")) continue
+            val visible = File(file.parentFile ?: continue, visibleName(file.name))
+            val target = if (visible.exists()) File(visible.parentFile, "_" + visible.name) else visible
+            if (target.exists() || !file.renameTo(target)) onFailed(file)
+        }
+    }
+
+    /** [name] without its leading dots; an empty title becomes `_`, so `.mp4` is `_.mp4`. */
+    internal fun visibleName(name: String): String {
+        val dot = name.lastIndexOf('.')
+        val title = if (dot > 0) name.substring(0, dot) else ""
+        val ext = if (dot >= 0) name.substring(dot) else ""
+        return title.trimStart('.').ifEmpty { "_" } + ext
+    }
+
     /** True when [file] is a symbolic link. Fails closed: an unreadable path counts as one. */
     fun isLink(file: File): Boolean {
         val parent = file.absoluteFile.parentFile ?: return false
