@@ -24,6 +24,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,6 +64,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import com.hazel.android.ui.components.ModalBottomSheet
 import com.hazel.android.ui.components.ExpressiveTextField
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -354,9 +358,9 @@ fun CookiesScreen(onBack: () -> Unit) {
 
     if (adding) {
         AddSignInSheet(
-            onContinue = { url ->
+            onContinue = { url, title ->
                 adding = false
-                signInLauncher.launch(CookieWebViewActivity.intent(context, url, ""))
+                signInLauncher.launch(CookieWebViewActivity.intent(context, url, title))
             },
             onDismiss = { adding = false }
         )
@@ -553,15 +557,38 @@ private fun CookieMeta(summary: CookieSummary, showSite: Boolean) {
     }
 }
 
-/** Takes a site address and opens its sign-in page; nothing else is asked for up front. */
+/** Common sites as one-tap sign-ins, so signing in never has to wait for a failed download. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun QuickSiteChips(onPick: (name: String, home: String) -> Unit) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        SignInBrowser.QUICK_SITES.forEach { (name, home) ->
+            SuggestionChip(
+                onClick = { onPick(name, home) },
+                label = { Text(name, maxLines = 1) },
+                border = null,
+                colors = SuggestionChipDefaults.suggestionChipColors(
+                    containerColor = tonalFill(0.6f),
+                    labelColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
+        }
+    }
+}
+
+/** Takes a site address, or one tap on a common site, and opens its sign-in page. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AddSignInSheet(onContinue: (String) -> Unit, onDismiss: () -> Unit) {
+private fun AddSignInSheet(onContinue: (String, String) -> Unit, onDismiss: () -> Unit) {
     val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
     var url by remember { mutableStateOf("") }
     val focus = remember { FocusRequester() }
     val ready = hasHost(withScheme(url))
-    val submit = { if (ready) onContinue(withScheme(url)) }
+    val submit = { if (ready) onContinue(withScheme(url), "") }
 
     LaunchedEffect(Unit) { focus.requestFocus() }
 
@@ -582,7 +609,9 @@ private fun AddSignInSheet(onContinue: (String) -> Unit, onDismiss: () -> Unit) 
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
             )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            QuickSiteChips(onPick = { name, home -> onContinue(home, name) })
+            Spacer(modifier = Modifier.height(16.dp))
             ExpressiveTextField(
                 value = url,
                 onValueChange = { url = it },

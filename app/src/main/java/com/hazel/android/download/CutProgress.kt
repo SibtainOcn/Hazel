@@ -1,5 +1,6 @@
 package com.hazel.android.download
 
+import com.hazel.android.util.StagedFiles
 import java.io.File
 
 /**
@@ -103,12 +104,12 @@ object CutProgress {
      * post-processing (cover/tag embedding, audio conversion) writes a second copy beside the first.
      */
     fun mediaBytesIn(dir: File): Long = try {
-        dir.listFiles()
-            ?.filter { f ->
-                f.isFile && !f.name.endsWith(".ytdl") &&
-                    f.extension.lowercase() !in SIDE_FILE_EXTENSIONS
+        // Read once a second, so the link checks are skipped.
+        StagedFiles.list(dir, checkLinks = false).map { it.file }
+            .filter { f ->
+                !f.name.endsWith(".ytdl") && f.extension.lowercase() !in SIDE_FILE_EXTENSIONS
             }
-            ?.maxOfOrNull { it.length() }
+            .maxOfOrNull { it.length() }
             ?: 0L
     } catch (_: Exception) {
         0L

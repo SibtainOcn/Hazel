@@ -1,8 +1,12 @@
 package com.hazel.android.download
 
+import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class LocalTrimTest {
@@ -68,6 +72,31 @@ class LocalTrimTest {
     }
 
     @Test
+    fun `a file in output template folders is found`() {
+        val dir = kotlin.io.path.createTempDirectory("trim").toFile()
+        try {
+            File(dir, "Uploader/2024").mkdirs()
+            File(dir, "Uploader/2024/abc.mp4").writeBytes(ByteArray(100))
+            File(dir, LocalTrim.DONE_MARKER).writeText("x")
+            assertEquals("abc.mp4", LocalTrim.mainMedia(dir)?.name)
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `a title starting with a dot is still the file trimmed`() {
+        val dir = kotlin.io.path.createTempDirectory("trim").toFile()
+        try {
+            File(dir, "...And Justice for All.mp4").writeBytes(ByteArray(100))
+            File(dir, LocalTrim.DONE_MARKER).writeText("x")
+            assertEquals("...And Justice for All.mp4", LocalTrim.mainMedia(dir)?.name)
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `the newest media file is the one trimmed, as the save picks it`() {
         val dir = kotlin.io.path.createTempDirectory("trim").toFile()
         try {
@@ -79,5 +108,30 @@ class LocalTrimTest {
         } finally {
             dir.deleteRecursively()
         }
+    }
+
+    private class FakeProcess(private val exitsAfterChecks: Int) : Process() {
+        var checks = 0
+        override fun getOutputStream(): OutputStream = OutputStream.nullOutputStream()
+        override fun getInputStream(): InputStream = ByteArrayInputStream(ByteArray(0))
+        override fun getErrorStream(): InputStream = ByteArrayInputStream(ByteArray(0))
+        override fun waitFor(): Int = 0
+        override fun exitValue(): Int {
+            if (++checks <= exitsAfterChecks) throw IllegalThreadStateException()
+            return 0
+        }
+        override fun destroy() = Unit
+    }
+
+    @Test
+    fun `legacy wait returns once the process exits`() {
+        val p = FakeProcess(exitsAfterChecks = 2)
+        assertTrue(LocalTrim.waitFor(p, 5_000L, legacy = true))
+        assertEquals(3, p.checks)
+    }
+
+    @Test
+    fun `legacy wait gives up at the timeout`() {
+        assertFalse(LocalTrim.waitFor(FakeProcess(exitsAfterChecks = Int.MAX_VALUE), 300L, legacy = true))
     }
 }

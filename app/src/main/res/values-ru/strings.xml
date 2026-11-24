@@ -164,6 +164,7 @@
     <string name="format_sheet_audio_language">Язык аудио</string>
     <string name="format_sheet_change_audio_language">Сменить язык аудио</string>
     <string name="format_sheet_filename_template">Шаблон имени файла</string>
+    <string name="format_sheet_extra_args">Дополнительные аргументы</string>
     <string name="format_sheet_change_field">Изменить</string>
     <string name="format_sheet_save_dir">Папка сохранения</string>
     <string name="format_sheet_save_location">Место сохранения</string>
@@ -297,6 +298,8 @@
     <string name="cleanup_category_other_cache_description">Обложки и другие файлы, кэшированные при просмотре ссылок.</string>
     <string name="cleanup_category_link_reads_label">Сохранённые данные ссылок</string>
     <string name="cleanup_category_link_reads_description">Форматы последних 50 ссылок для мгновенного открытия. Хранятся 6 ч, не в инкогнито.</string>
+    <string name="cleanup_category_history_thumbs_label">Обложки загрузок</string>
+    <string name="cleanup_category_history_thumbs_description">Копии обложек для списка загрузок. После очистки они пересоздаются из ссылки или сохранённого файла при показе строк.</string>
     <string name="cleanup_confirm_category_title">Очистить эти файлы?</string>
     <string name="cleanup_confirm_category_safe">Будет освобождено %1$s. Сохранённые файлы не будут затронуты.</string>
     <string name="cleanup_confirm_category_unsafe">Будет освобождено %1$s; следующая загрузка займёт больше времени из-за повторной распаковки.</string>
@@ -564,6 +567,7 @@
     <string name="cookie_webview_close">Закрыть</string>
     <string name="cookie_webview_desktop_site">Версия для ПК</string>
     <string name="cookie_webview_no_cookies">Файлы cookie не были получены</string>
+    <string name="cookie_webview_crashed">Страница входа остановилась. Откройте её снова.</string>
     <string name="cookie_webview_done">"  ОК"</string>
 
     <!-- FormatSelectionSheet -->
@@ -1025,4 +1029,18 @@
     <string name="upd_report_copied">Данные устройства скопированы. Вставьте их в отчёт.</string>
     <string name="upd_channel_note">Beta и Nightly получают исправления раньше и могут быть менее стабильны.</string>
     <string name="upd_status_ok">Актуально на %1$s</string>
+    <string name="upd_failure_no_space">На этом устройстве недостаточно свободной памяти для установки обновления. Освободите место и попробуйте снова.</string>
+    <string name="upd_failure_timeout">Время подключения к GitHub истекло. Перейдите на более стабильную сеть и попробуйте снова.</string>
+    <string name="upd_failure_unreachable">Hazel не удалось подключиться к GitHub. Проверьте подключение к интернету, а также настройки VPN и персонального DNS-сервера, затем попробуйте снова.</string>
+    <string name="upd_failure_connection_lost">Соединение прервалось во время загрузки. Попробуйте снова в более стабильной сети.</string>
+    <string name="upd_failure_clock_or_tls">Не удалось установить защищённое соединение с GitHub. Убедитесь, что дата и время на этом устройстве указаны верно, и попробуйте снова.</string>
+    <string name="upd_failure_http">GitHub отклонил загрузку (HTTP %1$s). Попробуйте снова через несколько минут.</string>
+    <string name="upd_failure_release_gone">Эта версия больше не доступна на GitHub. Проверьте обновления, чтобы получить последнюю.</string>
+    <string name="upd_failure_incomplete">Загрузка завершилась некорректно. Попробуйте снова в более стабильной сети.</string>
+    <string name="upd_failure_could_not_install">Не удалось установить обновление на этом устройстве. Попробуйте снова.</string>
+    <string name="upd_failure_would_not_start">Новая версия yt-dlp не смогла запуститься на этом устройстве, поэтому осталась текущая версия. Загрузки продолжат работать.</string>
+    <string name="upd_failure_stopped_while_starting">Система остановила новую версию yt-dlp во время запуска, вероятно из-за нехватки оперативной памяти. Осталась текущая версия. Закройте другие приложения и попробуйте снова.</string>
+    <string name="upd_failure_unknown">Не удалось завершить обновление (%1$s). Попробуйте снова чуть позже.</string>
+    <string name="upd_status_update_failed">Обновление не завершено</string>
+    <string name="upd_status_check_failed">Проверка не завершена</string>
 </resources>

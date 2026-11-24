@@ -48,8 +48,10 @@ object TempStorage {
     /** The formats of links read lately, kept so opening one again needs no read. */
     const val LINK_READS = "link_reads"
 
+    const val HISTORY_THUMBS = "history_thumbs"
+
     /** Folders in the cache that have a category of their own, not counted as "other". */
-    private val OWN_CATEGORY = setOf("yt-dlp", InfoCache.DIRECTORY_NAME)
+    private val OWN_CATEGORY = setOf("yt-dlp", InfoCache.DIRECTORY_NAME, HistoryThumbnails.DIRECTORY_NAME)
 
     suspend fun categories(context: Context): List<TempCategory> = withContext(Dispatchers.IO) {
         val cache = context.cacheDir
@@ -66,6 +68,12 @@ object TempStorage {
                 labelRes = R.string.cleanup_category_link_reads_label,
                 descriptionRes = R.string.cleanup_category_link_reads_description,
                 bytes = InfoCache.diskBytes()
+            ),
+            TempCategory(
+                id = HISTORY_THUMBS,
+                labelRes = R.string.cleanup_category_history_thumbs_label,
+                descriptionRes = R.string.cleanup_category_history_thumbs_description,
+                bytes = HistoryThumbnails.sizeBytes(context)
             ),
             TempCategory(
                 id = "partial_downloads",
@@ -107,6 +115,7 @@ object TempStorage {
             "ytdlp_cache" -> wipe(File(cache, "yt-dlp"))
             // Through the cache itself, so what it holds in memory goes with the files.
             LINK_READS -> InfoCache.clear()
+            HISTORY_THUMBS -> HistoryThumbnails.clearAll(context)
             "partial_downloads" -> SdCards.workRoots(context).forEach { wipe(it) }
             "converted" -> wipe(StoragePaths.tempConverted)
             "other_cache" -> {

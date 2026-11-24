@@ -86,7 +86,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -97,7 +96,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.ui.components.FastScrollbar
 import com.hazel.android.ui.components.gridColumns
@@ -1163,18 +1161,15 @@ private fun SelectMark(chosen: Boolean, modifier: Modifier = Modifier, onImage: 
 @Composable
 private fun Artwork(entry: HistoryEntry, present: Boolean, modifier: Modifier) {
     com.hazel.android.ui.components.ArtworkPlaceholder(modifier)
-    if (entry.thumbnail != null) {
-        AsyncImage(
-            model = entry.thumbnail,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            alpha = if (present) 1f else 0.7f,
-            // A file that is gone keeps its row, drained of colour, so the record still says
-            // what was downloaded without looking like something that will open.
-            colorFilter = if (present) null else ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
-            modifier = modifier
-        )
-    }
+    HistoryArtworkImage(
+        entry = entry,
+        present = present,
+        modifier = modifier,
+        alpha = if (present) 1f else 0.7f,
+        // A file that is gone keeps its row, drained of colour, so the record still says
+        // what was downloaded without looking like something that will open.
+        colorFilter = if (present) null else ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
+    )
 }
 
 @Composable

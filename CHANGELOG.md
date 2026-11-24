@@ -8,8 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
+- Download sheet: an Extra arguments chip in Adjust opens the same setting as Settings > Advanced.
 - Cut: three modes, Quick cut (default), Precise cuts and Trim after download, which downloads the whole file and cuts it on the device. Covers, tags, chapters and subtitle files stay in step.
 - Cut mode is saved, and set from either the Cut sheet or Processing settings. Trim after download is unavailable while SponsorBlock removes parts, chapters are split or a live stream is taken from the start.
+- Cut screen: mode rows switch in one calm step, without the bounce or the flash on tap.
 - Cut: opens full screen, shows every mode's hint at once, and the preview's quality can be changed from its corner.
 - The player's quality change takes effect again.
 - Home long-press card: a full-width Play button above connected Download, Open and Properties tiles, each icon on its own M3 shape.
@@ -18,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Format list: the rail's loading skeleton shows small label lines on quiet steps instead of solid blocks.
 - Save location is a full screen with the last 5 picked folders; tap one to save there, hold any location to open it in a file manager.
 - Screen changes: the home header and the bottom bar move with their screen, so nothing jumps part way through a transition.
+- Sign-in: one-tap Instagram, YouTube, X, Facebook, TikTok and Reddit in Settings > Cookies, so you can sign in before downloading.
 
 ### Fixed
 - Video sizes in the download sheet, format list and queue now include the audio track, matching the download card.
@@ -33,6 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Loading skeletons are easier to see on light and light glass themes.
 - Format list without the side rail: shorter rows, grouped on connected cards like the settings lists.
 - Multi-link sheet: a quality picked for a link while it is still being read is kept (#157).
+- Instagram sign-in page no longer greys out or stays blank; it opens straight on the login form.
+- Desktop site in sign-in fits the screen and can be pinched and scrolled.
+- Sign-in page ignores "open in app" links and closes cleanly if the browser engine stops.
 - Trimmed downloads show a real percentage and time left instead of sitting at 0%.
 - A trimmed download's history entry shows the kept length, not the whole video's.
 - A trimmed download no longer shows a Merge stage.
@@ -44,14 +50,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The notification for a download with no known size shows the size so far, not "0% · 0 MB / total".
 - Format list: a link whose qualities could not be read now says why, instead of leaving the quality ladder looking like its final list.
 - YouTube's "confirm you're not a bot" refusal is named as such, not as private content.
+- yt-dlp updates work on older, low-memory and nearly full phones, and resume after a dropped connection (#166).
+- The yt-dlp update screen says why an update failed, and Retry repeats the install.
+- Updating yt-dlp while a download runs no longer reports a failure once the update goes live.
 - The quality ladder keeps its original look and side rail until the real qualities arrive.
 - A link refused until sign-in now opens the sign-in dialog right away; signing in reads it again.
 - Off screen, the same refusal posts a notification with Sign in and Dismiss.
 - Notification taps open the screen they are about: Running, Failed, History or the failure dialog.
 - The share sheet's format list now shows why a read failed.
+- Extra download arguments: `-o` sets the file name and folders again, e.g. `-o "%(uploader)s/%(id)s.%(ext)s"`; a template that leaves the download folder is ignored. (#165)
+- Files saved with `-o` folders keep their folders in Downloads and in a picked folder, and reuse a folder that already exists.
+- Trim after download and cut progress find the file inside `-o` folders.
+- Properties "Saved to" shows the file's own folder, and a folder picked through Downloads no longer shows as `raw//storage/...`.
+- Files saved to a picked folder are now listed by gallery and music apps.
+- Saving a download no longer rescans the whole Hazel folder.
+- A download whose title starts with "." is saved instead of deleted, without the leading dots. (#168)
 - Format sheet: rows no longer draw over each other when switching between quality stops, and the list starts from the top on each switch.
+- Downloads list keeps each item's artwork after its source link expires.
+- Trim after download no longer crashes on Android 7.
 
 ### Changed
+- Storage cleanup lists the saved download thumbnails as "Downloads artwork", so they can be cleared.
 - The bottom bar's selected-tab shape is easier to see.
 - Format sheet: the quality rail is one connected group with round outer ends and tight inner corners; the chosen stop fills with the accent and lifts out of the group on a spring.
 - Format sheet: the panes keep one height while a link is read, when the formats arrive and between stops, and the rail and list scroll on their own.
