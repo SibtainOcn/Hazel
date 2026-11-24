@@ -530,6 +530,7 @@
     <string name="cookie_webview_close">关闭</string>
     <string name="cookie_webview_desktop_site">桌面版网站</string>
     <string name="cookie_webview_no_cookies">没有取到任何 Cookie</string>
+    <string name="cookie_webview_crashed">登录页面已停止。请重新打开。</string>
     <string name="cookie_webview_done">"  确定"</string>
 
     <!-- FormatSelectionSheet -->

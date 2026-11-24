@@ -543,6 +543,7 @@
     <string name="cookie_webview_close">बंद करें</string>
     <string name="cookie_webview_desktop_site">डेस्कटॉप साइट</string>
     <string name="cookie_webview_no_cookies">कोई कुकी नहीं मिली</string>
+    <string name="cookie_webview_crashed">साइन-इन पेज रुक गया। इसे फिर से खोलें।</string>
     <string name="cookie_webview_done">"  ठीक है"</string>
 
     <!-- FormatSelectionSheet -->
