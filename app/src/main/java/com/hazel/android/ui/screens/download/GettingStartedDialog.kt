@@ -41,7 +41,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.BatteryChargingFull
 import androidx.compose.material.icons.rounded.BlurOn
@@ -77,6 +77,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -143,7 +144,8 @@ fun GettingStartedDialog(
     onOpenBatterySettings: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    var currentStep by remember { mutableIntStateOf(1) }
+    // Saved, so coming back from Software update lands on the same step.
+    var currentStep by rememberSaveable { mutableIntStateOf(1) }
     val totalSteps = TOTAL_STEPS
     val context = LocalContext.current
     val glass = LocalGlass.current
@@ -224,7 +226,7 @@ fun GettingStartedDialog(
                         AppearanceStep(appearance)
                     } else if (step == UPDATES_STEP) {
                         UpdatesStep(onOpenUpdates = {
-                            onDismiss()
+                            // The guide stays open underneath; back returns to this step.
                             // The app's own deep route, so it works from every screen that shows this guide.
                             runCatching {
                                 context.startActivity(
@@ -602,10 +604,10 @@ internal fun UpdatesStep(onOpenUpdates: () -> Unit = {}) {
                         .background(MaterialTheme.colorScheme.primary)
                 ) {
                     Icon(
-                        Icons.AutoMirrored.Rounded.ArrowForward,
+                        Icons.AutoMirrored.Rounded.ArrowForwardIos,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(14.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
