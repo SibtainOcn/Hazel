@@ -224,11 +224,7 @@ fun ProcessingTracker(
     )
 }
 
-/**
- * A line that only runs, for a trimmed or audio download: nothing says how far along it is,
- * so none is claimed. It shades the artwork the way [ProcessingTracker] does, so the title
- * and figures laid over it stay readable.
- */
+/** Indeterminate line for a cut not yet reported on, over the same artwork shade as [ProcessingTracker]. */
 @Composable
 fun LiveProgressLine(modifier: Modifier = Modifier) {
     Box(modifier = modifier.background(Color.Black.copy(alpha = 0.45f))) {

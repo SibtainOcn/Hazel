@@ -8,14 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
+- Cut: three modes, Quick cut (default), Precise cuts and Trim after download, which downloads the whole file and cuts it on the device. Covers, tags, chapters and subtitle files stay in step.
+- Cut mode is saved, and set from either the Cut sheet or Processing settings. Trim after download is unavailable while SponsorBlock removes parts, chapters are split or a live stream is taken from the start.
+- Cut: opens full screen, shows every mode's hint at once, and the preview's quality can be changed from its corner.
+- The player's quality change takes effect again.
 
 ### Fixed
-- A trimmed download's history entry shows the length of the part that was kept, not of the whole video.
-- Trimmed downloads no longer sit at 0%: the card and the notification show a line that keeps moving, with the size written so far beside it.
-- Audio downloads are followed the same way, by size on disk, instead of a stage list that did not match what was running.
-- A trimmed download no longer shows a Merge stage, which yt-dlp never runs for one.
-- Cancelling, pausing or re-adding a trimmed download no longer leaves it stuck on "downloading" with ffmpeg still running in the background, using the network and the processor.
-- Resuming a paused trimmed download starts its size from zero again instead of from the size where it stopped.
+- Trimmed downloads show a real percentage and time left instead of sitting at 0%.
+- A trimmed download's history entry shows the kept length, not the whole video's.
+- A trimmed download no longer shows a Merge stage.
+- Stopping a trimmed download no longer leaves it stuck on "downloading" with ffmpeg still running.
+- Stopping a download no longer kills a Converter job running at the same time.
+- A trimmed download's size no longer nearly doubles while the cover or tags are added.
+- A paused trimmed download shows only Paused, and its unusable part file is removed.
+- A trimmed download retried after an expired link starts its progress over.
 - The notification for a download with no known size shows the size so far, not "0% · 0 MB / total".
 - Format list: a link whose qualities could not be read now says why, instead of leaving the quality ladder looking like its final list.
 - YouTube's "confirm you're not a bot" refusal is named as such, not as private content.

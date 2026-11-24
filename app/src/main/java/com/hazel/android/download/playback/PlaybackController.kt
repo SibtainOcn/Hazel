@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import com.hazel.android.data.SettingsRepository
 import kotlinx.coroutines.launch
 
 /**
@@ -37,6 +38,7 @@ class PlaybackController(
     enum class Phase { LOADING, READY, FAILED }
 
     val player: ExoPlayer = PlayerFactory.create(context)
+    private val app = context.applicationContext
 
     var phase by mutableStateOf(Phase.LOADING)
         private set
@@ -174,6 +176,20 @@ class PlaybackController(
     }
 
     fun retry() = start(positionMs, playWhenReady = true)
+
+    /**
+     * Saves [height] as the playback quality, on the settings' own steps, and plays it from the same
+     * moment. Runs in the player's scope, so closing the dialog that asked for it does not cancel it.
+     */
+    fun changeQuality(height: Int) {
+        if (released) return
+        scope.launch {
+            val step = SettingsRepository.PLAY_QUALITIES.firstOrNull { it >= height }
+                ?: SettingsRepository.PLAY_QUALITIES.last()
+            SettingsRepository.setPlayQuality(app, step)
+            reload()
+        }
+    }
 
     /** Finds the stream again, for a changed quality, and carries on from the same moment. */
     fun reload() = start(player.currentPosition.coerceAtLeast(0L), playWhenReady = player.playWhenReady)

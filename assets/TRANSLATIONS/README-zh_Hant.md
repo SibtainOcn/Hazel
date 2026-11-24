@@ -93,7 +93,7 @@ Hazel 是一款由 **yt-dlp** 驅動的免費開源 Android 下載器。從 **15
   <tr><th width="50%" align="left">📥 下載</th><th width="50%" align="left">🔍 搜尋與播放</th></tr>
   <tr><td><b>1500+ 個網站：</b>YouTube、Instagram、TikTok、X、Reddit、SoundCloud 及<a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">更多</a>。</td><td><b>搜尋：</b>YouTube、YouTube Music、SoundCloud 或 Bandcamp，可選搜尋建議。</td></tr>
   <tr><td><b>批次：</b>一個連結、多個連結或整個播放清單 / 頻道。</td><td><b>先播放：</b>在卡片上直接播放任何結果，支援拖曳進度、雙擊快轉和全螢幕。</td></tr>
-  <tr><td><b>Hazel Instant：</b>從任何 App 分享連結，即依已儲存的畫質開始下載。</td><td><b>剪輯：</b>在即時預覽中選取，只儲存你想要的部分。</td></tr>
+  <tr><td><b>Hazel Instant：</b>從任何 App 分享連結，即依已儲存的畫質開始下載。</td><td><b>剪輯：</b>在即時預覽中選取，只儲存你想要的部分。可選快速、精確，或下載後裁剪：全速下載整個檔案，再在手機上剪出片段。</td></tr>
   <tr><td><b>你的格式：</b>選擇畫質、容器、音軌，並編輯標題 / 中繼資料。</td><td><b>直播：</b>從頭錄製，或等待首播。</td></tr>
 </table>
 

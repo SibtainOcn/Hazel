@@ -104,6 +104,7 @@ internal val SETTINGS_INDEX: List<SettingEntry> = buildList {
         R.string.processing_use_sponsorblock to R.string.processing_use_sponsorblock_summary,
         R.string.processing_sponsorblock_categories to null,
         R.string.processing_sponsorblock_server to R.string.processing_sponsorblock_server_hint,
+        R.string.options_cut_mode to null,
         R.string.properties_bitrate to null,
         R.string.options_thumbnail_embed to null,
         R.string.options_thumbnail_crop to null,

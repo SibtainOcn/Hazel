@@ -110,9 +110,7 @@ fun MediaCard(
     processingSteps: List<ProcessingStep> = emptyList(),
     processingStep: Int = 0,
     progress: Float = 0f,
-    /** A cut with nothing to measure it by yet: the track runs on its own, with no figure. */
     unmeasured: Boolean = false,
-    /** What a trimmed or audio download has written so far, shown in place of a fraction. */
     liveBytes: Long = 0L,
     totalBytes: Long = 0L,
     eta: String = "",
