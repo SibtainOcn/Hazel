@@ -134,4 +134,55 @@ class HazelUpdateTogglesLayoutTest(private val locale: String, private val theme
         assertTrue("More button runs off the edge", open.positionOnScreen.x + open.size.width <= context.resources.displayMetrics.widthPixels)
         saveScreen("guide-updates-$theme-$locale")
     }
+
+    private val nightlyInfo = com.hazel.android.update.HazelUpdater.ReleaseInfo(
+        version = "1.1.19-nightly.14", channel = com.hazel.android.update.HazelUpdater.Channel.NIGHTLY,
+        binarySize = 76_646_657L, downloadUrl = "https://example.com/a.apk", changelog = "",
+        publishedAt = "", assetName = "Hazel-v1.1.19-nightly.14-arm64-v8a-nightly.apk"
+    )
+
+    private fun statusCard(state: com.hazel.android.update.HazelUpdateViewModel.UiState) = show {
+        androidx.compose.foundation.layout.Column {
+            HazelStatus(
+                state = state,
+                installedVersion = "1.1.18-nightly.14",
+                channel = com.hazel.android.update.HazelUpdater.Channel.STABLE,
+                onCheckNow = {}, onDownload = {}, onCancel = {}, onInstall = {}, onOpenFdroid = {}, onViewChangelog = {}
+            )
+            JoinedTiles(listOf("Nightly" to "Channel", "10118034" to "Code", "24 Nov" to "Installed", "GitHub" to "Source"))
+        }
+    }
+
+    private fun assertTextFits(text: String, substring: Boolean = false) {
+        val node = compose.onNodeWithText(text, substring = substring).performScrollTo().assertIsDisplayed().fetchSemanticsNode()
+        assertTrue("$text runs off the right edge", node.positionOnScreen.x + node.size.width <= context.resources.displayMetrics.widthPixels)
+    }
+
+    @Test
+    fun `status card fits a nightly build waiting for stable`() {
+        statusCard(com.hazel.android.update.HazelUpdateViewModel.UiState.Idle)
+        assertTextFits("1.1.18-nightly.14", substring = true)
+        assertTextFits(context.getString(R.string.upd_status_waiting, "Stable"))
+        assertTextFits(context.getString(R.string.upd_btn_check_now))
+        assertTextFits("10118034")
+        saveScreen("hazel-status-waiting-$theme-$locale")
+    }
+
+    @Test
+    fun `status card fits an available update and a classified failure`() {
+        statusCard(com.hazel.android.update.HazelUpdateViewModel.UiState.Available(nightlyInfo))
+        assertTextFits(context.getString(R.string.upd_btn_download))
+        assertTextFits(context.getString(R.string.upd_status_available, "1.1.18-nightly.14"))
+        saveScreen("hazel-status-available-$theme-$locale")
+    }
+
+    @Test
+    fun `status card words a failed download in the person's language`() {
+        val failure = com.hazel.android.update.UpdateFailure.http(429)
+        statusCard(com.hazel.android.update.HazelUpdateViewModel.UiState.Error(failure.summary, nightlyInfo, failure))
+        assertTextFits(context.getString(R.string.upd_status_update_failed))
+        assertTextFits(context.getString(R.string.upd_btn_retry))
+        compose.onNodeWithText(failure.summary).assertDoesNotExist()
+        saveScreen("hazel-status-error-$theme-$locale")
+    }
 }

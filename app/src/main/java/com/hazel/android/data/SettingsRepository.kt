@@ -706,7 +706,8 @@ object SettingsRepository {
     }
 
     fun getHazelChannel(context: Context): Flow<String> {
-        return context.dataStore.data.map { prefs -> prefs[HAZEL_CHANNEL_KEY] ?: "Stable" }
+        // Until picked, the channel this build came from.
+        return context.dataStore.data.map { prefs -> prefs[HAZEL_CHANNEL_KEY] ?: com.hazel.android.BuildConfig.HAZEL_CHANNEL }
     }
     suspend fun setHazelChannel(context: Context, channel: String) {
         context.dataStore.edit { prefs -> prefs[HAZEL_CHANNEL_KEY] = channel }

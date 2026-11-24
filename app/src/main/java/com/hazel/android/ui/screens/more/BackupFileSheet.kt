@@ -47,6 +47,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.TextAutoSize
 import com.hazel.android.R
 import com.hazel.android.data.BackupCategory
 import com.hazel.android.data.BackupFile
@@ -204,22 +209,56 @@ private fun Tiles(file: BackupFile, contents: BackupRepository.Contents?) {
 /** Value-over-label tiles joined into one row, as on the properties sheet. */
 @Composable
 internal fun JoinedTiles(tiles: List<Pair<String, String>>) {
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        tiles.forEachIndexed { index, (value, label) ->
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(rowShape(index, tiles.size, horizontal = true))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .padding(horizontal = 4.dp, vertical = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(value, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+    if (tiles.isEmpty()) return
+    BoxWithConstraints {
+        // One row while every tile has room for its value; two per row at large fonts or on
+        // narrow screens, rather than values cut to "Nightl".
+        val fontScale = LocalDensity.current.fontScale
+        val perRow = if (maxWidth / tiles.size >= 72.dp * fontScale) tiles.size else 2
+        val rows = tiles.chunked(perRow)
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            rows.forEachIndexed { r, row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    row.forEachIndexed { c, (value, label) ->
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(gridShape(r, c, rows.size, row.size))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                .padding(horizontal = 4.dp, vertical = 12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                value,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                autoSize = TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = MaterialTheme.typography.titleSmall.fontSize)
+                            )
+                            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+/** Connected-group corners for a grid cell: round on the group's outside, tight inside. */
+private fun gridShape(row: Int, col: Int, rows: Int, cols: Int): RoundedCornerShape {
+    val outer = 20.dp
+    val inner = 6.dp
+    val top = row == 0
+    val bottom = row == rows - 1
+    val start = col == 0
+    val end = col == cols - 1
+    return RoundedCornerShape(
+        topStart = if (top && start) outer else inner,
+        topEnd = if (top && end) outer else inner,
+        bottomEnd = if (bottom && end) outer else inner,
+        bottomStart = if (bottom && start) outer else inner
+    )
 }
 
 /** Opens the backup folder in the user's file manager, or the default folder when none was picked. */

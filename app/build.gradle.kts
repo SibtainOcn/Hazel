@@ -85,9 +85,55 @@ gradle.taskGraph.whenReady {
 // The code is a plain counter with two digits kept free at the end for the architecture. Its
 // only rule is that it increases; it says nothing about the version a person reads.
 
-// The name of the release, taken from defaultConfig so there is one copy of it. Nothing on
-// the release path overrides it: CI and the F-Droid server both build with the version as
-// it stands in this file, which is what keeps their two APKs in agreement.
+// ── Release channels ──
+//
+// Stable is what the literals in defaultConfig describe, and the only build F-Droid makes.
+// Beta and nightly builds are described by CI alone, with three properties:
+//
+//   -PhazelChannel=beta|nightly  -PhazelVersion=1.1.18  -PhazelBuild=N
+//
+// A build without them (local, a stable tag, the F-Droid server) is the plain stable build,
+// unchanged. With them, the name becomes 1.1.18-nightly.N or 1.1.18-beta.N and the code is
+//
+//   (major x 10000 + minor x 100 + patch) x 1000 + slot x 10 + architecture
+//
+// where the slot is N for a nightly (1 to 79), 79 + N for a beta (80 to 98) and 99 for the
+// stable. So for one version, nightly < beta < stable, and every channel can move up to the
+// next without a reinstall. The stable of a version therefore carries the code of slot 99;
+// release.yml checks that before it publishes.
+data class ChannelBuild(val channel: String, val name: String, val code: Int)
+
+val channelBuild: ChannelBuild? = run {
+    val channel = (project.findProperty("hazelChannel") as String?)?.trim()?.lowercase()
+    if (channel.isNullOrEmpty() || channel == "stable") return@run null
+    require(channel == "beta" || channel == "nightly") {
+        "hazelChannel must be stable, beta or nightly, not '$channel'"
+    }
+    val version = (project.findProperty("hazelVersion") as String?)?.trim()
+        ?: error("A $channel build needs -PhazelVersion, the version it leads up to")
+    val build = (project.findProperty("hazelBuild") as String?)?.trim()?.toIntOrNull()
+        ?: error("A $channel build needs -PhazelBuild, a whole number")
+    val (major, minor, patch) = Regex("""(\d+)\.(\d+)\.(\d+)""").matchEntire(version)
+        ?.destructured?.toList()?.map { it.toInt() }
+        ?: error("hazelVersion must look like 1.1.18, not '$version'")
+    require(minor <= 99 && patch <= 99 && major <= 200) { "hazelVersion $version is out of range" }
+    val slot = when (channel) {
+        "nightly" -> build.takeIf { it in 1..79 }
+            ?: error("Nightly build $build is out of range 1 to 79 for $version; ship a stable or a new version")
+        else -> build.takeIf { it in 1..19 }?.plus(79)
+            ?: error("Beta build $build is out of range 1 to 19 for $version")
+    }
+    ChannelBuild(channel, "$version-$channel.$build", ((major * 10000 + minor * 100 + patch) * 1000) + slot * 10)
+}
+
+// Where and when a CI build was made, shown on the update screen. Left empty otherwise, so a
+// plain build stays reproducible: F-Droid rebuilds the app and compares it byte for byte.
+val buildCommit: String = (project.findProperty("hazelCommit") as String?)?.trim()?.take(12) ?: ""
+val buildDate: String = (project.findProperty("hazelBuildDate") as String?)?.trim()?.take(10) ?: ""
+
+// The name of the release, taken from defaultConfig so there is one copy of it. A stable
+// build never overrides it: CI and the F-Droid server both build with the version as it
+// stands in this file, which is what keeps their two APKs in agreement.
 val hazelVersionName: String by lazy { android.defaultConfig.versionName ?: "1.0.0" }
 
 // The release's own code, without the architecture digits. Read back from defaultConfig for
@@ -118,7 +164,7 @@ val splitAbi: Boolean =
 // suffix after the number, and anything with one is a beta as far as a downloader cares.
 // Debug builds override this, because there the build type says more than the version does.
 val hazelChannel: String by lazy {
-    if (hazelVersionName.contains('-')) "beta" else "stable"
+    channelBuild?.channel ?: if (hazelVersionName.contains('-')) "beta" else "stable"
 }
 
 android {
@@ -151,6 +197,19 @@ android {
 
         ndk {
             abiFilters += listOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
+        }
+
+        buildConfigField("String", "HAZEL_CHANNEL", "\"${channelBuild?.channel ?: "stable"}\"")
+        buildConfigField("String", "BUILD_COMMIT", "\"$buildCommit\"")
+        buildConfigField("String", "BUILD_DATE", "\"$buildDate\"")
+    }
+
+    // A beta or nightly build takes its name and code from CI. Written without literals so
+    // the F-Droid version scan, which reads this file as text, only ever finds the stable.
+    channelBuild?.let { build ->
+        defaultConfig {
+            versionName = build.name
+            versionCode = build.code
         }
     }
 

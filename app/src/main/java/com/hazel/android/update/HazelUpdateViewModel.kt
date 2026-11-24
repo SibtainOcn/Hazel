@@ -35,7 +35,12 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
             val etaSeconds: Long = 0L
         ) : UiState()
         data class ReadyToInstall(val info: HazelUpdater.ReleaseInfo, val apkFile: File) : UiState()
-        data class Error(val message: String, val info: HazelUpdater.ReleaseInfo? = null) : UiState()
+        /** [failure], when known, is worded on screen in the person's language; [message] is the fallback. */
+        data class Error(
+            val message: String,
+            val info: HazelUpdater.ReleaseInfo? = null,
+            val failure: UpdateFailure? = null
+        ) : UiState()
         data object FdroidManaged : UiState()
     }
 
@@ -113,10 +118,11 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
                     _uiState.value = UiState.Idle
                 }
                 is HazelUpdater.CheckResult.NetworkError -> {
-                    _uiState.value = UiState.Error(
-                        if (HazelUpdater.isFdroid()) "Couldn't reach F-Droid repository. Check your connection."
-                        else result.message
-                    )
+                    _uiState.value = if (HazelUpdater.isFdroid()) {
+                        UiState.Error(getApplication<Application>().getString(R.string.upd_failure_fdroid_unreachable))
+                    } else {
+                        UiState.Error(result.message, failure = UpdateFailure.of(UpdateFailure.Kind.UNREACHABLE))
+                    }
                 }
             }
         }
@@ -151,7 +157,9 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                _uiState.value = UiState.Error(e.message ?: "Download failed. Please try again.", info)
+                val failure = UpdateFailure.from(e)
+                android.util.Log.w("Hazel", "Hazel update download failed: ${failure.summary}")
+                _uiState.value = UiState.Error(failure.summary, info, failure)
             }
         }
     }

@@ -29,8 +29,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.TextAutoSize
 import com.hazel.android.update.UpdateTokens
 
 /**
@@ -74,9 +76,17 @@ internal fun UpdateStatusHeader(
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = UpdateTokens.OnSurface)
-            Text(line, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = tone,
-                maxLines = 3, overflow = TextOverflow.Ellipsis)
+            // A long version (1.1.18-nightly.14) shrinks a step before it breaks mid-number.
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = UpdateTokens.OnSurface,
+                maxLines = 2,
+                autoSize = TextAutoSize.StepBased(minFontSize = 12.sp, maxFontSize = MaterialTheme.typography.titleLarge.fontSize)
+            )
+            // The reason is never cut: it is what the person acts on.
+            Text(line, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = tone)
         }
     }
 }
@@ -98,9 +108,16 @@ internal fun UpdateStateButtons(buttons: List<Triple<String, Boolean, () -> Unit
                     .weight(1f)
                     .heightIn(min = 52.dp)
             ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp, vertical = 14.dp)) {
-                    Text(text, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp)) {
+                    // One line, a smaller step at the largest font, instead of "Jetzt p…" or a word cut in two.
+                    Text(
+                        text,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        autoSize = TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = MaterialTheme.typography.labelLarge.fontSize)
+                    )
                 }
             }
         }

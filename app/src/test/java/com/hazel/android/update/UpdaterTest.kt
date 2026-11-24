@@ -146,23 +146,24 @@ class UpdaterTest {
     }
 
     @Test
-    fun `HazelUpdater parseReleasesAtom returns null when Beta channel has no releases`() {
+    fun `HazelUpdater parseReleasesAtom gives Beta the stable when no beta is newer`() {
         val rel = HazelUpdater.parseReleasesAtom(
             xml = sampleAtomFeed,
             channel = HazelUpdater.Channel.BETA,
             supportedAbis = listOf("arm64-v8a")
         )
-        assertNull(rel)
+        assertEquals("1.0.8", rel?.version)
+        assertEquals(HazelUpdater.Channel.STABLE, rel?.channel)
     }
 
     @Test
-    fun `HazelUpdater parseReleasesAtom returns null when Nightly channel has no releases`() {
+    fun `HazelUpdater parseReleasesAtom gives Nightly the stable when no nightly is newer`() {
         val rel = HazelUpdater.parseReleasesAtom(
             xml = sampleAtomFeed,
             channel = HazelUpdater.Channel.NIGHTLY,
             supportedAbis = listOf("arm64-v8a")
         )
-        assertNull(rel)
+        assertEquals("1.0.8", rel?.version)
     }
 
     @Test
@@ -235,8 +236,9 @@ class UpdaterTest {
         assertNotNull(beta)
         assertEquals("1.0.9-beta", beta?.version)
 
+        // Nightly takes the newest it accepts, here the beta.
         val nightly = HazelUpdater.findReleaseMatchingChannel(jsonArray, HazelUpdater.Channel.NIGHTLY, listOf("arm64-v8a"))
-        assertNull(nightly)
+        assertEquals("1.0.9-beta", nightly?.version)
     }
 
     // ── 5. YtDlpUpdater Tests ──
@@ -310,15 +312,16 @@ class UpdaterTest {
     }
 
     @Test
-    fun `HazelUpdater latestReleaseResult returns NoReleaseFound for empty Beta channel without 403`() = kotlinx.coroutines.runBlocking {
+    fun `HazelUpdater latestReleaseResult answers for the Beta channel without 403`() = kotlinx.coroutines.runBlocking {
         val result = HazelUpdater.latestReleaseResult(HazelUpdater.Channel.BETA)
-        assertEquals(HazelUpdater.CheckResult.NoReleaseFound, result)
+        assertTrue("Expected Success but got $result", result is HazelUpdater.CheckResult.Success)
+        assertTrue((result as HazelUpdater.CheckResult.Success).info.channel != HazelUpdater.Channel.NIGHTLY)
     }
 
     @Test
-    fun `HazelUpdater latestReleaseResult returns NoReleaseFound for empty Nightly channel without 403`() = kotlinx.coroutines.runBlocking {
+    fun `HazelUpdater latestReleaseResult answers for the Nightly channel without 403`() = kotlinx.coroutines.runBlocking {
         val result = HazelUpdater.latestReleaseResult(HazelUpdater.Channel.NIGHTLY)
-        assertEquals(HazelUpdater.CheckResult.NoReleaseFound, result)
+        assertTrue("Expected Success but got $result", result is HazelUpdater.CheckResult.Success)
     }
 
     @Test
