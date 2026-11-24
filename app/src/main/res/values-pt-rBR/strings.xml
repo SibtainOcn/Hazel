@@ -160,6 +160,7 @@
     <string name="format_sheet_audio_language">Idioma do áudio</string>
     <string name="format_sheet_change_audio_language">Mudar o idioma do áudio</string>
     <string name="format_sheet_filename_template">Modelo do nome do arquivo</string>
+    <string name="format_sheet_extra_args">Argumentos extras</string>
     <string name="format_sheet_change_field">Mudar</string>
     <string name="format_sheet_save_dir">Pasta</string>
     <string name="format_sheet_save_location">Onde salvar</string>
@@ -294,6 +295,8 @@
     <string name="cleanup_category_other_cache_description">Miniaturas e tudo o mais guardado em cache enquanto você navega pelos links.</string>
     <string name="cleanup_category_link_reads_label">Leituras de links salvas</string>
     <string name="cleanup_category_link_reads_description">Formatos dos últimos 50 links, para reabrir na hora. Guardados por 6 h, nunca no anônimo.</string>
+    <string name="cleanup_category_history_thumbs_label">Miniaturas dos downloads</string>
+    <string name="cleanup_category_history_thumbs_description">Cópias das miniaturas usadas na lista de downloads. Se forem limpas, são recriadas a partir do link ou do arquivo salvo ao exibir cada linha.</string>
     <string name="cleanup_confirm_category_title">Limpar estes arquivos?</string>
     <string name="cleanup_confirm_category_safe">%1$s serão liberados. Nada do que você salvou é afetado.</string>
     <string name="cleanup_confirm_category_unsafe">%1$s serão liberados, e o próximo download vai demorar mais enquanto eles são descompactados de novo.</string>
@@ -553,6 +556,7 @@
     <string name="cookie_webview_close">Fechar</string>
     <string name="cookie_webview_desktop_site">Versão para computador</string>
     <string name="cookie_webview_no_cookies">Nenhum cookie foi coletado</string>
+    <string name="cookie_webview_crashed">A página de login parou. Abra-a novamente.</string>
     <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->
@@ -1002,4 +1006,18 @@
     <string name="upd_report_copied">Informações copiadas. Cole no relato.</string>
     <string name="upd_channel_note">Beta e Nightly recebem correções antes e podem ser menos estáveis.</string>
     <string name="upd_status_ok">Atualizado no %1$s</string>
+    <string name="upd_failure_no_space">Não há armazenamento livre suficiente neste aparelho para instalar a atualização. Libere espaço e tente de novo.</string>
+    <string name="upd_failure_timeout">A conexão com o GitHub expirou. Mude para uma rede com sinal melhor e tente de novo.</string>
+    <string name="upd_failure_unreachable">O Hazel não conseguiu acessar o GitHub. Verifique sua conexão com a internet e as configurações de VPN e DNS privado, e tente de novo.</string>
+    <string name="upd_failure_connection_lost">A conexão caiu durante o download. Tente de novo em uma rede mais estável.</string>
+    <string name="upd_failure_clock_or_tls">Não foi possível estabelecer uma conexão segura com o GitHub. Verifique se a data e a hora deste aparelho estão corretas e tente de novo.</string>
+    <string name="upd_failure_http">O GitHub recusou o download (HTTP %1$s). Tente de novo em alguns minutos.</string>
+    <string name="upd_failure_release_gone">Esta versão não está mais disponível no GitHub. Verifique as atualizações para obter a mais recente.</string>
+    <string name="upd_failure_incomplete">O download não foi concluído corretamente. Tente de novo em uma rede mais estável.</string>
+    <string name="upd_failure_could_not_install">Não foi possível instalar a atualização neste aparelho. Tente de novo.</string>
+    <string name="upd_failure_would_not_start">A nova versão do yt-dlp não conseguiu iniciar neste aparelho, então a versão atual foi mantida. Os downloads continuam funcionando.</string>
+    <string name="upd_failure_stopped_while_starting">O sistema interrompeu a nova versão do yt-dlp durante a inicialização, provavelmente por falta de memória. A versão atual foi mantida. Feche outros aplicativos e tente de novo.</string>
+    <string name="upd_failure_unknown">Não foi possível concluir a atualização (%1$s). Tente de novo em instantes.</string>
+    <string name="upd_status_update_failed">A atualização não foi concluída</string>
+    <string name="upd_status_check_failed">A verificação não foi concluída</string>
 </resources>

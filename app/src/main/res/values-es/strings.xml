@@ -160,6 +160,7 @@
     <string name="format_sheet_audio_language">Idioma del audio</string>
     <string name="format_sheet_change_audio_language">Cambiar el idioma del audio</string>
     <string name="format_sheet_filename_template">Plantilla del nombre de archivo</string>
+    <string name="format_sheet_extra_args">Argumentos extra</string>
     <string name="format_sheet_change_field">Cambiar</string>
     <string name="format_sheet_save_dir">Carpeta</string>
     <string name="format_sheet_save_location">Dónde guardar</string>
@@ -294,6 +295,8 @@
     <string name="cleanup_category_other_cache_description">Miniaturas y todo lo demás guardado mientras se exploran enlaces.</string>
     <string name="cleanup_category_link_reads_label">Lecturas de enlaces guardadas</string>
     <string name="cleanup_category_link_reads_description">Formatos de los últimos 50 enlaces para reabrirlos al instante. 6 horas; nunca en incógnito.</string>
+    <string name="cleanup_category_history_thumbs_label">Miniaturas de descargas</string>
+    <string name="cleanup_category_history_thumbs_description">Copias de las miniaturas que usa la lista de descargas. Si se borran, se reconstruyen desde el enlace o el archivo guardado al mostrar cada fila.</string>
     <string name="cleanup_confirm_category_title">¿Borrar estos archivos?</string>
     <string name="cleanup_confirm_category_safe">Se liberarán %1$s. Nada de lo que has guardado se ve afectado.</string>
     <string name="cleanup_confirm_category_unsafe">Se liberarán %1$s, y la siguiente descarga tardará más mientras se desempaquetan otra vez.</string>
@@ -553,6 +556,7 @@
     <string name="cookie_webview_close">Cerrar</string>
     <string name="cookie_webview_desktop_site">Versión de escritorio</string>
     <string name="cookie_webview_no_cookies">No se recogió ninguna cookie</string>
+    <string name="cookie_webview_crashed">La página de inicio de sesión se detuvo. Ábrela de nuevo.</string>
     <string name="cookie_webview_done">"  Aceptar"</string>
 
     <!-- FormatSelectionSheet -->
@@ -1002,4 +1006,18 @@
     <string name="upd_report_copied">Información copiada. Pégala en el reporte.</string>
     <string name="upd_channel_note">Beta y Nightly reciben arreglos antes y pueden ser menos estables.</string>
     <string name="upd_status_ok">Actualizado en %1$s</string>
+    <string name="upd_failure_no_space">No hay suficiente almacenamiento libre en este dispositivo para instalar la actualización. Libera espacio e inténtalo de nuevo.</string>
+    <string name="upd_failure_timeout">La conexión con GitHub agotó el tiempo de espera. Cambia a una red con mejor señal e inténtalo de nuevo.</string>
+    <string name="upd_failure_unreachable">Hazel no pudo conectarse con GitHub. Revisa tu conexión a internet y los ajustes de VPN y DNS privado, y vuelve a intentarlo.</string>
+    <string name="upd_failure_connection_lost">La conexión se interrumpió durante la descarga. Inténtalo de nuevo en una red más estable.</string>
+    <string name="upd_failure_clock_or_tls">No se pudo establecer una conexión segura con GitHub. Comprueba que la fecha y la hora de este dispositivo sean correctas e inténtalo de nuevo.</string>
+    <string name="upd_failure_http">GitHub rechazó la descarga (HTTP %1$s). Inténtalo de nuevo en unos minutos.</string>
+    <string name="upd_failure_release_gone">Esta versión ya no está disponible en GitHub. Busca actualizaciones para obtener la más reciente.</string>
+    <string name="upd_failure_incomplete">La descarga no se completó correctamente. Inténtalo de nuevo en una red más estable.</string>
+    <string name="upd_failure_could_not_install">No se pudo instalar la actualización en este dispositivo. Inténtalo de nuevo.</string>
+    <string name="upd_failure_would_not_start">La nueva versión de yt-dlp no pudo iniciarse en este dispositivo, así que se mantuvo tu versión actual. Las descargas seguirán funcionando.</string>
+    <string name="upd_failure_stopped_while_starting">El sistema detuvo la nueva versión de yt-dlp mientras se iniciaba, probablemente por falta de memoria. Se mantuvo tu versión actual. Cierra otras aplicaciones e inténtalo de nuevo.</string>
+    <string name="upd_failure_unknown">No se pudo completar la actualización (%1$s). Inténtalo de nuevo en un momento.</string>
+    <string name="upd_status_update_failed">La actualización no terminó</string>
+    <string name="upd_status_check_failed">La comprobación no terminó</string>
 </resources>

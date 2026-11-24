@@ -221,6 +221,20 @@ class QueueRunStateTest {
     }
 
     @Test
+    fun `a work folder counts the files in the folders its template made`() {
+        val dir = kotlin.io.path.createTempDirectory("hazel_work").toFile()
+        try {
+            java.io.File(dir, "Uploader").mkdirs()
+            java.io.File(dir, "Uploader/id.mp4.part").writeBytes(ByteArray(400))
+            java.io.File(dir, "Uploader/id.mp4.part.ytdl").writeBytes(ByteArray(50))
+            java.io.File(dir, "other.m4a").writeBytes(ByteArray(100))
+            assertEquals(500L, bytesIn(dir))
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `a missing work folder is nothing rather than a failure`() {
         val gone = java.io.File(System.getProperty("java.io.tmpdir"), "hazel_missing_${System.nanoTime()}")
         assertEquals(0L, bytesIn(gone))

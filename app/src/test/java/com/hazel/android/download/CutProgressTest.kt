@@ -160,4 +160,11 @@ class CutProgressTest {
     fun `a folder that is missing weighs nothing`() {
         assertEquals(0L, CutProgress.mediaBytesIn(File("/no/such/cut/folder")))
     }
+
+    @Test
+    fun `a cut inside output template folders is counted`() = withDir { dir ->
+        File(dir, "Uploader").mkdirs()
+        dir.put("Uploader/clip.mp4.part", 120)
+        assertEquals(120L, CutProgress.mediaBytesIn(dir))
+    }
 }

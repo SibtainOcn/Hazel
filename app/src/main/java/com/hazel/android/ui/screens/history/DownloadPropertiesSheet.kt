@@ -63,7 +63,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -72,7 +71,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.data.HistoryEntry
 import com.hazel.android.download.formatDuration
@@ -185,16 +183,13 @@ private fun Header(entry: HistoryEntry, present: Boolean, facts: MediaFacts) {
                 contentAlignment = Alignment.Center
             ) {
                 com.hazel.android.ui.components.ArtworkPlaceholder()
-                if (entry.thumbnail != null) {
-                    AsyncImage(
-                        model = entry.thumbnail,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        alpha = if (present) 1f else 0.55f,
-                        colorFilter = if (present) null else GreyFilter,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                HistoryArtworkImage(
+                    entry = entry,
+                    present = present,
+                    modifier = Modifier.fillMaxSize(),
+                    alpha = if (present) 1f else 0.55f,
+                    colorFilter = if (present) null else GreyFilter
+                )
                 val length = formatDuration(entry.durationSeconds.takeIf { it > 0 } ?: facts.durationSeconds)
                 if (length.isNotBlank()) {
                     Text(

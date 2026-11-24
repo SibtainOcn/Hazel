@@ -23,6 +23,11 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import com.hazel.android.ui.screens.download.batch.BatchContainerSheet
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.icons.filled.Code
+import com.hazel.android.download.AdvancedSettingsStore
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.selection.selectable
@@ -281,6 +286,8 @@ fun FormatSheet(
     LaunchedEffect(info.uploader) { if (author.isBlank()) author = info.uploader }
 
     var openDialog by remember { mutableStateOf(SheetDialog.NONE) }
+    val advancedContext = androidx.compose.ui.platform.LocalContext.current
+    val advancedScope = rememberCoroutineScope()
     // A cut and the live options belong to this download, so they start empty for every
     // link and are never written to the saved settings.
     var oneOff by remember(info.url) { mutableStateOf(OneOffOptions()) }
@@ -627,6 +634,11 @@ fun FormatSheet(
             val liveLabel = stringResource(R.string.options_live_title)
             val cookiesLabel = stringResource(R.string.cookies_title)
             val cookiesOn = rememberUseCookies()
+            // Same setting as Settings > Advanced > Extra download arguments.
+            val extraArgsLabel = stringResource(R.string.format_sheet_extra_args)
+            val advanced by remember(advancedContext) { com.hazel.android.data.SettingsRepository.getAdvancedSettings(advancedContext) }
+                .collectAsState(initial = AdvancedSettingsStore.current)
+            val extraArgsOn = advanced.downloadExtraArgs.isNotBlank()
 
             val thumbnailOn = options.thumbnailBadge > 0
             val bitrateOn = !videoTab && options.audioQuality.isNotBlank()
@@ -651,7 +663,8 @@ fun FormatSheet(
                     sponsorBlockLabel.takeIf { sponsorBlockOn },
                     cutLabel.takeIf { cutOn },
                     liveLabel.takeIf { liveOn },
-                    cookiesLabel.takeIf { cookiesOn }
+                    cookiesLabel.takeIf { cookiesOn },
+                    extraArgsLabel.takeIf { extraArgsOn }
                 ).joinToString(", "),
                 expanded = adjustOpen,
                 onToggle = { toggle(SECTION_ADJUST) }
@@ -709,6 +722,12 @@ fun FormatSheet(
                         icon = Icons.Filled.Cookie,
                         active = cookiesOn,
                         onClick = { openDialog = SheetDialog.COOKIES }
+                    )
+                    OptionChip(
+                        label = extraArgsLabel,
+                        icon = Icons.Filled.Code,
+                        active = extraArgsOn,
+                        onClick = { openDialog = SheetDialog.EXTRA_ARGS }
                     )
                     // For this download alone, so not offered where the sheet only adjusts
                     // a link in a set.
@@ -830,6 +849,26 @@ fun FormatSheet(
             onChange = { oneOff = it },
             onDismiss = { openDialog = SheetDialog.NONE }
         )
+
+        SheetDialog.EXTRA_ARGS -> {
+            val settings = AdvancedSettingsStore.current
+            TextInputDialog(
+                title = stringResource(R.string.advanced_extra_args),
+                hint = stringResource(R.string.advanced_extra_args_hint),
+                value = settings.downloadExtraArgs,
+                onConfirm = { text ->
+                    // Saved like the Advanced screen saves it, on top of what is stored now.
+                    advancedScope.launch {
+                        com.hazel.android.data.SettingsRepository.setAdvancedSettings(
+                            advancedContext,
+                            AdvancedSettingsStore.current.copy(downloadExtraArgs = text)
+                        )
+                    }
+                    openDialog = SheetDialog.NONE
+                },
+                onDismiss = { openDialog = SheetDialog.NONE }
+            )
+        }
 
         SheetDialog.THUMBNAIL -> ThumbnailDialog(
             options = options,
@@ -1092,7 +1131,7 @@ private fun SheetTab(label: String, selected: Boolean, enabled: Boolean, onClick
 }
 
 /** Which of the sheet's dialogs is open. Only one can be at a time. */
-private enum class SheetDialog { NONE, CUT, LIVE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY, CONTAINER, COOKIES, LINK }
+private enum class SheetDialog { NONE, CUT, LIVE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY, CONTAINER, COOKIES, EXTRA_ARGS, LINK }
 
 /** One message from the footer; a new one for every tap, so a repeat starts its time over. */
 private class Feedback(val message: String)
