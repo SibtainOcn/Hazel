@@ -16,9 +16,6 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.geometry.Size
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
@@ -74,6 +71,10 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.toShape
 import com.hazel.android.ui.components.ModalBottomSheet
+import com.hazel.android.ui.components.loadingPhase
+import com.hazel.android.ui.screens.more.groupShape
+import com.hazel.android.ui.components.FormatRailShimmer
+import kotlinx.coroutines.delay
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -121,6 +122,8 @@ import com.hazel.android.ui.components.GlintHost
 import com.hazel.android.ui.components.ShimmerLabel
 import com.hazel.android.download.qualityRung
 import com.hazel.android.ui.theme.SizeBadgeContainer
+import com.hazel.android.ui.theme.IdBadgeContainer
+import com.hazel.android.ui.theme.IdBadgeContent
 import com.hazel.android.ui.theme.SizeBadgeContent
 import com.hazel.android.ui.components.keepFlingInSheet
 
@@ -214,7 +217,25 @@ fun FormatSelectionSheet(
     // hidden behind it.
     var refreshing by remember { mutableStateOf(false) }
     LaunchedEffect(isLoadingFormats) { if (!isLoadingFormats) refreshing = false }
-    val hidingRows = refreshing && isLoadingFormats
+    // When the real formats land on a sheet that was showing the plain ladder, the list is
+    // swapped out behind the same skeleton as a refresh for a moment, so the change reads
+    // as the sheet refreshing rather than jumping.
+    val resolved = info.hasResolvedFormats
+    var wasResolved by remember { mutableStateOf(resolved) }
+    var revealing by remember { mutableStateOf(false) }
+    LaunchedEffect(resolved) {
+        val arrived = resolved && !wasResolved
+        wasResolved = resolved
+        if (arrived) {
+            try {
+                revealing = true
+                delay(REVEAL_SKELETON_MS)
+            } finally {
+                revealing = false
+            }
+        }
+    }
+    val hidingRows = (refreshing && isLoadingFormats) || revealing
     val source = (if (hidingRows) chosenSource else null) ?: readSource
     val refresh: (ListingSource?, Boolean) -> Unit = { picked, fresh ->
         refreshing = true
@@ -237,13 +258,11 @@ fun FormatSelectionSheet(
         buildStops(info, sort, filter, audioFirst, videoTitle, audioTitle, allLabel, ends)
     }
 
-    // The rail earns its width only when it splits the list into more than one part. While
-    // a link is still being read, a video list will have resolutions to split into shortly,
-    // so the rail is there from the start rather than pushing the list aside as they land.
-    // A video list not read yet, or whose read failed, keeps it too, so the ladder always
-    // looks like the ladder rather than switching to the wide single list.
-    val showRail = stops.size > 2 ||
-        (info.videoFormats.isNotEmpty() && (isLoadingFormats || !info.hasResolvedFormats))
+    // The rail earns its width only when it splits a real list into more than one part.
+    // The ladder a link offers before it is read, and the set's own ladder, are one short
+    // list with nothing to split, so they fill the sheet; the rail comes in once the read
+    // lands with resolutions to sort into.
+    val showRail = info.hasResolvedFormats && stops.size > 2
 
     // Opens on the step of the preferred quality set in settings, or the nearest one below
     // it, so the list starts where the download would land. With no preference it opens on
@@ -261,6 +280,8 @@ fun FormatSelectionSheet(
             ?: stops.first()
     }
     val rows = active.rows
+    // Each entry's place in its section, for the connected group shapes of the plain list.
+    val groupPlaces = remember(rows) { groupPlacesOf(rows) }
 
     val listState = rememberLazyListState()
 
@@ -268,7 +289,9 @@ fun FormatSelectionSheet(
     // above coming along for context. A stop that does not hold it opens at its top. Rows
     // rebuilt while formats arrive leave the scroll where it is.
     var shownStop by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(active.key, rows) {
+    // Held while the skeleton stands in, so the scroll lands on the rows once they are shown.
+    LaunchedEffect(active.key, rows, hidingRows) {
+        if (hidingRows) return@LaunchedEffect
         val index = rows.indexOfFirst { it is FormatListRow.Entry && it.format.formatId == draft?.formatId }
         when {
             index > 0 -> listState.scrollToItem(index - 1)
@@ -415,7 +438,13 @@ fun FormatSelectionSheet(
                     .then(if (showRail) Modifier.height(paneHeight + bottomInset) else Modifier)
                     .padding(horizontal = if (showRail) 12.dp else 0.dp)
             ) {
-                if (showRail) {
+                if (showRail && hidingRows) {
+                    FormatRailShimmer(
+                        stops = stops.size.coerceIn(3, RAIL_SKELETON_MAX),
+                        modifier = Modifier.width(RAIL_WIDTH)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                } else if (showRail) {
                     FormatRail(
                         stops = stops,
                         activeKey = active.key,
@@ -440,7 +469,7 @@ fun FormatSelectionSheet(
                         .weight(1f)
                         .then(if (showRail) Modifier.fillMaxHeight() else Modifier)
                         .keepFlingInSheet(),
-                    verticalArrangement = Arrangement.spacedBy(if (showRail) 6.dp else 0.dp),
+                    verticalArrangement = Arrangement.spacedBy(if (showRail) 6.dp else PLAIN_LIST_GAP),
                     contentPadding = PaddingValues(bottom = bottomInset)
                 ) {
                     items(
@@ -470,7 +499,12 @@ fun FormatSelectionSheet(
                                 compact = showRail,
                                 modifier = motion
                             )
-                            is FormatListRow.Entry -> Box(modifier = motion) {
+                            is FormatListRow.Entry -> Box(
+                                modifier = if (showRail) motion else motion.padding(horizontal = PLAIN_LIST_GUTTER)
+                            ) {
+                                // Without the rail the rows sit as one connected group per
+                                // section, the way settings lists do, at the rail list's height.
+                                val (position, count) = groupPlaces[index] ?: (0 to 1)
                                 FormatRow(
                                     format = row.format,
                                     // By id: a list rebuilt while formats arrive holds new
@@ -478,7 +512,9 @@ fun FormatSelectionSheet(
                                     selected = row.format.formatId == draft?.formatId,
                                     onClick = { draft = row.format },
                                     mergeAudio = mergeAudio,
-                                    compact = showRail
+                                    compact = true,
+                                    shape = if (showRail) RoundedCornerShape(14.dp) else groupShape(position, count),
+                                    tagId = !showRail
                                 )
                             }
                         }
@@ -502,7 +538,7 @@ fun FormatSelectionSheet(
                     // that are already there (the ladder a link opens with, while the link
                     // is read) they would only look like rows that never arrive; the line
                     // under the title and the rail's glint say the read is running.
-                    if (isLoadingFormats && (hidingRows || rows.isEmpty())) {
+                    if (hidingRows || (isLoadingFormats && rows.isEmpty())) {
                         item(key = "loading", contentType = 2) {
                             FormatListShimmer(
                                 rows = if (hidingRows) 6 else 4,
@@ -1048,7 +1084,10 @@ fun FormatRow(
     pendingBadges: Boolean = false,
     popBadges: Boolean = false,
     /** Whether a picked row's badge turns into the pentagon, which only the list's rows do. */
-    pickedShape: Boolean = true
+    pickedShape: Boolean = true,
+    shape: Shape = RoundedCornerShape(14.dp),
+    /** A ladder step's id as a tag after its Auto tag, in the list without the side rail. */
+    tagId: Boolean = !compact
 ) {
     val scheme = MaterialTheme.colorScheme
     val fill by animateColorAsState(
@@ -1067,7 +1106,7 @@ fun FormatRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(shape)
             .drawBehind { drawRect(fill) }
             .clickable(onClick = onClick)
             .padding(horizontal = if (compact) 10.dp else 14.dp, vertical = 8.dp),
@@ -1098,18 +1137,23 @@ fun FormatRow(
                     color = if (selected) scheme.primary else scheme.onSurface,
                     modifier = Modifier.weight(1f, fill = false)
                 )
-                Spacer(modifier = Modifier.width(if (compact) 6.dp else 8.dp))
-                // Bounded, so a long DASH id ("dash-1234…") ellipsizes in its own corner
-                // rather than squeezing the headline down to nothing.
-                Text(
-                    "id: ${shortId(format.formatId)}",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontSize = if (compact) 10.sp else MaterialTheme.typography.labelMedium.fontSize,
-                    color = scheme.onSurface.copy(alpha = if (selected) 0.6f else 0.45f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.widthIn(max = if (compact) 64.dp else 96.dp)
-                )
+                // The plain ladder (no rail) carries the id as a tag after its Auto tag; the
+                // sorted list keeps it beside the headline.
+                val idAsTag = format.isGeneric && tagId
+                if (!idAsTag) {
+                    Spacer(modifier = Modifier.width(if (compact) 6.dp else 8.dp))
+                    // Bounded, so a long DASH id ("dash-1234…") ellipsizes in its own corner
+                    // rather than squeezing the headline down to nothing.
+                    Text(
+                        "id: ${shortId(format.formatId)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = if (compact) 10.sp else MaterialTheme.typography.labelMedium.fontSize,
+                        color = scheme.onSurface.copy(alpha = if (selected) 0.6f else 0.45f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.widthIn(max = if (compact) 64.dp else 96.dp)
+                    )
+                }
             }
 
             // Badges are omitted entirely when the extractor did not report them,
@@ -1139,9 +1183,13 @@ fun FormatRow(
 
             // A ladder row while the formats are read holds the places the real badges will
             // take, rather than saying it will be matched later.
+            val idTag = "id: ${shortId(format.formatId)}".takeIf { generic && tagId }
             if (pendingBadges && (generic || !hasBadges)) {
                 Spacer(modifier = Modifier.height(6.dp))
-                FillingBadges()
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    FillingBadges()
+                    idTag?.let { MetaBadge(it, tone = BadgeTone.ID) }
+                }
             } else if (hasBadges) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
@@ -1165,10 +1213,14 @@ fun FormatRow(
                     }
                     // Said once, on the ladder's rows: the step is matched to a real stream
                     // when the download starts, so there is no codec or size to show yet.
-                    if (generic) MetaBadge(stringResource(R.string.format_generic_badge), tone = BadgeTone.ACCENT)
+                    if (generic) MetaBadge(
+                        stringResource(R.string.format_generic_badge),
+                        tone = if (tagId) BadgeTone.SIZE else BadgeTone.ACCENT
+                    )
                     if (codec.isNotBlank()) MetaBadge(codec)
                     if (size.isNotBlank()) MetaBadge(size, tone = BadgeTone.SIZE)
                     if (bitrate.isNotBlank()) MetaBadge(bitrate, tone = BadgeTone.ACCENT)
+                    idTag?.let { MetaBadge(it, tone = BadgeTone.ID) }
                 }
             }
         }
@@ -1292,11 +1344,31 @@ private const val BADGE_TURN_DEGREES = 72f
 
 private const val PICKED_TINT = 0.18f
 
+/** Each entry's index within the run of entries between two headers, and that run's size. */
+private fun groupPlacesOf(rows: List<FormatListRow>): Map<Int, Pair<Int, Int>> {
+    val places = HashMap<Int, Pair<Int, Int>>(rows.size)
+    var start = 0
+    while (start < rows.size) {
+        if (rows[start] !is FormatListRow.Entry) { start++; continue }
+        var end = start
+        while (end < rows.size && rows[end] is FormatListRow.Entry) end++
+        for (i in start until end) places[i] = (i - start) to (end - start)
+        start = end
+    }
+    return places
+}
+
+private val PLAIN_LIST_GUTTER = 14.dp
+private val PLAIN_LIST_GAP = 3.dp
+
+/** How long the skeleton stands in when the real formats replace the plain ladder. */
+private const val REVEAL_SKELETON_MS = 1000L
+
+/** Most stop blocks the rail's skeleton draws; more would only run under the fold. */
+private const val RAIL_SKELETON_MAX = 9
+
 /** How small the badges start when they spring in. */
 private const val BADGE_POP_FROM = 0.6f
-
-/** One fill of a waiting pill, from empty through full to faded. */
-private const val BADGE_FILL_MS = 1300
 
 /** Share of a fill spent growing; the rest is spent full and fading out. */
 private const val BADGE_FILL_GROW = 0.7f
@@ -1304,18 +1376,12 @@ private const val BADGE_FILL_GROW = 0.7f
 /**
  * The two pills that stand where the codec and the size will be, filling with colour while
  * the formats are read: the codec's in the accent, the size's in its own blue, a beat
- * behind. One loop drives both, and it is read while drawing, so the fill repaints the
+ * behind. The shared loading loop drives them, read while drawing, so the fill repaints the
  * pills without recomposing them; it stops as soon as the row has real badges to show.
  */
 @Composable
 private fun FillingBadges() {
-    val transition = rememberInfiniteTransition(label = "fillingBadges")
-    val progress = transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(BADGE_FILL_MS, easing = LinearEasing)),
-        label = "fillingBadgesFill"
-    )
+    val progress = loadingPhase()
     val accent = MaterialTheme.colorScheme.primary
     // layout-safe: placeholder pills of fixed width, no text
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -1385,7 +1451,10 @@ enum class BadgeTone {
     ACCENT,
 
     /** The audio track that will be muxed in, which is the one thing here that is a choice. */
-    SOLID
+    SOLID,
+
+    /** The format's own id, in a colour of its own beside the facts about it. */
+    ID
 }
 
 /** Small pill under a format's headline. */
@@ -1398,12 +1467,14 @@ fun MetaBadge(
     val container = when (tone) {
         BadgeTone.SOLID -> MaterialTheme.colorScheme.primary
         BadgeTone.SIZE -> SizeBadgeContainer
+        BadgeTone.ID -> IdBadgeContainer
         BadgeTone.ACCENT -> MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
         BadgeTone.NEUTRAL -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f)
     }
     val content = when (tone) {
         BadgeTone.SOLID -> MaterialTheme.colorScheme.onPrimary
         BadgeTone.SIZE -> SizeBadgeContent
+        BadgeTone.ID -> IdBadgeContent
         else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
     }
 

@@ -1077,9 +1077,6 @@ fun DownloadScreen(
 
     SignInPrompt(downloadViewModel)
 
-    val openSaveDirOf: (Boolean) -> Unit = { isVideo ->
-        MediaOpener.openLocation(context, saveDirs.of(isVideo).uri, isVideo)
-    }
     val resetSaveDir: (Boolean) -> Unit = { isVideo ->
         scope.launch { SettingsRepository.resetSaveDir(context, isVideo) }
     }
@@ -1099,7 +1096,6 @@ fun DownloadScreen(
                 isReadingLink = !info.hasResolvedFormats && info.url in formatsReading,
                 formatsError = formatReadErrors[info.url],
                 onRefreshFormats = { source, fresh -> downloadViewModel.refreshFormats(listOf(info), source, fresh) },
-                onOpenSaveDir = openSaveDirOf,
                 onPickSaveDir = pickSaveDir,
                 onResetSaveDir = resetSaveDir,
                 onDownload = { format, audioLanguage, title, author, oneOff ->
@@ -1146,7 +1142,6 @@ fun DownloadScreen(
                 scope.launch { SettingsRepository.setDownloadOptions(context, it) }
             },
             saveDirs = saveDirs,
-            onOpenSaveDir = openSaveDirOf,
             onPickSaveDir = pickSaveDir,
             onResetSaveDir = resetSaveDir,
             onResolveFormats = downloadViewModel::resolveFormats,

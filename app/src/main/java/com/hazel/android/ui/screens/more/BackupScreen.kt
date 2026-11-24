@@ -1,5 +1,8 @@
 package com.hazel.android.ui.screens.more
 
+import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.filled.ErrorOutline
+import com.hazel.android.ui.components.AlertDialog
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -66,7 +69,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.hazel.android.data.SaveDir
-import com.hazel.android.ui.screens.download.SaveDirDialog
+import com.hazel.android.ui.screens.download.SaveLocationScreen
 
 private enum class BackupDialog { BACKUP, SCHEDULE, KEEP, INCLUDE, FOLDER }
 
@@ -95,6 +98,8 @@ fun BackupScreen(onBack: () -> Unit) {
     LaunchedEffect(refresh, settings.folderLabel) { saved = BackupRepository.list(context) }
 
     fun toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+    // A folder that cannot be picked or kept is said in a dialog, as the download folders do.
+    var folderProblem by remember { mutableStateOf<String?>(null) }
     val restore = rememberRestoreFlow(onDone = { refresh++ })
 
     val onFolderPicked: (Uri?) -> Unit = { uri ->
@@ -109,10 +114,10 @@ fun BackupScreen(onBack: () -> Unit) {
                     // A card's root gets Hazel/Backups rather than files piling up at its top.
                     val folder = if (toCard) SdCards.hazelFolderIn(app, uri, BACKUP_CARD_SUBFOLDER) ?: uri else uri
                     runCatching { BackupRepository.setFolder(app, folder.toString(), MediaStoreHelper.describeTree(folder)) }
-                        .onFailure { withContext(Dispatchers.Main) { toast(resources.getString(R.string.save_location_error_access)) } }
+                        .onFailure { withContext(Dispatchers.Main) { folderProblem = resources.getString(R.string.save_location_error_access) } }
                 }
             } catch (_: SecurityException) {
-                toast(resources.getString(R.string.save_location_error_access))
+                folderProblem = resources.getString(R.string.save_location_error_access)
             }
         }
     }
@@ -125,7 +130,7 @@ fun BackupScreen(onBack: () -> Unit) {
     }
 
     fun openPlainPicker() = runCatching { folderPicker.launch(null) }
-        .onFailure { toast(resources.getString(R.string.save_location_error_no_picker)) }
+        .onFailure { folderProblem = resources.getString(R.string.save_location_error_no_picker) }
 
     SettingsScreen(
         title = stringResource(R.string.backup_title),
@@ -270,15 +275,15 @@ fun BackupScreen(onBack: () -> Unit) {
             },
             onDismiss = { dialog = null }
         )
-        BackupDialog.FOLDER -> SaveDirDialog(
+        BackupDialog.FOLDER -> SaveLocationScreen(
             isVideo = false,
             saveDir = SaveDir(settings.folderUri, settings.folderLabel),
             label = settings.folderLabel,
             title = stringResource(R.string.backup_folder),
             body = stringResource(R.string.backup_folder_body),
             internalPath = BackupRepository.DEFAULT_FOLDER_LABEL,
+            internalFolder = { BackupRepository.defaultFolder() },
             cardFolder = BACKUP_CARD_FOLDER,
-            onOpen = { openFolder(context, settings.folderUri) },
             onPick = { card ->
                 dialog = null
                 pickingCard = card != null
@@ -292,9 +297,24 @@ fun BackupScreen(onBack: () -> Unit) {
                 dialog = null
                 scope.launch { BackupRepository.setFolder(context, "", "") }
             },
+            onUseRecent = { BackupRepository.setFolder(context, it.uri, it.label) },
             onDismiss = { dialog = null }
         )
         null -> Unit
+    }
+
+    folderProblem?.let { message ->
+        AlertDialog(
+            onDismissRequest = { folderProblem = null },
+            icon = { Icon(Icons.Filled.ErrorOutline, null) },
+            title = { Text(stringResource(R.string.save_location_error_title), fontWeight = FontWeight.Bold) },
+            text = { Text(message) },
+            confirmButton = {
+                TextButton(onClick = { folderProblem = null }) {
+                    Text(stringResource(R.string.save_location_close))
+                }
+            }
+        )
     }
 
     actionsFor?.let { file ->

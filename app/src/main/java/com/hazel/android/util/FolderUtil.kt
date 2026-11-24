@@ -23,8 +23,18 @@ object FolderUtil {
     /** The provider that owns everything on the built-in storage. */
     private const val EXTERNAL_STORAGE_PROVIDER = "com.android.externalstorage.documents"
 
-    /** Opens a folder that lives on the filesystem, creating it first if it is missing. */
+    /** Opens a folder that lives on the filesystem, or puts its path on screen when nothing can. */
     fun open(context: Context, folder: File) {
+        if (!tryOpen(context, folder)) Toast.makeText(context, folder.absolutePath, Toast.LENGTH_LONG).show()
+    }
+
+    /**
+     * Opens a folder that lives on the filesystem, creating it first if it is missing. False
+     * when no app on the device would open it, so the caller can say so in its own words.
+     * A folder that cannot be made yet (storage access not granted on Android 7 to 9) is
+     * still offered: the file manager shows the nearest place it can.
+     */
+    fun tryOpen(context: Context, folder: File): Boolean {
         if (!folder.exists()) folder.mkdirs()
 
         val documentUri = documentUriFor(folder)
@@ -34,7 +44,7 @@ object FolderUtil {
 
         // Every file manager on the device, offered together, rather than whichever one
         // answers the first way of asking.
-        if (chooseManager(context, documentUri, providerUri)) return
+        if (chooseManager(context, documentUri, providerUri)) return true
 
         // The system's own picker, opened at this folder. Nothing is being picked: it is
         // the one file browser guaranteed to be present, and this is how it is asked to
@@ -50,13 +60,12 @@ object FolderUtil {
                     }
                 )
             }.isSuccess
-            if (opened) return
+            if (opened) return true
         }
 
         // Deliberately not a file:// intent. Passing one has thrown FileUriExposedException
-        // since Android 7, which is every version this app runs on, so the path is put on
-        // screen instead where the user can at least go and find it.
-        Toast.makeText(context, folder.absolutePath, Toast.LENGTH_LONG).show()
+        // since Android 7, which is every version this app runs on.
+        return false
     }
 
     /**
@@ -85,11 +94,30 @@ object FolderUtil {
      * to a document URI first, since a tree URI on its own is not viewable.
      */
     fun openTree(context: Context, treeUri: Uri) {
+        if (!tryOpenTree(context, treeUri)) {
+            Toast.makeText(context, MediaStoreHelper.describeTree(treeUri), Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /** [openTree], answering false instead of showing anything when nothing opened it. */
+    fun tryOpenTree(context: Context, treeUri: Uri): Boolean {
         val documentUri = runCatching {
             MediaStoreHelper.folderDocument(treeUri)
         }.getOrDefault(treeUri)
+        return openDocument(context, documentUri)
+    }
 
-        if (chooseManager(context, documentUri, null)) return
+    /** Opens the top of a removable volume, such as an SD card, by its UUID. False when nothing did. */
+    fun tryOpenVolume(context: Context, uuid: String): Boolean {
+        val documentUri = runCatching {
+            DocumentsContract.buildDocumentUri(EXTERNAL_STORAGE_PROVIDER, "$uuid:")
+        }.getOrNull() ?: return false
+        return openDocument(context, documentUri)
+    }
+
+    /** Every file manager first, then the system picker opened at the folder. */
+    private fun openDocument(context: Context, documentUri: Uri): Boolean {
+        if (chooseManager(context, documentUri, null)) return true
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val opened = runCatching {
@@ -100,10 +128,9 @@ object FolderUtil {
                     }
                 )
             }.isSuccess
-            if (opened) return
+            if (opened) return true
         }
-
-        Toast.makeText(context, MediaStoreHelper.describeTree(treeUri), Toast.LENGTH_LONG).show()
+        return false
     }
 
     /** The folder types file managers register for, most specific first. */

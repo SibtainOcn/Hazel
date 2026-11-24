@@ -135,7 +135,9 @@ fun HazelBottomBar(
     }
 }
 
-private val BAR_HEIGHT = 56.dp
+/** The bar's height above the navigation bar; screens shown with it keep this much room. */
+val HazelBottomBarHeight = 56.dp
+private val BAR_HEIGHT = HazelBottomBarHeight
 private val ICON_SIZE = 24.dp
 private val INDICATOR_SIZE = 46.dp
 

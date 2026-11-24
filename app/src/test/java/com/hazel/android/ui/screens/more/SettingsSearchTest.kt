@@ -62,7 +62,7 @@ class SettingsSearchTest {
         SETTINGS_INDEX.forEach { entry ->
             assertTrue(entry.route != null || entry.action != null, "$entry goes nowhere")
             val route = entry.route ?: return@forEach
-            val declared = if (route.startsWith("docs/")) "\"docs/{page}" else "composable(\"$route\")"
+            val declared = if (route.startsWith("docs/")) "\"docs/{page}" else "screen(\"$route\")"
             assertTrue(nav.contains(declared), "No screen for $route")
         }
     }

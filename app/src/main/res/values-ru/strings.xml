@@ -169,7 +169,6 @@
     <string name="format_sheet_save_dir">Папка сохранения</string>
     <string name="format_sheet_save_location">Место сохранения</string>
     <string name="format_sheet_save_location_title">Место сохранения</string>
-    <string name="format_sheet_save_location_body">Откройте эту папку в файловом менеджере или выберите другую для сохранения загрузок.</string>
     <string name="format_sheet_open_folder">Открыть папку</string>
     <string name="format_sheet_reset">Сбросить</string>
 
@@ -498,7 +497,6 @@
     <string name="batch_type_audio">Аудио</string>
     <string name="batch_type_video">Видео</string>
     <string name="batch_container_title">Контейнер</string>
-    <string name="batch_container_subtitle">Формат файла для сохранения ссылок</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Обложка</string>
@@ -923,6 +921,16 @@
     <string name="save_location_other">Другая папка</string>
     <string name="save_location_other_hint">Любая папка на устройстве или карте</string>
     <string name="save_location_close">Закрыть</string>
+    <string name="save_location_hold_hint">Удерживайте место, чтобы открыть его в файловом менеджере</string>
+    <string name="save_location_recent">Недавние места</string>
+    <string name="save_location_recent_clear">Очистить</string>
+    <string name="save_location_tag_internal">Внутр.</string>
+    <string name="save_location_tag_card">SD-карта</string>
+    <string name="save_location_recent_missing">Эта папка удалена или Hazel больше не может в неё записывать, поэтому она убрана из списка.</string>
+    <string name="save_location_open_title">Не удалось открыть это место</string>
+    <string name="save_location_open_missing">%1$s больше нет или Hazel не может к нему обратиться. Выберите его снова или другое место.</string>
+    <string name="save_location_open_no_app">Ни одно приложение на устройстве не смогло открыть %1$s.</string>
+    <string name="save_location_current_missing">%1$s больше нет или Hazel не может в него записывать. Выберите его снова или другое место.</string>
     <string name="save_location_error_title">Не удалось использовать папку</string>
     <string name="save_location_error_access">Android не позволил Hazel сохранить доступ к этой папке. Попробуйте снова или выберите другую.</string>
     <string name="save_location_error_no_picker">На этом устройстве нет приложения для выбора папок.</string>

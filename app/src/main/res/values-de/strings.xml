@@ -161,7 +161,6 @@
     <string name="format_sheet_save_dir">Ordner</string>
     <string name="format_sheet_save_location">Speicherort</string>
     <string name="format_sheet_save_location_title">Speicherort</string>
-    <string name="format_sheet_save_location_body">Öffne diesen Ordner in deinem Dateimanager, oder wähle einen anderen für deine Downloads.</string>
     <string name="format_sheet_open_folder">Ordner öffnen</string>
     <string name="format_sheet_reset">Zurücksetzen</string>
 
@@ -476,7 +475,6 @@
     <string name="batch_type_audio">Audio</string>
     <string name="batch_type_video">Video</string>
     <string name="batch_container_title">Container</string>
-    <string name="batch_container_subtitle">Die Datei, als die diese Links gespeichert werden</string>
 
     <!-- Batch action bar -->
     <string name="batch_bar_thumbnail">Vorschaubild</string>
@@ -894,6 +892,16 @@
     <string name="save_location_other">Anderer Ordner</string>
     <string name="save_location_other_hint">Beliebiger Ordner auf diesem Gerät oder einer Karte</string>
     <string name="save_location_close">Schließen</string>
+    <string name="save_location_hold_hint">Halte einen Ort gedrückt, um ihn im Dateimanager zu öffnen</string>
+    <string name="save_location_recent">Zuletzt verwendete Orte</string>
+    <string name="save_location_recent_clear">Leeren</string>
+    <string name="save_location_tag_internal">Intern</string>
+    <string name="save_location_tag_card">SD-Karte</string>
+    <string name="save_location_recent_missing">Dieser Ordner ist weg oder Hazel kann nicht mehr hineinschreiben, daher wurde er aus der Liste entfernt.</string>
+    <string name="save_location_open_title">Ort konnte nicht geöffnet werden</string>
+    <string name="save_location_open_missing">%1$s ist nicht mehr da oder Hazel kommt nicht heran. Wähle ihn erneut oder einen anderen Ort.</string>
+    <string name="save_location_open_no_app">Keine App auf diesem Gerät konnte %1$s öffnen.</string>
+    <string name="save_location_current_missing">%1$s ist nicht mehr da oder Hazel kann nicht hineinschreiben. Wähle ihn erneut oder einen anderen Ort.</string>
     <string name="save_location_error_title">Ordner nicht verwendbar</string>
     <string name="save_location_error_access">Android hat Hazel keinen dauerhaften Zugriff auf diesen Ordner gegeben. Versuche es erneut oder wähle einen anderen.</string>
     <string name="save_location_error_no_picker">Keine App auf diesem Gerät kann Ordner auswählen.</string>

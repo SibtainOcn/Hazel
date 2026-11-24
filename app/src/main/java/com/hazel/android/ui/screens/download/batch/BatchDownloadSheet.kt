@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.download.batch
 
+import com.hazel.android.data.SettingsRepository
+import androidx.compose.ui.platform.LocalContext
 import com.hazel.android.ui.components.MenuTone
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Delete
@@ -123,7 +125,7 @@ import com.hazel.android.download.languageLabel
 import com.hazel.android.ui.screens.download.AudioLanguageSheet
 import com.hazel.android.ui.screens.download.ChaptersDialog
 import com.hazel.android.ui.screens.download.CookiesDialog
-import com.hazel.android.ui.screens.download.SaveDirDialog
+import com.hazel.android.ui.screens.download.SaveLocationScreen
 import com.hazel.android.ui.screens.download.rememberUseCookies
 import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.ui.screens.download.FEEDBACK_MS
@@ -177,7 +179,6 @@ fun BatchDownloadSheet(
     /** Where audio and video are saved; the set shows the one for its current kind. */
     saveDirs: SaveDirs,
     /** Each is given the kind in question: true for video. */
-    onOpenSaveDir: (isVideo: Boolean) -> Unit,
     onPickSaveDir: (isVideo: Boolean, card: SdCard?) -> Unit,
     onResetSaveDir: (isVideo: Boolean) -> Unit,
     onResolveFormats: (MediaInfo) -> Unit,
@@ -588,6 +589,7 @@ fun BatchDownloadSheet(
             Box(modifier = Modifier.padding(horizontal = SIDE)) {
                 SheetSection(
                     icon = Icons.Outlined.Tune,
+                    iconPill = true,
                     title = if (isVideo) stringResource(R.string.format_sheet_adjust_video)
                     else stringResource(R.string.format_sheet_adjust_audio),
                     summary = listOfNotNull(
@@ -885,7 +887,6 @@ fun BatchDownloadSheet(
             initialFormat = state.formatOf(focused),
             initialAudioLanguage = state.languageOf(focused),
             confirmAsApply = true,
-            onOpenSaveDir = onOpenSaveDir,
             onPickSaveDir = onPickSaveDir,
             onResetSaveDir = onResetSaveDir,
             onDownload = { format, audioLanguage, title, author, _ ->
@@ -896,6 +897,7 @@ fun BatchDownloadSheet(
         )
     }
 
+    val appContext = LocalContext.current.applicationContext
     when (openSheet) {
         BatchSheet.NONE -> Unit
 
@@ -996,7 +998,7 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
-        BatchSheet.CONTAINER -> BatchContainerSheet(
+        BatchSheet.CONTAINER -> ContainerDialog(
             isVideo = state.videoTab,
             current = if (state.videoTab) options.videoContainer else options.audioContainer,
             onSelect = { choice ->
@@ -1016,14 +1018,10 @@ fun BatchDownloadSheet(
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 
-        BatchSheet.SAVE_DIR -> SaveDirDialog(
+        BatchSheet.SAVE_DIR -> SaveLocationScreen(
             isVideo = state.videoTab,
             saveDir = saveDirs.of(state.videoTab),
             label = saveDirs.labelOf(state.videoTab),
-            onOpen = {
-                openSheet = BatchSheet.NONE
-                onOpenSaveDir(state.videoTab)
-            },
             onPick = { card ->
                 openSheet = BatchSheet.NONE
                 onPickSaveDir(state.videoTab, card)
@@ -1032,6 +1030,7 @@ fun BatchDownloadSheet(
                 openSheet = BatchSheet.NONE
                 onResetSaveDir(state.videoTab)
             },
+            onUseRecent = { SettingsRepository.setSaveDir(appContext, state.videoTab, it.uri, it.label) },
             onDismiss = { openSheet = BatchSheet.NONE }
         )
 

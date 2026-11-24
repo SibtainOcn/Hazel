@@ -52,6 +52,23 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.hazel.android.ui.components.HazelBottomBarHeight
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NamedNavArgument
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.AnimatedVisibility
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hazel.android.R
@@ -104,6 +121,25 @@ private val bottomNavItems = listOf(
 )
 
 private val tabRoutes = bottomNavItems.map { it.route }.toSet()
+
+/** Screens shown without the bottom bar. */
+private val subScreenRoutes = setOf(
+    "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "sponsor", "software_update", "hazel_update", "ytdlp_update",
+    "processing", "advanced", "proxy"
+)
+
+/**
+ * A destination that keeps the room for the bottom bar itself. The room moves with the
+ * screen, so a screen leaving or arriving never changes size while the bar comes or goes.
+ */
+private fun NavGraphBuilder.screen(
+    route: String,
+    arguments: List<NamedNavArgument> = emptyList(),
+    content: @Composable (NavBackStackEntry) -> Unit
+) = composable(route, arguments) { entry ->
+    val barRoom = if (route in subScreenRoutes) 0.dp else HazelBottomBarHeight
+    Box(modifier = Modifier.fillMaxSize().padding(bottom = barRoom)) { content(entry) }
+}
 
 /** True when both ends of the move are bottom bar tabs, which are peers rather than a step deeper. */
 private fun androidx.compose.animation.AnimatedContentTransitionScope<androidx.navigation.NavBackStackEntry>.isTabSwitch(): Boolean =
@@ -163,10 +199,7 @@ fun AppNavigation(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val isSubScreen = currentRoute in listOf(
-        "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "sponsor", "software_update", "hazel_update", "ytdlp_update",
-        "processing", "advanced", "proxy"
-    )
+    val isSubScreen = currentRoute in subScreenRoutes
 
     val downloadViewModel: com.hazel.android.download.DownloadViewModel =
         remember { com.hazel.android.download.DownloadViewModelHolder.get() }
@@ -191,128 +224,130 @@ fun AppNavigation(
 
     com.hazel.android.ui.screens.more.BackupRestoreOffer()
 
-    Scaffold(
-        topBar = {
-            // Only over the home screen. The other two carry their own headings, and the
-            // app's name above those made two titles stacked on top of each other, with the
-            // screen's own one pushed down a bar's height for nothing. The incognito switch
-            // goes with it: what it changes is what a download records, which is decided
-            // here and nowhere else.
-            if (currentRoute == Screen.Download.route) {
-                TopAppBar(
-                    title = {
-                        // One tonal pill holding the bolt and the name; a tap opens Support.
-                        Row(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .clickable(role = Role.Button) {
-                                    navController.navigate("sponsor") { launchSingleTop = true }
-                                }
-                                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
-                                .padding(start = 12.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.update),
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onBackground
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.app_name),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
+    // The home header is part of the home screen and moves with it. The other screens carry
+    // their own headings. The incognito switch goes with it: what it changes is what a
+    // download records, which is decided here and nowhere else.
+    val homeTopBar: @Composable () -> Unit = {
+        TopAppBar(
+            title = {
+                // One tonal pill holding the bolt and the name; a tap opens Support.
+                Row(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable(role = Role.Button) {
+                            navController.navigate("sponsor") { launchSingleTop = true }
                         }
-                    },
-                    actions = {
-                        // For GitHub release builds only (not yt-dlp): when Hazel app update is available,
-                        // display a theme-adaptive, accent-independent "Update" pill next to incognito icon
-                        if (!HazelUpdater.isFdroid() && hazelUpdateAvailable) {
-                            // The app's own theme, which can differ from the system's.
-                            val isDark = isDarkTheme
-                            val pillBg = if (isDark) UpdateTokens.UpdateContainer else Color(0xFFFFEECC)
-                            val pillFg = if (isDark) UpdateTokens.Update else Color(0xFF8F4D00)
-
-                            Row(
-                                modifier = Modifier
-                                    .padding(end = 6.dp)
-                                    .clip(CircleShape)
-                                    .background(pillBg)
-                                    .clickable {
-                                        navController.navigate("hazel_update")
-                                    }
-                                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Download,
-                                    contentDescription = stringResource(R.string.home_update_available),
-                                    tint = pillFg,
-                                    modifier = Modifier.size(15.dp)
-                                )
-                                Spacer(modifier = Modifier.width(5.dp))
-                                Text(
-                                    text = stringResource(R.string.home_update),
-                                    color = pillFg,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
-
-                        // Reads as on or off at a glance: lit and on a filled ground while
-                        // it is active, plain and muted while it is not. A mode that
-                        // silently changes what the app records has to be visible from the
-                        // screen it affects, not buried in settings.
-                        // Always on the same soft tone as the logo pill, so the header is
-                        // balanced; filled with the accent while it is on.
-                        val incognitoPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-                        val incognitoFill by androidx.compose.animation.animateColorAsState(
-                            if (incognito) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f),
-                            label = "incognito"
-                        )
-                        Surface(
-                            onClick = {
-                                scope.launch {
-                                    SettingsRepository.setIncognito(context, !incognito)
-                                }
-                            },
-                            interactionSource = incognitoPress,
-                            shape = CircleShape,
-                            color = incognitoFill,
-                            modifier = Modifier
-                                .padding(end = 12.dp)
-                                .pressScale(incognitoPress, pressed = 0.9f)
-                                .size(42.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    painter = painterResource(R.drawable.incognito),
-                                    contentDescription = if (incognito) {
-                                        stringResource(R.string.nav_incognito_on)
-                                    } else {
-                                        stringResource(R.string.nav_incognito_off)
-                                    },
-                                    modifier = Modifier.size(24.dp),
-                                    tint = if (incognito) MaterialTheme.colorScheme.onPrimary
-                                    else MaterialTheme.colorScheme.onBackground
-                                )
-                            }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        titleContentColor = MaterialTheme.colorScheme.primary
+                        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
+                        .padding(start = 12.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.update),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            },
+            actions = {
+                // For GitHub release builds only (not yt-dlp): when Hazel app update is available,
+                // display a theme-adaptive, accent-independent "Update" pill next to incognito icon
+                if (!HazelUpdater.isFdroid() && hazelUpdateAvailable) {
+                    // The app's own theme, which can differ from the system's.
+                    val isDark = isDarkTheme
+                    val pillBg = if (isDark) UpdateTokens.UpdateContainer else Color(0xFFFFEECC)
+                    val pillFg = if (isDark) UpdateTokens.Update else Color(0xFF8F4D00)
+
+                    Row(
+                        modifier = Modifier
+                            .padding(end = 6.dp)
+                            .clip(CircleShape)
+                            .background(pillBg)
+                            .clickable {
+                                navController.navigate("hazel_update")
+                            }
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Download,
+                            contentDescription = stringResource(R.string.home_update_available),
+                            tint = pillFg,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = stringResource(R.string.home_update),
+                            color = pillFg,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
+                // Reads as on or off at a glance: lit and on a filled ground while
+                // it is active, plain and muted while it is not. A mode that
+                // silently changes what the app records has to be visible from the
+                // screen it affects, not buried in settings.
+                // Always on the same soft tone as the logo pill, so the header is
+                // balanced; filled with the accent while it is on.
+                val incognitoPress = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                val incognitoFill by androidx.compose.animation.animateColorAsState(
+                    if (incognito) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f),
+                    label = "incognito"
                 )
-            }
-        },
+                Surface(
+                    onClick = {
+                        scope.launch {
+                            SettingsRepository.setIncognito(context, !incognito)
+                        }
+                    },
+                    interactionSource = incognitoPress,
+                    shape = CircleShape,
+                    color = incognitoFill,
+                    modifier = Modifier
+                        .padding(end = 12.dp)
+                        .pressScale(incognitoPress, pressed = 0.9f)
+                        .size(42.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = painterResource(R.drawable.incognito),
+                            contentDescription = if (incognito) {
+                                stringResource(R.string.nav_incognito_on)
+                            } else {
+                                stringResource(R.string.nav_incognito_off)
+                            },
+                            modifier = Modifier.size(24.dp),
+                            tint = if (incognito) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            },
+            windowInsets = WindowInsets(0, 0, 0, 0),
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                titleContentColor = MaterialTheme.colorScheme.primary
+            )
+        )
+    }
+
+    Scaffold(
         bottomBar = {
-            if (!isSubScreen) {
+            AnimatedVisibility(
+                visible = !isSubScreen,
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut()
+            ) {
                 val downloadState by downloadViewModel.state.collectAsState()
                 val savedQueue by remember(context) { DownloadQueueRepository.getQueue(context) }
                     .collectAsState(initial = emptyList())
@@ -356,33 +391,45 @@ fun AppNavigation(
             }
         }
     ) { innerPadding ->
+        val layoutDirection = LocalLayoutDirection.current
+        val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
         NavHost(
             navController = navController,
             startDestination = Screen.Download.route,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.padding(
+                start = innerPadding.calculateStartPadding(layoutDirection),
+                top = innerPadding.calculateTopPadding(),
+                end = innerPadding.calculateEndPadding(layoutDirection),
+                bottom = navBarBottom
+            ),
             enterTransition = { if (isTabSwitch()) M3Motion.tabEnter() else M3Motion.forwardEnter() },
             exitTransition = { if (isTabSwitch()) M3Motion.tabExit() else M3Motion.forwardExit() },
             popEnterTransition = { if (isTabSwitch()) M3Motion.tabEnter() else M3Motion.backEnter() },
             popExitTransition = { if (isTabSwitch()) M3Motion.tabExit() else M3Motion.backExit() }
         ) {
-            composable(Screen.Download.route) {
-                DownloadScreen(
-                    pendingShares = pendingShares,
-                    pendingFailure = pendingFailure,
-                    onPendingFailureConsumed = onPendingFailureConsumed,
-                    onSharesConsumed = onSharesConsumed,
-                    downloadViewModel = downloadViewModel,
-                    onOpenQueue = {
-                        navController.navigate(Screen.Queue.route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+            screen(Screen.Download.route) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    homeTopBar()
+                    Box(modifier = Modifier.weight(1f)) {
+                        DownloadScreen(
+                            pendingShares = pendingShares,
+                            pendingFailure = pendingFailure,
+                            onPendingFailureConsumed = onPendingFailureConsumed,
+                            onSharesConsumed = onSharesConsumed,
+                            downloadViewModel = downloadViewModel,
+                            onOpenQueue = {
+                                navController.navigate(Screen.Queue.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        )
                     }
-                )
+                }
             }
-            composable(Screen.History.route) {
+            screen(Screen.History.route) {
                 HistoryScreen(
                     onDownloadAgain = { entry ->
                         downloadViewModel.instantDownload(context, entry.url, audioOnlyOverride = !entry.isVideo)
@@ -399,14 +446,14 @@ fun AppNavigation(
                     }
                 )
             }
-            composable(Screen.Queue.route) {
+            screen(Screen.Queue.route) {
                 QueueScreen(
                     downloadViewModel = downloadViewModel,
                     openTab = queueTab,
                     onTabOpened = { queueTab = null }
                 )
             }
-            composable(Screen.More.route) {
+            screen(Screen.More.route) {
                 MoreScreen(
                     onNavigateToAppearance = { navController.navigate("appearance") },
                     onNavigateToConverter = { navController.navigate("converter") },
@@ -424,20 +471,20 @@ fun AppNavigation(
                     onNavigateToSettingsSearch = { navController.navigate("settings_search") }
                 )
             }
-            composable("settings_search") {
+            screen("settings_search") {
                 com.hazel.android.ui.screens.more.SettingsSearchScreen(
                     onBack = { navController.popBackStack() },
                     onOpen = { route -> navController.navigate(route) },
                     onOpenBatterySettings = { openBatterySettings(context) }
                 )
             }
-            composable("docs") {
+            screen("docs") {
                 com.hazel.android.ui.screens.more.DocumentationScreen(
                     onBack = { navController.popBackStack() },
                     onOpen = { page -> navController.navigate("docs/${page.name}") }
                 )
             }
-            composable(
+            screen(
                 "docs/{page}?version={version}",
                 arguments = listOf(navArgument("version") { type = NavType.StringType; nullable = true; defaultValue = null })
             ) { entry ->
@@ -447,38 +494,38 @@ fun AppNavigation(
                     version = entry.arguments?.getString("version")
                 )
             }
-            composable("cookies") {
+            screen("cookies") {
                 CookiesScreen(onBack = { navController.popBackStack() })
             }
-            composable("storage_cleanup") {
+            screen("storage_cleanup") {
                 StorageCleanupScreen(onBack = { navController.popBackStack() })
             }
-            composable("fetch_settings") {
+            screen("fetch_settings") {
                 FetchSettingsScreen(onBack = { navController.popBackStack() })
             }
-            composable("sponsor") {
+            screen("sponsor") {
                 SponsorScreen(onBack = { navController.popBackStack() })
             }
 
-            composable("processing") {
+            screen("processing") {
                 ProcessingScreen(onBack = { navController.popBackStack() })
             }
-            composable("advanced") {
+            screen("advanced") {
                 AdvancedScreen(
                     onBack = { navController.popBackStack() },
                     onOpenProxy = { navController.navigate("proxy") }
                 )
             }
-            composable("proxy") {
+            screen("proxy") {
                 com.hazel.android.ui.screens.more.ProxyScreen(onBack = { navController.popBackStack() })
             }
-            composable("backup") {
+            screen("backup") {
                 BackupScreen(onBack = { navController.popBackStack() })
             }
-            composable("storage_locations") {
+            screen("storage_locations") {
                 StorageLocationsScreen(onBack = { navController.popBackStack() })
             }
-            composable("appearance") {
+            screen("appearance") {
                 AppearanceScreen(
                     isDarkTheme = isDarkTheme,
                     onToggleTheme = onToggleTheme,
@@ -491,13 +538,13 @@ fun AppNavigation(
                     onBack = { navController.popBackStack() }
                 )
             }
-            composable("tools") {
+            screen("tools") {
                 ToolsScreen(onBack = { navController.popBackStack() })
             }
-            composable("converter") {
+            screen("converter") {
                 ConverterScreen(onBack = { navController.popBackStack() })
             }
-            composable("software_update") {
+            screen("software_update") {
                 SoftwareUpdateScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToHazelUpdate = { navController.navigate("hazel_update") },
@@ -509,7 +556,7 @@ fun AppNavigation(
                     }
                 )
             }
-            composable("hazel_update") {
+            screen("hazel_update") {
                 HazelUpdateScreen(
                     onBack = { navController.popBackStack() },
                     onOpenWhatsNew = { version ->
@@ -519,10 +566,10 @@ fun AppNavigation(
                     }
                 )
             }
-            composable("ytdlp_update") {
+            screen("ytdlp_update") {
                 YtDlpUpdateScreen(onBack = { navController.popBackStack() })
             }
-            composable("update") {
+            screen("update") {
                 SoftwareUpdateScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToHazelUpdate = { navController.navigate("hazel_update") },

@@ -54,7 +54,6 @@ import com.hazel.android.ui.screens.download.batch.BatchDownloadSheet
 import com.hazel.android.ui.theme.AccentColors
 import com.hazel.android.ui.theme.HazelTypography
 import com.hazel.android.util.AppLocale
-import com.hazel.android.util.MediaOpener
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.StoragePaths
 import com.hazel.android.util.UrlExtractor
@@ -223,9 +222,6 @@ class ShareOverlayActivity : ComponentActivity() {
 
                 val pickSaveDir = rememberSaveDirPicker(saveDirs)
 
-                val openSaveDir: (Boolean) -> Unit = { isVideo ->
-                    MediaOpener.openLocation(this@ShareOverlayActivity, saveDirs.of(isVideo).uri, isVideo)
-                }
                 val resetSaveDir: (Boolean) -> Unit = { isVideo ->
                     scope.launch { SettingsRepository.resetSaveDir(this@ShareOverlayActivity, isVideo) }
                 }
@@ -301,7 +297,6 @@ class ShareOverlayActivity : ComponentActivity() {
                                     scope.launch { SettingsRepository.setDownloadOptions(this@ShareOverlayActivity, changed) }
                                 },
                                 saveDirs = saveDirs,
-                                onOpenSaveDir = openSaveDir,
                                 onPickSaveDir = pickSaveDir,
                                 onResetSaveDir = resetSaveDir,
                                 onResolveFormats = downloadViewModel::resolveFormats,
@@ -339,7 +334,6 @@ class ShareOverlayActivity : ComponentActivity() {
                                     onRefreshFormats = resolved?.let { item ->
                                         { source, fresh -> downloadViewModel.refreshFormats(listOf(item), source, fresh) }
                                     },
-                                    onOpenSaveDir = openSaveDir,
                                     onPickSaveDir = pickSaveDir,
                                     onResetSaveDir = resetSaveDir,
                                     onDownload = { format, audioLanguage, title, author, oneOff ->

@@ -34,9 +34,6 @@ import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Check
 import com.hazel.android.ui.components.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -54,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -127,8 +125,9 @@ internal fun SettingsHeader(title: String, onBack: () -> Unit) {
 }
 
 /**
- * A titled group of rows on one card. Rows are separated by thin rules, which the section
- * draws itself, so a row never has to know whether it is first or last.
+ * A titled group of rows as one connected group: each row on its own tonal card, round at
+ * the group's outer ends and tight where two rows meet, the way the update screen lists its
+ * parts. A row never has to know whether it is first or last.
  */
 @Composable
 internal fun SettingsSection(title: String, rows: List<@Composable () -> Unit>) {
@@ -139,22 +138,30 @@ internal fun SettingsSection(title: String, rows: List<@Composable () -> Unit>) 
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(top = 8.dp, bottom = 8.dp, start = 4.dp)
     )
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
+    ConnectedRows(rows)
+    Spacer(modifier = Modifier.height(16.dp))
+}
+
+/**
+ * Rows as one connected group, with no title: the M3 segmented list the settings screens
+ * share. Each row is clipped to its card, so its ripple stays inside the card.
+ */
+@Composable
+internal fun ConnectedRows(
+    rows: List<@Composable () -> Unit>,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.surfaceContainerHigh
+) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GroupGap)) {
         rows.forEachIndexed { index, row ->
-            if (index > 0) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                )
-            }
-            row()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(groupShape(index, rows.size))
+                    .background(color)
+            ) { row() }
         }
     }
-    Spacer(modifier = Modifier.height(16.dp))
 }
 
 /** An on or off setting. The whole row toggles it, not only the switch. */
@@ -350,6 +357,7 @@ internal fun <T> MultiChoiceDialog(
 /** The outer corners of a group of choices, and the tighter ones between two of them. */
 private val GroupOuter = 20.dp
 private val GroupInner = 6.dp
+private val GroupGap = 2.dp
 
 /** The shape of the choice at [index] of [count]: rounded outward at the ends of the group. */
 internal fun groupShape(index: Int, count: Int) = RoundedCornerShape(
