@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Download sheet: Title/Author and Save dir/Container rows are connected groups, and each section icon sits on its own M3 shape.
 - Format list: the rail's loading skeleton shows small label lines on quiet steps instead of solid blocks.
 - Save location is a full screen with the last 5 picked folders; tap one to save there, hold any location to open it in a file manager.
+- Screen changes: the home header and the bottom bar move with their screen, so nothing jumps part way through a transition.
 
 ### Fixed
 - Video sizes in the download sheet, format list and queue now include the audio track, matching the download card.
