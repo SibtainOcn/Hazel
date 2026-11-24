@@ -1,8 +1,12 @@
 package com.hazel.android.download
 
+import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class LocalTrimTest {
@@ -79,5 +83,30 @@ class LocalTrimTest {
         } finally {
             dir.deleteRecursively()
         }
+    }
+
+    private class FakeProcess(private val exitsAfterChecks: Int) : Process() {
+        var checks = 0
+        override fun getOutputStream(): OutputStream = OutputStream.nullOutputStream()
+        override fun getInputStream(): InputStream = ByteArrayInputStream(ByteArray(0))
+        override fun getErrorStream(): InputStream = ByteArrayInputStream(ByteArray(0))
+        override fun waitFor(): Int = 0
+        override fun exitValue(): Int {
+            if (++checks <= exitsAfterChecks) throw IllegalThreadStateException()
+            return 0
+        }
+        override fun destroy() = Unit
+    }
+
+    @Test
+    fun `legacy wait returns once the process exits`() {
+        val p = FakeProcess(exitsAfterChecks = 2)
+        assertTrue(LocalTrim.waitFor(p, 5_000L, legacy = true))
+        assertEquals(3, p.checks)
+    }
+
+    @Test
+    fun `legacy wait gives up at the timeout`() {
+        assertFalse(LocalTrim.waitFor(FakeProcess(exitsAfterChecks = Int.MAX_VALUE), 300L, legacy = true))
     }
 }
