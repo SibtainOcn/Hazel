@@ -26,9 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material.icons.filled.Code
-import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.AdvancedSettingsStore
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
@@ -288,7 +286,7 @@ fun FormatSheet(
     LaunchedEffect(info.uploader) { if (author.isBlank()) author = info.uploader }
 
     var openDialog by remember { mutableStateOf(SheetDialog.NONE) }
-    val advancedContext = LocalContext.current
+    val advancedContext = androidx.compose.ui.platform.LocalContext.current
     val advancedScope = rememberCoroutineScope()
     // A cut and the live options belong to this download, so they start empty for every
     // link and are never written to the saved settings.
@@ -637,7 +635,7 @@ fun FormatSheet(
             val cookiesOn = rememberUseCookies()
             // Same setting as Settings > Advanced > Extra download arguments.
             val extraArgsLabel = stringResource(R.string.format_sheet_extra_args)
-            val advanced by remember(advancedContext) { SettingsRepository.getAdvancedSettings(advancedContext) }
+            val advanced by remember(advancedContext) { com.hazel.android.data.SettingsRepository.getAdvancedSettings(advancedContext) }
                 .collectAsState(initial = AdvancedSettingsStore.current)
             val extraArgsOn = advanced.downloadExtraArgs.isNotBlank()
 
@@ -859,7 +857,7 @@ fun FormatSheet(
                 onConfirm = { text ->
                     // Saved like the Advanced screen saves it, on top of what is stored now.
                     advancedScope.launch {
-                        SettingsRepository.setAdvancedSettings(
+                        com.hazel.android.data.SettingsRepository.setAdvancedSettings(
                             advancedContext,
                             AdvancedSettingsStore.current.copy(downloadExtraArgs = text)
                         )
