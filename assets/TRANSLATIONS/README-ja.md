@@ -93,7 +93,7 @@ Hazel は **yt-dlp** を搭載した無料・オープンソースの Android �
   <tr><th width="50%" align="left">📥 ダウンロード</th><th width="50%" align="left">🔍 検索と再生</th></tr>
   <tr><td><b>1500 以上のサイト：</b>YouTube、Instagram、TikTok、X、Reddit、SoundCloud など<a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">多数</a>。</td><td><b>検索：</b>YouTube、YouTube Music、SoundCloud、Bandcamp に対応。候補表示も任意で利用可能。</td></tr>
   <tr><td><b>一括：</b>リンク 1 つ、複数同時、またはプレイリスト / チャンネル全体。</td><td><b>まず再生：</b>どの結果もカード上でシーク、ダブルタップでスキップ、全画面で再生。</td></tr>
-  <tr><td><b>Hazel Instant：</b>任意のアプリからリンクを共有すると、保存した画質ですぐ開始。</td><td><b>切り抜き：</b>ライブプレビューで選んだ部分だけを保存。</td></tr>
+  <tr><td><b>Hazel Instant：</b>任意のアプリからリンクを共有すると、保存した画質ですぐ開始。</td><td><b>切り抜き：</b>ライブプレビューで選んだ部分だけを保存。クイック、正確、またはダウンロード後にトリミング：ファイル全体を全速で取得し、端末上で切り出します。</td></tr>
   <tr><td><b>好きな形式：</b>画質、コンテナ、音声トラックを選び、タイトル / メタデータを編集。</td><td><b>ライブ配信：</b>最初から録画、またはプレミア公開を待機。</td></tr>
 </table>
 

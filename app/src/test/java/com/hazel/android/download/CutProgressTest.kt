@@ -5,10 +5,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/**
- * A cut has no progress line to read, so the bar is measured against what the kept part
- * should weigh. These pin the scale, and that nothing odd about a cut can make it nonsense.
- */
 class CutProgressTest {
 
     private val hundredMb = 100_000_000L
@@ -62,6 +58,59 @@ class CutProgressTest {
         assertEquals(twentyGb / 2, half)
     }
 
+    // ffmpeg's `-progress` report, as yt-dlp's ffmpeg downloader passes it on.
+
+    @Test
+    fun `how far a cut has got is read from ffmpeg's report`() {
+        assertEquals(2.283537, CutProgress.outTimeSeconds("out_time_us=2283537"))
+        assertEquals(4.744853, CutProgress.outTimeSeconds("out_time_ms=4744853"))
+        assertEquals(62.5, CutProgress.outTimeSeconds("out_time=00:01:02.500000"))
+    }
+
+    @Test
+    fun `nothing is read before the first packet or from other lines`() {
+        assertEquals(null, CutProgress.outTimeSeconds("out_time_us=-15238"))
+        assertEquals(null, CutProgress.outTimeSeconds("out_time_us=N/A"))
+        assertEquals(null, CutProgress.outTimeSeconds("out_time=-00:00:00.015238"))
+        assertEquals(null, CutProgress.outTimeSeconds("[download] Destination: clip.mp4"))
+    }
+
+    @Test
+    fun `report lines are told apart from yt-dlp's`() {
+        assertTrue(CutProgress.isProgressLine("progress=continue"))
+        assertTrue(CutProgress.isProgressLine("stream_0_0_q=-1.0"))
+        assertTrue(CutProgress.isProgressLine("speed=N/A"))
+        assertTrue(!CutProgress.isProgressLine("[download] 100% of    7.55MiB in 00:00:14"))
+        assertTrue(!CutProgress.isProgressLine("ERROR: unable to download video data"))
+    }
+
+    @Test
+    fun `speed is read only when there is one`() {
+        assertEquals(1.49, CutProgress.speedFactor("speed=   1.49x"))
+        assertEquals(null, CutProgress.speedFactor("speed=   0x"))
+        assertEquals(null, CutProgress.speedFactor("speed=N/A"))
+    }
+
+    @Test
+    fun `the kept part's length follows the cut`() {
+        assertEquals(30.0, CutProgress.keptSeconds(120, 90.0, 400.0))
+        assertEquals(30.0, CutProgress.keptSeconds(0, 40.0, 70.0))
+        assertEquals(0.0, CutProgress.keptSeconds(120, 30.0, 10.0))
+        assertEquals(0.0, CutProgress.keptSeconds(120, Double.NaN, 10.0))
+    }
+
+    @Test
+    fun `the share stays short of whole and the time left is never negative`() {
+        assertEquals(0.5f, CutProgress.fraction(15.0, 30.0))
+        assertEquals(0.99f, CutProgress.fraction(31.0, 30.0))
+        assertEquals(0f, CutProgress.fraction(10.0, 0.0))
+        assertEquals(10L, CutProgress.etaSeconds(10.0, 30.0, 2.0))
+        assertEquals(0L, CutProgress.etaSeconds(31.0, 30.0, 2.0))
+        assertEquals(null, CutProgress.etaSeconds(10.0, 30.0, 0.0))
+        assertEquals("01:05", CutProgress.clock(65))
+        assertEquals("1:01:05", CutProgress.clock(3665))
+    }
+
     private fun withDir(block: (File) -> Unit) {
         val dir = java.nio.file.Files.createTempDirectory("cut-progress").toFile()
         try {
@@ -82,17 +131,23 @@ class CutProgressTest {
     }
 
     @Test
-    fun `a finished stream and the part file in hand both count`() = withDir { dir ->
-        dir.put("clip.f137.mp4", 200)
-        dir.put("clip.f140.m4a.part", 10)
+    fun `the part file being written is the cut`() = withDir { dir ->
+        dir.put("clip.mp4.part", 210)
         assertEquals(210L, CutProgress.mediaBytesIn(dir))
     }
 
     @Test
-    fun `part files are left out when a run starts`() = withDir { dir ->
-        dir.put("clip.f137.mp4", 200)
-        dir.put("clip.f140.m4a.part", 50)
-        assertEquals(200L, CutProgress.mediaBytesIn(dir, includePartFiles = false))
+    fun `a copy written while the cover or tags go in does not double the cut`() = withDir { dir ->
+        dir.put("clip.mp4", 200)
+        dir.put("clip.temp.mp4", 190)
+        assertEquals(200L, CutProgress.mediaBytesIn(dir))
+    }
+
+    @Test
+    fun `an audio cut being converted is not counted twice`() = withDir { dir ->
+        dir.put("clip.webm", 120)
+        dir.put("clip.mp3", 150)
+        assertEquals(150L, CutProgress.mediaBytesIn(dir))
     }
 
     @Test
