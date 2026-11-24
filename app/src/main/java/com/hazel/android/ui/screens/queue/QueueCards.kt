@@ -146,7 +146,7 @@ fun QueuedCard(
                 KindIcon(item.hasVideo)
                 formatDuration(item.durationSeconds).takeIf { it.isNotBlank() }?.let { CardTag(it) }
                 item.formatLabel.takeIf { it.isNotBlank() }?.let { CardTag(it) }
-                if (item.fileSizeBytes > 0) CardTag(formatFileSize(item.fileSizeBytes))
+                if (item.fileSizeBytes > 0) CardTag(formatFileSize(item.fileSizeBytes + item.mergeAudioSizeBytes))
             }
         }
     }

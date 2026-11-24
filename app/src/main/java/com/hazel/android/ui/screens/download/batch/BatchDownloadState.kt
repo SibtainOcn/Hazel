@@ -194,7 +194,7 @@ class BatchDownloadState {
 
     /** Every link's chosen format added up, which is what the whole set will cost. */
     val totalBytes: Long
-        get() = plans.sumOf { it.format.fileSizeBytes }
+        get() = plans.sumOf { it.format.bytesWith(it.info.mergeAudioFor(it.audioLanguage)) }
 
     /**
      * False while some link has not reported a size yet, which is the case for a link from

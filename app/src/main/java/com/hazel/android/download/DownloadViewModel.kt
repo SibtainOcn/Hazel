@@ -1189,6 +1189,21 @@ class DownloadViewModel : ViewModel() {
         if (claimed) startFormatRead(info, fresh, source)
     }
 
+    /**
+     * [url]'s whole format list for a sheet opened on a link already queued, from the cache
+     * where it holds one and otherwise read again. Null when the read fails.
+     */
+    suspend fun formatsFor(url: String): MediaInfo? = withContext(Dispatchers.IO) {
+        try {
+            formatReads.withPermit { readFormats(url, fresh = false, source = null) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w("Hazel", "Format read failed for a queued link: ${sanitizeError(e.message.orEmpty())}")
+            null
+        }
+    }
+
     /** Runs one read of [info]'s formats; the caller holds its claim in [_formatsReading]. */
     private fun startFormatRead(info: MediaInfo, fresh: Boolean, source: ListingSource?) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -1223,6 +1238,11 @@ class DownloadViewModel : ViewModel() {
             // The artwork the full read found is preferred, since a listing often carries
             // only a small preview; the listing's title is kept, as the card already shows it.
             val merged = resolved.copy(
+                // The link keeps the address it was listed under. A read answers with the
+                // site's own form of it (a youtu.be or Shorts link comes back as a watch
+                // page), and the sheets hold each link's picks by that address: a new one
+                // dropped a quality picked while the link was still being read.
+                url = info.url,
                 title = info.title.ifBlank { resolved.title },
                 thumbnail = resolved.thumbnail ?: info.thumbnail,
                 // A running time the listing gave is kept when the full read has none,
@@ -2291,7 +2311,14 @@ class DownloadViewModel : ViewModel() {
         val current = synchronized(queue) { queue.firstOrNull { it.url == url } } ?: saved
             ?: return QueueAdjust.GONE
         val wanted = plan.toQueued(options, treeUri).copy(paused = current.paused)
-        if (wanted == current) return QueueAdjust.UNCHANGED
+        // A list read again can report the same streams with other sizes or names; that alone
+        // is no change, and must not start a running link over.
+        val sameChoice = wanted.copy(
+            fileSizeBytes = current.fileSizeBytes,
+            mergeAudioSizeBytes = current.mergeAudioSizeBytes,
+            formatLabel = current.formatLabel
+        ) == current
+        if (sameChoice) return QueueAdjust.UNCHANGED
 
         val streamsChange = wanted.selector != current.selector || wanted.sort != current.sort ||
             wanted.mergeAudioSelector != current.mergeAudioSelector ||
@@ -3433,14 +3460,9 @@ class DownloadViewModel : ViewModel() {
      * figure is used instead, which is the best there is in that case.
      */
     private fun expectedTotalFor(plan: DownloadPlan, options: DownloadOptions): Long {
-        val format = plan.format
-        if (format.fileSizeBytes <= 0L) return 0L
-
-        val mergedAudio = if (format.hasVideo && !format.hasAudio) {
-            plan.info.mergeAudio?.fileSizeBytes ?: 0L
-        } else 0L
-
-        val whole = format.fileSizeBytes + mergedAudio
+        // The track for the soundtrack that was picked, the same one the command asks for.
+        val whole = plan.format.bytesWith(plan.info.mergeAudioFor(plan.audioLanguage))
+        if (whole <= 0L) return 0L
         if (!options.cutsWhileDownloading) return whole
 
         return CutProgress.expectedBytes(

@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sign-in: one-tap Instagram, YouTube, X, Facebook, TikTok and Reddit in Settings > Cookies, so you can sign in before downloading.
 
 ### Fixed
+- Video sizes in the download sheet, format list and queue now include the audio track, matching the download card.
+- The download card counts the picked audio language's track, not the default one.
+- A queued, paused or running link's sheet lists every quality again, not only the one picked.
+- The picked row in the format list is easy to see on every accent, and its badge turns into a pentagon.
+- The download sheet and format list open faster the first time.
+- Multi-link sheet: a quality picked for a link while it is still being read is kept (#157).
 - Instagram sign-in page no longer greys out or stays blank; it opens straight on the login form.
 - Desktop site in sign-in fits the screen and can be pinched and scrolled.
 - Sign-in page ignores "open in app" links and closes cleanly if the browser engine stops.
