@@ -41,6 +41,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.BatteryChargingFull
 import androidx.compose.material.icons.rounded.BlurOn
@@ -56,7 +57,6 @@ import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -575,7 +575,21 @@ internal fun UpdatesStep(onOpenUpdates: () -> Unit = {}) {
     val fdroid = remember { HazelUpdater.isFdroid() }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        StepIcon(rememberVectorPainter(Icons.Rounded.SystemUpdate), MaterialShapes.Cookie12Sided.toShape(), size = 72.dp)
+        // The way to the full update screen sits beside the icon, so the card keeps its height.
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            StepIcon(rememberVectorPainter(Icons.Rounded.SystemUpdate), MaterialShapes.Cookie12Sided.toShape(), size = 72.dp)
+            FilledTonalIconButton(
+                onClick = onOpenUpdates,
+                modifier = Modifier.align(Alignment.TopEnd).size(48.dp),
+                shape = MaterialShapes.Cookie9Sided.toShape()
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Rounded.ArrowForward,
+                    contentDescription = stringResource(R.string.more_software_update),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(16.dp))
         StepTitle(stringResource(R.string.guide_step_updates_title))
         Spacer(modifier = Modifier.height(6.dp))
@@ -618,25 +632,6 @@ internal fun UpdatesStep(onOpenUpdates: () -> Unit = {}) {
                     if (!fdroid) SettingsRepository.setHazelUpdateWifiOnly(context, on)
                 }
             }
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        FilledTonalButton(
-            onClick = onOpenUpdates,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-            contentPadding = ActionPadding
-        ) {
-            Text(
-                stringResource(R.string.more_software_update),
-                style = MaterialTheme.typography.labelLarge.copy(hyphens = Hyphens.Auto),
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Icon(
-                painter = painterResource(R.drawable.small_chevron),
-                contentDescription = null,
-                modifier = Modifier.size(14.dp)
-            )
         }
     }
 }
