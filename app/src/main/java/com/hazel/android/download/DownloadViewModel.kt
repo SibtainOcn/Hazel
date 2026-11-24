@@ -3057,6 +3057,10 @@ class DownloadViewModel : ViewModel() {
         // Purge fragments first: the move publishes every file it finds, so a leftover
         // .part from a cancelled or failed run would otherwise land in Downloads.
         purgeFragments()
+        // A title starting with "." gives a hidden file that galleries and file managers skip.
+        com.hazel.android.util.StagedFiles.unhideFiles(downloadDir) {
+            Log.w("Hazel", "Could not rename a file starting with a dot")
+        }
 
         val latest = com.hazel.android.util.StagedFiles.list(
             downloadDir,
@@ -3339,12 +3343,7 @@ class DownloadViewModel : ViewModel() {
     private fun purgeFragments() {
         try {
             com.hazel.android.util.StagedFiles.list(downloadDir).forEach { staged ->
-                val f = staged.file
-                if (f.name.endsWith(".part") || f.name.endsWith(".ytdl")
-                    || f.name.endsWith(".temp") || f.name.startsWith(".")
-                ) {
-                    f.delete()
-                }
+                if (isWorkLeftover(staged.file.name)) staged.file.delete()
             }
         } catch (_: Exception) { /* best-effort cleanup */ }
     }
@@ -3794,6 +3793,15 @@ internal data class RunCounts(val total: Int, val done: Int, val failed: Int, va
         )
     }
 }
+
+/**
+ * True for a file a run leaves behind: yt-dlp's part, fragment, state and temp files and the
+ * trim's done marker. A finished file is never matched by its name alone, so a title starting
+ * with "." is kept.
+ */
+internal fun isWorkLeftover(name: String): Boolean =
+    name.endsWith(".part") || ".part-Frag" in name || name.endsWith(".ytdl") ||
+        name.endsWith(".temp") || name == LocalTrim.DONE_MARKER
 
 /**
  * The bytes a download's work folder holds, its engine bookkeeping aside. Zero for a folder

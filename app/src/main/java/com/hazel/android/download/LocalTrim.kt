@@ -142,7 +142,7 @@ object LocalTrim {
         // Includes files in folders from the user's output template.
         StagedFiles.list(dir).map { it.file }
             .filter { f ->
-                !f.name.startsWith(".") && !f.name.startsWith(TRIM_PREFIX) &&
+                f.name != DONE_MARKER && !f.name.startsWith(TRIM_PREFIX) &&
                     !f.name.endsWith(".part") && !f.name.endsWith(".ytdl") && !f.name.endsWith(".temp") &&
                     f.extension.lowercase() !in CutProgress.SIDE_FILE_EXTENSIONS
             }
