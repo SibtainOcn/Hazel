@@ -20,6 +20,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import com.hazel.android.data.SettingsRepository
+import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.newpipe.NewPipeEngine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
@@ -143,8 +145,8 @@ class PlaybackController(
         }
         // A play engine picked while this player is open applies to it straight away.
         engineWatch = scope.launch {
-            SettingsRepository.getPlayEngine(app).distinctUntilChanged().drop(1).collect {
-                if (!released) reload()
+            SettingsRepository.getPlayEngine(app).distinctUntilChanged().drop(1).collect { engine ->
+                if (!released && (phase == Phase.FAILED || changesStream(engine))) reload()
             }
         }
     }
@@ -269,6 +271,12 @@ class PlaybackController(
         ticker?.cancel()
         player.removeListener(listener)
         player.release()
+    }
+
+    /** Whether [engine] would play this link from another source than the one playing. */
+    private fun changesStream(engine: ListingSource): Boolean {
+        val playing = current?.engine ?: return true
+        return playing != engine && (engine == ListingSource.YT_DLP || NewPipeEngine.handlesStream(url))
     }
 
     private fun stopRead() {
