@@ -1004,4 +1004,19 @@
     <string name="upd_report_copied">Información copiada. Pégala en el reporte.</string>
     <string name="upd_channel_note">Beta y Nightly reciben arreglos antes y pueden ser menos estables.</string>
     <string name="upd_status_ok">Actualizado en %1$s</string>
+    <string name="upd_section_automatic">Actualizaciones automáticas</string>
+    <string name="upd_notify_new_title">Avisar de nuevas versiones</string>
+    <string name="upd_notify_new_summary">Un aviso abre esta pantalla cuando hay una actualización</string>
+    <string name="upd_auto_download_title">Descargar actualizaciones automáticamente</string>
+    <string name="upd_auto_download_summary">Con Wi-Fi, para que estén listas para instalar</string>
+    <string name="hazel_update_channel_name">Actualizaciones de Hazel</string>
+    <string name="hazel_update_channel_description">Nuevas versiones de Hazel</string>
+    <string name="hazel_update_available_title">Hazel %1$s está disponible</string>
+    <string name="hazel_update_available_text">Toca para ver las novedades y actualizar.</string>
+    <string name="hazel_update_ready_text">Descargada y lista. Toca para instalar.</string>
+    <string name="guide_step_updates_title">Mantente al día</string>
+    <string name="guide_step_updates_desc">Elige cómo se actualiza Hazel. Puedes cambiarlo cuando quieras en Actualización de software.</string>
+    <string name="guide_done">Listo</string>
+    <string name="guide_updates_notify">Avisarme</string>
+    <string name="guide_updates_auto">Bajar antes</string>
 </resources>

@@ -988,4 +988,19 @@
     <string name="upd_report_copied">डिवाइस जानकारी कॉपी हुई। इसे इश्यू में पेस्ट करें।</string>
     <string name="upd_channel_note">Beta और Nightly को सुधार पहले मिलते हैं और ये कम स्थिर हो सकते हैं।</string>
     <string name="upd_status_ok">%1$s पर अप टू डेट</string>
+    <string name="upd_section_automatic">स्वचालित अपडेट</string>
+    <string name="upd_notify_new_title">नए वर्ज़न की सूचना दें</string>
+    <string name="upd_notify_new_summary">अपडेट आने पर सूचना यह स्क्रीन खोलती है</string>
+    <string name="upd_auto_download_title">अपडेट अपने आप डाउनलोड करें</string>
+    <string name="upd_auto_download_summary">वाई-फ़ाई पर, ताकि अपडेट इंस्टॉल के लिए तैयार रहें</string>
+    <string name="hazel_update_channel_name">Hazel अपडेट</string>
+    <string name="hazel_update_channel_description">Hazel के नए वर्ज़न</string>
+    <string name="hazel_update_available_title">Hazel %1$s उपलब्ध है</string>
+    <string name="hazel_update_available_text">नया क्या है देखने और अपडेट करने के लिए टैप करें।</string>
+    <string name="hazel_update_ready_text">डाउनलोड हो गया। इंस्टॉल करने के लिए टैप करें।</string>
+    <string name="guide_step_updates_title">अप टू डेट रहें</string>
+    <string name="guide_step_updates_desc">चुनें कि Hazel खुद को कैसे अपडेट करे। इसे कभी भी सॉफ़्टवेयर अपडेट में बदल सकते हैं।</string>
+    <string name="guide_done">हो गया</string>
+    <string name="guide_updates_notify">सूचना दें</string>
+    <string name="guide_updates_auto">पहले लाएं</string>
 </resources>

@@ -12,7 +12,11 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -45,6 +49,19 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
 
     private var downloadJob: Job? = null
 
+    val notifyNew: StateFlow<Boolean> = SettingsRepository.getHazelUpdateNotify(application)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+    val autoDownload: StateFlow<Boolean> = SettingsRepository.getHazelUpdateAutoDownload(application)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    fun setNotifyNew(enabled: Boolean) {
+        viewModelScope.launch { SettingsRepository.setHazelUpdateNotify(getApplication(), enabled) }
+    }
+
+    fun setAutoDownload(enabled: Boolean) {
+        viewModelScope.launch { SettingsRepository.setHazelUpdateAutoDownload(getApplication(), enabled) }
+    }
+
     init {
         viewModelScope.launch {
             _channel.value = HazelUpdater.Channel.fromLabel(
@@ -75,15 +92,12 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
                     val info = result.info
                     val isAvailable = HazelUpdater.isNewer(info.version)
                     SettingsRepository.setHazelUpdateAvailable(getApplication(), isAvailable, info.version)
-                    _uiState.value = if (isAvailable) {
-                        val cachedApk = HazelUpdater.getCachedApk(getApplication(), info)
-                        if (cachedApk != null) {
-                            UiState.ReadyToInstall(info, cachedApk)
-                        } else {
-                            UiState.Available(info)
-                        }
-                    } else {
-                        UiState.Idle
+                    val cachedApk = if (isAvailable) HazelUpdater.getCachedApk(getApplication(), info) else null
+                    when {
+                        !isAvailable -> _uiState.value = UiState.Idle
+                        cachedApk != null -> _uiState.value = UiState.ReadyToInstall(info, cachedApk)
+                        HazelUpdater.background.value?.version == info.version -> follow(info)
+                        else -> _uiState.value = UiState.Available(info)
                     }
                 }
                 is HazelUpdater.CheckResult.NoReleaseFound -> {
@@ -107,6 +121,11 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
             else -> return
         }
 
+        if (HazelUpdater.background.value?.version == info.version) {
+            follow(info)
+            return
+        }
+
         downloadJob?.cancel()
         _uiState.value = UiState.Downloading(info, 0L, info.binarySize, 0L, 0L)
 
@@ -126,6 +145,19 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
                 if (e is CancellationException) throw e
                 _uiState.value = UiState.Error(e.message ?: "Download failed. Please try again.", info)
             }
+        }
+    }
+
+    /** Shows a download already running in the background, then its result, instead of starting another. */
+    private fun follow(info: HazelUpdater.ReleaseInfo) {
+        downloadJob?.cancel()
+        _uiState.value = UiState.Downloading(info, 0L, info.binarySize, 0L, 0L)
+        downloadJob = viewModelScope.launch {
+            HazelUpdater.background.takeWhile { it != null }.filterNotNull().collect { bg ->
+                _uiState.value = UiState.Downloading(info, bg.bytes, bg.total, bg.speedBps, bg.etaSeconds)
+            }
+            val apk = HazelUpdater.getCachedApk(getApplication(), info)
+            _uiState.value = if (apk != null) UiState.ReadyToInstall(info, apk) else UiState.Available(info)
         }
     }
 

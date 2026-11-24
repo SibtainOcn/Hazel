@@ -44,6 +44,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.BatteryChargingFull
 import androidx.compose.material.icons.rounded.BlurOn
+import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.NotificationsActive
@@ -91,6 +92,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -110,13 +112,14 @@ import com.hazel.android.ui.theme.GlassStyle
 import com.hazel.android.ui.theme.LocalDarkTheme
 import com.hazel.android.ui.theme.LocalGlass
 import com.hazel.android.ui.theme.glassBackdrop
+import com.hazel.android.update.HazelUpdater
 import com.hazel.android.util.PermissionHelper
 import kotlinx.coroutines.launch
 
 /**
  * Getting-started onboarding stepper carousel, shown on first app launch.
  *
- * 7 slides introduce core capabilities:
+ * 8 slides introduce core capabilities:
  * 1. Paste and Download
  * 2. Appearance (theme, accent, glass), saved as soon as it is picked
  * 3. Format Selection
@@ -124,6 +127,7 @@ import kotlinx.coroutines.launch
  * 5. Hazel Instant
  * 6. Battery Optimization (Deny or Allow options of equal size)
  * 7. Notifications (Deny or Allow options of equal size)
+ * 8. Updates (notify about new versions, download them in the background), saved as soon as switched
  *
  * Follows the app theme: accent coloured Material 3 actions on the glass surface when glass is on.
  */
@@ -133,7 +137,7 @@ fun GettingStartedDialog(
     onDismiss: () -> Unit
 ) {
     var currentStep by remember { mutableIntStateOf(1) }
-    val totalSteps = 7
+    val totalSteps = UPDATES_STEP
     val context = LocalContext.current
     val glass = LocalGlass.current
     val colors = MaterialTheme.colorScheme
@@ -211,6 +215,8 @@ fun GettingStartedDialog(
                 ) { step ->
                     if (step == APPEARANCE_STEP) {
                         AppearanceStep(appearance)
+                    } else if (step == UPDATES_STEP) {
+                        UpdatesStep()
                     } else {
                         val data = stepData(step)
                         StepHeader(
@@ -260,29 +266,37 @@ fun GettingStartedDialog(
                                 next()
                             }
                         )
-                        totalSteps -> DenyAllow(
+                        NOTIFY_STEP -> DenyAllow(
                             modifier = Modifier.weight(1f),
-                            onDeny = onDismiss,
-                            onAllow = dismissWithPermission
+                            onDeny = next,
+                            onAllow = {
+                                PermissionHelper.ensureNotificationPermission(context)
+                                next()
+                            }
                         )
-                        else -> Button(
-                            onClick = next,
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            contentPadding = ActionPadding
-                        ) {
-                            Text(
-                                text = stringResource(R.string.guide_next),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Icon(
-                                painter = painterResource(R.drawable.small_chevron),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
+                        else -> {
+                            val last = currentStep == totalSteps
+                            Button(
+                                onClick = if (last) onDismiss else next,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
+                                contentPadding = ActionPadding
+                            ) {
+                                Text(
+                                    text = stringResource(if (last) R.string.guide_done else R.string.guide_next),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                if (!last) {
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Icon(
+                                        painter = painterResource(R.drawable.small_chevron),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -534,6 +548,46 @@ internal fun AppearanceStep(
     }
 }
 
+/** How Hazel keeps itself current, the same two switches as on the Hazel update screen. */
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+internal fun UpdatesStep() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val notify by remember(context) { SettingsRepository.getHazelUpdateNotify(context) }.collectAsState(initial = false)
+    val auto by remember(context) { SettingsRepository.getHazelUpdateAutoDownload(context) }.collectAsState(initial = false)
+    val save: (suspend () -> Unit) -> Unit = { write -> scope.launch { runCatching { write() } } }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        StepTitle(stringResource(R.string.guide_step_updates_title))
+        Spacer(modifier = Modifier.height(6.dp))
+        StepDescription(stringResource(R.string.guide_step_updates_desc))
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+        ) {
+            ToggleRow(
+                stringResource(R.string.guide_updates_notify), Icons.Rounded.NotificationsActive,
+                MaterialShapes.SoftBurst.toShape(), notify
+            ) { on ->
+                if (on) PermissionHelper.ensureNotificationPermission(context)
+                save { SettingsRepository.setHazelUpdateNotify(context, on) }
+            }
+            // F-Droid installs are updated by F-Droid.
+            if (!HazelUpdater.isFdroid()) {
+                RowDivider()
+                ToggleRow(
+                    stringResource(R.string.guide_updates_auto), Icons.Rounded.CloudDownload,
+                    MaterialShapes.Cookie7Sided.toShape(), auto
+                ) { on -> save { SettingsRepository.setHazelUpdateAutoDownload(context, on) } }
+            }
+        }
+    }
+}
+
 @Composable
 private fun ToggleRow(label: String, icon: ImageVector, shape: Shape, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(
@@ -600,7 +654,8 @@ private fun RowIcon(icon: ImageVector, shape: Shape) {
 private fun RowLabel(text: String, modifier: Modifier) {
     Text(
         text = text,
-        style = MaterialTheme.typography.bodyMedium,
+        // At the largest font a long word breaks at a syllable, not at whatever letter fits.
+        style = MaterialTheme.typography.bodyMedium.copy(hyphens = Hyphens.Auto),
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.onSurface,
         modifier = modifier
@@ -625,6 +680,8 @@ private data class StepInfo(
 
 private const val APPEARANCE_STEP = 2
 private const val BATTERY_STEP = 6
+private const val NOTIFY_STEP = 7
+private const val UPDATES_STEP = 8
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

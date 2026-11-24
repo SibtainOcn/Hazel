@@ -988,4 +988,19 @@
     <string name="upd_report_copied">Geräteinfos kopiert. Füge sie in das Issue ein.</string>
     <string name="upd_channel_note">Beta und Nightly bekommen Korrekturen zuerst und können weniger stabil sein.</string>
     <string name="upd_status_ok">Aktuell auf %1$s</string>
+    <string name="upd_section_automatic">Automatische Updates</string>
+    <string name="upd_notify_new_title">Neue Versionen melden</string>
+    <string name="upd_notify_new_summary">Eine Mitteilung öffnet diese Seite bei einem Update</string>
+    <string name="upd_auto_download_title">Updates vorab laden</string>
+    <string name="upd_auto_download_summary">Im WLAN, damit sie bereit zur Installation sind</string>
+    <string name="hazel_update_channel_name">Hazel-Updates</string>
+    <string name="hazel_update_channel_description">Neue Hazel-Versionen</string>
+    <string name="hazel_update_available_title">Hazel %1$s ist verfügbar</string>
+    <string name="hazel_update_available_text">Tippen, um Neuerungen zu sehen und zu aktualisieren.</string>
+    <string name="hazel_update_ready_text">Geladen und bereit. Zum Installieren tippen.</string>
+    <string name="guide_step_updates_title">Immer aktuell</string>
+    <string name="guide_step_updates_desc">Wähle, wie Hazel sich aktualisiert. Jederzeit änderbar unter Software-Update.</string>
+    <string name="guide_done">Fertig</string>
+    <string name="guide_updates_notify">Melden</string>
+    <string name="guide_updates_auto">Vorab laden</string>
 </resources>
