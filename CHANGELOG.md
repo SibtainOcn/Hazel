@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Release channels: Beta and Nightly builds on GitHub, a daily nightly from the nightly branch, and one-step switching on the Hazel update screen.
+- Hazel update screen: the build's commit and date on beta and nightly builds.
 - Hazel updates: optional notification for new versions, opening the Hazel update screen.
 - Hazel updates: optional background download, with a Wi-Fi only switch, so the update screen opens on Install. Off by default.
 - Getting started: a third step to set update notifications, yt-dlp and Hazel auto-updates and Wi-Fi only.
@@ -26,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sign-in: one-tap Instagram, YouTube, X, Facebook, TikTok and Reddit in Settings > Cookies, so you can sign in before downloading.
 
 ### Fixed
+- Hazel updates: Beta and Nightly find their releases, move from one build to the next, and move onto a newer stable.
+- Hazel updates: a GitHub install never picks an F-Droid APK, and x86 phones get the x86 APK.
+- Hazel update screen: translated in every language, with clear failure reasons; nothing is cut off at the largest font.
 - Support Hazel screen: follows the accent and theme, icons on M3 shapes, rows in connected groups, and a redesigned developer card.
 - Switching the play engine no longer breaks playback of results already on screen; an open player switches at once.
 - Video sizes in the download sheet, format list and queue now include the audio track, matching the download card.

@@ -1,0 +1,179 @@
+name: Nightly
+
+# A daily build of the nightly branch, published to one rolling GitHub release tagged
+# "nightly". It replaces the previous nightly instead of adding a release per build, so the
+# releases list stays short: Hazel 1.1.17 and older read only the first page of releases to
+# find the stable one.
+#
+# Version: the next patch after the stable in app/build.gradle.kts, numbered per build:
+# 1.1.18-nightly.1, 1.1.18-nightly.2, ... The number restarts when that stable moves on.
+# The tag never matches F-Droid's update pattern (^v[0-9.]+$), so F-Droid ignores it.
+#
+# Scheduled runs only start from the default branch; workflow_dispatch builds one now.
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.parallel=true -Dorg.gradle.caching=true
+
+jobs:
+  nightly:
+    name: Build and publish nightly
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    permissions:
+      contents: write
+
+    env:
+      GH_TOKEN: ${{ github.token }}
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: nightly
+          fetch-depth: 0
+
+      - name: Decide the build
+        id: plan
+        run: |
+          SHA=$(git rev-parse HEAD)
+          LAST_SHA=$(git ls-remote --tags origin refs/tags/nightly | cut -f1)
+
+          # Nothing new since the last nightly: a scheduled run stops here. A manual run
+          # still builds, for when a nightly has to be redone.
+          if [ "$LAST_SHA" = "$SHA" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "No new commits since the last nightly ($SHA)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          STABLE=$(sed -n 's/^[[:space:]]*versionName[[:space:]]*=[[:space:]]*"\(.*\)".*$/\1/p' app/build.gradle.kts | head -n 1)
+          IFS=. read -r MAJOR MINOR PATCH <<< "${STABLE%%-*}"
+          NEXT="$MAJOR.$MINOR.$((PATCH + 1))"
+
+          PREVIOUS=$(gh release view nightly --json name --jq .name 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+-nightly\.[0-9]+' || true)
+          if [ "${PREVIOUS%-nightly.*}" = "$NEXT" ]; then
+            BUILD=$(( ${PREVIOUS##*.} + 1 ))
+          else
+            BUILD=1
+          fi
+
+          echo "Nightly $NEXT-nightly.$BUILD from $SHA (previous: ${PREVIOUS:-none})."
+          {
+            echo "skip=false"
+            echo "sha=$SHA"
+            echo "last_sha=$LAST_SHA"
+            echo "next=$NEXT"
+            echo "build=$BUILD"
+            echo "version=$NEXT-nightly.$BUILD"
+            echo "date=$(date -u +%F)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 17
+        if: steps.plan.outputs.skip != 'true'
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        if: steps.plan.outputs.skip != 'true'
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+
+      # A nightly that fails its tests is not published; the last good one stays up.
+      - name: Run unit tests
+        if: steps.plan.outputs.skip != 'true'
+        run: ./gradlew :app:testDebugUnitTest --stacktrace
+
+      # The same key as the stable releases, so a nightly installs over a stable build.
+      - name: Restore the signing keystore
+        if: steps.plan.outputs.skip != 'true'
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::No signing keystore is configured. Set the KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS and KEY_PASSWORD repository secrets."
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/signing"
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/signing/hazel.jks"
+          cat > "$RUNNER_TEMP/signing/signing.properties" <<PROPS
+          storeFile=hazel.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          PROPS
+          echo "HAZEL_SIGNING_DIR=$RUNNER_TEMP/signing" >> "$GITHUB_ENV"
+
+      # GitHub builds only: F-Droid users stay on F-Droid's own stable updates.
+      - name: Build every architecture
+        if: steps.plan.outputs.skip != 'true'
+        run: >
+          ./gradlew :app:assembleGithubRelease --stacktrace
+          -PhazelChannel=nightly
+          -PhazelVersion=${{ steps.plan.outputs.next }}
+          -PhazelBuild=${{ steps.plan.outputs.build }}
+          -PhazelCommit=${{ steps.plan.outputs.sha }}
+          -PhazelBuildDate=${{ steps.plan.outputs.date }}
+
+      - name: Collect the APKs
+        if: steps.plan.outputs.skip != 'true'
+        run: |
+          mkdir -p artifacts
+          find app/build/outputs/apk/github/release -name '*.apk' -exec cp {} artifacts/ \;
+          for ABI in universal armeabi-v7a x86 x86_64 arm64-v8a; do
+            APK="artifacts/Hazel-v${{ steps.plan.outputs.version }}-$ABI-nightly.apk"
+            if [ ! -f "$APK" ]; then
+              echo "::error::The build did not produce $APK. It produced: $(ls artifacts | tr '\n' ' ')"
+              exit 1
+            fi
+          done
+
+      - name: Write the release notes
+        if: steps.plan.outputs.skip != 'true'
+        run: |
+          SHA=${{ steps.plan.outputs.sha }}
+          LAST=${{ steps.plan.outputs.last_sha }}
+          {
+            echo "Daily build of the \`nightly\` branch at \`${SHA:0:7}\`, ${{ steps.plan.outputs.date }}. Not tested on devices; it can break."
+            echo
+            echo "Switch channels in Hazel: More > Software update > Hazel. A nightly installs over a stable or beta build and keeps your data. Going back to Stable happens with the next stable release."
+            echo
+            echo "### Changes"
+            if [ -n "$LAST" ] && git cat-file -e "$LAST^{commit}" 2>/dev/null; then
+              git log --no-merges --format='- %s' "$LAST..$SHA" | head -n 40
+            else
+              git log --no-merges --format='- %s' -n 20 "$SHA"
+            fi
+          } > nightly-notes.md
+
+      # Replaced, not added: delete the old nightly and its tag, then publish this one at the
+      # built commit. Never marked latest, so the stable stays GitHub's latest release.
+      - name: Publish the nightly
+        if: steps.plan.outputs.skip != 'true'
+        run: |
+          gh release delete nightly --yes --cleanup-tag 2>/dev/null || true
+          gh release create nightly artifacts/*.apk \
+            --target "${{ steps.plan.outputs.sha }}" \
+            --prerelease --latest=false \
+            --title "🌙 Hazel ${{ steps.plan.outputs.version }}" \
+            --notes-file nightly-notes.md
+
+      - name: Delete the keystore
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/signing"

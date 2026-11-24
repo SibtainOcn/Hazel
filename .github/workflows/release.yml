@@ -8,8 +8,8 @@ name: Release
 # The tag selects the commit to build and names the release. It does not set the version:
 # the version lives in app/build.gradle.kts and the tag is checked against it, so a tag
 # that disagrees stops the release instead of publishing APKs that contradict their name.
-# A tag carrying a pre-release suffix (v1.1.0-beta.1) publishes as a pre-release and its
-# files are named beta rather than stable.
+# A beta tag (v1.1.18-beta.1) publishes a GitHub-only pre-release named beta, with its
+# version taken from the tag. Nightlies are published by nightly.yml.
 
 on:
   push:
@@ -109,12 +109,51 @@ jobs:
             exit 1
           fi
 
+          # A beta (v1.1.18-beta.2) is built for the GitHub flavor only, with its version given
+          # to Gradle from the tag; the file keeps the last stable, so F-Droid sees nothing new.
+          if [[ "$VERSION" =~ ^([0-9]+\.[0-9]+\.[0-9]+)-beta\.([0-9]+)$ ]]; then
+            BASE="${BASH_REMATCH[1]}"
+            BUILD="${BASH_REMATCH[2]}"
+            if [ "$(printf '%s\n%s\n' "$VERSION_NAME" "$BASE" | sort -V | tail -n 1)" != "$BASE" ] || [ "$BASE" = "$VERSION_NAME" ]; then
+              echo "::error::Beta $TAG must lead up to a version after the stable $VERSION_NAME in $BUILD_FILE."
+              exit 1
+            fi
+            echo "Releasing beta $VERSION (build $BUILD of $BASE)."
+            {
+              echo "tag=$TAG"
+              echo "version=$VERSION"
+              echo "channel=beta"
+              echo "prerelease=true"
+              echo "gradle_task=:app:assembleGithubRelease"
+              echo "gradle_args=-PhazelChannel=beta -PhazelVersion=$BASE -PhazelBuild=$BUILD -PhazelCommit=$(git rev-parse HEAD) -PhazelBuildDate=$(date -u +%F)"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          case "$VERSION" in
+            *-*)
+              echo "::error::Tag $TAG is neither a stable (v1.1.18) nor a beta (v1.1.18-beta.1). Nightlies are built by nightly.yml."
+              exit 1
+              ;;
+          esac
+
           # A tag names a commit, it does not set the version. When the two disagree either
           # the wrong commit was tagged or the bump was forgotten, and in both cases the
           # APKs would not be the ones the tag claims they are.
           if [ "$VERSION_NAME" != "$VERSION" ]; then
             echo "::error::Tag $TAG says $VERSION but $BUILD_FILE says $VERSION_NAME. Tag the commit that already carries the version."
             exit 1
+          fi
+
+          # From 1.1.18 on, a stable's code is the channel formula's slot 99, so it sits above
+          # every nightly and beta of the same version (see the channel notes in the file).
+          if [ "$(printf '%s\n%s\n' 1.1.17 "$VERSION" | sort -V | tail -n 1)" != "1.1.17" ]; then
+            IFS=. read -r MAJOR MINOR PATCH <<< "$VERSION"
+            EXPECTED=$(( (MAJOR * 10000 + MINOR * 100 + PATCH) * 1000 + 990 ))
+            if [ "$VERSION_CODE" != "$EXPECTED" ]; then
+              echo "::error::Stable $VERSION needs the code $EXPECTED in $BUILD_FILE, not $VERSION_CODE."
+              exit 1
+            fi
           fi
 
           # F-Droid shows the changelog filed under the version code of the exact APK it is
@@ -130,19 +169,16 @@ jobs:
             exit 1
           fi
 
-          # Anything after the version number marks a pre-release: v1.1.0-beta.1, v2.0.0-rc1.
-          case "$VERSION" in
-            *-*) PRERELEASE=true ;;
-            *)   PRERELEASE=false ;;
-          esac
-
           echo "Releasing $VERSION as version codes $VERSION_CODE to $((VERSION_CODE + 4))."
 
           {
             echo "tag=$TAG"
             echo "version=$VERSION"
             echo "version_code=$VERSION_CODE"
-            echo "prerelease=$PRERELEASE"
+            echo "channel=stable"
+            echo "prerelease=false"
+            echo "gradle_task=:app:assembleRelease"
+            echo "gradle_args="
           } >> "$GITHUB_OUTPUT"
 
       - name: Set up JDK 17
@@ -181,7 +217,7 @@ jobs:
       # end up disagreeing, because the F-Droid build never passes it. Plain assembleRelease
       # is what its server runs, so this is the same build.
       - name: Build every architecture
-        run: ./gradlew :app:assembleRelease --stacktrace
+        run: ./gradlew ${{ steps.version.outputs.gradle_task }} --stacktrace ${{ steps.version.outputs.gradle_args }}
 
       - name: Collect the APKs
         id: apks
@@ -192,8 +228,7 @@ jobs:
           # Every output is named after the version it carries, so checking that the five
           # expected names are present is also the proof that the version in the file is the
           # version that got built. Without it a misconfigured build publishes quietly.
-          CHANNEL=stable
-          [ "${{ steps.version.outputs.prerelease }}" = "true" ] && CHANNEL=beta
+          CHANNEL=${{ steps.version.outputs.channel }}
           for ABI in universal armeabi-v7a x86 x86_64 arm64-v8a; do
             APK="artifacts/Hazel-v${{ steps.version.outputs.version }}-$ABI-$CHANNEL.apk"
             if [ ! -f "$APK" ]; then
@@ -260,8 +295,26 @@ jobs:
           name: "🌿 Hazel ${{ steps.version.outputs.tag }}"
           body_path: release-notes.md
           prerelease: ${{ steps.version.outputs.prerelease }}
+          make_latest: ${{ steps.version.outputs.prerelease != 'true' }}
           files: artifacts/*.apk
           fail_on_unmatched_files: true
+
+      # Once a stable is out, its betas (and older ones) are only clutter, and Hazel 1.1.17
+      # and older find the stable only on the first page of releases. The nightly is kept.
+      - name: Remove betas the stable replaces
+        if: steps.version.outputs.channel == 'stable'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release list --limit 100 --json tagName,isPrerelease --jq '.[] | select(.isPrerelease) | .tagName' |
+            while read -r TAG; do
+              if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-beta\.[0-9]+$ ]] &&
+                 [ "$(printf '%s\n%s\n' "${BASH_REMATCH[1]}" "$VERSION" | sort -V | tail -n 1)" = "$VERSION" ]; then
+                echo "Removing $TAG"
+                gh release delete "$TAG" --yes --cleanup-tag
+              fi
+            done
 
       - name: Delete the keystore
         if: always()
