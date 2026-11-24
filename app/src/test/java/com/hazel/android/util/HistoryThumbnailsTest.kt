@@ -62,14 +62,14 @@ class HistoryThumbnailsTest {
 
     @Test
     fun `delete removes the copy, the marker and a half written file`() {
-        put("1.jpg"); put("1.none"); put("1.part"); put("2.jpg")
+        put("1.jpg"); put("1.none"); put("1.4821.part"); put("2.jpg"); put("12.jpg")
         HistoryThumbnails.delete(context, listOf(1L))
-        assertEquals(listOf("2.jpg"), dir().list()!!.toList())
+        assertEquals(setOf("2.jpg", "12.jpg"), dir().list()!!.toSet())
     }
 
     @Test
     fun `prune keeps entries still listed and drops everything else of ours`() {
-        put("1.jpg"); put("2.jpg"); put("2.none"); put("3.part"); put("4.none")
+        put("1.jpg"); put("2.jpg"); put("2.none"); put("3.77.part"); put("4.none")
         HistoryThumbnails.prune(context, keep = setOf(1L, 2L))
         assertEquals(setOf("1.jpg", "2.jpg", "2.none"), dir().list()!!.toSet())
     }

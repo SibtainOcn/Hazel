@@ -73,6 +73,10 @@ object HistoryThumbnails {
 
     private fun markerFile(context: Context, id: Long): File = File(root(context), "$id.none")
 
+    /** One per write, so the finish-time copy and a row's copy of the same entry never share a file. */
+    private fun tempFile(context: Context, id: Long): File =
+        File.createTempFile("$id.", ".part", rootForWrite(context))
+
     suspend fun cached(context: Context, id: Long): File? = withContext(Dispatchers.IO) {
         copyFile(context, id).takeIf { it.isFile && it.length() > 0 }
     }
@@ -85,7 +89,7 @@ object HistoryThumbnails {
         cached(context, id)?.let { return it }
         return withContext(Dispatchers.IO) {
             attempt {
-                val temp = File(rootForWrite(context), "$id.part")
+                val temp = tempFile(context, id)
                 try {
                     val request = Request.Builder().url(url).build()
                     client.newCall(request).execute().use { response ->
@@ -124,7 +128,7 @@ object HistoryThumbnails {
                 val diskCache = SingletonImageLoader.get(context.applicationContext).diskCache
                     ?: return@attempt null
                 val snapshot = diskCache.openSnapshot(url) ?: return@attempt null
-                val temp = File(rootForWrite(context), "$id.part")
+                val temp = tempFile(context, id)
                 try {
                     snapshot.data.toFile().copyTo(temp, overwrite = true)
                     adopt(context, id, temp)
@@ -217,15 +221,24 @@ object HistoryThumbnails {
                     ?.toLongOrNull() ?: 0L
                 // Not the first frame, which is often black.
                 val atUs = (durationMs * 1000L / 10L).coerceAtLeast(0L)
-                retriever.getFrameAtTime(atUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-                    ?: retriever.getFrameAtTime(0L, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-                    ?: embedded()
+                frameAt(retriever, atUs) ?: frameAt(retriever, 0L) ?: embedded()
             } else {
                 embedded()
             }
         } finally {
             runCatching { retriever.release() }
         }
+    }
+
+    /** Scaled while decoding where possible: a full 4K frame alone is over 30 MB. */
+    private fun frameAt(retriever: MediaMetadataRetriever, atUs: Long): Bitmap? {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            attempt {
+                retriever.getScaledFrameAtTime(atUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC, TARGET_WIDTH, TARGET_HEIGHT)
+            }?.let { return it }
+        }
+        // Some vendor decoders give nothing scaled but do give the full frame.
+        return retriever.getFrameAtTime(atUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
     }
 
     private fun decodeSampled(bytes: ByteArray): Bitmap? {
@@ -246,7 +259,8 @@ object HistoryThumbnails {
 
     /** JPEG has no alpha, so a transparent cover would be saved as black. */
     private fun flatten(source: Bitmap): Bitmap {
-        if (!source.hasAlpha()) return source
+        // A hardware bitmap cannot be drawn on a software canvas.
+        if (!source.hasAlpha() || isHardware(source)) return source
         val out = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
         Canvas(out).apply {
             drawColor(Color.BLACK)
@@ -255,17 +269,27 @@ object HistoryThumbnails {
         return out
     }
 
+    private fun isHardware(bitmap: Bitmap): Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && bitmap.config == Bitmap.Config.HARDWARE
+
     private fun save(context: Context, id: Long, bitmap: Bitmap): File? {
-        val temp = File(rootForWrite(context), "$id.part")
+        val temp = tempFile(context, id)
+        var scaled: Bitmap? = null
+        var ready: Bitmap? = null
         return try {
-            val ready = flatten(scaleDown(bitmap))
-            val written = temp.outputStream().use { ready.compress(Bitmap.CompressFormat.JPEG, 85, it) }
-            if (written && temp.length() > 0 && temp.renameTo(copyFile(context, id))) {
+            val small = scaleDown(bitmap).also { scaled = it }
+            val flat = flatten(small).also { ready = it }
+            val written = temp.outputStream().use { flat.compress(Bitmap.CompressFormat.JPEG, 85, it) }
+            val target = copyFile(context, id)
+            if (written && temp.length() > 0 && temp.renameTo(target)) {
                 markerFile(context, id).delete()
-                copyFile(context, id)
+                target
             } else null
         } finally {
             temp.delete()
+            ready?.takeIf { it !== scaled }?.recycle()
+            scaled?.takeIf { it !== bitmap }?.recycle()
+            bitmap.recycle()
         }
     }
 
@@ -292,11 +316,11 @@ object HistoryThumbnails {
     }
 
     fun delete(context: Context, ids: Collection<Long>) {
-        ids.forEach { id ->
-            attempt {
-                copyFile(context, id).delete()
-                markerFile(context, id).delete()
-                File(root(context), "$id.part").delete()
+        if (ids.isEmpty()) return
+        val gone = ids.toHashSet()
+        attempt {
+            root(context).listFiles()?.forEach { file ->
+                if (file.name.substringBefore('.').toLongOrNull() in gone) file.delete()
             }
         }
     }
