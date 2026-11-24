@@ -287,6 +287,8 @@
     <string name="cleanup_category_other_cache_description">リンク閲覧時にキャッシュされたサムネイルなどです。</string>
     <string name="cleanup_category_link_reads_label">保存済みのリンク情報</string>
     <string name="cleanup_category_link_reads_description">直近 50 件のリンクの形式。すぐ開き直せます。6 時間保持、シークレットでは保存しません。</string>
+    <string name="cleanup_category_history_thumbs_label">ダウンロードのサムネイル</string>
+    <string name="cleanup_category_history_thumbs_description">ダウンロード一覧用に保存したサムネイルのコピーです。消去しても、表示時にリンクまたは保存済みファイルから作り直されます。</string>
     <string name="cleanup_confirm_category_title">これらの一時ファイルを削除しますか？</string>
     <string name="cleanup_confirm_category_safe">%1$s が解放されます。保存済みのファイルには影響ありません。</string>
     <string name="cleanup_confirm_category_unsafe">%1$s が解放されます。次回ダウンロード時に再展開するため時間がかかります。</string>
@@ -992,4 +994,18 @@
     <string name="guide_updates_hazel">Hazel 自動</string>
     <string name="guide_updates_wifi">Wi-Fi のみ</string>
     <string name="guide_updates_more">詳細</string>
+    <string name="upd_failure_no_space">このデバイスにはアップデートをインストールするための空き容量が足りません。容量を空けてから、もう一度お試しください。</string>
+    <string name="upd_failure_timeout">GitHub への接続がタイムアウトしました。より安定した通信環境でもう一度お試しください。</string>
+    <string name="upd_failure_unreachable">Hazel は GitHub に接続できませんでした。インターネット接続と、VPN およびプライベート DNS の設定を確認してから、もう一度お試しください。</string>
+    <string name="upd_failure_connection_lost">ダウンロード中に接続が切断されました。より安定した通信環境でもう一度お試しください。</string>
+    <string name="upd_failure_clock_or_tls">GitHub との安全な接続を確立できませんでした。このデバイスの日付と時刻が正しいか確認してから、もう一度お試しください。</string>
+    <string name="upd_failure_http">GitHub がダウンロードを拒否しました（HTTP %1$s）。数分後にもう一度お試しください。</string>
+    <string name="upd_failure_release_gone">このバージョンは GitHub で提供されなくなりました。アップデートを確認して最新バージョンを入手してください。</string>
+    <string name="upd_failure_incomplete">ダウンロードが正常に完了しませんでした。より安定した通信環境でもう一度お試しください。</string>
+    <string name="upd_failure_could_not_install">このデバイスにアップデートをインストールできませんでした。もう一度お試しください。</string>
+    <string name="upd_failure_would_not_start">yt-dlp の新しいバージョンをこのデバイスで起動できなかったため、現在のバージョンを維持しました。ダウンロードは引き続き利用できます。</string>
+    <string name="upd_failure_stopped_while_starting">yt-dlp の新しいバージョンの起動中にシステムが停止させました。メモリ不足が原因と考えられます。現在のバージョンを維持しました。他のアプリを終了してから、もう一度お試しください。</string>
+    <string name="upd_failure_unknown">アップデートを完了できませんでした（%1$s）。しばらくしてからもう一度お試しください。</string>
+    <string name="upd_status_update_failed">アップデートが完了しませんでした</string>
+    <string name="upd_status_check_failed">確認が完了しませんでした</string>
 </resources>

@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.hazel.android.util.HistoryThumbnails
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaDeleter
 import com.hazel.android.util.MediaPresence
@@ -121,10 +122,20 @@ object DownloadHistoryRepository {
             .flowOn(Dispatchers.Default)
 
     suspend fun record(context: Context, entry: HistoryEntry) = withContext(Dispatchers.IO) {
+        var saved = entry
+        var kept = emptyList<HistoryEntry>()
         context.dataStore.edit { prefs ->
             val existing = decode(prefs[HISTORY_KEY])
-            prefs[HISTORY_KEY] = encode((listOf(withFreeId(entry, existing)) + existing).take(LIMIT))
+            saved = withFreeId(entry, existing)
+            kept = (listOf(saved) + existing).take(LIMIT)
+            prefs[HISTORY_KEY] = encode(kept)
         }
+        // Runs after the row is saved and survives the caller being cancelled.
+        withContext(NonCancellable) {
+            HistoryThumbnails.prune(context, kept.mapTo(HashSet()) { it.id })
+            HistoryThumbnails.store(context, saved.id, saved.thumbnail, saved.fileUri, saved.isVideo)
+        }
+        Unit
     }
 
     suspend fun remove(context: Context, id: Long) = removeAll(context, setOf(id))
@@ -137,6 +148,7 @@ object DownloadHistoryRepository {
             if (remaining.isEmpty()) prefs.remove(HISTORY_KEY)
             else prefs[HISTORY_KEY] = encode(remaining)
         }
+        HistoryThumbnails.delete(context, ids)
     }
 
     /**
@@ -152,6 +164,7 @@ object DownloadHistoryRepository {
 
     suspend fun clear(context: Context) = withContext(Dispatchers.IO) {
         context.dataStore.edit { prefs -> prefs.remove(HISTORY_KEY) }
+        HistoryThumbnails.clearAll(context)
     }
 
     /**

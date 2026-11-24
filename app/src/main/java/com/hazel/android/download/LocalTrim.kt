@@ -1,12 +1,15 @@
 package com.hazel.android.download
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import com.yausername.youtubedl_android.YoutubeDL
 import com.hazel.android.util.StagedFiles
 import java.io.File
+import java.io.IOException
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 /**
  * Trim after download: cuts the finished file in the work folder with the bundled ffmpeg by
@@ -18,6 +21,8 @@ object LocalTrim {
     class Result(val ok: Boolean, val stopped: Boolean, val message: String = "")
 
     private const val WATCH_MS = 15_000L
+    private const val LEGACY_POLL_MS = 250L
+    private const val TAIL_CHARS = 2000
     private const val STALL_MS = 5 * 60_000L
     private const val TRIM_PREFIX = "hazel.trim."
 
@@ -123,7 +128,7 @@ object LocalTrim {
             .apply { environment()["LD_LIBRARY_PATH"] = env }
             .start()
         val listing = p.inputStream.bufferedReader().use { it.readText() }
-        if (!p.waitFor(30, TimeUnit.SECONDS)) p.destroy()
+        if (!waitFor(p, 30_000L)) p.destroy()
         parseStreams(listing)
     } catch (_: Exception) {
         emptyList()
@@ -219,11 +224,9 @@ object LocalTrim {
 
     private fun run(context: Context, command: List<String>, env: String, writes: File): Result {
         if (stopped) return Result(false, true)
-        val log = File(context.cacheDir, "hazel-trim.log")
         val started = try {
             ProcessBuilder(command)
                 .redirectErrorStream(true)
-                .redirectOutput(log)
                 .apply { environment()["LD_LIBRARY_PATH"] = env }
                 .start()
         } catch (e: Exception) {
@@ -231,12 +234,30 @@ object LocalTrim {
         }
         process = started
         if (stopped) started.destroy()
+        val tail = StringBuilder()
+        // Drained as it comes, or ffmpeg blocks once the pipe is full.
+        val drain = thread(isDaemon = true, name = "hazel-trim-output") {
+            try {
+                started.inputStream.bufferedReader().use { reader ->
+                    val buffer = CharArray(4096)
+                    while (true) {
+                        val read = reader.read(buffer)
+                        if (read < 0) break
+                        synchronized(tail) {
+                            tail.append(buffer, 0, read)
+                            if (tail.length > TAIL_CHARS * 2) tail.delete(0, tail.length - TAIL_CHARS)
+                        }
+                    }
+                }
+            } catch (_: IOException) {
+            }
+        }
 
         return try {
             var lastSize = -1L
             var lastChange = System.currentTimeMillis()
             var stalled = false
-            while (!started.waitFor(WATCH_MS, TimeUnit.MILLISECONDS)) {
+            while (!waitFor(started, WATCH_MS)) {
                 val size = writes.length()
                 val now = System.currentTimeMillis()
                 if (size != lastSize) {
@@ -248,25 +269,47 @@ object LocalTrim {
                 }
             }
             val code = started.exitValue()
+            drain.join(1_000L)
             when {
                 stopped -> Result(false, true)
                 stalled -> Result(false, false, "ffmpeg stopped making progress")
-                code != 0 -> Result(false, false, tailOf(log))
+                code != 0 -> Result(false, false, clean(synchronized(tail) { tail.toString() }))
                 else -> Result(true, false)
             }
         } catch (e: Exception) {
+            started.destroy()
             Result(false, stopped, e.message ?: "ffmpeg stopped")
         } finally {
             process = null
-            log.delete()
         }
     }
 
     /** The last lines ffmpeg wrote, without file paths. */
-    private fun tailOf(log: File): String = try {
-        log.readText().takeLast(2000).trim().replace(Regex("""(?:/[^/\s:]+)+/"""), "")
-    } catch (_: Exception) {
-        ""
+    private fun clean(output: String): String =
+        output.takeLast(TAIL_CHARS).trim().replace(PATH_PREFIX, "")
+
+    private val PATH_PREFIX = Regex("""(?:/[^/\s:]+)+/""")
+
+    /** `Process.waitFor(timeout)` needs Android 8; below it the exit is polled. */
+    internal fun waitFor(
+        p: Process,
+        timeoutMs: Long,
+        legacy: Boolean = false
+    ): Boolean {
+        if (!legacy && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return p.waitFor(timeoutMs, TimeUnit.MILLISECONDS)
+        }
+        val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMs)
+        while (true) {
+            try {
+                p.exitValue()
+                return true
+            } catch (_: IllegalThreadStateException) {
+            }
+            val leftMs = TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime())
+            if (leftMs <= 0) return false
+            Thread.sleep(minOf(leftMs, LEGACY_POLL_MS))
+        }
     }
 
     private fun libraryPath(context: Context): String {

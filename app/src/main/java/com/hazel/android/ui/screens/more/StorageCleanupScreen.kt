@@ -37,6 +37,7 @@ import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.PhotoLibrary
 import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -511,6 +512,7 @@ private fun ClearEverythingButton(enabled: Boolean, onClick: () -> Unit) {
 private fun categoryColor(id: String): Color = when (id) {
     "ytdlp_cache" -> MaterialTheme.colorScheme.primary
     TempStorage.LINK_READS -> InfoBlue
+    TempStorage.HISTORY_THUMBS -> MaterialTheme.colorScheme.tertiary
     "partial_downloads" -> WarningAmber
     "converted" -> SuccessGreen
     else -> OtherCacheViolet
@@ -521,6 +523,7 @@ private val OtherCacheViolet = Color(0xFFB388FF)
 private fun categoryIcon(id: String): ImageVector = when (id) {
     "ytdlp_cache" -> Icons.Outlined.Link
     TempStorage.LINK_READS -> Icons.Outlined.History
+    TempStorage.HISTORY_THUMBS -> Icons.Outlined.PhotoLibrary
     "partial_downloads" -> Icons.Outlined.Downloading
     "converted" -> Icons.Outlined.GraphicEq
     "other_cache" -> Icons.Outlined.Image

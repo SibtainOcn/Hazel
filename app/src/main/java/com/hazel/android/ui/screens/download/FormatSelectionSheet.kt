@@ -12,6 +12,7 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.geometry.Size
 import androidx.compose.animation.core.animateFloat
@@ -22,6 +23,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -81,6 +83,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.derivedStateOf
+import androidx.graphics.shapes.Morph
+import com.hazel.android.ui.components.player.MorphShape
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -175,7 +180,9 @@ fun FormatSelectionSheet(
     linkUrls: List<String> = listOf(info.url),
     preferredHeight: Int = 0,
     /** Why the last read of the link's formats failed, shown in place of the list's own. */
-    readError: String? = null
+    readError: String? = null,
+    /** The soundtrack a video-only row is muxed with, counted in that row's size. */
+    mergeAudio: MediaFormat? = null
 ) {
     // Half height on open. The sheet is a list, and a list is readable from the top down,
     // so the whole screen is offered rather than demanded.
@@ -470,6 +477,7 @@ fun FormatSelectionSheet(
                                     // objects for the same entries.
                                     selected = row.format.formatId == draft?.formatId,
                                     onClick = { draft = row.format },
+                                    mergeAudio = mergeAudio,
                                     compact = showRail
                                 )
                             }
@@ -1034,15 +1042,21 @@ fun FormatRow(
     selected: Boolean,
     onClick: () -> Unit,
     showChevron: Boolean = false,
-    mergeAudioId: String? = null,
+    mergeAudio: MediaFormat? = null,
+    showMergeId: Boolean = false,
     compact: Boolean = false,
     pendingBadges: Boolean = false,
-    popBadges: Boolean = false
+    popBadges: Boolean = false,
+    /** Whether a picked row's badge turns into the pentagon, which only the list's rows do. */
+    pickedShape: Boolean = true
 ) {
     val scheme = MaterialTheme.colorScheme
     val fill by animateColorAsState(
         when {
-            selected -> scheme.primary.copy(alpha = 0.14f)
+            // A tint of the accent over the row's own tone: the theme's container colour is
+            // darker than the row itself for a white accent, which hid the pick.
+            selected && compact -> scheme.primary.copy(alpha = PICKED_TINT).compositeOver(sheetButtonColor)
+            selected -> scheme.primary.copy(alpha = PICKED_TINT)
             compact -> sheetButtonColor
             else -> Color.Transparent
         },
@@ -1059,7 +1073,7 @@ fun FormatRow(
             .padding(horizontal = if (compact) 10.dp else 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ContainerBadge(text = badgeTextOf(format), compact = compact)
+        ContainerBadge(text = badgeTextOf(format), compact = compact, selected = selected && pickedShape)
 
         Spacer(modifier = Modifier.width(if (compact) 10.dp else 12.dp))
 
@@ -1091,7 +1105,7 @@ fun FormatRow(
                     "id: ${shortId(format.formatId)}",
                     style = MaterialTheme.typography.labelMedium,
                     fontSize = if (compact) 10.sp else MaterialTheme.typography.labelMedium.fontSize,
-                    color = scheme.onSurface.copy(alpha = 0.45f),
+                    color = scheme.onSurface.copy(alpha = if (selected) 0.6f else 0.45f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.widthIn(max = if (compact) 64.dp else 96.dp)
@@ -1101,7 +1115,9 @@ fun FormatRow(
             // Badges are omitted entirely when the extractor did not report them,
             // which is common outside the largest sites.
             val codec = format.codecLabel
-            val size = format.sizeLabel
+            // The whole file: a video-only stream counts the soundtrack muxed into it.
+            val size = format.sizeLabelWith(mergeAudio)
+            val mergeAudioId = mergeAudio?.formatId?.takeIf { showMergeId && format.needsAudio }
             // The bitrate says something the resolution does not only for audio; on a
             // video row it repeats what the size already showed.
             val generic = format.isGeneric
@@ -1220,17 +1236,29 @@ internal const val SOLID_BADGE_MIN_CONTRAST = 3f
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ContainerBadge(text: String, compact: Boolean = false) {
+private fun ContainerBadge(text: String, compact: Boolean = false, selected: Boolean = false) {
     val fill = MaterialTheme.colorScheme.primary
     val onPrimary = MaterialTheme.colorScheme.onPrimary
     val ink = remember(fill, onPrimary) { solidBadgeInk(fill, onPrimary) }
+    // The picked row's cookie turns into the pentagon the play buttons use, with the same
+    // bouncy turn as the cut modes. A fifth of a turn lands the pentagon upright again.
+    val turn = animateFloatAsState(
+        if (selected) 1f else 0f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "badgeMorph"
+    )
+    val shape by remember { derivedStateOf { MorphShape(badgeMorph, turn.value.coerceIn(0f, 1f)) } }
     Box(
-        modifier = Modifier
-            .size(if (compact) 48.dp else 58.dp)
-            .clip(MaterialShapes.Cookie6Sided.toShape())
-            .background(fill),
+        modifier = Modifier.size(if (compact) 48.dp else 58.dp),
         contentAlignment = Alignment.Center
     ) {
+        Box(
+            Modifier
+                .matchParentSize()
+                .graphicsLayer { rotationZ = turn.value * BADGE_TURN_DEGREES }
+                .clip(shape)
+                .background(fill)
+        )
         val cleanText = text.trim().uppercase()
         // The cookie keeps its size, so the label grows with the font only a little before
         // it would run past the shape's edge.
@@ -1256,6 +1284,13 @@ private fun ContainerBadge(text: String, compact: Boolean = false) {
         )
     }
 }
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private val badgeMorph by lazy { Morph(MaterialShapes.Cookie6Sided, MaterialShapes.Pentagon) }
+
+private const val BADGE_TURN_DEGREES = 72f
+
+private const val PICKED_TINT = 0.18f
 
 /** How small the badges start when they spring in. */
 private const val BADGE_POP_FROM = 0.6f
