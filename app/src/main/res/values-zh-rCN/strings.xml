@@ -152,6 +152,7 @@
     <string name="format_sheet_audio_language">音轨语言</string>
     <string name="format_sheet_change_audio_language">更改音轨语言</string>
     <string name="format_sheet_filename_template">文件名模板</string>
+    <string name="format_sheet_extra_args">额外参数</string>
     <string name="format_sheet_change_field">更改</string>
     <string name="format_sheet_save_dir">保存目录</string>
     <string name="format_sheet_save_location">保存位置</string>

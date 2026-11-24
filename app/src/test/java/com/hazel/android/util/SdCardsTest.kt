@@ -199,4 +199,25 @@ class SdCardsTest {
         assertEquals(listOf("Two"), second.titles)
         assertEquals("Card B/Hazel/Audio", second.wanted)
     }
+
+    @Test
+    fun `raw ids from the Downloads provider read like other paths`() {
+        val names = mapOf("1A2B-3C4D" to "SanDisk SD card")
+        assertEquals("Download/testing_hz", MediaStoreHelper.describeDocumentId("raw:/storage/emulated/0/Download/testing_hz", names::get))
+        assertEquals("Internal storage", MediaStoreHelper.describeDocumentId("raw:/storage/emulated/0/", names::get))
+        assertEquals("SanDisk SD card/Movies", MediaStoreHelper.describeDocumentId("raw:/storage/1A2B-3C4D/Movies", names::get))
+        assertEquals("/data/x", MediaStoreHelper.describeDocumentId("raw:/data/x", names::get))
+    }
+
+    @Test
+    fun `document ids map to paths only when they are paths`() {
+        val root = "/storage/emulated/0"
+        assertEquals("/storage/emulated/0/Download/a/b.mp4", MediaStoreHelper.documentIdPath("primary:Download/a/b.mp4", root))
+        assertEquals("/storage/1A2B-3C4D/Movies/b.mp4", MediaStoreHelper.documentIdPath("1A2B-3C4D:Movies/b.mp4", root))
+        assertEquals("/storage/emulated/0/Download/x/b.mp4", MediaStoreHelper.documentIdPath("raw:/storage/emulated/0/Download/x/b.mp4", root))
+        assertEquals(null, MediaStoreHelper.documentIdPath("msf:42", root))
+        assertEquals(null, MediaStoreHelper.documentIdPath("primary:", root))
+        assertEquals(null, MediaStoreHelper.documentIdPath("raw:relative", root))
+        assertEquals(null, MediaStoreHelper.documentIdPath("1234", root))
+    }
 }

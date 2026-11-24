@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
+- Download sheet: an Extra arguments chip in Adjust opens the same setting as Settings > Advanced.
 - Cut: three modes, Quick cut (default), Precise cuts and Trim after download, which downloads the whole file and cuts it on the device. Covers, tags, chapters and subtitle files stay in step.
 - Cut mode is saved, and set from either the Cut sheet or Processing settings. Trim after download is unavailable while SponsorBlock removes parts, chapters are split or a live stream is taken from the start.
 - Cut screen: mode rows switch in one calm step, without the bounce or the flash on tap.
@@ -34,6 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Off screen, the same refusal posts a notification with Sign in and Dismiss.
 - Notification taps open the screen they are about: Running, Failed, History or the failure dialog.
 - The share sheet's format list now shows why a read failed.
+- Extra download arguments: `-o` sets the file name and folders again, e.g. `-o "%(uploader)s/%(id)s.%(ext)s"`; a template that leaves the download folder is ignored. (#165)
+- Files saved with `-o` folders keep their folders in Downloads and in a picked folder, and reuse a folder that already exists.
+- Trim after download and cut progress find the file inside `-o` folders.
+- Properties "Saved to" shows the file's own folder, and a folder picked through Downloads no longer shows as `raw//storage/...`.
+- Files saved to a picked folder are now listed by gallery and music apps.
+- Saving a download no longer rescans the whole Hazel folder.
 - Format sheet: rows no longer draw over each other when switching between quality stops, and the list starts from the top on each switch.
 - Downloads list keeps each item's artwork after its source link expires.
 - Trim after download no longer crashes on Android 7.

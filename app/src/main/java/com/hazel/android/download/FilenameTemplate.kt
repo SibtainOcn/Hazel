@@ -51,7 +51,35 @@ object FilenameTemplate {
             if (bytes == null) m.value else "%(${m.groupValues[1]}).${bytes}B"
         }
 
+    /** True for an identifier field (`id`, `uploader_id`, `playlist_id`), which yt-dlp does not strip leading dots from. */
+    fun isIdKey(key: String): Boolean = key == "id" || key.endsWith("_id")
+
+    /** [limitBytes] for a folder name; fields the name limits don't list get [otherBytes], identifiers [idBytes]. */
+    fun limitFolderBytes(template: String, limits: Map<String, Int>, otherBytes: Int, idBytes: Int): String =
+        PLAIN_FIELD.replace(template) { m ->
+            val keys = m.groupValues[1].split(',')
+            val bytes = keys.mapNotNull { limits[it] }.maxOrNull()
+                ?: if (keys.any(::isIdKey)) idBytes else otherBytes
+            "%(${m.groupValues[1]}).${bytes}B"
+        }
+
     fun normalize(template: String): String {
+        var result = escape(template).trim().trimStart('.', ' ')
+        if (result.isEmpty()) return DownloadOptions.DEFAULT_FILENAME_TEMPLATE
+        if (EXT !in result) result = result.trimEnd('.', ' ') + ".$EXT"
+        return result
+    }
+
+    /** One folder name of a user's template: rejected characters and a lone `%` escaped, dots and spaces at both ends dropped. */
+    fun segment(template: String): String =
+        escape(template).trim().trimStart('.', ' ').trimEnd('.', ' ')
+
+    /** A folder name after app text went into it: dots and spaces at the ends go and an empty result becomes `_`, so it cannot be `..`. */
+    fun containFolder(name: String): String =
+        name.trim().trim('.', ' ').ifEmpty { "_" }
+
+    /** Keeps fields as written; escapes a lone `%` and replaces rejected characters. */
+    private fun escape(template: String): String {
         val out = StringBuilder()
         var i = 0
         while (i < template.length) {
@@ -76,17 +104,14 @@ object FilenameTemplate {
             }
             i++
         }
-        var result = out.toString().trim().trimStart('.', ' ')
-        if (result.isEmpty()) return DownloadOptions.DEFAULT_FILENAME_TEMPLATE
-        if (EXT !in result) result = result.trimEnd('.', ' ') + ".$EXT"
-        return result
+        return out.toString()
     }
 
     /**
      * The index just past a field starting at [start] (`%(` … `)` then its conversion letter),
      * or -1 when the brackets never close or no conversion follows.
      */
-    private fun fieldEnd(s: String, start: Int): Int {
+    internal fun fieldEnd(s: String, start: Int): Int {
         var depth = 0
         var i = start + 1
         while (i < s.length) {

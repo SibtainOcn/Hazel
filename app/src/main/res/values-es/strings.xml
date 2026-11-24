@@ -160,6 +160,7 @@
     <string name="format_sheet_audio_language">Idioma del audio</string>
     <string name="format_sheet_change_audio_language">Cambiar el idioma del audio</string>
     <string name="format_sheet_filename_template">Plantilla del nombre de archivo</string>
+    <string name="format_sheet_extra_args">Argumentos extra</string>
     <string name="format_sheet_change_field">Cambiar</string>
     <string name="format_sheet_save_dir">Carpeta</string>
     <string name="format_sheet_save_location">Dónde guardar</string>

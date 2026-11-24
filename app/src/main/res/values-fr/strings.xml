@@ -160,6 +160,7 @@
     <string name="format_sheet_audio_language">Langue de l\'audio</string>
     <string name="format_sheet_change_audio_language">Changer la langue de l\'audio</string>
     <string name="format_sheet_filename_template">Modèle de nom de fichier</string>
+    <string name="format_sheet_extra_args">Arguments supplémentaires</string>
     <string name="format_sheet_change_field">Modifier</string>
     <string name="format_sheet_save_dir">Dossier</string>
     <string name="format_sheet_save_location">Emplacement</string>

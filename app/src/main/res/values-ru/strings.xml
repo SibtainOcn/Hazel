@@ -164,6 +164,7 @@
     <string name="format_sheet_audio_language">Язык аудио</string>
     <string name="format_sheet_change_audio_language">Сменить язык аудио</string>
     <string name="format_sheet_filename_template">Шаблон имени файла</string>
+    <string name="format_sheet_extra_args">Дополнительные аргументы</string>
     <string name="format_sheet_change_field">Изменить</string>
     <string name="format_sheet_save_dir">Папка сохранения</string>
     <string name="format_sheet_save_location">Место сохранения</string>

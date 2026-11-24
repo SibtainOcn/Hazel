@@ -152,6 +152,7 @@
     <string name="format_sheet_audio_language">Bahasa audio</string>
     <string name="format_sheet_change_audio_language">Ubah bahasa audio</string>
     <string name="format_sheet_filename_template">Templat nama file</string>
+    <string name="format_sheet_extra_args">Argumen tambahan</string>
     <string name="format_sheet_change_field">Ubah</string>
     <string name="format_sheet_save_dir">Folder penyimpanan</string>
     <string name="format_sheet_save_location">Lokasi penyimpanan</string>

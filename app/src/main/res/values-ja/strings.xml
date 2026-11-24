@@ -152,6 +152,7 @@
     <string name="format_sheet_audio_language">音声の言語</string>
     <string name="format_sheet_change_audio_language">音声の言語を変更</string>
     <string name="format_sheet_filename_template">ファイル名テンプレート</string>
+    <string name="format_sheet_extra_args">追加の引数</string>
     <string name="format_sheet_change_field">変更</string>
     <string name="format_sheet_save_dir">保存フォルダ</string>
     <string name="format_sheet_save_location">保存場所</string>
