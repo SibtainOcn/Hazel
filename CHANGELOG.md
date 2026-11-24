@@ -13,8 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cut mode is saved, and set from either the Cut sheet or Processing settings. Trim after download is unavailable while SponsorBlock removes parts, chapters are split or a live stream is taken from the start.
 - Cut: opens full screen, shows every mode's hint at once, and the preview's quality can be changed from its corner.
 - The player's quality change takes effect again.
+- Sign-in: one-tap Instagram, YouTube, X, Facebook, TikTok and Reddit in Settings > Cookies, so you can sign in before downloading.
 
 ### Fixed
+- Instagram sign-in page no longer greys out or stays blank; it opens straight on the login form.
+- Desktop site in sign-in fits the screen and can be pinched and scrolled.
+- Sign-in page ignores "open in app" links and closes cleanly if the browser engine stops.
 - Trimmed downloads show a real percentage and time left instead of sitting at 0%.
 - A trimmed download's history entry shows the kept length, not the whole video's.
 - A trimmed download no longer shows a Merge stage.

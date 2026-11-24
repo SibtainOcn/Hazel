@@ -554,6 +554,7 @@
     <string name="cookie_webview_close">Cerrar</string>
     <string name="cookie_webview_desktop_site">Versión de escritorio</string>
     <string name="cookie_webview_no_cookies">No se recogió ninguna cookie</string>
+    <string name="cookie_webview_crashed">La página de inicio de sesión se detuvo. Ábrela de nuevo.</string>
     <string name="cookie_webview_done">"  Aceptar"</string>
 
     <!-- FormatSelectionSheet -->

@@ -567,6 +567,7 @@
     <string name="cookie_webview_close">Закрыть</string>
     <string name="cookie_webview_desktop_site">Версия для ПК</string>
     <string name="cookie_webview_no_cookies">Файлы cookie не были получены</string>
+    <string name="cookie_webview_crashed">Страница входа остановилась. Откройте её снова.</string>
     <string name="cookie_webview_done">"  ОК"</string>
 
     <!-- FormatSelectionSheet -->

@@ -554,6 +554,7 @@
     <string name="cookie_webview_close">Fermer</string>
     <string name="cookie_webview_desktop_site">Version ordinateur</string>
     <string name="cookie_webview_no_cookies">Aucun cookie n\'a été récupéré</string>
+    <string name="cookie_webview_crashed">La page de connexion s’est arrêtée. Ouvrez-la à nouveau.</string>
     <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->

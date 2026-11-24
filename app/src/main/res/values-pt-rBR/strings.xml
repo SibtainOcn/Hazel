@@ -554,6 +554,7 @@
     <string name="cookie_webview_close">Fechar</string>
     <string name="cookie_webview_desktop_site">Versão para computador</string>
     <string name="cookie_webview_no_cookies">Nenhum cookie foi coletado</string>
+    <string name="cookie_webview_crashed">A página de login parou. Abra-a novamente.</string>
     <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->

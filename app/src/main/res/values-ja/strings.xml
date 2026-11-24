@@ -528,6 +528,7 @@
     <string name="cookie_webview_close">閉じる</string>
     <string name="cookie_webview_desktop_site">PC版サイト</string>
     <string name="cookie_webview_no_cookies">Cookie は取得されませんでした</string>
+    <string name="cookie_webview_crashed">サインインページが停止しました。もう一度開いてください。</string>
     <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->

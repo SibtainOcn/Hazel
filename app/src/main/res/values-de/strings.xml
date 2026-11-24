@@ -541,6 +541,7 @@
     <string name="cookie_webview_close">Schließen</string>
     <string name="cookie_webview_desktop_site">Desktop-Version</string>
     <string name="cookie_webview_no_cookies">Es wurden keine Cookies gesammelt</string>
+    <string name="cookie_webview_crashed">Die Anmeldeseite wurde beendet. Bitte erneut öffnen.</string>
     <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->

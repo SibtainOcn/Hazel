@@ -252,11 +252,25 @@ class CookieWebViewActivity : ComponentActivity() {
                                         }
                                     }
 
-                                    override fun onPageCommitVisible(view: WebView?, committedUrl: String?) {
-                                        super.onPageCommitVisible(view, committedUrl)
-                                        firstPaint = true
+                                    override fun shouldOverrideUrlLoading(
+                                        view: WebView?,
+                                        request: android.webkit.WebResourceRequest?
+                                    ): Boolean = !SignInBrowser.opensInPage(request?.url?.toString())
+
+                                    override fun onRenderProcessGone(
+                                        view: WebView?,
+                                        detail: android.webkit.RenderProcessGoneDetail?
+                                    ): Boolean {
+                                        if (view != null) {
+                                            (view.parent as? android.view.ViewGroup)?.removeView(view)
+                                            view.destroy()
+                                        }
+                                        if (webView === view) webView = null
+                                        Toast.makeText(this@CookieWebViewActivity, R.string.cookie_webview_crashed, Toast.LENGTH_LONG).show()
+                                        finish()
+                                        return true
                                     }
-    
+
                                     override fun onPageFinished(view: WebView?, finishedUrl: String?) {
                                         super.onPageFinished(view, finishedUrl)
                                         firstPaint = true
@@ -267,10 +281,11 @@ class CookieWebViewActivity : ComponentActivity() {
                                 webChromeClient = object : WebChromeClient() {
                                     override fun onProgressChanged(view: WebView?, newProgress: Int) {
                                         progress = newProgress
+                                        if (newProgress >= 100) firstPaint = true
                                     }
                                 }
                                 webView = this
-                                loadUrl(url)
+                                loadUrl(SignInBrowser.startUrl(url))
                             }
                         }
                     )
@@ -303,6 +318,10 @@ class CookieWebViewActivity : ComponentActivity() {
             javaScriptCanOpenWindowsAutomatically = true
             domStorageEnabled = true
             cacheMode = WebSettings.LOAD_DEFAULT
+            userAgentString = SignInBrowser.mobileUserAgent(WebSettings.getDefaultUserAgent(view.context))
+            setSupportZoom(true)
+            builtInZoomControls = true
+            displayZoomControls = false
             if (Build.VERSION.SDK_INT >= 26) safeBrowsingEnabled = true
         }
         CookieManager.getInstance().apply {
@@ -313,20 +332,25 @@ class CookieWebViewActivity : ComponentActivity() {
 
     /**
      * Some sites only offer the sign-in form to a desktop browser, so the user agent can be
-     * switched to one.
+     * switched to one. The wide page is zoomed out to fit the screen and can be pinched.
      */
     private fun applyDesktopMode(view: WebView, desktop: Boolean) {
+        val base = WebSettings.getDefaultUserAgent(view.context)
         view.settings.apply {
-            if (desktop) {
-                userAgentString = DESKTOP_USER_AGENT
-                useWideViewPort = true
-                loadWithOverviewMode = true
-            } else {
-                userAgentString = WebSettings.getDefaultUserAgent(view.context)
-                useWideViewPort = false
-                loadWithOverviewMode = false
-            }
+            userAgentString = if (desktop) SignInBrowser.desktopUserAgent(base) else SignInBrowser.mobileUserAgent(base)
+            useWideViewPort = desktop
+            loadWithOverviewMode = desktop
         }
+    }
+
+    override fun onDestroy() {
+        webView?.let {
+            webView = null
+            it.stopLoading()
+            (it.parent as? android.view.ViewGroup)?.removeView(it)
+            it.destroy()
+        }
+        super.onDestroy()
     }
 
     private fun saveCookies(url: String, title: String, onFailed: () -> Unit) {
@@ -382,10 +406,6 @@ class CookieWebViewActivity : ComponentActivity() {
         /** How long a proxy set a moment ago is given to reach web views: 20 x 100 ms. */
         private const val PROXY_WAIT_STEPS = 20
         private const val PROXY_WAIT_STEP_MS = 100L
-
-        private const val DESKTOP_USER_AGENT =
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " +
-                    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
         /** Intent that opens the sign-in page for [url]. */
         fun intent(context: Context, url: String, title: String = ""): Intent =
