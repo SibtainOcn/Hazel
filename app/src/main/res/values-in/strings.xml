@@ -984,7 +984,6 @@
     <string name="hazel_update_ready_text">Sudah diunduh dan siap. Ketuk untuk memasang.</string>
     <string name="guide_step_updates_title">Selalu terbaru</string>
     <string name="guide_step_updates_desc">Pilih cara Hazel dan yt-dlp diperbarui. Ubah kapan saja di Pembaruan perangkat lunak.</string>
-    <string name="guide_done">Selesai</string>
     <string name="guide_updates_notify">Beri tahu</string>
     <string name="upd_wifi_only_title">Hanya lewat Wi-Fi</string>
     <string name="upd_wifi_only_summary">Tanpa unduhan lewat data seluler</string>

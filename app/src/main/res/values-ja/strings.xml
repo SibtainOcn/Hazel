@@ -984,7 +984,6 @@
     <string name="hazel_update_ready_text">ダウンロード済みです。タップしてインストール。</string>
     <string name="guide_step_updates_title">常に最新に</string>
     <string name="guide_step_updates_desc">Hazel と yt-dlp の更新方法を選びます。ソフトウェアアップデートでいつでも変更できます。</string>
-    <string name="guide_done">完了</string>
     <string name="guide_updates_notify">通知する</string>
     <string name="upd_wifi_only_title">Wi-Fi のみ</string>
     <string name="upd_wifi_only_summary">モバイルデータではダウンロードしない</string>

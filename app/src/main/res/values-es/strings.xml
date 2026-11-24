@@ -1016,7 +1016,6 @@
     <string name="hazel_update_ready_text">Descargada y lista. Toca para instalar.</string>
     <string name="guide_step_updates_title">Mantente al día</string>
     <string name="guide_step_updates_desc">Elige cómo se actualizan Hazel y yt-dlp. Cámbialo cuando quieras en Actualización de software.</string>
-    <string name="guide_done">Listo</string>
     <string name="guide_updates_notify">Avisarme</string>
     <string name="upd_wifi_only_title">Solo con Wi-Fi</string>
     <string name="upd_wifi_only_summary">Sin descargas con datos móviles</string>

@@ -1031,7 +1031,6 @@
     <string name="hazel_update_ready_text">Загружено и готово. Нажмите, чтобы установить.</string>
     <string name="guide_step_updates_title">Будьте в курсе</string>
     <string name="guide_step_updates_desc">Выберите, как обновляются Hazel и yt-dlp. Это можно изменить в разделе «Обновление ПО».</string>
-    <string name="guide_done">Готово</string>
     <string name="guide_updates_notify">Сообщать</string>
     <string name="upd_wifi_only_title">Только по Wi-Fi</string>
     <string name="upd_wifi_only_summary">Без загрузки через мобильную сеть</string>

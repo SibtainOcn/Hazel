@@ -126,12 +126,12 @@ import kotlinx.coroutines.launch
  * 8 slides introduce core capabilities:
  * 1. Paste and Download
  * 2. Appearance (theme, accent, glass), saved as soon as it is picked
- * 3. Format Selection
- * 4. Share to Hazel
- * 5. Hazel Instant
- * 6. Battery Optimization (Deny or Allow options of equal size)
- * 7. Notifications (Deny or Allow options of equal size)
- * 8. Updates (notify, auto yt-dlp, auto Hazel, Wi-Fi only), saved as soon as switched
+ * 3. Updates (notify, auto yt-dlp, auto Hazel, Wi-Fi only), saved as soon as switched
+ * 4. Format Selection
+ * 5. Share to Hazel
+ * 6. Hazel Instant
+ * 7. Battery Optimization (Deny or Allow options of equal size)
+ * 8. Notifications (Deny or Allow options of equal size)
  *
  * Follows the app theme: accent coloured Material 3 actions on the glass surface when glass is on.
  */
@@ -141,7 +141,7 @@ fun GettingStartedDialog(
     onDismiss: () -> Unit
 ) {
     var currentStep by remember { mutableIntStateOf(1) }
-    val totalSteps = UPDATES_STEP
+    val totalSteps = TOTAL_STEPS
     val context = LocalContext.current
     val glass = LocalGlass.current
     val colors = MaterialTheme.colorScheme
@@ -280,37 +280,29 @@ fun GettingStartedDialog(
                                 next()
                             }
                         )
-                        NOTIFY_STEP -> DenyAllow(
+                        totalSteps -> DenyAllow(
                             modifier = Modifier.weight(1f),
-                            onDeny = next,
-                            onAllow = {
-                                PermissionHelper.ensureNotificationPermission(context)
-                                next()
-                            }
+                            onDeny = onDismiss,
+                            onAllow = dismissWithPermission
                         )
-                        else -> {
-                            val last = currentStep == totalSteps
-                            Button(
-                                onClick = if (last) onDismiss else next,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp),
-                                contentPadding = ActionPadding
-                            ) {
-                                Text(
-                                    text = stringResource(if (last) R.string.guide_done else R.string.guide_next),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                if (!last) {
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Icon(
-                                        painter = painterResource(R.drawable.small_chevron),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
+                        else -> Button(
+                            onClick = next,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            contentPadding = ActionPadding
+                        ) {
+                            Text(
+                                text = stringResource(R.string.guide_next),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                painter = painterResource(R.drawable.small_chevron),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
                         }
                     }
                 }
@@ -740,9 +732,9 @@ private data class StepInfo(
 )
 
 private const val APPEARANCE_STEP = 2
-private const val BATTERY_STEP = 6
-private const val NOTIFY_STEP = 7
-private const val UPDATES_STEP = 8
+private const val UPDATES_STEP = 3
+private const val BATTERY_STEP = 7
+private const val TOTAL_STEPS = 8
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -753,31 +745,31 @@ private fun stepData(step: Int): StepInfo = when (step) {
         shape = MaterialShapes.Cookie7Sided.toShape(),
         icon = Icons.Rounded.Link
     )
-    3 -> StepInfo(
+    4 -> StepInfo(
         titleRes = R.string.guide_step2_title,
         descRes = R.string.guide_step_pick_format,
         shape = MaterialShapes.Clover4Leaf.toShape(),
         icon = Icons.Rounded.VideoSettings
     )
-    4 -> StepInfo(
+    5 -> StepInfo(
         titleRes = R.string.guide_step_share_title,
         descRes = R.string.guide_step_share_sheet,
         shape = MaterialShapes.Sunny.toShape(),
         icon = Icons.Rounded.Share
     )
-    5 -> StepInfo(
+    6 -> StepInfo(
         titleRes = R.string.guide_step3_title,
         descRes = R.string.guide_step_share_instant,
         shape = MaterialShapes.Cookie9Sided.toShape(),
         iconRes = R.drawable.ic_hazel_bolt
     )
-    6 -> StepInfo(
+    7 -> StepInfo(
         titleRes = R.string.guide_step4_title,
         descRes = R.string.guide_step_battery_unrestricted,
         shape = MaterialShapes.Gem.toShape(),
         icon = Icons.Rounded.BatteryChargingFull
     )
-    7 -> StepInfo(
+    8 -> StepInfo(
         titleRes = R.string.guide_step5_title,
         descRes = R.string.guide_step_notifications,
         shape = MaterialShapes.SoftBurst.toShape(),

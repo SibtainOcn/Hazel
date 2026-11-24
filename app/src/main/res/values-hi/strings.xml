@@ -1000,7 +1000,6 @@
     <string name="hazel_update_ready_text">डाउनलोड हो गया। इंस्टॉल करने के लिए टैप करें।</string>
     <string name="guide_step_updates_title">अप टू डेट रहें</string>
     <string name="guide_step_updates_desc">चुनें कि Hazel और yt-dlp कैसे अपडेट हों। इसे कभी भी सॉफ़्टवेयर अपडेट में बदलें।</string>
-    <string name="guide_done">हो गया</string>
     <string name="guide_updates_notify">सूचना दें</string>
     <string name="upd_wifi_only_title">सिर्फ़ वाई-फ़ाई पर</string>
     <string name="upd_wifi_only_summary">मोबाइल डेटा पर डाउनलोड नहीं</string>

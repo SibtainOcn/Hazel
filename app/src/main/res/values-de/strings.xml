@@ -1000,7 +1000,6 @@
     <string name="hazel_update_ready_text">Geladen und bereit. Zum Installieren tippen.</string>
     <string name="guide_step_updates_title">Immer aktuell</string>
     <string name="guide_step_updates_desc">Wähle, wie Hazel und yt-dlp aktualisieren. Jederzeit änderbar unter Software-Update.</string>
-    <string name="guide_done">Fertig</string>
     <string name="guide_updates_notify">Melden</string>
     <string name="upd_wifi_only_title">Nur im WLAN laden</string>
     <string name="upd_wifi_only_summary">Keine Downloads über mobile Daten</string>
