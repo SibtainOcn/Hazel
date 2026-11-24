@@ -101,7 +101,7 @@ Hazel is a free, open-source downloader for Android powered by **yt-dlp**. Save 
   <tr><th width="50%" align="left">⚙️ Processing & Downloads</th><th width="50%" align="left">🔒 Privacy & Customisation</th></tr>
   <tr><td><b>SponsorBlock:</b> cut sponsors, intros and other segments.</td><td><b>No tracking:</b> no accounts, no analytics. Incognito and HTTP / SOCKS5 proxy built in.</td></tr>
   <tr><td><b>Chapters & subtitles:</b> embed, split per chapter, pick subtitle and audio languages.</td><td><b>Glass look:</b> 8 see-through styles, dark and light themes, 20+ accent colours.</td></tr>
-  <tr><td><b>Background:</b> long downloads with pause, resume and cancel from the notification.</td><td><b>Engine updates:</b> update yt-dlp on its own, Stable, Nightly or Master channel.</td></tr>
+  <tr><td><b>Background:</b> long downloads with pause, resume and cancel from the notification.</td><td><b>Updates:</b> Hazel on Stable, Beta or Nightly, with an optional notice and background download. yt-dlp updates on its own.</td></tr>
   <tr><td><b>Speed:</b> no limit by default, parallel fragments, optional cap and Wi-Fi only mode.</td><td><b>Extras:</b> 10+ app languages, offline audio converter, backup & restore, settings search.</td></tr>
 </table>
 
