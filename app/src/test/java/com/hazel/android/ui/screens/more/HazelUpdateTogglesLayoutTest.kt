@@ -129,7 +129,13 @@ class HazelUpdateTogglesLayoutTest(private val locale: String, private val theme
     @Test
     fun `onboarding updates step fits`() {
         show { Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh) { Box(Modifier.padding(24.dp)) { UpdatesStep() } } }
-        assertFits(R.string.guide_step_updates_title, R.string.guide_updates_notify, R.string.guide_updates_ytdlp, R.string.guide_updates_hazel, R.string.guide_updates_wifi)
+        // F-Droid builds hide Auto Hazel: F-Droid updates the app itself.
+        val rows = listOfNotNull(
+            R.string.guide_step_updates_title, R.string.guide_updates_notify, R.string.guide_updates_ytdlp,
+            R.string.guide_updates_hazel.takeUnless { com.hazel.android.update.HazelUpdater.isFdroid() },
+            R.string.guide_updates_wifi
+        )
+        assertFits(*rows.toIntArray())
         val open = compose.onNodeWithText(context.getString(R.string.guide_updates_more)).performScrollTo().assertIsDisplayed().fetchSemanticsNode()
         assertTrue("More button runs off the edge", open.positionOnScreen.x + open.size.width <= context.resources.displayMetrics.widthPixels)
         saveScreen("guide-updates-$theme-$locale")
