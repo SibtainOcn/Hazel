@@ -793,6 +793,10 @@ object YtDlpUpdater {
             stage(context, target, onProgress)
             while (!applyStagedUpdate(context)) {
                 if (!stagedBinary(context).exists()) {
+                    // The engine's idle hook may have taken the build on another thread: wait
+                    // for its swap to end, then a build that went live is this install's success.
+                    synchronized(this@YtDlpUpdater) {}
+                    if (rejection == null && cachedVersion(context) == target.version) break
                     throw UpdateFailureException(
                         rejection ?: UpdateFailure.of(UpdateFailure.Kind.COULD_NOT_INSTALL, "update was rejected")
                     )

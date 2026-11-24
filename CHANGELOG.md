@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - YouTube's "confirm you're not a bot" refusal is named as such, not as private content.
 - yt-dlp updates work on older, low-memory and nearly full phones, and resume after a dropped connection (#166).
 - The yt-dlp update screen says why an update failed, and Retry repeats the install.
+- Updating yt-dlp while a download runs no longer reports a failure once the update goes live.
 - The quality ladder keeps its original look and side rail until the real qualities arrive.
 - A link refused until sign-in now opens the sign-in dialog right away; signing in reads it again.
 - Off screen, the same refusal posts a notification with Sign in and Dismiss.
