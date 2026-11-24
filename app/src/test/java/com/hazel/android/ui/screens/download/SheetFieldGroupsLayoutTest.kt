@@ -85,7 +85,7 @@ class SheetFieldGroupsLayoutTest(
                     )
                 }
             }
-            SheetSection(Icons.Outlined.FolderOpen, "Save", "Download/Hazel/Video", expanded = true, onToggle = {}, iconShape = MaterialShapes.Pentagon, iconTurn = SAVE_ICON_TURN) {
+            SheetSection(Icons.Outlined.FolderOpen, "Save", "Download/Hazel/Video", expanded = true, onToggle = {}, iconShape = MaterialShapes.Pentagon) {
                 Column(verticalArrangement = Arrangement.spacedBy(FIELD_GROUP_GAP)) {
                     SaveDirField(label = "Download/Hazel/Video", onClick = {}, color = field, shape = fieldGroupShape(0, 2))
                     PickerField(
