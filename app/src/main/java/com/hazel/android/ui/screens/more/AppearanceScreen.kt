@@ -17,16 +17,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItem
@@ -75,116 +71,102 @@ fun AppearanceScreen(
     val currentAccent = AccentColors.find { it.name == accentName } ?: AccentColors.first()
 
     SettingsScreen(title = stringResource(R.string.appearance_title), onBack = onBack) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            // Dark theme toggle
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.appearance_dark_theme)) },
-                supportingContent = {
-                    Text(stringResource(if (isDarkTheme) R.string.appearance_on else R.string.appearance_off))
-                },
-                leadingContent = {
-                    ShapedIcon(
-                        if (isDarkTheme) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
-                        MaterialShapes.Cookie9Sided.toShape(), 40.dp
-                    )
-                },
-                trailingContent = {
-                    Switch(
-                        checked = isDarkTheme,
-                        onCheckedChange = { onToggleTheme() },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary
+        ConnectedRows(listOf(
+            {
+                // Dark theme toggle
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.appearance_dark_theme)) },
+                    supportingContent = {
+                        Text(stringResource(if (isDarkTheme) R.string.appearance_on else R.string.appearance_off))
+                    },
+                    leadingContent = {
+                        ShapedIcon(
+                            if (isDarkTheme) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
+                            MaterialShapes.Cookie9Sided.toShape(), 40.dp
                         )
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onToggleTheme() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.appearance_glass)) },
-                supportingContent = {
-                    Text(stringResource(if (glassEnabled) R.string.appearance_on else R.string.appearance_off))
-                },
-                leadingContent = {
-                    ShapedIcon(Icons.Outlined.BlurOn, MaterialShapes.Sunny.toShape(), 40.dp)
-                },
-                trailingContent = {
-                    Switch(
-                        checked = glassEnabled,
-                        onCheckedChange = { onToggleGlass() },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = isDarkTheme,
+                            onCheckedChange = { onToggleTheme() },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                                checkedTrackColor = MaterialTheme.colorScheme.primary
+                            )
                         )
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { onToggleGlass() }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.glass_style_title)) },
-                supportingContent = { Text(glassStyleLabel(glassStyle)) },
-                leadingContent = {
-                    ShapedIcon(Icons.Outlined.AutoAwesome, MaterialShapes.Cookie6Sided.toShape(), 40.dp)
-                },
-                trailingContent = { GlassStyleSwatch(glassStyle, accentName) },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier
-                    .clickable(enabled = glassEnabled) { glassPickerVisible = true }
-                    .alpha(if (glassEnabled) 1f else 0.45f)
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            // Accent Color row — opens centered dialog
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.appearance_accent_color)) },
-                supportingContent = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .clip(CircleShape)
-                                .background(currentAccent.dark)
+                    },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onToggleTheme() }
+                )
+            },
+            {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.appearance_glass)) },
+                    supportingContent = {
+                        Text(stringResource(if (glassEnabled) R.string.appearance_on else R.string.appearance_off))
+                    },
+                    leadingContent = {
+                        ShapedIcon(Icons.Outlined.BlurOn, MaterialShapes.Sunny.toShape(), 40.dp)
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = glassEnabled,
+                            onCheckedChange = { onToggleGlass() },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                                checkedTrackColor = MaterialTheme.colorScheme.primary
+                            )
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(accentName)
-                    }
-                },
-                leadingContent = {
-                    ShapedIcon(Icons.Filled.Palette, MaterialShapes.Clover4Leaf.toShape(), 40.dp)
-                },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                modifier = Modifier.clickable { accentPickerVisible = true }
-            )
-        }
+                    },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onToggleGlass() }
+                )
+            },
+            {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.glass_style_title)) },
+                    supportingContent = { Text(glassStyleLabel(glassStyle)) },
+                    leadingContent = {
+                        ShapedIcon(Icons.Outlined.AutoAwesome, MaterialShapes.Cookie6Sided.toShape(), 40.dp)
+                    },
+                    trailingContent = { GlassStyleSwatch(glassStyle, accentName) },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier
+                        .clickable(enabled = glassEnabled) { glassPickerVisible = true }
+                        .alpha(if (glassEnabled) 1f else 0.45f)
+                )
+            },
+            {
+                // Accent Color row — opens centered dialog
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.appearance_accent_color)) },
+                    supportingContent = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .clip(CircleShape)
+                                    .background(currentAccent.dark)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(accentName)
+                        }
+                    },
+                    leadingContent = {
+                        ShapedIcon(Icons.Filled.Palette, MaterialShapes.Clover4Leaf.toShape(), 40.dp)
+                    },
+                    trailingContent = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { accentPickerVisible = true }
+                )
+            }
+        ))
 
         FlatSettingButton(
             icon = Icons.Filled.RestartAlt,

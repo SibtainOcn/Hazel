@@ -31,8 +31,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -189,50 +187,55 @@ fun SponsorScreen(onBack: () -> Unit) {
                 color = textPrimary
             )
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = surfaceColor)
-            ) {
-                Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                    HelpRow(
-                        icon = Icons.Filled.Star,
-                        title = stringResource(R.string.sponsor_star_title),
-                        subtitle = stringResource(R.string.sponsor_star_subtitle),
-                        iconTint = iconTint,
-                        textPrimary = textPrimary,
-                        textSecondary = textSecondary,
-                        onClick = { openLink(context, SOURCE_URL) }
-                    )
-                    HelpRow(
-                        icon = Icons.Filled.Share,
-                        title = stringResource(R.string.sponsor_share_title),
-                        subtitle = stringResource(R.string.sponsor_share_subtitle),
-                        iconTint = iconTint,
-                        textPrimary = textPrimary,
-                        textSecondary = textSecondary,
-                        onClick = { shareApp(context) }
-                    )
-                    HelpRow(
-                        icon = Icons.Filled.BugReport,
-                        title = stringResource(R.string.sponsor_issues_title),
-                        subtitle = stringResource(R.string.sponsor_issues_subtitle),
-                        iconTint = iconTint,
-                        textPrimary = textPrimary,
-                        textSecondary = textSecondary,
-                        onClick = { openLink(context, ISSUES_URL) }
-                    )
-                    HelpRow(
-                        icon = Icons.Filled.Code,
-                        title = stringResource(R.string.sponsor_source_title),
-                        subtitle = stringResource(R.string.sponsor_source_subtitle),
-                        iconTint = iconTint,
-                        textPrimary = textPrimary,
-                        textSecondary = textSecondary,
-                        onClick = { openLink(context, SOURCE_URL) }
-                    )
-                }
-            }
+            ConnectedRows(
+                color = surfaceColor,
+                rows = listOf(
+                    {
+                        HelpRow(
+                            icon = Icons.Filled.Star,
+                            title = stringResource(R.string.sponsor_star_title),
+                            subtitle = stringResource(R.string.sponsor_star_subtitle),
+                            iconTint = iconTint,
+                            textPrimary = textPrimary,
+                            textSecondary = textSecondary,
+                            onClick = { openLink(context, SOURCE_URL) }
+                        )
+                    },
+                    {
+                        HelpRow(
+                            icon = Icons.Filled.Share,
+                            title = stringResource(R.string.sponsor_share_title),
+                            subtitle = stringResource(R.string.sponsor_share_subtitle),
+                            iconTint = iconTint,
+                            textPrimary = textPrimary,
+                            textSecondary = textSecondary,
+                            onClick = { shareApp(context) }
+                        )
+                    },
+                    {
+                        HelpRow(
+                            icon = Icons.Filled.BugReport,
+                            title = stringResource(R.string.sponsor_issues_title),
+                            subtitle = stringResource(R.string.sponsor_issues_subtitle),
+                            iconTint = iconTint,
+                            textPrimary = textPrimary,
+                            textSecondary = textSecondary,
+                            onClick = { openLink(context, ISSUES_URL) }
+                        )
+                    },
+                    {
+                        HelpRow(
+                            icon = Icons.Filled.Code,
+                            title = stringResource(R.string.sponsor_source_title),
+                            subtitle = stringResource(R.string.sponsor_source_subtitle),
+                            iconTint = iconTint,
+                            textPrimary = textPrimary,
+                            textSecondary = textSecondary,
+                            onClick = { openLink(context, SOURCE_URL) }
+                        )
+                    }
+                )
+            )
 
             Spacer(modifier = Modifier.height(40.dp))
         }

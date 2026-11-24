@@ -26,7 +26,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import com.hazel.android.ui.components.DropdownMenu
 import com.hazel.android.ui.components.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -58,9 +57,8 @@ import androidx.compose.ui.unit.sp
 import com.hazel.android.R
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.data.SettingsRepository
-import com.hazel.android.ui.screens.download.SaveDirDialog
+import com.hazel.android.ui.screens.download.SaveLocationScreen
 import com.hazel.android.ui.screens.download.rememberSaveDirPicker
-import com.hazel.android.util.MediaOpener
 import kotlinx.coroutines.launch
 
 /**
@@ -89,30 +87,26 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
         description = stringResource(R.string.storage_locations_subtitle)
     ) {
         // Locations card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            // One row per kind: each is saved on its own, the built-in folder until a
-            // folder is picked for it.
-            StorageLocationItem(
-                icon = Icons.Filled.MusicNote,
-                title = stringResource(R.string.format_sheet_tab_audio),
-                path = saveDirs.labelOf(isVideo = false),
-                onClick = { dirDialogFor = false }
-            )
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-            StorageLocationItem(
-                icon = Icons.Filled.Videocam,
-                title = stringResource(R.string.format_sheet_tab_video),
-                path = saveDirs.labelOf(isVideo = true),
-                onClick = { dirDialogFor = true }
-            )
-        }
+        ConnectedRows(listOf(
+            {
+                // One row per kind: each is saved on its own, the built-in folder until a
+                // folder is picked for it.
+                StorageLocationItem(
+                    icon = Icons.Filled.MusicNote,
+                    title = stringResource(R.string.format_sheet_tab_audio),
+                    path = saveDirs.labelOf(isVideo = false),
+                    onClick = { dirDialogFor = false }
+                )
+            },
+            {
+                StorageLocationItem(
+                    icon = Icons.Filled.Videocam,
+                    title = stringResource(R.string.format_sheet_tab_video),
+                    path = saveDirs.labelOf(isVideo = true),
+                    onClick = { dirDialogFor = true }
+                )
+            }
+        ))
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -206,14 +200,10 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
     }
 
     dirDialogFor?.let { isVideo ->
-        SaveDirDialog(
+        SaveLocationScreen(
             isVideo = isVideo,
             saveDir = saveDirs.of(isVideo),
             label = saveDirs.labelOf(isVideo),
-            onOpen = {
-                dirDialogFor = null
-                MediaOpener.openLocation(context, saveDirs.of(isVideo).uri, isVideo)
-            },
             onPick = { card ->
                 dirDialogFor = null
                 pickSaveDir(isVideo, card)
@@ -222,6 +212,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                 dirDialogFor = null
                 scope.launch { SettingsRepository.resetSaveDir(context, isVideo) }
             },
+            onUseRecent = { SettingsRepository.setSaveDir(context, isVideo, it.uri, it.label) },
             onDismiss = { dirDialogFor = null }
         )
     }

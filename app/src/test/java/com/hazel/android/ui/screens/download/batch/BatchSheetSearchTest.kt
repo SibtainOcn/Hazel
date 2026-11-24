@@ -54,7 +54,6 @@ class BatchSheetSearchTest {
                     options = DownloadOptions(),
                     onOptionsChange = {},
                     saveDirs = SaveDirs(),
-                    onOpenSaveDir = {},
                     onPickSaveDir = { _, _ -> },
                     onResetSaveDir = {},
                     onResolveFormats = {},

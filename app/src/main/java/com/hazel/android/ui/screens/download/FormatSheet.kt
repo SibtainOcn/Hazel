@@ -1,7 +1,10 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.data.SettingsRepository
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
+import androidx.graphics.shapes.RoundedPolygon
 import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.ui.theme.sheetButtonColor
 import com.hazel.android.ui.theme.sheetRaisedColor
@@ -21,7 +24,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import com.hazel.android.ui.screens.download.batch.BatchContainerSheet
+import com.hazel.android.ui.screens.download.batch.ContainerDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.collectAsState
@@ -36,6 +39,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -181,7 +186,6 @@ fun FormatSheet(
      */
     onPlay: (() -> Unit)? = null,
     /** Each is given the kind the sheet is on: true for video. */
-    onOpenSaveDir: (isVideo: Boolean) -> Unit,
     /** Given the card to save to, or null to pick any folder. */
     onPickSaveDir: (isVideo: Boolean, card: SdCard?) -> Unit,
     onResetSaveDir: (isVideo: Boolean) -> Unit,
@@ -341,6 +345,7 @@ fun FormatSheet(
 
     // One step up from the section, so a field reads as a field inside it.
     val fieldColor = sheetButtonColor
+    val appContext = LocalContext.current.applicationContext
 
     // Editing the title or author opens the keyboard over the sheet rather than lifting it,
     // unless the keyboard would cover the field; then the sheet rises by that much only.
@@ -512,27 +517,32 @@ fun FormatSheet(
             // ── Details: what the file is called ──
             SheetSection(
                 icon = Icons.Outlined.Description,
+                iconShape = MaterialShapes.Cookie6Sided,
                 title = stringResource(R.string.format_sheet_section_details),
                 summary = listOf(title.trim(), author.trim()).filter { it.isNotBlank() }.joinToString(" · "),
                 expanded = detailsOpen,
                 onToggle = { toggle(SECTION_DETAILS) }
             ) {
                 // Kept above the keyboard as one, so typing in either leaves both in view.
-                Column(modifier = Modifier.keptAboveKeyboard(keyboard)) {
+                Column(
+                    modifier = Modifier.keptAboveKeyboard(keyboard),
+                    verticalArrangement = Arrangement.spacedBy(FIELD_GROUP_GAP)
+                ) {
                     EditableField(
                         label = stringResource(R.string.format_sheet_label_title),
                         value = title,
                         onValueChange = { title = it },
                         color = fieldColor,
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                        shape = fieldGroupShape(0, 2)
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
                     EditableField(
                         label = stringResource(R.string.format_sheet_label_author),
                         value = author,
                         onValueChange = { author = it },
                         color = fieldColor,
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                        shape = fieldGroupShape(1, 2)
                     )
                 }
             }
@@ -545,6 +555,7 @@ fun FormatSheet(
                 ?.takeIf { info.audioLanguages.size > 1 }
             SheetSection(
                 icon = if (videoTab) Icons.Outlined.HighQuality else Icons.Outlined.GraphicEq,
+                iconShape = MaterialShapes.Cookie7Sided,
                 title = if (videoTab) stringResource(R.string.format_sheet_video_quality)
                 else stringResource(R.string.format_sheet_audio_quality),
                 summary = current?.let { qualitySummary(it, languageName, info.mergeAudioFor(audioLanguage)) } ?: noStream,
@@ -600,23 +611,27 @@ fun FormatSheet(
             val containerLabel = container.ifBlank { "Default" }
             SheetSection(
                 icon = Icons.Outlined.FolderOpen,
+                iconShape = MaterialShapes.Pentagon,
                 title = stringResource(R.string.format_sheet_save_dir),
                 summary = "${saveDirs.labelOf(videoTab)} · $containerLabel",
                 expanded = saveOpen,
                 onToggle = { toggle(SECTION_SAVE) }
             ) {
-                SaveDirField(
-                    label = saveDirs.labelOf(videoTab),
-                    onClick = { openDialog = SheetDialog.SAVE_DIR },
-                    color = fieldColor
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                PickerField(
-                    label = stringResource(R.string.format_sheet_label_container),
-                    value = containerLabel,
-                    onClick = { openDialog = SheetDialog.CONTAINER },
-                    color = fieldColor
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(FIELD_GROUP_GAP)) {
+                    SaveDirField(
+                        label = saveDirs.labelOf(videoTab),
+                        onClick = { openDialog = SheetDialog.SAVE_DIR },
+                        color = fieldColor,
+                        shape = fieldGroupShape(0, 2)
+                    )
+                    PickerField(
+                        label = stringResource(R.string.format_sheet_label_container),
+                        value = containerLabel,
+                        onClick = { openDialog = SheetDialog.CONTAINER },
+                        color = fieldColor,
+                        shape = fieldGroupShape(1, 2)
+                    )
+                }
             }
 
             // ── Adjust: everything done to the file on the way ──
@@ -653,6 +668,7 @@ fun FormatSheet(
 
             SheetSection(
                 icon = Icons.Outlined.Tune,
+                iconPill = true,
                 title = if (videoTab) stringResource(R.string.format_sheet_adjust_video)
                 else stringResource(R.string.format_sheet_adjust_audio),
                 summary = listOfNotNull(
@@ -909,10 +925,8 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
-        // A sheet of its own rather than a menu: nine audio containers are more than a menu
-        // anchored to a field shows comfortably, and the set-of-links sheet already picks
-        // the container this way.
-        SheetDialog.CONTAINER -> BatchContainerSheet(
+        // The app's choice dialog, the same one settings use; nine audio containers scroll in it.
+        SheetDialog.CONTAINER -> ContainerDialog(
             isVideo = videoTab,
             current = container,
             onSelect = { stored ->
@@ -930,18 +944,15 @@ fun FormatSheet(
             onDismiss = { openDialog = SheetDialog.NONE }
         )
 
-        SheetDialog.SAVE_DIR -> SaveDirDialog(
+        SheetDialog.SAVE_DIR -> SaveLocationScreen(
             isVideo = videoTab,
             saveDir = saveDirs.of(videoTab),
             label = saveDirs.labelOf(videoTab),
-            onOpen = {
-                openDialog = SheetDialog.NONE
-                onOpenSaveDir(videoTab)
-            },
             onPick = { card ->
                 openDialog = SheetDialog.NONE
                 onPickSaveDir(videoTab, card)
             },
+            onUseRecent = { SettingsRepository.setSaveDir(appContext, videoTab, it.uri, it.label) },
             onReset = {
                 openDialog = SheetDialog.NONE
                 onResetSaveDir(videoTab)
@@ -1001,8 +1012,12 @@ internal fun SheetSection(
     expanded: Boolean,
     onToggle: () -> Unit,
     color: Color = sheetRaisedColor,
+    iconShape: RoundedPolygon? = null,
+    iconPill: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val badge: Shape? = if (iconPill) CircleShape
+    else remember(iconShape) { iconShape?.let { FittedPolygonShape(it) } }
     val turn by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
@@ -1024,13 +1039,26 @@ internal fun SheetSection(
                     .padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.width(14.dp))
+                if (badge != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(width = 36.dp, height = if (iconPill) 26.dp else 36.dp)
+                            .clip(badge)
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f).compositeOver(color)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                } else {
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(14.dp))
+                }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         title,
@@ -1151,6 +1179,25 @@ private fun withLadderUntilRead(info: MediaInfo): MediaInfo {
     }
 }
 
+/** Rows inside a section that read as one connected group: round outside, tight between. */
+internal fun fieldGroupShape(index: Int, count: Int) = RoundedCornerShape(
+    topStart = if (index == 0) FIELD_GROUP_OUTER else FIELD_GROUP_INNER,
+    topEnd = if (index == 0) FIELD_GROUP_OUTER else FIELD_GROUP_INNER,
+    bottomStart = if (index == count - 1) FIELD_GROUP_OUTER else FIELD_GROUP_INNER,
+    bottomEnd = if (index == count - 1) FIELD_GROUP_OUTER else FIELD_GROUP_INNER
+)
+
+private val FIELD_GROUP_OUTER = 18.dp
+private val FIELD_GROUP_INNER = 6.dp
+internal val FIELD_GROUP_GAP = 2.dp
+
+/** A field's name, the small line above its value. */
+@Composable
+private fun FieldLabel(text: String, color: Color) {
+    Text(text, style = MaterialTheme.typography.labelSmall, color = color)
+    Spacer(modifier = Modifier.height(2.dp))
+}
+
 /**
  * Labelled box whose value the user can type into, matching the read-only fields' look.
  *
@@ -1165,13 +1212,14 @@ internal fun EditableField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     color: Color = defaultFieldColor(),
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    shape: Shape = RoundedCornerShape(10.dp)
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = shape,
         color = color
     ) {
         Column(
@@ -1185,12 +1233,7 @@ internal fun EditableField(
                 }
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
-            Text(
-                label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
-            Spacer(modifier = Modifier.height(2.dp))
+            FieldLabel(label, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
@@ -1218,26 +1261,23 @@ internal fun PickerField(
     value: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    color: Color = defaultFieldColor()
+    color: Color = defaultFieldColor(),
+    shape: Shape = RoundedCornerShape(10.dp)
 ) {
+    val vertical = 10.dp
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = shape,
         color = color
     ) {
         Row(
             modifier = Modifier
                 .clickable(onClick = onClick)
-                .padding(start = 14.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
+                .padding(start = 14.dp, end = 8.dp, top = vertical, bottom = vertical),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(2.dp))
+                FieldLabel(label, MaterialTheme.colorScheme.primary)
                 Text(value, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
             }
             Icon(
@@ -1285,10 +1325,15 @@ private fun LanguageField(value: String, onClick: () -> Unit, color: Color = def
 
 /** The destination row. Tapping it leads to opening or changing the folder. */
 @Composable
-private fun SaveDirField(label: String, onClick: () -> Unit, color: Color = defaultFieldColor()) {
+internal fun SaveDirField(
+    label: String,
+    onClick: () -> Unit,
+    color: Color = defaultFieldColor(),
+    shape: Shape = RoundedCornerShape(10.dp)
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = shape,
         color = color
     ) {
         Row(
@@ -1298,12 +1343,7 @@ private fun SaveDirField(label: String, onClick: () -> Unit, color: Color = defa
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    stringResource(R.string.format_sheet_save_dir),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
-                Spacer(modifier = Modifier.height(2.dp))
+                FieldLabel(stringResource(R.string.format_sheet_save_dir), MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 Text(label, style = MaterialTheme.typography.bodyMedium, maxLines = 2)
             }
             Spacer(modifier = Modifier.width(8.dp))

@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cut screen: mode rows switch in one calm step, without the bounce or the flash on tap.
 - Cut: opens full screen, shows every mode's hint at once, and the preview's quality can be changed from its corner.
 - The player's quality change takes effect again.
+- Home long-press card: a full-width Play button above connected Download, Open and Properties tiles, each icon on its own M3 shape.
+- Settings screens and the search options sheet group their rows as connected M3 lists, like the update screen.
+- Download sheet: Title/Author and Save dir/Container rows are connected groups, and each section icon sits on its own M3 shape.
+- Format list: the rail's loading skeleton shows small label lines on quiet steps instead of solid blocks.
+- Save location is a full screen with the last 5 picked folders; tap one to save there, hold any location to open it in a file manager.
+- Screen changes: the home header and the bottom bar move with their screen, so nothing jumps part way through a transition.
 - Sign-in: one-tap Instagram, YouTube, X, Facebook, TikTok and Reddit in Settings > Cookies, so you can sign in before downloading.
 
 ### Fixed
@@ -22,6 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A queued, paused or running link's sheet lists every quality again, not only the one picked.
 - The picked row in the format list is easy to see on every accent, and its badge turns into a pentagon.
 - The download sheet and format list open faster the first time.
+- Format list: before a link is read, and in the multi-link quality list, the ladder fills the sheet without the side rail, which appears once real formats arrive (#159).
+- Format list without the side rail: the Auto tag uses the size badge's blue, and each step's id is shown as its own tag.
+- The container choice opens in the app's choice dialog instead of a bottom sheet.
+- Format sheets: loading placeholders move together on one slower loop.
+- Format list: when real formats arrive, the list and rail show the loading skeleton for a moment before the rail appears.
+- Loading skeletons are easier to see on light and light glass themes.
+- Format list without the side rail: shorter rows, grouped on connected cards like the settings lists.
 - Multi-link sheet: a quality picked for a link while it is still being read is kept (#157).
 - Instagram sign-in page no longer greys out or stays blank; it opens straight on the login form.
 - Desktop site in sign-in fits the screen and can be pinched and scrolled.

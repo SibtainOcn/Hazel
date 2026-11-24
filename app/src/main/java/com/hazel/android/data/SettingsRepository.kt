@@ -16,6 +16,7 @@ import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.SearchSource
 import kotlinx.coroutines.flow.Flow
 import androidx.datastore.preferences.preferencesDataStore
+import com.hazel.android.data.RecentFolders.with
 import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
@@ -642,11 +643,37 @@ object SettingsRepository {
         context.dataStore.edit { prefs ->
             prefs[treeUriKey(isVideo)] = uri
             prefs[treeLabelKey(isVideo)] = label
+            if (uri.isNotBlank()) prefs[RECENT_FOLDERS_KEY] = RecentFolders.encode(RecentFolders.decode(prefs[RECENT_FOLDERS_KEY]).with(uri, label))
         }
     }
 
     /** Back to the built-in folder for that kind. */
     suspend fun resetSaveDir(context: Context, isVideo: Boolean) = setSaveDir(context, isVideo, "", "")
+
+    // The last folders picked anywhere in the app (downloads of either kind, backups), newest
+    // first, so one can be chosen again without the document picker.
+    private val RECENT_FOLDERS_KEY = stringPreferencesKey("recent_folders")
+
+    fun getRecentFolders(context: Context): Flow<List<SaveDir>> =
+        context.dataStore.data.map { prefs -> RecentFolders.decode(prefs[RECENT_FOLDERS_KEY]) }
+
+    suspend fun addRecentFolder(context: Context, uri: String, label: String) {
+        if (uri.isBlank()) return
+        context.dataStore.edit { prefs ->
+            prefs[RECENT_FOLDERS_KEY] = RecentFolders.encode(RecentFolders.decode(prefs[RECENT_FOLDERS_KEY]).with(uri, label))
+        }
+    }
+
+    suspend fun removeRecentFolders(context: Context, uris: Set<String>) {
+        if (uris.isEmpty()) return
+        context.dataStore.edit { prefs ->
+            prefs[RECENT_FOLDERS_KEY] = RecentFolders.encode(RecentFolders.decode(prefs[RECENT_FOLDERS_KEY]).filterNot { it.uri in uris })
+        }
+    }
+
+    suspend fun clearRecentFolders(context: Context) {
+        context.dataStore.edit { it.remove(RECENT_FOLDERS_KEY) }
+    }
 
     // yt-dlp update channel persistence ("Stable" / "Nightly" / "Master")
     private val YTDLP_CHANNEL_KEY = stringPreferencesKey("ytdlp_channel")
