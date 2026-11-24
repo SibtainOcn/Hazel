@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hazel updates: Beta and Nightly find their releases, move from one build to the next, and move onto a newer stable.
 - Hazel updates: a GitHub install never picks an F-Droid APK, and x86 phones get the x86 APK.
 - Hazel update screen: translated in every language, with clear failure reasons; nothing is cut off at the largest font.
+- Support Hazel screen: follows the accent and theme, icons on M3 shapes, rows in connected groups, and a redesigned developer card.
 - Switching the play engine no longer breaks playback of results already on screen; an open player switches at once.
 - Video sizes in the download sheet, format list and queue now include the audio track, matching the download card.
 - The download card counts the picked audio language's track, not the default one.
