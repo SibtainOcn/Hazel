@@ -1019,6 +1019,7 @@
     <string name="guide_updates_notify">Avisar</string>
     <string name="upd_wifi_only_title">Só no Wi-Fi</string>
     <string name="upd_wifi_only_summary">Sem downloads nos dados móveis</string>
+    <string name="upd_install_failed">Não foi possível abrir o instalador. Tente de novo.</string>
     <string name="guide_updates_ytdlp">yt-dlp auto</string>
     <string name="guide_updates_hazel">Hazel auto</string>
     <string name="guide_updates_wifi">Só Wi-Fi</string>

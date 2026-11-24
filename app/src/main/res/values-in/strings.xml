@@ -987,6 +987,7 @@
     <string name="guide_updates_notify">Beri tahu</string>
     <string name="upd_wifi_only_title">Hanya lewat Wi-Fi</string>
     <string name="upd_wifi_only_summary">Tanpa unduhan lewat data seluler</string>
+    <string name="upd_install_failed">Penginstal tidak dapat dibuka. Coba lagi.</string>
     <string name="guide_updates_ytdlp">yt-dlp otomatis</string>
     <string name="guide_updates_hazel">Hazel otomatis</string>
     <string name="guide_updates_wifi">Hanya Wi-Fi</string>

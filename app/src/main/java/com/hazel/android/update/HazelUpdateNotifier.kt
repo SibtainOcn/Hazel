@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.hazel.android.MainActivity
 import com.hazel.android.R
@@ -31,25 +32,23 @@ object HazelUpdateNotifier {
     suspend fun post(context: Context, event: Event, version: String) {
         val app = context.applicationContext
         if (!SettingsRepository.getHazelUpdateNotify(app).first()) return
-        if (alreadyPosted(app, event, version)) return
-        runCatching { show(app, event, version) }
+        // Each notice is posted once per version; one that could not be shown is tried again.
+        val prefs = app.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (prefs.getString(event.name, null) == version) return
+        if (runCatching { show(app, event, version) }.getOrDefault(false)) {
+            prefs.edit().putString(event.name, version).apply()
+        }
     }
 
-    /** Each notice is posted once per version, not on every launch. */
-    private fun alreadyPosted(context: Context, event: Event, version: String): Boolean {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (prefs.getString(event.name, null) == version) return true
-        prefs.edit().putString(event.name, version).apply()
-        return false
-    }
-
-    private fun show(context: Context, event: Event, version: String) {
+    private fun show(context: Context, event: Event, version: String): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
-        ) return
+        ) return false
+        // Covers notifications turned off for the app on any Android version, not only 13+.
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return false
 
-        val mgr = context.getSystemService(NotificationManager::class.java) ?: return
+        val mgr = context.getSystemService(NotificationManager::class.java) ?: return false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mgr.createNotificationChannel(
                 NotificationChannel(
@@ -82,5 +81,6 @@ object HazelUpdateNotifier {
             )
             .build()
         mgr.notify(NOTIFICATION_ID, notification)
+        return true
     }
 }

@@ -987,6 +987,7 @@
     <string name="guide_updates_notify">通知我</string>
     <string name="upd_wifi_only_title">仅限 Wi-Fi</string>
     <string name="upd_wifi_only_summary">不使用移动数据下载</string>
+    <string name="upd_install_failed">无法打开安装程序，请重试。</string>
     <string name="guide_updates_ytdlp">yt-dlp 自动</string>
     <string name="guide_updates_hazel">Hazel 自动</string>
     <string name="guide_updates_wifi">仅限 Wi-Fi</string>

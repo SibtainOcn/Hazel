@@ -1031,9 +1031,10 @@
     <string name="hazel_update_ready_text">Загружено и готово. Нажмите, чтобы установить.</string>
     <string name="guide_step_updates_title">Будьте в курсе</string>
     <string name="guide_step_updates_desc">Выберите, как обновляются Hazel и yt-dlp. Это можно изменить в разделе «Обновление ПО».</string>
-    <string name="guide_updates_notify">Сообщать</string>
+    <string name="guide_updates_notify">Новые версии</string>
     <string name="upd_wifi_only_title">Только по Wi-Fi</string>
     <string name="upd_wifi_only_summary">Без загрузки через мобильную сеть</string>
+    <string name="upd_install_failed">Не удалось открыть установщик. Попробуйте ещё раз.</string>
     <string name="guide_updates_ytdlp">yt-dlp авто</string>
     <string name="guide_updates_hazel">Hazel авто</string>
     <string name="guide_updates_wifi">Только Wi-Fi</string>

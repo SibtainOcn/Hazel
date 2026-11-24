@@ -1003,6 +1003,7 @@
     <string name="guide_updates_notify">सूचना दें</string>
     <string name="upd_wifi_only_title">सिर्फ़ वाई-फ़ाई पर</string>
     <string name="upd_wifi_only_summary">मोबाइल डेटा पर डाउनलोड नहीं</string>
+    <string name="upd_install_failed">इंस्टॉलर नहीं खुल सका। फिर से कोशिश करें।</string>
     <string name="guide_updates_ytdlp">yt-dlp ऑटो</string>
     <string name="guide_updates_hazel">Hazel ऑटो</string>
     <string name="guide_updates_wifi">सिर्फ़ वाई-फ़ाई</string>

@@ -987,6 +987,7 @@
     <string name="guide_updates_notify">通知する</string>
     <string name="upd_wifi_only_title">Wi-Fi のみ</string>
     <string name="upd_wifi_only_summary">モバイルデータではダウンロードしない</string>
+    <string name="upd_install_failed">インストーラーを開けませんでした。もう一度お試しください。</string>
     <string name="guide_updates_ytdlp">yt-dlp 自動</string>
     <string name="guide_updates_hazel">Hazel 自動</string>
     <string name="guide_updates_wifi">Wi-Fi のみ</string>

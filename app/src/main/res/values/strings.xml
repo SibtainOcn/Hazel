@@ -1059,6 +1059,7 @@
     <string name="guide_updates_notify">Notify me</string>
     <string name="upd_wifi_only_title">Download on Wi-Fi only</string>
     <string name="upd_wifi_only_summary">Skip downloads on mobile data</string>
+    <string name="upd_install_failed">The installer could not be opened. Please try again.</string>
     <string name="guide_updates_ytdlp">Auto yt-dlp</string>
     <string name="guide_updates_hazel">Auto Hazel</string>
     <string name="guide_updates_wifi">Wi-Fi only</string>

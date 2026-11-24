@@ -1003,6 +1003,7 @@
     <string name="guide_updates_notify">Melden</string>
     <string name="upd_wifi_only_title">Nur im WLAN laden</string>
     <string name="upd_wifi_only_summary">Keine Downloads über mobile Daten</string>
+    <string name="upd_install_failed">Das Installationsprogramm ließ sich nicht öffnen. Bitte erneut versuchen.</string>
     <string name="guide_updates_ytdlp">yt-dlp auto</string>
     <string name="guide_updates_hazel">Hazel auto</string>
     <string name="guide_updates_wifi">Nur WLAN</string>

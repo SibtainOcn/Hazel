@@ -3,6 +3,7 @@ package com.hazel.android.update
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -182,12 +183,23 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
     fun installUpdate(customContext: android.content.Context? = null) {
         val ready = _uiState.value as? UiState.ReadyToInstall ?: return
         val targetContext = customContext ?: getApplication()
+        // Phone cleaners can empty the cache while the screen waits on Install.
+        if (!ready.apkFile.isFile) {
+            _uiState.value = UiState.Available(ready.info)
+            return
+        }
+        try {
+            HazelUpdater.installApk(targetContext, ready.apkFile)
+        } catch (e: Exception) {
+            android.util.Log.w("Hazel", "Hazel installer could not be opened: ${e.javaClass.simpleName}")
+            _uiState.value = UiState.Error(getApplication<Application>().getString(R.string.upd_install_failed), ready.info)
+            return
+        }
         if (HazelUpdater.canInstallApks(targetContext)) {
             viewModelScope.launch {
                 SettingsRepository.setHazelUpdateAvailable(getApplication(), false)
             }
         }
-        HazelUpdater.installApk(targetContext, ready.apkFile)
     }
 
     fun dismiss() {

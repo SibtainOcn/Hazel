@@ -591,16 +591,24 @@ object HazelUpdater {
             HazelUpdateNotifier.post(app, HazelUpdateNotifier.Event.READY, release.version)
             return
         }
+        val wifiOnly = com.hazel.android.data.SettingsRepository.getHazelUpdateWifiOnly(app).first()
         val auto = !isFdroid() && release.downloadUrl.isNotBlank() &&
             com.hazel.android.data.SettingsRepository.getHazelUpdateAutoDownload(app).first() &&
-            (!com.hazel.android.data.SettingsRepository.getHazelUpdateWifiOnly(app).first() || onUnmeteredNetwork(app))
+            (!wifiOnly || onUnmeteredNetwork(app))
         if (!auto || !_background.compareAndSet(null, BackgroundDownload(release.version, total = release.binarySize))) {
             if (!auto) HazelUpdateNotifier.post(app, HazelUpdateNotifier.Event.AVAILABLE, release.version)
             return
         }
         scope.launch {
             try {
+                var lastNetworkCheck = System.currentTimeMillis()
                 downloadApk(app, release) { bytes, total, speed, eta ->
+                    // Wi-Fi only also holds when Wi-Fi drops mid-download and mobile data takes over.
+                    val now = System.currentTimeMillis()
+                    if (wifiOnly && now - lastNetworkCheck >= 3_000) {
+                        lastNetworkCheck = now
+                        if (!onUnmeteredNetwork(app)) throw java.io.IOException("Network became metered")
+                    }
                     _background.value = BackgroundDownload(release.version, bytes, total, speed, eta)
                 }
                 HazelUpdateNotifier.post(app, HazelUpdateNotifier.Event.READY, release.version)
