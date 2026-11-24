@@ -314,6 +314,11 @@ class UpdaterTest {
     @Test
     fun `HazelUpdater latestReleaseResult answers for the Beta channel without 403`() = kotlinx.coroutines.runBlocking {
         val result = HazelUpdater.latestReleaseResult(HazelUpdater.Channel.BETA)
+        // F-Droid builds follow F-Droid's stable releases only.
+        if (HazelUpdater.isFdroid()) {
+            assertEquals(HazelUpdater.CheckResult.NoReleaseFound, result)
+            return@runBlocking
+        }
         assertTrue("Expected Success but got $result", result is HazelUpdater.CheckResult.Success)
         assertTrue((result as HazelUpdater.CheckResult.Success).info.channel != HazelUpdater.Channel.NIGHTLY)
     }
@@ -321,6 +326,10 @@ class UpdaterTest {
     @Test
     fun `HazelUpdater latestReleaseResult answers for the Nightly channel without 403`() = kotlinx.coroutines.runBlocking {
         val result = HazelUpdater.latestReleaseResult(HazelUpdater.Channel.NIGHTLY)
+        if (HazelUpdater.isFdroid()) {
+            assertEquals(HazelUpdater.CheckResult.NoReleaseFound, result)
+            return@runBlocking
+        }
         assertTrue("Expected Success but got $result", result is HazelUpdater.CheckResult.Success)
     }
 
