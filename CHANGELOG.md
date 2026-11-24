@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sign-in: one-tap Instagram, YouTube, X, Facebook, TikTok and Reddit in Settings > Cookies, so you can sign in before downloading.
 
 ### Fixed
+- Switching the play engine no longer breaks playback of results already on screen; an open player switches at once.
 - Instagram sign-in page no longer greys out or stays blank; it opens straight on the login form.
 - Desktop site in sign-in fits the screen and can be pinched and scrolled.
 - Sign-in page ignores "open in app" links and closes cleanly if the browser engine stops.
