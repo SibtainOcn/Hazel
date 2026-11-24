@@ -26,7 +26,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -131,8 +130,8 @@ class HazelUpdateTogglesLayoutTest(private val locale: String, private val theme
     fun `onboarding updates step fits`() {
         show { Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh) { Box(Modifier.padding(24.dp)) { UpdatesStep() } } }
         assertFits(R.string.guide_step_updates_title, R.string.guide_updates_notify, R.string.guide_updates_ytdlp, R.string.guide_updates_hazel, R.string.guide_updates_wifi)
-        val open = compose.onNodeWithContentDescription(context.getString(R.string.more_software_update)).performScrollTo().assertIsDisplayed().fetchSemanticsNode()
-        assertTrue("Software update button runs off the edge", open.positionOnScreen.x + open.size.width <= context.resources.displayMetrics.widthPixels)
+        val open = compose.onNodeWithText(context.getString(R.string.guide_updates_more)).performScrollTo().assertIsDisplayed().fetchSemanticsNode()
+        assertTrue("More button runs off the edge", open.positionOnScreen.x + open.size.width <= context.resources.displayMetrics.widthPixels)
         saveScreen("guide-updates-$theme-$locale")
     }
 }

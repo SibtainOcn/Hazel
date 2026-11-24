@@ -1023,4 +1023,5 @@
     <string name="guide_updates_ytdlp">yt-dlp auto</string>
     <string name="guide_updates_hazel">Hazel auto</string>
     <string name="guide_updates_wifi">Solo Wi-Fi</string>
+    <string name="guide_updates_more">Más</string>
 </resources>

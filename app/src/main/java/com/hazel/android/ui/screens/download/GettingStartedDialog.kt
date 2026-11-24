@@ -57,6 +57,7 @@ import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -94,6 +95,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextAlign
@@ -575,18 +578,42 @@ internal fun UpdatesStep(onOpenUpdates: () -> Unit = {}) {
     val fdroid = remember { HazelUpdater.isFdroid() }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        // The way to the full update screen sits beside the icon, so the card keeps its height.
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            StepIcon(rememberVectorPainter(Icons.Rounded.SystemUpdate), MaterialShapes.Cookie12Sided.toShape(), size = 72.dp)
-            FilledTonalIconButton(
+        // The update icon and the way to the full screen share one row, so the card keeps its height.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            StepIcon(rememberVectorPainter(Icons.Rounded.SystemUpdate), MaterialShapes.Cookie12Sided.toShape(), size = 64.dp)
+            val openLabel = stringResource(R.string.more_software_update)
+            FilledTonalButton(
                 onClick = onOpenUpdates,
-                modifier = Modifier.align(Alignment.TopEnd).size(48.dp),
-                shape = MaterialShapes.Cookie9Sided.toShape()
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .heightIn(min = 48.dp)
+                    .semantics(mergeDescendants = true) { contentDescription = openLabel },
+                contentPadding = PaddingValues(start = 6.dp, end = 14.dp, top = 6.dp, bottom = 6.dp)
             ) {
-                Icon(
-                    Icons.AutoMirrored.Rounded.ArrowForward,
-                    contentDescription = stringResource(R.string.more_software_update),
-                    modifier = Modifier.size(20.dp)
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(MaterialShapes.Cookie9Sided.toShape())
+                        .background(MaterialTheme.colorScheme.primary)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Rounded.ArrowForward,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    stringResource(R.string.guide_updates_more),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1
                 )
             }
         }

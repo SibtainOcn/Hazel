@@ -1063,4 +1063,5 @@
     <string name="guide_updates_ytdlp">Auto yt-dlp</string>
     <string name="guide_updates_hazel">Auto Hazel</string>
     <string name="guide_updates_wifi">Wi-Fi only</string>
+    <string name="guide_updates_more">More</string>
 </resources>

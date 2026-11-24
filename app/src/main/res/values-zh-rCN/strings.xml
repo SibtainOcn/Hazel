@@ -991,4 +991,5 @@
     <string name="guide_updates_ytdlp">yt-dlp 自动</string>
     <string name="guide_updates_hazel">Hazel 自动</string>
     <string name="guide_updates_wifi">仅限 Wi-Fi</string>
+    <string name="guide_updates_more">更多</string>
 </resources>

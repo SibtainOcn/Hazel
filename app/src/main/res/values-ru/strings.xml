@@ -1038,4 +1038,5 @@
     <string name="guide_updates_ytdlp">yt-dlp авто</string>
     <string name="guide_updates_hazel">Hazel авто</string>
     <string name="guide_updates_wifi">Только Wi-Fi</string>
+    <string name="guide_updates_more">Ещё</string>
 </resources>
