@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,9 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
@@ -69,7 +73,8 @@ class HazelUpdateTogglesLayoutTest(private val locale: String, private val theme
                 val density = LocalDensity.current
                 CompositionLocalProvider(LocalDensity provides Density(density.density, 2f)) {
                     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).glassScreen()) {
-                        Box(Modifier.padding(16.dp)) { content() }
+                        // Both places scroll in the app: the update screen and the guide dialog.
+                        Box(Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) { content() }
                     }
                 }
             }
@@ -81,7 +86,7 @@ class HazelUpdateTogglesLayoutTest(private val locale: String, private val theme
         val width = context.resources.displayMetrics.widthPixels
         ids.forEach { id ->
             val text = context.getString(id)
-            val node = compose.onNodeWithText(text).assertIsDisplayed().fetchSemanticsNode()
+            val node = compose.onNodeWithText(text).performScrollTo().assertIsDisplayed().fetchSemanticsNode()
             assertTrue("$text runs off the right edge", node.positionOnScreen.x + node.size.width <= width)
         }
     }
@@ -96,7 +101,7 @@ class HazelUpdateTogglesLayoutTest(private val locale: String, private val theme
                 R.string.upd_section_automatic,
                 listOf(
                     ComponentToggle(
-                        Icons.Filled.NotificationsActive, MaterialShapes.SoftBurst.toShape(),
+                        Icons.Filled.NotificationsActive, MaterialShapes.Cookie9Sided.toShape(),
                         context.getString(R.string.upd_notify_new_title),
                         context.getString(R.string.upd_notify_new_summary), notify
                     ) { notify = it },
@@ -104,7 +109,12 @@ class HazelUpdateTogglesLayoutTest(private val locale: String, private val theme
                         Icons.Filled.CloudDownload, MaterialShapes.Cookie7Sided.toShape(),
                         context.getString(R.string.upd_auto_download_title),
                         context.getString(R.string.upd_auto_download_summary), auto
-                    ) { auto = it }
+                    ) { auto = it },
+                    ComponentToggle(
+                        Icons.Filled.Wifi, MaterialShapes.Cookie4Sided.toShape(),
+                        context.getString(R.string.upd_wifi_only_title),
+                        context.getString(R.string.upd_wifi_only_summary), false
+                    ) {}
                 )
             )
         }
@@ -119,7 +129,7 @@ class HazelUpdateTogglesLayoutTest(private val locale: String, private val theme
     @Test
     fun `onboarding updates step fits`() {
         show { Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh) { Box(Modifier.padding(24.dp)) { UpdatesStep() } } }
-        assertFits(R.string.guide_step_updates_title, R.string.guide_updates_notify, R.string.guide_updates_auto)
+        assertFits(R.string.guide_step_updates_title, R.string.guide_updates_notify, R.string.guide_updates_ytdlp, R.string.guide_updates_hazel, R.string.guide_updates_wifi, R.string.more_software_update)
         saveScreen("guide-updates-$theme-$locale")
     }
 }

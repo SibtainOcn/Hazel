@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.InstallMobile
@@ -293,12 +294,13 @@ fun HazelUpdateScreen(
 
             val notifyNew by viewModel.notifyNew.collectAsState()
             val autoDownload by viewModel.autoDownload.collectAsState()
+            val wifiOnly by viewModel.wifiOnly.collectAsState()
             ToggleGroup(
                 R.string.upd_section_automatic,
                 buildList {
                     add(
                         ComponentToggle(
-                            Icons.Filled.NotificationsActive, MaterialShapes.SoftBurst.toShape(),
+                            Icons.Filled.NotificationsActive, MaterialShapes.Cookie9Sided.toShape(),
                             stringResource(R.string.upd_notify_new_title),
                             stringResource(R.string.upd_notify_new_summary),
                             notifyNew
@@ -308,15 +310,26 @@ fun HazelUpdateScreen(
                         }
                     )
                     // F-Droid installs are updated by F-Droid, so there is nothing to fetch here.
-                    if (!isFdroid) add(
-                        ComponentToggle(
-                            Icons.Filled.CloudDownload, MaterialShapes.Cookie7Sided.toShape(),
-                            stringResource(R.string.upd_auto_download_title),
-                            stringResource(R.string.upd_auto_download_summary),
-                            autoDownload,
-                            viewModel::setAutoDownload
+                    if (!isFdroid) {
+                        add(
+                            ComponentToggle(
+                                Icons.Filled.CloudDownload, MaterialShapes.Cookie7Sided.toShape(),
+                                stringResource(R.string.upd_auto_download_title),
+                                stringResource(R.string.upd_auto_download_summary),
+                                autoDownload,
+                                viewModel::setAutoDownload
+                            )
                         )
-                    )
+                        add(
+                            ComponentToggle(
+                                Icons.Filled.Wifi, MaterialShapes.Cookie4Sided.toShape(),
+                                stringResource(R.string.upd_wifi_only_title),
+                                stringResource(R.string.upd_wifi_only_summary),
+                                wifiOnly,
+                                viewModel::setWifiOnly
+                            )
+                        )
+                    }
                 }
             )
 

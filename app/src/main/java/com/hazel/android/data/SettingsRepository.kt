@@ -737,6 +737,15 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[HAZEL_UPDATE_AUTO_DOWNLOAD_KEY] = enabled }
     }
 
+    private val HAZEL_UPDATE_WIFI_ONLY_KEY = booleanPreferencesKey("hazel_update_wifi_only")
+
+    /** Whether the background download of a Hazel update waits for Wi-Fi. Off, as for yt-dlp. */
+    fun getHazelUpdateWifiOnly(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[HAZEL_UPDATE_WIFI_ONLY_KEY] ?: false }
+    suspend fun setHazelUpdateWifiOnly(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[HAZEL_UPDATE_WIFI_ONLY_KEY] = enabled }
+    }
+
 
     // Dynamic update availability indicators for UI red dot badges
     private val HAS_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("has_update_available")

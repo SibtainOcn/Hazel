@@ -581,9 +581,9 @@ object HazelUpdater {
     }
 
     /**
-     * A newer version was found. With auto-download on, and on a network that is not metered,
-     * it is fetched in the background so the update screen opens on Install; otherwise, or if
-     * that fails, it is only announced. F-Droid builds are updated by F-Droid, never here.
+     * A newer version was found. With auto-download on (and Wi-Fi only off, or on a network that
+     * is not metered) it is fetched in the background so the update screen opens on Install;
+     * otherwise, or if that fails, it is only announced. F-Droid builds are updated by F-Droid.
      */
     private suspend fun onNewRelease(context: Context, release: ReleaseInfo) {
         val app = context.applicationContext
@@ -593,7 +593,7 @@ object HazelUpdater {
         }
         val auto = !isFdroid() && release.downloadUrl.isNotBlank() &&
             com.hazel.android.data.SettingsRepository.getHazelUpdateAutoDownload(app).first() &&
-            onUnmeteredNetwork(app)
+            (!com.hazel.android.data.SettingsRepository.getHazelUpdateWifiOnly(app).first() || onUnmeteredNetwork(app))
         if (!auto || !_background.compareAndSet(null, BackgroundDownload(release.version, total = release.binarySize))) {
             if (!auto) HazelUpdateNotifier.post(app, HazelUpdateNotifier.Event.AVAILABLE, release.version)
             return

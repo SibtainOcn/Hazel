@@ -992,15 +992,19 @@
     <string name="upd_notify_new_title">Neue Versionen melden</string>
     <string name="upd_notify_new_summary">Eine Mitteilung öffnet diese Seite bei einem Update</string>
     <string name="upd_auto_download_title">Updates vorab laden</string>
-    <string name="upd_auto_download_summary">Im WLAN, damit sie bereit zur Installation sind</string>
+    <string name="upd_auto_download_summary">Lädt neue Versionen, bereit zur Installation</string>
     <string name="hazel_update_channel_name">Hazel-Updates</string>
     <string name="hazel_update_channel_description">Neue Hazel-Versionen</string>
     <string name="hazel_update_available_title">Hazel %1$s ist verfügbar</string>
     <string name="hazel_update_available_text">Tippen, um Neuerungen zu sehen und zu aktualisieren.</string>
     <string name="hazel_update_ready_text">Geladen und bereit. Zum Installieren tippen.</string>
     <string name="guide_step_updates_title">Immer aktuell</string>
-    <string name="guide_step_updates_desc">Wähle, wie Hazel sich aktualisiert. Jederzeit änderbar unter Software-Update.</string>
+    <string name="guide_step_updates_desc">Wähle, wie Hazel und yt-dlp aktualisieren. Jederzeit änderbar unter Software-Update.</string>
     <string name="guide_done">Fertig</string>
     <string name="guide_updates_notify">Melden</string>
-    <string name="guide_updates_auto">Vorab laden</string>
+    <string name="upd_wifi_only_title">Nur im WLAN laden</string>
+    <string name="upd_wifi_only_summary">Keine Downloads über mobile Daten</string>
+    <string name="guide_updates_ytdlp">yt-dlp auto</string>
+    <string name="guide_updates_hazel">Hazel auto</string>
+    <string name="guide_updates_wifi">Nur WLAN</string>
 </resources>

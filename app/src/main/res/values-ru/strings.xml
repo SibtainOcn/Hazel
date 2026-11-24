@@ -1023,15 +1023,19 @@
     <string name="upd_notify_new_title">Сообщать о новых версиях</string>
     <string name="upd_notify_new_summary">Откроет этот экран, когда выйдет новая версия</string>
     <string name="upd_auto_download_title">Загружать заранее</string>
-    <string name="upd_auto_download_summary">По Wi-Fi, чтобы сразу установить</string>
+    <string name="upd_auto_download_summary">Скачает новую версию, чтобы сразу установить</string>
     <string name="hazel_update_channel_name">Обновления Hazel</string>
     <string name="hazel_update_channel_description">Новые версии Hazel</string>
     <string name="hazel_update_available_title">Доступен Hazel %1$s</string>
     <string name="hazel_update_available_text">Нажмите, чтобы узнать о новом и обновиться.</string>
     <string name="hazel_update_ready_text">Загружено и готово. Нажмите, чтобы установить.</string>
     <string name="guide_step_updates_title">Будьте в курсе</string>
-    <string name="guide_step_updates_desc">Выберите, как Hazel обновляется. Это можно изменить в разделе «Обновление ПО».</string>
+    <string name="guide_step_updates_desc">Выберите, как обновляются Hazel и yt-dlp. Это можно изменить в разделе «Обновление ПО».</string>
     <string name="guide_done">Готово</string>
     <string name="guide_updates_notify">Сообщать</string>
-    <string name="guide_updates_auto">Качать заранее</string>
+    <string name="upd_wifi_only_title">Только по Wi-Fi</string>
+    <string name="upd_wifi_only_summary">Без загрузки через мобильную сеть</string>
+    <string name="guide_updates_ytdlp">yt-dlp авто</string>
+    <string name="guide_updates_hazel">Hazel авто</string>
+    <string name="guide_updates_wifi">Только Wi-Fi</string>
 </resources>

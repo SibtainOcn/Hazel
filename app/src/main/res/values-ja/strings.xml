@@ -976,15 +976,19 @@
     <string name="upd_notify_new_title">新しいバージョンを通知</string>
     <string name="upd_notify_new_summary">アップデートが出ると通知からこの画面を開きます</string>
     <string name="upd_auto_download_title">アップデートを自動でダウンロード</string>
-    <string name="upd_auto_download_summary">Wi-Fi 接続時に取得し、すぐインストールできます</string>
+    <string name="upd_auto_download_summary">新しいバージョンを取得し、すぐインストールできます</string>
     <string name="hazel_update_channel_name">Hazel のアップデート</string>
     <string name="hazel_update_channel_description">Hazel の新しいバージョン</string>
     <string name="hazel_update_available_title">Hazel %1$s を利用できます</string>
     <string name="hazel_update_available_text">タップして新機能を確認し、アップデートします。</string>
     <string name="hazel_update_ready_text">ダウンロード済みです。タップしてインストール。</string>
     <string name="guide_step_updates_title">常に最新に</string>
-    <string name="guide_step_updates_desc">Hazel の更新方法を選びます。ソフトウェアアップデートでいつでも変更できます。</string>
+    <string name="guide_step_updates_desc">Hazel と yt-dlp の更新方法を選びます。ソフトウェアアップデートでいつでも変更できます。</string>
     <string name="guide_done">完了</string>
     <string name="guide_updates_notify">通知する</string>
-    <string name="guide_updates_auto">先に取得</string>
+    <string name="upd_wifi_only_title">Wi-Fi のみ</string>
+    <string name="upd_wifi_only_summary">モバイルデータではダウンロードしない</string>
+    <string name="guide_updates_ytdlp">yt-dlp 自動</string>
+    <string name="guide_updates_hazel">Hazel 自動</string>
+    <string name="guide_updates_wifi">Wi-Fi のみ</string>
 </resources>

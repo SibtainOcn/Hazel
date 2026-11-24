@@ -50,10 +50,13 @@ import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.VideoSettings
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -112,6 +115,7 @@ import com.hazel.android.ui.theme.GlassStyle
 import com.hazel.android.ui.theme.LocalDarkTheme
 import com.hazel.android.ui.theme.LocalGlass
 import com.hazel.android.ui.theme.glassBackdrop
+import com.hazel.android.MainActivity
 import com.hazel.android.update.HazelUpdater
 import com.hazel.android.util.PermissionHelper
 import kotlinx.coroutines.launch
@@ -127,7 +131,7 @@ import kotlinx.coroutines.launch
  * 5. Hazel Instant
  * 6. Battery Optimization (Deny or Allow options of equal size)
  * 7. Notifications (Deny or Allow options of equal size)
- * 8. Updates (notify about new versions, download them in the background), saved as soon as switched
+ * 8. Updates (notify, auto yt-dlp, auto Hazel, Wi-Fi only), saved as soon as switched
  *
  * Follows the app theme: accent coloured Material 3 actions on the glass surface when glass is on.
  */
@@ -216,7 +220,17 @@ fun GettingStartedDialog(
                     if (step == APPEARANCE_STEP) {
                         AppearanceStep(appearance)
                     } else if (step == UPDATES_STEP) {
-                        UpdatesStep()
+                        UpdatesStep(onOpenUpdates = {
+                            onDismiss()
+                            // The app's own deep route, so it works from every screen that shows this guide.
+                            runCatching {
+                                context.startActivity(
+                                    Intent(context, MainActivity::class.java)
+                                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                        .putExtra(MainActivity.EXTRA_NAVIGATE_TO, "software_update")
+                                )
+                            }
+                        })
                     } else {
                         val data = stepData(step)
                         StepHeader(
@@ -368,34 +382,40 @@ private fun DenyAllow(modifier: Modifier, onDeny: () -> Unit, onAllow: () -> Uni
 
 @Composable
 private fun StepHeader(icon: Painter, shape: Shape, title: String, description: String) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        StepIcon(icon, shape)
+        Spacer(modifier = Modifier.height(20.dp))
+        StepTitle(title)
+        Spacer(modifier = Modifier.height(8.dp))
+        StepDescription(description, Modifier.heightIn(min = 50.dp))
+    }
+}
+
+/** A step's icon on its M3 shape, which settles into place with a small turn. */
+@Composable
+private fun StepIcon(icon: Painter, shape: Shape, size: Dp = 96.dp) {
     val colors = MaterialTheme.colorScheme
     val settle = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
         settle.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessLow))
     }
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(96.dp)) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .graphicsLayer {
-                        rotationZ = (1f - settle.value) * -60f
-                        val s = 0.7f + 0.3f * settle.value
-                        scaleX = s
-                        scaleY = s
-                    }
-                    .clip(shape)
-                    .background(colors.primary.copy(alpha = 0.16f))
-            )
-            Icon(painter = icon, contentDescription = null, modifier = Modifier.size(42.dp), tint = colors.primary)
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        StepTitle(title)
-        Spacer(modifier = Modifier.height(8.dp))
-        StepDescription(description, Modifier.heightIn(min = 50.dp))
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(size)) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .graphicsLayer {
+                    rotationZ = (1f - settle.value) * -60f
+                    val s = 0.7f + 0.3f * settle.value
+                    scaleX = s
+                    scaleY = s
+                }
+                .clip(shape)
+                .background(colors.primary.copy(alpha = 0.16f))
+        )
+        Icon(painter = icon, contentDescription = null, modifier = Modifier.size(size * 0.44f), tint = colors.primary)
     }
 }
 
@@ -551,14 +571,20 @@ internal fun AppearanceStep(
 /** How Hazel keeps itself current, the same two switches as on the Hazel update screen. */
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-internal fun UpdatesStep() {
+internal fun UpdatesStep(onOpenUpdates: () -> Unit = {}) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val notify by remember(context) { SettingsRepository.getHazelUpdateNotify(context) }.collectAsState(initial = false)
-    val auto by remember(context) { SettingsRepository.getHazelUpdateAutoDownload(context) }.collectAsState(initial = false)
+    val autoHazel by remember(context) { SettingsRepository.getHazelUpdateAutoDownload(context) }.collectAsState(initial = false)
+    val autoYtDlp by remember(context) { SettingsRepository.getUpdateAutoDownload(context) }.collectAsState(initial = true)
+    val wifiYtDlp by remember(context) { SettingsRepository.getUpdateWifiOnly(context) }.collectAsState(initial = false)
+    val wifiHazel by remember(context) { SettingsRepository.getHazelUpdateWifiOnly(context) }.collectAsState(initial = false)
     val save: (suspend () -> Unit) -> Unit = { write -> scope.launch { runCatching { write() } } }
+    val fdroid = remember { HazelUpdater.isFdroid() }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        StepIcon(rememberVectorPainter(Icons.Rounded.SystemUpdate), MaterialShapes.Cookie12Sided.toShape(), size = 72.dp)
+        Spacer(modifier = Modifier.height(16.dp))
         StepTitle(stringResource(R.string.guide_step_updates_title))
         Spacer(modifier = Modifier.height(6.dp))
         StepDescription(stringResource(R.string.guide_step_updates_desc))
@@ -571,19 +597,54 @@ internal fun UpdatesStep() {
         ) {
             ToggleRow(
                 stringResource(R.string.guide_updates_notify), Icons.Rounded.NotificationsActive,
-                MaterialShapes.SoftBurst.toShape(), notify
+                MaterialShapes.Cookie9Sided.toShape(), notify
             ) { on ->
                 if (on) PermissionHelper.ensureNotificationPermission(context)
                 save { SettingsRepository.setHazelUpdateNotify(context, on) }
             }
+            RowDivider()
+            ToggleRow(
+                stringResource(R.string.guide_updates_ytdlp), Icons.Rounded.CloudDownload,
+                MaterialShapes.Cookie7Sided.toShape(), autoYtDlp
+            ) { on -> save { SettingsRepository.setUpdateAutoDownload(context, on) } }
             // F-Droid installs are updated by F-Droid.
-            if (!HazelUpdater.isFdroid()) {
+            if (!fdroid) {
                 RowDivider()
                 ToggleRow(
-                    stringResource(R.string.guide_updates_auto), Icons.Rounded.CloudDownload,
-                    MaterialShapes.Cookie7Sided.toShape(), auto
+                    stringResource(R.string.guide_updates_hazel), Icons.Rounded.SystemUpdate,
+                    MaterialShapes.Cookie6Sided.toShape(), autoHazel
                 ) { on -> save { SettingsRepository.setHazelUpdateAutoDownload(context, on) } }
             }
+            RowDivider()
+            // One switch for both downloads; each screen still has its own.
+            ToggleRow(
+                stringResource(R.string.guide_updates_wifi), Icons.Rounded.Wifi,
+                MaterialShapes.Cookie4Sided.toShape(), wifiYtDlp && (fdroid || wifiHazel)
+            ) { on ->
+                save {
+                    SettingsRepository.setUpdateWifiOnly(context, on)
+                    if (!fdroid) SettingsRepository.setHazelUpdateWifiOnly(context, on)
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        FilledTonalButton(
+            onClick = onOpenUpdates,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            contentPadding = ActionPadding
+        ) {
+            Text(
+                stringResource(R.string.more_software_update),
+                style = MaterialTheme.typography.labelLarge.copy(hyphens = Hyphens.Auto),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                painter = painterResource(R.drawable.small_chevron),
+                contentDescription = null,
+                modifier = Modifier.size(14.dp)
+            )
         }
     }
 }

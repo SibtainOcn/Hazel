@@ -1008,15 +1008,19 @@
     <string name="upd_notify_new_title">Avisar sobre novas versões</string>
     <string name="upd_notify_new_summary">Um aviso abre esta tela quando sai uma atualização</string>
     <string name="upd_auto_download_title">Baixar atualizações automaticamente</string>
-    <string name="upd_auto_download_summary">No Wi-Fi, para ficarem prontas para instalar</string>
+    <string name="upd_auto_download_summary">Baixa novas versões, prontas para instalar</string>
     <string name="hazel_update_channel_name">Atualizações do Hazel</string>
     <string name="hazel_update_channel_description">Novas versões do Hazel</string>
     <string name="hazel_update_available_title">Hazel %1$s está disponível</string>
     <string name="hazel_update_available_text">Toque para ver as novidades e atualizar.</string>
     <string name="hazel_update_ready_text">Baixada e pronta. Toque para instalar.</string>
     <string name="guide_step_updates_title">Fique em dia</string>
-    <string name="guide_step_updates_desc">Escolha como o Hazel se atualiza. Mude quando quiser em Atualização de software.</string>
+    <string name="guide_step_updates_desc">Escolha como o Hazel e o yt-dlp se atualizam. Mude quando quiser em Atualização de software.</string>
     <string name="guide_done">Concluir</string>
     <string name="guide_updates_notify">Avisar</string>
-    <string name="guide_updates_auto">Baixar antes</string>
+    <string name="upd_wifi_only_title">Só no Wi-Fi</string>
+    <string name="upd_wifi_only_summary">Sem downloads nos dados móveis</string>
+    <string name="guide_updates_ytdlp">yt-dlp auto</string>
+    <string name="guide_updates_hazel">Hazel auto</string>
+    <string name="guide_updates_wifi">Só Wi-Fi</string>
 </resources>

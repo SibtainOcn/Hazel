@@ -976,15 +976,19 @@
     <string name="upd_notify_new_title">Beri tahu versi baru</string>
     <string name="upd_notify_new_summary">Notifikasi membuka layar ini saat ada pembaruan</string>
     <string name="upd_auto_download_title">Unduh pembaruan otomatis</string>
-    <string name="upd_auto_download_summary">Lewat Wi-Fi, agar pembaruan siap dipasang</string>
+    <string name="upd_auto_download_summary">Mengunduh versi baru agar siap dipasang</string>
     <string name="hazel_update_channel_name">Pembaruan Hazel</string>
     <string name="hazel_update_channel_description">Versi baru Hazel</string>
     <string name="hazel_update_available_title">Hazel %1$s tersedia</string>
     <string name="hazel_update_available_text">Ketuk untuk melihat yang baru dan memperbarui.</string>
     <string name="hazel_update_ready_text">Sudah diunduh dan siap. Ketuk untuk memasang.</string>
     <string name="guide_step_updates_title">Selalu terbaru</string>
-    <string name="guide_step_updates_desc">Pilih cara Hazel memperbarui diri. Bisa diubah kapan saja di Pembaruan perangkat lunak.</string>
+    <string name="guide_step_updates_desc">Pilih cara Hazel dan yt-dlp diperbarui. Ubah kapan saja di Pembaruan perangkat lunak.</string>
     <string name="guide_done">Selesai</string>
     <string name="guide_updates_notify">Beri tahu</string>
-    <string name="guide_updates_auto">Unduh dulu</string>
+    <string name="upd_wifi_only_title">Hanya lewat Wi-Fi</string>
+    <string name="upd_wifi_only_summary">Tanpa unduhan lewat data seluler</string>
+    <string name="guide_updates_ytdlp">yt-dlp otomatis</string>
+    <string name="guide_updates_hazel">Hazel otomatis</string>
+    <string name="guide_updates_wifi">Hanya Wi-Fi</string>
 </resources>

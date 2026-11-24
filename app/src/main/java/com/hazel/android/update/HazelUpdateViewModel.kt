@@ -58,6 +58,13 @@ class HazelUpdateViewModel(application: Application) : AndroidViewModel(applicat
         viewModelScope.launch { SettingsRepository.setHazelUpdateNotify(getApplication(), enabled) }
     }
 
+    val wifiOnly: StateFlow<Boolean> = SettingsRepository.getHazelUpdateWifiOnly(application)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    fun setWifiOnly(enabled: Boolean) {
+        viewModelScope.launch { SettingsRepository.setHazelUpdateWifiOnly(getApplication(), enabled) }
+    }
+
     fun setAutoDownload(enabled: Boolean) {
         viewModelScope.launch { SettingsRepository.setHazelUpdateAutoDownload(getApplication(), enabled) }
     }
