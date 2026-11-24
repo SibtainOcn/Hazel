@@ -1,7 +1,5 @@
 package com.hazel.android.ui.screens.more
 
-import com.hazel.android.ui.theme.LocalDarkTheme
-import com.hazel.android.ui.theme.LocalGlass
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -14,16 +12,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Coffee
@@ -31,22 +30,25 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.hazel.android.R
 import com.hazel.android.util.openInAppBrowser
 
@@ -62,27 +64,11 @@ import com.hazel.android.util.openInAppBrowser
  * anybody ever opens this screen, and the ways of helping that cost nothing sit next to the
  * ones that cost money because they are worth as much.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SponsorScreen(onBack: () -> Unit) {
     val context = LocalContext.current
-    val isDark = LocalDarkTheme.current
-
-    // Independent theme-adaptive color tokens matching GettingStartedDialog black shades aesthetic
-    val glass = LocalGlass.current
-    val surfaceColor = when {
-        glass -> MaterialTheme.colorScheme.surface
-        isDark -> Color(0xFF121418)
-        else -> Color(0xFFFFFFFF)
-    }
-    val textPrimary = if (isDark) Color(0xFFF9FAFB) else Color(0xFF0F172A)
-    val textSecondary = if (isDark) Color(0xFFA0A7B5) else Color(0xFF475569)
-    val badgeBg = when {
-        glass -> MaterialTheme.colorScheme.surfaceVariant
-        isDark -> Color(0xFF1A1D24)
-        else -> Color(0xFFF1F5F9)
-    }
-    val iconTint = if (isDark) Color.White else Color(0xFF0F172A)
-    val chevronTint = if (isDark) Color(0xFF717784) else Color(0xFF94A3B8)
+    val colors = MaterialTheme.colorScheme
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -96,7 +82,7 @@ fun SponsorScreen(onBack: () -> Unit) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBackIos,
                     contentDescription = stringResource(R.string.sponsor_back),
-                    tint = textPrimary
+                    tint = colors.onSurface
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -104,7 +90,7 @@ fun SponsorScreen(onBack: () -> Unit) {
                 stringResource(R.string.sponsor_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = textPrimary
+                color = colors.onSurface
             )
         }
         Column(
@@ -114,123 +100,78 @@ fun SponsorScreen(onBack: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            SectionLabel(
-                text = stringResource(R.string.sponsor_section_developer),
-                color = textPrimary
-            )
+            DeveloperCard(onClick = { openLink(context, DEVELOPER_URL) })
 
-            SupportCard(
-                icon = Icons.Filled.Person,
-                title = stringResource(R.string.sponsor_developer_name),
-                subtitle = stringResource(R.string.sponsor_developer_subtitle),
-                enabled = true,
-                surfaceColor = surfaceColor,
-                badgeBg = badgeBg,
-                iconTint = iconTint,
-                textPrimary = textPrimary,
-                textSecondary = textSecondary,
-                chevronTint = chevronTint,
-                onClick = { openLink(context, DEVELOPER_URL) }
-            )
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Spacer(modifier = Modifier.height(28.dp))
+            HeroCard()
 
-            HeroCard(
-                surfaceColor = surfaceColor,
-                badgeBg = badgeBg,
-                iconTint = iconTint,
-                textPrimary = textPrimary,
-                textSecondary = textSecondary
-            )
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Spacer(modifier = Modifier.height(28.dp))
-
-            SectionLabel(
-                text = stringResource(R.string.sponsor_section_ways),
-                color = textPrimary
-            )
-
-            SupportCard(
-                icon = Icons.Filled.Favorite,
-                title = stringResource(R.string.sponsor_github_title),
-                subtitle = stringResource(R.string.sponsor_github_subtitle),
-                enabled = SPONSORS_URL.isNotBlank(),
-                surfaceColor = surfaceColor,
-                badgeBg = badgeBg,
-                iconTint = iconTint,
-                textPrimary = textPrimary,
-                textSecondary = textSecondary,
-                chevronTint = chevronTint,
-                onClick = { openLink(context, SPONSORS_URL) }
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            SupportCard(
-                icon = Icons.Filled.Coffee,
-                title = stringResource(R.string.sponsor_bmac_title),
-                subtitle = stringResource(R.string.sponsor_bmac_subtitle),
-                enabled = BMAC_URL.isNotBlank(),
-                surfaceColor = surfaceColor,
-                badgeBg = badgeBg,
-                iconTint = iconTint,
-                textPrimary = textPrimary,
-                textSecondary = textSecondary,
-                chevronTint = chevronTint,
-                onClick = { openLink(context, BMAC_URL) }
-            )
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            SectionLabel(
-                text = stringResource(R.string.sponsor_section_free),
-                color = textPrimary
-            )
-
+            SectionLabel(stringResource(R.string.sponsor_section_ways))
             ConnectedRows(
-                color = surfaceColor,
                 rows = listOf(
                     {
-                        HelpRow(
+                        SupportRow(
+                            icon = Icons.Filled.Favorite,
+                            shape = MaterialShapes.Cookie6Sided.toShape(),
+                            title = stringResource(R.string.sponsor_github_title),
+                            subtitle = stringResource(R.string.sponsor_github_subtitle),
+                            enabled = SPONSORS_URL.isNotBlank(),
+                            onClick = { openLink(context, SPONSORS_URL) }
+                        )
+                    },
+                    {
+                        SupportRow(
+                            icon = Icons.Filled.Coffee,
+                            shape = MaterialShapes.Cookie7Sided.toShape(),
+                            title = stringResource(R.string.sponsor_bmac_title),
+                            subtitle = stringResource(R.string.sponsor_bmac_subtitle),
+                            enabled = BMAC_URL.isNotBlank(),
+                            onClick = { openLink(context, BMAC_URL) }
+                        )
+                    }
+                )
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            SectionLabel(stringResource(R.string.sponsor_section_free))
+            ConnectedRows(
+                rows = listOf(
+                    {
+                        SupportRow(
                             icon = Icons.Filled.Star,
+                            shape = MaterialShapes.Sunny.toShape(),
                             title = stringResource(R.string.sponsor_star_title),
                             subtitle = stringResource(R.string.sponsor_star_subtitle),
-                            iconTint = iconTint,
-                            textPrimary = textPrimary,
-                            textSecondary = textSecondary,
                             onClick = { openLink(context, SOURCE_URL) }
                         )
                     },
                     {
-                        HelpRow(
+                        SupportRow(
                             icon = Icons.Filled.Share,
+                            shape = MaterialShapes.Cookie9Sided.toShape(),
                             title = stringResource(R.string.sponsor_share_title),
                             subtitle = stringResource(R.string.sponsor_share_subtitle),
-                            iconTint = iconTint,
-                            textPrimary = textPrimary,
-                            textSecondary = textSecondary,
                             onClick = { shareApp(context) }
                         )
                     },
                     {
-                        HelpRow(
+                        SupportRow(
                             icon = Icons.Filled.BugReport,
+                            shape = MaterialShapes.Pentagon.toShape(),
                             title = stringResource(R.string.sponsor_issues_title),
                             subtitle = stringResource(R.string.sponsor_issues_subtitle),
-                            iconTint = iconTint,
-                            textPrimary = textPrimary,
-                            textSecondary = textSecondary,
                             onClick = { openLink(context, ISSUES_URL) }
                         )
                     },
                     {
-                        HelpRow(
+                        SupportRow(
                             icon = Icons.Filled.Code,
+                            shape = MaterialShapes.Cookie4Sided.toShape(),
                             title = stringResource(R.string.sponsor_source_title),
                             subtitle = stringResource(R.string.sponsor_source_subtitle),
-                            iconTint = iconTint,
-                            textPrimary = textPrimary,
-                            textSecondary = textSecondary,
                             onClick = { openLink(context, SOURCE_URL) }
                         )
                     }
@@ -242,178 +183,143 @@ fun SponsorScreen(onBack: () -> Unit) {
     }
 }
 
-/** The block at the top, which is the part that has something to say. */
+/**
+ * The person behind the app, set apart from the rows below: a flat card in the accent's
+ * container colour, the avatar on a 12-sided cookie and the way to the profile above the name.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun HeroCard(
-    surfaceColor: Color,
-    badgeBg: Color,
-    iconTint: Color,
-    textPrimary: Color,
-    textSecondary: Color
-) {
+internal fun DeveloperCard(onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
     Surface(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        color = surfaceColor
+        shape = RoundedCornerShape(28.dp),
+        color = colors.primaryContainer,
+        contentColor = colors.onPrimaryContainer
     ) {
-        Column(
-            modifier = Modifier
-                .padding(24.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(CircleShape)
-                    .background(badgeBg),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Filled.Favorite,
-                    contentDescription = null,
-                    modifier = Modifier.size(26.dp),
-                    tint = iconTint
-                )
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(MaterialShapes.Cookie12Sided.toShape())
+                        .background(colors.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Filled.Person, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(28.dp))
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(MaterialShapes.Cookie4Sided.toShape())
+                        .background(colors.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(20.dp))
+                }
             }
-
-            Spacer(modifier = Modifier.height(18.dp))
-
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
-                stringResource(R.string.sponsor_hero_title),
-                style = MaterialTheme.typography.headlineSmall,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = textPrimary
+                stringResource(R.string.sponsor_section_developer),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.onPrimary,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(colors.primary)
+                    .padding(horizontal = 10.dp, vertical = 3.dp)
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                stringResource(R.string.sponsor_hero_body),
+                stringResource(R.string.sponsor_developer_name),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                stringResource(R.string.sponsor_developer_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
-                color = textSecondary,
-                lineHeight = 22.sp
+                color = colors.onPrimaryContainer.copy(alpha = 0.8f)
             )
         }
     }
 }
 
+/** The block that says why, with the heart on an accent cookie. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SectionLabel(text: String, color: Color) {
+private fun HeroCard() {
+    val colors = MaterialTheme.colorScheme
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(colors.surfaceContainerHigh)
+            .padding(24.dp)
+    ) {
+        ShapedIcon(Icons.Filled.Favorite, MaterialShapes.Cookie9Sided.toShape(), size = 52.dp)
+        Spacer(modifier = Modifier.height(18.dp))
+        Text(
+            stringResource(R.string.sponsor_hero_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = colors.onSurface
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            stringResource(R.string.sponsor_hero_body),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
     Text(
         text,
         style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.Bold,
-        color = color,
-        modifier = Modifier.padding(bottom = 12.dp)
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.padding(start = 4.dp, bottom = 10.dp)
     )
 }
 
-/** One place money can go, drawn large enough to be the point of the screen. */
+/** One way of helping, as a row of a connected group: the icon on its own accent shape. */
 @Composable
-private fun SupportCard(
+private fun SupportRow(
     icon: ImageVector,
+    shape: Shape,
     title: String,
     subtitle: String,
-    enabled: Boolean,
-    surfaceColor: Color,
-    badgeBg: Color,
-    iconTint: Color,
-    textPrimary: Color,
-    textSecondary: Color,
-    chevronTint: Color,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = surfaceColor
-    ) {
-        Row(
-            modifier = Modifier
-                .clickable(enabled = enabled, onClick = onClick)
-                .padding(horizontal = 18.dp, vertical = 18.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(badgeBg),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp),
-                    tint = if (enabled) iconTint else textSecondary.copy(alpha = 0.45f)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (enabled) textPrimary else textSecondary.copy(alpha = 0.5f)
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = textSecondary
-                )
-            }
-
-            if (enabled) {
-                Spacer(modifier = Modifier.width(12.dp))
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowForwardIos,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = chevronTint
-                )
-            }
-        }
-    }
-}
-
-/** One of the ways of helping that costs nothing. */
-@Composable
-private fun HelpRow(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    iconTint: Color,
-    textPrimary: Color,
-    textSecondary: Color,
-    onClick: () -> Unit
-) {
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .heightIn(min = 64.dp)
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(start = 12.dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
+            .alpha(if (enabled) 1f else 0.5f),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = iconTint
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                title,
-                fontWeight = FontWeight.Medium,
-                color = textPrimary
-            )
-            Text(
-                subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = textSecondary
+        ShapedIcon(icon, shape)
+        Spacer(modifier = Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = colors.onSurface)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+        }
+        if (enabled) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = colors.onSurfaceVariant,
+                modifier = Modifier.size(22.dp)
             )
         }
     }
