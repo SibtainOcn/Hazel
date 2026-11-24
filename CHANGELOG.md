@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notification taps open the screen they are about: Running, Failed, History or the failure dialog.
 - The share sheet's format list now shows why a read failed.
 - Format sheet: rows no longer draw over each other when switching between quality stops, and the list starts from the top on each switch.
+- Trim after download no longer crashes on Android 7.
 
 ### Changed
 - The bottom bar's selected-tab shape is easier to see.
