@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
 - Cut: three modes, Quick cut (default), Precise cuts and Trim after download, which downloads the whole file and cuts it on the device. Covers, tags, chapters and subtitle files stay in step.
 - Cut mode is saved, and set from either the Cut sheet or Processing settings. Trim after download is unavailable while SponsorBlock removes parts, chapters are split or a live stream is taken from the start.
+- Cut screen: mode rows switch in one calm step, without the bounce or the flash on tap.
 - Cut: opens full screen, shows every mode's hint at once, and the preview's quality can be changed from its corner.
 - The player's quality change takes effect again.
 
@@ -25,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The notification for a download with no known size shows the size so far, not "0% · 0 MB / total".
 - Format list: a link whose qualities could not be read now says why, instead of leaving the quality ladder looking like its final list.
 - YouTube's "confirm you're not a bot" refusal is named as such, not as private content.
+- yt-dlp updates work on older, low-memory and nearly full phones, and resume after a dropped connection (#166).
+- The yt-dlp update screen says why an update failed, and Retry repeats the install.
+- Updating yt-dlp while a download runs no longer reports a failure once the update goes live.
 - The quality ladder keeps its original look and side rail until the real qualities arrive.
 - A link refused until sign-in now opens the sign-in dialog right away; signing in reads it again.
 - Off screen, the same refusal posts a notification with Sign in and Dismiss.
@@ -32,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The share sheet's format list now shows why a read failed.
 - Format sheet: rows no longer draw over each other when switching between quality stops, and the list starts from the top on each switch.
 - Downloads list keeps each item's artwork after its source link expires.
+- Trim after download no longer crashes on Android 7.
 
 ### Changed
 - Storage cleanup lists the saved download thumbnails as "Downloads artwork", so they can be cleared.

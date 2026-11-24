@@ -1,5 +1,10 @@
 package com.hazel.android.ui.screens.download
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -54,6 +59,10 @@ internal fun CutModePicker(
     onSelect: (CutMode) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Shown at once on a tap rather than after the choice has been saved and read back, so the
+    // old row and the new one change together instead of one after the other.
+    var picked by remember { mutableStateOf(selected) }
+    LaunchedEffect(selected) { picked = selected }
     Column(
         modifier = modifier.fillMaxWidth().selectableGroup(),
         verticalArrangement = Arrangement.spacedBy(3.dp)
@@ -77,11 +86,14 @@ internal fun CutModePicker(
             }
             ModeCard(
                 spec = spec,
-                selected = mode == selected,
+                selected = mode == picked,
                 enabled = enabled,
                 first = mode == CutMode.entries.first(),
                 last = mode == CutMode.entries.last(),
-                onClick = { onSelect(mode) }
+                onClick = {
+                    picked = mode
+                    onSelect(mode)
+                }
             )
         }
     }
@@ -98,19 +110,29 @@ private fun ModeCard(
     last: Boolean,
     onClick: () -> Unit
 ) {
-    val bouncy = spring<androidx.compose.ui.unit.Dp>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow)
+    // Settles without overshoot: the change reads as a calm step, not a wobble.
+    val settle = spring<androidx.compose.ui.unit.Dp>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
     val outer = 22.dp
     val inner = 6.dp
-    val top by animateDpAsState(if (selected || first) outer else inner, bouncy, label = "top")
-    val bottom by animateDpAsState(if (selected || last) outer else inner, bouncy, label = "bottom")
+    val top by animateDpAsState(if (selected || first) outer else inner, settle, label = "top")
+    val bottom by animateDpAsState(if (selected || last) outer else inner, settle, label = "bottom")
     val turn by animateFloatAsState(
-        if (selected) 60f else 0f,
-        spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        if (selected) MODE_TURN else 0f,
+        spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
         label = "turn"
     )
     val colors = MaterialTheme.colorScheme
-    val fill by animateColorAsState(if (selected) colors.primaryContainer else colors.surfaceContainerHigh, label = "fill")
-    val ink = if (selected) colors.onPrimaryContainer else colors.onSurface
+    // Every colour moves on one timing, so no part of a row changes ahead of the rest.
+    val fade = tween<androidx.compose.ui.graphics.Color>(MODE_FADE_MS)
+    val fill by animateColorAsState(if (selected) colors.primaryContainer else colors.surfaceContainerHigh, fade, label = "fill")
+    val ink by animateColorAsState(if (selected) colors.onPrimaryContainer else colors.onSurface, fade, label = "ink")
+    val badge by animateColorAsState(if (selected) colors.primary else colors.surfaceContainerHighest, fade, label = "badge")
+    val glyph by animateColorAsState(if (selected) colors.onPrimary else colors.onSurfaceVariant, fade, label = "glyph")
+    val hint by animateColorAsState(
+        if (selected) colors.onPrimaryContainer.copy(alpha = 0.85f) else colors.onSurfaceVariant,
+        fade,
+        label = "hint"
+    )
     val alpha = if (enabled) 1f else 0.38f
 
     Row(
@@ -118,7 +140,15 @@ private fun ModeCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(top, top, bottom, bottom))
             .background(fill)
-            .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onClick)
+            .selectable(
+                selected = selected,
+                enabled = enabled,
+                role = Role.RadioButton,
+                interactionSource = null,
+                // The fill is the feedback; a ripple on top flashed over the change.
+                indication = null,
+                onClick = onClick
+            )
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -128,12 +158,12 @@ private fun ModeCard(
                     .size(40.dp)
                     .rotate(turn)
                     .clip(spec.shape)
-                    .background(if (selected) colors.primary else colors.surfaceContainerHighest)
+                    .background(badge)
             )
             Icon(
                 spec.icon,
                 contentDescription = null,
-                tint = (if (selected) colors.onPrimary else colors.onSurfaceVariant).copy(alpha = alpha),
+                tint = glyph.copy(alpha = alpha),
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -148,10 +178,12 @@ private fun ModeCard(
             Text(
                 stringResource(spec.hint),
                 style = MaterialTheme.typography.bodySmall,
-                color = (if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant)
-                    .copy(alpha = if (selected) 0.85f else alpha),
+                color = if (enabled) hint else hint.copy(alpha = alpha),
                 modifier = Modifier.padding(top = 2.dp)
             )
         }
     }
 }
+
+private const val MODE_TURN = 30f
+private const val MODE_FADE_MS = 200
