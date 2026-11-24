@@ -60,4 +60,28 @@ class SignInBrowserTest {
         assertFalse(SignInBrowser.opensInPage("instagram://user?username=x"))
         assertFalse(SignInBrowser.opensInPage(null))
     }
+
+    @Test
+    fun `client hints name Chrome on the matching platform`() {
+        val mobile = SignInBrowser.metadata(webView, desktop = false)
+        assertEquals(listOf("Not_A Brand", "Chromium", "Google Chrome"), mobile.brandVersionList.map { it.brand })
+        assertTrue(mobile.brandVersionList.none { "WebView" in it.brand })
+        assertEquals("142.0.7444.60", mobile.fullVersion)
+        assertEquals("Android", mobile.platform)
+        assertEquals("17.0.0", mobile.platformVersion)
+        assertTrue(mobile.isMobile)
+        assertEquals("", mobile.model)
+
+        val desktop = SignInBrowser.metadata(webView, desktop = true)
+        assertEquals("Windows", desktop.platform)
+        assertFalse(desktop.isMobile)
+        assertEquals("142", desktop.brandVersionList.last().majorVersion)
+    }
+
+    @Test
+    fun `client hints survive an unreadable agent`() {
+        val hints = SignInBrowser.metadata("", desktop = false)
+        assertEquals("131.0.0.0", hints.fullVersion)
+        assertEquals("10.0.0", hints.platformVersion)
+    }
 }

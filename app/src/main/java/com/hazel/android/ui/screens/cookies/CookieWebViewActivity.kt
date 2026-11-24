@@ -11,6 +11,8 @@ import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -266,8 +268,14 @@ class CookieWebViewActivity : ComponentActivity() {
                                             view.destroy()
                                         }
                                         if (webView === view) webView = null
-                                        Toast.makeText(this@CookieWebViewActivity, R.string.cookie_webview_crashed, Toast.LENGTH_LONG).show()
-                                        finish()
+                                        // Reclaimed by the system for memory: open again where it was.
+                                        // A real crash is not retried, so it cannot loop.
+                                        if (Build.VERSION.SDK_INT >= 26 && detail?.didCrash() == false) {
+                                            recreate()
+                                        } else {
+                                            Toast.makeText(this@CookieWebViewActivity, R.string.cookie_webview_crashed, Toast.LENGTH_LONG).show()
+                                            finish()
+                                        }
                                         return true
                                     }
 
@@ -318,11 +326,15 @@ class CookieWebViewActivity : ComponentActivity() {
             javaScriptCanOpenWindowsAutomatically = true
             domStorageEnabled = true
             cacheMode = WebSettings.LOAD_DEFAULT
-            userAgentString = SignInBrowser.mobileUserAgent(WebSettings.getDefaultUserAgent(view.context))
             setSupportZoom(true)
             builtInZoomControls = true
             displayZoomControls = false
             if (Build.VERSION.SDK_INT >= 26) safeBrowsingEnabled = true
+        }
+        applyIdentity(view, desktop = false)
+        // Without this every request names the app in X-Requested-With, marking it as a WebView.
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.REQUESTED_WITH_HEADER_ALLOW_LIST)) {
+            WebSettingsCompat.setRequestedWithHeaderOriginAllowList(view.settings, emptySet())
         }
         CookieManager.getInstance().apply {
             setAcceptCookie(true)
@@ -335,11 +347,20 @@ class CookieWebViewActivity : ComponentActivity() {
      * switched to one. The wide page is zoomed out to fit the screen and can be pinched.
      */
     private fun applyDesktopMode(view: WebView, desktop: Boolean) {
-        val base = WebSettings.getDefaultUserAgent(view.context)
+        applyIdentity(view, desktop)
         view.settings.apply {
-            userAgentString = if (desktop) SignInBrowser.desktopUserAgent(base) else SignInBrowser.mobileUserAgent(base)
             useWideViewPort = desktop
             loadWithOverviewMode = desktop
+        }
+    }
+
+    /** The user agent and its matching Client Hints, as a mobile or desktop Chrome. */
+    private fun applyIdentity(view: WebView, desktop: Boolean) {
+        val base = WebSettings.getDefaultUserAgent(view.context)
+        view.settings.userAgentString =
+            if (desktop) SignInBrowser.desktopUserAgent(base) else SignInBrowser.mobileUserAgent(base)
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.USER_AGENT_METADATA)) {
+            runCatching { WebSettingsCompat.setUserAgentMetadata(view.settings, SignInBrowser.metadata(base, desktop)) }
         }
     }
 
