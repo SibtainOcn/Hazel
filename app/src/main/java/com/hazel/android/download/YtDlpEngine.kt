@@ -3,6 +3,7 @@ package com.hazel.android.download
 import android.util.Log
 import com.hazel.android.HazelApp
 import com.hazel.android.update.YtDlpUpdater
+import com.hazel.android.util.SdCards
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLException
 import com.yausername.youtubedl_android.YoutubeDLRequest
@@ -73,16 +74,11 @@ object YtDlpEngine {
     }
 
     /**
-     * Stops the run started under [processId], and the ffmpeg it started.
-     *
-     * The library stops a run by ending the Python process and asks `pstree` for its
-     * children by the run's *name* rather than its pid, so the children are never found. A
-     * cut is downloaded by ffmpeg, a child of Python that shares its output pipes: it kept
-     * running after Python was gone, the pipes never closed, and the run that was stopped
-     * never returned. The card stayed on "downloading", the next link never started, and
-     * every stop left one more ffmpeg burning the processor and the network.
+     * Stops the run under [processId] and its ffmpeg. The library never finds Python's
+     * children, so a cut's ffmpeg kept the output pipe open and the stopped run never returned.
      */
     fun stop(processId: String): Boolean {
+        LocalTrim.stop()
         val stopped = try {
             YoutubeDL.getInstance().destroyProcessById(processId)
         } catch (_: Exception) {
@@ -92,29 +88,30 @@ object YtDlpEngine {
         return stopped
     }
 
-    /**
-     * Ends every ffmpeg this app has running. The engine is the only thing here that starts
-     * one, and it runs one download at a time, so any that is alive when nothing is
-     * downloading, or just after a stop, belongs to a run that is over.
-     */
+    /** Kills ffmpeg working under a download root only, so a Converter job survives. */
     fun killStrayFfmpeg() {
         try {
+            val roots = SdCards.workRoots()
+                .map { it.absolutePath.trimEnd('/') + "/" }
+                .filter { it.length > 1 }
+            if (roots.isEmpty()) return
             val self = android.os.Process.myPid()
             File("/proc").listFiles()?.forEach { dir ->
                 val pid = dir.name.toIntOrNull() ?: return@forEach
                 if (pid == self) return@forEach
-                val program = try {
-                    File(dir, "cmdline").readText().substringBefore('\u0000')
+                val args = try {
+                    File(dir, "cmdline").readText().split('\u0000')
                 } catch (_: Exception) {
                     return@forEach
                 }
-                if (program.endsWith("libffmpeg.so")) {
-                    try {
-                        Os.kill(pid, OsConstants.SIGKILL)
-                    } catch (_: Exception) { /* already gone */ }
-                }
+                if (!args.first().endsWith("libffmpeg.so")) return@forEach
+                // Paths arrive as `file:<path>`.
+                if (args.none { arg -> roots.any { root -> root in arg } }) return@forEach
+                try {
+                    Os.kill(pid, OsConstants.SIGKILL)
+                } catch (_: Exception) { /* already gone */ }
             }
-        } catch (_: Exception) { /* best effort: the stop itself has already been done */ }
+        } catch (_: Exception) { /* best effort */ }
     }
 
     /**

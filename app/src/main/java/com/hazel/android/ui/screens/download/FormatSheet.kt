@@ -829,12 +829,15 @@ fun FormatSheet(
             thumbnail = info.thumbnail,
             durationSeconds = info.durationSeconds,
             current = oneOff,
-            onApply = { start, end, precise ->
-                oneOff = oneOff.copy(sectionStart = start, sectionEnd = end, preciseCuts = precise)
+            mode = options.cutMode,
+            onModeChange = { onOptionsChange(options.copy(cutMode = it)) },
+            canTrimAfterDownload = options.copy(liveFromStart = oneOff.liveFromStart).canTrimAfterDownload,
+            onApply = { start, end ->
+                oneOff = oneOff.copy(sectionStart = start, sectionEnd = end)
                 openDialog = SheetDialog.NONE
             },
             onClear = {
-                oneOff = oneOff.copy(sectionStart = -1.0, sectionEnd = -1.0, preciseCuts = false)
+                oneOff = oneOff.copy(sectionStart = -1.0, sectionEnd = -1.0)
                 openDialog = SheetDialog.NONE
             },
             onDismiss = { openDialog = SheetDialog.NONE }

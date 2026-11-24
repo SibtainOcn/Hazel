@@ -93,7 +93,7 @@ Hazel **yt-dlp** əsaslı pulsuz, açıq mənbəli Android yükləyicisidir. **1
   <tr><th width="50%" align="left">📥 Yükləmə</th><th width="50%" align="left">🔍 Axtarış və oxutma</th></tr>
   <tr><td><b>1500+ sayt:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud və <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">daha çoxu</a>.</td><td><b>Axtarış:</b> YouTube, YouTube Music, SoundCloud və ya Bandcamp, istəyə bağlı təkliflərlə.</td></tr>
   <tr><td><b>Toplu:</b> bir keçid, eyni anda bir neçəsi və ya bütöv pleylist / kanal.</td><td><b>Əvvəlcə oxut:</b> istənilən nəticəni öz kartında irəli-geri çəkmə, iki toxunuşla keçmə və tam ekranla oxudun.</td></tr>
-  <tr><td><b>Hazel Instant:</b> istənilən tətbiqdən keçid paylaşın, yükləmə saxlanmış keyfiyyətdə başlayır.</td><td><b>Kəsmə:</b> canlı önizləmədə seçdiyiniz hissəni saxlayın.</td></tr>
+  <tr><td><b>Hazel Instant:</b> istənilən tətbiqdən keçid paylaşın, yükləmə saxlanmış keyfiyyətdə başlayır.</td><td><b>Kəsmə:</b> canlı önizləmədə seçdiyiniz hissəni saxlayın. Sürətli, dəqiq və ya endirmədən sonra kəsmə: bütün fayl tam sürətlə yüklənir, sonra telefonunuzda kəsilir.</td></tr>
   <tr><td><b>Öz formatınız:</b> keyfiyyət, konteyner, audio trek seçin, başlıq / metadatanı redaktə edin.</td><td><b>Canlı yayımlar:</b> əvvəldən yazın və ya premyeranı gözləyin.</td></tr>
 </table>
 

@@ -131,6 +131,7 @@ object SettingsRepository {
         val preferredVideoCodec = stringPreferencesKey("${prefix}preferred_video_codec")
         val videoQuality = intPreferencesKey("${prefix}video_quality")
         val sheetOpensOnAudio = booleanPreferencesKey("${prefix}sheet_opens_on_audio")
+        val cutMode = stringPreferencesKey("${prefix}cut_mode")
     }
 
     private val SHEET_OPTIONS = OptionKeys("")
@@ -159,7 +160,9 @@ object SettingsRepository {
             preferredAudioCodec = this[keys.preferredAudioCodec] ?: defaults.preferredAudioCodec,
             preferredVideoCodec = this[keys.preferredVideoCodec] ?: defaults.preferredVideoCodec,
             videoQuality = this[keys.videoQuality] ?: defaults.videoQuality,
-            sheetOpensOnAudio = this[keys.sheetOpensOnAudio] ?: defaults.sheetOpensOnAudio
+            sheetOpensOnAudio = this[keys.sheetOpensOnAudio] ?: defaults.sheetOpensOnAudio,
+            cutMode = com.hazel.android.download.CutMode.entries.firstOrNull { it.name == this[keys.cutMode] }
+                ?: defaults.cutMode
         )
     }
 
@@ -185,6 +188,7 @@ object SettingsRepository {
         this[keys.preferredVideoCodec] = options.preferredVideoCodec
         this[keys.videoQuality] = options.videoQuality
         this[keys.sheetOpensOnAudio] = options.sheetOpensOnAudio
+        this[keys.cutMode] = options.cutMode.name
     }
 
     fun getDownloadOptions(context: Context): Flow<DownloadOptions> =
