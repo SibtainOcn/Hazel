@@ -45,7 +45,7 @@ object MediaStoreHelper {
         keepFolders: Boolean = false,
         onMoved: (Uri) -> Unit = {}
     ): File {
-        if (tempDir.listFiles() == null) return tempDir
+        if (!tempDir.isDirectory) return tempDir
         // With keepFolders, a file in tempDir/a/b is published under relativePath/a/b.
         var skipped = false
         val files = StagedFiles.list(
@@ -266,7 +266,7 @@ object MediaStoreHelper {
         keepFolders: Boolean = false,
         onMoved: (Uri) -> Unit = {}
     ): Boolean {
-        if (tempDir.listFiles() == null) return true
+        if (!tempDir.isDirectory) return true
         var skipped = false
         val files = StagedFiles.list(
             tempDir,

@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Trim after download and cut progress find the file inside `-o` folders.
 - Properties "Saved to" shows the file's own folder, and a folder picked through Downloads no longer shows as `raw//storage/...`.
 - Files saved to a picked folder are now listed by gallery and music apps.
+- Saving a download no longer rescans the whole Hazel folder.
 - Format sheet: rows no longer draw over each other when switching between quality stops, and the list starts from the top on each switch.
 
 ### Changed
