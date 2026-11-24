@@ -21,7 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
@@ -185,7 +185,7 @@ fun SponsorScreen(onBack: () -> Unit) {
 
 /**
  * The person behind the app, set apart from the rows below: a flat card in the accent's
- * container colour, the avatar on a 12-sided cookie and the way to the profile above the name.
+ * container colour, the avatar on a Bun shape and the way to the profile above the name.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -203,7 +203,7 @@ internal fun DeveloperCard(onClick: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(56.dp)
-                        .clip(MaterialShapes.Cookie12Sided.toShape())
+                        .clip(MaterialShapes.Bun.toShape())
                         .background(colors.primary),
                     contentAlignment = Alignment.Center
                 ) {
@@ -213,11 +213,11 @@ internal fun DeveloperCard(onClick: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(44.dp)
-                        .clip(MaterialShapes.Cookie4Sided.toShape())
+                        .clip(MaterialShapes.Clover4Leaf.toShape())
                         .background(colors.primary),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(20.dp))
+                    Icon(Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(16.dp))
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
