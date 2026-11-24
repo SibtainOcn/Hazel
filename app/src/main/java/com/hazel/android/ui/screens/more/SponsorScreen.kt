@@ -185,7 +185,7 @@ fun SponsorScreen(onBack: () -> Unit) {
 
 /**
  * The person behind the app, set apart from the rows below: a flat card in the accent's
- * container colour, the avatar on a Bun shape and the way to the profile above the name.
+ * container colour, the avatar on the same 9-sided cookie as the heart, and the way to the profile above the name.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -203,7 +203,7 @@ internal fun DeveloperCard(onClick: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(56.dp)
-                        .clip(MaterialShapes.Bun.toShape())
+                        .clip(MaterialShapes.Cookie9Sided.toShape())
                         .background(colors.primary),
                     contentAlignment = Alignment.Center
                 ) {
