@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The player's quality change takes effect again.
 
 ### Fixed
-- Downloads list keeps each item's artwork after its source link expires.
 - Trimmed downloads show a real percentage and time left instead of sitting at 0%.
 - A trimmed download's history entry shows the kept length, not the whole video's.
 - A trimmed download no longer shows a Merge stage.
@@ -32,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notification taps open the screen they are about: Running, Failed, History or the failure dialog.
 - The share sheet's format list now shows why a read failed.
 - Format sheet: rows no longer draw over each other when switching between quality stops, and the list starts from the top on each switch.
+- Downloads list keeps each item's artwork after its source link expires.
 
 ### Changed
 - Storage cleanup lists the saved download thumbnails as "Downloads artwork", so they can be cleared.
