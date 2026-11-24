@@ -467,7 +467,7 @@ fun MoreScreen(
 
                 // The first-launch carousel again, for anyone who skipped it or installed before
                 // it said what it says now.
-                var guideOpen by remember { mutableStateOf(false) }
+                var guideOpen by rememberSaveable { mutableStateOf(false) }
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.more_getting_started)) },
                     leadingContent = {

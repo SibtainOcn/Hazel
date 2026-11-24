@@ -76,7 +76,12 @@ object StreamResolver {
      * @param picked the sound track picked for this video, kept across reloads. Its language
      *   stands in when the other engine names its tracks differently.
      */
-    suspend fun resolve(url: String, attempt: Int = 0, picked: AudioTrack? = null): PlayableStream =
+    suspend fun resolve(
+        url: String,
+        attempt: Int = 0,
+        picked: AudioTrack? = null,
+        processId: String = newReadId()
+    ): PlayableStream =
         withContext(Dispatchers.IO) {
             val app = HazelApp.instance
             val engine = SettingsRepository.getPlayEngine(app).first()
@@ -100,7 +105,7 @@ object StreamResolver {
                     access,
                     SettingsRepository.getFetchMode(app).first(),
                     SettingsRepository.getForceIpv4(app).first(),
-                    PLAY_PROCESS_ID
+                    processId
                 )
                 InfoCache.infoJsonFor(url)
             }
@@ -287,4 +292,16 @@ object StreamResolver {
     private val AUDIO_EXTENSIONS = setOf("m4a", "mp3", "aac", "opus", "ogg", "oga", "flac", "wav", "weba")
     private val COOKIE_ATTRIBUTES = setOf("domain", "path", "expires", "max-age", "samesite", "secure", "httponly")
     const val PLAY_PROCESS_ID = "hazel_play"
+    private val readCount = java.util.concurrent.atomic.AtomicInteger()
+
+    /**
+     * A process id of its own for each read: a stopped read's yt-dlp keeps running until it is
+     * killed, and the library refuses a second run under an id still in use.
+     */
+    fun newReadId(): String = "${PLAY_PROCESS_ID}_${readCount.incrementAndGet()}"
+
+    /** Kills the yt-dlp read under [processId], if it is still running. */
+    fun stopRead(processId: String) {
+        runCatching { com.yausername.youtubedl_android.YoutubeDL.getInstance().destroyProcessById(processId) }
+    }
 }

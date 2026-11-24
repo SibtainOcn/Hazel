@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Hazel updates: optional notification for new versions, opening the Hazel update screen.
+- Hazel updates: optional background download, with a Wi-Fi only switch, so the update screen opens on Install. Off by default.
+- Getting started: a third step to set update notifications, yt-dlp and Hazel auto-updates and Wi-Fi only.
 - Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
 - Download sheet: an Extra arguments chip in Adjust opens the same setting as Settings > Advanced.
 - Cut: three modes, Quick cut (default), Precise cuts and Trim after download, which downloads the whole file and cuts it on the device. Covers, tags, chapters and subtitle files stay in step.
@@ -23,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sign-in: one-tap Instagram, YouTube, X, Facebook, TikTok and Reddit in Settings > Cookies, so you can sign in before downloading.
 
 ### Fixed
+- Switching the play engine no longer breaks playback of results already on screen; an open player switches at once.
 - Video sizes in the download sheet, format list and queue now include the audio track, matching the download card.
 - The download card counts the picked audio language's track, not the default one.
 - A queued, paused or running link's sheet lists every quality again, not only the one picked.

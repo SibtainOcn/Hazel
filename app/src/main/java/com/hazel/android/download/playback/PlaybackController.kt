@@ -20,6 +20,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import com.hazel.android.data.SettingsRepository
+import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.download.extractor.newpipe.NewPipeEngine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 /**
@@ -78,6 +82,8 @@ class PlaybackController(
 
     private var attempt = 0
     private var loadJob: Job? = null
+    private var readId: String? = null
+    private var engineWatch: Job? = null
     private var ticker: Job? = null
     private var released = false
     private var current: PlayableStream? = null
@@ -137,6 +143,12 @@ class PlaybackController(
                 delay(TICK_MS)
             }
         }
+        // A play engine picked while this player is open applies to it straight away.
+        engineWatch = scope.launch {
+            SettingsRepository.getPlayEngine(app).distinctUntilChanged().drop(1).collect { engine ->
+                if (!released && (phase == Phase.FAILED || changesStream(engine))) reload()
+            }
+        }
     }
 
     /** Finds the stream and starts playing, from [startAtMs] when given. */
@@ -148,10 +160,12 @@ class PlaybackController(
 
     private fun load(resumeAt: Long) {
         loadJob?.cancel()
+        stopRead()
         phase = Phase.LOADING
+        val id = StreamResolver.newReadId().also { readId = it }
         loadJob = scope.launch {
             try {
-                val stream = StreamResolver.resolve(url, attempt, pickedAudio)
+                val stream = StreamResolver.resolve(url, attempt, pickedAudio, id)
                 if (released) return@launch
                 current = stream
                 hasVideo = stream.hasVideo
@@ -252,9 +266,22 @@ class PlaybackController(
         if (released) return
         released = true
         loadJob?.cancel()
+        stopRead()
+        engineWatch?.cancel()
         ticker?.cancel()
         player.removeListener(listener)
         player.release()
+    }
+
+    /** Whether [engine] would play this link from another source than the one playing. */
+    private fun changesStream(engine: ListingSource): Boolean {
+        val playing = current?.engine ?: return true
+        return playing != engine && (engine == ListingSource.YT_DLP || NewPipeEngine.handlesStream(url))
+    }
+
+    private fun stopRead() {
+        readId?.let(StreamResolver::stopRead)
+        readId = null
     }
 
     private companion object {

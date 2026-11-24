@@ -5,10 +5,19 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.content.FileProvider
 import com.hazel.android.BuildConfig
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okhttp3.Call
 import com.hazel.android.download.NetworkProxy.throughProxy
@@ -19,6 +28,7 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Handles fetching, verifying, and downloading Hazel application releases directly
@@ -33,12 +43,34 @@ object HazelUpdater {
     @Volatile
     private var currentDownloadCall: Call? = null
 
+    /** Set when the person stops a download, so a stopped background download is not announced. */
+    private val stoppedByUser = AtomicBoolean(false)
+
     fun cancelActiveDownload() {
+        stoppedByUser.set(true)
         try {
             currentDownloadCall?.cancel()
         } catch (_: Exception) {}
         currentDownloadCall = null
     }
+
+    /** One APK download at a time: the screen's and the background's share the same file. */
+    private val downloadLock = Mutex()
+
+    /** A background download in progress, for the update screen to show instead of starting its own. */
+    data class BackgroundDownload(
+        val version: String,
+        val bytes: Long = 0L,
+        val total: Long = 0L,
+        val speedBps: Long = 0L,
+        val etaSeconds: Long = 0L
+    )
+
+    private val _background = MutableStateFlow<BackgroundDownload?>(null)
+    val background: StateFlow<BackgroundDownload?> = _background.asStateFlow()
+
+    /** Outlives the screen that started the check, so a background download is not cut short. */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     enum class Channel(val label: String) {
         STABLE("Stable"),
@@ -524,7 +556,11 @@ object HazelUpdater {
             val release = latestRelease(channel)
             val hasHazelUpdate = release != null && isNewer(release.version)
             com.hazel.android.data.SettingsRepository.setHazelUpdateAvailable(context, hasHazelUpdate, release?.version)
-            cleanStaleApks(context, preserveVersion = if (hasHazelUpdate) release.version else null)
+            // A download in progress owns its part file; tidying now would delete it under it.
+            if (!downloadLock.isLocked) {
+                cleanStaleApks(context, preserveVersion = if (hasHazelUpdate) release.version else null)
+            }
+            if (hasHazelUpdate) onNewRelease(context, release)
         } catch (_: Exception) {
             // Ignore silent network check failure
         }
@@ -545,9 +581,69 @@ object HazelUpdater {
     }
 
     /**
+     * A newer version was found. With auto-download on (and Wi-Fi only off, or on a network that
+     * is not metered) it is fetched in the background so the update screen opens on Install;
+     * otherwise, or if that fails, it is only announced. F-Droid builds are updated by F-Droid.
+     */
+    private suspend fun onNewRelease(context: Context, release: ReleaseInfo) {
+        val app = context.applicationContext
+        if (getCachedApk(app, release) != null) {
+            HazelUpdateNotifier.post(app, HazelUpdateNotifier.Event.READY, release.version)
+            return
+        }
+        val wifiOnly = com.hazel.android.data.SettingsRepository.getHazelUpdateWifiOnly(app).first()
+        val auto = !isFdroid() && release.downloadUrl.isNotBlank() &&
+            com.hazel.android.data.SettingsRepository.getHazelUpdateAutoDownload(app).first() &&
+            (!wifiOnly || onUnmeteredNetwork(app))
+        if (!auto || !_background.compareAndSet(null, BackgroundDownload(release.version, total = release.binarySize))) {
+            if (!auto) HazelUpdateNotifier.post(app, HazelUpdateNotifier.Event.AVAILABLE, release.version)
+            return
+        }
+        scope.launch {
+            try {
+                var lastNetworkCheck = System.currentTimeMillis()
+                downloadApk(app, release) { bytes, total, speed, eta ->
+                    // Wi-Fi only also holds when Wi-Fi drops mid-download and mobile data takes over.
+                    val now = System.currentTimeMillis()
+                    if (wifiOnly && now - lastNetworkCheck >= 3_000) {
+                        lastNetworkCheck = now
+                        if (!onUnmeteredNetwork(app)) throw java.io.IOException("Network became metered")
+                    }
+                    _background.value = BackgroundDownload(release.version, bytes, total, speed, eta)
+                }
+                HazelUpdateNotifier.post(app, HazelUpdateNotifier.Event.READY, release.version)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                android.util.Log.w("Hazel", "Hazel update download in the background failed: ${e.message}")
+                if (!stoppedByUser.get()) HazelUpdateNotifier.post(app, HazelUpdateNotifier.Event.AVAILABLE, release.version)
+            } finally {
+                _background.value = null
+            }
+        }
+    }
+
+    /** Metered or unknown counts as metered: an APK is tens of megabytes. */
+    private fun onUnmeteredNetwork(context: Context): Boolean = runCatching {
+        val manager = context.getSystemService(android.net.ConnectivityManager::class.java)
+        manager?.activeNetwork != null && !manager.isActiveNetworkMetered
+    }.getOrDefault(false)
+
+    /**
      * Downloads the APK file to cache directory with progress reporting and immediate cancellation.
+     * Waits for a download already running and reuses its file when it is the same version.
      */
     suspend fun downloadApk(
+        context: Context,
+        info: ReleaseInfo,
+        onProgress: (bytesRead: Long, totalBytes: Long, speedBps: Long, etaSeconds: Long) -> Unit
+    ): File = downloadLock.withLock {
+        getCachedApk(context, info)?.let { return@withLock it }
+        stoppedByUser.set(false)
+        fetchApk(context, info, onProgress)
+    }
+
+    private suspend fun fetchApk(
         context: Context,
         info: ReleaseInfo,
         onProgress: (bytesRead: Long, totalBytes: Long, speedBps: Long, etaSeconds: Long) -> Unit
