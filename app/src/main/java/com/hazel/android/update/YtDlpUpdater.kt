@@ -385,7 +385,9 @@ object YtDlpUpdater {
                     // A build the system stopped for lack of memory is not known to be bad, and
                     // auto-update runs while the app is still starting, which is when memory is
                     // tightest. Its tag is left unmarked so the next launch tries it again.
-                    if (tag.isNotBlank() && failure.kind != UpdateFailure.Kind.STOPPED_WHILE_STARTING) {
+                    val mayRetry = failure.kind == UpdateFailure.Kind.STOPPED_WHILE_STARTING &&
+                        tag.isNotBlank() && mayRetryAfterMemoryStop(context, tag)
+                    if (tag.isNotBlank() && !mayRetry) {
                         runCatching { rejectedTag(context).writeText(tag) }
                     }
                     stagedTag(context).delete()
@@ -440,9 +442,25 @@ object YtDlpUpdater {
 
     private fun clearFailure(context: Context) {
         runCatching {
-            context.getSharedPreferences(STATE_PREFS, Context.MODE_PRIVATE).edit().remove(FAILURE_KEY).apply()
+            context.getSharedPreferences(STATE_PREFS, Context.MODE_PRIVATE).edit()
+                .remove(FAILURE_KEY).remove(MEMORY_STOPS_KEY).apply()
         }
     }
+
+    private const val MEMORY_STOPS_KEY = "memoryStops"
+    private const val MAX_MEMORY_STOPS = 3
+
+    /**
+     * Counts [tag]'s starts that were stopped for memory; true while it may be tried again.
+     * Past the limit it is rejected, so auto-update stops fetching it on every launch.
+     */
+    private fun mayRetryAfterMemoryStop(context: Context, tag: String): Boolean = runCatching {
+        val prefs = context.getSharedPreferences(STATE_PREFS, Context.MODE_PRIVATE)
+        val saved = prefs.getString(MEMORY_STOPS_KEY, null)?.split('|')
+        val count = (if (saved?.getOrNull(0) == tag) saved.getOrNull(1)?.toIntOrNull() else null) ?: 0
+        prefs.edit().putString(MEMORY_STOPS_KEY, "$tag|${count + 1}").apply()
+        count + 1 < MAX_MEMORY_STOPS
+    }.getOrDefault(false)
 
     /** The last update failure, as one line for a bug report; null when the last update worked. */
     fun lastFailure(context: Context): String? = runCatching {
@@ -762,11 +780,16 @@ object YtDlpUpdater {
         release: ReleaseInfo? = null,
         onProgress: (Long, Long) -> Unit = { _, _ -> }
     ): YoutubeDL.UpdateStatus = withContext(Dispatchers.IO) {
+        // Auto-update shares the download file; wait for it rather than write over it.
+        while (!isUpdating.compareAndSet(false, true)) delay(APPLY_RETRY_MS)
         try {
             // A refusal from an earlier swap must not be reported as this attempt's.
             rejection = null
             val target = release ?: latestRelease(channel)
                 ?: throw UpdateFailureException(UpdateFailure.Kind.UNREACHABLE, "release lookup failed")
+            if (cachedVersion(context) == target.version && isValidBinary(liveBinary(context))) {
+                return@withContext YoutubeDL.UpdateStatus.DONE
+            }
             stage(context, target, onProgress)
             while (!applyStagedUpdate(context)) {
                 if (!stagedBinary(context).exists()) {
@@ -784,6 +807,8 @@ object YtDlpUpdater {
             // refreshes the time, and it keeps the download's own failures from going unseen.
             recordFailure(context, UpdateFailure.from(e))
             throw e
+        } finally {
+            isUpdating.set(false)
         }
     }
 
