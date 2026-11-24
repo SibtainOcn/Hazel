@@ -1,16 +1,20 @@
 package com.hazel.android.ui.screens.cookies
 
+import androidx.webkit.UserAgentMetadata
+
 /**
  * How the sign-in page presents itself and where it starts.
  *
  * Sites such as Instagram, Facebook and Google grey out or refuse their sign-in form when the
  * user agent says it is an embedded WebView (`; wv`, `Version/4.0`). The page is shown with a
  * plain Chrome user agent built from the WebView's own Chrome version, so it stays current on
- * every device without a hard-coded version going stale, and carries no device model.
+ * every device without a hard-coded version going stale, and carries no device model. The
+ * Client Hints ([metadata]) say the same, since by default they still name Android WebView.
  */
 internal object SignInBrowser {
 
-    private val CHROME_MAJOR = Regex("""Chrome/(\d+)""")
+    private val CHROME_VERSION = Regex("""Chrome/(\d+)((?:\.\d+)*)""")
+    private val ANDROID_VERSION = Regex("""Android (\d+)""")
     private const val FALLBACK_MAJOR = "131"
 
     fun mobileUserAgent(webViewUserAgent: String): String =
@@ -22,7 +26,39 @@ internal object SignInBrowser {
             "Chrome/${chromeMajor(webViewUserAgent)}.0.0.0 Safari/537.36"
 
     private fun chromeMajor(userAgent: String): String =
-        CHROME_MAJOR.find(userAgent)?.groupValues?.get(1) ?: FALLBACK_MAJOR
+        CHROME_VERSION.find(userAgent)?.groupValues?.get(1) ?: FALLBACK_MAJOR
+
+    private fun chromeFull(userAgent: String): String =
+        CHROME_VERSION.find(userAgent)?.let { it.groupValues[1] + it.groupValues[2] }
+            ?.takeIf { version -> version.count { it == '.' } == 3 }
+            ?: "${chromeMajor(userAgent)}.0.0.0"
+
+    /** Client Hints matching [mobileUserAgent] or [desktopUserAgent]. */
+    fun metadata(webViewUserAgent: String, desktop: Boolean): UserAgentMetadata {
+        val major = chromeMajor(webViewUserAgent)
+        val full = chromeFull(webViewUserAgent)
+        fun brand(name: String, majorVersion: String, fullVersion: String) =
+            UserAgentMetadata.BrandVersion.Builder()
+                .setBrand(name).setMajorVersion(majorVersion).setFullVersion(fullVersion).build()
+        val builder = UserAgentMetadata.Builder()
+            .setBrandVersionList(
+                listOf(
+                    brand("Not_A Brand", "24", "24.0.0.0"),
+                    brand("Chromium", major, full),
+                    brand("Google Chrome", major, full)
+                )
+            )
+            .setFullVersion(full)
+            .setModel("")
+            .setMobile(!desktop)
+        if (desktop) {
+            builder.setPlatform("Windows").setPlatformVersion("15.0.0").setArchitecture("x86").setBitness(64)
+        } else {
+            val android = ANDROID_VERSION.find(webViewUserAgent)?.groupValues?.get(1) ?: "10"
+            builder.setPlatform("Android").setPlatformVersion("$android.0.0")
+        }
+        return builder.build()
+    }
 
     /**
      * The page to open for [url]. A site's bare home page is swapped for its sign-in form
