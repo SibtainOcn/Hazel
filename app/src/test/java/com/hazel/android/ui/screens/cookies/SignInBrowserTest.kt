@@ -84,4 +84,12 @@ class SignInBrowserTest {
         assertEquals("131.0.0.0", hints.fullVersion)
         assertEquals("10.0.0", hints.platformVersion)
     }
+
+    @Test
+    fun `an app link falls back to its web page`() {
+        val link = "intent://instagram.com/#Intent;package=com.instagram.android;" +
+            "S.browser_fallback_url=https%3A%2F%2Fwww.instagram.com%2Faccounts%2Flogin%2F;end"
+        assertEquals("https://www.instagram.com/accounts/login/", SignInBrowser.webFallback(link))
+        assertEquals(null, SignInBrowser.webFallback("instagram://user?username=a"))
+    }
 }
