@@ -87,7 +87,7 @@ Hazel sizə faydalı olubsa, onun inkişafını dəstəkləməyi düşünün. D�
 ---
 ## ✨ Niyə Hazel?
 
-Hazel **yt-dlp** əsaslı pulsuz, açıq mənbəli Android yükləyicisidir. **1500+ saytdan** video, musiqi və pleylistləri reklamsız, izləmə olmadan və hesabsız saxlayın.
+Hazel **yt-dlp** & **gallery-dl** əsaslı pulsuz, açıq mənbəli Android yükləyicisidir. **1500+ saytdan** video, musiqi və pleylistləri reklamsız, izləmə olmadan və hesabsız saxlayın.
 
 <table>
   <tr><th width="50%" align="left">📥 Yükləmə</th><th width="50%" align="left">🔍 Axtarış və oxutma</th></tr>
@@ -95,6 +95,7 @@ Hazel **yt-dlp** əsaslı pulsuz, açıq mənbəli Android yükləyicisidir. **1
   <tr><td><b>Toplu:</b> bir keçid, eyni anda bir neçəsi və ya bütöv pleylist / kanal.</td><td><b>Əvvəlcə oxut:</b> istənilən nəticəni öz kartında irəli-geri çəkmə, iki toxunuşla keçmə və tam ekranla oxudun.</td></tr>
   <tr><td><b>Hazel Instant:</b> istənilən tətbiqdən keçid paylaşın, yükləmə saxlanmış keyfiyyətdə başlayır.</td><td><b>Kəsmə:</b> canlı önizləmədə seçdiyiniz hissəni saxlayın. Sürətli, dəqiq və ya endirmədən sonra kəsmə: bütün fayl tam sürətlə yüklənir, sonra telefonunuzda kəsilir.</td></tr>
   <tr><td><b>Öz formatınız:</b> keyfiyyət, konteyner, audio trek seçin, başlıq / metadatanı redaktə edin.</td><td><b>Canlı yayımlar:</b> əvvəldən yazın və ya premyeranı gözləyin.</td></tr>
+  <tr><td><b>Şəkillər:</b> Instagram, X, Pinterest, Reddit və digərlərində paylaşımlar, profillər və şəkil axtarışı, başlıqlarla birlikdə.</td><td><b>Giriş:</b> Instagram, YouTube, X və digərlərinə bir toxunuşla giriş, hər hesabın vəziyyəti ilə.</td></tr>
 </table>
 
 <table>
@@ -195,6 +196,7 @@ Töhfələrə şadıq! Qaydalar üçün [CONTRIBUTING.md](https://github.com/Sib
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - F-Droid repozitoriyasının idarəsi
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Hazel-in arxasındakı güclü yükləmə mühərriki
 * [youtubedl-android](https://github.com/yausername/youtubedl-android) - Android üçün yt-dlp bağlamaları
+* [gallery-dl](https://github.com/mikf/gallery-dl) - Şəkil və qalereya yükləmələri
 * [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - Sürətli siyahılar, axtarış və oxutma axınları
 * [Media3 ExoPlayer](https://github.com/androidx/media) - Tətbiqdaxili rəvan oxutma
 

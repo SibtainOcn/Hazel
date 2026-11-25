@@ -13,10 +13,10 @@ APKs. F-Droid finds the new tag by itself within a day or two.
 2. **Store changelogs**: five short text files in
    `fastlane/metadata/android/en-US/changelogs/`, written by hand. One file for each APK
    version code. The code comes from the version:
-   `(major·10000 + minor·100 + patch)·1000 + 990`. Example: 1.1.18 needs
+   `(major·10000 + minor·100 + patch)·1000 + 990`. Example: 1.2.17 needs
 
    ```
-   10118990.txt  10118991.txt  10118992.txt  10118993.txt  10118994.txt
+   10217990.txt  10217991.txt  10217992.txt  10217993.txt  10217994.txt
    ```
 
    `-DryRun` prints the exact names.
@@ -31,12 +31,12 @@ APKs. F-Droid finds the new tag by itself within a day or two.
 ## Running it
 
 ```powershell
-.\tools\release\release.ps1 -Version 1.1.18 -DryRun   # only shows the plan, changes nothing
-.\tools\release\release.ps1 -Version 1.1.18           # makes the release
-.\tools\release\release.ps1 -Version 1.1.18 -NoPush   # commit and tag only, no push
+.\tools\release\release.ps1 -Version 1.2.17 -DryRun   # only shows the plan, changes nothing
+.\tools\release\release.ps1 -Version 1.2.17           # makes the release
+.\tools\release\release.ps1 -Version 1.2.17 -NoPush   # commit and tag only, no push
 ```
 
-Stable versions only. A beta is a `v1.1.18-beta.N` tag pushed by hand; nightlies are built
+Stable versions only. A beta is a `v1.2.17-beta.N` tag pushed by hand; nightlies are built
 by the nightly workflow. Neither changes the literals in `app/build.gradle.kts`.
 
 ## When it stops

@@ -87,7 +87,7 @@ Si Hazel te ha resultado útil, considera apoyar su desarrollo. Tu apoyo me ayud
 ---
 ## ✨ ¿Por qué elegir Hazel?
 
-Hazel es un descargador gratuito y de código abierto para Android impulsado por **yt-dlp**. Guarda vídeos, música y listas de reproducción de **más de 1500 sitios** sin anuncios, sin rastreo y sin cuenta.
+Hazel es un descargador gratuito y de código abierto para Android impulsado por **yt-dlp** & **gallery-dl**. Guarda vídeos, música y listas de reproducción de **más de 1500 sitios** sin anuncios, sin rastreo y sin cuenta.
 
 <table>
   <tr><th width="50%" align="left">📥 Descargas</th><th width="50%" align="left">🔍 Buscar y reproducir</th></tr>
@@ -95,6 +95,7 @@ Hazel es un descargador gratuito y de código abierto para Android impulsado por
   <tr><td><b>Por lotes:</b> un enlace, varios a la vez o una lista de reproducción / canal completo.</td><td><b>Reproduce primero:</b> reproduce cualquier resultado en su tarjeta con barra de progreso, doble toque para saltar y pantalla completa.</td></tr>
   <tr><td><b>Hazel Instant:</b> comparte un enlace desde cualquier app y empieza con tu calidad guardada.</td><td><b>Recortar:</b> guarda solo la parte que quieras, elegida sobre una vista previa en directo. Rápido, preciso o recortar tras descargar: el archivo completo a toda velocidad, cortado en tu teléfono.</td></tr>
   <tr><td><b>Tu formato:</b> elige calidad, contenedor y pista de audio, y edita título / metadatos.</td><td><b>Directos:</b> graba desde el inicio o espera a un estreno.</td></tr>
+  <tr><td><b>Imágenes:</b> publicaciones, perfiles y búsqueda de imágenes en Instagram, X, Pinterest, Reddit y más, con descripciones.</td><td><b>Inicio de sesión:</b> inicia sesión con un toque en Instagram, YouTube, X y más, con el estado de cada cuenta.</td></tr>
 </table>
 
 <table>
@@ -195,6 +196,7 @@ MD5:        3bcce9e14c616a9087766563875978e6
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - Gestión del repositorio de F-Droid
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) - El potente motor de descarga detrás de Hazel
 * [youtubedl-android](https://github.com/yausername/youtubedl-android) - Integración de yt-dlp para Android
+* [gallery-dl](https://github.com/mikf/gallery-dl) - Descargas de imágenes y galerías
 * [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - Listados, búsqueda y streams de reproducción rápidos
 * [Media3 ExoPlayer](https://github.com/androidx/media) - Reproducción fluida dentro de la app
 

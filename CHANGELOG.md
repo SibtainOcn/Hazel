@@ -7,102 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Gallery tab: saves images and videos from posts on Instagram, X, Reddit and 1,500 more sites through gallery-dl.
-- gallery-dl updates itself from PyPI, with its own screen under Software update.
-- Gallery downloads go through the Queue one at a time with notifications, History (Images filter) and the Failed tab.
-- Search: an Images chip with a Search on row of sites, and an Images tab in the search options.
-- Gallery: post files land as cards like videos, with a fullscreen viewer to swipe, zoom and save each one.
-- Gallery: an item sheet and a Download all sheet with image size, video quality, save folder and file options.
-- Gallery: searches, profiles and several pasted links show one carousel card per post; tapping opens the post.
-- Share menu: Hazel Images and Instant Images targets for posts; the video targets are now Hazel Video and Instant Video.
-- Release channels: Beta and Nightly builds on GitHub, a daily nightly from the nightly branch, and one-step switching on the Hazel update screen.
-- Hazel update screen: the build's commit and date on beta and nightly builds.
-- Hazel updates: optional notification for new versions, opening the Hazel update screen.
-- Hazel updates: optional background download, with a Wi-Fi only switch, so the update screen opens on Install. Off by default.
-- Getting started: a third step to set update notifications, yt-dlp and Hazel auto-updates and Wi-Fi only.
-- Quick actions home-screen widget: Paste, Audio, Video and Downloads on M3 Expressive shapes, in the app's accent and theme.
-- Download sheet: an Extra arguments chip in Adjust opens the same setting as Settings > Advanced.
-- Cut: three modes, Quick cut (default), Precise cuts and Trim after download, which downloads the whole file and cuts it on the device. Covers, tags, chapters and subtitle files stay in step.
-- Cut mode is saved, and set from either the Cut sheet or Processing settings. Trim after download is unavailable while SponsorBlock removes parts, chapters are split or a live stream is taken from the start.
-- Cut screen: mode rows switch in one calm step, without the bounce or the flash on tap.
-- Cut: opens full screen, shows every mode's hint at once, and the preview's quality can be changed from its corner.
-- The player's quality change takes effect again.
-- Home long-press card: a full-width Play button above connected Download, Open and Properties tiles, each icon on its own M3 shape.
-- Settings screens and the search options sheet group their rows as connected M3 lists, like the update screen.
-- Download sheet: Title/Author and Save dir/Container rows are connected groups, and each section icon sits on its own M3 shape.
-- Format list: the rail's loading skeleton shows small label lines on quiet steps instead of solid blocks.
-- Save location is a full screen with the last 5 picked folders; tap one to save there, hold any location to open it in a file manager.
-- Screen changes: the home header and the bottom bar move with their screen, so nothing jumps part way through a transition.
-- Sign-in: one-tap Instagram, YouTube, X, Facebook, TikTok and Reddit in Settings > Cookies, so you can sign in before downloading.
-- Download settings: a Gallery save folder, Download/Hazel/Gallery by default.
-- More > Gallery: defaults for gallery downloads and image search, and clearing the download record.
-- Gallery: View log on a failed run, and a Gallery files row in Temporary files.
-
-### Fixed
-- Gallery sheets: saved image options and the cookies choice show on the first frame instead of popping in.
-- Gallery viewer: tapping the title also opens the caption, with a short hint under the count when a caption exists.
-- Player: the mini player keeps playing over every tab and screen instead of stopping when you leave Home.
-- Hazel updates: Beta and Nightly find their releases, move from one build to the next, and move onto a newer stable.
-- Hazel updates: a GitHub install never picks an F-Droid APK, and x86 phones get the x86 APK.
-- Hazel update screen: translated in every language, with clear failure reasons; nothing is cut off at the largest font.
-- Support Hazel screen: follows the accent and theme, icons on M3 shapes, rows in connected groups, and a redesigned developer card.
-- Switching the play engine no longer breaks playback of results already on screen; an open player switches at once.
-- Video sizes in the download sheet, format list and queue now include the audio track, matching the download card.
-- The download card counts the picked audio language's track, not the default one.
-- A queued, paused or running link's sheet lists every quality again, not only the one picked.
-- The picked row in the format list is easy to see on every accent, and its badge turns into a pentagon.
-- The download sheet and format list open faster the first time.
-- Format list: before a link is read, and in the multi-link quality list, the ladder fills the sheet without the side rail, which appears once real formats arrive (#159).
-- Format list without the side rail: the Auto tag uses the size badge's blue, and each step's id is shown as its own tag.
-- The container choice opens in the app's choice dialog instead of a bottom sheet.
-- Format sheets: loading placeholders move together on one slower loop.
-- Format list: when real formats arrive, the list and rail show the loading skeleton for a moment before the rail appears.
-- Loading skeletons are easier to see on light and light glass themes.
-- Format list without the side rail: shorter rows, grouped on connected cards like the settings lists.
-- Multi-link sheet: a quality picked for a link while it is still being read is kept (#157).
-- Instagram sign-in page no longer greys out or stays blank; it opens straight on the login form.
-- Desktop site in sign-in fits the screen and can be pinched and scrolled.
-- Sign-in page ignores "open in app" links and closes cleanly if the browser engine stops.
-- Trimmed downloads show a real percentage and time left instead of sitting at 0%.
-- A trimmed download's history entry shows the kept length, not the whole video's.
-- A trimmed download no longer shows a Merge stage.
-- Stopping a trimmed download no longer leaves it stuck on "downloading" with ffmpeg still running.
-- Stopping a download no longer kills a Converter job running at the same time.
-- A trimmed download's size no longer nearly doubles while the cover or tags are added.
-- A paused trimmed download shows only Paused, and its unusable part file is removed.
-- A trimmed download retried after an expired link starts its progress over.
-- The notification for a download with no known size shows the size so far, not "0% · 0 MB / total".
-- Format list: a link whose qualities could not be read now says why, instead of leaving the quality ladder looking like its final list.
-- YouTube's "confirm you're not a bot" refusal is named as such, not as private content.
-- yt-dlp updates work on older, low-memory and nearly full phones, and resume after a dropped connection (#166).
-- The yt-dlp update screen says why an update failed, and Retry repeats the install.
-- Updating yt-dlp while a download runs no longer reports a failure once the update goes live.
-- The quality ladder keeps its original look and side rail until the real qualities arrive.
-- A link refused until sign-in now opens the sign-in dialog right away; signing in reads it again.
-- Off screen, the same refusal posts a notification with Sign in and Dismiss.
-- Notification taps open the screen they are about: Running, Failed, History or the failure dialog.
-- The share sheet's format list now shows why a read failed.
-- Extra download arguments: `-o` sets the file name and folders again, e.g. `-o "%(uploader)s/%(id)s.%(ext)s"`; a template that leaves the download folder is ignored. (#165)
-- Files saved with `-o` folders keep their folders in Downloads and in a picked folder, and reuse a folder that already exists.
-- Trim after download and cut progress find the file inside `-o` folders.
-- Properties "Saved to" shows the file's own folder, and a folder picked through Downloads no longer shows as `raw//storage/...`.
-- Files saved to a picked folder are now listed by gallery and music apps.
-- Saving a download no longer rescans the whole Hazel folder.
-- A download whose title starts with "." is saved instead of deleted, without the leading dots. (#168)
-- Format sheet: rows no longer draw over each other when switching between quality stops, and the list starts from the top on each switch.
-- Downloads list keeps each item's artwork after its source link expires.
-- Trim after download no longer crashes on Android 7.
+- Gallery tab powered by gallery-dl: save photos, videos and captions from posts, profiles and galleries on Instagram, X, Reddit, Pinterest, Tumblr and many more sites.
+- Image search on Pinterest, X, Bluesky, Tumblr, DeviantArt, Instagram and Pixiv, with an optional Group by author.
+- Gallery results as cards and swipeable carousels, a fullscreen viewer with zoom and a thumbnail strip, and Download all for posts with several files.
+- Image sheet: size and video quality, save folder, file name, metadata, post date, cookies, and editable title and author.
+- Captions: view, copy, save as text, or write them into saved JPEG and PNG files.
+- Image downloads share the Queue, notifications, History (Images filter), Failed tab with logs, retry and sign-in.
+- Share targets Hazel Images and Instant Images; the video targets are now Hazel Video and Instant Video.
+- Image settings: defaults for downloads and search, retries, captions in files, and a separate Gallery save folder.
+- gallery-dl updates from PyPI on its own screen under Software update, with a built-in fallback.
+- Gallery tab keeps its results until cleared, like Home; nothing is kept in incognito.
+- Release channels: Stable, Beta and Nightly builds of Hazel, with a daily nightly and in-place switching.
+- Hazel updates: optional new-version notification and background download, with a Wi-Fi only switch.
+- Cut: three modes, Quick cut, Precise cuts and Trim after download, which saves the whole file at full speed and cuts it on the phone.
+- Save location screen with the last five folders used; hold one to open it in a file manager.
+- Cookies: one-tap sign-in for Instagram, YouTube, X, Facebook, TikTok and Reddit, account cards with Active, Expired and Signed out states, and an account sheet.
+- Download sheet: a cookie dialog showing the site's sign-in state, and an Extra arguments chip.
+- Downloads screen: a live card for the download in progress.
+- Accents: Blush, Powder, Sage and Peach.
+- Getting started: refreshed steps, one share card for all four targets, and an update preferences step.
 
 ### Changed
-- Home and Queue: a calm empty state with a cookie icon, title and short hint replaces the twinkling stars.
-- Support Hazel: the Developer tag and name sit beside the avatar on the developer card.
-- Storage cleanup lists the saved download thumbnails as "Downloads artwork", so they can be cleared.
-- The bottom bar's selected-tab shape is easier to see.
-- Format sheet: the quality rail is one connected group with round outer ends and tight inner corners; the chosen stop fills with the accent and lifts out of the group on a spring.
-- Format sheet: the panes keep one height while a link is read, when the formats arrive and between stops, and the rail and list scroll on their own.
-- Audio options in the download sheets use a waveform icon in place of the HQ badge and the music note: the audio quality row and bitrate chip, the format rail's Audio stop and the batch type picker.
-- Download sheet: Play is a tilted gem in a soft tint of the accent with a rounded play triangle, so Download is the only solid button.
-- The drifting stars on empty screens stop whenever another screen or app is in front, saving battery.
+- Home and Queue use a calm empty state in place of the drifting stars.
+- Settings, the download sheet and the search options group their rows as connected M3 lists, with section icons on M3 shapes.
+- Format sheet: the quality rail is one connected group, the panes keep their height while formats load, and codec and id badges are crimson.
+- Home long-press card: a full-width Play button above connected Download, Open and Properties tiles.
+- Fullscreen player: Download, Minimize and Close as one connected button group.
+- Queue tabs, Downloads rows and the bottom bar follow the accent's tonal colours.
+- Support Hazel screen follows the accent and theme, with a redesigned developer card.
+- Audio options use a waveform icon; Play in the download sheet is a tilted accent gem.
+- Glass: Mono is listed first, and dialogs, sheets, menus and toasts have no edge line.
+- Storage cleanup lists saved thumbnails as Downloads artwork.
+- Faster Home with large restored results, faster first opens of every screen, and less redrawing while downloading.
+
+### Fixed
+- The mini player keeps playing on every tab and screen instead of stopping when Home is left.
+- Instagram sign-in page no longer greys out or stays blank; desktop sites fit the screen and "open in app" links are ignored. (#156, #182)
+- Multi-link sheet keeps a quality picked while a link is still being read. (#157)
+- Cut downloads show real progress instead of staying at 0%. (#161)
+- Extra arguments: `-o` sets the file name and folders again, and files keep those folders. (#165)
+- yt-dlp updates work on older, low-memory and nearly full phones and resume after a dropped connection; failures say why and Retry repeats the install. (#166)
+- A download whose title starts with "." is saved instead of deleted. (#168)
+- Downloads list keeps each item's artwork after its source link expires. (#187)
+- Switching the play engine no longer breaks playback of results already on screen.
+- The player's quality change takes effect again.
+- Video sizes include the audio track, and the download card counts the picked audio language.
+- A queued, paused or running link's sheet lists every quality again.
+- Hazel updates never pick an F-Droid APK on a GitHub install, and x86 phones get the x86 APK.
+- Stopping a download no longer stops a Converter job running at the same time.
+- The notification for a download with no known size shows the size so far.
+- Files saved to a picked folder are listed by gallery and music apps, Show file opens built-in folders by path, and Properties shows the real folder.
+- Saving a download no longer rescans the whole Hazel folder.
+- Format sheet rows no longer overlap when switching quality stops.
+- Repeat downloads of the same file keep their extension, so they open normally.
 
 ## [1.1.17] - 2026-10-29
 ### Added
