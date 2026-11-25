@@ -36,9 +36,13 @@ import kotlinx.coroutines.launch
 fun rememberUseCookies(): Boolean {
     val context = LocalContext.current
     val flow = remember(context) { CookieRepository.getUseCookies(context) }
-    val useCookies by flow.collectAsState(initial = false)
+    val useCookies by flow.collectAsState(initial = lastUseCookies)
+    lastUseCookies = useCookies
     return useCookies
 }
+
+/** The last value read, so a sheet opened again shows it at once instead of off for a frame. */
+@Volatile private var lastUseCookies = false
 
 /**
  * The cookies option of a download sheet.
