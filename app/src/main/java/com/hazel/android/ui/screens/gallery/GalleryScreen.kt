@@ -7,6 +7,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import com.hazel.android.ui.components.rememberScrollShrink
+import com.hazel.android.ui.components.SkeletonSpacing
+import com.hazel.android.ui.components.ArrivingCard
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -178,15 +185,21 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
 
     /** Saves the files of [post] at [indexes] (counted from 1), or the whole post when null. */
     /** Queues the files of [post] at [indexes] (counted from 1), or the whole post when null. */
-    fun download(indexes: List<Int>?, options: GalleryOptions? = null, post: GalleryPost? = this.post) {
+    fun download(
+        indexes: List<Int>?,
+        options: GalleryOptions? = null,
+        post: GalleryPost? = this.post,
+        title: String? = null,
+        author: String? = null
+    ) {
         val link = post?.source?.takeIf { it.isNotEmpty() } ?: return
         val first = indexes?.firstOrNull()?.let { i -> post.items.firstOrNull { it.index == i } } ?: post.items.firstOrNull()
         val request = GalleryDownloadRequest(
             url = link,
             indexes = indexes,
             options = options,
-            title = first?.title.orEmpty(),
-            author = post.author,
+            title = title ?: first?.title.orEmpty(),
+            author = author ?: post.author,
             thumbnail = first?.thumbnail ?: first?.url?.takeUnless { first.isVideo }
         )
         viewModelScope.launch {
@@ -262,6 +275,25 @@ fun GalleryScreen(
 
     val currentPost = viewModel.posts.indexOf(viewModel.post)
 
+    val searchBarShine = remember { Animatable(0f) }
+    var wasBusy by remember { mutableStateOf(false) }
+    LaunchedEffect(viewModel.busy) {
+        if (viewModel.busy) {
+            wasBusy = true
+        } else if (wasBusy) {
+            wasBusy = false
+            searchBarShine.snapTo(0f)
+            searchBarShine.animateTo(1f, tween(durationMillis = 850, easing = FastOutSlowInEasing))
+        }
+    }
+    // A video in a post is read by yt-dlp and opens the video sheet on Home.
+    val openItem: (Int, Int) -> Unit = { postIndex, position ->
+        val post = viewModel.posts.getOrNull(postIndex)
+        val item = post?.items?.getOrNull(position)
+        if (item != null && item.isVideo) onVideoLinks(listOf(item.postUrl ?: post.source))
+        else sheetFor = postIndex to position
+    }
+
     LaunchedEffect(Unit) {
         com.hazel.android.gallery.GallerySpare.warm(context)
         GalleryRequests.next.collect { if (it != null) GalleryRequests.take()?.let(viewModel::handle) }
@@ -274,11 +306,13 @@ fun GalleryScreen(
             UrlSearchBar(
                 url = viewModel.query,
                 onOpenSearch = { searchOpen = true },
+                shineProgress = searchBarShine.value,
                 onMenuOpen = { menuOpen = true },
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
             Spacer(modifier = Modifier.height(12.dp))
 
+            val shrink = rememberScrollShrink()
             when {
                 viewModel.busy && viewModel.posts.isEmpty() ->
                     ResultsSkeleton(modifier = Modifier.fillMaxWidth().weight(1f))
@@ -303,9 +337,9 @@ fun GalleryScreen(
                     }
                 }
                 else -> LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 96.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier.weight(1f).nestedScroll(shrink),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 96.dp),
+                    verticalArrangement = Arrangement.spacedBy(SkeletonSpacing)
                 ) {
                     viewModel.notice?.let { notice ->
                         item(key = "notice") {
@@ -325,19 +359,21 @@ fun GalleryScreen(
                     if (viewModel.showsList) {
                         itemsIndexed(viewModel.posts, key = { i, _ -> "post-$i" }) { i, post ->
                             val single = post.items.singleOrNull()
-                            if (single != null) {
-                                GalleryCard(
-                                    item = single,
-                                    total = 1,
-                                    onOpen = { sheetFor = i to 0 },
-                                    onView = { viewing = i to 0 }
-                                )
-                            } else {
-                                GalleryPostCard(
-                                    post = post,
-                                    onOpen = { viewModel.open(i) },
-                                    onDownloadAll = { postSheetFor = i }
-                                )
+                            ArrivingCard(post.source to i, shrink) {
+                                if (single != null) {
+                                    GalleryCard(
+                                        item = single,
+                                        total = 1,
+                                        onOpen = { openItem(i, 0) },
+                                        onView = { viewing = i to 0 }
+                                    )
+                                } else {
+                                    GalleryPostCard(
+                                        post = post,
+                                        onOpen = { viewModel.open(i) },
+                                        onDownloadAll = { postSheetFor = i }
+                                    )
+                                }
                             }
                         }
                     } else {
@@ -351,12 +387,14 @@ fun GalleryScreen(
                             }
                         }
                         itemsIndexed(viewModel.items, key = { _, it -> it.index }) { position, item ->
-                            GalleryCard(
-                                item = item,
-                                total = viewModel.items.size,
-                                onOpen = { sheetFor = currentPost to position },
-                                onView = { viewing = currentPost to position }
-                            )
+                            ArrivingCard(item.url, shrink) {
+                                GalleryCard(
+                                    item = item,
+                                    total = viewModel.items.size,
+                                    onOpen = { openItem(currentPost, position) },
+                                    onView = { viewing = currentPost to position }
+                                )
+                            }
                         }
                     }
                 }
@@ -490,11 +528,10 @@ fun GalleryScreen(
         val item = post.items.getOrNull(position) ?: return@let
         GalleryItemSheet(
             item = item,
-            total = post.items.size,
             postUrl = post.source,
-            onDownload = { options ->
+            onDownload = { options, title, author ->
                 sheetFor = null
-                viewModel.download(listOf(item.index), options, post)
+                viewModel.download(listOf(item.index), options, post, title, author)
             },
             onDismiss = { sheetFor = null }
         )
@@ -504,9 +541,9 @@ fun GalleryScreen(
         GalleryPostSheet(
             items = post.items,
             postUrl = post.source,
-            onDownload = { indexes, options ->
+            onDownload = { indexes, options, title, author ->
                 postSheetFor = null
-                viewModel.download(indexes, options, post)
+                viewModel.download(indexes, options, post, title, author)
             },
             onDismiss = { postSheetFor = null }
         )

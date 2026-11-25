@@ -41,8 +41,6 @@
     <string name="gallery_no_player">No app can play this video</string>
     <string name="gallery_all_posts">All posts</string>
     <string name="gallery_under_maintenance">Under maintenance</string>
-    <string name="gallery_sheet_image_of">Image %1$d of %2$d</string>
-    <string name="gallery_sheet_video_of">Video %1$d of %2$d</string>
     <string name="gallery_image_size">Image size</string>
     <string name="gallery_size_original">Original</string>
     <string name="gallery_size_large">Large</string>

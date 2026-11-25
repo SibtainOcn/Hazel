@@ -30,8 +30,6 @@
     <string name="gallery_no_player">Ninguna app puede reproducir este vídeo</string>
     <string name="gallery_all_posts">Todas las publicaciones</string>
     <string name="gallery_under_maintenance">En mantenimiento</string>
-    <string name="gallery_sheet_image_of">Imagen %1$d de %2$d</string>
-    <string name="gallery_sheet_video_of">Vídeo %1$d de %2$d</string>
     <string name="gallery_image_size">Tamaño de imagen</string>
     <string name="gallery_size_original">Original</string>
     <string name="gallery_size_large">Grande</string>

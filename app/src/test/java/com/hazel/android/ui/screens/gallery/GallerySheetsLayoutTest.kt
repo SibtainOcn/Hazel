@@ -6,7 +6,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Density
 import androidx.test.core.app.ApplicationProvider
 import com.hazel.android.R
@@ -73,28 +75,26 @@ class GallerySheetsLayoutTest(private val locale: String) {
     }
 
     @Test
-    fun `image item sheet keeps its header and size choice inside`() {
-        show { GalleryItemSheet(item = POST[0], total = POST.size, postUrl = "", onDownload = {}, onDismiss = {}) }
+    fun `image item sheet keeps its header and size row inside, and the row opens the size picker`() {
+        show { GalleryItemSheet(item = POST[0], postUrl = "https://x.com/a/status/1", onDownload = { _, _, _ -> }, onDismiss = {}) }
         saveScreen("gallery-item-image-$locale")
-        assertInside(
-            context.getString(R.string.gallery_sheet_image_of, 1, POST.size),
-            context.getString(R.string.gallery_image_size)
-        )
+        assertInside(context.getString(R.string.gallery_image_size))
+        compose.onNodeWithContentDescription(context.getString(R.string.format_selection_change)).performClick()
+        compose.waitForIdle()
+        saveScreen("gallery-item-picker-$locale")
+        assertInside(context.getString(R.string.format_selection_subtitle), context.getString(R.string.format_selection_confirm))
     }
 
     @Test
     fun `video item sheet offers the video quality instead`() {
-        show { GalleryItemSheet(item = POST[2], total = POST.size, postUrl = "", onDownload = {}, onDismiss = {}) }
+        show { GalleryItemSheet(item = POST[2], postUrl = "", onDownload = { _, _, _ -> }, onDismiss = {}) }
         saveScreen("gallery-item-video-$locale")
-        assertInside(
-            context.getString(R.string.gallery_sheet_video_of, 3, POST.size),
-            context.getString(R.string.format_sheet_video_quality)
-        )
+        assertInside(context.getString(R.string.format_sheet_video_quality))
     }
 
     @Test
     fun `download all sheet keeps the filter, adjust section and bar in view`() {
-        show { GalleryPostSheet(items = POST, postUrl = "", onDownload = { _, _ -> }, onDismiss = {}) }
+        show { GalleryPostSheet(items = POST, postUrl = "", onDownload = { _, _, _, _ -> }, onDismiss = {}) }
         saveScreen("gallery-post-$locale")
         assertInside(
             context.resources.getQuantityString(R.plurals.gallery_items, POST.size, POST.size),

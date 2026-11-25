@@ -30,8 +30,6 @@
     <string name="gallery_no_player">Нет приложения для этого видео</string>
     <string name="gallery_all_posts">Все посты</string>
     <string name="gallery_under_maintenance">На обслуживании</string>
-    <string name="gallery_sheet_image_of">Изображение %1$d из %2$d</string>
-    <string name="gallery_sheet_video_of">Видео %1$d из %2$d</string>
     <string name="gallery_image_size">Размер изображения</string>
     <string name="gallery_size_original">Оригинал</string>
     <string name="gallery_size_large">Большой</string>

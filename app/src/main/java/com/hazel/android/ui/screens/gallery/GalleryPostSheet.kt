@@ -100,7 +100,8 @@ internal fun GalleryPostSheet(
     items: List<GalleryItem>,
     postUrl: String,
     /** The files to save, counted from 1, or null for the whole post. */
-    onDownload: (indexes: List<Int>?, options: GalleryOptions) -> Unit,
+    /** [title] and [author] are set when one file was adjusted on its own sheet. */
+    onDownload: (indexes: List<Int>?, options: GalleryOptions, title: String?, author: String?) -> Unit,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -152,7 +153,7 @@ internal fun GalleryPostSheet(
                     enabled = options != null && chosen.isNotEmpty(),
                     onClick = {
                         val whole = filter == GalleryFilter.ALL && chosen.size == items.size
-                        options?.let { onDownload(if (whole) null else chosen, it) }
+                        options?.let { onDownload(if (whole) null else chosen, it, null, null) }
                     }
                 )
             }
@@ -319,11 +320,10 @@ internal fun GalleryPostSheet(
     opened?.let { item ->
         GalleryItemSheet(
             item = item,
-            total = items.size,
             postUrl = postUrl,
-            onDownload = { chosenOptions ->
+            onDownload = { chosenOptions, title, author ->
                 opened = null
-                onDownload(listOf(item.index), chosenOptions)
+                onDownload(listOf(item.index), chosenOptions, title, author)
             },
             onDismiss = { opened = null }
         )

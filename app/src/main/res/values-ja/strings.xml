@@ -30,8 +30,6 @@
     <string name="gallery_no_player">この動画を再生できるアプリがありません</string>
     <string name="gallery_all_posts">すべての投稿</string>
     <string name="gallery_under_maintenance">メンテナンス中</string>
-    <string name="gallery_sheet_image_of">画像 %1$d / %2$d</string>
-    <string name="gallery_sheet_video_of">動画 %1$d / %2$d</string>
     <string name="gallery_image_size">画像サイズ</string>
     <string name="gallery_size_original">オリジナル</string>
     <string name="gallery_size_large">大</string>

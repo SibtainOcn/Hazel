@@ -70,6 +70,8 @@ private sealed interface GalleryRead {
 internal fun GalleryShareContent(
     url: String,
     onDownload: (GalleryDownloadRequest) -> Unit,
+    /** A post that is one video goes to the video sheet, with this link. */
+    onVideo: (String) -> Unit,
     onClose: () -> Unit
 ) {
     val context = LocalContext.current
@@ -121,19 +123,22 @@ internal fun GalleryShareContent(
         is GalleryRead.Ready -> {
             val post = state.post
             val single = post.items.singleOrNull()
-            if (single != null) {
+            if (single != null && single.isVideo) {
+                LaunchedEffect(single.url) { onVideo(single.postUrl ?: post.source) }
+            } else if (single != null) {
                 GalleryItemSheet(
                     item = single,
-                    total = 1,
                     postUrl = post.source,
-                    onDownload = { options -> onDownload(requestFor(post, listOf(single.index), options)) },
+                    onDownload = { options, title, author ->
+                        onDownload(requestFor(post, listOf(single.index), options, title, author))
+                    },
                     onDismiss = onClose
                 )
             } else {
                 GalleryPostSheet(
                     items = post.items,
                     postUrl = post.source,
-                    onDownload = { indexes, options -> onDownload(requestFor(post, indexes, options)) },
+                    onDownload = { indexes, options, title, author -> onDownload(requestFor(post, indexes, options, title, author)) },
                     onDismiss = onClose
                 )
             }
@@ -152,14 +157,20 @@ private suspend fun readFirstPost(context: Context, url: String): GalleryPost {
     return post ?: throw GalleryDlException(GalleryDlException.Kind.NOT_FOUND, "no files")
 }
 
-private fun requestFor(post: GalleryPost, indexes: List<Int>?, options: com.hazel.android.gallery.GalleryOptions): GalleryDownloadRequest {
+private fun requestFor(
+    post: GalleryPost,
+    indexes: List<Int>?,
+    options: com.hazel.android.gallery.GalleryOptions,
+    title: String?,
+    author: String?
+): GalleryDownloadRequest {
     val first = indexes?.firstOrNull()?.let { i -> post.items.firstOrNull { it.index == i } } ?: post.items.firstOrNull()
     return GalleryDownloadRequest(
         url = post.source,
         indexes = indexes,
         options = options,
-        title = first?.title.orEmpty(),
-        author = post.author,
+        title = title ?: first?.title.orEmpty(),
+        author = author ?: post.author,
         thumbnail = first?.thumbnail ?: first?.url?.takeUnless { first.isVideo }
     )
 }

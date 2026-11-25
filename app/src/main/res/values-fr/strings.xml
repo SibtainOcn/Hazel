@@ -30,8 +30,6 @@
     <string name="gallery_no_player">Aucune appli ne peut lire cette vidéo</string>
     <string name="gallery_all_posts">Toutes les publications</string>
     <string name="gallery_under_maintenance">En maintenance</string>
-    <string name="gallery_sheet_image_of">Image %1$d sur %2$d</string>
-    <string name="gallery_sheet_video_of">Vidéo %1$d sur %2$d</string>
     <string name="gallery_image_size">Taille de l\'image</string>
     <string name="gallery_size_original">Originale</string>
     <string name="gallery_size_large">Grande</string>
