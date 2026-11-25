@@ -41,6 +41,37 @@
     <string name="gallery_view">View</string>
     <string name="gallery_close">Close</string>
     <string name="gallery_no_player">No app can play this video</string>
+    <string name="gallery_under_maintenance">Under maintenance</string>
+    <string name="gallery_sheet_image_of">Image %1$d of %2$d</string>
+    <string name="gallery_sheet_video_of">Video %1$d of %2$d</string>
+    <string name="gallery_image_size">Image size</string>
+    <string name="gallery_size_original">Original</string>
+    <string name="gallery_size_large">Large</string>
+    <string name="gallery_size_medium">Medium</string>
+    <string name="gallery_size_original_hint">Largest the site serves</string>
+    <string name="gallery_size_x_only">X only</string>
+    <string name="gallery_video_best">Best (merged)</string>
+    <string name="gallery_video_best_hint">Via yt-dlp</string>
+    <string name="gallery_video_single">Single file</string>
+    <string name="gallery_video_single_hint">No merge</string>
+    <string name="gallery_adjust_image">Adjust image</string>
+    <string name="gallery_adjust_all">Adjust all</string>
+    <string name="gallery_metadata">Metadata</string>
+    <string name="gallery_post_date">Post date</string>
+    <string name="gallery_caption">Caption</string>
+    <string name="gallery_video_options">Video options</string>
+    <string name="gallery_skip_downloaded">Skip downloaded</string>
+    <string name="gallery_pack_zip">Pack as ZIP</string>
+    <string name="gallery_filter_all">All %d</string>
+    <string name="gallery_filter_images">Images %d</string>
+    <string name="gallery_filter_videos">Videos %d</string>
+    <string name="gallery_filename_preset_user_num">Username and number</string>
+    <string name="gallery_filename_preset_id_num">Post ID and number</string>
+    <string name="gallery_filename_preset_original">Original filename</string>
+    <plurals name="gallery_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
     <string name="nav_incognito_on">Incognito on, downloads are not recorded</string>
     <string name="nav_incognito_off">Incognito off</string>
 
