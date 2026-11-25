@@ -5,7 +5,6 @@
     <string name="nav_history">下载</string>
     <string name="nav_more">更多</string>
     <string name="nav_gallery">图库</string>
-    <string name="gallery_download">下载</string>
     <string name="gallery_image">图片</string>
     <string name="gallery_video">视频</string>
     <string name="gallery_failed">无法读取此帖子</string>
@@ -28,10 +27,7 @@
     <string name="gallery_view">查看</string>
     <string name="gallery_close">关闭</string>
     <string name="gallery_no_player">没有应用可以播放此视频</string>
-    <string name="gallery_all_posts">全部帖子</string>
     <string name="gallery_under_maintenance">维护中</string>
-    <string name="gallery_sheet_image_of">图片 %1$d / %2$d</string>
-    <string name="gallery_sheet_video_of">视频 %1$d / %2$d</string>
     <string name="gallery_image_size">图片尺寸</string>
     <string name="gallery_size_original">原图</string>
     <string name="gallery_size_large">大</string>
@@ -1159,4 +1155,8 @@
     <string name="gallery_fetched">已获取 %1$d 个文件</string>
     <string name="gallery_saved_before_failure">停止前已保存 %1$d 个</string>
     <string name="properties_kind_image">图片</string>
+    <string name="gallery_search_files">搜索这些文件</string>
+    <string name="gallery_type_sheet_subtitle">下载此帖子的哪些文件</string>
+    <string name="gallery_remove_title">移除此文件？</string>
+    <string name="incognito_off">无痕模式已关闭</string>
 </resources>

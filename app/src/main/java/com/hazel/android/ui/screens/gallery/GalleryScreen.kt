@@ -2,11 +2,20 @@ package com.hazel.android.ui.screens.gallery
 
 import android.app.Application
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import com.hazel.android.ui.components.gridItems
+import com.hazel.android.ui.components.gridColumns
+import androidx.compose.foundation.layout.BoxWithConstraints
+import com.hazel.android.ui.components.rememberScrollShrink
+import com.hazel.android.ui.components.SkeletonSpacing
+import com.hazel.android.ui.components.ArrivingCard
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -28,7 +37,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -93,9 +101,6 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         private set
     var posts by mutableStateOf<List<GalleryPost>>(emptyList())
         private set
-    /** The post opened from the list of several; null shows the list. */
-    var openPost by mutableStateOf<Int?>(null)
-        private set
     var busy by mutableStateOf(false)
         internal set
     var notice by mutableStateOf<GalleryNotice?>(null)
@@ -115,16 +120,16 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     }
 
     /** The post shown as cards: the only one, or the one opened from the list. */
-    val post: GalleryPost? get() = posts.singleOrNull() ?: openPost?.let(posts::getOrNull)
+    val post: GalleryPost? get() = posts.singleOrNull()
     val items: List<GalleryItem> get() = post?.items.orEmpty()
-    val showsList: Boolean get() = posts.size > 1 && post == null
+    val showsList: Boolean get() = posts.size > 1
 
     /** Whether the results came from a search, where each post is a result of its own. */
     var fromSearch by mutableStateOf(false)
         internal set
 
     /** Download all belongs to one post with several files, never to a page of search results. */
-    val offersDownloadAll: Boolean get() = !showsList && items.size > 1 && (openPost != null || !fromSearch)
+    val offersDownloadAll: Boolean get() = !showsList && items.size > 1 && !fromSearch
 
     private var job: Job? = null
     private var lastRun: (() -> Unit)? = null
@@ -133,7 +138,6 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         job?.cancel()
         lastRun = { handle(request) }
         posts = emptyList()
-        openPost = null
         when (request) {
             is GalleryRequest.Links -> {
                 fromSearch = false
@@ -168,25 +172,24 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         show(posts)
     }
 
-    fun open(index: Int) {
-        openPost = index.takeIf { it in posts.indices }
-    }
-
-    fun closePost() {
-        openPost = null
-    }
 
     /** Saves the files of [post] at [indexes] (counted from 1), or the whole post when null. */
     /** Queues the files of [post] at [indexes] (counted from 1), or the whole post when null. */
-    fun download(indexes: List<Int>?, options: GalleryOptions? = null, post: GalleryPost? = this.post) {
+    fun download(
+        indexes: List<Int>?,
+        options: GalleryOptions? = null,
+        post: GalleryPost? = this.post,
+        title: String? = null,
+        author: String? = null
+    ) {
         val link = post?.source?.takeIf { it.isNotEmpty() } ?: return
         val first = indexes?.firstOrNull()?.let { i -> post.items.firstOrNull { it.index == i } } ?: post.items.firstOrNull()
         val request = GalleryDownloadRequest(
             url = link,
             indexes = indexes,
             options = options,
-            title = first?.title.orEmpty(),
-            author = post.author,
+            title = title ?: first?.title.orEmpty(),
+            author = author ?: post.author,
             thumbnail = first?.thumbnail ?: first?.url?.takeUnless { first.isVideo }
         )
         viewModelScope.launch {
@@ -204,7 +207,6 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     fun clear() {
         job?.cancel()
         posts = emptyList()
-        openPost = null
         notice = null
         failure = null
         lastRun = null
@@ -262,11 +264,29 @@ fun GalleryScreen(
 
     val currentPost = viewModel.posts.indexOf(viewModel.post)
 
+    val searchBarShine = remember { Animatable(0f) }
+    var wasBusy by remember { mutableStateOf(false) }
+    LaunchedEffect(viewModel.busy) {
+        if (viewModel.busy) {
+            wasBusy = true
+        } else if (wasBusy) {
+            wasBusy = false
+            searchBarShine.snapTo(0f)
+            searchBarShine.animateTo(1f, tween(durationMillis = 850, easing = FastOutSlowInEasing))
+        }
+    }
+    // A video in a post is read by yt-dlp and opens the video sheet on Home.
+    val openItem: (Int, Int) -> Unit = { postIndex, position ->
+        val post = viewModel.posts.getOrNull(postIndex)
+        val item = post?.items?.getOrNull(position)
+        if (item != null && item.isVideo) onVideoLinks(listOf(item.postUrl ?: post.source))
+        else sheetFor = postIndex to position
+    }
+
     LaunchedEffect(Unit) {
         com.hazel.android.gallery.GallerySpare.warm(context)
         GalleryRequests.next.collect { if (it != null) GalleryRequests.take()?.let(viewModel::handle) }
     }
-    BackHandler(enabled = viewModel.posts.size > 1 && viewModel.openPost != null, onBack = viewModel::closePost)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -274,11 +294,13 @@ fun GalleryScreen(
             UrlSearchBar(
                 url = viewModel.query,
                 onOpenSearch = { searchOpen = true },
+                shineProgress = searchBarShine.value,
                 onMenuOpen = { menuOpen = true },
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
             Spacer(modifier = Modifier.height(12.dp))
 
+            val shrink = rememberScrollShrink()
             when {
                 viewModel.busy && viewModel.posts.isEmpty() ->
                     ResultsSkeleton(modifier = Modifier.fillMaxWidth().weight(1f))
@@ -302,10 +324,13 @@ fun GalleryScreen(
                         }
                     }
                 }
-                else -> LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 96.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                // A wide screen lays the cards side by side, as Home and History do.
+                else -> BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                val columns = gridColumns(maxWidth - 40.dp)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().nestedScroll(shrink),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 96.dp),
+                    verticalArrangement = Arrangement.spacedBy(SkeletonSpacing)
                 ) {
                     viewModel.notice?.let { notice ->
                         item(key = "notice") {
@@ -323,42 +348,40 @@ fun GalleryScreen(
                         }
                     }
                     if (viewModel.showsList) {
-                        itemsIndexed(viewModel.posts, key = { i, _ -> "post-$i" }) { i, post ->
+                        gridItems(viewModel.posts.indices.toList(), columns, SkeletonSpacing, key = { "post-$it" }) { i ->
+                            val post = viewModel.posts[i]
                             val single = post.items.singleOrNull()
-                            if (single != null) {
-                                GalleryCard(
-                                    item = single,
-                                    total = 1,
-                                    onOpen = { sheetFor = i to 0 },
-                                    onView = { viewing = i to 0 }
-                                )
-                            } else {
-                                GalleryPostCard(
-                                    post = post,
-                                    onOpen = { viewModel.open(i) },
-                                    onDownloadAll = { postSheetFor = i }
-                                )
-                            }
-                        }
-                    } else {
-                        if (viewModel.posts.size > 1) {
-                            item(key = "back") {
-                                TextButton(onClick = viewModel::closePost) {
-                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(stringResource(R.string.gallery_all_posts))
+                            ArrivingCard(post.source to i, shrink) {
+                                if (single != null) {
+                                    GalleryCard(
+                                        item = single,
+                                        total = 1,
+                                        onOpen = { openItem(i, 0) },
+                                        onView = { viewing = i to 0 }
+                                    )
+                                } else {
+                                    GalleryPostCard(
+                                        post = post,
+                                        onOpen = { position -> viewing = i to position },
+                                        onDownloadAll = { postSheetFor = i }
+                                    )
                                 }
                             }
                         }
-                        itemsIndexed(viewModel.items, key = { _, it -> it.index }) { position, item ->
-                            GalleryCard(
-                                item = item,
-                                total = viewModel.items.size,
-                                onOpen = { sheetFor = currentPost to position },
-                                onView = { viewing = currentPost to position }
-                            )
+                    } else {
+                        gridItems(viewModel.items.indices.toList(), columns, SkeletonSpacing, key = { viewModel.items[it].index }) { position ->
+                            val item = viewModel.items[position]
+                            ArrivingCard(item.url, shrink) {
+                                GalleryCard(
+                                    item = item,
+                                    total = viewModel.items.size,
+                                    onOpen = { openItem(currentPost, position) },
+                                    onView = { viewing = currentPost to position }
+                                )
+                            }
                         }
                     }
+                }
                 }
             }
         }
@@ -425,7 +448,11 @@ fun GalleryScreen(
             GalleryViewer(
                 items = post.items,
                 startIndex = start,
-                onDownload = { item -> viewModel.download(listOf(item.index), post = post) },
+                onOpenSheet = { item ->
+                    // A video goes to the video sheet on Home, so the viewer closes first.
+                    if (item.isVideo) viewing = null
+                    openItem(postIndex, post.items.indexOf(item))
+                },
                 onDismiss = { viewing = null }
             )
         }
@@ -490,11 +517,10 @@ fun GalleryScreen(
         val item = post.items.getOrNull(position) ?: return@let
         GalleryItemSheet(
             item = item,
-            total = post.items.size,
             postUrl = post.source,
-            onDownload = { options ->
+            onDownload = { options, title, author ->
                 sheetFor = null
-                viewModel.download(listOf(item.index), options, post)
+                viewModel.download(listOf(item.index), options, post, title, author)
             },
             onDismiss = { sheetFor = null }
         )
@@ -504,9 +530,9 @@ fun GalleryScreen(
         GalleryPostSheet(
             items = post.items,
             postUrl = post.source,
-            onDownload = { indexes, options ->
+            onDownload = { picks ->
                 postSheetFor = null
-                viewModel.download(indexes, options, post)
+                picks.forEach { viewModel.download(it.indexes, it.options, post, it.title, it.author) }
             },
             onDismiss = { postSheetFor = null }
         )

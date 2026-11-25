@@ -5,7 +5,6 @@
     <string name="nav_history">Unduhan</string>
     <string name="nav_more">Lainnya</string>
     <string name="nav_gallery">Galeri</string>
-    <string name="gallery_download">Unduh</string>
     <string name="gallery_image">Gambar</string>
     <string name="gallery_video">Video</string>
     <string name="gallery_failed">Tidak dapat membaca postingan ini</string>
@@ -28,10 +27,7 @@
     <string name="gallery_view">Lihat</string>
     <string name="gallery_close">Tutup</string>
     <string name="gallery_no_player">Tidak ada aplikasi yang dapat memutar video ini</string>
-    <string name="gallery_all_posts">Semua posting</string>
     <string name="gallery_under_maintenance">Sedang dalam perbaikan</string>
-    <string name="gallery_sheet_image_of">Gambar %1$d dari %2$d</string>
-    <string name="gallery_sheet_video_of">Video %1$d dari %2$d</string>
     <string name="gallery_image_size">Ukuran gambar</string>
     <string name="gallery_size_original">Asli</string>
     <string name="gallery_size_large">Besar</string>
@@ -1159,4 +1155,8 @@
     <string name="gallery_fetched">%1$d file diambil</string>
     <string name="gallery_saved_before_failure">%1$d tersimpan sebelum berhenti</string>
     <string name="properties_kind_image">Gambar</string>
+    <string name="gallery_search_files">Cari di file ini</string>
+    <string name="gallery_type_sheet_subtitle">File mana dari postingan ini yang diunduh</string>
+    <string name="gallery_remove_title">Hapus file ini?</string>
+    <string name="incognito_off">Mode penyamaran mati</string>
 </resources>

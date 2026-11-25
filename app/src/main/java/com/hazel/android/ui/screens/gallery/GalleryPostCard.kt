@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
@@ -60,14 +61,15 @@ import com.hazel.android.ui.theme.tonalFill
 @Composable
 internal fun GalleryPostCard(
     post: GalleryPost,
-    onOpen: () -> Unit,
+    /** Opens the viewer on the file at this place in the post. */
+    onOpen: (position: Int) -> Unit,
     onDownloadAll: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
     val count = post.items.size
     Surface(
-        onClick = onOpen,
+        onClick = { onOpen(0) },
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         color = tonalFill(0.35f)
@@ -125,7 +127,7 @@ internal fun GalleryPostCard(
                             .fillMaxSize()
                             .maskClip(RoundedCornerShape(16.dp))
                             .background(colors.surfaceVariant)
-                            .clickable(onClick = onOpen)
+                            .clickable { onOpen(i) }
                     ) {
                         ArtworkPlaceholder(Modifier.fillMaxSize())
                         item.thumbnail?.let {
@@ -192,9 +194,15 @@ internal fun GalleryPostCard(
 /** The post card's Download all: a compact tonal chip, so it fits beside the dots in any language. */
 @Composable
 private fun PostDownloadAllChip(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    // The accent's own tint, as the sheets' link button has, rather than the stock tonal colour.
+    val accent = MaterialTheme.colorScheme.primary
     FilledTonalButton(
         onClick = onClick,
         modifier = modifier.heightIn(min = 40.dp),
+        colors = ButtonDefaults.filledTonalButtonColors(
+            containerColor = accent.copy(alpha = 0.18f),
+            contentColor = accent
+        ),
         contentPadding = PaddingValues(start = 12.dp, end = 14.dp, top = 8.dp, bottom = 8.dp)
     ) {
         Icon(Icons.Filled.Download, contentDescription = null, modifier = Modifier.size(16.dp))

@@ -5,7 +5,6 @@
     <string name="nav_history">ダウンロード</string>
     <string name="nav_more">その他</string>
     <string name="nav_gallery">ギャラリー</string>
-    <string name="gallery_download">ダウンロード</string>
     <string name="gallery_image">画像</string>
     <string name="gallery_video">動画</string>
     <string name="gallery_failed">この投稿を読み込めませんでした</string>
@@ -28,10 +27,7 @@
     <string name="gallery_view">表示</string>
     <string name="gallery_close">閉じる</string>
     <string name="gallery_no_player">この動画を再生できるアプリがありません</string>
-    <string name="gallery_all_posts">すべての投稿</string>
     <string name="gallery_under_maintenance">メンテナンス中</string>
-    <string name="gallery_sheet_image_of">画像 %1$d / %2$d</string>
-    <string name="gallery_sheet_video_of">動画 %1$d / %2$d</string>
     <string name="gallery_image_size">画像サイズ</string>
     <string name="gallery_size_original">オリジナル</string>
     <string name="gallery_size_large">大</string>
@@ -1159,4 +1155,8 @@
     <string name="gallery_fetched">%1$d 件のファイルを取得</string>
     <string name="gallery_saved_before_failure">停止前に %1$d 件を保存</string>
     <string name="properties_kind_image">画像</string>
+    <string name="gallery_search_files">これらのファイルを検索</string>
+    <string name="gallery_type_sheet_subtitle">この投稿のどのファイルをダウンロードするか</string>
+    <string name="gallery_remove_title">このファイルを外しますか？</string>
+    <string name="incognito_off">シークレット オフ</string>
 </resources>

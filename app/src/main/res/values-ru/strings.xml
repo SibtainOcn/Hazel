@@ -5,7 +5,6 @@
     <string name="nav_history">Загрузки</string>
     <string name="nav_more">Ещё</string>
     <string name="nav_gallery">Галерея</string>
-    <string name="gallery_download">Скачать</string>
     <string name="gallery_image">Изображение</string>
     <string name="gallery_video">Видео</string>
     <string name="gallery_failed">Не удалось прочитать пост</string>
@@ -28,10 +27,7 @@
     <string name="gallery_view">Открыть</string>
     <string name="gallery_close">Закрыть</string>
     <string name="gallery_no_player">Нет приложения для этого видео</string>
-    <string name="gallery_all_posts">Все посты</string>
     <string name="gallery_under_maintenance">На обслуживании</string>
-    <string name="gallery_sheet_image_of">Изображение %1$d из %2$d</string>
-    <string name="gallery_sheet_video_of">Видео %1$d из %2$d</string>
     <string name="gallery_image_size">Размер изображения</string>
     <string name="gallery_size_original">Оригинал</string>
     <string name="gallery_size_large">Большой</string>
@@ -1209,4 +1205,8 @@
     <string name="gallery_fetched">Получено файлов: %1$d</string>
     <string name="gallery_saved_before_failure">Сохранено до остановки: %1$d</string>
     <string name="properties_kind_image">Изображение</string>
+    <string name="gallery_search_files">Поиск по этим файлам</string>
+    <string name="gallery_type_sheet_subtitle">Какие файлы этой публикации загрузить</string>
+    <string name="gallery_remove_title">Убрать этот файл?</string>
+    <string name="incognito_off">Инкогнито выключен</string>
 </resources>

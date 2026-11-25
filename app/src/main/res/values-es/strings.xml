@@ -5,7 +5,6 @@
     <string name="nav_history">Descargas</string>
     <string name="nav_more">Más</string>
     <string name="nav_gallery">Galería</string>
-    <string name="gallery_download">Descargar</string>
     <string name="gallery_image">Imagen</string>
     <string name="gallery_video">Vídeo</string>
     <string name="gallery_failed">No se pudo leer esta publicación</string>
@@ -28,10 +27,7 @@
     <string name="gallery_view">Ver</string>
     <string name="gallery_close">Cerrar</string>
     <string name="gallery_no_player">Ninguna app puede reproducir este vídeo</string>
-    <string name="gallery_all_posts">Todas las publicaciones</string>
     <string name="gallery_under_maintenance">En mantenimiento</string>
-    <string name="gallery_sheet_image_of">Imagen %1$d de %2$d</string>
-    <string name="gallery_sheet_video_of">Vídeo %1$d de %2$d</string>
     <string name="gallery_image_size">Tamaño de imagen</string>
     <string name="gallery_size_original">Original</string>
     <string name="gallery_size_large">Grande</string>
@@ -1193,4 +1189,8 @@
     <string name="gallery_fetched">%1$d archivos obtenidos</string>
     <string name="gallery_saved_before_failure">%1$d guardados antes de detenerse</string>
     <string name="properties_kind_image">Imagen</string>
+    <string name="gallery_search_files">Buscar en estos archivos</string>
+    <string name="gallery_type_sheet_subtitle">Qué archivos de esta publicación se descargan</string>
+    <string name="gallery_remove_title">¿Quitar este archivo?</string>
+    <string name="incognito_off">Incógnito desactivado</string>
 </resources>

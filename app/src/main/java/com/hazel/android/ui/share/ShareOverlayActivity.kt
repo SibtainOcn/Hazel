@@ -205,7 +205,7 @@ class ShareOverlayActivity : ComponentActivity() {
                 val glass by remember(this) { SettingsRepository.isGlassEnabled(this) }.collectAsState(initial = false)
                 val glassStyle by remember(this) { SettingsRepository.getGlassStyle(this) }.collectAsState(initial = GlassStyle.DEFAULT.key)
 
-                LaunchedEffect(url) {
+                LaunchedEffect(url, mode) {
                     // Instant was handed its link in onCreate or onNewIntent, outside the
                     // composition, so closing the dialog cannot cancel it.
                     if (mode != ShareMode.VIDEO) return@LaunchedEffect
@@ -256,10 +256,14 @@ class ShareOverlayActivity : ComponentActivity() {
                         when {
                             mode == ShareMode.IMAGES -> GalleryShareContent(
                                 url = url,
-                                onDownload = { request ->
-                                    queueGallery { request }
+                                onDownload = { requests ->
+                                    requests.forEach { request -> queueGallery { request } }
                                     announceStarted()
                                     closeOverlay()
+                                },
+                                onVideo = { link ->
+                                    sharedUrl = link
+                                    mode = ShareMode.VIDEO
                                 },
                                 onClose = { closeOverlay() }
                             )

@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import com.hazel.android.ui.components.pressScale
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.util.SdCard
 import com.hazel.android.ui.components.FittedPolygonShape
@@ -313,8 +314,7 @@ fun FormatSheet(
     // could be left unable to take it again until the sheet was reopened.
     val focusManager = LocalFocusManager.current
     fun toggle(section: String) {
-        val next = if (section in openList) openList - section
-        else (openList + section).takeLast(MAX_OPEN_SECTIONS)
+        val next = withSectionToggled(openList, section)
         if (SECTION_DETAILS in openList && SECTION_DETAILS !in next) focusManager.clearFocus()
         openSections = next.joinToString(",")
     }
@@ -1076,6 +1076,10 @@ private const val SECTION_FADE_MS = 150
 /** How many sections can be open at once before the oldest closes. */
 private const val MAX_OPEN_SECTIONS = 2
 
+/** [open] with [section] closed if open, else opened, the oldest closing past [MAX_OPEN_SECTIONS]. */
+internal fun withSectionToggled(open: List<String>, section: String): List<String> =
+    if (section in open) open - section else (open + section).takeLast(MAX_OPEN_SECTIONS)
+
 private const val SECTION_DETAILS = "details"
 private const val SECTION_QUALITY = "quality"
 private const val SECTION_SAVE = "save"
@@ -1140,7 +1144,7 @@ internal fun SheetTab(
 private enum class SheetDialog { NONE, CUT, LIVE, THUMBNAIL, SPONSORBLOCK, CHAPTERS, SUBTITLES, FILENAME, SAVE_DIR, AUDIO_QUALITY, CONTAINER, COOKIES, EXTRA_ARGS, LINK }
 
 /** One message from the footer; a new one for every tap, so a repeat starts its time over. */
-private class Feedback(val message: String)
+internal class Feedback(val message: String)
 
 /** The fill the sheet's fields rest on outside a section. */
 @Composable
@@ -1346,20 +1350,29 @@ internal fun SheetDownloadPill(
     icon: ImageVector,
     enabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Only the cookie and its icon, with [label] read out instead of shown. */
+    iconOnly: Boolean = false
 ) {
     val colors = MaterialTheme.colorScheme
     val fill = if (enabled) colors.primary else colors.primary.copy(alpha = 0.12f)
+    // The M3 Expressive press: squeezed a little and its corners tightened, sprung back on release.
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val corner by com.hazel.android.ui.components.pressCorner(interaction, resting = 24.dp, pressed = 14.dp)
     Surface(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(corner),
         color = fill,
         contentColor = if (enabled) colors.onPrimary else colors.primary.copy(alpha = 0.5f),
-        modifier = modifier.height(48.dp)
+        interactionSource = interaction,
+        modifier = modifier
+            .pressScale(interaction, pressed = 0.94f)
+            .height(48.dp)
+            .then(if (iconOnly) Modifier.semantics { contentDescription = label } else Modifier)
     ) {
         Row(
-            modifier = Modifier.padding(start = 5.dp, end = 18.dp),
+            modifier = Modifier.padding(start = 5.dp, end = if (iconOnly) 5.dp else 18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -1371,8 +1384,10 @@ internal fun SheetDownloadPill(
             ) {
                 Icon(icon, null, modifier = Modifier.size(18.dp), tint = if (enabled) fill else colors.surface)
             }
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+            if (!iconOnly) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+            }
         }
     }
 }

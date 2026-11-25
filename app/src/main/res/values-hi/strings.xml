@@ -5,7 +5,6 @@
     <string name="nav_history">डाउनलोड</string>
     <string name="nav_more">और</string>
     <string name="nav_gallery">गैलरी</string>
-    <string name="gallery_download">डाउनलोड</string>
     <string name="gallery_image">इमेज</string>
     <string name="gallery_video">वीडियो</string>
     <string name="gallery_failed">यह पोस्ट पढ़ी नहीं जा सकी</string>
@@ -28,10 +27,7 @@
     <string name="gallery_view">देखें</string>
     <string name="gallery_close">बंद करें</string>
     <string name="gallery_no_player">कोई ऐप यह वीडियो नहीं चला सकता</string>
-    <string name="gallery_all_posts">सभी पोस्ट</string>
     <string name="gallery_under_maintenance">रखरखाव जारी है</string>
-    <string name="gallery_sheet_image_of">छवि %1$d / %2$d</string>
-    <string name="gallery_sheet_video_of">वीडियो %1$d / %2$d</string>
     <string name="gallery_image_size">छवि का आकार</string>
     <string name="gallery_size_original">मूल</string>
     <string name="gallery_size_large">बड़ा</string>
@@ -1176,4 +1172,8 @@
     <string name="gallery_fetched">%1$d फ़ाइलें प्राप्त हुईं</string>
     <string name="gallery_saved_before_failure">रुकने से पहले %1$d सेव हुईं</string>
     <string name="properties_kind_image">इमेज</string>
+    <string name="gallery_search_files">इन फ़ाइलों में खोजें</string>
+    <string name="gallery_type_sheet_subtitle">इस पोस्ट की कौन सी फ़ाइलें डाउनलोड हों</string>
+    <string name="gallery_remove_title">यह फ़ाइल हटाएँ?</string>
+    <string name="incognito_off">इनकॉग्निटो बंद</string>
 </resources>

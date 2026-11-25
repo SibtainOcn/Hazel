@@ -19,8 +19,8 @@ import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.hazel.android.ui.components.EmptyState
+import com.hazel.android.ui.components.ArrivingCard
 import com.hazel.android.ui.components.rememberScrollShrink
-import com.hazel.android.ui.components.scrollShrink
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -93,7 +93,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -561,17 +560,6 @@ fun DownloadScreen(
                         gridItems(orderedResults, columns, SkeletonSpacing, key = { it.url }) { info ->
                             Spacer(modifier = Modifier.height(20.dp))
 
-                            // Each card arrives rather than appearing: it fades up from slightly
-                            // below where it belongs, once, the first time it is composed. A long
-                            // playlist scrolls past as a series of cards settling into place
-                            // instead of a wall that redraws itself under the finger.
-                            var shown by remember(info.url) { mutableStateOf(false) }
-                            LaunchedEffect(info.url) { shown = true }
-                            val entrance by animateFloatAsState(
-                                targetValue = if (shown) 1f else 0f,
-                                animationSpec = M3Motion.emphasized(320),
-                                label = "cardEntrance"
-                            )
 
                             val batchItem = state.batch.firstOrNull { it.url == info.url }
                             // The item's own state says which card is running; the shared pointer
@@ -590,14 +578,7 @@ fun DownloadScreen(
                                 sheetVisible = true
                             }
 
-                            Box(
-                                modifier = Modifier
-                                    .scrollShrink(shrink)
-                                    .graphicsLayer {
-                                        alpha = entrance
-                                        translationY = (1f - entrance) * 28f
-                                    }
-                            ) {
+                            ArrivingCard(info.url, shrink) {
                                 MediaCard(
                                     info = info,
                                     isDownloading = isActive,

@@ -16,7 +16,6 @@
     <string name="nav_history">Downloads</string>
     <string name="nav_more">More</string>
     <string name="nav_gallery">Gallery</string>
-    <string name="gallery_download">Download</string>
     <string name="gallery_image">Image</string>
     <string name="gallery_video">Video</string>
     <string name="gallery_failed">Could not read this post</string>
@@ -39,10 +38,7 @@
     <string name="gallery_view">View</string>
     <string name="gallery_close">Close</string>
     <string name="gallery_no_player">No app can play this video</string>
-    <string name="gallery_all_posts">All posts</string>
     <string name="gallery_under_maintenance">Under maintenance</string>
-    <string name="gallery_sheet_image_of">Image %1$d of %2$d</string>
-    <string name="gallery_sheet_video_of">Video %1$d of %2$d</string>
     <string name="gallery_image_size">Image size</string>
     <string name="gallery_size_original">Original</string>
     <string name="gallery_size_large">Large</string>
@@ -1232,4 +1228,8 @@
     <string name="gallery_fetched">%1$d files fetched</string>
     <string name="gallery_saved_before_failure">%1$d saved before it stopped</string>
     <string name="properties_kind_image">Image</string>
+    <string name="gallery_search_files">Search these files</string>
+    <string name="gallery_type_sheet_subtitle">Which files of this post download</string>
+    <string name="gallery_remove_title">Remove this file?</string>
+    <string name="incognito_off">Incognito off</string>
 </resources>
