@@ -473,8 +473,15 @@ object MediaStoreHelper {
         segments.size >= 4 && segments[0] == "tree" && segments[2] == "document"
 
 
-    private fun getMimeType(file: File): String {
-        return when (file.extension.lowercase()) {
+    /**
+     * The type a file is saved under. It must match the extension: storage treats the name of
+     * an untyped file as having no extension, so a second "a.png" became "a.png (1)".
+     */
+    private fun getMimeType(file: File): String = mimeTypeOf(file.name)
+
+    internal fun mimeTypeOf(name: String): String {
+        val extension = name.substringAfterLast('.', "").lowercase()
+        return when (extension) {
             "mp3" -> "audio/mpeg"
             "m4a" -> "audio/mp4"
             "flac" -> "audio/flac"
@@ -486,7 +493,17 @@ object MediaStoreHelper {
             "webm" -> "video/webm"
             "3gp" -> "video/3gpp"
             "json" -> "application/json"
-            else -> "application/octet-stream"
+            "jpg", "jpeg" -> "image/jpeg"
+            "png" -> "image/png"
+            "gif" -> "image/gif"
+            "webp" -> "image/webp"
+            "heic" -> "image/heic"
+            "avif" -> "image/avif"
+            "bmp" -> "image/bmp"
+            "mov" -> "video/quicktime"
+            "txt" -> "text/plain"
+            else -> android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+                ?: "application/octet-stream"
         }
     }
 }

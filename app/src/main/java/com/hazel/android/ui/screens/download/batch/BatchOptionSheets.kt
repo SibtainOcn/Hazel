@@ -174,7 +174,7 @@ fun ContainerDialog(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ChoiceSheet(
+internal fun ChoiceSheet(
     title: String,
     subtitle: String,
     onDismiss: () -> Unit,
@@ -250,7 +250,7 @@ private fun SheetHeader(title: String, subtitle: String) {
 }
 
 @Composable
-private fun ChoiceRow(
+internal fun ChoiceRow(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,

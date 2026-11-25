@@ -114,13 +114,16 @@ fun MediaCard(
     liveBytes: Long = 0L,
     totalBytes: Long = 0L,
     eta: String = "",
+    /** A figure of its own, such as how many files a gallery job has fetched. */
+    note: String = "",
     isComplete: Boolean = false,
     batchItem: BatchItem? = null,
     waitingForWifi: Boolean = false,
     alreadyDownloaded: Boolean = false,
     onOpenSheet: () -> Unit = {},
     onCancel: () -> Unit = {},
-    onPause: () -> Unit = {},
+    /** Null for a download that cannot be paused, which then offers no Pause. */
+    onPause: (() -> Unit)? = {},
     onResume: () -> Unit = {},
     onDetails: (() -> Unit)? = null
 ) {
@@ -292,7 +295,7 @@ fun MediaCard(
                                     onResume()
                                 }
                             )
-                        } else if (isDownloading) {
+                        } else if (isDownloading && onPause != null) {
                             // Nothing is left to hold once the file is being worked on.
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.download_pause)) },
@@ -349,6 +352,7 @@ fun MediaCard(
                         val done = (totalBytes * shown).toLong().coerceAtLeast(1L)
                         add("${formatFileSize(done)} / ${formatFileSize(totalBytes)}")
                     }
+                    if (note.isNotBlank()) add(note)
                     if (transferring && eta.isNotBlank()) add(stringResource(R.string.queue_header_eta, eta))
                 }
                 if (figures.isNotEmpty()) {
