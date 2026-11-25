@@ -792,7 +792,6 @@
     <string name="storage_locations_no_limit">No limit</string>
     <string name="storage_locations_internal_note">Saved to internal storage unless you pick another folder or an SD card.</string>
     <string name="storage_locations_gallery">Gallery</string>
-    <string name="storage_locations_gallery_hint">Images and posts</string>
     <string name="gallery_settings_description">How images and posts are saved and searched</string>
     <string name="gallery_settings_save_folder">Save folder</string>
     <string name="gallery_settings_image_size">Image size</string>
@@ -1236,4 +1235,5 @@
     <string name="upd_gallerydl_auto_summary">Install new versions when no download is running</string>
     <string name="gallery_group_by_author">Group by author</string>
     <string name="gallery_group_by_author_summary">Single images from one author in one carousel</string>
+    <string name="more_image_settings">Image settings</string>
 </resources>

@@ -727,7 +727,6 @@
     <string name="storage_locations_no_limit">Sin límite</string>
     <string name="storage_locations_internal_note">Se guarda en el almacenamiento interno salvo que elijas otra carpeta o una tarjeta SD.</string>
     <string name="storage_locations_gallery">Galería</string>
-    <string name="storage_locations_gallery_hint">Imágenes y publicaciones</string>
     <string name="gallery_settings_description">Cómo se guardan y buscan imágenes y publicaciones</string>
     <string name="gallery_settings_save_folder">Carpeta de guardado</string>
     <string name="gallery_settings_image_size">Tamaño de imagen</string>
@@ -1196,4 +1195,5 @@
     <string name="upd_gallerydl_auto_summary">Instalar versiones nuevas cuando no haya descargas</string>
     <string name="gallery_group_by_author">Agrupar por autor</string>
     <string name="gallery_group_by_author_summary">Imágenes sueltas de un autor en un carrusel</string>
+    <string name="more_image_settings">Ajustes de imágenes</string>
 </resources>
