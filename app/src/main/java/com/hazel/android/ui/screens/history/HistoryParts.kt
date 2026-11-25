@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.download.DownloadViewModelHolder
 import com.hazel.android.gallery.queue.GalleryQueue
+import com.hazel.android.ui.theme.accentInk
+import com.hazel.android.ui.theme.accentTint
 
 /** What is downloading now, from either engine: its title and share done, null while unknown. */
 internal data class ActiveDownload(val title: String, val progress: Float?)
@@ -64,7 +66,7 @@ internal fun ActiveDownloadCard(onClick: () -> Unit, modifier: Modifier = Modifi
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
-        color = scheme.primaryContainer
+        color = accentTint()
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
@@ -73,10 +75,10 @@ internal fun ActiveDownloadCard(onClick: () -> Unit, modifier: Modifier = Modifi
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .background(scheme.onPrimaryContainer.copy(alpha = 0.12f), MaterialShapes.Cookie9Sided.toShape()),
+                    .background(accentInk().copy(alpha = 0.14f), MaterialShapes.Cookie9Sided.toShape()),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Filled.Download, contentDescription = null, tint = scheme.onPrimaryContainer)
+                Icon(Icons.Filled.Download, contentDescription = null, tint = accentInk())
             }
             Spacer(modifier = Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -85,7 +87,7 @@ internal fun ActiveDownloadCard(onClick: () -> Unit, modifier: Modifier = Modifi
                         active.title,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = scheme.onPrimaryContainer,
+                        color = accentInk(),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
@@ -95,13 +97,13 @@ internal fun ActiveDownloadCard(onClick: () -> Unit, modifier: Modifier = Modifi
                             "${(it.coerceIn(0f, 1f) * 100).toInt()}%",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
-                            color = scheme.onPrimaryContainer,
+                            color = accentInk(),
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
-                val track = scheme.onPrimaryContainer.copy(alpha = 0.15f)
+                val track = accentInk().copy(alpha = 0.2f)
                 val bar = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp))
                 val progress = active.progress
                 if (progress == null) {
@@ -129,7 +131,7 @@ internal fun CookieMenuButton(onClick: () -> Unit) {
         modifier = Modifier
             .size(36.dp)
             .clip(MaterialShapes.Cookie7Sided.toShape())
-            .background(scheme.primaryContainer)
+            .background(accentTint())
             .clickable(onClick = onClick, onClickLabel = stringResource(R.string.history_card_options)),
         contentAlignment = Alignment.Center
     ) {
@@ -137,7 +139,7 @@ internal fun CookieMenuButton(onClick: () -> Unit) {
             painterResource(R.drawable.ic_more_vert),
             contentDescription = stringResource(R.string.history_card_options),
             modifier = Modifier.size(20.dp),
-            tint = scheme.onPrimaryContainer
+            tint = accentInk()
         )
     }
 }
@@ -150,9 +152,9 @@ internal fun CardKindMark(icon: ImageVector) {
     Box(
         modifier = Modifier
             .size(28.dp)
-            .background(scheme.primaryContainer, MaterialShapes.Cookie7Sided.toShape()),
+            .background(accentTint(), MaterialShapes.Cookie7Sided.toShape()),
         contentAlignment = Alignment.Center
     ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp), tint = scheme.onPrimaryContainer)
+        Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp), tint = accentInk())
     }
 }
