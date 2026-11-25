@@ -30,6 +30,36 @@
     <string name="gallery_view">Lihat</string>
     <string name="gallery_close">Tutup</string>
     <string name="gallery_no_player">Tidak ada aplikasi yang dapat memutar video ini</string>
+    <string name="gallery_under_maintenance">Sedang dalam perbaikan</string>
+    <string name="gallery_sheet_image_of">Gambar %1$d dari %2$d</string>
+    <string name="gallery_sheet_video_of">Video %1$d dari %2$d</string>
+    <string name="gallery_image_size">Ukuran gambar</string>
+    <string name="gallery_size_original">Asli</string>
+    <string name="gallery_size_large">Besar</string>
+    <string name="gallery_size_medium">Sedang</string>
+    <string name="gallery_size_original_hint">Terbesar yang diberikan situs</string>
+    <string name="gallery_size_x_only">Hanya X</string>
+    <string name="gallery_video_best">Terbaik (digabung)</string>
+    <string name="gallery_video_best_hint">Lewat yt-dlp</string>
+    <string name="gallery_video_single">Satu file</string>
+    <string name="gallery_video_single_hint">Tanpa penggabungan</string>
+    <string name="gallery_adjust_image">Atur gambar</string>
+    <string name="gallery_adjust_all">Atur semua</string>
+    <string name="gallery_metadata">Metadata</string>
+    <string name="gallery_post_date">Tanggal posting</string>
+    <string name="gallery_caption">Keterangan</string>
+    <string name="gallery_video_options">Opsi video</string>
+    <string name="gallery_skip_downloaded">Lewati yang sudah diunduh</string>
+    <string name="gallery_pack_zip">Kemas sebagai ZIP</string>
+    <string name="gallery_filter_all">Semua %d</string>
+    <string name="gallery_filter_images">Gambar %d</string>
+    <string name="gallery_filter_videos">Video %d</string>
+    <string name="gallery_filename_preset_user_num">Nama pengguna dan nomor</string>
+    <string name="gallery_filename_preset_id_num">ID posting dan nomor</string>
+    <string name="gallery_filename_preset_original">Nama file asli</string>
+    <plurals name="gallery_items">
+        <item quantity="other">%d item</item>
+    </plurals>
     <string name="nav_incognito_on">Mode samaran aktif, unduhan tidak dicatat</string>
     <string name="nav_incognito_off">Mode samaran nonaktif</string>
 

@@ -30,6 +30,36 @@
     <string name="gallery_view">查看</string>
     <string name="gallery_close">关闭</string>
     <string name="gallery_no_player">没有应用可以播放此视频</string>
+    <string name="gallery_under_maintenance">维护中</string>
+    <string name="gallery_sheet_image_of">图片 %1$d / %2$d</string>
+    <string name="gallery_sheet_video_of">视频 %1$d / %2$d</string>
+    <string name="gallery_image_size">图片尺寸</string>
+    <string name="gallery_size_original">原图</string>
+    <string name="gallery_size_large">大</string>
+    <string name="gallery_size_medium">中</string>
+    <string name="gallery_size_original_hint">网站提供的最大尺寸</string>
+    <string name="gallery_size_x_only">仅 X</string>
+    <string name="gallery_video_best">最佳（合并）</string>
+    <string name="gallery_video_best_hint">通过 yt-dlp</string>
+    <string name="gallery_video_single">单个文件</string>
+    <string name="gallery_video_single_hint">不合并</string>
+    <string name="gallery_adjust_image">调整图片</string>
+    <string name="gallery_adjust_all">全部调整</string>
+    <string name="gallery_metadata">元数据</string>
+    <string name="gallery_post_date">发布日期</string>
+    <string name="gallery_caption">说明文字</string>
+    <string name="gallery_video_options">视频选项</string>
+    <string name="gallery_skip_downloaded">跳过已下载</string>
+    <string name="gallery_pack_zip">打包为 ZIP</string>
+    <string name="gallery_filter_all">全部 %d</string>
+    <string name="gallery_filter_images">图片 %d</string>
+    <string name="gallery_filter_videos">视频 %d</string>
+    <string name="gallery_filename_preset_user_num">用户名和编号</string>
+    <string name="gallery_filename_preset_id_num">帖子 ID 和编号</string>
+    <string name="gallery_filename_preset_original">原始文件名</string>
+    <plurals name="gallery_items">
+        <item quantity="other">%d 项</item>
+    </plurals>
     <string name="nav_incognito_on">无痕模式已开启，下载不会被记录</string>
     <string name="nav_incognito_off">无痕模式已关闭</string>
 

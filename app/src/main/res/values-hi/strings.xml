@@ -30,6 +30,37 @@
     <string name="gallery_view">देखें</string>
     <string name="gallery_close">बंद करें</string>
     <string name="gallery_no_player">कोई ऐप यह वीडियो नहीं चला सकता</string>
+    <string name="gallery_under_maintenance">रखरखाव जारी है</string>
+    <string name="gallery_sheet_image_of">छवि %1$d / %2$d</string>
+    <string name="gallery_sheet_video_of">वीडियो %1$d / %2$d</string>
+    <string name="gallery_image_size">छवि का आकार</string>
+    <string name="gallery_size_original">मूल</string>
+    <string name="gallery_size_large">बड़ा</string>
+    <string name="gallery_size_medium">मध्यम</string>
+    <string name="gallery_size_original_hint">साइट का सबसे बड़ा आकार</string>
+    <string name="gallery_size_x_only">केवल X</string>
+    <string name="gallery_video_best">सर्वश्रेष्ठ (मर्ज किया)</string>
+    <string name="gallery_video_best_hint">yt-dlp से</string>
+    <string name="gallery_video_single">एकल फ़ाइल</string>
+    <string name="gallery_video_single_hint">बिना मर्ज</string>
+    <string name="gallery_adjust_image">छवि समायोजित करें</string>
+    <string name="gallery_adjust_all">सभी समायोजित करें</string>
+    <string name="gallery_metadata">मेटाडेटा</string>
+    <string name="gallery_post_date">पोस्ट की तारीख</string>
+    <string name="gallery_caption">कैप्शन</string>
+    <string name="gallery_video_options">वीडियो विकल्प</string>
+    <string name="gallery_skip_downloaded">डाउनलोड हो चुके छोड़ें</string>
+    <string name="gallery_pack_zip">ZIP में पैक करें</string>
+    <string name="gallery_filter_all">सभी %d</string>
+    <string name="gallery_filter_images">छवियाँ %d</string>
+    <string name="gallery_filter_videos">वीडियो %d</string>
+    <string name="gallery_filename_preset_user_num">यूज़रनेम और नंबर</string>
+    <string name="gallery_filename_preset_id_num">पोस्ट ID और नंबर</string>
+    <string name="gallery_filename_preset_original">मूल फ़ाइल नाम</string>
+    <plurals name="gallery_items">
+        <item quantity="one">%d आइटम</item>
+        <item quantity="other">%d आइटम</item>
+    </plurals>
     <string name="nav_incognito_on">गुप्त मोड चालू है, डाउनलोड दर्ज नहीं होंगे</string>
     <string name="nav_incognito_off">गुप्त मोड बंद है</string>
 
