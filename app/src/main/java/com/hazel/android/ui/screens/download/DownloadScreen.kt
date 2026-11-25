@@ -79,6 +79,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -140,6 +141,7 @@ import com.hazel.android.util.StoragePaths
 import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import com.hazel.android.ui.components.player.FullscreenPlayer
 import com.hazel.android.ui.components.player.InlinePlayer
@@ -317,11 +319,13 @@ fun DownloadScreen(
     // The records behind the links on screen, so each one can be asked whether the file it
     // produced is still on the device. Only the links being shown are looked up, rather
     // than the whole history, which can run to hundreds of rows.
-    val listedEntries = remember(state.results, history) {
-        state.results.mapNotNull { info ->
-            history.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
-        }
+    // Matched off the main thread through one index of the history, each link reduced once:
+    // comparing every card with every record took seconds on a long playlist and history.
+    val results = state.results
+    val entryFor by produceState(emptyMap<String, HistoryEntry>(), results, history) {
+        value = withContext(Dispatchers.Default) { matchHistory(results, history) }
     }
+    val listedEntries = remember(entryFor) { entryFor.values.distinct() }
     val presence = rememberPresence(listedEntries)
 
     /**
@@ -334,10 +338,7 @@ fun DownloadScreen(
      */
     val savedUrls by remember(state.results, listedEntries) {
         derivedStateOf {
-            state.results.filter { info ->
-                listedEntries.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
-                    ?.let { presence[it.id] == true } == true
-            }.map { it.url }.toSet()
+            entryFor.filterValues { presence[it.id] == true }.keys
         }
     }
 
@@ -913,7 +914,7 @@ fun DownloadScreen(
 
     heldInfo?.let { info ->
         // The saved copy, if its file is still there; presence is already read off the main thread.
-        val entry = listedEntries.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
+        val entry = entryFor[info.url]
         val onDevice = entry?.takeIf { info.url in savedUrls }
         MediaHoldDialog(
             info = info,
@@ -1589,3 +1590,19 @@ private val MediaInfo.canStream: Boolean
  * The site's front page, which is where a sign-in starts. Cookies are stored per site, so
  * the individual media address is trimmed away.
  */
+
+/**
+ * Each listed link's history record, by link. The first record for a media wins, as a scan
+ * of the history in order would find it.
+ */
+internal fun matchHistory(results: List<MediaInfo>, history: List<HistoryEntry>): Map<String, HistoryEntry> {
+    if (results.isEmpty() || history.isEmpty()) return emptyMap()
+    val byKey = HashMap<String, HistoryEntry>(history.size)
+    history.forEach { entry ->
+        val key = LinkKey.canonical(entry.url)
+        if (key.isNotBlank()) byKey.putIfAbsent(key, entry)
+    }
+    val found = HashMap<String, HistoryEntry>()
+    results.forEach { info -> byKey[LinkKey.canonical(info.url)]?.let { found[info.url] = it } }
+    return found
+}
