@@ -383,7 +383,6 @@
     <string name="history_delete_dialog_confirm">Удалить</string>
     <string name="history_delete_dialog_cancel">Отмена</string>
     <string name="history_card_options">Параметры</string>
-    <string name="history_recent">Недавние</string>
     <string name="history_card_properties">Свойства</string>
     <string name="history_card_remove">Удалить из списка</string>
     <string name="history_card_delete">Удалить файл</string>

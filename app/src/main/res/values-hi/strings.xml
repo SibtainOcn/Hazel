@@ -373,7 +373,6 @@
     <string name="history_delete_dialog_confirm">हटाएँ</string>
     <string name="history_delete_dialog_cancel">रद्द करें</string>
     <string name="history_card_options">विकल्प</string>
-    <string name="history_recent">हाल के डाउनलोड</string>
     <string name="history_card_properties">विवरण</string>
     <string name="history_card_remove">सूची से हटाएँ</string>
     <string name="history_card_delete">फ़ाइल हटाएँ</string>

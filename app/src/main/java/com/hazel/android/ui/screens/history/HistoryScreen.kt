@@ -536,7 +536,8 @@ fun HistoryScreen(
                     contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(spacing)
                 ) {
-                    fun actionsFor(entry: HistoryEntry): EntryActions {
+                    gridItems(visible, columns, spacing, key = { it.id }) { entry ->
+                        val present = presence[entry.id] ?: true
                         val open: () -> Unit = {
                             scope.launch {
                                 if (MediaPresence.refresh(context, entry.fileUri)) {
@@ -548,28 +549,13 @@ fun HistoryScreen(
                             }
                         }
                         val toggle = { selected = HistorySelection.toggle(selected, entry.id) }
-                        return EntryActions(
+                        val actions = EntryActions(
                             onOpen = if (selecting) toggle else open,
                             onHold = if (selecting) toggle else { { actionFor = listOf(entry) } },
                             onProperties = { properties = entry },
                             onRemove = { scope.launch { DownloadHistoryRepository.remove(context, entry.id) } },
                             onDeleteFile = { confirmDelete = listOf(entry) }
                         )
-                    }
-                    if (query.isBlank() && visible.size > 1) {
-                        item(key = "recent") {
-                            RecentCarousel(
-                                entries = visible.take(RECENT_COUNT),
-                                presence = { presence[it.id] ?: true },
-                                marks = { if (selecting) it.id in selected else null },
-                                actionsFor = ::actionsFor,
-                                sidePadding = 20.dp
-                            )
-                        }
-                    }
-                    gridItems(visible, columns, spacing, key = { it.id }) { entry ->
-                        val present = presence[entry.id] ?: true
-                        val actions = actionsFor(entry)
                         val mark = if (selecting) entry.id in selected else null
                         Box(modifier = Modifier.scrollShrink(shrink)) {
                             if (listLayout) HistoryRow(entry, present, mark, actions)
@@ -878,7 +864,7 @@ private fun HistoryActionDialog(
 /** A new instance per message, so the same text twice still shows twice. */
 
 /** What can be done with one finished download, whichever layout draws it. */
-internal class EntryActions(
+private class EntryActions(
     val onOpen: () -> Unit,
     val onHold: () -> Unit,
     val onProperties: () -> Unit,
@@ -953,7 +939,7 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit, onClose:
 
 /** The entry's options, anchored to whatever opened them. */
 @Composable
-internal fun EntryMenu(
+private fun EntryMenu(
     expanded: Boolean,
     present: Boolean,
     actions: EntryActions,
@@ -1065,12 +1051,7 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, mark: Boolean?, a
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    kindIcon(entry),
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = Color.White
-                )
+                CardKindMark(kindIcon(entry))
                 formatDuration(entry.durationSeconds).takeIf { it.isNotBlank() }?.let { CardTag(it) }
                 if (entry.sizeBytes > 0) CardTag(formatFileSize(entry.sizeBytes))
                 if (!present) DeletedTag()
@@ -1183,7 +1164,7 @@ private fun KindMark(entry: HistoryEntry) {
 
 /** The tick on a row while picking: filled when picked, an empty ring when not. */
 @Composable
-internal fun SelectMark(chosen: Boolean, modifier: Modifier = Modifier, onImage: Boolean = false) {
+private fun SelectMark(chosen: Boolean, modifier: Modifier = Modifier, onImage: Boolean = false) {
     Box(
         modifier = modifier
             .size(24.dp)
@@ -1212,7 +1193,7 @@ internal fun SelectMark(chosen: Boolean, modifier: Modifier = Modifier, onImage:
 }
 
 @Composable
-internal fun Artwork(entry: HistoryEntry, present: Boolean, modifier: Modifier) {
+private fun Artwork(entry: HistoryEntry, present: Boolean, modifier: Modifier) {
     com.hazel.android.ui.components.ArtworkPlaceholder(modifier)
     HistoryArtworkImage(
         entry = entry,
@@ -1226,7 +1207,7 @@ internal fun Artwork(entry: HistoryEntry, present: Boolean, modifier: Modifier) 
 }
 
 @Composable
-internal fun DeletedTag() {
+private fun DeletedTag() {
     CardTag(
         stringResource(R.string.history_tag_deleted),
         background = MaterialTheme.colorScheme.error,
@@ -1234,11 +1215,8 @@ internal fun DeletedTag() {
     )
 }
 
-/** How many of the newest downloads the Downloads screen offers to swipe through. */
-private const val RECENT_COUNT = 7
-
 /** Audio, video or picture, as the row and the card both mark it. */
-internal fun kindIcon(entry: HistoryEntry) = when {
+private fun kindIcon(entry: HistoryEntry) = when {
     entry.isImage -> Icons.Filled.Image
     entry.isVideo -> Icons.Filled.Videocam
     else -> Icons.Filled.MusicNote
