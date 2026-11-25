@@ -64,7 +64,10 @@ import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.toShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -1128,19 +1131,39 @@ private fun HistoryRow(entry: HistoryEntry, present: Boolean, mark: Boolean?, ac
             }
             Spacer(modifier = Modifier.width(8.dp))
             if (mark != null) SelectMark(mark)
-            else Icon(
-                kindIcon(entry),
-                contentDescription = stringResource(
-                    when {
-                        entry.isImage -> R.string.properties_kind_image
-                        entry.isVideo -> R.string.properties_kind_video
-                        else -> R.string.properties_kind_audio
-                    }
-                ),
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            else KindMark(entry)
         }
+    }
+}
+
+/** The row's audio, video or picture mark on a tonal six-sided cookie, one tone per kind. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun KindMark(entry: HistoryEntry) {
+    val scheme = MaterialTheme.colorScheme
+    val (fill, tint) = when {
+        entry.isImage -> scheme.tertiaryContainer to scheme.onTertiaryContainer
+        entry.isVideo -> scheme.primaryContainer to scheme.onPrimaryContainer
+        else -> scheme.secondaryContainer to scheme.onSecondaryContainer
+    }
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .background(fill, MaterialShapes.Cookie6Sided.toShape()),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            kindIcon(entry),
+            contentDescription = stringResource(
+                when {
+                    entry.isImage -> R.string.properties_kind_image
+                    entry.isVideo -> R.string.properties_kind_video
+                    else -> R.string.properties_kind_audio
+                }
+            ),
+            modifier = Modifier.size(18.dp),
+            tint = tint
+        )
     }
 }
 
