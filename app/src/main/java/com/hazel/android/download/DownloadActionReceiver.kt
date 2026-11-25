@@ -60,7 +60,9 @@ class DownloadActionReceiver : BroadcastReceiver() {
             ACTION_RESUME -> (viewModel ?: DownloadViewModelHolder.get()).resumeDownload()
 
             ACTION_CANCEL ->
-                if (viewModel != null) {
+                if (com.hazel.android.gallery.queue.GalleryQueue.cancelRunning()) {
+                    Unit
+                } else if (viewModel != null) {
                     viewModel.cancelDownload()
                 } else {
                     DownloadNotificationHelper.cancelPaused(context)

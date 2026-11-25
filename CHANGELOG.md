@@ -8,9 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Gallery tab: saves images and videos from posts on Instagram, X, Reddit and 1,500 more sites through gallery-dl.
+- gallery-dl updates itself from PyPI, with its own screen under Software update.
+- Gallery downloads go through the Queue one at a time with notifications, History (Images filter) and the Failed tab.
 - Search: an Images chip with a Search on row of sites, and an Images tab in the search options.
 - Gallery: post files land as cards like videos, with a fullscreen viewer to swipe, zoom and save each one.
 - Gallery: an item sheet and a Download all sheet with image size, video quality, save folder and file options.
+- Gallery: searches, profiles and several pasted links show one carousel card per post; tapping opens the post.
+- Share menu: Hazel Images and Instant Images targets for posts; the video targets are now Hazel Video and Instant Video.
 - Release channels: Beta and Nightly builds on GitHub, a daily nightly from the nightly branch, and one-step switching on the Hazel update screen.
 - Hazel update screen: the build's commit and date on beta and nightly builds.
 - Hazel updates: optional notification for new versions, opening the Hazel update screen.
@@ -32,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sign-in: one-tap Instagram, YouTube, X, Facebook, TikTok and Reddit in Settings > Cookies, so you can sign in before downloading.
 - Download settings: a Gallery save folder, Download/Hazel/Gallery by default.
 - More > Gallery: defaults for gallery downloads and image search, and clearing the download record.
+- Gallery: View log on a failed run, and a Gallery files row in Temporary files.
 
 ### Fixed
 - Hazel updates: Beta and Nightly find their releases, move from one build to the next, and move onto a newer stable.

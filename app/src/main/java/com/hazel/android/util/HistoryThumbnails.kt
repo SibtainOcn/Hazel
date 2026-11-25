@@ -178,8 +178,13 @@ object HistoryThumbnails {
 
     private fun readFile(context: Context, id: Long, fileUri: String, isVideo: Boolean): File? {
         val uri = runCatching { Uri.parse(fileUri) }.getOrNull() ?: return null
-        val bitmap = attempt { platformThumbnail(context, uri, isVideo) }
-            ?: attempt { readOffFile(context, uri, isVideo) }
+        val bitmap = if (isImage(context, uri)) {
+            attempt { platformThumbnail(context, uri, isVideo = false).takeIf { uri.scheme == ContentResolver.SCHEME_CONTENT } }
+                ?: attempt { decodeImage(context, uri) }
+        } else {
+            attempt { platformThumbnail(context, uri, isVideo) }
+                ?: attempt { readOffFile(context, uri, isVideo) }
+        }
 
         if (bitmap == null) {
             markNothingFound(context, id)
@@ -228,6 +233,26 @@ object HistoryThumbnails {
         } finally {
             runCatching { retriever.release() }
         }
+    }
+
+    private fun isImage(context: Context, uri: Uri): Boolean {
+        val type = runCatching { context.contentResolver.getType(uri) }.getOrNull()
+            ?: android.webkit.MimeTypeMap.getSingleton()
+                .getMimeTypeFromExtension(uri.lastPathSegment.orEmpty().substringAfterLast('.', "").lowercase())
+        return type?.startsWith("image/") == true
+    }
+
+    /** A saved picture, read at a fraction of its size: a phone photo decoded whole is tens of MB. */
+    private fun decodeImage(context: Context, uri: Uri): Bitmap? {
+        fun open(): java.io.InputStream? = if (uri.scheme == ContentResolver.SCHEME_FILE) File(uri.path ?: return null).inputStream()
+        else context.contentResolver.openInputStream(uri)
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        open()?.use { BitmapFactory.decodeStream(it, null, bounds) } ?: return null
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        var sample = 1
+        while (bounds.outWidth / (sample * 2) >= TARGET_WIDTH) sample *= 2
+        val options = BitmapFactory.Options().apply { inSampleSize = sample }
+        return open()?.use { BitmapFactory.decodeStream(it, null, options) }?.let(::scaleDown)
     }
 
     /** Scaled while decoding where possible: a full 4K frame alone is over 30 MB. */
