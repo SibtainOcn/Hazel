@@ -101,6 +101,13 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     val items: List<GalleryItem> get() = post?.items.orEmpty()
     val showsList: Boolean get() = posts.size > 1 && post == null
 
+    /** Whether the results came from a search, where each post is a result of its own. */
+    var fromSearch by mutableStateOf(false)
+        internal set
+
+    /** Download all belongs to one post with several files, never to a page of search results. */
+    val offersDownloadAll: Boolean get() = !showsList && items.size > 1 && (openPost != null || !fromSearch)
+
     private var job: Job? = null
     private var lastRun: (() -> Unit)? = null
 
@@ -111,11 +118,13 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         openPost = null
         when (request) {
             is GalleryRequest.Links -> {
+                fromSearch = false
                 if (request.urls.isEmpty()) return
                 query = request.urls.joinToString(" ")
                 launchRun(request.urls.first()) { readLinks(request.urls) }
             }
             is GalleryRequest.Search -> {
+                fromSearch = true
                 query = request.query
                 val url = request.site.urlFor(request.query)
                 launchRun(url) {
@@ -179,7 +188,7 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         query = ""
     }
 
-    private fun show(found: List<GalleryPost>) {
+    internal fun show(found: List<GalleryPost>) {
         posts = found
         notice = if (found.isEmpty()) GalleryNotice(R.string.gallery_empty) else null
     }
@@ -230,10 +239,13 @@ fun GalleryScreen(
     val clipboard = LocalClipboard.current
     var searchOpen by rememberSaveable { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
-    var viewing by rememberSaveable { mutableStateOf<Int?>(null) }
+    // Post index and file position, so a file of any post on a list of several can be opened.
+    var viewing by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
     var logOpen by rememberSaveable { mutableStateOf(false) }
-    var sheetFor by rememberSaveable { mutableStateOf<Int?>(null) }
+    var sheetFor by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
     var postSheetFor by rememberSaveable { mutableStateOf<Int?>(null) }
+
+    val currentPost = viewModel.posts.indexOf(viewModel.post)
 
     LaunchedEffect(Unit) {
         GalleryRequests.next.collect { if (it != null) GalleryRequests.take()?.let(viewModel::handle) }
@@ -303,11 +315,21 @@ fun GalleryScreen(
                     }
                     if (viewModel.showsList) {
                         itemsIndexed(viewModel.posts, key = { i, _ -> "post-$i" }) { i, post ->
-                            GalleryPostCard(
-                                post = post,
-                                onOpen = { viewModel.open(i) },
-                                onDownloadAll = { postSheetFor = i }
-                            )
+                            val single = post.items.singleOrNull()
+                            if (single != null) {
+                                GalleryCard(
+                                    item = single,
+                                    total = 1,
+                                    onOpen = { sheetFor = i to 0 },
+                                    onView = { viewing = i to 0 }
+                                )
+                            } else {
+                                GalleryPostCard(
+                                    post = post,
+                                    onOpen = { viewModel.open(i) },
+                                    onDownloadAll = { postSheetFor = i }
+                                )
+                            }
                         }
                     } else {
                         if (viewModel.posts.size > 1) {
@@ -323,8 +345,8 @@ fun GalleryScreen(
                             GalleryCard(
                                 item = item,
                                 total = viewModel.items.size,
-                                onOpen = { sheetFor = position },
-                                onView = { viewing = position }
+                                onOpen = { sheetFor = currentPost to position },
+                                onView = { viewing = currentPost to position }
                             )
                         }
                     }
@@ -362,8 +384,8 @@ fun GalleryScreen(
                     }
                 )
             }
-            if (viewModel.items.size > 1 && !viewModel.busy) {
-                DownloadAllButton(onClick = { postSheetFor = viewModel.posts.indexOf(viewModel.post).takeIf { it >= 0 } })
+            if (viewModel.offersDownloadAll && !viewModel.busy) {
+                DownloadAllButton(onClick = { postSheetFor = currentPost.takeIf { it >= 0 } })
             }
         }
     }
@@ -389,13 +411,15 @@ fun GalleryScreen(
         )
     }
 
-    viewing?.let { start ->
-        GalleryViewer(
-            items = viewModel.items,
-            startIndex = start,
-            onDownload = { item -> viewModel.download(listOf(item.index)) },
-            onDismiss = { viewing = null }
-        )
+    viewing?.let { (postIndex, start) ->
+        viewModel.posts.getOrNull(postIndex)?.let { post ->
+            GalleryViewer(
+                items = post.items,
+                startIndex = start,
+                onDownload = { item -> viewModel.download(listOf(item.index), post = post) },
+                onDismiss = { viewing = null }
+            )
+        }
     }
 
     viewModel.failure?.takeIf { logOpen }?.let { item ->
@@ -417,32 +441,27 @@ fun GalleryScreen(
         )
     }
 
-    // New results, or another post opened, close what was open on the old ones.
-    val items = viewModel.items
-    var sheetsBelongTo by remember { mutableStateOf(items) }
-    LaunchedEffect(items) {
-        if (sheetsBelongTo !== items) {
-            sheetsBelongTo = items
-            sheetFor = null
-            viewing = null
-        }
-    }
+    // New results close what was open on the old ones.
     var postsShown by remember { mutableStateOf(viewModel.posts) }
     LaunchedEffect(viewModel.posts) {
         if (postsShown !== viewModel.posts) {
             postsShown = viewModel.posts
+            sheetFor = null
+            viewing = null
             postSheetFor = null
         }
     }
 
-    sheetFor?.let(items::getOrNull)?.let { item ->
+    sheetFor?.let { (postIndex, position) ->
+        val post = viewModel.posts.getOrNull(postIndex) ?: return@let
+        val item = post.items.getOrNull(position) ?: return@let
         GalleryItemSheet(
             item = item,
-            total = items.size,
-            postUrl = viewModel.post?.source.orEmpty(),
+            total = post.items.size,
+            postUrl = post.source,
             onDownload = { options ->
                 sheetFor = null
-                viewModel.download(listOf(item.index), options)
+                viewModel.download(listOf(item.index), options, post)
             },
             onDismiss = { sheetFor = null }
         )
