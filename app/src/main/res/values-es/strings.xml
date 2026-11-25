@@ -1182,7 +1182,6 @@
     <string name="upd_notify_engines_summary">Para las actualizaciones de yt-dlp y gallery-dl</string>
     <string name="upd_notify_installed_title">Avisar al instalarse</string>
     <string name="upd_notify_failed_title">Avisar si una actualización falla</string>
-    <string name="upd_action_use_bundled">Incluida</string>
     <string name="upd_bundled_restored">Ahora se usa gallery-dl %1$s incluido</string>
     <string name="upd_busy">Hay una descarga en curso. Inténtalo cuando termine</string>
     <string name="gallery_fetched">%1$d archivos obtenidos</string>
@@ -1192,4 +1191,7 @@
     <string name="gallery_type_sheet_subtitle">Qué archivos de esta publicación se descargan</string>
     <string name="gallery_remove_title">¿Quitar este archivo?</string>
     <string name="incognito_off">Incógnito desactivado</string>
+    <string name="upd_tile_builtin">Integrada</string>
+    <string name="upd_action_use_builtin">Usar integrada</string>
+    <string name="upd_gallerydl_auto_summary">Instalar versiones nuevas cuando no haya descargas</string>
 </resources>

@@ -1148,7 +1148,6 @@
     <string name="upd_notify_engines_summary">Untuk pembaruan yt-dlp dan gallery-dl</string>
     <string name="upd_notify_installed_title">Beri tahu setelah terpasang</string>
     <string name="upd_notify_failed_title">Beri tahu jika pembaruan gagal</string>
-    <string name="upd_action_use_bundled">Bawaan</string>
     <string name="upd_bundled_restored">Sekarang memakai gallery-dl %1$s bawaan</string>
     <string name="upd_busy">Ada unduhan yang berjalan. Coba lagi setelah selesai</string>
     <string name="gallery_fetched">%1$d file diambil</string>
@@ -1158,4 +1157,7 @@
     <string name="gallery_type_sheet_subtitle">File mana dari postingan ini yang diunduh</string>
     <string name="gallery_remove_title">Hapus file ini?</string>
     <string name="incognito_off">Mode penyamaran mati</string>
+    <string name="upd_tile_builtin">Bawaan</string>
+    <string name="upd_action_use_builtin">Pakai bawaan</string>
+    <string name="upd_gallerydl_auto_summary">Pasang versi baru saat tidak ada unduhan</string>
 </resources>

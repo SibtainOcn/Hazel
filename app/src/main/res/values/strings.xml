@@ -1222,7 +1222,6 @@
     <string name="upd_notify_engines_summary">For yt-dlp and gallery-dl updates</string>
     <string name="upd_notify_installed_title">Notify when installed</string>
     <string name="upd_notify_failed_title">Notify when an update fails</string>
-    <string name="upd_action_use_bundled">Bundled</string>
     <string name="upd_bundled_restored">Now using the bundled gallery-dl %1$s</string>
     <string name="upd_busy">A download is running. Try again after it finishes</string>
     <string name="gallery_fetched">%1$d files fetched</string>
@@ -1232,4 +1231,7 @@
     <string name="gallery_type_sheet_subtitle">Which files of this post download</string>
     <string name="gallery_remove_title">Remove this file?</string>
     <string name="incognito_off">Incognito off</string>
+    <string name="upd_tile_builtin">Built in</string>
+    <string name="upd_action_use_builtin">Use built-in</string>
+    <string name="upd_gallerydl_auto_summary">Install new versions when no download is running</string>
 </resources>

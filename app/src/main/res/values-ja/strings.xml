@@ -1148,7 +1148,6 @@
     <string name="upd_notify_engines_summary">yt-dlp と gallery-dl の更新用</string>
     <string name="upd_notify_installed_title">インストール後に通知</string>
     <string name="upd_notify_failed_title">更新に失敗したら通知</string>
-    <string name="upd_action_use_bundled">同梱版</string>
     <string name="upd_bundled_restored">同梱の gallery-dl %1$s を使用しています</string>
     <string name="upd_busy">ダウンロード中です。終了後にもう一度お試しください</string>
     <string name="gallery_fetched">%1$d 件のファイルを取得</string>
@@ -1158,4 +1157,7 @@
     <string name="gallery_type_sheet_subtitle">この投稿のどのファイルをダウンロードするか</string>
     <string name="gallery_remove_title">このファイルを外しますか？</string>
     <string name="incognito_off">シークレット オフ</string>
+    <string name="upd_tile_builtin">内蔵</string>
+    <string name="upd_action_use_builtin">内蔵版を使う</string>
+    <string name="upd_gallerydl_auto_summary">ダウンロードしていない時に新しい版を入れる</string>
 </resources>
