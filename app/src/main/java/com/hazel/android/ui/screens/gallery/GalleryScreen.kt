@@ -84,6 +84,8 @@ import com.hazel.android.ui.screens.download.FailureKind
 import com.hazel.android.ui.screens.download.NoResultsDialog
 import com.hazel.android.ui.screens.download.PasteButton
 import com.hazel.android.ui.screens.download.SearchOptionsSheet
+import com.hazel.android.ui.screens.download.StatusToastHost
+import com.hazel.android.ui.screens.download.rememberStatusToastState
 import com.hazel.android.ui.screens.download.SearchScreen
 import com.hazel.android.ui.screens.download.UrlSearchBar
 import com.hazel.android.ui.screens.download.rememberClipStamp
@@ -297,6 +299,7 @@ fun GalleryScreen(
         GalleryRequests.next.collect { if (it != null) GalleryRequests.take()?.let(viewModel::handle) }
     }
 
+    val statusToast = rememberStatusToastState()
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -416,6 +419,12 @@ fun GalleryScreen(
                 DownloadAllButton(onClick = { postSheetFor = currentPost.takeIf { it >= 0 } })
             }
         }
+        StatusToastHost(
+            statusToast,
+            Modifier
+                .align(Alignment.BottomCenter)
+                .padding(start = 20.dp, end = 20.dp, bottom = 104.dp)
+        )
     }
 
     if (searchOpen) {
@@ -549,7 +558,8 @@ fun GalleryScreen(
         SearchOptionsSheet(
             onClearResults = viewModel::clear,
             onDismiss = { menuOpen = false },
-            imagesFirst = true
+            imagesFirst = true,
+            onCleared = statusToast::show
         )
     }
 }
