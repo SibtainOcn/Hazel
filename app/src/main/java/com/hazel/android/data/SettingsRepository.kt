@@ -553,7 +553,10 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[INCOGNITO_KEY] = enabled }
         // In force at once, so a read finishing a moment later is not written to disk.
         com.hazel.android.download.ReadProfile.incognito = enabled
-        if (enabled) HomeResultsRepository.clear(context)
+        if (enabled) {
+            HomeResultsRepository.clear(context)
+            com.hazel.android.gallery.GalleryResultsStore.clear(context)
+        }
     }
 
     // ── Downloads list ──

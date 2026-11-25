@@ -93,7 +93,12 @@ import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
+import androidx.compose.runtime.snapshotFlow
+import com.hazel.android.gallery.GalleryResultsStore
 import kotlinx.coroutines.launch
 
 /** A line under the search bar, kept as a resource so it follows the app's language. */
@@ -137,6 +142,29 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
 
     private var job: Job? = null
     private var lastRun: (() -> Unit)? = null
+
+    init {
+        val app = getApplication<Application>()
+        viewModelScope.launch {
+            val saved = withContext(Dispatchers.IO) {
+                if (SettingsRepository.getIncognito(app).first()) null else GalleryResultsStore.load(app)
+            }
+            if (saved != null && posts.isEmpty() && !busy) {
+                query = saved.query
+                fromSearch = saved.fromSearch
+                posts = saved.posts
+            }
+            snapshotFlow { GalleryResultsStore.Saved(query, fromSearch, posts) }
+                .distinctUntilChangedBy { it.posts }
+                .drop(1)
+                .collect { current ->
+                    withContext(Dispatchers.IO) {
+                        if (SettingsRepository.getIncognito(app).first()) GalleryResultsStore.clear(app)
+                        else GalleryResultsStore.save(app, current)
+                    }
+                }
+        }
+    }
 
     fun handle(request: GalleryRequest) {
         job?.cancel()
