@@ -41,6 +41,7 @@ import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.gallery.GallerySpare
 import com.hazel.android.gallery.queue.GalleryDownloadRequest
+import com.hazel.android.gallery.queue.request
 import com.hazel.android.ui.components.ArtworkPlaceholder
 import com.hazel.android.ui.components.ModalBottomSheet
 import com.hazel.android.ui.components.SheetHeaderLayout
@@ -165,17 +166,7 @@ private fun requestFor(
     options: com.hazel.android.gallery.GalleryOptions,
     title: String?,
     author: String?
-): GalleryDownloadRequest {
-    val first = indexes?.firstOrNull()?.let { i -> post.items.firstOrNull { it.index == i } } ?: post.items.firstOrNull()
-    return GalleryDownloadRequest(
-        url = post.source,
-        indexes = indexes,
-        options = options,
-        title = title ?: first?.title.orEmpty(),
-        author = author ?: post.author,
-        thumbnail = first?.thumbnail ?: first?.url?.takeUnless { first.isVideo }
-    )
-}
+): GalleryDownloadRequest = post.request(indexes, options, title, author)
 
 /** The gallery sheet's header and preview while the link is read, as the video overlay shows it. */
 @OptIn(ExperimentalMaterial3Api::class)

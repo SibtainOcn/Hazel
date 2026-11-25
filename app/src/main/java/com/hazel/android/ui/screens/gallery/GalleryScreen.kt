@@ -70,7 +70,7 @@ import com.hazel.android.gallery.GalleryOptions
 import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.gallery.GalleryRequest
 import com.hazel.android.gallery.GalleryRequests
-import com.hazel.android.gallery.queue.GalleryDownloadRequest
+import com.hazel.android.gallery.queue.request
 import com.hazel.android.gallery.queue.GalleryQueue
 import com.hazel.android.ui.components.BetaTag
 import com.hazel.android.ui.components.EmptyState
@@ -151,7 +151,7 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
                 val url = request.site.urlFor(request.query)
                 launchRun(url) {
                     val limit = SettingsRepository.getGalleryPostsPerSearch(getApplication()).first()
-                    show(GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items))
+                    show(GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items, feed = true))
                 }
             }
         }
@@ -160,9 +160,10 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     /** Each link in turn, its posts shown as they land. A failed link is skipped while others remain. */
     private suspend fun readLinks(urls: List<String>) {
         var failure: GalleryDlException? = null
+        val limit = SettingsRepository.getGalleryPostsPerSearch(getApplication()).first()
         urls.forEach { url ->
             try {
-                posts = posts + GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url).items)
+                posts = posts + GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items)
             } catch (e: GalleryDlException) {
                 if (urls.size == 1) throw e
                 failure = e
@@ -172,8 +173,6 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         show(posts)
     }
 
-
-    /** Saves the files of [post] at [indexes] (counted from 1), or the whole post when null. */
     /** Queues the files of [post] at [indexes] (counted from 1), or the whole post when null. */
     fun download(
         indexes: List<Int>?,
@@ -182,16 +181,8 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         title: String? = null,
         author: String? = null
     ) {
-        val link = post?.source?.takeIf { it.isNotEmpty() } ?: return
-        val first = indexes?.firstOrNull()?.let { i -> post.items.firstOrNull { it.index == i } } ?: post.items.firstOrNull()
-        val request = GalleryDownloadRequest(
-            url = link,
-            indexes = indexes,
-            options = options,
-            title = title ?: first?.title.orEmpty(),
-            author = author ?: post.author,
-            thumbnail = first?.thumbnail ?: first?.url?.takeUnless { first.isVideo }
-        )
+        if (post == null || post.source.isEmpty()) return
+        val request = post.request(indexes, options, title, author)
         viewModelScope.launch {
             GalleryQueue.add(getApplication(), request)
             notice = GalleryNotice(R.string.gallery_queued)

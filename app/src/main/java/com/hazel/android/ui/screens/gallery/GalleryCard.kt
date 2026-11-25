@@ -109,7 +109,7 @@ fun GalleryCard(
                 }
             }
             Box(modifier = Modifier.align(Alignment.BottomStart).padding(10.dp)) {
-                CornerTag(text = "${item.extension.uppercase()} · ${item.index} / $total")
+                CornerTag(text = if (total > 1) "${item.extension.uppercase()} · ${item.index} / $total" else item.extension.uppercase())
             }
             val action = stringResource(if (item.isVideo) R.string.player_play else R.string.gallery_view)
             Box(

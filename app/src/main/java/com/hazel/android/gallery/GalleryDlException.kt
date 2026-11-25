@@ -28,6 +28,14 @@ class GalleryDlException(
     }
 
     companion object {
+        /** Sorts an error gallery-dl wrote into its `-j` listing, by its class first. */
+        fun classifyError(name: String, message: String): Kind = when (name) {
+            "AuthRequired", "AuthorizationError", "AuthenticationError" -> Kind.LOGIN_REQUIRED
+            "NotFoundError" -> Kind.NOT_FOUND
+            "NoExtractorError" -> Kind.UNSUPPORTED
+            else -> classify("$name $message")
+        }
+
         /** Sorts gallery-dl's last error line into a [Kind]. */
         fun classify(line: String): Kind {
             val text = line.lowercase()
