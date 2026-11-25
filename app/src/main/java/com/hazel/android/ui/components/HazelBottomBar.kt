@@ -86,7 +86,7 @@ fun HazelBottomBar(
                 spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
                 label = "tabShape"
             )
-            val tone = MaterialTheme.colorScheme.secondaryContainer
+            val tone = MaterialTheme.colorScheme.primaryContainer
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -117,7 +117,7 @@ fun HazelBottomBar(
                         painter = painterResource(item.icon),
                         contentDescription = stringResource(item.label),
                         modifier = Modifier.size(ICON_SIZE),
-                        tint = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
+                        tint = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
                         else MaterialTheme.colorScheme.onSurface.copy(alpha = UNSELECTED_ALPHA)
                     )
                     if (item.showDot) {

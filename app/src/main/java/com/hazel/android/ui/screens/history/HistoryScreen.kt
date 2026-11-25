@@ -1136,16 +1136,12 @@ private fun HistoryRow(entry: HistoryEntry, present: Boolean, mark: Boolean?, ac
     }
 }
 
-/** The row's audio, video or picture mark on a tonal six-sided cookie, one tone per kind. */
+/** The row's audio, video or picture mark on a six-sided cookie in the accent's tone. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun KindMark(entry: HistoryEntry) {
-    val scheme = MaterialTheme.colorScheme
-    val (fill, tint) = when {
-        entry.isImage -> scheme.tertiaryContainer to scheme.onTertiaryContainer
-        entry.isVideo -> scheme.primaryContainer to scheme.onPrimaryContainer
-        else -> scheme.secondaryContainer to scheme.onSecondaryContainer
-    }
+    val fill = MaterialTheme.colorScheme.primaryContainer
+    val tint = MaterialTheme.colorScheme.onPrimaryContainer
     Box(
         modifier = Modifier
             .size(36.dp)
