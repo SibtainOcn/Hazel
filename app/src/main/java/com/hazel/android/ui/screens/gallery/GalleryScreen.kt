@@ -8,21 +8,17 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,8 +32,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -46,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.SearchSource
@@ -174,6 +167,7 @@ fun GalleryScreen(
     val clipboard = LocalClipboard.current
     var searchOpen by rememberSaveable { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
+    var viewing by rememberSaveable { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) {
         GalleryRequests.next.collect { if (it != null) GalleryRequests.take()?.let(viewModel::handle) }
@@ -215,7 +209,7 @@ fun GalleryScreen(
                 else -> LazyColumn(
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 96.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     viewModel.notice?.let { notice ->
                         item(key = "notice") {
@@ -226,8 +220,13 @@ fun GalleryScreen(
                             )
                         }
                     }
-                    items(viewModel.items, key = { it.index }) { item ->
-                        GalleryRow(item = item, enabled = !viewModel.busy, onDownload = { viewModel.download(item.index) })
+                    itemsIndexed(viewModel.items, key = { _, it -> it.index }) { position, item ->
+                        GalleryCard(
+                            item = item,
+                            total = viewModel.items.size,
+                            onOpen = { viewing = position },
+                            onView = { viewing = position }
+                        )
                     }
                 }
             }
@@ -290,44 +289,20 @@ fun GalleryScreen(
         )
     }
 
+    viewing?.let { start ->
+        GalleryViewer(
+            items = viewModel.items,
+            startIndex = start,
+            onDownload = { item -> viewModel.download(item.index) },
+            onDismiss = { viewing = null }
+        )
+    }
+
     if (menuOpen) {
         SearchOptionsSheet(
             onClearResults = viewModel::clear,
             onDismiss = { menuOpen = false },
             imagesFirst = true
         )
-    }
-}
-
-@Composable
-private fun GalleryRow(item: GalleryItem, enabled: Boolean, onDownload: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        AsyncImage(
-            model = item.thumbnail,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(64.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-        )
-        Column(Modifier.weight(1f)) {
-            Text(item.title.ifBlank { "#${item.index}" }, style = MaterialTheme.typography.titleSmall, maxLines = 1)
-            Text(
-                stringResource(if (item.isVideo) R.string.gallery_video else R.string.gallery_image) +
-                    " · " + item.extension.uppercase(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        FilledTonalButton(onClick = onDownload, enabled = enabled) { Text(stringResource(R.string.gallery_download)) }
     }
 }

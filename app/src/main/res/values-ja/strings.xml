@@ -27,6 +27,9 @@
     <string name="gallery_skip_reposts">リポストを除く</string>
     <string name="gallery_empty_title">投稿とアルバムを保存</string>
     <string name="gallery_empty_hint">Instagram、X、Reddit、Pinterest など 1,500 以上のサイトのリンクを貼り付け</string>
+    <string name="gallery_view">表示</string>
+    <string name="gallery_close">閉じる</string>
+    <string name="gallery_no_player">この動画を再生できるアプリがありません</string>
     <string name="nav_incognito_on">シークレットモード有効、ダウンロードは記録されません</string>
     <string name="nav_incognito_off">シークレットモード無効</string>
 

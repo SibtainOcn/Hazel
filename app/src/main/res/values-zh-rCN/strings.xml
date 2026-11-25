@@ -27,6 +27,9 @@
     <string name="gallery_skip_reposts">跳过转发</string>
     <string name="gallery_empty_title">保存帖子和相册</string>
     <string name="gallery_empty_hint">粘贴来自 Instagram、X、Reddit、Pinterest 等 1,500 多个网站的链接</string>
+    <string name="gallery_view">查看</string>
+    <string name="gallery_close">关闭</string>
+    <string name="gallery_no_player">没有应用可以播放此视频</string>
     <string name="nav_incognito_on">无痕模式已开启，下载不会被记录</string>
     <string name="nav_incognito_off">无痕模式已关闭</string>
 

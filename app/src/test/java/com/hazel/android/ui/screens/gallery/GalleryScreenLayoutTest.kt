@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.Density
 import androidx.test.core.app.ApplicationProvider
 import com.hazel.android.R
+import com.hazel.android.gallery.GalleryItem
 import com.hazel.android.ui.saveScreen
 import com.hazel.android.ui.theme.HazelTheme
 import org.junit.Assert.assertTrue
@@ -68,5 +69,32 @@ class GalleryScreenLayoutTest(private val locale: String) {
             assertTrue("$text runs off the bottom edge", at.y + node.size.height <= metrics.heightPixels)
         }
         saveScreen("gallery-empty-$locale")
+    }
+
+    @Test
+    fun `post card keeps its title, tag and action inside`() {
+        RuntimeEnvironment.setQualifiers("$locale-w320dp-h568dp")
+        val item = GalleryItem(
+            index = 3, url = "https://cdn.example/a.jpg", extension = "jpg",
+            title = "China's next space mission explained in ten slides", author = "spacebrief",
+            site = "instagram", width = 1080, height = 1350, thumbnail = null
+        )
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = true) {
+                val density = LocalDensity.current
+                CompositionLocalProvider(LocalDensity provides Density(density.density, 2f)) {
+                    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+                        GalleryCard(item = item, total = 10, onOpen = {}, onView = {})
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        val metrics = context.resources.displayMetrics
+        listOf("spacebrief", "JPG · 3 / 10").forEach { text ->
+            val node = compose.onNodeWithText(text).assertIsDisplayed().fetchSemanticsNode()
+            assertTrue("$text runs off the right edge", node.positionOnScreen.x + node.size.width <= metrics.widthPixels)
+        }
+        saveScreen("gallery-card-$locale")
     }
 }

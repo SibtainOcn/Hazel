@@ -27,6 +27,9 @@
     <string name="gallery_skip_reposts">Пропускать репосты</string>
     <string name="gallery_empty_title">Сохраняйте посты и альбомы</string>
     <string name="gallery_empty_hint">Вставьте ссылку из Instagram, X, Reddit, Pinterest и ещё 1500 сайтов</string>
+    <string name="gallery_view">Открыть</string>
+    <string name="gallery_close">Закрыть</string>
+    <string name="gallery_no_player">Нет приложения для этого видео</string>
     <string name="nav_incognito_on">Инкогнито включено, загрузки не сохраняются</string>
     <string name="nav_incognito_off">Инкогнито выключено</string>
 

@@ -27,6 +27,9 @@
     <string name="gallery_skip_reposts">Ignorer les republications</string>
     <string name="gallery_empty_title">Enregistrez publications et albums</string>
     <string name="gallery_empty_hint">Collez un lien Instagram, X, Reddit, Pinterest et 1 500 autres sites</string>
+    <string name="gallery_view">Voir</string>
+    <string name="gallery_close">Fermer</string>
+    <string name="gallery_no_player">Aucune appli ne peut lire cette vidéo</string>
     <string name="nav_incognito_on">Navigation privée activée, les téléchargements ne sont pas enregistrés</string>
     <string name="nav_incognito_off">Navigation privée désactivée</string>
 
