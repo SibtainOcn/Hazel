@@ -5,14 +5,10 @@
     <string name="nav_history">Descargas</string>
     <string name="nav_more">Más</string>
     <string name="nav_gallery">Galería</string>
-    <string name="gallery_paste_hint">Pega el enlace de una publicación</string>
-    <string name="gallery_get">Obtener publicación</string>
     <string name="gallery_stop">Detener</string>
     <string name="gallery_download">Descargar</string>
-    <string name="gallery_download_all">Descargar todo</string>
     <string name="gallery_image">Imagen</string>
     <string name="gallery_video">Vídeo</string>
-    <string name="gallery_found">%1$d elementos encontrados en %2$s s</string>
     <string name="gallery_saved">%1$d guardados en Download/Hazel/Gallery en %2$s s</string>
     <string name="gallery_failed">No se pudo leer esta publicación</string>
     <string name="gallery_empty">Esta publicación no tiene archivos</string>
@@ -21,6 +17,16 @@
     <string name="gallery_error_not_found">La publicación ya no existe, es privada o está vacía</string>
     <string name="gallery_error_network">Sin conexión. Revisa la red o el proxy</string>
     <string name="gallery_error_setup">Galería no pudo iniciarse en este dispositivo</string>
+    <string name="search_source_images">Imágenes</string>
+    <string name="search_options_tab_videos">Vídeos</string>
+    <string name="gallery_posts_per_search">Publicaciones por búsqueda</string>
+    <string name="gallery_show">Mostrar</string>
+    <string name="gallery_show_all">Imágenes y vídeos</string>
+    <string name="gallery_show_images">Solo imágenes</string>
+    <string name="gallery_show_videos">Solo vídeos</string>
+    <string name="gallery_skip_reposts">Omitir reposts</string>
+    <string name="gallery_empty_title">Guarda publicaciones y álbumes</string>
+    <string name="gallery_empty_hint">Pega un enlace de Instagram, X, Reddit, Pinterest y 1500 sitios más</string>
     <string name="nav_incognito_on">Incógnito activado, las descargas no se registran</string>
     <string name="nav_incognito_off">Incógnito desactivado</string>
 

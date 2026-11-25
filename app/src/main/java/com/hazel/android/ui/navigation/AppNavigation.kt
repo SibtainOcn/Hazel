@@ -229,6 +229,14 @@ fun AppNavigation(
     // The home header is part of the home screen and moves with it. The other screens carry
     // their own headings. The incognito switch goes with it: what it changes is what a
     // download records, which is decided here and nowhere else.
+    val openTab: (String) -> Unit = { route ->
+        navController.navigate(route) {
+            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     val homeTopBar: @Composable () -> Unit = {
         TopAppBar(
             title = {
@@ -420,6 +428,7 @@ fun AppNavigation(
                             onPendingFailureConsumed = onPendingFailureConsumed,
                             onSharesConsumed = onSharesConsumed,
                             downloadViewModel = downloadViewModel,
+                            onOpenGallery = { openTab(Screen.Gallery.route) },
                             onOpenQueue = {
                                 navController.navigate(Screen.Queue.route) {
                                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -449,7 +458,21 @@ fun AppNavigation(
                 )
             }
             screen(Screen.Gallery.route) {
-                com.hazel.android.ui.screens.gallery.GalleryScreen()
+                Column(modifier = Modifier.fillMaxSize()) {
+                    homeTopBar()
+                    Box(modifier = Modifier.weight(1f)) {
+                        com.hazel.android.ui.screens.gallery.GalleryScreen(
+                            onVideoLinks = { links ->
+                                downloadViewModel.fetchAll(links)
+                                openTab(Screen.Download.route)
+                            },
+                            onVideoSearch = { query, source ->
+                                downloadViewModel.search(query, source)
+                                openTab(Screen.Download.route)
+                            }
+                        )
+                    }
+                }
             }
             screen(Screen.Queue.route) {
                 QueueScreen(

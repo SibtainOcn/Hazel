@@ -16,14 +16,10 @@
     <string name="nav_history">Downloads</string>
     <string name="nav_more">More</string>
     <string name="nav_gallery">Gallery</string>
-    <string name="gallery_paste_hint">Paste a post link</string>
-    <string name="gallery_get">Get post</string>
     <string name="gallery_stop">Stop</string>
     <string name="gallery_download">Download</string>
-    <string name="gallery_download_all">Download all</string>
     <string name="gallery_image">Image</string>
     <string name="gallery_video">Video</string>
-    <string name="gallery_found">%1$d items found in %2$s s</string>
     <string name="gallery_saved">%1$d saved to Download/Hazel/Gallery in %2$s s</string>
     <string name="gallery_failed">Could not read this post</string>
     <string name="gallery_empty">No files in this post</string>
@@ -32,6 +28,16 @@
     <string name="gallery_error_not_found">This post is gone, private or empty</string>
     <string name="gallery_error_network">Couldn\'t connect. Check the network or proxy</string>
     <string name="gallery_error_setup">Gallery couldn\'t start on this device</string>
+    <string name="search_source_images">Images</string>
+    <string name="search_options_tab_videos">Videos</string>
+    <string name="gallery_posts_per_search">Posts per search</string>
+    <string name="gallery_show">Show</string>
+    <string name="gallery_show_all">Images and videos</string>
+    <string name="gallery_show_images">Images only</string>
+    <string name="gallery_show_videos">Videos only</string>
+    <string name="gallery_skip_reposts">Skip reposts</string>
+    <string name="gallery_empty_title">Save posts and albums</string>
+    <string name="gallery_empty_hint">Paste a link from Instagram, X, Reddit, Pinterest and 1,500 more sites</string>
     <string name="nav_incognito_on">Incognito on, downloads are not recorded</string>
     <string name="nav_incognito_off">Incognito off</string>
 

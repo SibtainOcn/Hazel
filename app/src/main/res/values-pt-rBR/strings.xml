@@ -5,14 +5,10 @@
     <string name="nav_history">Downloads</string>
     <string name="nav_more">Mais</string>
     <string name="nav_gallery">Galeria</string>
-    <string name="gallery_paste_hint">Cole o link de uma postagem</string>
-    <string name="gallery_get">Obter postagem</string>
     <string name="gallery_stop">Parar</string>
     <string name="gallery_download">Baixar</string>
-    <string name="gallery_download_all">Baixar tudo</string>
     <string name="gallery_image">Imagem</string>
     <string name="gallery_video">Vídeo</string>
-    <string name="gallery_found">%1$d itens encontrados em %2$s s</string>
     <string name="gallery_saved">%1$d salvos em Download/Hazel/Gallery em %2$s s</string>
     <string name="gallery_failed">Não foi possível ler esta postagem</string>
     <string name="gallery_empty">Nenhum arquivo nesta postagem</string>
@@ -21,6 +17,16 @@
     <string name="gallery_error_not_found">Postagem removida, privada ou vazia</string>
     <string name="gallery_error_network">Sem conexão. Verifique a rede ou o proxy</string>
     <string name="gallery_error_setup">A Galeria não pôde iniciar neste dispositivo</string>
+    <string name="search_source_images">Imagens</string>
+    <string name="search_options_tab_videos">Vídeos</string>
+    <string name="gallery_posts_per_search">Postagens por pesquisa</string>
+    <string name="gallery_show">Mostrar</string>
+    <string name="gallery_show_all">Imagens e vídeos</string>
+    <string name="gallery_show_images">Só imagens</string>
+    <string name="gallery_show_videos">Só vídeos</string>
+    <string name="gallery_skip_reposts">Pular reposts</string>
+    <string name="gallery_empty_title">Salve postagens e álbuns</string>
+    <string name="gallery_empty_hint">Cole um link do Instagram, X, Reddit, Pinterest e mais 1.500 sites</string>
     <string name="nav_incognito_on">Anônimo ativado, os downloads não são registrados</string>
     <string name="nav_incognito_off">Anônimo desativado</string>
 

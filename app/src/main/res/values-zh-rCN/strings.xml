@@ -5,14 +5,10 @@
     <string name="nav_history">下载</string>
     <string name="nav_more">更多</string>
     <string name="nav_gallery">图库</string>
-    <string name="gallery_paste_hint">粘贴帖子链接</string>
-    <string name="gallery_get">获取帖子</string>
     <string name="gallery_stop">停止</string>
     <string name="gallery_download">下载</string>
-    <string name="gallery_download_all">全部下载</string>
     <string name="gallery_image">图片</string>
     <string name="gallery_video">视频</string>
-    <string name="gallery_found">%2$s 秒内找到 %1$d 项</string>
     <string name="gallery_saved">%2$s 秒内已将 %1$d 项保存到 Download/Hazel/Gallery</string>
     <string name="gallery_failed">无法读取此帖子</string>
     <string name="gallery_empty">此帖子中没有文件</string>
@@ -21,6 +17,16 @@
     <string name="gallery_error_not_found">帖子已删除、私密或为空</string>
     <string name="gallery_error_network">无法连接。请检查网络或代理</string>
     <string name="gallery_error_setup">图库无法在此设备上启动</string>
+    <string name="search_source_images">图片</string>
+    <string name="search_options_tab_videos">视频</string>
+    <string name="gallery_posts_per_search">每次搜索的帖子数</string>
+    <string name="gallery_show">显示</string>
+    <string name="gallery_show_all">图片和视频</string>
+    <string name="gallery_show_images">仅图片</string>
+    <string name="gallery_show_videos">仅视频</string>
+    <string name="gallery_skip_reposts">跳过转发</string>
+    <string name="gallery_empty_title">保存帖子和相册</string>
+    <string name="gallery_empty_hint">粘贴来自 Instagram、X、Reddit、Pinterest 等 1,500 多个网站的链接</string>
     <string name="nav_incognito_on">无痕模式已开启，下载不会被记录</string>
     <string name="nav_incognito_off">无痕模式已关闭</string>
 
