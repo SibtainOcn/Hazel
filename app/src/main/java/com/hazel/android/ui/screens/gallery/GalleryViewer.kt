@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.gallery
 
+import com.hazel.android.ui.components.CaptionSheet
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.widget.Toast
@@ -101,7 +102,7 @@ fun GalleryViewer(
                         .fillMaxSize()
                         .graphicsLayer { alpha = 1f - offset.absoluteValue.coerceIn(0f, 1f) * 0.85f }
                 ) {
-                    ViewerPage(item = items[page], active = page == pager.currentPage)
+                    items.getOrNull(page)?.let { ViewerPage(item = it, active = page == pager.currentPage) }
                 }
             }
 
@@ -128,7 +129,8 @@ fun GalleryViewer(
                 Spacer(modifier = Modifier.size(44.dp))
             }
 
-            val current = items[pager.currentPage]
+            // The results can shrink under an open viewer (a new search), so the page is clamped.
+            val current = items[pager.currentPage.coerceIn(0, items.lastIndex)]
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -171,6 +173,22 @@ fun GalleryViewer(
                         iconOnly = true
                     )
                 }
+                // The caption's start; a tap opens all of it.
+                var captionOpen by remember { mutableStateOf(false) }
+                if (current.caption.isNotBlank() && current.caption != current.title) {
+                    Text(
+                        current.caption,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.85f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(onClickLabel = stringResource(R.string.caption_view_full)) { captionOpen = true }
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                    )
+                }
+                if (captionOpen) CaptionSheet(current.caption, current.title, onDismiss = { captionOpen = false })
                 if (items.size > 1) {
                     Spacer(modifier = Modifier.height(10.dp))
                     LazyRow(
@@ -178,7 +196,7 @@ fun GalleryViewer(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        itemsIndexed(items, key = { _, it -> it.index }) { index, item ->
+                        itemsIndexed(items) { index, item ->
                             val selected = index == pager.currentPage
                             val scale by animateFloatAsState(if (selected) 1.1f else 1f, label = "thumb")
                             val fade by animateFloatAsState(if (selected) 1f else 0.5f, label = "thumbAlpha")

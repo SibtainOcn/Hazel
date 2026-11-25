@@ -64,6 +64,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import com.hazel.android.gallery.queue.GalleryDownloadRequest
 import com.hazel.android.gallery.queue.GalleryQueue
+import com.hazel.android.gallery.queue.instantRequest
+import com.hazel.android.gallery.GalleryDlEngine
+import com.hazel.android.gallery.GalleryPost
 
 /** The share targets, told apart by the component they were launched through. */
 private enum class ShareMode { VIDEO, INSTANT_VIDEO, IMAGES, INSTANT_IMAGES }
@@ -421,7 +424,12 @@ class ShareOverlayActivity : ComponentActivity() {
             ShareMode.INSTANT_IMAGES -> {
                 recordLink(url)
                 queueGallery { app ->
-                    GalleryDownloadRequest(url, options = SettingsRepository.getGalleryOptions(app).first())
+                    val options = SettingsRepository.getGalleryOptions(app).first()
+                    // A link that can't be read is still queued, so its failure shows in the Failed tab.
+                    val posts = runCatching { GalleryPost.group(url, GalleryDlEngine.list(app, url).items) }
+                        .onFailure { android.util.Log.w("HazelShare", "Could not read the shared post", it) }
+                        .getOrDefault(emptyList())
+                    instantRequest(url, posts, options)
                 }
             }
         }

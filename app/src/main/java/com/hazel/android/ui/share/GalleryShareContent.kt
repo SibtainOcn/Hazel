@@ -130,8 +130,8 @@ internal fun GalleryShareContent(
                 GalleryItemSheet(
                     item = single,
                     postUrl = post.source,
-                    onDownload = { options, title, author ->
-                        onDownload(listOf(requestFor(post, listOf(single.index), options, title, author)))
+                    onDownload = { options, title, author, save ->
+                        onDownload(listOf(requestFor(post, listOf(single.index), options, title, author, save)))
                     },
                     onDismiss = onClose
                 )
@@ -165,8 +165,9 @@ private fun requestFor(
     indexes: List<Int>?,
     options: com.hazel.android.gallery.GalleryOptions,
     title: String?,
-    author: String?
-): GalleryDownloadRequest = post.request(indexes, options, title, author)
+    author: String?,
+    save: com.hazel.android.gallery.GallerySave = com.hazel.android.gallery.GallerySave.MEDIA
+): GalleryDownloadRequest = post.request(indexes, options, title, author, save)
 
 /** The gallery sheet's header and preview while the link is read, as the video overlay shows it. */
 @OptIn(ExperimentalMaterial3Api::class)

@@ -84,6 +84,8 @@ import com.hazel.android.ui.screens.download.FailureKind
 import com.hazel.android.ui.screens.download.NoResultsDialog
 import com.hazel.android.ui.screens.download.PasteButton
 import com.hazel.android.ui.screens.download.SearchOptionsSheet
+import com.hazel.android.ui.screens.download.StatusToastHost
+import com.hazel.android.ui.screens.download.rememberStatusToastState
 import com.hazel.android.ui.screens.download.SearchScreen
 import com.hazel.android.ui.screens.download.UrlSearchBar
 import com.hazel.android.ui.screens.download.rememberClipStamp
@@ -186,10 +188,11 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         options: GalleryOptions? = null,
         post: GalleryPost? = this.post,
         title: String? = null,
-        author: String? = null
+        author: String? = null,
+        save: com.hazel.android.gallery.GallerySave = com.hazel.android.gallery.GallerySave.MEDIA
     ) {
         if (post == null || post.source.isEmpty()) return
-        val request = post.request(indexes, options, title, author)
+        val request = post.request(indexes, options, title, author, save)
         viewModelScope.launch { GalleryQueue.add(getApplication(), request) }
     }
 
@@ -297,6 +300,7 @@ fun GalleryScreen(
         GalleryRequests.next.collect { if (it != null) GalleryRequests.take()?.let(viewModel::handle) }
     }
 
+    val statusToast = rememberStatusToastState()
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -416,6 +420,12 @@ fun GalleryScreen(
                 DownloadAllButton(onClick = { postSheetFor = currentPost.takeIf { it >= 0 } })
             }
         }
+        StatusToastHost(
+            statusToast,
+            Modifier
+                .align(Alignment.BottomCenter)
+                .padding(start = 20.dp, end = 20.dp, bottom = 104.dp)
+        )
     }
 
     if (searchOpen) {
@@ -525,9 +535,9 @@ fun GalleryScreen(
         GalleryItemSheet(
             item = item,
             postUrl = post.source,
-            onDownload = { options, title, author ->
+            onDownload = { options, title, author, save ->
                 sheetFor = null
-                viewModel.download(listOf(item.index), options, post, title, author)
+                viewModel.download(listOf(item.index), options, post, title, author, save)
             },
             onDismiss = { sheetFor = null }
         )
@@ -549,7 +559,8 @@ fun GalleryScreen(
         SearchOptionsSheet(
             onClearResults = viewModel::clear,
             onDismiss = { menuOpen = false },
-            imagesFirst = true
+            imagesFirst = true,
+            onCleared = statusToast::show
         )
     }
 }
