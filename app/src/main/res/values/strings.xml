@@ -1229,4 +1229,5 @@
     <string name="gallery_queued">Added to the download queue</string>
     <string name="gallery_fetched">%1$d files fetched</string>
     <string name="gallery_saved_before_failure">%1$d saved before it stopped</string>
+    <string name="properties_kind_image">Image</string>
 </resources>

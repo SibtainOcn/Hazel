@@ -1190,4 +1190,5 @@
     <string name="gallery_queued">Añadido a la cola de descargas</string>
     <string name="gallery_fetched">%1$d archivos obtenidos</string>
     <string name="gallery_saved_before_failure">%1$d guardados antes de detenerse</string>
+    <string name="properties_kind_image">Imagen</string>
 </resources>

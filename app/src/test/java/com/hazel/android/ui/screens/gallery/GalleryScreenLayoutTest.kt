@@ -90,6 +90,7 @@ class GalleryScreenLayoutTest(private val locale: String) {
                 log = "[instagram][info] Requesting post\n[instagram][error] AuthorizationError: Login required"
             )
         )
+        viewModel.dismissFailureDialog()
         compose.setContent {
             HazelTheme(darkTheme = true, glass = true) {
                 val density = LocalDensity.current

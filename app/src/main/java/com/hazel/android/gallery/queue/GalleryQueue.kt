@@ -20,6 +20,7 @@ import com.hazel.android.download.DownloadTurn
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryItem
+import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
@@ -199,7 +200,8 @@ object GalleryQueue {
                         stoppedAt = if (entries.isNotEmpty()) app.getString(com.hazel.android.R.string.gallery_saved_before_failure, entries.size) else null
                     )
                 )
-                DownloadNotificationHelper.showError(app, reason, title, recorded = true)
+                val signIn = if (failure?.kind == GalleryDlException.Kind.LOGIN_REQUIRED) siteRootOf(request.url) else null
+                DownloadNotificationHelper.showError(app, reason, title, signInUrl = signIn, recorded = true)
             }
         } finally {
             synchronized(lock) { running = null; runningId = null }

@@ -1190,4 +1190,5 @@
     <string name="gallery_queued">Adicionado à fila de downloads</string>
     <string name="gallery_fetched">%1$d arquivos obtidos</string>
     <string name="gallery_saved_before_failure">%1$d salvos antes de parar</string>
+    <string name="properties_kind_image">Imagem</string>
 </resources>

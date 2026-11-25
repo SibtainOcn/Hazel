@@ -1173,4 +1173,5 @@
     <string name="gallery_queued">Zur Download-Warteschlange hinzugefügt</string>
     <string name="gallery_fetched">%1$d Dateien abgerufen</string>
     <string name="gallery_saved_before_failure">%1$d gespeichert, bevor es abbrach</string>
+    <string name="properties_kind_image">Bild</string>
 </resources>

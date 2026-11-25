@@ -1173,4 +1173,5 @@
     <string name="gallery_queued">डाउनलोड कतार में जोड़ा गया</string>
     <string name="gallery_fetched">%1$d फ़ाइलें प्राप्त हुईं</string>
     <string name="gallery_saved_before_failure">रुकने से पहले %1$d सेव हुईं</string>
+    <string name="properties_kind_image">इमेज</string>
 </resources>

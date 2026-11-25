@@ -1206,4 +1206,5 @@
     <string name="gallery_queued">Добавлено в очередь загрузок</string>
     <string name="gallery_fetched">Получено файлов: %1$d</string>
     <string name="gallery_saved_before_failure">Сохранено до остановки: %1$d</string>
+    <string name="properties_kind_image">Изображение</string>
 </resources>
