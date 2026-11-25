@@ -1279,8 +1279,7 @@ internal fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifie
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 stringResource(R.string.download_download_all),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = ink,
                 maxLines = 1,
                 softWrap = false,
