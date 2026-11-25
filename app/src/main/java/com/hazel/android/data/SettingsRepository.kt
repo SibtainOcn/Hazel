@@ -345,7 +345,7 @@ object SettingsRepository {
     private val GALLERY_REPOSTS_KEY = booleanPreferencesKey("gallery_skip_reposts")
     private val GALLERY_GROUP_AUTHOR_KEY = booleanPreferencesKey("gallery_group_by_author")
 
-    val GALLERY_POST_COUNTS = listOf(10, 30, 60)
+    val GALLERY_POST_COUNTS = listOf(10, 30, 60, 100)
     const val DEFAULT_GALLERY_POSTS = 30
 
     fun getImageSearch(context: Context): Flow<Boolean> =
@@ -556,7 +556,10 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[INCOGNITO_KEY] = enabled }
         // In force at once, so a read finishing a moment later is not written to disk.
         com.hazel.android.download.ReadProfile.incognito = enabled
-        if (enabled) HomeResultsRepository.clear(context)
+        if (enabled) {
+            HomeResultsRepository.clear(context)
+            com.hazel.android.gallery.GalleryResultsStore.clear(context)
+        }
     }
 
     // ── Downloads list ──

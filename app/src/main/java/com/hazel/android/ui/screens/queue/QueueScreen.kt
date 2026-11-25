@@ -833,7 +833,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.galleryCards(
 ) {
     items(jobs, key = { "gallery_${it.request.id}" }) { job ->
         val request = job.request
-        val total = request.indexes?.size ?: 0
+        val total = request.files?.size ?: request.indexes?.size ?: 0
         val running = job.state == GalleryQueue.State.RUNNING
         Box(modifier = Modifier.scrollShrink(shrink)) {
             MediaCard(
