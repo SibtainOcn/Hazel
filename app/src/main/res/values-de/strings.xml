@@ -4,6 +4,23 @@
     <string name="nav_home">Start</string>
     <string name="nav_history">Downloads</string>
     <string name="nav_more">Mehr</string>
+    <string name="nav_gallery">Galerie</string>
+    <string name="gallery_paste_hint">Beitragslink einfügen</string>
+    <string name="gallery_get">Beitrag laden</string>
+    <string name="gallery_stop">Stopp</string>
+    <string name="gallery_download">Herunterladen</string>
+    <string name="gallery_download_all">Alle herunterladen</string>
+    <string name="gallery_image">Bild</string>
+    <string name="gallery_video">Video</string>
+    <string name="gallery_found">%1$d Elemente in %2$s s gefunden</string>
+    <string name="gallery_saved">%1$d in Download/Hazel/Gallery gespeichert in %2$s s</string>
+    <string name="gallery_failed">Beitrag konnte nicht gelesen werden</string>
+    <string name="gallery_empty">Keine Dateien in diesem Beitrag</string>
+    <string name="gallery_error_login">Melde dich unter Cookies bei dieser Seite an und versuche es erneut</string>
+    <string name="gallery_error_unsupported">Galerie kann diesen Link nicht lesen</string>
+    <string name="gallery_error_not_found">Beitrag gelöscht, privat oder leer</string>
+    <string name="gallery_error_network">Keine Verbindung. Netzwerk oder Proxy prüfen</string>
+    <string name="gallery_error_setup">Galerie konnte auf diesem Gerät nicht starten</string>
     <string name="nav_incognito_on">Inkognito an, Downloads werden nicht aufgezeichnet</string>
     <string name="nav_incognito_off">Inkognito aus</string>
 

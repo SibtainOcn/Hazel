@@ -109,12 +109,14 @@ sealed class Screen(
 ) {
     data object Download : Screen("download", R.string.nav_home, R.drawable.home)
     data object History : Screen("history", R.string.nav_history, R.drawable.downloads_tab)
+    data object Gallery : Screen("gallery", R.string.nav_gallery, R.drawable.gallery_tab)
     data object Queue : Screen("queue", R.string.nav_queue, R.drawable.queue_tab)
     data object More : Screen("more", R.string.nav_more, R.drawable.more_tab)
 }
 
 private val bottomNavItems = listOf(
     Screen.Download,
+    Screen.Gallery,
     Screen.History,
     Screen.Queue,
     Screen.More,
@@ -445,6 +447,9 @@ fun AppNavigation(
                         }
                     }
                 )
+            }
+            screen(Screen.Gallery.route) {
+                com.hazel.android.ui.screens.gallery.GalleryScreen()
             }
             screen(Screen.Queue.route) {
                 QueueScreen(

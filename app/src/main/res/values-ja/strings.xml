@@ -4,6 +4,23 @@
     <string name="nav_home">ホーム</string>
     <string name="nav_history">ダウンロード</string>
     <string name="nav_more">その他</string>
+    <string name="nav_gallery">ギャラリー</string>
+    <string name="gallery_paste_hint">投稿のリンクを貼り付け</string>
+    <string name="gallery_get">投稿を取得</string>
+    <string name="gallery_stop">停止</string>
+    <string name="gallery_download">ダウンロード</string>
+    <string name="gallery_download_all">すべてダウンロード</string>
+    <string name="gallery_image">画像</string>
+    <string name="gallery_video">動画</string>
+    <string name="gallery_found">%2$s 秒で %1$d 件見つかりました</string>
+    <string name="gallery_saved">%2$s 秒で %1$d 件を Download/Hazel/Gallery に保存しました</string>
+    <string name="gallery_failed">この投稿を読み込めませんでした</string>
+    <string name="gallery_empty">この投稿にファイルはありません</string>
+    <string name="gallery_error_login">Cookies でこのサイトにログインしてから再試行してください</string>
+    <string name="gallery_error_unsupported">ギャラリーはこのリンクを読み込めません</string>
+    <string name="gallery_error_not_found">投稿は削除済み、非公開、または空です</string>
+    <string name="gallery_error_network">接続できません。ネットワークまたはプロキシを確認してください</string>
+    <string name="gallery_error_setup">この端末でギャラリーを開始できませんでした</string>
     <string name="nav_incognito_on">シークレットモード有効、ダウンロードは記録されません</string>
     <string name="nav_incognito_off">シークレットモード無効</string>
 

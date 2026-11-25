@@ -4,6 +4,23 @@
     <string name="nav_home">Beranda</string>
     <string name="nav_history">Unduhan</string>
     <string name="nav_more">Lainnya</string>
+    <string name="nav_gallery">Galeri</string>
+    <string name="gallery_paste_hint">Tempel tautan postingan</string>
+    <string name="gallery_get">Ambil postingan</string>
+    <string name="gallery_stop">Berhenti</string>
+    <string name="gallery_download">Unduh</string>
+    <string name="gallery_download_all">Unduh semua</string>
+    <string name="gallery_image">Gambar</string>
+    <string name="gallery_video">Video</string>
+    <string name="gallery_found">%1$d item ditemukan dalam %2$s d</string>
+    <string name="gallery_saved">%1$d disimpan ke Download/Hazel/Gallery dalam %2$s d</string>
+    <string name="gallery_failed">Tidak dapat membaca postingan ini</string>
+    <string name="gallery_empty">Tidak ada file di postingan ini</string>
+    <string name="gallery_error_login">Masuk ke situs ini di Cookies, lalu coba lagi</string>
+    <string name="gallery_error_unsupported">Galeri tidak dapat membaca tautan ini</string>
+    <string name="gallery_error_not_found">Postingan dihapus, privat, atau kosong</string>
+    <string name="gallery_error_network">Tidak dapat terhubung. Periksa jaringan atau proxy</string>
+    <string name="gallery_error_setup">Galeri tidak dapat dimulai di perangkat ini</string>
     <string name="nav_incognito_on">Mode samaran aktif, unduhan tidak dicatat</string>
     <string name="nav_incognito_off">Mode samaran nonaktif</string>
 
