@@ -413,10 +413,21 @@ class ShareOverlayActivity : ComponentActivity() {
                 com.hazel.android.util.AppShortcuts.reportShared(this, instant = true)
                 DownloadViewModelHolder.get().instantDownload(this, url, intent.audioOnlyOverride())
             }
-            ShareMode.IMAGES -> Unit
-            ShareMode.INSTANT_IMAGES -> queueGallery { app ->
-                GalleryDownloadRequest(url, options = SettingsRepository.getGalleryOptions(app).first())
+            ShareMode.IMAGES -> recordLink(url)
+            ShareMode.INSTANT_IMAGES -> {
+                recordLink(url)
+                queueGallery { app ->
+                    GalleryDownloadRequest(url, options = SettingsRepository.getGalleryOptions(app).first())
+                }
             }
+        }
+    }
+
+    /** Keeps a shared image link in search history, as the video targets do; never in incognito. */
+    private fun recordLink(url: String) {
+        val app = applicationContext
+        HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
+            if (!SettingsRepository.getIncognito(app).first()) SearchHistoryRepository.record(app, url)
         }
     }
 

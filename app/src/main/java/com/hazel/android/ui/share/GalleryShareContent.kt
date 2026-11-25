@@ -1,7 +1,10 @@
 package com.hazel.android.ui.share
 
+import android.app.Activity
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +25,7 @@ import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,8 +48,11 @@ import com.hazel.android.ui.screens.download.NoResultsDialog
 import com.hazel.android.ui.screens.download.SheetDownloadPill
 import com.hazel.android.ui.screens.gallery.GalleryItemSheet
 import com.hazel.android.ui.screens.gallery.GalleryPostSheet
+import com.hazel.android.ui.screens.gallery.dialogKind
+import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.util.copyToClipboard
+import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.CancellationException
 
 private sealed interface GalleryRead {
@@ -66,7 +73,17 @@ internal fun GalleryShareContent(
 ) {
     val context = LocalContext.current
     var read by remember(url) { mutableStateOf<GalleryRead>(GalleryRead.Reading) }
-    LaunchedEffect(url) {
+    var attempt by remember(url) { mutableIntStateOf(0) }
+    // Signing in from the failure dialog reads the link again with the new cookies.
+    val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            read = GalleryRead.Reading
+            attempt++
+        } else {
+            onClose()
+        }
+    }
+    LaunchedEffect(url, attempt) {
         read = try {
             GalleryRead.Ready(readFirstPost(context.applicationContext, url))
         } catch (e: CancellationException) {
@@ -81,19 +98,21 @@ internal fun GalleryShareContent(
     when (val state = read) {
         GalleryRead.Reading -> GalleryReadingSheet(onDismiss = onClose)
         is GalleryRead.Failed -> {
-            val summary = stringResource(state.error.kind.message)
-            val log = state.error.log.ifBlank { summary }
+            val log = state.error.log.ifBlank { stringResource(state.error.kind.message) }
             NoResultsDialog(
                 message = log,
-                summary = summary,
                 link = url,
-                canFetchCookies = false,
+                knownKind = dialogKind(state.error.kind),
+                canFetchCookies = true,
+                canAddCookies = true,
                 canContinue = false,
                 onCopyLog = {
                     copyToClipboard(context, log)
                     Toast.makeText(context, context.getString(R.string.history_failed_log_copied), Toast.LENGTH_SHORT).show()
                 },
-                onGetCookies = {},
+                onGetCookies = {
+                    signInLauncher.launch(CookieWebViewActivity.intent(context, siteRootOf(url)))
+                },
                 onContinueAnyway = {},
                 onDismiss = onClose
             )
