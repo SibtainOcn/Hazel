@@ -124,7 +124,9 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadViewModel
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
-import com.hazel.android.ui.components.MediaCardShimmer
+import com.hazel.android.ui.components.MediaCardShimmerRow
+import com.hazel.android.ui.components.ResultsSkeleton
+import com.hazel.android.ui.components.SkeletonSpacing
 import com.hazel.android.ui.components.ShimmerHost
 import com.hazel.android.ui.components.refreshShine
 import com.hazel.android.ui.components.rememberPresence
@@ -525,37 +527,7 @@ fun DownloadScreen(
             )
 
             if (orderedResults.isEmpty() && state.isFetching) {
-                // Fixed viewport skeleton placeholders during initial link fetch.
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(horizontal = 20.dp)
-                        .clipToBounds()
-                ) {
-                    Column {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        // As many cards as the screen has room for, each at its real size, so
-                        // the last one runs off the bottom rather than being squeezed. A tall
-                        // screen shows more of them and a short one fewer.
-                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                            val columns = gridColumns(maxWidth)
-                            val cardWidth = (maxWidth - SKELETON_SPACING * (columns - 1)) / columns
-                            val cardHeight = cardWidth * 9f / 16f + SKELETON_SPACING
-                            val count = (maxHeight / cardHeight).toInt().plus(1)
-                                .coerceIn(1, MAX_VIEWPORT_SKELETONS)
-                            ShimmerHost(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight(align = Alignment.Top, unbounded = true)
-                            ) {
-                                Column(verticalArrangement = Arrangement.spacedBy(SKELETON_SPACING)) {
-                                    repeat(count) { ShimmerRow(columns) }
-                                }
-                            }
-                        }
-                    }
-                }
+                ResultsSkeleton(modifier = Modifier.fillMaxWidth().weight(1f))
             } else {
                 // A lazy list rather than a scrolling column: a column composes every card it
                 // holds, artwork and all, so a playlist of a hundred built a hundred full width
@@ -586,7 +558,7 @@ fun DownloadScreen(
                             bottom = if (orderedResults.isEmpty()) 0.dp else LIST_BOTTOM_ROOM
                         )
                     ) {
-                        gridItems(orderedResults, columns, SKELETON_SPACING, key = { it.url }) { info ->
+                        gridItems(orderedResults, columns, SkeletonSpacing, key = { it.url }) { info ->
                             Spacer(modifier = Modifier.height(20.dp))
 
                             // Each card arrives rather than appearing: it fades up from slightly
@@ -671,7 +643,7 @@ fun DownloadScreen(
                                             // One row of them on a wide screen: two would
                                             // stand in for more cards than are coming.
                                             repeat(if (columns > 1) 1 else INCREMENTAL_SKELETON_COUNT) {
-                                                ShimmerRow(columns)
+                                                MediaCardShimmerRow(columns)
                                             }
                                         }
                                     }
@@ -1585,22 +1557,9 @@ private fun MediaCard(
     }
 }
 
-/** Gap between skeleton cards, the same as between the cards they stand in for. */
-private val SKELETON_SPACING = 20.dp
 
 /** Room at the foot of the results list for the action that floats over it. */
 private val LIST_BOTTOM_ROOM = 96.dp
-
-/** A row of [columns] skeleton cards, the width the real ones will take. */
-@Composable
-private fun ShimmerRow(columns: Int) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SKELETON_SPACING)) {
-        repeat(columns) { MediaCardShimmer(modifier = Modifier.weight(1f)) }
-    }
-}
-
-/** An upper bound on skeleton cards, for a screen taller than any phone's. */
-private const val MAX_VIEWPORT_SKELETONS = 8
 
 /**
  * 2 cards stand in below already-loaded results while remaining playlist items continue loading.

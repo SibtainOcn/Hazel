@@ -195,6 +195,21 @@ class GalleryScreenLayoutTest(private val locale: String) {
         assertTrue(compose.onAllNodesWithContentDescription(context.getString(R.string.gallery_close)).fetchSemanticsNodes().isEmpty())
     }
 
+    @Test
+    fun `reading shows the home skeleton, not the empty state`() {
+        RuntimeEnvironment.setQualifiers("$locale-w320dp-h568dp")
+        val viewModel = GalleryViewModel(ApplicationProvider.getApplicationContext<Application>())
+        viewModel.busy = true
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = false) {
+                GalleryScreen(onVideoLinks = {}, onVideoSearch = { _, _ -> }, viewModel = viewModel)
+            }
+        }
+        compose.waitForIdle()
+        assertTrue(compose.onAllNodesWithText(context.getString(R.string.gallery_empty_title)).fetchSemanticsNodes().isEmpty())
+        saveScreen("gallery-reading-$locale")
+    }
+
     private fun downloadAllShown(search: Boolean, keys: List<String>): Boolean {
         RuntimeEnvironment.setQualifiers("$locale-w411dp-h891dp")
         val viewModel = GalleryViewModel(ApplicationProvider.getApplicationContext<Application>())
