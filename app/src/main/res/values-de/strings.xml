@@ -744,9 +744,6 @@
     <string name="gallery_settings_x_posts_value">Antworten, Retweets, Zitate</string>
     <string name="gallery_settings_network">Netzwerk</string>
     <string name="gallery_settings_retries">Wiederholungen</string>
-    <string name="gallery_settings_extras">Extras</string>
-    <string name="gallery_settings_captions">Bildtexte als .txt</string>
-    <string name="gallery_settings_ugoira">Pixiv-Animationen als Video</string>
     <string name="storage_locations_wifi_only">Nur WLAN</string>
     <string name="storage_locations_speed_limit">Geschwindigkeitsgrenze</string>
 
@@ -1187,4 +1184,6 @@
     <string name="caption_save_choices">Was gespeichert wird</string>
     <string name="caption_only">Nur Beschriftung</string>
     <string name="caption_with_file">Alle</string>
+    <string name="gallery_settings_caption_in_file">Beschriftung im Bild</string>
+    <string name="gallery_settings_caption_in_file_hint">In JPEG und PNG</string>
 </resources>

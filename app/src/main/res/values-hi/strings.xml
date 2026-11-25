@@ -744,9 +744,6 @@
     <string name="gallery_settings_x_posts_value">जवाब, रीट्वीट, कोट</string>
     <string name="gallery_settings_network">नेटवर्क</string>
     <string name="gallery_settings_retries">दोबारा कोशिशें</string>
-    <string name="gallery_settings_extras">अतिरिक्त</string>
-    <string name="gallery_settings_captions">कैप्शन .txt में</string>
-    <string name="gallery_settings_ugoira">Pixiv एनिमेशन वीडियो में</string>
     <string name="storage_locations_wifi_only">सिर्फ़ वाई-फ़ाई</string>
     <string name="storage_locations_speed_limit">गति सीमा</string>
 
@@ -1187,4 +1184,6 @@
     <string name="caption_save_choices">क्या सेव करें</string>
     <string name="caption_only">सिर्फ़ कैप्शन</string>
     <string name="caption_with_file">सभी</string>
+    <string name="gallery_settings_caption_in_file">इमेज फ़ाइलों में कैप्शन</string>
+    <string name="gallery_settings_caption_in_file_hint">सेव JPEG और PNG में लिखा जाता है</string>
 </resources>

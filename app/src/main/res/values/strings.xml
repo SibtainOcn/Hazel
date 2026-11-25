@@ -824,9 +824,6 @@
     <string name="gallery_settings_x_posts_value">Replies, retweets, quotes</string>
     <string name="gallery_settings_network">Network</string>
     <string name="gallery_settings_retries">Retries</string>
-    <string name="gallery_settings_extras">Extras</string>
-    <string name="gallery_settings_captions">Captions to .txt</string>
-    <string name="gallery_settings_ugoira">Pixiv animations to video</string>
     <string name="storage_locations_wifi_only">Wi-Fi only</string>
     <string name="storage_locations_speed_limit">Speed limit</string>
 
@@ -1244,4 +1241,6 @@
     <string name="caption_save_choices">What to save</string>
     <string name="caption_only">Caption only</string>
     <string name="caption_with_file">All</string>
+    <string name="gallery_settings_caption_in_file">Caption in image files</string>
+    <string name="gallery_settings_caption_in_file_hint">Written into saved JPEG and PNG</string>
 </resources>

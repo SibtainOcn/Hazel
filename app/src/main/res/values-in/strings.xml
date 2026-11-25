@@ -729,9 +729,6 @@
     <string name="gallery_settings_x_posts_value">Balasan, retweet, kutipan</string>
     <string name="gallery_settings_network">Jaringan</string>
     <string name="gallery_settings_retries">Percobaan ulang</string>
-    <string name="gallery_settings_extras">Ekstra</string>
-    <string name="gallery_settings_captions">Keterangan ke .txt</string>
-    <string name="gallery_settings_ugoira">Animasi Pixiv ke video</string>
     <string name="storage_locations_wifi_only">Hanya Wi-Fi</string>
     <string name="storage_locations_speed_limit">Batas kecepatan</string>
 
@@ -1170,4 +1167,6 @@
     <string name="caption_save_choices">Yang disimpan</string>
     <string name="caption_only">Hanya keterangan</string>
     <string name="caption_with_file">Semua</string>
+    <string name="gallery_settings_caption_in_file">Keterangan di file gambar</string>
+    <string name="gallery_settings_caption_in_file_hint">Ditulis ke JPEG dan PNG yang disimpan</string>
 </resources>

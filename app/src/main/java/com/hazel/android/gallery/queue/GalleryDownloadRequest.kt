@@ -47,6 +47,7 @@ data class GalleryDownloadRequest(
                 put("packZip", o.packZip)
                 put("skipDownloaded", o.skipDownloaded)
                 put("embedCaption", o.embedCaption)
+                put("retries", o.retries)
             })
         }
     }
@@ -89,7 +90,8 @@ data class GalleryDownloadRequest(
                         keepPostDate = o.optBoolean("keepPostDate", true),
                         packZip = o.optBoolean("packZip"),
                         skipDownloaded = o.optBoolean("skipDownloaded"),
-                        embedCaption = o.optBoolean("embedCaption")
+                        embedCaption = o.optBoolean("embedCaption"),
+                        retries = o.optInt("retries", GalleryOptions.DEFAULT_RETRIES)
                     )
                 },
                 title = json.optString("title"),

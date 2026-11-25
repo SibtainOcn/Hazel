@@ -729,9 +729,6 @@
     <string name="gallery_settings_x_posts_value">返信、リツイート、引用</string>
     <string name="gallery_settings_network">ネットワーク</string>
     <string name="gallery_settings_retries">再試行</string>
-    <string name="gallery_settings_extras">その他</string>
-    <string name="gallery_settings_captions">キャプションを .txt に</string>
-    <string name="gallery_settings_ugoira">Pixiv アニメーションを動画に</string>
     <string name="storage_locations_wifi_only">Wi-Fi のみ</string>
     <string name="storage_locations_speed_limit">速度制限</string>
 
@@ -1170,4 +1167,6 @@
     <string name="caption_save_choices">保存する内容</string>
     <string name="caption_only">キャプションのみ</string>
     <string name="caption_with_file">すべて</string>
+    <string name="gallery_settings_caption_in_file">画像ファイルにキャプション</string>
+    <string name="gallery_settings_caption_in_file_hint">保存するJPEG・PNGに書き込みます</string>
 </resources>

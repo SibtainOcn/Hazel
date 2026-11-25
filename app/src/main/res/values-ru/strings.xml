@@ -774,9 +774,6 @@
     <string name="gallery_settings_x_posts_value">Ответы, ретвиты, цитаты</string>
     <string name="gallery_settings_network">Сеть</string>
     <string name="gallery_settings_retries">Повторы</string>
-    <string name="gallery_settings_extras">Дополнительно</string>
-    <string name="gallery_settings_captions">Подписи в .txt</string>
-    <string name="gallery_settings_ugoira">Анимации Pixiv в видео</string>
     <string name="storage_locations_wifi_only">Только по Wi-Fi</string>
     <string name="storage_locations_speed_limit">Ограничение скорости</string>
 
@@ -1220,4 +1217,6 @@
     <string name="caption_save_choices">Что сохранить</string>
     <string name="caption_only">Только подпись</string>
     <string name="caption_with_file">Всё</string>
+    <string name="gallery_settings_caption_in_file">Подпись в файлах изображений</string>
+    <string name="gallery_settings_caption_in_file_hint">Записывается в сохранённые JPEG и PNG</string>
 </resources>

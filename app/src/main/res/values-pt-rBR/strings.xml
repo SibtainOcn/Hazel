@@ -759,9 +759,6 @@
     <string name="gallery_settings_x_posts_value">Respostas, retuítes, citações</string>
     <string name="gallery_settings_network">Rede</string>
     <string name="gallery_settings_retries">Novas tentativas</string>
-    <string name="gallery_settings_extras">Extras</string>
-    <string name="gallery_settings_captions">Legendas em .txt</string>
-    <string name="gallery_settings_ugoira">Animações do Pixiv em vídeo</string>
     <string name="storage_locations_wifi_only">Só no Wi-Fi</string>
     <string name="storage_locations_speed_limit">Limite de velocidade</string>
 
@@ -1204,4 +1201,6 @@
     <string name="caption_save_choices">O que salvar</string>
     <string name="caption_only">Só a legenda</string>
     <string name="caption_with_file">Tudo</string>
+    <string name="gallery_settings_caption_in_file">Legenda nos arquivos de imagem</string>
+    <string name="gallery_settings_caption_in_file_hint">Gravada nos JPEG e PNG salvos</string>
 </resources>
