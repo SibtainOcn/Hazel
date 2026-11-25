@@ -1198,7 +1198,7 @@
     <string name="more_image_settings">Configurações de imagens</string>
     <string name="caption_copy">Copiar</string>
     <string name="caption_save_text">Salvar como texto</string>
-    <string name="caption_saved">Legenda salva</string>
+    <string name="caption_saved">Legenda baixada</string>
     <string name="caption_save_failed">Não foi possível salvar a legenda</string>
     <string name="caption_view_full">Ver legenda completa</string>
     <string name="caption_save_choices">O que salvar</string>
