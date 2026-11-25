@@ -255,7 +255,7 @@ fun AppNavigation(
                         painter = painterResource(R.drawable.update),
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onBackground
+                        tint = com.hazel.android.ui.theme.accentInk()
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(

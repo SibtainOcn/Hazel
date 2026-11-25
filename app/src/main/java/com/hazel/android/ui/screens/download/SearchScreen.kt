@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.ui.theme.accentTint
+import com.hazel.android.ui.theme.accentInk
 import com.hazel.android.gallery.GallerySearchSite
 import com.hazel.android.gallery.GalleryRequest
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -860,14 +862,14 @@ private fun HistoryRow(
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)),
+                .background(accentTint()),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.Filled.History,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                tint = accentInk()
             )
         }
         Spacer(modifier = Modifier.width(14.dp))
@@ -892,7 +894,7 @@ private fun FillArrow(onFill: () -> Unit) {
             modifier = Modifier
                 .size(22.dp)
                 .rotate(-90f),
-            tint = MaterialTheme.colorScheme.primary
+            tint = accentInk()
         )
     }
 }

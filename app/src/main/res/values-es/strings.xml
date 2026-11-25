@@ -950,6 +950,7 @@
     <string name="player_play">Reproducir</string>
     <string name="player_pause">Pausa</string>
     <string name="player_close">Cerrar reproductor</string>
+    <string name="player_close_short">Cerrar</string>
     <string name="player_fullscreen">Pantalla completa</string>
     <string name="player_minimize">Minimizar</string>
     <string name="player_expand">Abrir reproductor</string>

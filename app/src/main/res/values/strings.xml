@@ -1014,6 +1014,7 @@
     <string name="player_play">Play</string>
     <string name="player_pause">Pause</string>
     <string name="player_close">Close player</string>
+    <string name="player_close_short">Close</string>
     <string name="player_fullscreen">Full screen</string>
     <string name="player_minimize">Minimize</string>
     <string name="player_expand">Open player</string>

@@ -1,5 +1,7 @@
 package com.hazel.android.ui.components.player
 
+import com.hazel.android.ui.theme.accentTint
+import com.hazel.android.ui.theme.accentInk
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -576,7 +578,7 @@ fun LargePlayer(
                         PlayerAction(Icons.Filled.Download, R.string.format_sheet_download, MaterialShapes.Cookie6Sided, it)
                     },
                     PlayerAction(Icons.Filled.KeyboardArrowDown, R.string.player_minimize, MaterialShapes.Pentagon) { closing = true },
-                    PlayerAction(Icons.Filled.Close, R.string.player_close, MaterialShapes.Triangle, onClose)
+                    PlayerAction(Icons.Filled.Close, R.string.player_close_short, MaterialShapes.Pill, onClose)
                 )
                 PlayerActionGroup(actions, Modifier.fillMaxWidth().padding(horizontal = 24.dp))
             }
@@ -593,7 +595,7 @@ private class PlayerAction(
 
 /**
  * The player's actions as an M3 connected button group: equal parts, rounded outside and
- * tighter where they meet, in the accent's container tone, each icon on its own shape.
+ * tighter where they meet, in a tint of the accent, each icon on its own shape.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -609,8 +611,8 @@ private fun PlayerActionGroup(actions: List<PlayerAction>, modifier: Modifier = 
             Surface(
                 onClick = action.onClick,
                 shape = RoundedCornerShape(topStart = start, bottomStart = start, topEnd = end, bottomEnd = end),
-                color = scheme.primaryContainer,
-                contentColor = scheme.onPrimaryContainer,
+                color = accentTint(),
+                contentColor = accentInk(),
                 modifier = Modifier.weight(1f).fillMaxHeight()
             ) {
                 Column(

@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.queue
 
+import com.hazel.android.ui.theme.accentTint
+import com.hazel.android.ui.theme.accentInk
 import androidx.compose.foundation.selection.selectableGroup
 import com.hazel.android.ui.components.pressScale
 import androidx.compose.ui.semantics.semantics
@@ -116,7 +118,7 @@ import kotlinx.coroutines.withContext
 private fun badgeShapeOf(tab: QueueTab): Shape = when (tab) {
     QueueTab.RUNNING -> MaterialShapes.Cookie6Sided
     QueueTab.QUEUED -> MaterialShapes.Pentagon
-    QueueTab.FAILED -> MaterialShapes.Triangle
+    QueueTab.FAILED -> MaterialShapes.Pill
 }.toShape()
 
 @Composable
@@ -136,10 +138,10 @@ private fun QueueTabSegment(
     val outer = 25.dp
     val inner = 8.dp
     val fill by androidx.compose.animation.animateColorAsState(
-        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+        if (selected) MaterialTheme.colorScheme.primary else accentTint(),
         label = "segmentFill"
     )
-    val ink = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer
+    val ink = if (selected) MaterialTheme.colorScheme.onPrimary else accentInk()
     val start = if (first) outer else inner
     val end = if (last) outer else inner
     Surface(

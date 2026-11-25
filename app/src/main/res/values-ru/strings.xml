@@ -964,6 +964,7 @@
     <string name="player_play">Воспроизвести</string>
     <string name="player_pause">Пауза</string>
     <string name="player_close">Закрыть плеер</string>
+    <string name="player_close_short">Закрыть</string>
     <string name="player_fullscreen">Во весь экран</string>
     <string name="player_minimize">Свернуть</string>
     <string name="player_expand">Открыть плеер</string>
