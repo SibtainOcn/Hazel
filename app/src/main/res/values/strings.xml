@@ -1268,6 +1268,7 @@
     <string name="caption_saved">Caption downloaded</string>
     <string name="caption_save_failed">Caption could not be saved</string>
     <string name="caption_view_full">Show full caption</string>
+    <string name="gallery_caption_tap_hint">Tap the caption to view and copy</string>
     <string name="caption_save_choices">What to save</string>
     <string name="caption_only">Caption only</string>
     <string name="caption_with_file">All</string>

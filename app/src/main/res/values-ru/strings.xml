@@ -1244,6 +1244,7 @@
     <string name="caption_saved">Подпись скачана</string>
     <string name="caption_save_failed">Не удалось сохранить подпись</string>
     <string name="caption_view_full">Показать всю подпись</string>
+    <string name="gallery_caption_tap_hint">Нажмите на подпись, чтобы скопировать</string>
     <string name="caption_save_choices">Что сохранить</string>
     <string name="caption_only">Только подпись</string>
     <string name="caption_with_file">Всё</string>

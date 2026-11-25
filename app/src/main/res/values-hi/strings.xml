@@ -1211,6 +1211,7 @@
     <string name="caption_saved">कैप्शन डाउनलोड हो गया</string>
     <string name="caption_save_failed">कैप्शन सेव नहीं हो सका</string>
     <string name="caption_view_full">पूरा कैप्शन देखें</string>
+    <string name="gallery_caption_tap_hint">देखने और कॉपी करने के लिए कैप्शन पर टैप करें</string>
     <string name="caption_save_choices">क्या सेव करें</string>
     <string name="caption_only">सिर्फ़ कैप्शन</string>
     <string name="caption_with_file">सभी</string>

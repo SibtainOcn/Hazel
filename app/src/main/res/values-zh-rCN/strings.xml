@@ -1194,6 +1194,7 @@
     <string name="caption_saved">已下载说明文字</string>
     <string name="caption_save_failed">无法保存说明文字</string>
     <string name="caption_view_full">查看完整说明文字</string>
+    <string name="gallery_caption_tap_hint">点按说明文字即可查看和复制</string>
     <string name="caption_save_choices">保存内容</string>
     <string name="caption_only">仅说明文字</string>
     <string name="caption_with_file">全部</string>
