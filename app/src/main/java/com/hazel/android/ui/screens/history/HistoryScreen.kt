@@ -422,13 +422,15 @@ fun HistoryScreen(
             FlatIconButton(
                 icon = if (listLayout) Icons.Filled.ViewAgenda else Icons.AutoMirrored.Filled.ViewList,
                 contentDescription = stringResource(R.string.history_layout_toggle),
-                onClick = { scope.launch { SettingsRepository.setHistoryListLayout(context, !listLayout) } }
+                onClick = { scope.launch { SettingsRepository.setHistoryListLayout(context, !listLayout) } },
+                tonal = true
             )
             VerticalDivider(modifier = Modifier.height(24.dp))
             Box {
                 FlatChip(
                     label = stringResource(sort.labelRes),
                     onClick = { sortMenuOpen = true },
+                    tonal = true,
                     leading = {
                         Icon(
                             Icons.Filled.ArrowUpward,
@@ -869,7 +871,7 @@ private fun KindChip(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    FlatChip(label = label, onClick = onClick, icon = icon, selected = selected)
+    FlatChip(label = label, onClick = onClick, icon = icon, selected = selected, tonal = true)
 }
 
 @Composable
