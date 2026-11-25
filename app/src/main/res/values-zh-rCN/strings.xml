@@ -694,6 +694,7 @@
     <string name="gallery_settings_clear_record_confirm_body">已保存的帖子会再次下载。</string>
     <string name="gallery_settings_clear_record_done">下载记录已清除</string>
     <string name="gallery_settings_clear_record_failed">无法清除下载记录</string>
+    <string name="gallery_settings_clear_record_busy">正在下载，请在完成后重试</string>
     <string name="gallery_settings_profiles">个人主页</string>
     <string name="gallery_settings_instagram_sections">Instagram 分区</string>
     <string name="gallery_settings_instagram_sections_value">帖子、Reels、快拍、精选、被标记</string>

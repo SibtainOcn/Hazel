@@ -787,6 +787,7 @@
     <string name="gallery_settings_clear_record_confirm_body">Posts saved before will download again.</string>
     <string name="gallery_settings_clear_record_done">Download record cleared</string>
     <string name="gallery_settings_clear_record_failed">Couldn\'t clear the download record</string>
+    <string name="gallery_settings_clear_record_busy">A download is running. Try again after it finishes</string>
     <string name="gallery_settings_profiles">Profiles</string>
     <string name="gallery_settings_instagram_sections">Instagram sections</string>
     <string name="gallery_settings_instagram_sections_value">Posts, reels, stories, highlights, tagged</string>

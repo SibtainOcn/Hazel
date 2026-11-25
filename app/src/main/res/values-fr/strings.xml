@@ -722,6 +722,7 @@
     <string name="gallery_settings_clear_record_confirm_body">Les publications déjà enregistrées seront retéléchargées.</string>
     <string name="gallery_settings_clear_record_done">Historique des téléchargements effacé</string>
     <string name="gallery_settings_clear_record_failed">Impossible d\'effacer l\'historique des téléchargements</string>
+    <string name="gallery_settings_clear_record_busy">Un téléchargement est en cours. Réessayez une fois terminé</string>
     <string name="gallery_settings_profiles">Profils</string>
     <string name="gallery_settings_instagram_sections">Sections Instagram</string>
     <string name="gallery_settings_instagram_sections_value">Publications, reels, stories, à la une, identifications</string>

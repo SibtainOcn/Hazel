@@ -708,6 +708,7 @@
     <string name="gallery_settings_clear_record_confirm_body">Bereits gespeicherte Beiträge werden erneut geladen.</string>
     <string name="gallery_settings_clear_record_done">Download-Verlauf gelöscht</string>
     <string name="gallery_settings_clear_record_failed">Download-Verlauf konnte nicht gelöscht werden</string>
+    <string name="gallery_settings_clear_record_busy">Ein Download läuft. Versuche es danach erneut</string>
     <string name="gallery_settings_profiles">Profile</string>
     <string name="gallery_settings_instagram_sections">Instagram-Bereiche</string>
     <string name="gallery_settings_instagram_sections_value">Beiträge, Reels, Storys, Highlights, Markierungen</string>

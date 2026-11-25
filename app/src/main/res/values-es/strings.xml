@@ -722,6 +722,7 @@
     <string name="gallery_settings_clear_record_confirm_body">Las publicaciones ya guardadas se descargarán otra vez.</string>
     <string name="gallery_settings_clear_record_done">Registro de descargas borrado</string>
     <string name="gallery_settings_clear_record_failed">No se pudo borrar el registro de descargas</string>
+    <string name="gallery_settings_clear_record_busy">Hay una descarga en curso. Inténtalo cuando termine</string>
     <string name="gallery_settings_profiles">Perfiles</string>
     <string name="gallery_settings_instagram_sections">Secciones de Instagram</string>
     <string name="gallery_settings_instagram_sections_value">Publicaciones, reels, historias, destacadas, etiquetadas</string>

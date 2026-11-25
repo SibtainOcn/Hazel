@@ -6,6 +6,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.Density
 import androidx.test.core.app.ApplicationProvider
@@ -72,6 +74,27 @@ class GallerySettingsLayoutTest(private val locale: String) {
             assertTrue("$text runs off the screen", node.positionOnScreen.x + node.size.width <= width)
         }
         saveScreen("gallery-settings-end-$locale")
+    }
+
+    @Test
+    fun `filename dialog has cancel`() {
+        RuntimeEnvironment.setQualifiers("$locale-w320dp-h568dp")
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        compose.setContent {
+            HazelTheme(darkTheme = true) {
+                val density = LocalDensity.current
+                CompositionLocalProvider(LocalDensity provides Density(density.density, 2f)) {
+                    GallerySettingsScreen(onBack = {}, onOpenCookies = {}, onOpenProxy = {})
+                }
+            }
+        }
+        val title = context.getString(R.string.options_filename_title)
+        compose.onAllNodesWithText(title)[0].performScrollTo().performClick()
+        compose.waitForIdle()
+        saveScreen("gallery-filename-dialog-$locale")
+        val cancel = context.getString(R.string.download_cancel)
+        compose.onNodeWithText(cancel).assertIsDisplayed().performClick()
+        compose.onNodeWithText(cancel).assertDoesNotExist()
     }
 
     @Test

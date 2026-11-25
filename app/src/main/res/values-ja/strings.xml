@@ -694,6 +694,7 @@
     <string name="gallery_settings_clear_record_confirm_body">保存済みの投稿が再びダウンロードされます。</string>
     <string name="gallery_settings_clear_record_done">ダウンロード記録を消去しました</string>
     <string name="gallery_settings_clear_record_failed">ダウンロード記録を消去できませんでした</string>
+    <string name="gallery_settings_clear_record_busy">ダウンロード中です。終わってからもう一度お試しください</string>
     <string name="gallery_settings_profiles">プロフィール</string>
     <string name="gallery_settings_instagram_sections">Instagram のセクション</string>
     <string name="gallery_settings_instagram_sections_value">投稿、リール、ストーリーズ、ハイライト、タグ付け</string>

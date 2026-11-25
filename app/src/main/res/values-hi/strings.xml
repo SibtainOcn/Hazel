@@ -708,6 +708,7 @@
     <string name="gallery_settings_clear_record_confirm_body">पहले सहेजे गए पोस्ट फिर से डाउनलोड होंगे।</string>
     <string name="gallery_settings_clear_record_done">डाउनलोड रिकॉर्ड मिटा दिया गया</string>
     <string name="gallery_settings_clear_record_failed">डाउनलोड रिकॉर्ड मिटाया नहीं जा सका</string>
+    <string name="gallery_settings_clear_record_busy">एक डाउनलोड चल रहा है। उसके पूरा होने के बाद फिर कोशिश करें</string>
     <string name="gallery_settings_profiles">प्रोफ़ाइल</string>
     <string name="gallery_settings_instagram_sections">Instagram सेक्शन</string>
     <string name="gallery_settings_instagram_sections_value">पोस्ट, रील, स्टोरी, हाइलाइट, टैग किए गए</string>

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,6 +55,7 @@ import com.hazel.android.R
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.data.SaveKind
 import com.hazel.android.data.SettingsRepository
+import com.hazel.android.download.YtDlpEngine
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryImageSize
 import com.hazel.android.gallery.GalleryOptions
@@ -283,6 +285,7 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
 
     val cleared = stringResource(R.string.gallery_settings_clear_record_done)
     val clearFailed = stringResource(R.string.gallery_settings_clear_record_failed)
+    val clearBusy = stringResource(R.string.gallery_settings_clear_record_busy)
     when (open) {
         GalleryChoice.IMAGE_SIZE -> SingleChoiceDialog(
             title = stringResource(R.string.gallery_settings_image_size),
@@ -333,10 +336,16 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
                 close()
                 val app = context.applicationContext
                 scope.launch {
+                    // Gallery runs hold the engine's shared lock, so a busy engine means the archive is in use.
                     val ok = withContext(NonCancellable + Dispatchers.IO) {
-                        runCatching { GalleryDlEngine.clearArchive(app) }.getOrDefault(false)
+                        runCatching { YtDlpEngine.whenIdle { GalleryDlEngine.clearArchive(app) } }.getOrDefault(false)
                     }
-                    Toast.makeText(app, if (ok) cleared else clearFailed, Toast.LENGTH_SHORT).show()
+                    val message = when (ok) {
+                        null -> clearBusy
+                        true -> cleared
+                        false -> clearFailed
+                    }
+                    Toast.makeText(app, message, Toast.LENGTH_SHORT).show()
                 }
             },
             onDismiss = close
@@ -402,7 +411,12 @@ private fun GalleryTemplateDialog(current: String, onSave: (String) -> Unit, onD
             }
         },
         dismissButton = {
-            TextButton(onClick = { draft = "" }) { Text(stringResource(R.string.options_filename_clear)) }
+            Row {
+                TextButton(onClick = { draft = "" }, enabled = draft.isNotEmpty()) {
+                    Text(stringResource(R.string.options_filename_clear))
+                }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.download_cancel)) }
+            }
         }
     )
 }

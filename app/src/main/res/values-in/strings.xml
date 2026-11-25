@@ -694,6 +694,7 @@
     <string name="gallery_settings_clear_record_confirm_body">Postingan yang sudah disimpan akan diunduh lagi.</string>
     <string name="gallery_settings_clear_record_done">Catatan unduhan dihapus</string>
     <string name="gallery_settings_clear_record_failed">Tidak bisa menghapus catatan unduhan</string>
+    <string name="gallery_settings_clear_record_busy">Ada unduhan berjalan. Coba lagi setelah selesai</string>
     <string name="gallery_settings_profiles">Profil</string>
     <string name="gallery_settings_instagram_sections">Bagian Instagram</string>
     <string name="gallery_settings_instagram_sections_value">Postingan, reels, story, sorotan, tag</string>
