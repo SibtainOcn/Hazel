@@ -55,6 +55,7 @@ fun SegmentIconButton(
     position: SegmentPosition,
     modifier: Modifier = Modifier,
     size: Dp = 44.dp,
+    selected: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val interaction = remember { MutableInteractionSource() }
@@ -68,8 +69,8 @@ fun SegmentIconButton(
             .pressScale(interaction, pressed = 0.92f)
             .size(size),
         shape = RoundedCornerShape(topStart = start, bottomStart = start, topEnd = end, bottomEnd = end),
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-        contentColor = MaterialTheme.colorScheme.onSurface,
+        color = if (selected) MaterialTheme.colorScheme.primary else com.hazel.android.ui.theme.accentTint(),
+        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else com.hazel.android.ui.theme.accentInk(),
         interactionSource = interaction
     ) {
         Box(contentAlignment = Alignment.Center) { content() }

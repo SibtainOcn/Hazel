@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.dp
+import com.hazel.android.ui.components.SegmentIconButton
+import com.hazel.android.ui.components.SegmentPosition
 import com.hazel.android.ui.saveScreen
 import org.junit.Rule
 import org.junit.Test
@@ -66,6 +71,11 @@ class AccentTintShotsTest(private val theme: String) {
                                 }
                                 Box(Modifier.background(MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp)).padding(horizontal = 14.dp, vertical = 8.dp)) {
                                     Text("On", color = MaterialTheme.colorScheme.onPrimary)
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                                    SegmentIconButton({}, SegmentPosition.First, size = 36.dp, selected = true) { Icon(Icons.Filled.Search, null) }
+                                    SegmentIconButton({}, SegmentPosition.Middle, size = 36.dp) { Icon(Icons.Filled.FilterList, null) }
+                                    SegmentIconButton({}, SegmentPosition.Last, size = 36.dp) { Icon(Icons.Filled.MoreVert, null) }
                                 }
                             }
                         }

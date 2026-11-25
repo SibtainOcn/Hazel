@@ -303,26 +303,25 @@ fun HistoryScreen(
             // Search, filter and the menu as one connected group.
             com.hazel.android.ui.components.SegmentIconButton(
                 onClick = { searchOpen = !searchOpen },
-                position = com.hazel.android.ui.components.SegmentPosition.First
+                position = com.hazel.android.ui.components.SegmentPosition.First,
+                selected = searchOpen
             ) {
                 Icon(
                     Icons.Filled.Search,
                     contentDescription = stringResource(R.string.history_search_action),
-                    modifier = Modifier.size(22.dp),
-                    tint = if (searchOpen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    modifier = Modifier.size(22.dp)
                 )
             }
             Spacer(modifier = Modifier.width(3.dp))
             com.hazel.android.ui.components.SegmentIconButton(
                 onClick = { statusDialogOpen = true },
-                position = com.hazel.android.ui.components.SegmentPosition.Middle
+                position = com.hazel.android.ui.components.SegmentPosition.Middle,
+                selected = status != HistoryStatus.ALL
             ) {
                 Icon(
                     Icons.Filled.FilterList,
                     contentDescription = stringResource(R.string.history_filter_action),
-                    modifier = Modifier.size(22.dp),
-                    tint = if (status != HistoryStatus.ALL) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurface
+                    modifier = Modifier.size(22.dp)
                 )
             }
             Spacer(modifier = Modifier.width(3.dp))
