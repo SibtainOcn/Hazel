@@ -106,8 +106,11 @@ data class GalleryListing(
             return "$site:id:${info.optString("id")}:${authorOf(info)}"
         }
 
+        // Pinterest search pins mostly leave title and description empty; their alt text reads as one.
+        private val TITLE_KEYS = listOf("title", "grid_title", "description", "content", "caption", "seo_alt_text", "auto_alt_text")
+
         private fun titleOf(info: JSONObject): String =
-            listOf("title", "description", "content", "caption")
+            TITLE_KEYS
                 .firstNotNullOfOrNull { key -> info.optString(key).takeIf { it.isNotBlank() && it != "null" } }
                 ?.lineSequence()?.firstOrNull { it.isNotBlank() }?.trim()?.take(TITLE_MAX)
                 .orEmpty()
