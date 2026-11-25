@@ -1161,7 +1161,7 @@
     <string name="more_image_settings">图片设置</string>
     <string name="caption_copy">复制</string>
     <string name="caption_save_text">另存为文本</string>
-    <string name="caption_saved">已保存说明文字</string>
+    <string name="caption_saved">已下载说明文字</string>
     <string name="caption_save_failed">无法保存说明文字</string>
     <string name="caption_view_full">查看完整说明文字</string>
     <string name="caption_save_choices">保存内容</string>

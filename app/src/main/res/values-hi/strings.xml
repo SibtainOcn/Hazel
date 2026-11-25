@@ -1178,7 +1178,7 @@
     <string name="more_image_settings">इमेज सेटिंग्स</string>
     <string name="caption_copy">कॉपी करें</string>
     <string name="caption_save_text">टेक्स्ट के रूप में सेव करें</string>
-    <string name="caption_saved">कैप्शन सेव हो गया</string>
+    <string name="caption_saved">कैप्शन डाउनलोड हो गया</string>
     <string name="caption_save_failed">कैप्शन सेव नहीं हो सका</string>
     <string name="caption_view_full">पूरा कैप्शन देखें</string>
     <string name="caption_save_choices">क्या सेव करें</string>
