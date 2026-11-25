@@ -38,9 +38,10 @@ object MediaProbeFacts {
      * Reads [fileUri]'s header. Returns an empty answer for anything that cannot be opened,
      * which is the ordinary case for a download the user has since deleted.
      */
-    suspend fun read(context: Context, fileUri: String): MediaFacts =
+    suspend fun read(context: Context, fileUri: String, image: Boolean = false): MediaFacts =
         withContext(Dispatchers.IO) {
             if (fileUri.isBlank()) return@withContext MediaFacts()
+            if (image) return@withContext readImage(context, fileUri)
 
             val retriever = MediaMetadataRetriever()
             try {
@@ -75,4 +76,13 @@ object MediaProbeFacts {
                 runCatching { retriever.release() }
             }
         }
+
+    /** An image's size and type from its header alone; nothing is decoded. */
+    private fun readImage(context: Context, fileUri: String): MediaFacts = runCatching {
+        val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        context.contentResolver.openInputStream(Uri.parse(fileUri))?.use {
+            android.graphics.BitmapFactory.decodeStream(it, null, bounds)
+        }
+        MediaFacts(width = bounds.outWidth.coerceAtLeast(0), height = bounds.outHeight.coerceAtLeast(0), mimeType = bounds.outMimeType.orEmpty())
+    }.getOrDefault(MediaFacts())
 }

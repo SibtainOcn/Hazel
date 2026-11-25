@@ -53,7 +53,7 @@ class StorageLocationsLayoutTest(private val locale: String) {
             context.getString(R.string.format_sheet_tab_audio),
             context.getString(R.string.format_sheet_tab_video),
             context.getString(R.string.storage_locations_gallery),
-            context.getString(R.string.storage_locations_gallery_hint),
+            context.getString(R.string.search_source_images),
             "Download/Hazel/Gallery"
         ).forEach { text ->
             val node = compose.onNodeWithText(text, useUnmergedTree = true)
