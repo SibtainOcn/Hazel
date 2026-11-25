@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -173,5 +175,48 @@ class GalleryScreenLayoutTest(private val locale: String) {
             val node = compose.onNodeWithText(text).assertIsDisplayed().fetchSemanticsNode()
             assertTrue("$text runs off the right edge", node.positionOnScreen.x + node.size.width <= width)
         }
+    }
+
+    @Test
+    fun `tapping a card opens its download sheet, not the viewer`() {
+        RuntimeEnvironment.setQualifiers("$locale-w411dp-h891dp")
+        val viewModel = GalleryViewModel(ApplicationProvider.getApplicationContext<Application>())
+        val items = (1..2).map { GalleryItem(it, "https://x/$it.jpg", "jpg", "Cat $it", "nasa", "x", 0, 0, null, postKey = "p") }
+        viewModel.show(GalleryPost.group("https://x/post", items))
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = false) {
+                GalleryScreen(onVideoLinks = {}, onVideoSearch = { _, _ -> }, viewModel = viewModel)
+            }
+        }
+        compose.onNodeWithText("Cat 1").performClick()
+        compose.waitForIdle()
+        assertTrue(compose.onAllNodesWithText(context.getString(R.string.format_sheet_section_details), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithContentDescription(context.getString(R.string.gallery_close)).fetchSemanticsNodes().isEmpty())
+    }
+
+    private fun downloadAllShown(search: Boolean, keys: List<String>): Boolean {
+        RuntimeEnvironment.setQualifiers("$locale-w411dp-h891dp")
+        val viewModel = GalleryViewModel(ApplicationProvider.getApplicationContext<Application>())
+        val items = keys.mapIndexed { i, key -> GalleryItem(i + 1, "https://x/$i.jpg", "jpg", "Cat $i", "nasa", "x", 0, 0, null, postKey = key) }
+        viewModel.fromSearch = search
+        viewModel.show(GalleryPost.group("https://x/source", items))
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = false) {
+                GalleryScreen(onVideoLinks = {}, onVideoSearch = { _, _ -> }, viewModel = viewModel)
+            }
+        }
+        compose.waitForIdle()
+        return compose.onAllNodesWithText(context.getString(R.string.download_download_all)).fetchSemanticsNodes().isNotEmpty()
+    }
+
+    @Test
+    fun `search results of single files offer no download all`() {
+        assertTrue(!downloadAllShown(search = true, keys = listOf("a", "b", "c")))
+        assertTrue(compose.onAllNodesWithText("Cat 0").fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun `one pasted post with several files offers download all`() {
+        assertTrue(downloadAllShown(search = false, keys = listOf("p", "p", "p")))
     }
 }

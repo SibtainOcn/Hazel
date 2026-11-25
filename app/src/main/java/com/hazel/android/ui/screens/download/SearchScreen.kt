@@ -1,21 +1,13 @@
 package com.hazel.android.ui.screens.download
 
-import com.hazel.android.gallery.GallerySearchSite
-import com.hazel.android.gallery.GalleryRequest
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.animation.AnimatedVisibility
-import com.hazel.android.ui.theme.glassScreen
-import com.hazel.android.ui.components.ActionsRow
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,30 +24,35 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
-import com.hazel.android.ui.components.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -67,48 +64,52 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.hazel.android.HazelApp
 import com.hazel.android.R
 import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.HistoryEntry
-import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SaveDirs
+import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.download.extractor.SearchSuggestions
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.semantics.semantics
-import com.hazel.android.ui.components.pressScale
+import com.hazel.android.gallery.GalleryRequest
+import com.hazel.android.gallery.GallerySearchSite
+import com.hazel.android.ui.components.ActionsRow
+import com.hazel.android.ui.components.AlertDialog
 import com.hazel.android.ui.components.pressCorner
-import androidx.compose.ui.semantics.selected
-import androidx.compose.material3.MaterialShapes
-import androidx.compose.material3.toShape
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material.icons.filled.PlayArrow
+import com.hazel.android.ui.components.pressScale
+import com.hazel.android.ui.screens.gallery.GallerySiteRow
 import com.hazel.android.ui.screens.more.groupShape
+import com.hazel.android.ui.theme.glassScreen
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.MediaOpener
+import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.net.URI
 
 /**
  * Full screen search and link entry.
@@ -569,29 +570,11 @@ fun SearchScreen(
             }
 
             AnimatedVisibility(visible = images) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 12.dp)
-                        .padding(bottom = 10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        stringResource(R.string.fetch_settings_search_on),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 4.dp, end = 4.dp)
-                    )
-                    GallerySearchSite.entries.forEach { site ->
-                        SiteChip(
-                            label = site.label,
-                            selected = site == gallerySite,
-                            onClick = { scope.launch { SettingsRepository.setGallerySearchSite(context, site) } }
-                        )
-                    }
-                }
+                GallerySiteRow(
+                    selected = gallerySite,
+                    onSelect = { site -> scope.launch { SettingsRepository.setGallerySearchSite(context, site) } },
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -954,33 +937,6 @@ private val QUEUE_MAX_HEIGHT = 236.dp
 
 /** Any run of whitespace, which is what separates one pasted link from the next. */
 private val WHITESPACE = Regex("""\s+""")
-
-/** A site an image search goes to: a small pill, filled in the accent when chosen. */
-@Composable
-private fun SiteChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-    val radius by pressCorner(interaction, resting = 16.dp, pressed = 8.dp)
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(radius),
-        color = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer,
-        contentColor = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-        interactionSource = interaction,
-        modifier = Modifier
-            .pressScale(interaction)
-            .height(34.dp)
-            .semantics { this.selected = selected }
-    ) {
-        Box(modifier = Modifier.padding(horizontal = 14.dp), contentAlignment = Alignment.Center) {
-            Text(
-                label,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                maxLines = 1
-            )
-        }
-    }
-}
 
 /**
  * A search source. The chosen one is an accent tab led by a small cookie; the rest are soft
