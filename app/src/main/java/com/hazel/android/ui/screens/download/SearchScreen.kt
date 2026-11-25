@@ -569,7 +569,8 @@ fun SearchScreen(
                 }
             }
 
-            AnimatedVisibility(visible = images) {
+            // Links go to gallery-dl as they are: a site to search on only applies to words.
+            AnimatedVisibility(visible = images && queued.isEmpty() && !isLinks(text)) {
                 GallerySiteRow(
                     selected = gallerySite,
                     onSelect = { site -> scope.launch { SettingsRepository.setGallerySearchSite(context, site) } },

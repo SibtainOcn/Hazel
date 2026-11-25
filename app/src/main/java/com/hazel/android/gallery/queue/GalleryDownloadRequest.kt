@@ -2,6 +2,7 @@ package com.hazel.android.gallery.queue
 
 import com.hazel.android.gallery.GalleryImageSize
 import com.hazel.android.gallery.GalleryOptions
+import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.gallery.GalleryVideoMode
 import org.json.JSONArray
 import org.json.JSONObject
@@ -18,7 +19,9 @@ data class GalleryDownloadRequest(
     val title: String = "",
     val author: String = "",
     val thumbnail: String? = null,
-    val id: Long = nextId()
+    val id: Long = nextId(),
+    /** File addresses fetched one by one instead of [url], for a post without a link of its own. */
+    val files: List<String>? = null
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("url", url)
@@ -27,6 +30,7 @@ data class GalleryDownloadRequest(
         thumbnail?.let { put("thumbnail", it) }
         put("id", id)
         indexes?.let { put("indexes", JSONArray(it)) }
+        files?.let { put("files", JSONArray(it)) }
         options?.let { o ->
             put("options", JSONObject().apply {
                 put("imageSize", o.imageSize.name)
@@ -61,6 +65,8 @@ data class GalleryDownloadRequest(
             GalleryDownloadRequest(
                 url = url,
                 indexes = json.optJSONArray("indexes")?.let { a -> List(a.length()) { a.getInt(it) } },
+                files = json.optJSONArray("files")?.let { a -> List(a.length()) { a.getString(it) } }
+                    ?.filter { it.startsWith("http") || it.startsWith("ytdl:") }?.takeIf { it.isNotEmpty() },
                 options = json.optJSONObject("options")?.let { o ->
                     GalleryOptions(
                         imageSize = runCatching { GalleryImageSize.valueOf(o.optString("imageSize")) }.getOrDefault(GalleryImageSize.ORIGINAL),
@@ -79,4 +85,24 @@ data class GalleryDownloadRequest(
             )
         }.getOrNull()
     }
+}
+
+/** The request saving the files of this post at [indexes] (counted from 1), or all of them when null. */
+fun GalleryPost.request(
+    indexes: List<Int>?,
+    options: GalleryOptions?,
+    title: String? = null,
+    author: String? = null
+): GalleryDownloadRequest {
+    val chosen = indexes?.toSet()?.let { wanted -> items.filter { it.index in wanted } } ?: items
+    val first = chosen.firstOrNull()
+    return GalleryDownloadRequest(
+        url = source,
+        indexes = indexes.takeUnless { direct },
+        options = options,
+        title = title ?: first?.title.orEmpty(),
+        author = author ?: this.author,
+        thumbnail = first?.thumbnail ?: first?.url?.takeUnless { first.isVideo },
+        files = chosen.map { it.url }.takeIf { direct }
+    )
 }

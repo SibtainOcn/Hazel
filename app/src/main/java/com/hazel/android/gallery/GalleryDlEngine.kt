@@ -56,7 +56,7 @@ object GalleryDlEngine {
         val output = StringBuilder()
         val args = if (postLimit == null) listOf("--dump-json")
         else listOf("--resolve-json", "--post-range", "1-$postLimit", "--child-range", "1-$postLimit")
-        run(context, url, args) { line ->
+        run(context, listOf(url), args) { line ->
             if (output.length + line.length > LISTING_MAX_CHARS) {
                 throw GalleryDlException(GalleryDlException.Kind.OTHER, "listing too large")
             }
@@ -64,12 +64,30 @@ object GalleryDlEngine {
         }
         // A download usually follows a read: have gallery-dl loaded for it.
         GallerySpare.warm(context)
-        return GalleryListing.parse(output.toString())
+        val listing = GalleryListing.parse(output.toString())
+        val error = listing.error
+        if (error != null && listing.isEmpty) throw readError(context, url, error)
+        return listing
+    }
+
+    /**
+     * What a read that stopped on [error] means. Sites that turn away anonymous readers say so
+     * in many ways (X's "Unavailable", Reddit's "blocked by network security"): without a
+     * sign-in for the site, anything that is not plainly gone or unsupported asks for one.
+     */
+    private suspend fun readError(context: Context, url: String, error: Pair<String, String>): GalleryDlException {
+        val (name, message) = error
+        val detail = "$name: $message"
+        var kind = GalleryDlException.classifyError(name, message)
+        if (kind == GalleryDlException.Kind.OTHER && !CookieRepository.signsIn(context.applicationContext, listOf(url)).first()) {
+            kind = GalleryDlException.Kind.LOGIN_REQUIRED
+        }
+        return GalleryDlException(kind, detail, log = detail)
     }
 
     /**
      * Downloads the post at [url] into the gallery save folder: only the files at [indexes]
-     * (counted from 1) when given, else all of them. [onFetched] gets the count of files fetched
+     * (counted from 1) when given, else all of them; with [files], those file addresses instead. [onFetched] gets the count of files fetched
      * so far, [onSaved] each file once it is in the save folder. Returns how many were saved.
      */
     suspend fun download(
@@ -77,6 +95,7 @@ object GalleryDlEngine {
         url: String,
         indexes: List<Int>? = null,
         options: GalleryOptions? = null,
+        files: List<String>? = null,
         onFetched: (Int) -> Unit = {},
         onSaved: (Uri) -> Unit = {}
     ): Int {
@@ -89,11 +108,14 @@ object GalleryDlEngine {
             val args = buildList {
                 add("--directory"); add(work.absolutePath)
                 add("--no-part")
-                if (!indexes.isNullOrEmpty()) { add("--range"); add(indexes.sorted().joinToString(",")) }
+                if (files.isNullOrEmpty() && !indexes.isNullOrEmpty()) { add("--range"); add(indexes.sorted().joinToString(",")) }
                 addAll(chosen.toArgs(archive))
+                if (!files.isNullOrEmpty() && chosen.safeTemplate == null) {
+                    add("--option"); add("extractor.directlink.filename={filename}.{extension}")
+                }
             }
             var fetched = 0
-            run(context, url, args) { onFetched(++fetched) }
+            run(context, files?.takeIf { it.isNotEmpty() } ?: listOf(url), args) { onFetched(++fetched) }
             val target = SettingsRepository.getSaveDirs(context).first().of(SaveKind.GALLERY)
             return withContext(Dispatchers.IO) {
                 var saved = 0
@@ -112,9 +134,9 @@ object GalleryDlEngine {
         }
     }
 
-    private suspend fun run(context: Context, url: String, extra: List<String>, onLine: (String) -> Unit) {
+    private suspend fun run(context: Context, urls: List<String>, extra: List<String>, onLine: (String) -> Unit) {
         val app = context.applicationContext
-        val access = CookieRepository.accessFor(app, url)
+        val access = CookieRepository.accessFor(app, urls.first())
         val preferences = preferenceOptions(app)
         coroutineScope {
             val running = AtomicReference<Process?>()
@@ -131,7 +153,7 @@ object GalleryDlEngine {
                     addAll(preferences)
                     addAll(extra)
                     add("--")
-                    add(url)
+                    addAll(urls)
                 }
                 val secrets = listOfNotNull(access.cookieFile?.absolutePath)
                 try {

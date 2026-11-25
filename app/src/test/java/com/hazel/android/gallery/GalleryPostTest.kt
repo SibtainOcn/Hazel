@@ -3,6 +3,8 @@ package com.hazel.android.gallery
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import com.hazel.android.gallery.queue.GalleryDownloadRequest
+import com.hazel.android.gallery.queue.request
 import org.junit.Test
 
 class GalleryPostTest {
@@ -24,8 +26,17 @@ class GalleryPostTest {
         assertEquals("instagram:post_url:https://www.instagram.com/p/AAA/", items[0].postKey)
         assertEquals("https://www.instagram.com/p/AAA/", items[0].postUrl)
         assertEquals("twitter:tweet_id:42", items[1].postKey)
-        assertNull(items[1].postUrl)
+        assertEquals("https://x.com/i/status/42", items[1].postUrl)
         assertEquals("tumblr:id:7:c", items[2].postKey)
+        assertNull(items[2].postUrl)
+    }
+
+    @Test
+    fun `an error gallery-dl wrote into the listing is kept`() {
+        val listing = GalleryListing.parse("""[[-1, {"error": "AuthRequired", "message": "cookies needed"}]]""")
+        assertTrue(listing.isEmpty)
+        assertEquals("AuthRequired" to "cookies needed", listing.error)
+        assertEquals(GalleryDlException.Kind.LOGIN_REQUIRED, GalleryDlException.classifyError("AuthRequired", "cookies needed"))
     }
 
     @Test
@@ -52,9 +63,18 @@ class GalleryPostTest {
         assertEquals(listOf(1, 2), posts[0].items.map { it.index })
         assertEquals("https://site/p/2", posts[1].source)
         assertEquals(listOf(1), posts[1].items.map { it.index })
-        // Without a link of its own the post is saved from the search, at its place there.
-        assertEquals("https://site/search?q=x", posts[2].source)
-        assertEquals(listOf(4), posts[2].items.map { it.index })
+        // Without a link of its own the post's files are fetched by their own addresses.
+        assertTrue(posts[2].direct)
+        assertEquals(listOf(1), posts[2].items.map { it.index })
+    }
+
+    @Test
+    fun `a search result without a link never downloads from the search page`() {
+        val post = GalleryPost.group("https://site/search?q=x", listOf(file(34, "p1"), file(35, "p1")), feed = true).single()
+        val request = post.request(null, null)
+        assertNull(request.indexes)
+        assertEquals(listOf("https://cdn.example/34.jpg", "https://cdn.example/35.jpg"), request.files)
+        assertEquals(request.files, GalleryDownloadRequest.fromPayload(request.toPayload())?.files)
     }
 
     @Test

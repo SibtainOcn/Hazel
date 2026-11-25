@@ -143,13 +143,13 @@ object GalleryQueue {
             coroutineScope {
                 val work = async {
                     GalleryDlEngine.download(
-                        app, request.url, request.indexes, request.options,
+                        app, request.url, request.indexes, request.options, request.files,
                         onFetched = { count ->
                             setFetched(request.id, count)
                             val now = System.currentTimeMillis()
                             if (now - lastShown >= PROGRESS_INTERVAL_MS) {
                                 lastShown = now
-                                val total = request.indexes?.size ?: 0
+                                val total = request.files?.size ?: request.indexes?.size ?: 0
                                 val percent = if (total > 0) (count * 100 / total).coerceAtMost(100) else -1
                                 DownloadNotificationHelper.showProgress(
                                     app, percent, statusLine = app.getString(com.hazel.android.R.string.gallery_fetched, count),
