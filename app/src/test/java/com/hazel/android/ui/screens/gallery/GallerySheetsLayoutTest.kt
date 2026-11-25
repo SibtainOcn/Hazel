@@ -93,15 +93,13 @@ class GallerySheetsLayoutTest(private val locale: String) {
     }
 
     @Test
-    fun `download all sheet keeps the filter, adjust section and bar in view`() {
+    fun `download all sheet opens at its usual height with the count and filter in view`() {
         show { GalleryPostSheet(items = POST, postUrl = "", onDownload = { _, _, _, _ -> }, onDismiss = {}) }
         saveScreen("gallery-post-$locale")
         assertInside(
             context.resources.getQuantityString(R.plurals.gallery_items, POST.size, POST.size),
             context.getString(R.string.gallery_filter_all, POST.size),
-            context.getString(R.string.gallery_filter_videos, 1),
-            context.getString(R.string.gallery_adjust_all),
-            context.getString(R.string.gallery_size_original).uppercase()
+            context.getString(R.string.gallery_filter_videos, 1)
         )
     }
 }

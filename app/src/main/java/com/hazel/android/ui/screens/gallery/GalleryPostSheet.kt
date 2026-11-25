@@ -105,10 +105,8 @@ internal fun GalleryPostSheet(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
+    // Opens at its usual height; the list is dragged up to full screen when it is long.
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
     var options by rememberGalleryOptions()
     val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }
         .collectAsState(initial = SaveDirs())

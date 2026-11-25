@@ -2,7 +2,6 @@ package com.hazel.android.ui.screens.gallery
 
 import android.app.Application
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
@@ -35,7 +34,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -100,9 +98,6 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         private set
     var posts by mutableStateOf<List<GalleryPost>>(emptyList())
         private set
-    /** The post opened from the list of several; null shows the list. */
-    var openPost by mutableStateOf<Int?>(null)
-        private set
     var busy by mutableStateOf(false)
         internal set
     var notice by mutableStateOf<GalleryNotice?>(null)
@@ -122,16 +117,16 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     }
 
     /** The post shown as cards: the only one, or the one opened from the list. */
-    val post: GalleryPost? get() = posts.singleOrNull() ?: openPost?.let(posts::getOrNull)
+    val post: GalleryPost? get() = posts.singleOrNull()
     val items: List<GalleryItem> get() = post?.items.orEmpty()
-    val showsList: Boolean get() = posts.size > 1 && post == null
+    val showsList: Boolean get() = posts.size > 1
 
     /** Whether the results came from a search, where each post is a result of its own. */
     var fromSearch by mutableStateOf(false)
         internal set
 
     /** Download all belongs to one post with several files, never to a page of search results. */
-    val offersDownloadAll: Boolean get() = !showsList && items.size > 1 && (openPost != null || !fromSearch)
+    val offersDownloadAll: Boolean get() = !showsList && items.size > 1 && !fromSearch
 
     private var job: Job? = null
     private var lastRun: (() -> Unit)? = null
@@ -140,7 +135,6 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         job?.cancel()
         lastRun = { handle(request) }
         posts = emptyList()
-        openPost = null
         when (request) {
             is GalleryRequest.Links -> {
                 fromSearch = false
@@ -175,13 +169,6 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         show(posts)
     }
 
-    fun open(index: Int) {
-        openPost = index.takeIf { it in posts.indices }
-    }
-
-    fun closePost() {
-        openPost = null
-    }
 
     /** Saves the files of [post] at [indexes] (counted from 1), or the whole post when null. */
     /** Queues the files of [post] at [indexes] (counted from 1), or the whole post when null. */
@@ -217,7 +204,6 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     fun clear() {
         job?.cancel()
         posts = emptyList()
-        openPost = null
         notice = null
         failure = null
         lastRun = null
@@ -298,7 +284,6 @@ fun GalleryScreen(
         com.hazel.android.gallery.GallerySpare.warm(context)
         GalleryRequests.next.collect { if (it != null) GalleryRequests.take()?.let(viewModel::handle) }
     }
-    BackHandler(enabled = viewModel.posts.size > 1 && viewModel.openPost != null, onBack = viewModel::closePost)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -370,22 +355,13 @@ fun GalleryScreen(
                                 } else {
                                     GalleryPostCard(
                                         post = post,
-                                        onOpen = { viewModel.open(i) },
+                                        onOpen = { position -> viewing = i to position },
                                         onDownloadAll = { postSheetFor = i }
                                     )
                                 }
                             }
                         }
                     } else {
-                        if (viewModel.posts.size > 1) {
-                            item(key = "back") {
-                                TextButton(onClick = viewModel::closePost) {
-                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(stringResource(R.string.gallery_all_posts))
-                                }
-                            }
-                        }
                         itemsIndexed(viewModel.items, key = { _, it -> it.index }) { position, item ->
                             ArrivingCard(item.url, shrink) {
                                 GalleryCard(
