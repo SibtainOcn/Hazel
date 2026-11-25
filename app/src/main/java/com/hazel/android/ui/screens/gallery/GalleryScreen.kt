@@ -183,10 +183,7 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     ) {
         if (post == null || post.source.isEmpty()) return
         val request = post.request(indexes, options, title, author)
-        viewModelScope.launch {
-            GalleryQueue.add(getApplication(), request)
-            notice = GalleryNotice(R.string.gallery_queued)
-        }
+        viewModelScope.launch { GalleryQueue.add(getApplication(), request) }
     }
 
 
@@ -323,21 +320,6 @@ fun GalleryScreen(
                     contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 96.dp),
                     verticalArrangement = Arrangement.spacedBy(SkeletonSpacing)
                 ) {
-                    viewModel.notice?.let { notice ->
-                        item(key = "notice") {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    stringResource(notice.text, *notice.args.toTypedArray()),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                if (viewModel.failure != null) {
-                                    TextButton(onClick = { logOpen = true }) { Text(stringResource(R.string.gallery_view_log)) }
-                                }
-                            }
-                        }
-                    }
                     if (viewModel.showsList) {
                         gridItems(viewModel.posts.indices.toList(), columns, SkeletonSpacing, key = { "post-$it" }) { i ->
                             val post = viewModel.posts[i]

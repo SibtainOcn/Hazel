@@ -1185,7 +1185,6 @@
     <string name="upd_action_use_bundled">Incluida</string>
     <string name="upd_bundled_restored">Ahora se usa gallery-dl %1$s incluido</string>
     <string name="upd_busy">Hay una descarga en curso. Inténtalo cuando termine</string>
-    <string name="gallery_queued">Añadido a la cola de descargas</string>
     <string name="gallery_fetched">%1$d archivos obtenidos</string>
     <string name="gallery_saved_before_failure">%1$d guardados antes de detenerse</string>
     <string name="properties_kind_image">Imagen</string>

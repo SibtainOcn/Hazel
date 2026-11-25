@@ -1168,7 +1168,6 @@
     <string name="upd_action_use_bundled">Mitgeliefert</string>
     <string name="upd_bundled_restored">Jetzt wird das mitgelieferte gallery-dl %1$s verwendet</string>
     <string name="upd_busy">Ein Download läuft. Versuche es nach dessen Ende erneut</string>
-    <string name="gallery_queued">Zur Download-Warteschlange hinzugefügt</string>
     <string name="gallery_fetched">%1$d Dateien abgerufen</string>
     <string name="gallery_saved_before_failure">%1$d gespeichert, bevor es abbrach</string>
     <string name="properties_kind_image">Bild</string>

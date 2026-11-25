@@ -43,7 +43,7 @@ import com.hazel.android.ui.components.pressScale
 
 /**
  * Where an image search goes: a "Search on" label and one chip per site. The chosen site turns
- * into a tertiary tab led by a seven-sided cookie, a sibling of the search source chips above.
+ * into a tonal (secondary container) tab led by a seven-sided cookie.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -79,12 +79,12 @@ private fun SiteChip(label: String, selected: Boolean, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val resting by animateDpAsState(if (selected) 12.dp else 20.dp, label = "siteChip")
     val radius by pressCorner(interaction, resting = resting, pressed = 8.dp)
-    val container by animateColorAsState(if (selected) colors.tertiary else colors.surfaceContainerHigh, label = "siteFill")
+    val container by animateColorAsState(if (selected) colors.secondaryContainer else colors.surfaceContainerHigh, label = "siteFill")
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(radius),
         color = container,
-        contentColor = if (selected) colors.onTertiary else colors.onSurface,
+        contentColor = if (selected) colors.onSecondaryContainer else colors.onSurface,
         interactionSource = interaction,
         modifier = Modifier
             .pressScale(interaction)
@@ -100,10 +100,10 @@ private fun SiteChip(label: String, selected: Boolean, onClick: () -> Unit) {
                     modifier = Modifier
                         .size(28.dp)
                         .clip(MaterialShapes.Cookie7Sided.toShape())
-                        .background(colors.onTertiary),
+                        .background(colors.onSecondaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.tertiary)
+                    Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.secondaryContainer)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }
