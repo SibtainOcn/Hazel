@@ -4,6 +4,8 @@ import android.text.format.DateUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +55,10 @@ internal fun stateColors(state: AccountState): Pair<Color, Color> {
 @Composable
 internal fun StatePill(state: AccountState, modifier: Modifier = Modifier) {
     val (fill, ink) = stateColors(state)
+    val base = MaterialTheme.typography.labelSmall
+    // A tag grows with the system font only up to 1.3x, so it stays whole beside the name.
+    val fontScale = LocalDensity.current.fontScale
+    val size = base.fontSize * (minOf(fontScale, MAX_TAG_SCALE) / fontScale)
     Text(
         stringResource(
             when (state) {
@@ -60,7 +67,7 @@ internal fun StatePill(state: AccountState, modifier: Modifier = Modifier) {
                 AccountState.SIGNED_OUT -> R.string.cookies_state_signed_out
             }
         ),
-        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.2.sp),
+        style = base.copy(fontSize = size, lineHeight = size * 1.3f, fontWeight = FontWeight.Bold, letterSpacing = 0.2.sp),
         color = ink,
         maxLines = 1,
         modifier = modifier
@@ -70,19 +77,16 @@ internal fun StatePill(state: AccountState, modifier: Modifier = Modifier) {
     )
 }
 
-/** The site name with its state pill right after it; the name gives way first. */
+/** The site name with its state pill right after it; the pill moves under a name that needs the room. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun AccountTitle(name: String, state: AccountState, style: TextStyle) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            name,
-            style = style,
-            fontWeight = FontWeight.SemiBold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        itemVerticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(name, style = style, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         StatePill(state)
     }
 }
@@ -109,6 +113,8 @@ internal fun SiteMark(site: String?, name: String, size: Dp = 40.dp, dimmed: Boo
         )
     }
 }
+
+private const val MAX_TAG_SCALE = 1.3f
 
 private val SHORT_MARKS = mapOf(
     "instagram.com" to "IG", "youtube.com" to "YT", "twitter.com" to "X",
