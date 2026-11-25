@@ -164,6 +164,9 @@ object CookieRepository {
             .maxByOrNull { if (it.enabled) 1 else 0 }
     }
 
+    /** The site key of a link, as saved sign-ins are matched by. */
+    fun siteOfUrl(url: String): String? = siteKeyOf(hostOf(url))
+
     /** The site a saved set belongs to (registrable domain, aliases folded), or null. */
     fun siteOf(entry: CookieEntry): String? =
         siteKeyOf(hostOf(entry.url)) ?: entry.content.lineSequence().filter { isCookieLine(it) }

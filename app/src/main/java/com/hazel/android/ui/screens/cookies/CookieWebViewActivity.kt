@@ -2,6 +2,8 @@ package com.hazel.android.ui.screens.cookies
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -11,65 +13,86 @@ import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.webkit.WebSettingsCompat
-import androidx.webkit.WebViewFeature
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DesktopWindows
+import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalIconToggleButton
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.toShape
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.lifecycleScope
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
 import com.hazel.android.R
-import com.hazel.android.download.DownloadNotificationHelper
-import com.hazel.android.download.NetworkProxy
-import com.hazel.android.download.WebViewProxy
 import com.hazel.android.data.CookieEntry
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SettingsRepository
+import com.hazel.android.download.DownloadNotificationHelper
+import com.hazel.android.download.NetworkProxy
+import com.hazel.android.download.WebViewProxy
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
 import com.hazel.android.ui.components.HazelLoadingIndicator
+import com.hazel.android.ui.components.MenuTone
+import com.hazel.android.ui.components.ShapeIconButton
 import com.hazel.android.ui.theme.HazelTheme
+import com.hazel.android.ui.theme.sheetButtonColor
+import com.hazel.android.ui.theme.tonalFill
 import com.hazel.android.util.CookieExtractor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -77,7 +100,7 @@ import kotlinx.coroutines.launch
 /**
  * Signs in to a site so its cookies can be handed to yt-dlp.
  *
- * The user logs in exactly as they would in a browser. Confirming with the tick reads the
+ * The user logs in exactly as they would in a browser. Save sign-in reads the
  * cookies the session left behind, stores them under the site's address, and returns
  * [Activity.RESULT_OK] so the caller can retry whatever needed them.
  *
@@ -119,11 +142,13 @@ class CookieWebViewActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @androidx.compose.runtime.Composable
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Composable
     private fun CookieWebViewScreen(url: String, title: String, clearFirst: Boolean) {
-        var pageTitle by remember { mutableStateOf(url) }
-        var progress by remember { mutableStateOf(0) }
+        val siteKey = remember(url) { CookieRepository.siteOfUrl(url) }
+        val siteName = title.ifBlank { SignInBrowser.nameOf(siteKey) ?: url }
+        var currentUrl by remember { mutableStateOf(url) }
+        var progress by remember { mutableIntStateOf(0) }
         // The browser is started once the screen is up, and the loader stays until the
         // first page has something to show.
         var browserReady by remember { mutableStateOf(false) }
@@ -142,191 +167,215 @@ class CookieWebViewActivity : ComponentActivity() {
             browserReady = true
         }
         var desktopMode by remember { mutableStateOf(false) }
+        var textZoom by remember { mutableIntStateOf(100) }
+        var menuOpen by remember { mutableStateOf(false) }
         var saving by remember { mutableStateOf(false) }
+        // Solid once the site has set its login cookie; sites not known are always solid.
+        var signedIn by remember { mutableStateOf(false) }
         // The main page failed to load (offline, refused): shown with Retry instead of a blank page.
         var loadFailed by remember { mutableStateOf(false) }
+        val scheme = MaterialTheme.colorScheme
 
         BackHandler(enabled = true) {
             val view = webView
             if (view != null && view.canGoBack()) view.goBack() else finish()
         }
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    navigationIcon = {
-                        IconButton(onClick = { finish() }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBackIos,
-                                contentDescription = stringResource(R.string.cookie_webview_close)
-                            )
-                        }
-                    },
-                    title = {
-                        Text(
-                            pageTitle,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    },
-                    actions = {
-                        IconButton(onClick = { loadFailed = false; webView?.reload() }) {
-                            Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.cookie_webview_reload))
-                        }
-                        // Filled while on, so the state reads at a glance.
-                        FilledTonalIconToggleButton(
-                            checked = desktopMode,
-                            onCheckedChange = { on ->
-                                desktopMode = on
-                                webView?.let {
-                                    applyDesktopMode(it, on)
-                                    it.reload()
-                                }
-                            }
-                        ) {
-                            Icon(
-                                Icons.Filled.DesktopWindows,
-                                contentDescription = stringResource(R.string.cookie_webview_desktop_site)
-                            )
-                        }
+        fun setDesktop(on: Boolean) {
+            desktopMode = on
+            webView?.let {
+                applyDesktopMode(it, on)
+                it.reload()
+            }
+        }
 
+        Scaffold(
+            containerColor = scheme.background,
+            topBar = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    ShapeIconButton(onClick = { finish() }, size = 46.dp, shape = MaterialShapes.Cookie9Sided.toShape()) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cookies_back))
+                    }
+                    Surface(shape = RoundedCornerShape(22.dp), color = tonalFill(0.6f), modifier = Modifier.weight(1f).heightIn(min = 46.dp)) {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp), verticalArrangement = Arrangement.Center) {
+                            Text(siteName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(
+                                when {
+                                    loadFailed -> stringResource(R.string.cookie_webview_not_loaded)
+                                    desktopMode -> stringResource(R.string.cookie_webview_desktop) + " · " + hostOf(currentUrl)
+                                    else -> hostOf(currentUrl) + pathOf(currentUrl)
+                                },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = scheme.onSurface.copy(alpha = 0.6f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                    ShapeIconButton(onClick = { loadFailed = false; webView?.reload() }, size = 46.dp, shape = MaterialShapes.Cookie6Sided.toShape()) {
+                        Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.cookie_webview_reload))
+                    }
+                    Box {
                         Surface(
-                            onClick = {
-                                if (!saving) {
-                                    saving = true
-                                    saveCookies(url, title) { saving = false }
-                                }
-                            },
-                            enabled = !saving,
-                            shape = RoundedCornerShape(20.dp),
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                            modifier = Modifier.padding(end = 8.dp)
+                            onClick = { menuOpen = true },
+                            shape = RoundedCornerShape(50),
+                            color = if (menuOpen) scheme.primary.copy(alpha = 0.22f) else sheetButtonColor,
+                            contentColor = if (menuOpen) scheme.primary else scheme.onSurface,
+                            modifier = Modifier.size(width = 34.dp, height = 46.dp)
                         ) {
-                            Box(
-                                modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (saving) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(18.dp),
-                                        strokeWidth = 2.dp
-                                    )
-                                } else {
-                                    androidx.compose.foundation.layout.Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            Icons.Filled.Check,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(18.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                        Text(
-                                            stringResource(R.string.cookie_webview_done),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                }
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.cookies_menu))
                             }
                         }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background
-                    )
-                )
+                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.cookie_webview_desktop)) },
+                                icon = Icons.Filled.DesktopWindows,
+                                tone = MenuTone.Accent,
+                                selected = desktopMode,
+                                trailingIcon = { MenuValue(stringResource(if (desktopMode) R.string.cookie_webview_on else R.string.cookie_webview_off)) },
+                                onClick = { menuOpen = false; setDesktop(!desktopMode) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.cookie_webview_text_size)) },
+                                icon = Icons.Filled.FormatSize,
+                                tone = MenuTone.Info,
+                                trailingIcon = { MenuValue("$textZoom%") },
+                                // Steps through the sizes and stays open, so the change shows at once.
+                                onClick = {
+                                    textZoom = TEXT_SIZES[(TEXT_SIZES.indexOf(textZoom) + 1) % TEXT_SIZES.size]
+                                    webView?.settings?.textZoom = textZoom
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.cookie_webview_go_sign_in)) },
+                                icon = Icons.AutoMirrored.Filled.Login,
+                                tone = MenuTone.Neutral,
+                                onClick = { menuOpen = false; loadFailed = false; webView?.loadUrl(SignInBrowser.startUrl(url)) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.cookie_webview_clear_site)) },
+                                icon = Icons.Filled.CleaningServices,
+                                tone = MenuTone.Danger,
+                                onClick = {
+                                    menuOpen = false
+                                    CookieExtractor.clearSite(currentUrl)
+                                    signedIn = false
+                                    Toast.makeText(this@CookieWebViewActivity, R.string.cookie_webview_cleared, Toast.LENGTH_SHORT).show()
+                                    webView?.loadUrl(SignInBrowser.startUrl(url))
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.cookie_webview_copy_address)) },
+                                icon = Icons.Filled.Link,
+                                tone = MenuTone.Neutral,
+                                onClick = {
+                                    menuOpen = false
+                                    (getSystemService(CLIPBOARD_SERVICE) as? ClipboardManager)
+                                        ?.setPrimaryClip(ClipData.newPlainText("Hazel", currentUrl))
+                                    Toast.makeText(this@CookieWebViewActivity, R.string.cookies_toast_exported, Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        }
+                    }
+                }
             }
         ) { innerPadding ->
-            val background = MaterialTheme.colorScheme.background.toArgb()
+            val background = scheme.background.toArgb()
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    if (browserReady) AndroidView(
-                        modifier = Modifier.fillMaxSize(),
-                        factory = { context ->
-                            WebView(context).apply {
-                                configure(this)
-                                // The screen's own tone until the page paints, not a black box.
-                                setBackgroundColor(background)
-                                webViewClient = object : WebViewClient() {
-                                    override fun onReceivedHttpAuthRequest(
-                                        view: WebView?,
-                                        handler: android.webkit.HttpAuthHandler,
-                                        host: String?,
-                                        realm: String?
-                                    ) {
-                                        if (!WebViewProxy.answerAuth(handler, host)) {
-                                            super.onReceivedHttpAuthRequest(view, handler, host, realm)
-                                        }
-                                    }
-
-                                    override fun shouldOverrideUrlLoading(
-                                        view: WebView?,
-                                        request: android.webkit.WebResourceRequest?
-                                    ): Boolean {
-                                        val target = request?.url?.toString()
-                                        if (SignInBrowser.opensInPage(target)) return false
-                                        // An "open the app" link: show the web page it stands for.
-                                        SignInBrowser.webFallback(target)?.let { view?.loadUrl(it) }
-                                        return true
-                                    }
-
-                                    override fun onPageStarted(view: WebView?, startedUrl: String?, favicon: android.graphics.Bitmap?) {
-                                        super.onPageStarted(view, startedUrl, favicon)
-                                        loadFailed = false
-                                    }
-
-                                    override fun onReceivedError(
-                                        view: WebView?,
-                                        request: android.webkit.WebResourceRequest?,
-                                        error: android.webkit.WebResourceError?
-                                    ) {
-                                        super.onReceivedError(view, request, error)
-                                        if (request?.isForMainFrame != true) return
-                                        android.util.Log.w("HazelSignIn", "Page failed: ${error?.errorCode} ${error?.description}")
-                                        loadFailed = true
-                                        firstPaint = true
-                                    }
-
-                                    override fun onRenderProcessGone(
-                                        view: WebView?,
-                                        detail: android.webkit.RenderProcessGoneDetail?
-                                    ): Boolean {
-                                        if (view != null) {
-                                            (view.parent as? android.view.ViewGroup)?.removeView(view)
-                                            view.destroy()
-                                        }
-                                        if (webView === view) webView = null
-                                        // Reclaimed by the system for memory: open again where it was.
-                                        // A real crash is not retried, so it cannot loop.
-                                        if (Build.VERSION.SDK_INT >= 26 && detail?.didCrash() == false) {
-                                            recreate()
-                                        } else {
-                                            Toast.makeText(this@CookieWebViewActivity, R.string.cookie_webview_crashed, Toast.LENGTH_LONG).show()
-                                            finish()
-                                        }
-                                        return true
-                                    }
-
-                                    override fun onPageFinished(view: WebView?, finishedUrl: String?) {
-                                        super.onPageFinished(view, finishedUrl)
-                                        firstPaint = true
-                                        pageTitle = view?.title?.takeIf { it.isNotBlank() }
-                                            ?: finishedUrl.orEmpty()
+                if (browserReady) AndroidView(
+                    modifier = Modifier.fillMaxSize(),
+                    factory = { context ->
+                        WebView(context).apply {
+                            configure(this)
+                            // The screen's own tone until the page paints, not a black box.
+                            setBackgroundColor(background)
+                            webViewClient = object : WebViewClient() {
+                                override fun onReceivedHttpAuthRequest(
+                                    view: WebView?,
+                                    handler: android.webkit.HttpAuthHandler,
+                                    host: String?,
+                                    realm: String?
+                                ) {
+                                    if (!WebViewProxy.answerAuth(handler, host)) {
+                                        super.onReceivedHttpAuthRequest(view, handler, host, realm)
                                     }
                                 }
-                                webChromeClient = object : WebChromeClient() {
-                                    override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                                        progress = newProgress
-                                        if (newProgress >= 100) firstPaint = true
-                                    }
+
+                                override fun shouldOverrideUrlLoading(
+                                    view: WebView?,
+                                    request: android.webkit.WebResourceRequest?
+                                ): Boolean {
+                                    val target = request?.url?.toString()
+                                    if (SignInBrowser.opensInPage(target)) return false
+                                    // An "open the app" link: show the web page it stands for.
+                                    SignInBrowser.webFallback(target)?.let { view?.loadUrl(it) }
+                                    return true
                                 }
-                                webView = this
-                                loadUrl(SignInBrowser.startUrl(url))
+
+                                override fun onPageStarted(view: WebView?, startedUrl: String?, favicon: android.graphics.Bitmap?) {
+                                    super.onPageStarted(view, startedUrl, favicon)
+                                    loadFailed = false
+                                    startedUrl?.let { currentUrl = it }
+                                }
+
+                                override fun onReceivedError(
+                                    view: WebView?,
+                                    request: android.webkit.WebResourceRequest?,
+                                    error: android.webkit.WebResourceError?
+                                ) {
+                                    super.onReceivedError(view, request, error)
+                                    if (request?.isForMainFrame != true) return
+                                    android.util.Log.w("HazelSignIn", "Page failed: ${error?.errorCode} ${error?.description}")
+                                    loadFailed = true
+                                    firstPaint = true
+                                }
+
+                                override fun onRenderProcessGone(
+                                    view: WebView?,
+                                    detail: android.webkit.RenderProcessGoneDetail?
+                                ): Boolean {
+                                    if (view != null) {
+                                        (view.parent as? android.view.ViewGroup)?.removeView(view)
+                                        view.destroy()
+                                    }
+                                    if (webView === view) webView = null
+                                    // Reclaimed by the system for memory: open again where it was.
+                                    // A real crash is not retried, so it cannot loop.
+                                    if (Build.VERSION.SDK_INT >= 26 && detail?.didCrash() == false) {
+                                        recreate()
+                                    } else {
+                                        Toast.makeText(this@CookieWebViewActivity, R.string.cookie_webview_crashed, Toast.LENGTH_LONG).show()
+                                        finish()
+                                    }
+                                    return true
+                                }
+
+                                override fun onPageFinished(view: WebView?, finishedUrl: String?) {
+                                    super.onPageFinished(view, finishedUrl)
+                                    firstPaint = true
+                                    finishedUrl?.let { currentUrl = it }
+                                    signedIn = hasLoginCookie(siteKey)
+                                }
                             }
+                            webChromeClient = object : WebChromeClient() {
+                                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                                    progress = newProgress
+                                    if (newProgress >= 100) firstPaint = true
+                                }
+                            }
+                            webView = this
+                            loadUrl(SignInBrowser.startUrl(url))
                         }
-                    )
-                }
+                    }
+                )
                 // Over the page rather than above it, so the page is not resized while it loads.
                 if (firstPaint && progress in 1..99 && !loadFailed) {
                     LinearProgressIndicator(
@@ -335,20 +384,43 @@ class CookieWebViewActivity : ComponentActivity() {
                     )
                 }
                 if (loadFailed) {
-                    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    Surface(modifier = Modifier.fillMaxSize(), color = scheme.background) {
                         Column(
                             modifier = Modifier.fillMaxSize().padding(32.dp),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clip(MaterialShapes.Cookie9Sided.toShape())
+                                    .background(tonalFill(0.8f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Filled.CloudOff, contentDescription = null, modifier = Modifier.size(32.dp))
+                            }
+                            Spacer(modifier = Modifier.height(14.dp))
                             Text(
                                 stringResource(R.string.cookie_webview_load_failed),
                                 style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                stringResource(R.string.cookie_webview_load_failed_why),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = scheme.onSurface.copy(alpha = 0.65f),
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            FilledTonalButton(onClick = { loadFailed = false; webView?.reload() }) {
-                                Text(stringResource(R.string.history_failed_retry))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                FilledTonalButton(onClick = { setDesktop(!desktopMode) }) {
+                                    Text(stringResource(if (desktopMode) R.string.cookie_webview_mobile else R.string.cookie_webview_desktop))
+                                }
+                                Button(onClick = { loadFailed = false; webView?.reload() }, shape = RoundedCornerShape(16.dp)) {
+                                    Text(stringResource(R.string.history_failed_retry))
+                                }
                             }
                         }
                     }
@@ -356,9 +428,60 @@ class CookieWebViewActivity : ComponentActivity() {
                 if (!firstPaint) {
                     HazelLoadingIndicator(size = 48.dp, modifier = Modifier.align(Alignment.Center))
                 }
+                if (!loadFailed) {
+                    Surface(
+                        onClick = {
+                            if (!saving) {
+                                saving = true
+                                saveCookies(url, title, siteName) { saving = false }
+                            }
+                        },
+                        enabled = !saving,
+                        shape = RoundedCornerShape(28.dp),
+                        color = if (signedIn) scheme.primary else scheme.primary.copy(alpha = 0.45f),
+                        contentColor = scheme.onPrimary,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .navigationBarsPadding()
+                            .padding(end = 16.dp, bottom = 18.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
+                            if (saving) {
+                                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = scheme.onPrimary)
+                            } else {
+                                Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.cookie_webview_save), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
             }
         }
     }
+
+    @Composable
+    private fun MenuValue(text: String) {
+        Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+    }
+
+    /** Whether the WebView holds [site]'s login cookie; true for a site whose cookie is not known. */
+    private fun hasLoginCookie(site: String?): Boolean {
+        val names = site?.let { CookieRepository.LOGIN_COOKIES[it] } ?: return true
+        return runCatching {
+            val manager = CookieManager.getInstance()
+            LOGIN_HOSTS[site].orEmpty().plus(site).any { host ->
+                manager.getCookie("https://$host").orEmpty().split(';')
+                    .any { it.substringBefore('=').trim() in names }
+            }
+        }.getOrDefault(true)
+    }
+
+    private fun hostOf(address: String): String =
+        runCatching { java.net.URI(address).host.orEmpty() }.getOrDefault("").removePrefix("www.")
+
+    private fun pathOf(address: String): String =
+        runCatching { java.net.URI(address).path.orEmpty() }.getOrDefault("").trimEnd('/')
 
     /**
      * Whether web views go through the proxy, or there is none. The setting is read off the
@@ -429,7 +552,7 @@ class CookieWebViewActivity : ComponentActivity() {
         super.onDestroy()
     }
 
-    private fun saveCookies(url: String, title: String, onFailed: () -> Unit) {
+    private fun saveCookies(url: String, title: String, fallbackName: String, onFailed: () -> Unit) {
         lifecycleScope.launch {
             val result = CookieExtractor.extract(this@CookieWebViewActivity, url)
             val content = result.getOrNull()
@@ -447,13 +570,15 @@ class CookieWebViewActivity : ComponentActivity() {
 
             val existing = CookieRepository.getEntries(this@CookieWebViewActivity).first()
                 .firstOrNull { it.url == url && it.title == title }
+            // A new sign-in with no name is named after its site, so no account reads as a bare address.
+            val name = if (existing == null && title.isBlank()) fallbackName else title
 
             CookieRepository.upsert(
                 this@CookieWebViewActivity,
                 CookieEntry(
                     id = existing?.id ?: System.currentTimeMillis(),
                     url = url,
-                    title = title,
+                    title = name,
                     content = content,
                     enabled = true
                 )
@@ -482,6 +607,18 @@ class CookieWebViewActivity : ComponentActivity() {
         /** How long a proxy set a moment ago is given to reach web views: 20 x 100 ms. */
         private const val PROXY_WAIT_STEPS = 20
         private const val PROXY_WAIT_STEP_MS = 100L
+
+        private val TEXT_SIZES = listOf(100, 110, 125, 150, 90)
+
+        /** Hosts a site keeps its login cookie on, besides its own key. */
+        private val LOGIN_HOSTS = mapOf(
+            "twitter.com" to listOf("x.com"),
+            "youtube.com" to listOf("www.youtube.com", "google.com"),
+            "instagram.com" to listOf("www.instagram.com"),
+            "facebook.com" to listOf("www.facebook.com"),
+            "tiktok.com" to listOf("www.tiktok.com"),
+            "reddit.com" to listOf("www.reddit.com")
+        )
 
         /** Intent that opens the sign-in page for [url]. */
         fun intent(context: Context, url: String, title: String = ""): Intent =

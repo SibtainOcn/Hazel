@@ -104,6 +104,25 @@ internal object SignInBrowser {
         "reddit.com" to "https://www.reddit.com/login/"
     )
 
+    /**
+     * A readable name for a site key such as `instagram.com`: the site's own name where
+     * known, else its first label capitalised (`pixiv.net` -> Pixiv).
+     */
+    fun nameOf(site: String?): String? {
+        if (site.isNullOrBlank()) return null
+        return SITE_NAMES[site] ?: site.substringBefore('.').takeIf { it.isNotBlank() }
+            ?.replaceFirstChar { it.titlecase() } ?: site
+    }
+
+    private val SITE_NAMES = mapOf(
+        "instagram.com" to "Instagram", "youtube.com" to "YouTube", "twitter.com" to "X",
+        "facebook.com" to "Facebook", "tiktok.com" to "TikTok", "reddit.com" to "Reddit",
+        "threads.net" to "Threads", "threads.com" to "Threads", "pinterest.com" to "Pinterest",
+        "deviantart.com" to "DeviantArt", "soundcloud.com" to "SoundCloud", "bsky.app" to "Bluesky",
+        "vimeo.com" to "Vimeo", "twitch.tv" to "Twitch", "bilibili.com" to "Bilibili",
+        "nicovideo.jp" to "Niconico", "tumblr.com" to "Tumblr", "patreon.com" to "Patreon"
+    )
+
     /** Sites offered as one-tap sign-ins, as display name and home address. */
     val QUICK_SITES = listOf(
         "Instagram" to "https://www.instagram.com",

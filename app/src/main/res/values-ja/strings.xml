@@ -495,17 +495,11 @@
     <string name="cookies_toast_entry_copied">クリップボードにコピーしました</string>
     <string name="cookies_use_title">Cookieを使用</string>
     <string name="cookies_use_description">保存されたログイン情報をダウンローダーに渡す</string>
-    <string name="cookies_empty_title">保存されたCookieはありません</string>
-    <string name="cookies_empty_body">年齢制限付き、非公開、またはメンバー限定のコンテンツをダウンロードするには追加してください。</string>
-    <string name="cookies_delete_title">Cookieを削除</string>
-    <string name="cookies_delete_body">%1$s の保存済みログイン情報を削除しますか？</string>
-    <string name="cookies_delete_confirm">削除</string>
     <string name="cookies_delete_all_title">すべてのCookieを削除</string>
     <string name="cookies_delete_all_body">保存されたすべてのログイン情報が削除されます。この操作は元に戻せません。</string>
     <string name="cookies_delete_all_confirm">すべて削除</string>
     <string name="cookies_row_fallback_name">Cookie</string>
     <string name="cookies_sheet_copy">Cookieをコピー</string>
-    <string name="cookies_sheet_delete">Cookieを削除</string>
     <string name="cookies_field_title">タイトル</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">保存</string>
@@ -581,11 +575,8 @@
     <string name="queue_adjust_restart_confirm">やり直す</string>
 
     <!-- Sign-in web view -->
-    <string name="cookie_webview_close">閉じる</string>
-    <string name="cookie_webview_desktop_site">PC版サイト</string>
     <string name="cookie_webview_no_cookies">Cookie は取得されませんでした</string>
     <string name="cookie_webview_crashed">サインインページが停止しました。もう一度開いてください。</string>
-    <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->
     <string name="format_selection_change">形式を変更</string>
@@ -603,8 +594,6 @@
     <string name="sheet_link_options">リンクのオプション</string>
     <string name="sheet_link_copied">リンクをコピーしました</string>
     <string name="sheet_link_open_failed">このリンクを開けるアプリがありません</string>
-    <string name="sheet_cookies_site_saved">%1$s にログイン済み</string>
-    <string name="sheet_cookies_site_missing">%1$s のログインは保存されていません</string>
     <string name="batch_search_open">リンクを検索</string>
     <string name="batch_search_hint">これらのリンクを検索</string>
     <string name="batch_search_close">検索を閉じる</string>
@@ -1007,11 +996,8 @@
     <string name="ytdlp_update_failed_text">Hazel は現在のエンジンを維持し、後でもう一度試します</string>
     <string name="cookies_description">一度ログインすれば、年齢制限・非公開・メンバー限定の動画もダウンロードできます。</string>
     <string name="cookies_section_general">全般</string>
-    <string name="cookies_section_add">追加</string>
-    <string name="cookies_section_saved">保存済みのサインイン</string>
     <string name="cookies_add_sign_in">サイトにサインイン</string>
     <string name="cookies_add_sign_in_summary">サイトを開いて Cookie を保存</string>
-    <string name="cookies_add_import_file_summary">ブラウザからエクスポートした Netscape Cookie ファイル</string>
     <string name="cookies_off_hint">ダウンロード時に送るには「Cookie を使用」をオンにしてください。</string>
     <string name="cookies_expires">有効期限 %1$s</string>
     <string name="cookies_expired">期限切れ</string>
@@ -1134,4 +1120,49 @@
     <string name="upd_status_check_failed">確認が完了しませんでした</string>
     <string name="cookie_webview_reload">再読み込み</string>
     <string name="cookie_webview_load_failed">このページを読み込めませんでした</string>
+    <string name="cookie_webview_clear_site">このサイトのデータを消去</string>
+    <string name="cookie_webview_cleared">サイトのデータを消去しました</string>
+    <string name="cookie_webview_copy_address">ページのアドレスをコピー</string>
+    <string name="cookie_webview_desktop">PC表示</string>
+    <string name="cookie_webview_go_sign_in">ログインページへ</string>
+    <string name="cookie_webview_load_failed_why">接続できないか、プロキシに拒否されました</string>
+    <string name="cookie_webview_mobile">モバイル表示</string>
+    <string name="cookie_webview_not_loaded">未読み込み</string>
+    <string name="cookie_webview_off">オフ</string>
+    <string name="cookie_webview_on">オン</string>
+    <string name="cookie_webview_save">ログインを保存</string>
+    <string name="cookie_webview_text_size">文字サイズ</string>
+    <string name="cookies_check">ログインを確認</string>
+    <string name="cookies_check_button">確認</string>
+    <string name="cookies_check_failed">サイトに接続できません</string>
+    <string name="cookies_check_never">未確認</string>
+    <string name="cookies_check_ok">最終確認 %1$s · ログイン中</string>
+    <string name="cookies_check_refused">最終確認 %1$s · サイトがログアウト</string>
+    <string name="cookies_checked">確認 %1$s</string>
+    <string name="cookies_dialog_expired_title">ログイン期限切れ</string>
+    <string name="cookies_dialog_none_saved">保存されたログインなし</string>
+    <string name="cookies_dialog_sub_active">このダウンロードはあなたのアカウントで行われます</string>
+    <string name="cookies_dialog_sub_expired">再ログインするまで %1$s はこのリンクを拒否します</string>
+    <string name="cookies_dialog_sub_none">年齢制限・非公開・メンバー限定のリンクにはアカウントが必要です</string>
+    <string name="cookies_dialog_title">このリンクのログイン</string>
+    <string name="cookies_done">完了</string>
+    <string name="cookies_expired_ago">期限切れ %1$s</string>
+    <string name="cookies_import">インポート</string>
+    <string name="cookies_login_expires">ログインの期限</string>
+    <string name="cookies_no_login">ログインCookieなし</string>
+    <string name="cookies_not_now">後で</string>
+    <string name="cookies_section_accounts">アカウント</string>
+    <string name="cookies_section_quick">クイックログイン</string>
+    <string name="cookies_settings">Cookie設定</string>
+    <string name="cookies_settings_summary">保存したすべてのログイン</string>
+    <string name="cookies_show_summary">保存したCookieを表示・コピー</string>
+    <string name="cookies_sign_in_again_summary">保存したCookieを置き換えます</string>
+    <string name="cookies_sign_out">ログアウト</string>
+    <string name="cookies_sign_out_body">保存したCookieを削除し、ログインページからも消去します。</string>
+    <string name="cookies_sign_out_title">%1$s からログアウトしますか？</string>
+    <string name="cookies_signed_out_by_site">サイトがログアウト</string>
+    <string name="cookies_state_active">有効</string>
+    <string name="cookies_state_signed_out">ログアウト</string>
+    <string name="cookies_use_for_downloads">ダウンロードに使用</string>
+    <string name="cookies_use_for_downloads_summary">オフでも保存はされます</string>
 </resources>
