@@ -1186,5 +1186,5 @@
     <string name="caption_view_full">Ganze Beschriftung zeigen</string>
     <string name="caption_save_choices">Was gespeichert wird</string>
     <string name="caption_only">Nur Beschriftung</string>
-    <string name="caption_with_file">Datei und Beschriftung</string>
+    <string name="caption_with_file">Alle</string>
 </resources>

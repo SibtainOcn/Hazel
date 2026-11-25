@@ -1169,5 +1169,5 @@
     <string name="caption_view_full">Lihat keterangan lengkap</string>
     <string name="caption_save_choices">Yang disimpan</string>
     <string name="caption_only">Hanya keterangan</string>
-    <string name="caption_with_file">File dan keterangan</string>
+    <string name="caption_with_file">Semua</string>
 </resources>

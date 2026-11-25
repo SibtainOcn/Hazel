@@ -1169,5 +1169,5 @@
     <string name="caption_view_full">キャプションをすべて表示</string>
     <string name="caption_save_choices">保存する内容</string>
     <string name="caption_only">キャプションのみ</string>
-    <string name="caption_with_file">ファイルとキャプション</string>
+    <string name="caption_with_file">すべて</string>
 </resources>

@@ -1243,5 +1243,5 @@
     <string name="caption_view_full">Show full caption</string>
     <string name="caption_save_choices">What to save</string>
     <string name="caption_only">Caption only</string>
-    <string name="caption_with_file">File and caption</string>
+    <string name="caption_with_file">All</string>
 </resources>

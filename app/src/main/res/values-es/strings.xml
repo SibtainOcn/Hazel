@@ -1203,5 +1203,5 @@
     <string name="caption_view_full">Ver descripción completa</string>
     <string name="caption_save_choices">Qué guardar</string>
     <string name="caption_only">Solo descripción</string>
-    <string name="caption_with_file">Archivo y descripción</string>
+    <string name="caption_with_file">Todo</string>
 </resources>

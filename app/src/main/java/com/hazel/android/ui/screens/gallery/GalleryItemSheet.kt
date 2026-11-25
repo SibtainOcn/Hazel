@@ -1,6 +1,5 @@
 package com.hazel.android.ui.screens.gallery
 
-import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Surface
 import androidx.compose.material3.DropdownMenuItem
@@ -65,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -554,14 +554,14 @@ private fun CaptionField(caption: String, color: androidx.compose.ui.graphics.Co
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    caption,
+                    caption.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty(),
                     style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
             }
             androidx.compose.material3.IconButton(onClick = onOpen) {
-                Icon(Icons.Filled.OpenInFull, contentDescription = stringResource(R.string.caption_view_full))
+                Icon(painterResource(R.drawable.ic_expand_all), contentDescription = stringResource(R.string.caption_view_full))
             }
         }
     }
