@@ -1141,9 +1141,6 @@
     <string name="cookies_checked">Diperiksa %1$s</string>
     <string name="cookies_dialog_expired_title">Login kedaluwarsa</string>
     <string name="cookies_dialog_none_saved">Tidak ada login tersimpan</string>
-    <string name="cookies_dialog_sub_active">Unduhan ini memakai akun Anda</string>
-    <string name="cookies_dialog_sub_expired">%1$s akan menolak tautan ini sampai Anda masuk lagi</string>
-    <string name="cookies_dialog_sub_none">Beberapa tautan perlu akun: dibatasi usia, privat, atau khusus anggota</string>
     <string name="cookies_dialog_title">Login untuk tautan ini</string>
     <string name="cookies_done">Selesai</string>
     <string name="cookies_expired_ago">Kedaluwarsa %1$s</string>
@@ -1154,7 +1151,6 @@
     <string name="cookies_section_accounts">Akun</string>
     <string name="cookies_section_quick">Masuk cepat</string>
     <string name="cookies_settings">Pengaturan cookie</string>
-    <string name="cookies_settings_summary">Semua login tersimpan</string>
     <string name="cookies_show_summary">Lihat atau salin cookie</string>
     <string name="cookies_sign_in_again_summary">Mengganti cookie tersimpan</string>
     <string name="cookies_sign_out">Keluar</string>
@@ -1165,4 +1161,5 @@
     <string name="cookies_state_signed_out">Keluar</string>
     <string name="cookies_use_for_downloads">Pakai untuk unduhan</string>
     <string name="cookies_use_for_downloads_summary">Mati: tetap tersimpan tapi tidak dipakai</string>
+    <string name="cookies_dialog_sub">Beberapa sumber hanya bisa diunduh setelah masuk</string>
 </resources>

@@ -1158,9 +1158,6 @@
     <string name="cookies_checked">जाँचा %1$s</string>
     <string name="cookies_dialog_expired_title">साइन-इन की अवधि ख़त्म</string>
     <string name="cookies_dialog_none_saved">कोई साइन-इन सेव नहीं</string>
-    <string name="cookies_dialog_sub_active">यह डाउनलोड आपके खाते से होगा</string>
-    <string name="cookies_dialog_sub_expired">दोबारा साइन इन करने तक %1$s यह लिंक नहीं खोलेगा</string>
-    <string name="cookies_dialog_sub_none">कुछ लिंक के लिए खाता चाहिए: उम्र-सीमित, निजी या सिर्फ़ सदस्यों के लिए</string>
     <string name="cookies_dialog_title">इस लिंक के लिए साइन-इन</string>
     <string name="cookies_done">हो गया</string>
     <string name="cookies_expired_ago">ख़त्म %1$s</string>
@@ -1171,7 +1168,6 @@
     <string name="cookies_section_accounts">खाते</string>
     <string name="cookies_section_quick">झटपट साइन-इन</string>
     <string name="cookies_settings">कुकी सेटिंग</string>
-    <string name="cookies_settings_summary">सभी सेव साइन-इन</string>
     <string name="cookies_show_summary">सेव कुकी देखें या कॉपी करें</string>
     <string name="cookies_sign_in_again_summary">सेव कुकी उसी जगह बदलता है</string>
     <string name="cookies_sign_out">साइन आउट</string>
@@ -1182,4 +1178,5 @@
     <string name="cookies_state_signed_out">साइन आउट</string>
     <string name="cookies_use_for_downloads">डाउनलोड के लिए उपयोग</string>
     <string name="cookies_use_for_downloads_summary">बंद होने पर सेव रहेगा, उपयोग नहीं होगा</string>
+    <string name="cookies_dialog_sub">कुछ स्रोत साइन-इन के बिना डाउनलोड नहीं होते</string>
 </resources>

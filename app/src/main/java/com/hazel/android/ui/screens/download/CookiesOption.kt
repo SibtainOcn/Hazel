@@ -167,11 +167,7 @@ internal fun CookiesDialogContent(
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Text(
-                    when {
-                        expired -> stringResource(R.string.cookies_dialog_sub_expired, siteName.orEmpty())
-                        status.state == AccountState.ACTIVE -> stringResource(R.string.cookies_dialog_sub_active)
-                        else -> stringResource(R.string.cookies_dialog_sub_none)
-                    },
+                    stringResource(R.string.cookies_dialog_sub),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = scheme.onSurface.copy(alpha = 0.7f),
@@ -199,16 +195,9 @@ internal fun CookiesDialogContent(
                     add {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 12.dp, top = 10.dp, bottom = 10.dp)
+                            modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 12.dp, top = 6.dp, bottom = 6.dp)
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(stringResource(R.string.cookies_use_title), fontWeight = FontWeight.Medium)
-                                Text(
-                                    stringResource(R.string.cookies_use_description),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = scheme.onSurface.copy(alpha = 0.6f)
-                                )
-                            }
+                            Text(stringResource(R.string.cookies_use_title), fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
                             Spacer(modifier = Modifier.width(10.dp))
                             Switch(checked = useCookies, onCheckedChange = onUseCookies)
                         }
@@ -218,29 +207,22 @@ internal fun CookiesDialogContent(
                 Spacer(modifier = Modifier.height(10.dp))
                 Surface(
                     onClick = onOpenSettings,
-                    shape = RoundedCornerShape(22.dp),
+                    shape = RoundedCornerShape(20.dp),
                     color = tonalFill(0.5f),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
+                                .size(32.dp)
                                 .clip(MaterialShapes.Cookie6Sided.toShape())
                                 .background(scheme.primary.copy(alpha = 0.14f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Filled.Tune, contentDescription = null, tint = scheme.primary, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Filled.Tune, contentDescription = null, tint = scheme.primary, modifier = Modifier.size(18.dp))
                         }
                         Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(stringResource(R.string.cookies_settings), fontWeight = FontWeight.SemiBold)
-                            Text(
-                                stringResource(R.string.cookies_settings_summary),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = scheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
+                        Text(stringResource(R.string.cookies_settings), fontWeight = FontWeight.SemiBold)
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))

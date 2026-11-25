@@ -1175,9 +1175,6 @@
     <string name="cookies_checked">Comprobada %1$s</string>
     <string name="cookies_dialog_expired_title">Sesión caducada</string>
     <string name="cookies_dialog_none_saved">No hay sesión guardada</string>
-    <string name="cookies_dialog_sub_active">Esta descarga usa tu cuenta</string>
-    <string name="cookies_dialog_sub_expired">%1$s rechazará este enlace hasta que vuelvas a iniciar sesión</string>
-    <string name="cookies_dialog_sub_none">Algunos enlaces necesitan una cuenta: con restricción de edad, privados o solo para miembros</string>
     <string name="cookies_dialog_title">Sesión para este enlace</string>
     <string name="cookies_done">Listo</string>
     <string name="cookies_expired_ago">Caducó %1$s</string>
@@ -1188,7 +1185,6 @@
     <string name="cookies_section_accounts">Cuentas</string>
     <string name="cookies_section_quick">Inicio rápido</string>
     <string name="cookies_settings">Ajustes de cookies</string>
-    <string name="cookies_settings_summary">Todas las sesiones guardadas</string>
     <string name="cookies_show_summary">Ver o copiar las cookies</string>
     <string name="cookies_sign_in_again_summary">Reemplaza las cookies guardadas</string>
     <string name="cookies_sign_out">Cerrar sesión</string>
@@ -1199,4 +1195,5 @@
     <string name="cookies_state_signed_out">Sin sesión</string>
     <string name="cookies_use_for_downloads">Usar para descargas</string>
     <string name="cookies_use_for_downloads_summary">Desactivada se guarda pero no se usa</string>
+    <string name="cookies_dialog_sub">Algunas fuentes solo se descargan con sesión iniciada</string>
 </resources>

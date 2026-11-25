@@ -1191,9 +1191,6 @@
     <string name="cookies_checked">Проверено %1$s</string>
     <string name="cookies_dialog_expired_title">Вход истёк</string>
     <string name="cookies_dialog_none_saved">Вход не сохранён</string>
-    <string name="cookies_dialog_sub_active">Эта загрузка идёт от вашего аккаунта</string>
-    <string name="cookies_dialog_sub_expired">%1$s отклонит ссылку, пока вы не войдёте снова</string>
-    <string name="cookies_dialog_sub_none">Некоторым ссылкам нужен аккаунт: возрастные, приватные или для участников</string>
     <string name="cookies_dialog_title">Вход для этой ссылки</string>
     <string name="cookies_done">Готово</string>
     <string name="cookies_expired_ago">Истёк %1$s</string>
@@ -1204,7 +1201,6 @@
     <string name="cookies_section_accounts">Аккаунты</string>
     <string name="cookies_section_quick">Быстрый вход</string>
     <string name="cookies_settings">Настройки cookie</string>
-    <string name="cookies_settings_summary">Все сохранённые входы</string>
     <string name="cookies_show_summary">Просмотр или копирование cookie</string>
     <string name="cookies_sign_in_again_summary">Заменяет сохранённые cookie</string>
     <string name="cookies_sign_out">Выйти</string>
@@ -1215,4 +1211,5 @@
     <string name="cookies_state_signed_out">Не выполнен</string>
     <string name="cookies_use_for_downloads">Для загрузок</string>
     <string name="cookies_use_for_downloads_summary">Выкл: хранится, но не используется</string>
+    <string name="cookies_dialog_sub">Некоторые источники скачиваются только после входа</string>
 </resources>

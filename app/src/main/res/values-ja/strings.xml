@@ -1141,9 +1141,6 @@
     <string name="cookies_checked">確認 %1$s</string>
     <string name="cookies_dialog_expired_title">ログイン期限切れ</string>
     <string name="cookies_dialog_none_saved">保存されたログインなし</string>
-    <string name="cookies_dialog_sub_active">このダウンロードはあなたのアカウントで行われます</string>
-    <string name="cookies_dialog_sub_expired">再ログインするまで %1$s はこのリンクを拒否します</string>
-    <string name="cookies_dialog_sub_none">年齢制限・非公開・メンバー限定のリンクにはアカウントが必要です</string>
     <string name="cookies_dialog_title">このリンクのログイン</string>
     <string name="cookies_done">完了</string>
     <string name="cookies_expired_ago">期限切れ %1$s</string>
@@ -1154,7 +1151,6 @@
     <string name="cookies_section_accounts">アカウント</string>
     <string name="cookies_section_quick">クイックログイン</string>
     <string name="cookies_settings">Cookie設定</string>
-    <string name="cookies_settings_summary">保存したすべてのログイン</string>
     <string name="cookies_show_summary">保存したCookieを表示・コピー</string>
     <string name="cookies_sign_in_again_summary">保存したCookieを置き換えます</string>
     <string name="cookies_sign_out">ログアウト</string>
@@ -1165,4 +1161,5 @@
     <string name="cookies_state_signed_out">ログアウト</string>
     <string name="cookies_use_for_downloads">ダウンロードに使用</string>
     <string name="cookies_use_for_downloads_summary">オフでも保存はされます</string>
+    <string name="cookies_dialog_sub">一部のソースはログインしないとダウンロードできません</string>
 </resources>

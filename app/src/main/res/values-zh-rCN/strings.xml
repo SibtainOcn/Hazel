@@ -1141,9 +1141,6 @@
     <string name="cookies_checked">已检查 %1$s</string>
     <string name="cookies_dialog_expired_title">登录已过期</string>
     <string name="cookies_dialog_none_saved">未保存登录</string>
-    <string name="cookies_dialog_sub_active">此下载将以你的账号进行</string>
-    <string name="cookies_dialog_sub_expired">重新登录前，%1$s 会拒绝此链接</string>
-    <string name="cookies_dialog_sub_none">部分链接需要账号：年龄限制、私密或会员专享</string>
     <string name="cookies_dialog_title">此链接的登录</string>
     <string name="cookies_done">完成</string>
     <string name="cookies_expired_ago">已过期 %1$s</string>
@@ -1154,7 +1151,6 @@
     <string name="cookies_section_accounts">账号</string>
     <string name="cookies_section_quick">快速登录</string>
     <string name="cookies_settings">Cookie 设置</string>
-    <string name="cookies_settings_summary">所有已保存的登录</string>
     <string name="cookies_show_summary">查看或复制已保存的 Cookie</string>
     <string name="cookies_sign_in_again_summary">原地替换已保存的 Cookie</string>
     <string name="cookies_sign_out">退出登录</string>
@@ -1165,4 +1161,5 @@
     <string name="cookies_state_signed_out">已退出</string>
     <string name="cookies_use_for_downloads">用于下载</string>
     <string name="cookies_use_for_downloads_summary">关闭后仍保存但不使用</string>
+    <string name="cookies_dialog_sub">部分来源需要登录才能下载</string>
 </resources>

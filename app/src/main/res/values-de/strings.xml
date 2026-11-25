@@ -1158,9 +1158,6 @@
     <string name="cookies_checked">Geprüft %1$s</string>
     <string name="cookies_dialog_expired_title">Anmeldung abgelaufen</string>
     <string name="cookies_dialog_none_saved">Keine Anmeldung gespeichert</string>
-    <string name="cookies_dialog_sub_active">Dieser Download erfolgt mit deinem Konto</string>
-    <string name="cookies_dialog_sub_expired">%1$s lehnt diesen Link ab, bis du dich neu anmeldest</string>
-    <string name="cookies_dialog_sub_none">Manche Links brauchen ein Konto: altersbeschränkt, privat oder nur für Mitglieder</string>
     <string name="cookies_dialog_title">Anmeldung für diesen Link</string>
     <string name="cookies_done">Fertig</string>
     <string name="cookies_expired_ago">Abgelaufen %1$s</string>
@@ -1171,7 +1168,6 @@
     <string name="cookies_section_accounts">Konten</string>
     <string name="cookies_section_quick">Schnell anmelden</string>
     <string name="cookies_settings">Cookie-Einstellungen</string>
-    <string name="cookies_settings_summary">Alle gespeicherten Anmeldungen</string>
     <string name="cookies_show_summary">Gespeicherte Cookies ansehen oder kopieren</string>
     <string name="cookies_sign_in_again_summary">Ersetzt die gespeicherten Cookies</string>
     <string name="cookies_sign_out">Abmelden</string>
@@ -1182,4 +1178,5 @@
     <string name="cookies_state_signed_out">Abgemeldet</string>
     <string name="cookies_use_for_downloads">Für Downloads verwenden</string>
     <string name="cookies_use_for_downloads_summary">Aus: bleibt gespeichert, wird nicht genutzt</string>
+    <string name="cookies_dialog_sub">Manche Quellen laden nur mit Anmeldung</string>
 </resources>

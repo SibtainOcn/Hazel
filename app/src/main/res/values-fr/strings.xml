@@ -1175,9 +1175,6 @@
     <string name="cookies_checked">Vérifiée %1$s</string>
     <string name="cookies_dialog_expired_title">Connexion expirée</string>
     <string name="cookies_dialog_none_saved">Aucune connexion enregistrée</string>
-    <string name="cookies_dialog_sub_active">Ce téléchargement utilise votre compte</string>
-    <string name="cookies_dialog_sub_expired">%1$s refusera ce lien tant que vous ne vous reconnectez pas</string>
-    <string name="cookies_dialog_sub_none">Certains liens exigent un compte : limite d\'âge, privé ou réservé aux membres</string>
     <string name="cookies_dialog_title">Connexion pour ce lien</string>
     <string name="cookies_done">OK</string>
     <string name="cookies_expired_ago">Expirée %1$s</string>
@@ -1188,7 +1185,6 @@
     <string name="cookies_section_accounts">Comptes</string>
     <string name="cookies_section_quick">Connexion rapide</string>
     <string name="cookies_settings">Paramètres des cookies</string>
-    <string name="cookies_settings_summary">Toutes les connexions enregistrées</string>
     <string name="cookies_show_summary">Voir ou copier les cookies</string>
     <string name="cookies_sign_in_again_summary">Remplace les cookies enregistrés</string>
     <string name="cookies_sign_out">Se déconnecter</string>
@@ -1199,4 +1195,5 @@
     <string name="cookies_state_signed_out">Déconnecté</string>
     <string name="cookies_use_for_downloads">Utiliser pour les téléchargements</string>
     <string name="cookies_use_for_downloads_summary">Désactivé : gardé mais non utilisé</string>
+    <string name="cookies_dialog_sub">Certaines sources ne se téléchargent qu\'avec une connexion</string>
 </resources>
