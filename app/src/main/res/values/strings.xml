@@ -1206,6 +1206,8 @@
     <string name="upd_failure_unknown">The update couldn\'t be completed (%1$s). Please try again in a moment.</string>
     <string name="upd_status_update_failed">Update couldn\'t finish</string>
     <string name="upd_status_check_failed">Check couldn\'t finish</string>
+    <string name="cookie_webview_reload">Reload</string>
+    <string name="cookie_webview_load_failed">This page could not load</string>
     <string name="gallery_dl_update_available_title">gallery-dl %1$s is available</string>
     <string name="gallery_dl_update_available_text">Open Hazel to update the image engine</string>
     <string name="gallery_dl_update_installed_title">gallery-dl updated to %1$s</string>

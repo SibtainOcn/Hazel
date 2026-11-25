@@ -1149,6 +1149,8 @@
     <string name="upd_failure_unknown">अपडेट पूरा नहीं हो सका (%1$s)। थोड़ी देर में फिर कोशिश करें।</string>
     <string name="upd_status_update_failed">अपडेट पूरा नहीं हुआ</string>
     <string name="upd_status_check_failed">जाँच पूरी नहीं हुई</string>
+    <string name="cookie_webview_reload">फिर से लोड करें</string>
+    <string name="cookie_webview_load_failed">यह पेज लोड नहीं हो सका</string>
     <string name="gallery_dl_update_available_title">gallery-dl %1$s उपलब्ध है</string>
     <string name="gallery_dl_update_available_text">इमेज इंजन अपडेट करने के लिए Hazel खोलें</string>
     <string name="gallery_dl_update_installed_title">gallery-dl %1$s पर अपडेट हुआ</string>

@@ -1182,6 +1182,8 @@
     <string name="upd_failure_unknown">Не удалось завершить обновление (%1$s). Попробуйте снова чуть позже.</string>
     <string name="upd_status_update_failed">Обновление не завершено</string>
     <string name="upd_status_check_failed">Проверка не завершена</string>
+    <string name="cookie_webview_reload">Обновить</string>
+    <string name="cookie_webview_load_failed">Не удалось загрузить страницу</string>
     <string name="gallery_dl_update_available_title">Доступен gallery-dl %1$s</string>
     <string name="gallery_dl_update_available_text">Откройте Hazel, чтобы обновить движок изображений</string>
     <string name="gallery_dl_update_installed_title">gallery-dl обновлён до %1$s</string>
