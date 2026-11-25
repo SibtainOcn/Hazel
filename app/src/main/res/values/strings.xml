@@ -322,6 +322,8 @@
     <string name="cleanup_category_link_data_description">Player data yt-dlp keeps so a link read a second time is faster. Safe to clear.</string>
     <string name="cleanup_category_partial_downloads_label">Unfinished downloads</string>
     <string name="cleanup_category_partial_downloads_description">Pieces left by downloads that were cancelled or failed.</string>
+    <string name="cleanup_category_gallery_label">Gallery files</string>
+    <string name="cleanup_category_gallery_description">Work folders, cache and logs left by gallery downloads.</string>
     <string name="cleanup_category_conversions_label">Unfinished conversions</string>
     <string name="cleanup_category_conversions_description">Leftover working files from the audio converter.</string>
     <string name="cleanup_category_other_cache_label">Other cached files</string>
@@ -788,6 +790,7 @@
     <string name="gallery_settings_clear_record_done">Download record cleared</string>
     <string name="gallery_settings_clear_record_failed">Couldn\'t clear the download record</string>
     <string name="gallery_settings_clear_record_busy">A download is running. Try again after it finishes</string>
+    <string name="gallery_view_log">View log</string>
     <string name="gallery_settings_profiles">Profiles</string>
     <string name="gallery_settings_instagram_sections">Instagram sections</string>
     <string name="gallery_settings_instagram_sections_value">Posts, reels, stories, highlights, tagged</string>

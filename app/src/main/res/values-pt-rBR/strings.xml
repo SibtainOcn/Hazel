@@ -314,6 +314,8 @@
     <string name="cleanup_category_link_data_description">Dados do reprodutor que o yt-dlp guarda para que um link lido uma segunda vez seja mais rápido. Pode limpar sem risco.</string>
     <string name="cleanup_category_partial_downloads_label">Downloads incompletos</string>
     <string name="cleanup_category_partial_downloads_description">Sobras de downloads cancelados ou que falharam.</string>
+    <string name="cleanup_category_gallery_label">Arquivos da galeria</string>
+    <string name="cleanup_category_gallery_description">Pastas de trabalho, cache e registros dos downloads da galeria.</string>
     <string name="cleanup_category_conversions_label">Conversões incompletas</string>
     <string name="cleanup_category_conversions_description">Arquivos de trabalho que sobraram do conversor de áudio.</string>
     <string name="cleanup_category_other_cache_label">Outros arquivos em cache</string>
@@ -723,6 +725,7 @@
     <string name="gallery_settings_clear_record_done">Registro de downloads limpo</string>
     <string name="gallery_settings_clear_record_failed">Não foi possível limpar o registro de downloads</string>
     <string name="gallery_settings_clear_record_busy">Há um download em andamento. Tente de novo quando terminar</string>
+    <string name="gallery_view_log">Ver registro</string>
     <string name="gallery_settings_profiles">Perfis</string>
     <string name="gallery_settings_instagram_sections">Seções do Instagram</string>
     <string name="gallery_settings_instagram_sections_value">Publicações, reels, stories, destaques, marcações</string>

@@ -318,6 +318,8 @@
     <string name="cleanup_category_link_data_description">Данные плеера yt-dlp для ускорения повторного чтения ссылок. Можно безопасно очистить.</string>
     <string name="cleanup_category_partial_downloads_label">Незавершённые загрузки</string>
     <string name="cleanup_category_partial_downloads_description">Остатки отменённых или неудачных загрузок.</string>
+    <string name="cleanup_category_gallery_label">Файлы галереи</string>
+    <string name="cleanup_category_gallery_description">Рабочие папки, кэш и журналы загрузок галереи.</string>
     <string name="cleanup_category_conversions_label">Незавершённые конвертации</string>
     <string name="cleanup_category_conversions_description">Оставшиеся рабочие файлы аудиоконвертера.</string>
     <string name="cleanup_category_other_cache_label">Прочий кэш</string>
@@ -737,6 +739,7 @@
     <string name="gallery_settings_clear_record_done">Журнал загрузок очищен</string>
     <string name="gallery_settings_clear_record_failed">Не удалось очистить журнал загрузок</string>
     <string name="gallery_settings_clear_record_busy">Идёт загрузка. Повторите после её завершения</string>
+    <string name="gallery_view_log">Открыть журнал</string>
     <string name="gallery_settings_profiles">Профили</string>
     <string name="gallery_settings_instagram_sections">Разделы Instagram</string>
     <string name="gallery_settings_instagram_sections_value">Публикации, Reels, истории, актуальное, отметки</string>

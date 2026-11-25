@@ -306,6 +306,8 @@
     <string name="cleanup_category_link_data_description">同じリンクを再度開く際の高速化のために保持されているデータです。安全に消去できます。</string>
     <string name="cleanup_category_partial_downloads_label">未完了のダウンロード</string>
     <string name="cleanup_category_partial_downloads_description">キャンセルまたは失敗したダウンロードの残り。</string>
+    <string name="cleanup_category_gallery_label">ギャラリーのファイル</string>
+    <string name="cleanup_category_gallery_description">ギャラリーのダウンロードが残した作業フォルダ、キャッシュ、ログ。</string>
     <string name="cleanup_category_conversions_label">未完了の変換</string>
     <string name="cleanup_category_conversions_description">オーディオ変換で残った作業ファイル。</string>
     <string name="cleanup_category_other_cache_label">その他のキャッシュファイル</string>
@@ -695,6 +697,7 @@
     <string name="gallery_settings_clear_record_done">ダウンロード記録を消去しました</string>
     <string name="gallery_settings_clear_record_failed">ダウンロード記録を消去できませんでした</string>
     <string name="gallery_settings_clear_record_busy">ダウンロード中です。終わってからもう一度お試しください</string>
+    <string name="gallery_view_log">ログを表示</string>
     <string name="gallery_settings_profiles">プロフィール</string>
     <string name="gallery_settings_instagram_sections">Instagram のセクション</string>
     <string name="gallery_settings_instagram_sections_value">投稿、リール、ストーリーズ、ハイライト、タグ付け</string>

@@ -310,6 +310,8 @@
     <string name="cleanup_category_link_data_description">प्लेयर का वह डेटा जो yt-dlp रखता है ताकि दोबारा पढ़ा गया लिंक जल्दी खुले। मिटाना सुरक्षित है।</string>
     <string name="cleanup_category_partial_downloads_label">अधूरे डाउनलोड</string>
     <string name="cleanup_category_partial_downloads_description">रद्द या विफल डाउनलोड के बचे हिस्से।</string>
+    <string name="cleanup_category_gallery_label">गैलरी फ़ाइलें</string>
+    <string name="cleanup_category_gallery_description">गैलरी डाउनलोड के वर्क फ़ोल्डर, कैश और लॉग।</string>
     <string name="cleanup_category_conversions_label">अधूरे रूपांतरण</string>
     <string name="cleanup_category_conversions_description">ऑडियो कन्वर्टर की बची हुई कार्य फ़ाइलें।</string>
     <string name="cleanup_category_other_cache_label">अन्य कैश की गई फ़ाइलें</string>
@@ -709,6 +711,7 @@
     <string name="gallery_settings_clear_record_done">डाउनलोड रिकॉर्ड मिटा दिया गया</string>
     <string name="gallery_settings_clear_record_failed">डाउनलोड रिकॉर्ड मिटाया नहीं जा सका</string>
     <string name="gallery_settings_clear_record_busy">एक डाउनलोड चल रहा है। उसके पूरा होने के बाद फिर कोशिश करें</string>
+    <string name="gallery_view_log">लॉग देखें</string>
     <string name="gallery_settings_profiles">प्रोफ़ाइल</string>
     <string name="gallery_settings_instagram_sections">Instagram सेक्शन</string>
     <string name="gallery_settings_instagram_sections_value">पोस्ट, रील, स्टोरी, हाइलाइट, टैग किए गए</string>
