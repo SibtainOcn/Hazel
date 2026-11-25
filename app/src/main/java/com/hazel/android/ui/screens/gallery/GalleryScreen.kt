@@ -29,7 +29,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -67,7 +66,7 @@ import com.hazel.android.gallery.queue.GalleryDownloadRequest
 import com.hazel.android.gallery.queue.GalleryQueue
 import com.hazel.android.ui.components.BetaTag
 import com.hazel.android.ui.components.EmptyState
-import com.hazel.android.ui.components.HazelLoadingIndicator
+import com.hazel.android.ui.components.ResultsSkeleton
 import com.hazel.android.ui.screens.download.DownloadAllButton
 import com.hazel.android.ui.screens.download.FailureKind
 import com.hazel.android.ui.screens.download.NoResultsDialog
@@ -98,7 +97,7 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     var openPost by mutableStateOf<Int?>(null)
         private set
     var busy by mutableStateOf(false)
-        private set
+        internal set
     var notice by mutableStateOf<GalleryNotice?>(null)
         private set
     /** The last failed run, for the log sheet. */
@@ -196,9 +195,6 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun stop() {
-        job?.cancel()
-    }
 
     /** Runs the failed request again. */
     fun retry() {
@@ -283,16 +279,8 @@ fun GalleryScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             when {
-                viewModel.busy && viewModel.posts.isEmpty() -> Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        HazelLoadingIndicator(size = 48.dp)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        FilledTonalButton(onClick = viewModel::stop) { Text(stringResource(R.string.gallery_stop)) }
-                    }
-                }
+                viewModel.busy && viewModel.posts.isEmpty() ->
+                    ResultsSkeleton(modifier = Modifier.fillMaxWidth().weight(1f))
                 viewModel.posts.isEmpty() -> Box(
                     modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 32.dp),
                     contentAlignment = Alignment.Center
