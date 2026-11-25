@@ -15,6 +15,23 @@
     <string name="nav_home">Home</string>
     <string name="nav_history">Downloads</string>
     <string name="nav_more">More</string>
+    <string name="nav_gallery">Gallery</string>
+    <string name="gallery_paste_hint">Paste a post link</string>
+    <string name="gallery_get">Get post</string>
+    <string name="gallery_stop">Stop</string>
+    <string name="gallery_download">Download</string>
+    <string name="gallery_download_all">Download all</string>
+    <string name="gallery_image">Image</string>
+    <string name="gallery_video">Video</string>
+    <string name="gallery_found">%1$d items found in %2$s s</string>
+    <string name="gallery_saved">%1$d saved to Download/Hazel/Gallery in %2$s s</string>
+    <string name="gallery_failed">Could not read this post</string>
+    <string name="gallery_empty">No files in this post</string>
+    <string name="gallery_error_login">Sign in to this site under Cookies, then try again</string>
+    <string name="gallery_error_unsupported">Gallery can\'t read this link</string>
+    <string name="gallery_error_not_found">This post is gone, private or empty</string>
+    <string name="gallery_error_network">Couldn\'t connect. Check the network or proxy</string>
+    <string name="gallery_error_setup">Gallery couldn\'t start on this device</string>
     <string name="nav_incognito_on">Incognito on, downloads are not recorded</string>
     <string name="nav_incognito_off">Incognito off</string>
 

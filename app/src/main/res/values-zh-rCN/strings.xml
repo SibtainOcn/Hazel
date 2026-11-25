@@ -4,6 +4,23 @@
     <string name="nav_home">首页</string>
     <string name="nav_history">下载</string>
     <string name="nav_more">更多</string>
+    <string name="nav_gallery">图库</string>
+    <string name="gallery_paste_hint">粘贴帖子链接</string>
+    <string name="gallery_get">获取帖子</string>
+    <string name="gallery_stop">停止</string>
+    <string name="gallery_download">下载</string>
+    <string name="gallery_download_all">全部下载</string>
+    <string name="gallery_image">图片</string>
+    <string name="gallery_video">视频</string>
+    <string name="gallery_found">%2$s 秒内找到 %1$d 项</string>
+    <string name="gallery_saved">%2$s 秒内已将 %1$d 项保存到 Download/Hazel/Gallery</string>
+    <string name="gallery_failed">无法读取此帖子</string>
+    <string name="gallery_empty">此帖子中没有文件</string>
+    <string name="gallery_error_login">请在 Cookies 中登录此网站后重试</string>
+    <string name="gallery_error_unsupported">图库无法读取此链接</string>
+    <string name="gallery_error_not_found">帖子已删除、私密或为空</string>
+    <string name="gallery_error_network">无法连接。请检查网络或代理</string>
+    <string name="gallery_error_setup">图库无法在此设备上启动</string>
     <string name="nav_incognito_on">无痕模式已开启，下载不会被记录</string>
     <string name="nav_incognito_off">无痕模式已关闭</string>
 

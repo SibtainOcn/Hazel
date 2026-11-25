@@ -4,6 +4,23 @@
     <string name="nav_home">Inicio</string>
     <string name="nav_history">Descargas</string>
     <string name="nav_more">Más</string>
+    <string name="nav_gallery">Galería</string>
+    <string name="gallery_paste_hint">Pega el enlace de una publicación</string>
+    <string name="gallery_get">Obtener publicación</string>
+    <string name="gallery_stop">Detener</string>
+    <string name="gallery_download">Descargar</string>
+    <string name="gallery_download_all">Descargar todo</string>
+    <string name="gallery_image">Imagen</string>
+    <string name="gallery_video">Vídeo</string>
+    <string name="gallery_found">%1$d elementos encontrados en %2$s s</string>
+    <string name="gallery_saved">%1$d guardados en Download/Hazel/Gallery en %2$s s</string>
+    <string name="gallery_failed">No se pudo leer esta publicación</string>
+    <string name="gallery_empty">Esta publicación no tiene archivos</string>
+    <string name="gallery_error_login">Inicia sesión en este sitio en Cookies y vuelve a intentarlo</string>
+    <string name="gallery_error_unsupported">Galería no puede leer este enlace</string>
+    <string name="gallery_error_not_found">La publicación ya no existe, es privada o está vacía</string>
+    <string name="gallery_error_network">Sin conexión. Revisa la red o el proxy</string>
+    <string name="gallery_error_setup">Galería no pudo iniciarse en este dispositivo</string>
     <string name="nav_incognito_on">Incógnito activado, las descargas no se registran</string>
     <string name="nav_incognito_off">Incógnito desactivado</string>
 

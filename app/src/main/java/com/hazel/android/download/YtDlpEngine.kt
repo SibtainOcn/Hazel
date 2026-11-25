@@ -127,7 +127,7 @@ object YtDlpEngine {
         }
     }
 
-    private fun <T> shared(block: () -> T): T {
+    internal fun <T> shared(block: () -> T): T {
         lock.readLock().lock()
         Log.d("Hazel", "yt-dlp run started (${lock.readLockCount} running)")
         try {

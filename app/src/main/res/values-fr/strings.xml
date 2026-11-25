@@ -4,6 +4,23 @@
     <string name="nav_home">Accueil</string>
     <string name="nav_history">Téléchargements</string>
     <string name="nav_more">Plus</string>
+    <string name="nav_gallery">Galerie</string>
+    <string name="gallery_paste_hint">Collez le lien d\'une publication</string>
+    <string name="gallery_get">Obtenir la publication</string>
+    <string name="gallery_stop">Arrêter</string>
+    <string name="gallery_download">Télécharger</string>
+    <string name="gallery_download_all">Tout télécharger</string>
+    <string name="gallery_image">Image</string>
+    <string name="gallery_video">Vidéo</string>
+    <string name="gallery_found">%1$d éléments trouvés en %2$s s</string>
+    <string name="gallery_saved">%1$d enregistrés dans Download/Hazel/Gallery en %2$s s</string>
+    <string name="gallery_failed">Impossible de lire cette publication</string>
+    <string name="gallery_empty">Aucun fichier dans cette publication</string>
+    <string name="gallery_error_login">Connectez-vous à ce site dans Cookies, puis réessayez</string>
+    <string name="gallery_error_unsupported">Galerie ne peut pas lire ce lien</string>
+    <string name="gallery_error_not_found">Publication supprimée, privée ou vide</string>
+    <string name="gallery_error_network">Connexion impossible. Vérifiez le réseau ou le proxy</string>
+    <string name="gallery_error_setup">Galerie n\'a pas pu démarrer sur cet appareil</string>
     <string name="nav_incognito_on">Navigation privée activée, les téléchargements ne sont pas enregistrés</string>
     <string name="nav_incognito_off">Navigation privée désactivée</string>
 
