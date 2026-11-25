@@ -1023,9 +1023,12 @@
     <string name="home_empty_title">Guarda vídeos y música</string>
     <string name="home_empty_hint">Pega un enlace de YouTube, SoundCloud, Instagram Reels y 1700 sitios más</string>
     <string name="more_getting_started">Primeros pasos</string>
-    <string name="instant_label">Instant</string>
+    <string name="instant_label">Instant Vídeo</string>
+    <string name="instant_images_label">Instant Imágenes</string>
+    <string name="share_label_video">Hazel Vídeo</string>
+    <string name="share_label_images">Hazel Imágenes</string>
+    <string name="gallery_instant_settings">Ajustes de Galería</string>
     <string name="shortcut_search">Buscar</string>
-    <string name="share_shortcut_download">Descargar</string>
     <string name="instant_started">Descarga iniciada</string>
     <string name="instant_ok">Aceptar</string>
     <string name="instant_settings">Ajustes de síntesis</string>

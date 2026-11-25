@@ -1007,9 +1007,12 @@
     <string name="home_empty_title">वीडियो और संगीत सेव करें</string>
     <string name="home_empty_hint">YouTube, SoundCloud, Instagram Reels और 1,700 अन्य साइटों से लिंक पेस्ट करें</string>
     <string name="more_getting_started">शुरुआत करें</string>
-    <string name="instant_label">Instant</string>
+    <string name="instant_label">Instant वीडियो</string>
+    <string name="instant_images_label">Instant इमेज</string>
+    <string name="share_label_video">Hazel वीडियो</string>
+    <string name="share_label_images">Hazel इमेज</string>
+    <string name="gallery_instant_settings">गैलरी सेटिंग्स</string>
     <string name="shortcut_search">खोजें</string>
-    <string name="share_shortcut_download">डाउनलोड</string>
     <string name="instant_started">डाउनलोड शुरू हुआ</string>
     <string name="instant_ok">ठीक है</string>
     <string name="instant_settings">सिंथेसाइज़िंग सेटिंग्स</string>
