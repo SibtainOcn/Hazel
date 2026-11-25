@@ -20,7 +20,6 @@
     <string name="gallery_download">Download</string>
     <string name="gallery_image">Image</string>
     <string name="gallery_video">Video</string>
-    <string name="gallery_saved">%1$d saved to Download/Hazel/Gallery in %2$s s</string>
     <string name="gallery_failed">Could not read this post</string>
     <string name="gallery_empty">No files in this post</string>
     <string name="gallery_error_login">Sign in to this site under Cookies, then try again</string>
@@ -1227,4 +1226,7 @@
     <string name="upd_action_use_bundled">Bundled</string>
     <string name="upd_bundled_restored">Now using the bundled gallery-dl %1$s</string>
     <string name="upd_busy">A download is running. Try again after it finishes</string>
+    <string name="gallery_queued">Added to the download queue</string>
+    <string name="gallery_fetched">%1$d files fetched</string>
+    <string name="gallery_saved_before_failure">%1$d saved before it stopped</string>
 </resources>

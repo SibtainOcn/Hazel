@@ -61,6 +61,8 @@ import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.gallery.GalleryOptions
 import com.hazel.android.gallery.GalleryRequest
 import com.hazel.android.gallery.GalleryRequests
+import com.hazel.android.gallery.queue.GalleryDownloadRequest
+import com.hazel.android.gallery.queue.GalleryQueue
 import com.hazel.android.ui.components.BetaTag
 import com.hazel.android.ui.components.EmptyState
 import com.hazel.android.ui.components.HazelLoadingIndicator
@@ -160,13 +162,21 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     }
 
     /** Saves the files of [post] at [indexes] (counted from 1), or the whole post when null. */
+    /** Queues the files of [post] at [indexes] (counted from 1), or the whole post when null. */
     fun download(indexes: List<Int>?, options: GalleryOptions? = null, post: GalleryPost? = this.post) {
         val link = post?.source?.takeIf { it.isNotEmpty() } ?: return
-        lastRun = { download(indexes, options, post) }
-        launchRun(link) {
-            val started = System.currentTimeMillis()
-            val saved = GalleryDlEngine.download(getApplication(), link, indexes, options)
-            notice = GalleryNotice(R.string.gallery_saved, listOf(saved, secondsSince(started)))
+        val first = indexes?.firstOrNull()?.let { i -> post.items.firstOrNull { it.index == i } } ?: post.items.firstOrNull()
+        val request = GalleryDownloadRequest(
+            url = link,
+            indexes = indexes,
+            options = options,
+            title = first?.title.orEmpty(),
+            author = post.author,
+            thumbnail = first?.thumbnail ?: first?.url?.takeUnless { first.isVideo }
+        )
+        viewModelScope.launch {
+            GalleryQueue.add(getApplication(), request)
+            notice = GalleryNotice(R.string.gallery_queued)
         }
     }
 
@@ -213,20 +223,10 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
 
     internal fun fail(url: String, e: Exception) {
         val log = (e as? GalleryDlException)?.let { it.log.ifBlank { it.detail } } ?: e.message.orEmpty()
-        notice = GalleryNotice((e as? GalleryDlException)?.let { messageFor(it.kind) } ?: R.string.gallery_failed)
+        notice = GalleryNotice((e as? GalleryDlException)?.let { it.kind.message } ?: R.string.gallery_failed)
         failure = FailedDownload(url = url, title = query, author = "", thumbnail = null, isVideo = false, errorLog = log)
     }
 
-    private fun secondsSince(start: Long): String = "%.1f".format((System.currentTimeMillis() - start) / 1000f)
-
-    private fun messageFor(kind: GalleryDlException.Kind): Int = when (kind) {
-        GalleryDlException.Kind.LOGIN_REQUIRED -> R.string.gallery_error_login
-        GalleryDlException.Kind.UNSUPPORTED -> R.string.gallery_error_unsupported
-        GalleryDlException.Kind.NOT_FOUND -> R.string.gallery_error_not_found
-        GalleryDlException.Kind.NETWORK -> R.string.gallery_error_network
-        GalleryDlException.Kind.SETUP -> R.string.gallery_error_setup
-        GalleryDlException.Kind.OTHER -> R.string.gallery_failed
-    }
 }
 
 @Composable

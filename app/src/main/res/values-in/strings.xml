@@ -9,7 +9,6 @@
     <string name="gallery_download">Unduh</string>
     <string name="gallery_image">Gambar</string>
     <string name="gallery_video">Video</string>
-    <string name="gallery_saved">%1$d disimpan ke Download/Hazel/Gallery dalam %2$s d</string>
     <string name="gallery_failed">Tidak dapat membaca postingan ini</string>
     <string name="gallery_empty">Tidak ada file di postingan ini</string>
     <string name="gallery_error_login">Masuk ke situs ini di Cookies, lalu coba lagi</string>
@@ -1154,4 +1153,7 @@
     <string name="upd_action_use_bundled">Bawaan</string>
     <string name="upd_bundled_restored">Sekarang memakai gallery-dl %1$s bawaan</string>
     <string name="upd_busy">Ada unduhan yang berjalan. Coba lagi setelah selesai</string>
+    <string name="gallery_queued">Ditambahkan ke antrean unduhan</string>
+    <string name="gallery_fetched">%1$d file diambil</string>
+    <string name="gallery_saved_before_failure">%1$d tersimpan sebelum berhenti</string>
 </resources>

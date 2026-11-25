@@ -9,7 +9,6 @@
     <string name="gallery_download">Baixar</string>
     <string name="gallery_image">Imagem</string>
     <string name="gallery_video">Vídeo</string>
-    <string name="gallery_saved">%1$d salvos em Download/Hazel/Gallery em %2$s s</string>
     <string name="gallery_failed">Não foi possível ler esta postagem</string>
     <string name="gallery_empty">Nenhum arquivo nesta postagem</string>
     <string name="gallery_error_login">Entre neste site em Cookies e tente de novo</string>
@@ -1188,4 +1187,7 @@
     <string name="upd_action_use_bundled">Incluída</string>
     <string name="upd_bundled_restored">Agora usando o gallery-dl %1$s incluído</string>
     <string name="upd_busy">Há um download em andamento. Tente de novo quando terminar</string>
+    <string name="gallery_queued">Adicionado à fila de downloads</string>
+    <string name="gallery_fetched">%1$d arquivos obtidos</string>
+    <string name="gallery_saved_before_failure">%1$d salvos antes de parar</string>
 </resources>

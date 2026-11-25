@@ -9,7 +9,6 @@
     <string name="gallery_download">Скачать</string>
     <string name="gallery_image">Изображение</string>
     <string name="gallery_video">Видео</string>
-    <string name="gallery_saved">Сохранено %1$d в Download/Hazel/Gallery за %2$s с</string>
     <string name="gallery_failed">Не удалось прочитать пост</string>
     <string name="gallery_empty">В посте нет файлов</string>
     <string name="gallery_error_login">Войдите на этот сайт в разделе Cookies и повторите попытку</string>
@@ -1204,4 +1203,7 @@
     <string name="upd_action_use_bundled">Встроенная</string>
     <string name="upd_bundled_restored">Теперь используется встроенный gallery-dl %1$s</string>
     <string name="upd_busy">Идёт загрузка. Повторите попытку после её завершения</string>
+    <string name="gallery_queued">Добавлено в очередь загрузок</string>
+    <string name="gallery_fetched">Получено файлов: %1$d</string>
+    <string name="gallery_saved_before_failure">Сохранено до остановки: %1$d</string>
 </resources>
