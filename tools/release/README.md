@@ -12,11 +12,14 @@ APKs. F-Droid finds the new tag by itself within a day or two.
    that heading to the new version.
 2. **Store changelogs**: five short text files in
    `fastlane/metadata/android/en-US/changelogs/`, written by hand. One file for each APK
-   version code. Example: if the current `versionCode` is 900, the next release needs
+   version code. The code comes from the version:
+   `(major·10000 + minor·100 + patch)·1000 + 990`. Example: 1.1.18 needs
 
    ```
-   1000.txt  1001.txt  1002.txt  1003.txt  1004.txt
+   10118990.txt  10118991.txt  10118992.txt  10118993.txt  10118994.txt
    ```
+
+   `-DryRun` prints the exact names.
 
    - Same text in all five.
    - 1 to 500 characters each. F-Droid cuts anything longer.
@@ -28,10 +31,13 @@ APKs. F-Droid finds the new tag by itself within a day or two.
 ## Running it
 
 ```powershell
-.\tools\release\release.ps1 -Version 1.1.12 -DryRun   # only shows the plan, changes nothing
-.\tools\release\release.ps1 -Version 1.1.12           # makes the release
-.\tools\release\release.ps1 -Version 1.1.12 -NoPush   # commit and tag only, no push
+.\tools\release\release.ps1 -Version 1.1.18 -DryRun   # only shows the plan, changes nothing
+.\tools\release\release.ps1 -Version 1.1.18           # makes the release
+.\tools\release\release.ps1 -Version 1.1.18 -NoPush   # commit and tag only, no push
 ```
+
+Stable versions only. A beta is a `v1.1.18-beta.N` tag pushed by hand; nightlies are built
+by the nightly workflow. Neither changes the literals in `app/build.gradle.kts`.
 
 ## When it stops
 
@@ -41,6 +47,7 @@ changed.
 | Check | Stops when |
 |---|---|
 | Tag | `v<version>` already exists. A published tag is never moved. |
+| Version code | The code for the version is not above the current `versionCode`. |
 | Store changelogs | One of the five files is missing, empty, or longer than 500 characters. |
 | Translations | `tools/strings/check.py translations` fails: a broken placeholder, markup or link, a key that is not in English, bad escaping, wrong plural forms, or a listed language under 80%. |
 | `CHANGELOG.md` | There is no `[Unreleased]` or `[<version>]` heading. |
@@ -55,7 +62,7 @@ python tools/strings/check.py translations --strict
 
 ## What it does, in order
 
-1. Adds 100 to `versionCode` and sets `versionName` in `app/build.gradle.kts`.
+1. Sets `versionCode` (the version's slot-99 code) and `versionName` in `app/build.gradle.kts`.
 2. Renames `[Unreleased]` in `CHANGELOG.md` to the new version with today's date.
 3. Commits the build file, `CHANGELOG.md` and the store changelogs, then creates the tag
    `v<version>`.

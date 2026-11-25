@@ -33,3 +33,13 @@ Lcom/hazel/android/download/DownloadViewModel**;
 Lcom/hazel/android/download/DownloadOptions**;
 Lcom/hazel/android/download/InfoCache**;
 Lcom/hazel/android/data/**;
+HSPLcom/hazel/android/ui/screens/**;->**(**)**
+Lcom/hazel/android/ui/screens/**;
+HSPLcom/hazel/android/gallery/**;->**(**)**
+Lcom/hazel/android/gallery/**;
+HSPLcom/hazel/android/util/**;->**(**)**
+Lcom/hazel/android/util/**;
+HSPLcom/hazel/android/download/**;->**(**)**
+Lcom/hazel/android/download/**;
+HSPLcom/hazel/android/update/**;->**(**)**
+Lcom/hazel/android/update/**;

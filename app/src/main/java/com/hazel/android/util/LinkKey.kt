@@ -59,8 +59,10 @@ object LinkKey {
      * Whether two links point at the same media, which is the question a repeat download
      * turns on.
      */
-    fun sameMedia(first: String, second: String): Boolean =
-        canonical(first) == canonical(second) && canonical(first).isNotBlank()
+    fun sameMedia(first: String, second: String): Boolean {
+        val key = canonical(first)
+        return key.isNotBlank() && key == canonical(second)
+    }
 
     /**
      * The key a read of [url] is remembered under.
