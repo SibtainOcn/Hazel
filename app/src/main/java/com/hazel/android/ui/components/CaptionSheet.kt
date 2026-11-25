@@ -1,5 +1,7 @@
 package com.hazel.android.ui.components
 
+import com.hazel.android.ui.theme.sheetButtonColor
+import androidx.compose.material3.ButtonDefaults
 import android.content.ClipData
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -97,6 +99,7 @@ fun CaptionSheet(caption: String, title: String, onDismiss: () -> Unit) {
                         scope.launch { clipboard.setClipEntry(ClipData.newPlainText(title, caption).toClipEntry()) }
                         Toast.makeText(context, R.string.properties_copied, Toast.LENGTH_SHORT).show()
                     },
+                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = sheetButtonColor, contentColor = MaterialTheme.colorScheme.onSurface),
                     shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 8.dp, bottomEnd = 8.dp),
                     modifier = Modifier.weight(1f).heightIn(min = 52.dp)
                 ) {
