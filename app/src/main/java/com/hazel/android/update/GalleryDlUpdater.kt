@@ -9,6 +9,7 @@ import com.hazel.android.download.NetworkProxy.throughProxy
 import com.hazel.android.download.YtDlpEngine
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryDlPayload
+import com.hazel.android.gallery.GallerySpare
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
@@ -208,6 +209,7 @@ object GalleryDlUpdater {
         return YtDlpEngine.whenIdle {
             synchronized(this) {
                 if (!staged.exists()) return@synchronized false
+                GallerySpare.discard()
                 rejection = null
                 val tag = read(stagedTag(context)).orEmpty()
                 val live = liveFile(context)
@@ -248,6 +250,7 @@ object GalleryDlUpdater {
     /** Drops the downloaded wheel so runs use the bundled gallery-dl. False while a run holds the engine. */
     fun useBundled(context: Context): Boolean = YtDlpEngine.whenIdle {
         synchronized(this) {
+            GallerySpare.discard()
             liveFile(context).delete()
             liveTag(context).delete()
             stagedFile(context).delete()

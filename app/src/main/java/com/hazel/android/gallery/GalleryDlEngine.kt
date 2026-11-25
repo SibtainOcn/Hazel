@@ -62,6 +62,8 @@ object GalleryDlEngine {
             }
             output.append(line).append('\n')
         }
+        // A download usually follows a read: have gallery-dl loaded for it.
+        GallerySpare.warm(context)
         return GalleryListing.parse(output.toString())
     }
 
@@ -186,8 +188,23 @@ object GalleryDlEngine {
         }
     }.getOrDefault(false)
 
-    private const val PROBE = "import gallery_dl, gallery_dl.extractor, gallery_dl.job, gallery_dl.version as v; print(v.__version__)"
+    /** What a spare gallery-dl must have been started with to serve a run now. */
+    internal fun importKey(context: Context): String =
+        importPath(context, PythonRuntime.ready(context)).joinToString(":") { "${it.absolutePath}@${it.lastModified()}" }
+
+    /** A Python process running [boot] with the environment a run gets, its stderr in [stderr]. */
+    internal fun spareProcess(context: Context, boot: String, stderr: File): Process {
+        val runtime = PythonRuntime.ready(context)
+        val builder = ProcessBuilder(runtime.python.absolutePath, "-c", boot).redirectError(stderr)
+        runtime.applyTo(builder.environment(), importPath = importPath(context, runtime))
+        return builder.start()
+    }
+
+    private const val PROBE ="import gallery_dl, gallery_dl.extractor, gallery_dl.job, gallery_dl.version as v; print(v.__version__)"
     private const val PROBE_TIMEOUT_S = 60L
+
+    /** `python -m gallery_dl` at the head of every run's command; a spare gets what follows. */
+    private const val COMMAND_PREFIX = 3
 
     private fun fixedOptions(context: Context, runtime: PythonRuntime): List<String> = listOf(
         "--config-ignore",
@@ -208,10 +225,17 @@ object GalleryDlEngine {
         val logs = GalleryLogs.dir(context)
         var raw: File? = null
         try {
-            raw = GalleryLogs.rawFile(logs)
-            val builder = ProcessBuilder(command).redirectError(raw)
-            runtime.applyTo(builder.environment(), importPath = importPath(context, runtime))
-            val process = builder.start()
+            // A warmed-up gallery-dl takes the run when it fits; anything else starts one cold.
+            val spare = GallerySpare.take(importKey(context), command.drop(COMMAND_PREFIX))
+            val process = if (spare != null) {
+                raw = spare.second
+                spare.first
+            } else {
+                raw = GalleryLogs.rawFile(logs)
+                val builder = ProcessBuilder(command).redirectError(raw)
+                runtime.applyTo(builder.environment(), importPath = importPath(context, runtime))
+                builder.start()
+            }
             running.set(process)
             try {
                 if (job?.isActive == false) throw CancellationException()
