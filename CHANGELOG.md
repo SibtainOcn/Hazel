@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Audio options use a waveform icon; Play in the download sheet is a tilted accent gem.
 - Glass: Mono is listed first, and dialogs, sheets, menus and toasts have no edge line.
 - Storage cleanup lists saved thumbnails as Downloads artwork.
+- Software update: the header shows the Hazel and yt-dlp versions; device details stay in the Device group.
 - Faster Home with large restored results, faster first opens of every screen, and less redrawing while downloading.
 
 ### Fixed
