@@ -19,8 +19,8 @@ import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.hazel.android.ui.components.EmptyState
+import com.hazel.android.ui.components.ArrivingCard
 import com.hazel.android.ui.components.rememberScrollShrink
-import com.hazel.android.ui.components.scrollShrink
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -36,6 +36,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -78,6 +79,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -92,7 +94,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -101,6 +102,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.hazel.android.R
@@ -122,7 +124,9 @@ import com.hazel.android.download.DownloadOptions
 import com.hazel.android.download.DownloadViewModel
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.formatDuration
-import com.hazel.android.ui.components.MediaCardShimmer
+import com.hazel.android.ui.components.MediaCardShimmerRow
+import com.hazel.android.ui.components.ResultsSkeleton
+import com.hazel.android.ui.components.SkeletonSpacing
 import com.hazel.android.ui.components.ShimmerHost
 import com.hazel.android.ui.components.refreshShine
 import com.hazel.android.ui.components.rememberPresence
@@ -137,6 +141,7 @@ import com.hazel.android.util.StoragePaths
 import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import com.hazel.android.ui.components.player.FullscreenPlayer
 import com.hazel.android.ui.components.player.InlinePlayer
@@ -314,11 +319,13 @@ fun DownloadScreen(
     // The records behind the links on screen, so each one can be asked whether the file it
     // produced is still on the device. Only the links being shown are looked up, rather
     // than the whole history, which can run to hundreds of rows.
-    val listedEntries = remember(state.results, history) {
-        state.results.mapNotNull { info ->
-            history.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
-        }
+    // Matched off the main thread through one index of the history, each link reduced once:
+    // comparing every card with every record took seconds on a long playlist and history.
+    val results = state.results
+    val entryFor by produceState(emptyMap<String, HistoryEntry>(), results, history) {
+        value = withContext(Dispatchers.Default) { matchHistory(results, history) }
     }
+    val listedEntries = remember(entryFor) { entryFor.values.distinct() }
     val presence = rememberPresence(listedEntries)
 
     /**
@@ -331,10 +338,7 @@ fun DownloadScreen(
      */
     val savedUrls by remember(state.results, listedEntries) {
         derivedStateOf {
-            state.results.filter { info ->
-                listedEntries.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
-                    ?.let { presence[it.id] == true } == true
-            }.map { it.url }.toSet()
+            entryFor.filterValues { presence[it.id] == true }.keys
         }
     }
 
@@ -523,37 +527,7 @@ fun DownloadScreen(
             )
 
             if (orderedResults.isEmpty() && state.isFetching) {
-                // Fixed viewport skeleton placeholders during initial link fetch.
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(horizontal = 20.dp)
-                        .clipToBounds()
-                ) {
-                    Column {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        // As many cards as the screen has room for, each at its real size, so
-                        // the last one runs off the bottom rather than being squeezed. A tall
-                        // screen shows more of them and a short one fewer.
-                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                            val columns = gridColumns(maxWidth)
-                            val cardWidth = (maxWidth - SKELETON_SPACING * (columns - 1)) / columns
-                            val cardHeight = cardWidth * 9f / 16f + SKELETON_SPACING
-                            val count = (maxHeight / cardHeight).toInt().plus(1)
-                                .coerceIn(1, MAX_VIEWPORT_SKELETONS)
-                            ShimmerHost(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight(align = Alignment.Top, unbounded = true)
-                            ) {
-                                Column(verticalArrangement = Arrangement.spacedBy(SKELETON_SPACING)) {
-                                    repeat(count) { ShimmerRow(columns) }
-                                }
-                            }
-                        }
-                    }
-                }
+                ResultsSkeleton(modifier = Modifier.fillMaxWidth().weight(1f))
             } else {
                 // A lazy list rather than a scrolling column: a column composes every card it
                 // holds, artwork and all, so a playlist of a hundred built a hundred full width
@@ -584,20 +558,9 @@ fun DownloadScreen(
                             bottom = if (orderedResults.isEmpty()) 0.dp else LIST_BOTTOM_ROOM
                         )
                     ) {
-                        gridItems(orderedResults, columns, SKELETON_SPACING, key = { it.url }) { info ->
+                        gridItems(orderedResults, columns, SkeletonSpacing, key = { it.url }) { info ->
                             Spacer(modifier = Modifier.height(20.dp))
 
-                            // Each card arrives rather than appearing: it fades up from slightly
-                            // below where it belongs, once, the first time it is composed. A long
-                            // playlist scrolls past as a series of cards settling into place
-                            // instead of a wall that redraws itself under the finger.
-                            var shown by remember(info.url) { mutableStateOf(false) }
-                            LaunchedEffect(info.url) { shown = true }
-                            val entrance by animateFloatAsState(
-                                targetValue = if (shown) 1f else 0f,
-                                animationSpec = M3Motion.emphasized(320),
-                                label = "cardEntrance"
-                            )
 
                             val batchItem = state.batch.firstOrNull { it.url == info.url }
                             // The item's own state says which card is running; the shared pointer
@@ -616,14 +579,7 @@ fun DownloadScreen(
                                 sheetVisible = true
                             }
 
-                            Box(
-                                modifier = Modifier
-                                    .scrollShrink(shrink)
-                                    .graphicsLayer {
-                                        alpha = entrance
-                                        translationY = (1f - entrance) * 28f
-                                    }
-                            ) {
+                            ArrivingCard(info.url, shrink) {
                                 MediaCard(
                                     info = info,
                                     isDownloading = isActive,
@@ -669,7 +625,7 @@ fun DownloadScreen(
                                             // One row of them on a wide screen: two would
                                             // stand in for more cards than are coming.
                                             repeat(if (columns > 1) 1 else INCREMENTAL_SKELETON_COUNT) {
-                                                ShimmerRow(columns)
+                                                MediaCardShimmerRow(columns)
                                             }
                                         }
                                     }
@@ -958,7 +914,7 @@ fun DownloadScreen(
 
     heldInfo?.let { info ->
         // The saved copy, if its file is still there; presence is already read off the main thread.
-        val entry = listedEntries.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
+        val entry = entryFor[info.url]
         val onDevice = entry?.takeIf { info.url in savedUrls }
         MediaHoldDialog(
             info = info,
@@ -1277,11 +1233,14 @@ internal fun DownloadAllButton(onClick: () -> Unit, modifier: Modifier = Modifie
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 stringResource(R.string.download_download_all),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = ink,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                softWrap = false,
+                autoSize = TextAutoSize.StepBased(
+                    minFontSize = 8.sp,
+                    maxFontSize = MaterialTheme.typography.titleMedium.fontSize
+                )
             )
         }
     }
@@ -1580,22 +1539,9 @@ private fun MediaCard(
     }
 }
 
-/** Gap between skeleton cards, the same as between the cards they stand in for. */
-private val SKELETON_SPACING = 20.dp
 
 /** Room at the foot of the results list for the action that floats over it. */
 private val LIST_BOTTOM_ROOM = 96.dp
-
-/** A row of [columns] skeleton cards, the width the real ones will take. */
-@Composable
-private fun ShimmerRow(columns: Int) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SKELETON_SPACING)) {
-        repeat(columns) { MediaCardShimmer(modifier = Modifier.weight(1f)) }
-    }
-}
-
-/** An upper bound on skeleton cards, for a screen taller than any phone's. */
-private const val MAX_VIEWPORT_SKELETONS = 8
 
 /**
  * 2 cards stand in below already-loaded results while remaining playlist items continue loading.
@@ -1644,3 +1590,19 @@ private val MediaInfo.canStream: Boolean
  * The site's front page, which is where a sign-in starts. Cookies are stored per site, so
  * the individual media address is trimmed away.
  */
+
+/**
+ * Each listed link's history record, by link. The first record for a media wins, as a scan
+ * of the history in order would find it.
+ */
+internal fun matchHistory(results: List<MediaInfo>, history: List<HistoryEntry>): Map<String, HistoryEntry> {
+    if (results.isEmpty() || history.isEmpty()) return emptyMap()
+    val byKey = HashMap<String, HistoryEntry>(history.size)
+    history.forEach { entry ->
+        val key = LinkKey.canonical(entry.url)
+        if (key.isNotBlank()) byKey.putIfAbsent(key, entry)
+    }
+    val found = HashMap<String, HistoryEntry>()
+    results.forEach { info -> byKey[LinkKey.canonical(info.url)]?.let { found[info.url] = it } }
+    return found
+}

@@ -66,7 +66,7 @@ class GallerySettingsLayoutTest(private val locale: String) {
             R.string.gallery_skip_reposts,
             R.string.gallery_settings_instagram_sections_value,
             R.string.gallery_settings_retries,
-            R.string.gallery_settings_ugoira
+            R.string.gallery_settings_caption_in_file
         ).forEach { id ->
             val text = context.getString(id)
             val node = compose.onAllNodesWithText(text, useUnmergedTree = true)[0]

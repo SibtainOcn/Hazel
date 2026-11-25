@@ -1,6 +1,5 @@
 package com.hazel.android.ui.screens.download
 
-import com.hazel.android.ui.theme.glassBackdrop
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,18 +19,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import com.hazel.android.ui.components.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
-import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,11 +50,14 @@ import com.hazel.android.HazelApp
 import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.SearchSource
+import com.hazel.android.ui.components.BetaTag
 import com.hazel.android.ui.components.EqualWidthActions
-import com.hazel.android.ui.theme.sheetBlackColor
+import com.hazel.android.ui.components.ModalBottomSheet
 import com.hazel.android.ui.screens.more.ChoiceRow
 import com.hazel.android.ui.screens.more.DialogButton
 import com.hazel.android.ui.screens.more.groupShape
+import com.hazel.android.ui.theme.glassBackdrop
+import com.hazel.android.ui.theme.sheetBlackColor
 import kotlinx.coroutines.launch
 
 /**
@@ -258,16 +258,7 @@ private fun WebSearchNotice(onContinue: () -> Unit, onDismiss: () -> Unit) {
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
-                    Text(
-                        stringResource(R.string.search_web_beta),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
+                    BetaTag()
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(

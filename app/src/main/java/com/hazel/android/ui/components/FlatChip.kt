@@ -35,6 +35,10 @@ private val ChipShape = RoundedCornerShape(12.dp)
 @Composable
 private fun restingFill(): Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
 
+/** A resting chip in the accent's own tone, for rows that should carry the accent while idle. */
+@Composable
+private fun tonalRest(): Color = com.hazel.android.ui.theme.accentTint()
+
 /**
  * A setting that is on or off, or opens its own choices: an icon and a name on a flat
  * rounded surface. There is no outline; the surface alone says it can be tapped, and it
@@ -54,14 +58,26 @@ fun FlatChip(
     selected: Boolean = false,
     badge: Int = 0,
     leading: (@Composable () -> Unit)? = null,
-    compact: Boolean = false
+    compact: Boolean = false,
+    tonal: Boolean = false
 ) {
-    val content = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+    val scheme = MaterialTheme.colorScheme
+    val content = when {
+        tonal && selected -> scheme.onPrimary
+        tonal -> com.hazel.android.ui.theme.accentInk()
+        selected -> scheme.primary
+        else -> scheme.onSurface
+    }
     val chip = @Composable {
         Surface(
             onClick = onClick,
             shape = ChipShape,
-            color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else restingFill(),
+            color = when {
+                tonal && selected -> scheme.primary
+                tonal -> tonalRest()
+                selected -> scheme.primary.copy(alpha = 0.15f)
+                else -> restingFill()
+            },
             contentColor = content,
             modifier = modifier
                 .height(if (compact) 34.dp else 36.dp)
@@ -108,13 +124,14 @@ fun FlatIconButton(
     icon: ImageVector,
     contentDescription: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    tonal: Boolean = false
 ) {
     Surface(
         onClick = onClick,
         shape = ChipShape,
-        color = restingFill(),
-        contentColor = MaterialTheme.colorScheme.onSurface,
+        color = if (tonal) tonalRest() else restingFill(),
+        contentColor = if (tonal) com.hazel.android.ui.theme.accentInk() else MaterialTheme.colorScheme.onSurface,
         modifier = modifier.size(36.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {

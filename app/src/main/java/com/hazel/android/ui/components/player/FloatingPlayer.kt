@@ -1,5 +1,14 @@
 package com.hazel.android.ui.components.player
 
+import com.hazel.android.ui.theme.accentTint
+import com.hazel.android.ui.theme.accentInk
+import androidx.graphics.shapes.RoundedPolygon
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.annotation.StringRes
 import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -34,13 +43,11 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.toShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
@@ -83,7 +90,6 @@ import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.download.playback.PlaybackController
 import com.hazel.android.ui.components.rememberAnimationsOn
-import com.hazel.android.ui.screens.history.CookieAction
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -559,58 +565,87 @@ fun LargePlayer(
                 }
             }
 
-            // The actions alone under the picture, each on its own expressive shape and all in
-            // the accent, the way the app's other shaped actions look.
+            // The actions under the picture as one connected group of equal parts, each
+            // marked by its own expressive shape.
             AnimatedVisibility(
                 visible = settled && drag == 0f,
                 enter = fadeIn(),
                 exit = fadeOut(),
                 modifier = Modifier.offset { IntOffset(0, (target.bottom + 20.dp.toPx()).toInt()) }
             ) {
-                val accent = MaterialTheme.colorScheme.primary
-                val ink = MaterialTheme.colorScheme.onPrimary
-                CompositionLocalProvider(LocalContentColor provides Color.White) {
-                    Row(
+                val actions = listOfNotNull(
+                    onDownload?.let {
+                        PlayerAction(Icons.Filled.Download, R.string.format_sheet_download, MaterialShapes.Cookie6Sided, it)
+                    },
+                    PlayerAction(Icons.Filled.KeyboardArrowDown, R.string.player_minimize, MaterialShapes.Pentagon) { closing = true },
+                    PlayerAction(Icons.Filled.Close, R.string.player_close_short, MaterialShapes.Pill, onClose)
+                )
+                PlayerActionGroup(actions, Modifier.fillMaxWidth().padding(horizontal = 24.dp))
+            }
+        }
+    }
+}
+
+private class PlayerAction(
+    val icon: ImageVector,
+    @param:StringRes val label: Int,
+    val shape: RoundedPolygon,
+    val onClick: () -> Unit
+)
+
+/**
+ * The player's actions as an M3 connected button group: equal parts, rounded outside and
+ * tighter where they meet, in a tint of the accent, each icon on its own shape.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun PlayerActionGroup(actions: List<PlayerAction>, modifier: Modifier = Modifier) {
+    val scheme = MaterialTheme.colorScheme
+    Row(
+        modifier = modifier.height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(GROUP_GAP)
+    ) {
+        actions.forEachIndexed { index, action ->
+            val start = if (index == 0) GROUP_OUTER else GROUP_INNER
+            val end = if (index == actions.lastIndex) GROUP_OUTER else GROUP_INNER
+            Surface(
+                onClick = action.onClick,
+                shape = RoundedCornerShape(topStart = start, bottomStart = start, topEnd = end, bottomEnd = end),
+                color = accentTint(),
+                contentColor = accentInk(),
+                modifier = Modifier.weight(1f).fillMaxHeight()
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                            .size(44.dp)
+                            .background(scheme.primary, action.shape.toShape()),
+                        contentAlignment = Alignment.Center
                     ) {
-                        if (onDownload != null) {
-                            CookieAction(
-                                icon = Icons.Filled.Download,
-                                label = R.string.format_sheet_download,
-                                enabled = true,
-                                container = accent,
-                                content = ink,
-                                shape = MaterialShapes.Cookie6Sided.toShape(),
-                                onClick = onDownload
-                            )
-                        }
-                        CookieAction(
-                            icon = Icons.Filled.KeyboardArrowDown,
-                            label = R.string.player_minimize,
-                            enabled = true,
-                            container = accent,
-                            content = ink,
-                            shape = MaterialShapes.Pentagon.toShape(),
-                            onClick = { closing = true }
-                        )
-                        CookieAction(
-                            icon = Icons.Filled.Close,
-                            label = R.string.player_close,
-                            enabled = true,
-                            container = accent,
-                            content = ink,
-                            shape = MaterialShapes.Clover4Leaf.toShape(),
-                            onClick = onClose
-                        )
+                        Icon(action.icon, contentDescription = null, tint = scheme.onPrimary, modifier = Modifier.size(22.dp))
                     }
+                    Text(
+                        stringResource(action.label),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
             }
         }
     }
 }
+
+private val GROUP_OUTER = 28.dp
+private val GROUP_INNER = 10.dp
+private val GROUP_GAP = 3.dp
 
 private const val SCRIM = 0.82f
 private val TitleShape = RoundedCornerShape(24.dp)

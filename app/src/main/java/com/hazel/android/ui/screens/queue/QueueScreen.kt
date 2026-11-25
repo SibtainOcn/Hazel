@@ -1,38 +1,10 @@
 package com.hazel.android.ui.screens.queue
 
-import androidx.compose.foundation.selection.selectableGroup
-import com.hazel.android.ui.components.pressScale
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.Role
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.background
-import androidx.compose.ui.draw.clip
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Pause
-import com.hazel.android.ui.components.MenuTone
-import androidx.compose.material.icons.filled.Checklist
-import androidx.compose.material.icons.filled.ClearAll
-import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import com.hazel.android.ui.components.EmptyState
-import com.hazel.android.ui.components.ScrollShrink
-import com.hazel.android.ui.components.rememberScrollShrink
-import com.hazel.android.ui.components.scrollShrink
-import androidx.compose.foundation.lazy.rememberLazyListState
+import com.hazel.android.ui.theme.accentTint
+import com.hazel.android.ui.theme.accentInk
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.produceState
-import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -45,22 +17,30 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.ClearAll
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.HourglassEmpty
-import androidx.compose.material.icons.filled.Download
-import com.hazel.android.ui.components.AlertDialog
-import androidx.compose.foundation.layout.width
-import com.hazel.android.ui.components.DropdownMenu
-import com.hazel.android.ui.components.DropdownMenuItem
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -68,27 +48,37 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.material3.toShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
-import com.hazel.android.ui.components.FastScrollbar
-import com.hazel.android.ui.components.gridColumns
-import com.hazel.android.ui.components.gridItems
 import com.hazel.android.data.DownloadQueueRepository
 import com.hazel.android.data.FailedDownload
 import com.hazel.android.data.FailedDownloadRepository
@@ -98,7 +88,21 @@ import com.hazel.android.download.BatchState
 import com.hazel.android.download.DownloadViewModel
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.PausedShares
+import com.hazel.android.gallery.queue.GalleryDownloadRequest
+import com.hazel.android.gallery.queue.GalleryQueue
+import com.hazel.android.ui.components.AlertDialog
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
+import com.hazel.android.ui.components.EmptyState
+import com.hazel.android.ui.components.FastScrollbar
 import com.hazel.android.ui.components.MediaCard
+import com.hazel.android.ui.components.MenuTone
+import com.hazel.android.ui.components.ScrollShrink
+import com.hazel.android.ui.components.gridColumns
+import com.hazel.android.ui.components.gridItems
+import com.hazel.android.ui.components.pressScale
+import com.hazel.android.ui.components.rememberScrollShrink
+import com.hazel.android.ui.components.scrollShrink
 import com.hazel.android.util.LinkKey
 import com.hazel.android.util.copyToClipboard
 import kotlinx.coroutines.Dispatchers
@@ -110,6 +114,15 @@ import kotlinx.coroutines.withContext
  * tight until it is chosen, when it rounds out into an accent pill. Pressed, it squeezes. A
  * count shows in a small badge, red for failures.
  */
+/** Each tab's count sits on a shape of its own. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun badgeShapeOf(tab: QueueTab): Shape = when (tab) {
+    QueueTab.RUNNING -> MaterialShapes.Cookie6Sided
+    QueueTab.QUEUED -> MaterialShapes.Pentagon
+    QueueTab.FAILED -> MaterialShapes.Pill
+}.toShape()
+
 @Composable
 private fun QueueTabSegment(
     label: String,
@@ -118,21 +131,19 @@ private fun QueueTabSegment(
     selected: Boolean,
     first: Boolean,
     last: Boolean,
+    badgeShape: Shape,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    // Fixed joins on every segment, so the group keeps its symmetry whichever tab is chosen.
     val outer = 25.dp
-    val inner by androidx.compose.animation.core.animateDpAsState(
-        if (selected) outer else 8.dp,
-        androidx.compose.animation.core.spring(dampingRatio = 0.6f, stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow),
-        label = "segment"
-    )
+    val inner = 8.dp
     val fill by androidx.compose.animation.animateColorAsState(
-        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
+        if (selected) MaterialTheme.colorScheme.primary else accentTint(),
         label = "segmentFill"
     )
-    val ink = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val ink = if (selected) MaterialTheme.colorScheme.onPrimary else accentInk()
     val start = if (first) outer else inner
     val end = if (last) outer else inner
     Surface(
@@ -166,21 +177,19 @@ private fun QueueTabSegment(
                 Spacer(Modifier.width(6.dp))
                 Box(
                     modifier = Modifier
-                        .heightIn(min = 22.dp)
-                        .widthIn(min = 22.dp)
-                        .clip(CircleShape)
+                        .size(26.dp)
                         .background(
                             when {
                                 alarm -> MaterialTheme.colorScheme.error
                                 selected -> MaterialTheme.colorScheme.onPrimary
                                 else -> MaterialTheme.colorScheme.primary
-                            }
-                        )
-                        .padding(horizontal = 6.dp),
+                            },
+                            badgeShape
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        count.toString(),
+                        if (count > 99) "99+" else count.toString(),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = when {
@@ -240,6 +249,9 @@ fun QueueScreen(
         queueList.filterNot { it.url in runningUrls || it.paused }
     }
     val failed = remember(failedList) { failedList.sortedByDescending { it.failedAt } }
+    val galleryJobs by GalleryQueue.jobs.collectAsState()
+    val galleryRunning = remember(galleryJobs) { galleryJobs.filter { it.state == GalleryQueue.State.RUNNING } }
+    val galleryWaiting = remember(galleryJobs) { galleryJobs.filter { it.state == GalleryQueue.State.WAITING } }
 
     fun retry(item: FailedDownload) {
         Toast.makeText(context, resources.getString(R.string.history_retrying_toast), Toast.LENGTH_SHORT).show()
@@ -248,9 +260,16 @@ fun QueueScreen(
 
     // The link's own sheet, over the queue: it opens at once, fills as the link is read and
     // says so there if the read fails. The failure stays listed until a download settles it.
+    // A gallery-dl failure opens the Hazel Images sheet, so it is read by the engine that failed.
     fun reopen(item: FailedDownload) {
+        val target = if (GalleryDownloadRequest.isPayload(item.queuedPayload)) {
+            android.content.ComponentName(context, "com.hazel.android.${com.hazel.android.ui.share.ShareOverlayActivity.GALLERY_ALIAS}")
+        } else {
+            android.content.ComponentName(context, com.hazel.android.ui.share.ShareOverlayActivity::class.java)
+        }
         context.startActivity(
-            android.content.Intent(context, com.hazel.android.ui.share.ShareOverlayActivity::class.java)
+            android.content.Intent()
+                .setComponent(target)
                 .setAction(android.content.Intent.ACTION_SEND)
                 .setType("text/plain")
                 .putExtra(android.content.Intent.EXTRA_TEXT, item.url)
@@ -460,8 +479,8 @@ fun QueueScreen(
             val last = QueueTab.entries.lastIndex
             QueueTab.entries.forEachIndexed { index, tab ->
                 val count = when (tab) {
-                    QueueTab.RUNNING -> running.size
-                    QueueTab.QUEUED -> waiting.size
+                    QueueTab.RUNNING -> running.size + galleryRunning.size
+                    QueueTab.QUEUED -> waiting.size + galleryWaiting.size
                     QueueTab.FAILED -> failed.size
                 }
                 QueueTabSegment(
@@ -471,6 +490,7 @@ fun QueueScreen(
                     selected = pagerState.currentPage == index,
                     first = index == 0,
                     last = index == last,
+                    badgeShape = badgeShapeOf(tab),
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                     modifier = Modifier.weight(1f)
                 )
@@ -486,10 +506,11 @@ fun QueueScreen(
         ) { page ->
             when (QueueTab.entries[page]) {
                 QueueTab.RUNNING -> QueueList(
-                    isEmpty = running.isEmpty(),
+                    isEmpty = running.isEmpty() && galleryRunning.isEmpty(),
                     emptyIcon = Icons.Filled.Download,
                     emptyText = stringResource(R.string.queue_empty_running)
                 ) { shrink, columns ->
+                    galleryCards(galleryRunning, shrink, context)
                     gridItems(running, columns, CARD_SPACING, key = { "running_${it.info.url}" }) { item ->
                         val paused = item.batchItem?.state == BatchState.PAUSED
                         val inRun = !paused && (item.isDownloading || item.info.url == state.active?.url)
@@ -540,10 +561,11 @@ fun QueueScreen(
                 }
 
                 QueueTab.QUEUED -> QueueList(
-                    isEmpty = waiting.isEmpty(),
+                    isEmpty = waiting.isEmpty() && galleryWaiting.isEmpty(),
                     emptyIcon = Icons.Filled.HourglassEmpty,
                     emptyText = stringResource(R.string.queue_empty_queued)
                 ) { shrink, columns ->
+                    galleryCards(galleryWaiting, shrink, context)
                     gridItems(waiting, columns, CARD_SPACING, key = { "queued_${it.url}" }) { item ->
                         Box(modifier = Modifier.scrollShrink(shrink)) {
                             QueuedCard(
@@ -807,6 +829,39 @@ private fun QueueList(
                 verticalArrangement = Arrangement.spacedBy(CARD_SPACING)
             ) { content(shrink, columns) }
             FastScrollbar(listState, Modifier.align(Alignment.TopEnd), PaddingValues(top = 16.dp, bottom = 24.dp))
+        }
+    }
+}
+
+/** Gallery jobs drawn as the download cards are: fetched so far while running, waiting otherwise. */
+private fun androidx.compose.foundation.lazy.LazyListScope.galleryCards(
+    jobs: List<GalleryQueue.Job>,
+    shrink: ScrollShrink,
+    context: android.content.Context
+) {
+    items(jobs, key = { "gallery_${it.request.id}" }) { job ->
+        val request = job.request
+        val total = request.files?.size ?: request.indexes?.size ?: 0
+        val running = job.state == GalleryQueue.State.RUNNING
+        Box(modifier = Modifier.scrollShrink(shrink)) {
+            MediaCard(
+                info = MediaInfo(
+                    url = request.url,
+                    title = request.title.ifBlank { request.url },
+                    uploader = request.author,
+                    thumbnail = request.thumbnail,
+                    durationSeconds = 0,
+                    videoFormats = emptyList(),
+                    audioFormats = emptyList()
+                ),
+                isDownloading = running,
+                progress = if (total > 0) (job.fetched.toFloat() / total).coerceIn(0f, 1f) else 0f,
+                unmeasured = running && total == 0,
+                note = if (running && job.fetched > 0) context.getString(R.string.gallery_fetched, job.fetched) else "",
+                batchItem = if (running) null else BatchItem(request.url, request.title, BatchState.QUEUED),
+                onCancel = { GalleryQueue.cancel(context, request.id) },
+                onPause = null
+            )
         }
     }
 }

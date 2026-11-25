@@ -73,6 +73,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hazel.android.R
 import com.hazel.android.download.BatchState
+import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.DownloadQueueRepository
 import com.hazel.android.ui.screens.queue.QueueScreen
 import com.hazel.android.ui.components.HazelBottomBar
@@ -99,6 +100,7 @@ import com.hazel.android.ui.screens.more.BackupScreen
 import com.hazel.android.ui.screens.more.ToolsScreen
 import com.hazel.android.ui.screens.more.SoftwareUpdateScreen
 import com.hazel.android.ui.screens.more.HazelUpdateScreen
+import com.hazel.android.update.GalleryDlUpdateScreen
 import com.hazel.android.update.YtDlpUpdateScreen
 import com.hazel.android.update.UpdateScreen
 
@@ -126,7 +128,7 @@ private val tabRoutes = bottomNavItems.map { it.route }.toSet()
 
 /** Screens shown without the bottom bar. */
 private val subScreenRoutes = setOf(
-    "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "sponsor", "software_update", "hazel_update", "ytdlp_update",
+    "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "sponsor", "software_update", "hazel_update", "ytdlp_update", "gallery_dl_update",
     "processing", "advanced", "proxy", "gallery_settings"
 )
 
@@ -202,6 +204,10 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val isSubScreen = currentRoute in subScreenRoutes
+    val historyUnseen by remember(context) { DownloadHistoryRepository.hasUnseen(context) }.collectAsState(initial = false)
+    LaunchedEffect(currentRoute, historyUnseen) {
+        if (historyUnseen && currentRoute == Screen.History.route) DownloadHistoryRepository.markSeen(context)
+    }
 
     val downloadViewModel: com.hazel.android.download.DownloadViewModel =
         remember { com.hazel.android.download.DownloadViewModelHolder.get() }
@@ -255,7 +261,7 @@ fun AppNavigation(
                         painter = painterResource(R.drawable.update),
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onBackground
+                        tint = com.hazel.android.ui.theme.accentInk()
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -363,7 +369,8 @@ fun AppNavigation(
                     .collectAsState(initial = emptyList())
                 // Lit while anything is downloading, paused part way or waiting its turn,
                 // so the queue is found without having to go and look.
-                val queueBusy = downloadState.isDownloading || savedQueue.isNotEmpty() ||
+                val galleryJobs by com.hazel.android.gallery.queue.GalleryQueue.jobs.collectAsState()
+                val queueBusy = downloadState.isDownloading || savedQueue.isNotEmpty() || galleryJobs.isNotEmpty() ||
                     downloadState.batch.any {
                         it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED ||
                             it.state == BatchState.QUEUED
@@ -375,8 +382,11 @@ fun AppNavigation(
                             route = screen.route,
                             icon = screen.icon,
                             label = screen.titleRes,
-                            showDot = screen == Screen.Queue && queueBusy &&
-                                currentDestination?.route != Screen.Queue.route
+                            showDot = currentDestination?.route != screen.route && when (screen) {
+                                Screen.Queue -> queueBusy
+                                Screen.History -> historyUnseen
+                                else -> false
+                            }
                         )
                     },
                     selectedRoute = bottomNavItems.firstOrNull { screen ->
@@ -442,6 +452,10 @@ fun AppNavigation(
             }
             screen(Screen.History.route) {
                 HistoryScreen(
+                    onOpenRunning = {
+                        queueTab = "running"
+                        openTab(Screen.Queue.route)
+                    },
                     onDownloadAgain = { entry ->
                         downloadViewModel.instantDownload(context, entry.url, audioOnlyOverride = !entry.isVideo)
                     },
@@ -585,6 +599,7 @@ fun AppNavigation(
                     onBack = { navController.popBackStack() },
                     onNavigateToHazelUpdate = { navController.navigate("hazel_update") },
                     onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") },
+                    onNavigateToGalleryDlUpdate = { navController.navigate("gallery_dl_update") },
                     onOpenWhatsNew = { version ->
                         navController.navigate(
                             "docs/${com.hazel.android.ui.screens.more.DocPage.CHANGELOG.name}?version=${android.net.Uri.encode(version)}"
@@ -605,11 +620,15 @@ fun AppNavigation(
             screen("ytdlp_update") {
                 YtDlpUpdateScreen(onBack = { navController.popBackStack() })
             }
+            screen("gallery_dl_update") {
+                GalleryDlUpdateScreen(onBack = { navController.popBackStack() })
+            }
             screen("update") {
                 SoftwareUpdateScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToHazelUpdate = { navController.navigate("hazel_update") },
                     onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") },
+                    onNavigateToGalleryDlUpdate = { navController.navigate("gallery_dl_update") },
                     onOpenWhatsNew = { version ->
                         navController.navigate(
                             "docs/${com.hazel.android.ui.screens.more.DocPage.CHANGELOG.name}?version=${android.net.Uri.encode(version)}"
