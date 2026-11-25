@@ -930,6 +930,7 @@
     <string name="player_play">Reproduzir</string>
     <string name="player_pause">Pausar</string>
     <string name="player_close">Fechar player</string>
+    <string name="player_close_short">Fechar</string>
     <string name="player_fullscreen">Tela cheia</string>
     <string name="player_minimize">Minimizar</string>
     <string name="player_expand">Abrir player</string>

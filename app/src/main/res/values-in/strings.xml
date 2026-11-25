@@ -900,6 +900,7 @@
     <string name="player_play">Putar</string>
     <string name="player_pause">Jeda</string>
     <string name="player_close">Tutup pemutar</string>
+    <string name="player_close_short">Tutup</string>
     <string name="player_fullscreen">Layar penuh</string>
     <string name="player_minimize">Perkecil</string>
     <string name="player_expand">Buka pemutar</string>

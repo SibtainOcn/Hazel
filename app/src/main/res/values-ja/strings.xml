@@ -900,6 +900,7 @@
     <string name="player_play">再生</string>
     <string name="player_pause">一時停止</string>
     <string name="player_close">プレーヤーを閉じる</string>
+    <string name="player_close_short">閉じる</string>
     <string name="player_fullscreen">全画面</string>
     <string name="player_minimize">最小化</string>
     <string name="player_expand">プレーヤーを開く</string>

@@ -915,6 +915,7 @@
     <string name="player_play">Abspielen</string>
     <string name="player_pause">Pause</string>
     <string name="player_close">Player schließen</string>
+    <string name="player_close_short">Schließen</string>
     <string name="player_fullscreen">Vollbild</string>
     <string name="player_minimize">Minimieren</string>
     <string name="player_expand">Player öffnen</string>

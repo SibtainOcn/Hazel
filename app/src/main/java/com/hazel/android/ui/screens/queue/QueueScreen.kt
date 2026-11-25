@@ -1,5 +1,7 @@
 package com.hazel.android.ui.screens.queue
 
+import com.hazel.android.ui.theme.accentTint
+import com.hazel.android.ui.theme.accentInk
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -13,11 +15,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -25,7 +25,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -59,7 +58,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.material3.toShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -112,6 +114,15 @@ import kotlinx.coroutines.withContext
  * tight until it is chosen, when it rounds out into an accent pill. Pressed, it squeezes. A
  * count shows in a small badge, red for failures.
  */
+/** Each tab's count sits on a shape of its own. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun badgeShapeOf(tab: QueueTab): Shape = when (tab) {
+    QueueTab.RUNNING -> MaterialShapes.Cookie6Sided
+    QueueTab.QUEUED -> MaterialShapes.Pentagon
+    QueueTab.FAILED -> MaterialShapes.Pill
+}.toShape()
+
 @Composable
 private fun QueueTabSegment(
     label: String,
@@ -120,21 +131,19 @@ private fun QueueTabSegment(
     selected: Boolean,
     first: Boolean,
     last: Boolean,
+    badgeShape: Shape,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    // Fixed joins on every segment, so the group keeps its symmetry whichever tab is chosen.
     val outer = 25.dp
-    val inner by androidx.compose.animation.core.animateDpAsState(
-        if (selected) outer else 8.dp,
-        androidx.compose.animation.core.spring(dampingRatio = 0.6f, stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow),
-        label = "segment"
-    )
+    val inner = 8.dp
     val fill by androidx.compose.animation.animateColorAsState(
-        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
+        if (selected) MaterialTheme.colorScheme.primary else accentTint(),
         label = "segmentFill"
     )
-    val ink = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val ink = if (selected) MaterialTheme.colorScheme.onPrimary else accentInk()
     val start = if (first) outer else inner
     val end = if (last) outer else inner
     Surface(
@@ -168,21 +177,19 @@ private fun QueueTabSegment(
                 Spacer(Modifier.width(6.dp))
                 Box(
                     modifier = Modifier
-                        .heightIn(min = 22.dp)
-                        .widthIn(min = 22.dp)
-                        .clip(CircleShape)
+                        .size(26.dp)
                         .background(
                             when {
                                 alarm -> MaterialTheme.colorScheme.error
                                 selected -> MaterialTheme.colorScheme.onPrimary
                                 else -> MaterialTheme.colorScheme.primary
-                            }
-                        )
-                        .padding(horizontal = 6.dp),
+                            },
+                            badgeShape
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        count.toString(),
+                        if (count > 99) "99+" else count.toString(),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = when {
@@ -483,6 +490,7 @@ fun QueueScreen(
                     selected = pagerState.currentPage == index,
                     first = index == 0,
                     last = index == last,
+                    badgeShape = badgeShapeOf(tab),
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                     modifier = Modifier.weight(1f)
                 )

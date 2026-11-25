@@ -915,6 +915,7 @@
     <string name="player_play">चलाएं</string>
     <string name="player_pause">रोकें</string>
     <string name="player_close">प्लेयर बंद करें</string>
+    <string name="player_close_short">बंद करें</string>
     <string name="player_fullscreen">पूरी स्क्रीन</string>
     <string name="player_minimize">छोटा करें</string>
     <string name="player_expand">प्लेयर खोलें</string>
