@@ -1026,7 +1026,6 @@
     <string name="upd_ytdlp_bundled">内置</string>
     <string name="upd_tile_hazel">Hazel</string>
     <string name="upd_tile_cpu">CPU</string>
-    <string name="upd_tile_android">Android</string>
     <string name="upd_tile_channel">渠道</string>
     <string name="upd_tile_code">版本号</string>
     <string name="upd_tile_installed">安装于</string>
