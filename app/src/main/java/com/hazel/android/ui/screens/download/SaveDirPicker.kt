@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.hazel.android.R
 import com.hazel.android.data.SaveDirs
+import com.hazel.android.data.SaveKind
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.SdCard
@@ -46,9 +47,16 @@ import kotlinx.coroutines.withContext
  */
 @Composable
 fun rememberSaveDirPicker(saveDirs: SaveDirs): (isVideo: Boolean, card: SdCard?) -> Unit {
+    val pick = rememberSaveKindPicker(saveDirs)
+    return { isVideo, card -> pick(SaveKind.of(isVideo), card) }
+}
+
+/** [rememberSaveDirPicker] for any [SaveKind], gallery included. */
+@Composable
+fun rememberSaveKindPicker(saveDirs: SaveDirs): (kind: SaveKind, card: SdCard?) -> Unit {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var pickingVideo by rememberSaveable { mutableStateOf(true) }
+    var pickingKind by rememberSaveable { mutableStateOf(SaveKind.VIDEO.name) }
     var pickingCard by rememberSaveable { mutableStateOf(false) }
     var problem by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -62,18 +70,18 @@ fun rememberSaveDirPicker(saveDirs: SaveDirs): (isVideo: Boolean, card: SdCard?)
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
-                val forVideo = pickingVideo
+                val forKind = runCatching { SaveKind.valueOf(pickingKind) }.getOrDefault(SaveKind.VIDEO)
                 val toCard = pickingCard
                 val app = context.applicationContext
                 scope.launch(Dispatchers.IO) {
-                    // A card's root gets the same Hazel/Audio or Hazel/Video folder the
+                    // A card's root gets the same Hazel/<kind> folder the
                     // built-in location uses, rather than downloads piling up at its top.
                     // When the card will not make it, the picked folder is used as it is.
-                    val kindFolder = if (toCard) SdCards.kindFolderIn(app, uri, forVideo) else uri
+                    val kindFolder = if (toCard) SdCards.hazelFolderIn(app, uri, forKind.folderName) else uri
                     val folder = kindFolder ?: uri
                     runCatching {
                         SettingsRepository.setSaveDir(
-                            app, forVideo, folder.toString(), MediaStoreHelper.describeTree(folder)
+                            app, forKind, folder.toString(), MediaStoreHelper.describeTree(folder)
                         )
                     }.onFailure { error ->
                         withContext(Dispatchers.Main) { problem = error.message ?: accessRefused }
@@ -82,7 +90,7 @@ fun rememberSaveDirPicker(saveDirs: SaveDirs): (isVideo: Boolean, card: SdCard?)
                     if (kindFolder == null) {
                         val message = app.getString(
                             R.string.save_location_error_card_folder,
-                            "Hazel/" + SdCards.kindFolderName(forVideo)
+                            "Hazel/" + forKind.folderName
                         )
                         withContext(Dispatchers.Main) { problem = message }
                     }
@@ -115,10 +123,10 @@ fun rememberSaveDirPicker(saveDirs: SaveDirs): (isVideo: Boolean, card: SdCard?)
         )
     }
 
-    return { isVideo, card ->
-        pickingVideo = isVideo
+    return { kind, card ->
+        pickingKind = kind.name
         pickingCard = card != null
-        val current = saveDirs.of(isVideo).uri.takeIf { it.isNotBlank() }?.let(Uri::parse)
+        val current = saveDirs.of(kind).uri.takeIf { it.isNotBlank() }?.let(Uri::parse)
         val openPlain = {
             runCatching { folderPicker.launch(current) }.onFailure { problem = noPicker }
         }

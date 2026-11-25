@@ -674,6 +674,8 @@
     <string name="storage_locations_speed_limit_description">Wie schnell ein Download laufen darf</string>
     <string name="storage_locations_no_limit">Unbegrenzt</string>
     <string name="storage_locations_internal_note">Gespeichert im internen Speicher, außer du wählst einen anderen Ordner oder eine SD-Karte.</string>
+    <string name="storage_locations_gallery">Galerie</string>
+    <string name="storage_locations_gallery_hint">Bilder und Beiträge</string>
     <string name="storage_locations_wifi_only">Nur WLAN</string>
     <string name="storage_locations_speed_limit">Geschwindigkeitsgrenze</string>
 

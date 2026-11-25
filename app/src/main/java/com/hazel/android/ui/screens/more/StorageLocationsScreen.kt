@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Wifi
@@ -56,9 +57,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hazel.android.R
 import com.hazel.android.data.SaveDirs
+import com.hazel.android.data.SaveKind
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.ui.screens.download.SaveLocationScreen
-import com.hazel.android.ui.screens.download.rememberSaveDirPicker
+import com.hazel.android.ui.screens.download.rememberSaveKindPicker
 import kotlinx.coroutines.launch
 
 /**
@@ -71,12 +73,12 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
 
     val wifiOnly by remember(context) { SettingsRepository.getWifiOnly(context) }.collectAsState(initial = false)
     val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }.collectAsState(initial = SaveDirs())
-    // The kind whose folder is being looked at or chosen, or null when neither is.
-    var dirDialogFor by remember { mutableStateOf<Boolean?>(null) }
+    // The kind whose folder is being looked at or chosen, or null when none is.
+    var dirDialogFor by remember { mutableStateOf<SaveKind?>(null) }
 
     // The same picker the download sheet uses: any folder or an SD card, saved for the
     // kind it was made for until it is changed or reset.
-    val pickSaveDir = rememberSaveDirPicker(saveDirs)
+    val pickSaveDir = rememberSaveKindPicker(saveDirs)
     val speedLimit by remember(context) { SettingsRepository.getSpeedLimit(context) }.collectAsState(initial = "")
     val concurrentFragments by remember(context) { SettingsRepository.getConcurrentFragments(context) }.collectAsState(initial = SettingsRepository.CONCURRENT_FRAGMENTS.last())
     val throttledRate by remember(context) { SettingsRepository.getThrottledRate(context) }.collectAsState(initial = "")
@@ -94,16 +96,25 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                 StorageLocationItem(
                     icon = Icons.Filled.MusicNote,
                     title = stringResource(R.string.format_sheet_tab_audio),
-                    path = saveDirs.labelOf(isVideo = false),
-                    onClick = { dirDialogFor = false }
+                    path = saveDirs.labelOf(SaveKind.AUDIO),
+                    onClick = { dirDialogFor = SaveKind.AUDIO }
                 )
             },
             {
                 StorageLocationItem(
                     icon = Icons.Filled.Videocam,
                     title = stringResource(R.string.format_sheet_tab_video),
-                    path = saveDirs.labelOf(isVideo = true),
-                    onClick = { dirDialogFor = true }
+                    path = saveDirs.labelOf(SaveKind.VIDEO),
+                    onClick = { dirDialogFor = SaveKind.VIDEO }
+                )
+            },
+            {
+                StorageLocationItem(
+                    icon = Icons.Filled.PhotoLibrary,
+                    title = stringResource(R.string.storage_locations_gallery),
+                    path = saveDirs.labelOf(SaveKind.GALLERY),
+                    hint = stringResource(R.string.storage_locations_gallery_hint),
+                    onClick = { dirDialogFor = SaveKind.GALLERY }
                 )
             }
         ))
@@ -199,21 +210,24 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
         }
     }
 
-    dirDialogFor?.let { isVideo ->
+    dirDialogFor?.let { kind ->
         SaveLocationScreen(
-            isVideo = isVideo,
-            saveDir = saveDirs.of(isVideo),
-            label = saveDirs.labelOf(isVideo),
+            isVideo = kind == SaveKind.VIDEO,
+            saveDir = saveDirs.of(kind),
+            label = saveDirs.labelOf(kind),
             onPick = { card ->
                 dirDialogFor = null
-                pickSaveDir(isVideo, card)
+                pickSaveDir(kind, card)
             },
             onReset = {
                 dirDialogFor = null
-                scope.launch { SettingsRepository.resetSaveDir(context, isVideo) }
+                scope.launch { SettingsRepository.resetSaveDir(context, kind) }
             },
-            onUseRecent = { SettingsRepository.setSaveDir(context, isVideo, it.uri, it.label) },
-            onDismiss = { dirDialogFor = null }
+            onUseRecent = { SettingsRepository.setSaveDir(context, kind, it.uri, it.label) },
+            onDismiss = { dirDialogFor = null },
+            internalPath = kind.display,
+            internalFolder = { kind.builtInFolder() },
+            cardFolder = "Hazel/" + kind.folderName
         )
     }
 }
@@ -223,6 +237,7 @@ private fun StorageLocationItem(
     icon: ImageVector,
     title: String,
     path: String,
+    hint: String? = null,
     onClick: () -> Unit
 ) {
     ListItem(
@@ -230,12 +245,21 @@ private fun StorageLocationItem(
             Text(title, fontWeight = FontWeight.Medium)
         },
         supportingContent = {
-            Text(
-                path,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-            )
+            Column {
+                hint?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                    )
+                }
+                Text(
+                    path,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                )
+            }
         },
         leadingContent = {
             Icon(icon, null, tint = MaterialTheme.colorScheme.primary)
