@@ -26,13 +26,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.ContentCut
 import androidx.compose.material.icons.outlined.Cookie
 import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.PictureInPictureAlt
-import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -239,9 +237,7 @@ private fun HighlightsStep() {
         Highlight(Icons.Outlined.ImageSearch, MaterialShapes.Cookie6Sided.toShape(), R.string.whats_new_search_title, R.string.whats_new_search_desc),
         Highlight(Icons.Outlined.ContentCut, MaterialShapes.Pentagon.toShape(), R.string.whats_new_trim_title, R.string.whats_new_trim_desc),
         Highlight(Icons.Outlined.PictureInPictureAlt, MaterialShapes.Cookie7Sided.toShape(), R.string.whats_new_player_title, R.string.whats_new_player_desc),
-        Highlight(Icons.Outlined.Cookie, MaterialShapes.Sunny.toShape(), R.string.whats_new_accounts_title, R.string.whats_new_accounts_desc),
-        Highlight(Icons.Outlined.SystemUpdate, MaterialShapes.Cookie4Sided.toShape(), R.string.whats_new_channels_title, R.string.whats_new_channels_desc),
-        Highlight(Icons.Outlined.Build, MaterialShapes.Clover4Leaf.toShape(), R.string.whats_new_fixes_title, R.string.whats_new_fixes_desc)
+        Highlight(Icons.Outlined.Cookie, MaterialShapes.Sunny.toShape(), R.string.whats_new_accounts_title, R.string.whats_new_accounts_desc)
     )
     Column(modifier = Modifier.fillMaxWidth()) {
         StepTitle(stringResource(R.string.whats_new_highlights_title))

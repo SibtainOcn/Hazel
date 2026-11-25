@@ -686,10 +686,6 @@
     <string name="whats_new_player_desc">Sigue sonando en cada pestaña y pantalla.</string>
     <string name="whats_new_accounts_title">Cuentas de inicio de sesión</string>
     <string name="whats_new_accounts_desc">Inicio de sesión con un toque y el estado de cada cuenta.</string>
-    <string name="whats_new_channels_title">Canales de actualización</string>
-    <string name="whats_new_channels_desc">Stable, Beta o Nightly, con avisos de actualización opcionales.</string>
-    <string name="whats_new_fixes_title">Correcciones</string>
-    <string name="whats_new_fixes_desc">Inicio de sesión en Instagram, progreso de recortes, carpetas con -o y actualizaciones de yt-dlp en móviles con poca memoria.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Color de acento</string>

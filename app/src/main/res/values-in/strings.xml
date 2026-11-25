@@ -658,10 +658,6 @@
     <string name="whats_new_player_desc">Tetap diputar di setiap tab dan layar.</string>
     <string name="whats_new_accounts_title">Akun masuk</string>
     <string name="whats_new_accounts_desc">Masuk sekali ketuk, dengan status setiap akun.</string>
-    <string name="whats_new_channels_title">Kanal pembaruan</string>
-    <string name="whats_new_channels_desc">Stable, Beta, atau Nightly, dengan pemberitahuan pembaruan opsional.</string>
-    <string name="whats_new_fixes_title">Perbaikan</string>
-    <string name="whats_new_fixes_desc">Masuk Instagram, progres potong, folder -o, dan pembaruan yt-dlp di ponsel bermemori kecil.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Warna Aksen</string>

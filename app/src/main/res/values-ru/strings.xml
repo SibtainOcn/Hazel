@@ -700,10 +700,6 @@
     <string name="whats_new_player_desc">Продолжает играть на любой вкладке и экране.</string>
     <string name="whats_new_accounts_title">Аккаунты входа</string>
     <string name="whats_new_accounts_desc">Вход одним касанием и статус каждого аккаунта.</string>
-    <string name="whats_new_channels_title">Каналы обновлений</string>
-    <string name="whats_new_channels_desc">Stable, Beta или Nightly, с уведомлениями по желанию.</string>
-    <string name="whats_new_fixes_title">Исправления</string>
-    <string name="whats_new_fixes_desc">Вход в Instagram, прогресс обрезки, папки -o и обновления yt-dlp на телефонах с малой памятью.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Цветовой акцент</string>

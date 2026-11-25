@@ -672,10 +672,6 @@
     <string name="whats_new_player_desc">Spielt auf jedem Tab und Bildschirm weiter.</string>
     <string name="whats_new_accounts_title">Anmelde-Konten</string>
     <string name="whats_new_accounts_desc">Anmeldung mit einem Tipp, mit dem Status jedes Kontos.</string>
-    <string name="whats_new_channels_title">Update-Kanäle</string>
-    <string name="whats_new_channels_desc">Stable, Beta oder Nightly, mit optionalen Update-Hinweisen.</string>
-    <string name="whats_new_fixes_title">Korrekturen</string>
-    <string name="whats_new_fixes_desc">Instagram-Anmeldung, Schnittfortschritt, -o-Ordner und yt-dlp-Updates auf Handys mit wenig Speicher.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Akzentfarbe</string>

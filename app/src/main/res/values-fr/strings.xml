@@ -686,10 +686,6 @@
     <string name="whats_new_player_desc">Continue la lecture sur chaque onglet et écran.</string>
     <string name="whats_new_accounts_title">Comptes connectés</string>
     <string name="whats_new_accounts_desc">Connexion en un geste, avec l’état de chaque compte.</string>
-    <string name="whats_new_channels_title">Canaux de mise à jour</string>
-    <string name="whats_new_channels_desc">Stable, Beta ou Nightly, avec des avis de mise à jour en option.</string>
-    <string name="whats_new_fixes_title">Corrections</string>
-    <string name="whats_new_fixes_desc">Connexion Instagram, progression des coupes, dossiers -o et mises à jour de yt-dlp sur les téléphones avec peu de mémoire.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Couleur d\'accent</string>

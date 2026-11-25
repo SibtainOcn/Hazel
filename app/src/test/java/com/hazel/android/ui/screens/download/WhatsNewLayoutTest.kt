@@ -50,7 +50,7 @@ class WhatsNewLayoutTest(private val locale: String) {
         }
         compose.waitForIdle()
         saveScreen("whats-new-1.2.17-$locale")
-        listOf(R.string.whats_new_gallery_title, R.string.whats_new_fixes_desc, R.string.whats_new_done).forEach {
+        listOf(R.string.whats_new_gallery_title, R.string.whats_new_accounts_desc, R.string.whats_new_done).forEach {
             compose.onNodeWithText(context.getString(it)).performScrollTo().assertIsDisplayed()
         }
     }

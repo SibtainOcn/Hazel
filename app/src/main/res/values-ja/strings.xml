@@ -658,10 +658,6 @@
     <string name="whats_new_player_desc">どのタブや画面でも再生を継続。</string>
     <string name="whats_new_accounts_title">ログインアカウント</string>
     <string name="whats_new_accounts_desc">ワンタップでログイン。各アカウントの状態も表示。</string>
-    <string name="whats_new_channels_title">アップデートチャンネル</string>
-    <string name="whats_new_channels_desc">Stable、Beta、Nightly。更新通知はオプション。</string>
-    <string name="whats_new_fixes_title">修正</string>
-    <string name="whats_new_fixes_desc">Instagram ログイン、カットの進捗、-o フォルダー、メモリの少ない端末での yt-dlp 更新。</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">アクセントカラー</string>

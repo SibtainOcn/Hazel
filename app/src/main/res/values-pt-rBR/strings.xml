@@ -686,10 +686,6 @@
     <string name="whats_new_player_desc">Continua tocando em todas as abas e telas.</string>
     <string name="whats_new_accounts_title">Contas de login</string>
     <string name="whats_new_accounts_desc">Login com um toque e o status de cada conta.</string>
-    <string name="whats_new_channels_title">Canais de atualização</string>
-    <string name="whats_new_channels_desc">Stable, Beta ou Nightly, com avisos de atualização opcionais.</string>
-    <string name="whats_new_fixes_title">Correções</string>
-    <string name="whats_new_fixes_desc">Login no Instagram, progresso de cortes, pastas com -o e atualizações do yt-dlp em celulares com pouca memória.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Cor de destaque</string>

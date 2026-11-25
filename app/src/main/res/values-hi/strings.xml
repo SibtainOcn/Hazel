@@ -672,10 +672,6 @@
     <string name="whats_new_player_desc">हर टैब और स्क्रीन पर चलता रहता है।</string>
     <string name="whats_new_accounts_title">साइन-इन अकाउंट</string>
     <string name="whats_new_accounts_desc">एक टैप में साइन-इन, हर अकाउंट की स्थिति के साथ।</string>
-    <string name="whats_new_channels_title">अपडेट चैनल</string>
-    <string name="whats_new_channels_desc">Stable, Beta या Nightly, वैकल्पिक अपडेट सूचना के साथ।</string>
-    <string name="whats_new_fixes_title">सुधार</string>
-    <string name="whats_new_fixes_desc">Instagram साइन-इन, कट की प्रगति, -o फ़ोल्डर और कम मेमोरी वाले फ़ोन पर yt-dlp अपडेट।</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">एक्सेंट रंग</string>

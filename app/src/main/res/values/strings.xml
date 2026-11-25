@@ -743,10 +743,6 @@
     <string name="whats_new_player_desc">Keeps playing on every tab and screen.</string>
     <string name="whats_new_accounts_title">Sign-in accounts</string>
     <string name="whats_new_accounts_desc">One-tap sign-in, with each account\'s status.</string>
-    <string name="whats_new_channels_title">Update channels</string>
-    <string name="whats_new_channels_desc">Stable, Beta or Nightly, with optional update notices.</string>
-    <string name="whats_new_fixes_title">Fixes</string>
-    <string name="whats_new_fixes_desc">Instagram sign-in, cut progress, -o folders and yt-dlp updates on low-memory phones.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Accent Color</string>
