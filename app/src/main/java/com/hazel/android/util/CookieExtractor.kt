@@ -88,6 +88,40 @@ object CookieExtractor {
         }
     }
 
+    /** Expires the given cookies (domain, name) in the WebView store. Main thread. */
+    fun clearCookies(keys: List<Pair<String, String>>) {
+        if (keys.isEmpty()) return
+        runCatching {
+            val manager = CookieManager.getInstance()
+            keys.distinct().forEach { (domain, name) ->
+                val host = domain.removePrefix(".")
+                manager.setCookie("https://$host", "$name=; Max-Age=0; Path=/")
+                manager.setCookie("https://$host", "$name=; Max-Age=0; Path=/; Domain=.$host")
+            }
+            manager.flush()
+        }
+    }
+
+    /** Clears the cookies and stored data the WebView holds for the page [url]'s site. */
+    fun clearSite(url: String) {
+        runCatching {
+            val host = java.net.URI(url).host?.lowercase() ?: return
+            val root = host.split('.').takeLast(2).joinToString(".")
+            val manager = CookieManager.getInstance()
+            val keys = listOf(host, root).distinct().flatMap { domain ->
+                manager.getCookie("https://$domain").orEmpty().split(';')
+                    .map { it.substringBefore('=').trim() }.filter { it.isNotEmpty() }
+                    .map { domain to it }
+            }
+            clearCookies(keys)
+            android.webkit.WebStorage.getInstance().apply {
+                deleteOrigin("https://$host")
+                deleteOrigin("https://$root")
+                deleteOrigin("https://www.$root")
+            }
+        }
+    }
+
     /**
      * One tab separated cookie record.
      *

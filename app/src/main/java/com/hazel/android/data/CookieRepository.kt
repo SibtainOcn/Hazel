@@ -28,12 +28,21 @@ data class CookieEntry(
     val url: String,
     val title: String,
     val content: String,
-    val enabled: Boolean = true
+    val enabled: Boolean = true,
+    /** When the sign-in was last checked with the site, epoch ms; 0 when never. */
+    val checkedAt: Long = 0,
+    /** The last check found the site no longer signed in. */
+    val refused: Boolean = false
 ) {
     /** First few lines of the cookie text, for the row summary. */
     fun preview(lines: Int = 3): String =
         content.lineSequence().take(lines).joinToString("\n").take(300)
 }
+
+enum class AccountState { ACTIVE, EXPIRED, SIGNED_OUT }
+
+/** [expiresAt] is when the login cookie ends, epoch seconds; null for a session-only one. */
+data class AccountStatus(val state: AccountState, val expiresAt: Long?)
 
 /** [expiresAt] is in epoch seconds, null when every cookie lasts only for the session. */
 data class CookieSummary(val site: String, val count: Int, val expiresAt: Long?)
@@ -77,10 +86,10 @@ object CookieRepository {
         context.dataStore.edit { prefs ->
             prefs[USE_COOKIES_KEY] = enabled
             val existing = decode(prefs[COOKIES_KEY])
-            if (existing.isNotEmpty()) {
-                val updated = existing.map { it.copy(enabled = enabled) }
-                prefs[COOKIES_KEY] = encode(updated)
-                updatedEntries = updated
+            updatedEntries = if (enabled && existing.isNotEmpty() && existing.none { it.enabled }) {
+                existing.map { it.copy(enabled = true) }.also { prefs[COOKIES_KEY] = encode(it) }
+            } else {
+                existing
             }
         }
         writeCookieFile(context, explicitEntries = updatedEntries, explicitUseCookies = enabled)
@@ -139,6 +148,33 @@ object CookieRepository {
         writeCookieFile(context, explicitEntries = updatedEntries, explicitUseCookies = currentUseCookies)
         InfoCache.clear()
     }
+
+    /** Records the result of a sign-in check on the entry [id]. */
+    suspend fun markChecked(context: Context, id: Long, refused: Boolean, at: Long = System.currentTimeMillis()) {
+        context.dataStore.edit { prefs ->
+            val existing = decode(prefs[COOKIES_KEY])
+            prefs[COOKIES_KEY] = encode(existing.map { if (it.id == id) it.copy(checkedAt = at, refused = refused) else it })
+        }
+    }
+
+    /** The saved sign-in that a fetch of [url] would use, or null. */
+    fun entryFor(entries: List<CookieEntry>, url: String): CookieEntry? {
+        val site = siteKeyOf(hostOf(url)) ?: return null
+        return entries.filter { it.content.isNotBlank() && covers(it, site) }
+            .maxByOrNull { if (it.enabled) 1 else 0 }
+    }
+
+    /** The site a saved set belongs to (registrable domain, aliases folded), or null. */
+    fun siteOf(entry: CookieEntry): String? =
+        siteKeyOf(hostOf(entry.url)) ?: entry.content.lineSequence().filter { isCookieLine(it) }
+            .firstNotNullOfOrNull { line -> domainOf(line).takeIf(String::isNotBlank)?.let { siteKeyOf(it) } }
+
+    /** Domain and name of each cookie in [entry], for clearing them from the sign-in browser. */
+    fun cookieKeys(entry: CookieEntry): List<Pair<String, String>> =
+        entry.content.lineSequence().filter { isCookieLine(it) }.mapNotNull { line ->
+            val fields = line.split('\t')
+            if (fields.size < 7) null else domainOf(line) to fields[5]
+        }.toList()
 
     suspend fun delete(context: Context, id: Long) {
         var remainingEntries: List<CookieEntry> = emptyList()
@@ -407,6 +443,38 @@ object CookieRepository {
         "vt.tiktok.com" to "tiktok.com"
     )
 
+    /**
+     * The account state of a saved set, read from the site's own login cookie where the site
+     * is known, else from its longest-lived cookie. [nowSeconds] is epoch seconds.
+     */
+    fun statusOf(entry: CookieEntry, nowSeconds: Long = System.currentTimeMillis() / 1000): AccountStatus {
+        val site = siteOf(entry)
+        val cookies = entry.content.lineSequence().filter { isCookieLine(it) }.mapNotNull { line ->
+            val fields = line.split('\t').takeIf { it.size >= 7 } ?: line.trim().split(Regex("\\s+")).takeIf { it.size >= 7 }
+            fields?.let { Triple(domainOf(line), it[5], it[4].toLongOrNull() ?: 0L) }
+        }.toList()
+        val names = LOGIN_COOKIES[site]
+        val login = if (names == null) cookies else cookies.filter { (domain, name, _) ->
+            name in names && siteKeyOf(domain) == site
+        }
+        if (login.isEmpty()) return AccountStatus(AccountState.SIGNED_OUT, null)
+        val expiresAt = login.map { it.third }.filter { it > 0 }.maxOrNull()
+        val sessionOnly = if (names == null) expiresAt == null else login.any { it.third <= 0 }
+        val ranOut = !sessionOnly && expiresAt != null && expiresAt < nowSeconds
+        val state = if (ranOut || entry.refused) AccountState.EXPIRED else AccountState.ACTIVE
+        return AccountStatus(state, if (sessionOnly) null else expiresAt)
+    }
+
+    /** The cookie each known site signs a visitor in with. */
+    internal val LOGIN_COOKIES = mapOf(
+        "instagram.com" to setOf("sessionid"),
+        "twitter.com" to setOf("auth_token"),
+        "reddit.com" to setOf("reddit_session"),
+        "youtube.com" to setOf("__Secure-3PSID", "SID"),
+        "tiktok.com" to setOf("sessionid"),
+        "facebook.com" to setOf("c_user")
+    )
+
     /** The site a saved set is for, its cookie count and when its longest-lived cookie ends. */
     fun summaryOf(entry: CookieEntry): CookieSummary {
         val cookies = entry.content.lineSequence().filter { isCookieLine(it) }.toList()
@@ -524,6 +592,8 @@ object CookieRepository {
                     put("title", entry.title)
                     put("content", entry.content)
                     put("enabled", entry.enabled)
+                    if (entry.checkedAt > 0) put("checkedAt", entry.checkedAt)
+                    if (entry.refused) put("refused", true)
                 }
             )
         }
@@ -541,7 +611,9 @@ object CookieRepository {
                         url = json.optString("url"),
                         title = json.optString("title"),
                         content = json.optString("content"),
-                        enabled = json.optBoolean("enabled", true)
+                        enabled = json.optBoolean("enabled", true),
+                        checkedAt = json.optLong("checkedAt", 0),
+                        refused = json.optBoolean("refused", false)
                     )
                 }
             }
