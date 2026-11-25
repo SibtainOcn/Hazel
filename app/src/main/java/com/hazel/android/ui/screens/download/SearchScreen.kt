@@ -1,5 +1,10 @@
 package com.hazel.android.ui.screens.download
 
+import com.hazel.android.gallery.GallerySearchSite
+import com.hazel.android.gallery.GalleryRequest
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.animation.AnimatedVisibility
 import com.hazel.android.ui.theme.glassScreen
 import com.hazel.android.ui.components.ActionsRow
 import android.widget.Toast
@@ -122,6 +127,8 @@ fun SearchScreen(
     onSearch: (List<String>) -> Unit,
     onSearchWords: (String, SearchSource) -> Unit,
     onClearResults: () -> Unit = {},
+    imagesFirst: Boolean = false,
+    onSearchImages: (GalleryRequest) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -157,6 +164,16 @@ fun SearchScreen(
 
     val source by remember(context) { SettingsRepository.getSearchSource(context) }.collectAsState(initial = SearchSource.DEFAULT)
     val suggestionsOn by remember(context) { SettingsRepository.getSearchSuggestions(context) }.collectAsState(initial = false)
+    val imageSearchSaved by remember(context) { SettingsRepository.getImageSearch(context) }.collectAsState(initial = imagesFirst)
+    var imagesChosen by remember { mutableStateOf(if (imagesFirst) true else null) }
+    val images = imagesChosen ?: imageSearchSaved
+    val gallerySite by remember(context) { SettingsRepository.getGallerySearchSite(context) }
+        .collectAsState(initial = GallerySearchSite.DEFAULT)
+
+    fun chooseImages(on: Boolean) {
+        imagesChosen = on
+        scope.launch { SettingsRepository.setImageSearch(context, on) }
+    }
 
     // Links already queued are hidden from the list, and what is being typed filters it.
     val suggestions = remember(history, text, queued) {
@@ -220,7 +237,28 @@ fun SearchScreen(
         onSearchWords(words.trim(), source)
     }
 
+    fun submitImages() {
+        keyboard?.hide()
+        if (queued.isEmpty() && text.isNotBlank() && !isLinks(text)) {
+            onSearchImages(GalleryRequest.Search(text.trim(), gallerySite))
+            return
+        }
+        val links = (queued + typedLinks()).filter { it.isNotBlank() }.distinct()
+        if (links.isEmpty()) return
+        HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
+            val app = context.applicationContext
+            if (!SettingsRepository.getIncognito(app).first()) {
+                links.forEach { SearchHistoryRepository.record(app, it) }
+            }
+        }
+        onSearchImages(GalleryRequest.Links(links))
+    }
+
     fun submit() {
+        if (images) {
+            submitImages()
+            return
+        }
         if (queued.isEmpty() && text.isNotBlank() && !isLinks(text)) {
             searchWords(text)
             return
@@ -513,11 +551,46 @@ fun SearchScreen(
                 SearchSource.entries.forEach { option ->
                     SourceChip(
                         label = stringResource(option.labelRes),
-                        selected = option == source,
+                        selected = !images && option == source,
                         onClick = {
+                            if (images) chooseImages(false)
                             scope.launch { SettingsRepository.setSearchSource(context, option) }
                         }
                     )
+                    if (option == SearchSource.YOUTUBE) {
+                        SourceChip(
+                            label = stringResource(R.string.search_source_images),
+                            selected = images,
+                            icon = Icons.Filled.Image,
+                            onClick = { if (!images) chooseImages(true) }
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility(visible = images) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(R.string.fetch_settings_search_on),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 4.dp, end = 4.dp)
+                    )
+                    GallerySearchSite.entries.forEach { site ->
+                        SiteChip(
+                            label = site.label,
+                            selected = site == gallerySite,
+                            onClick = { scope.launch { SettingsRepository.setGallerySearchSite(context, site) } }
+                        )
+                    }
                 }
             }
 
@@ -882,13 +955,45 @@ private val QUEUE_MAX_HEIGHT = 236.dp
 /** Any run of whitespace, which is what separates one pasted link from the next. */
 private val WHITESPACE = Regex("""\s+""")
 
+/** A site an image search goes to: a small pill, filled in the accent when chosen. */
+@Composable
+private fun SiteChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val radius by pressCorner(interaction, resting = 16.dp, pressed = 8.dp)
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(radius),
+        color = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+        interactionSource = interaction,
+        modifier = Modifier
+            .pressScale(interaction)
+            .height(34.dp)
+            .semantics { this.selected = selected }
+    ) {
+        Box(modifier = Modifier.padding(horizontal = 14.dp), contentAlignment = Alignment.Center) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                maxLines = 1
+            )
+        }
+    }
+}
+
 /**
  * A search source. The chosen one is an accent tab led by a small cookie; the rest are soft
  * pills.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit) {
+private fun SourceChip(
+    label: String,
+    selected: Boolean,
+    icon: ImageVector = Icons.Filled.PlayArrow,
+    onClick: () -> Unit
+) {
     val accent = MaterialTheme.colorScheme.primary
     val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     // Pressed, the corners tighten and the chip squeezes; choosing one morphs pill to tab.
@@ -917,7 +1022,7 @@ private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit) {
                         .background(MaterialTheme.colorScheme.onPrimary),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp), tint = accent)
+                    Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = accent)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }

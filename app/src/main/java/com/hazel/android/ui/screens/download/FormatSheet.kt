@@ -1115,11 +1115,11 @@ private const val SECTION_QUALITY = "quality"
 private const val SECTION_SAVE = "save"
 private const val SECTION_ADJUST = "adjust"
 
-private val SHEET_TAB_PADDING = 12.dp
+internal val SHEET_TAB_PADDING = 12.dp
 
 /** One of the sheet's Audio / Video tabs: its word, and a short bar under it when chosen. */
 @Composable
-private fun SheetTab(label: String, selected: Boolean, enabled: Boolean, onClick: () -> Unit) {
+internal fun SheetTab(label: String, selected: Boolean, enabled: Boolean, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val textColor by animateColorAsState(
         targetValue = when {
