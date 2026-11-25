@@ -53,6 +53,9 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.hazel.android.ui.components.HazelBottomBarHeight
+import com.hazel.android.ui.components.player.PlayerOverlay
+import com.hazel.android.ui.components.player.PlayerSession
+import com.hazel.android.ui.components.player.rememberPlaybackController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NamedNavArgument
@@ -211,6 +214,10 @@ fun AppNavigation(
 
     val downloadViewModel: com.hazel.android.download.DownloadViewModel =
         remember { com.hazel.android.download.DownloadViewModelHolder.get() }
+
+    // Held above the screens, so the video plays on in the mini player on every screen.
+    val playerSession = remember { PlayerSession() }
+    val playback = playerSession.playingUrl?.let { rememberPlaybackController(it) }
 
     // A download that could not reach its folder (an SD card taken out, full or no longer
     // granting access) is reported wherever the user is in the app, including after it ran
@@ -438,6 +445,8 @@ fun AppNavigation(
                             onPendingFailureConsumed = onPendingFailureConsumed,
                             onSharesConsumed = onSharesConsumed,
                             downloadViewModel = downloadViewModel,
+                            playerSession = playerSession,
+                            playback = playback,
                             onOpenGallery = { openTab(Screen.Gallery.route) },
                             onOpenQueue = {
                                 navController.navigate(Screen.Queue.route) {
@@ -637,5 +646,46 @@ fun AppNavigation(
                 )
             }
         }
+
+        if (playerSession.playingUrl != null) {
+            PlayerLayer(
+                session = playerSession,
+                playback = playback,
+                downloadViewModel = downloadViewModel,
+                onDownload = {
+                    playerSession.sheetRequested = true
+                    if (currentRoute != Screen.Download.route) openTab(Screen.Download.route)
+                },
+                modifier = Modifier.padding(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = navBarBottom + if (isSubScreen) 0.dp else HazelBottomBarHeight
+                )
+            )
+        }
     }
+}
+
+/** The player's views over every screen. Only the results are watched, so download progress does not recompose it. */
+@Composable
+private fun PlayerLayer(
+    session: PlayerSession,
+    playback: com.hazel.android.download.playback.PlaybackController?,
+    downloadViewModel: com.hazel.android.download.DownloadViewModel,
+    onDownload: () -> Unit,
+    modifier: Modifier
+) {
+    val results by remember(downloadViewModel) {
+        downloadViewModel.state.map { it.results }.distinctUntilChanged()
+    }.collectAsState(initial = downloadViewModel.state.value.results)
+    PlayerOverlay(
+        session = session,
+        playback = playback,
+        results = results,
+        onDownload = { info ->
+            downloadViewModel.selectResult(info)
+            downloadViewModel.resolveFormats(info)
+            onDownload()
+        },
+        modifier = modifier
+    )
 }
