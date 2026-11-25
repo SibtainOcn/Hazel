@@ -30,6 +30,7 @@
     <string name="gallery_view">Lihat</string>
     <string name="gallery_close">Tutup</string>
     <string name="gallery_no_player">Tidak ada aplikasi yang dapat memutar video ini</string>
+    <string name="gallery_all_posts">Semua posting</string>
     <string name="gallery_under_maintenance">Sedang dalam perbaikan</string>
     <string name="gallery_sheet_image_of">Gambar %1$d dari %2$d</string>
     <string name="gallery_sheet_video_of">Video %1$d dari %2$d</string>

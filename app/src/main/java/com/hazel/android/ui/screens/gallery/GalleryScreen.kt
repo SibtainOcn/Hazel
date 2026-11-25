@@ -19,7 +19,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,6 +53,7 @@ import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryItem
+import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.gallery.GalleryOptions
 import com.hazel.android.gallery.GalleryRequest
 import com.hazel.android.gallery.GalleryRequests
@@ -69,43 +77,70 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
 
     var query by mutableStateOf("")
         private set
-    var items by mutableStateOf<List<GalleryItem>>(emptyList())
+    var posts by mutableStateOf<List<GalleryPost>>(emptyList())
+        private set
+    /** The post opened from the list of several; null shows the list. */
+    var openPost by mutableStateOf<Int?>(null)
         private set
     var busy by mutableStateOf(false)
         private set
     var notice by mutableStateOf<GalleryNotice?>(null)
         private set
 
+    /** The post shown as cards: the only one, or the one opened from the list. */
+    val post: GalleryPost? get() = posts.singleOrNull() ?: openPost?.let(posts::getOrNull)
+    val items: List<GalleryItem> get() = post?.items.orEmpty()
+    val showsList: Boolean get() = posts.size > 1 && post == null
+
     private var job: Job? = null
-    private var source = ""
 
     fun handle(request: GalleryRequest) {
         job?.cancel()
+        posts = emptyList()
+        openPost = null
         when (request) {
             is GalleryRequest.Links -> {
-                val link = request.urls.firstOrNull() ?: return
-                query = link
-                launchRun {
-                    show(link, GalleryDlEngine.list(getApplication(), link).items)
-                }
+                if (request.urls.isEmpty()) return
+                query = request.urls.joinToString(" ")
+                launchRun { readLinks(request.urls) }
             }
             is GalleryRequest.Search -> {
                 query = request.query
                 launchRun {
                     val url = request.site.urlFor(request.query)
                     val limit = SettingsRepository.getGalleryPostsPerSearch(getApplication()).first()
-                    show(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items)
+                    show(GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items))
                 }
             }
         }
     }
 
-    /** The post's link, for the sheets' sign-in. */
-    val link: String get() = source
+    /** Each link in turn, its posts shown as they land. A failed link is skipped while others remain. */
+    private suspend fun readLinks(urls: List<String>) {
+        var failure: GalleryDlException? = null
+        urls.forEach { url ->
+            try {
+                posts = posts + GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url).items)
+            } catch (e: GalleryDlException) {
+                if (urls.size == 1) throw e
+                failure = e
+            }
+        }
+        if (posts.isEmpty()) failure?.let { throw it }
+        show(posts)
+    }
 
-    /** Saves the files at [indexes] (counted from 1), or the whole post when null. */
-    fun download(indexes: List<Int>?, options: GalleryOptions? = null) {
-        val link = source.takeIf { it.isNotEmpty() } ?: return
+    fun open(index: Int) {
+        openPost = index.takeIf { it in posts.indices }
+    }
+
+    fun closePost() {
+        openPost = null
+    }
+
+    /** Saves the files of [post] at [indexes] (counted from 1), or the whole post when null. */
+    fun download(indexes: List<Int>?, options: GalleryOptions? = null, post: GalleryPost? = this.post) {
+        val link = post?.source?.takeIf { it.isNotEmpty() } ?: return
         launchRun {
             val started = System.currentTimeMillis()
             val saved = GalleryDlEngine.download(getApplication(), link, indexes, options)
@@ -119,15 +154,14 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
 
     fun clear() {
         job?.cancel()
-        items = emptyList()
+        posts = emptyList()
+        openPost = null
         notice = null
         query = ""
-        source = ""
     }
 
-    private fun show(url: String, found: List<GalleryItem>) {
-        source = url
-        items = found
+    private fun show(found: List<GalleryPost>) {
+        posts = found
         notice = if (found.isEmpty()) GalleryNotice(R.string.gallery_empty) else null
     }
 
@@ -174,11 +208,12 @@ fun GalleryScreen(
     var menuOpen by remember { mutableStateOf(false) }
     var viewing by rememberSaveable { mutableStateOf<Int?>(null) }
     var sheetFor by rememberSaveable { mutableStateOf<Int?>(null) }
-    var postSheetOpen by rememberSaveable { mutableStateOf(false) }
+    var postSheetFor by rememberSaveable { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) {
         GalleryRequests.next.collect { if (it != null) GalleryRequests.take()?.let(viewModel::handle) }
     }
+    BackHandler(enabled = viewModel.posts.size > 1 && viewModel.openPost != null, onBack = viewModel::closePost)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -192,7 +227,7 @@ fun GalleryScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             when {
-                viewModel.busy && viewModel.items.isEmpty() -> Box(
+                viewModel.busy && viewModel.posts.isEmpty() -> Box(
                     modifier = Modifier.fillMaxWidth().weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
@@ -202,7 +237,7 @@ fun GalleryScreen(
                         FilledTonalButton(onClick = viewModel::stop) { Text(stringResource(R.string.gallery_stop)) }
                     }
                 }
-                viewModel.items.isEmpty() -> Box(
+                viewModel.posts.isEmpty() -> Box(
                     modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 32.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -227,13 +262,32 @@ fun GalleryScreen(
                             )
                         }
                     }
-                    itemsIndexed(viewModel.items, key = { _, it -> it.index }) { position, item ->
-                        GalleryCard(
-                            item = item,
-                            total = viewModel.items.size,
-                            onOpen = { sheetFor = position },
-                            onView = { viewing = position }
-                        )
+                    if (viewModel.showsList) {
+                        itemsIndexed(viewModel.posts, key = { i, _ -> "post-$i" }) { i, post ->
+                            GalleryPostCard(
+                                post = post,
+                                onOpen = { viewModel.open(i) },
+                                onDownloadAll = { postSheetFor = i }
+                            )
+                        }
+                    } else {
+                        if (viewModel.posts.size > 1) {
+                            item(key = "back") {
+                                TextButton(onClick = viewModel::closePost) {
+                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(stringResource(R.string.gallery_all_posts))
+                                }
+                            }
+                        }
+                        itemsIndexed(viewModel.items, key = { _, it -> it.index }) { position, item ->
+                            GalleryCard(
+                                item = item,
+                                total = viewModel.items.size,
+                                onOpen = { sheetFor = position },
+                                onView = { viewing = position }
+                            )
+                        }
                     }
                 }
             }
@@ -270,7 +324,7 @@ fun GalleryScreen(
                 )
             }
             if (viewModel.items.size > 1 && !viewModel.busy) {
-                DownloadAllButton(onClick = { postSheetOpen = true })
+                DownloadAllButton(onClick = { postSheetFor = viewModel.posts.indexOf(viewModel.post).takeIf { it >= 0 } })
             }
         }
     }
@@ -305,14 +359,21 @@ fun GalleryScreen(
         )
     }
 
-    // New results close the sheets that were open on the old ones.
+    // New results, or another post opened, close what was open on the old ones.
     val items = viewModel.items
     var sheetsBelongTo by remember { mutableStateOf(items) }
     LaunchedEffect(items) {
         if (sheetsBelongTo !== items) {
             sheetsBelongTo = items
             sheetFor = null
-            postSheetOpen = false
+            viewing = null
+        }
+    }
+    var postsShown by remember { mutableStateOf(viewModel.posts) }
+    LaunchedEffect(viewModel.posts) {
+        if (postsShown !== viewModel.posts) {
+            postsShown = viewModel.posts
+            postSheetFor = null
         }
     }
 
@@ -320,7 +381,7 @@ fun GalleryScreen(
         GalleryItemSheet(
             item = item,
             total = items.size,
-            postUrl = viewModel.link,
+            postUrl = viewModel.post?.source.orEmpty(),
             onDownload = { options ->
                 sheetFor = null
                 viewModel.download(listOf(item.index), options)
@@ -329,15 +390,15 @@ fun GalleryScreen(
         )
     }
 
-    if (postSheetOpen && items.isNotEmpty()) {
+    postSheetFor?.let(viewModel.posts::getOrNull)?.let { post ->
         GalleryPostSheet(
-            items = items,
-            postUrl = viewModel.link,
+            items = post.items,
+            postUrl = post.source,
             onDownload = { indexes, options ->
-                postSheetOpen = false
-                viewModel.download(indexes, options)
+                postSheetFor = null
+                viewModel.download(indexes, options, post)
             },
-            onDismiss = { postSheetOpen = false }
+            onDismiss = { postSheetFor = null }
         )
     }
 

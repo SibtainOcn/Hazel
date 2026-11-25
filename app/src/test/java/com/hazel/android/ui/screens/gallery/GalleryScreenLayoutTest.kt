@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -13,9 +14,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import com.hazel.android.R
 import com.hazel.android.gallery.GalleryItem
+import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.ui.saveScreen
 import com.hazel.android.ui.theme.HazelTheme
 import org.junit.Assert.assertTrue
@@ -96,5 +99,42 @@ class GalleryScreenLayoutTest(private val locale: String) {
             assertTrue("$text runs off the right edge", node.positionOnScreen.x + node.size.width <= metrics.widthPixels)
         }
         saveScreen("gallery-card-$locale")
+    }
+
+    @Test
+    fun `carousel post card keeps its author, count and download inside`() {
+        RuntimeEnvironment.setQualifiers("$locale-w320dp-h568dp")
+        val post = GalleryPost(
+            key = "p1",
+            source = "https://www.instagram.com/p/AAA/",
+            items = (1..4).map { i ->
+                GalleryItem(
+                    index = i, url = "https://cdn.example/$i.jpg", extension = if (i == 2) "mp4" else "jpg",
+                    title = "", author = "spacebrief_with_a_long_name", site = "instagram",
+                    width = 1080, height = 1350, thumbnail = null, postKey = "p1"
+                )
+            }
+        )
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = true) {
+                val density = LocalDensity.current
+                CompositionLocalProvider(LocalDensity provides Density(density.density, 2f)) {
+                    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).padding(horizontal = 20.dp)) {
+                        GalleryPostCard(post = post, onOpen = {}, onDownloadAll = {})
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        saveScreen("gallery-post-card-$locale")
+        val width = context.resources.displayMetrics.widthPixels
+        listOf(
+            "spacebrief_with_a_long_name",
+            context.resources.getQuantityString(R.plurals.gallery_items, 4, 4),
+            "1 / 4"
+        ).forEach { text ->
+            val node = compose.onNodeWithText(text).assertIsDisplayed().fetchSemanticsNode()
+            assertTrue("$text runs off the right edge", node.positionOnScreen.x + node.size.width <= width)
+        }
     }
 }

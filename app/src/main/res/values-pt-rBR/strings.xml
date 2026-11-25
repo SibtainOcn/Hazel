@@ -30,6 +30,7 @@
     <string name="gallery_view">Ver</string>
     <string name="gallery_close">Fechar</string>
     <string name="gallery_no_player">Nenhum app pode reproduzir este vídeo</string>
+    <string name="gallery_all_posts">Todas as postagens</string>
     <string name="gallery_under_maintenance">Em manutenção</string>
     <string name="gallery_sheet_image_of">Imagem %1$d de %2$d</string>
     <string name="gallery_sheet_video_of">Vídeo %1$d de %2$d</string>

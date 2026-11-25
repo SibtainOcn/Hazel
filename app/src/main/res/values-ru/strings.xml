@@ -30,6 +30,7 @@
     <string name="gallery_view">Открыть</string>
     <string name="gallery_close">Закрыть</string>
     <string name="gallery_no_player">Нет приложения для этого видео</string>
+    <string name="gallery_all_posts">Все посты</string>
     <string name="gallery_under_maintenance">На обслуживании</string>
     <string name="gallery_sheet_image_of">Изображение %1$d из %2$d</string>
     <string name="gallery_sheet_video_of">Видео %1$d из %2$d</string>
