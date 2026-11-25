@@ -64,7 +64,10 @@ import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.toShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -419,13 +422,15 @@ fun HistoryScreen(
             FlatIconButton(
                 icon = if (listLayout) Icons.Filled.ViewAgenda else Icons.AutoMirrored.Filled.ViewList,
                 contentDescription = stringResource(R.string.history_layout_toggle),
-                onClick = { scope.launch { SettingsRepository.setHistoryListLayout(context, !listLayout) } }
+                onClick = { scope.launch { SettingsRepository.setHistoryListLayout(context, !listLayout) } },
+                tonal = true
             )
             VerticalDivider(modifier = Modifier.height(24.dp))
             Box {
                 FlatChip(
                     label = stringResource(sort.labelRes),
                     onClick = { sortMenuOpen = true },
+                    tonal = true,
                     leading = {
                         Icon(
                             Icons.Filled.ArrowUpward,
@@ -866,7 +871,7 @@ private fun KindChip(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    FlatChip(label = label, onClick = onClick, icon = icon, selected = selected)
+    FlatChip(label = label, onClick = onClick, icon = icon, selected = selected, tonal = true)
 }
 
 @Composable
@@ -1128,19 +1133,35 @@ private fun HistoryRow(entry: HistoryEntry, present: Boolean, mark: Boolean?, ac
             }
             Spacer(modifier = Modifier.width(8.dp))
             if (mark != null) SelectMark(mark)
-            else Icon(
-                kindIcon(entry),
-                contentDescription = stringResource(
-                    when {
-                        entry.isImage -> R.string.properties_kind_image
-                        entry.isVideo -> R.string.properties_kind_video
-                        else -> R.string.properties_kind_audio
-                    }
-                ),
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            else KindMark(entry)
         }
+    }
+}
+
+/** The row's audio, video or picture mark on a six-sided cookie in a tint of the accent. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun KindMark(entry: HistoryEntry) {
+    val fill = com.hazel.android.ui.theme.accentTint()
+    val tint = com.hazel.android.ui.theme.accentInk()
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .background(fill, MaterialShapes.Cookie6Sided.toShape()),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            kindIcon(entry),
+            contentDescription = stringResource(
+                when {
+                    entry.isImage -> R.string.properties_kind_image
+                    entry.isVideo -> R.string.properties_kind_video
+                    else -> R.string.properties_kind_audio
+                }
+            ),
+            modifier = Modifier.size(18.dp),
+            tint = tint
+        )
     }
 }
 
