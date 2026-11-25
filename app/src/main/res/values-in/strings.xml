@@ -647,6 +647,17 @@
     <string name="whats_new_done">Mengerti</string>
     <string name="whats_new_glass_title">Tampilan kaca baru</string>
     <string name="whats_new_glass_desc">Efek kaca, gaya dan warna aksen baru.</string>
+    <string name="whats_new_highlights_title">Di pembaruan ini</string>
+    <string name="whats_new_gallery_title">Tab Galeri</string>
+    <string name="whats_new_gallery_desc">Simpan foto, video, dan keterangan dari Instagram, X, Pinterest, Reddit, dan lainnya.</string>
+    <string name="whats_new_search_title">Pencarian gambar</string>
+    <string name="whats_new_search_desc">Cari di tujuh situs, hasil bisa dikelompokkan per pembuat.</string>
+    <string name="whats_new_trim_title">Potong setelah unduh</string>
+    <string name="whats_new_trim_desc">Unduh dengan kecepatan penuh, lalu potong di ponsel.</string>
+    <string name="whats_new_player_title">Pemutar mini di mana saja</string>
+    <string name="whats_new_player_desc">Tetap diputar di setiap tab dan layar.</string>
+    <string name="whats_new_accounts_title">Akun masuk</string>
+    <string name="whats_new_accounts_desc">Masuk sekali ketuk, dengan status setiap akun.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Warna Aksen</string>

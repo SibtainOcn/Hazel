@@ -647,6 +647,17 @@
     <string name="whats_new_done">OK</string>
     <string name="whats_new_glass_title">新しいガラスの見た目</string>
     <string name="whats_new_glass_desc">ガラス効果、新しいスタイルとアクセントカラー。</string>
+    <string name="whats_new_highlights_title">このアップデートの内容</string>
+    <string name="whats_new_gallery_title">ギャラリータブ</string>
+    <string name="whats_new_gallery_desc">Instagram、X、Pinterest、Reddit などから写真・動画・キャプションを保存。</string>
+    <string name="whats_new_search_title">画像検索</string>
+    <string name="whats_new_search_desc">7 つのサイトを検索。作者ごとにまとめることも可能。</string>
+    <string name="whats_new_trim_title">ダウンロード後にカット</string>
+    <string name="whats_new_trim_desc">フルスピードでダウンロードし、端末上でカット。</string>
+    <string name="whats_new_player_title">どこでもミニプレーヤー</string>
+    <string name="whats_new_player_desc">どのタブや画面でも再生を継続。</string>
+    <string name="whats_new_accounts_title">ログインアカウント</string>
+    <string name="whats_new_accounts_desc">ワンタップでログイン。各アカウントの状態も表示。</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">アクセントカラー</string>

@@ -661,6 +661,17 @@
     <string name="whats_new_done">ठीक है</string>
     <string name="whats_new_glass_title">नया ग्लास लुक</string>
     <string name="whats_new_glass_desc">ग्लास इफ़ेक्ट, नए स्टाइल और एक्सेंट रंग।</string>
+    <string name="whats_new_highlights_title">इस अपडेट में</string>
+    <string name="whats_new_gallery_title">गैलरी टैब</string>
+    <string name="whats_new_gallery_desc">Instagram, X, Pinterest, Reddit और अन्य से फ़ोटो, वीडियो और कैप्शन सेव करें।</string>
+    <string name="whats_new_search_title">इमेज सर्च</string>
+    <string name="whats_new_search_desc">सात साइटों पर खोजें, चाहें तो लेखक के अनुसार समूह में।</string>
+    <string name="whats_new_trim_title">डाउनलोड के बाद ट्रिम</string>
+    <string name="whats_new_trim_desc">पूरी स्पीड से डाउनलोड करें, फिर फ़ोन पर काटें।</string>
+    <string name="whats_new_player_title">हर जगह मिनी प्लेयर</string>
+    <string name="whats_new_player_desc">हर टैब और स्क्रीन पर चलता रहता है।</string>
+    <string name="whats_new_accounts_title">साइन-इन अकाउंट</string>
+    <string name="whats_new_accounts_desc">एक टैप में साइन-इन, हर अकाउंट की स्थिति के साथ।</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">एक्सेंट रंग</string>
