@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Videocam
@@ -63,7 +64,10 @@ import com.hazel.android.ui.components.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.toShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -147,6 +151,7 @@ import com.hazel.android.util.MediaDeleter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
+    onOpenRunning: () -> Unit = {},
     onDownloadAgain: ((com.hazel.android.data.HistoryEntry) -> Unit)? = null,
     onFetchAgain: ((com.hazel.android.data.HistoryEntry) -> Unit)? = null
 ) {
@@ -166,6 +171,7 @@ fun HistoryScreen(
     var searchOpen by remember { mutableStateOf(false) }
     var showAudio by remember { mutableStateOf(false) }
     var showVideo by remember { mutableStateOf(false) }
+    var showImages by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf(HistoryStatus.ALL) }
 
     var sortMenuOpen by remember { mutableStateOf(false) }
@@ -187,11 +193,15 @@ fun HistoryScreen(
         searchOpen = false
     }
 
-    val visible = remember(history, sort, reversed, query, showAudio, showVideo, status, presence.toMap()) {
+    val visible = remember(history, sort, reversed, query, showAudio, showVideo, showImages, status, presence.toMap()) {
         history
             .asSequence()
             // Neither chip on, or both, is everything; one on narrows to that kind.
-            .filter { showAudio == showVideo || it.isVideo == showVideo }
+            .filter { entry ->
+                val none = !showAudio && !showVideo && !showImages
+                none || (showImages && entry.isImage) || (showVideo && entry.isVideo) ||
+                    (showAudio && !entry.isVideo && !entry.isImage)
+            }
             .filter { entry ->
                 val present = presence[entry.id] ?: true
                 when (status) {
@@ -413,13 +423,15 @@ fun HistoryScreen(
             FlatIconButton(
                 icon = if (listLayout) Icons.Filled.ViewAgenda else Icons.AutoMirrored.Filled.ViewList,
                 contentDescription = stringResource(R.string.history_layout_toggle),
-                onClick = { scope.launch { SettingsRepository.setHistoryListLayout(context, !listLayout) } }
+                onClick = { scope.launch { SettingsRepository.setHistoryListLayout(context, !listLayout) } },
+                tonal = true
             )
             VerticalDivider(modifier = Modifier.height(24.dp))
             Box {
                 FlatChip(
                     label = stringResource(sort.labelRes),
                     onClick = { sortMenuOpen = true },
+                    tonal = true,
                     leading = {
                         Icon(
                             Icons.Filled.ArrowUpward,
@@ -469,6 +481,19 @@ fun HistoryScreen(
                 selected = showVideo,
                 onClick = { showVideo = !showVideo }
             )
+            KindChip(
+                label = stringResource(R.string.properties_kind_image),
+                icon = Icons.Filled.Image,
+                selected = showImages,
+                onClick = { showImages = !showImages }
+            )
+        }
+
+        if (!selecting) {
+            ActiveDownloadCard(
+                onClick = onOpenRunning,
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 8.dp)
+            )
         }
 
         // ── The list ──
@@ -516,7 +541,7 @@ fun HistoryScreen(
                         val open: () -> Unit = {
                             scope.launch {
                                 if (MediaPresence.refresh(context, entry.fileUri)) {
-                                    MediaOpener.play(context, entry.fileUri, entry.isVideo)
+                                    MediaOpener.play(context, entry.fileUri, entry.mimeType)
                                 } else {
                                     presence[entry.id] = false
                                     toast(resources.getString(R.string.history_toast_file_gone), ok = false)
@@ -854,7 +879,7 @@ private fun KindChip(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    FlatChip(label = label, onClick = onClick, icon = icon, selected = selected)
+    FlatChip(label = label, onClick = onClick, icon = icon, selected = selected, tonal = true)
 }
 
 @Composable
@@ -986,7 +1011,7 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, mark: Boolean?, a
                     )
             )
 
-            Column(modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 48.dp)) {
+            Column(modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 56.dp)) {
                 Text(
                     entry.title,
                     style = MaterialTheme.typography.titleSmall,
@@ -1011,14 +1036,8 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, mark: Boolean?, a
             }
             if (mark != null) {
                 SelectMark(mark, Modifier.align(Alignment.TopEnd).padding(12.dp), onImage = true)
-            } else Box(modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
-                IconButton(onClick = { menuOpen = true }) {
-                    Icon(
-                        painterResource(R.drawable.ic_more_vert),
-                        contentDescription = stringResource(R.string.history_card_options),
-                        tint = Color.White
-                    )
-                }
+            } else Box(modifier = Modifier.align(Alignment.TopEnd).padding(10.dp)) {
+                CookieMenuButton(onClick = { menuOpen = true })
                 EntryMenu(menuOpen, present, actions) { menuOpen = false }
             }
 
@@ -1032,12 +1051,7 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, mark: Boolean?, a
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    if (entry.isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = Color.White
-                )
+                CardKindMark(kindIcon(entry))
                 formatDuration(entry.durationSeconds).takeIf { it.isNotBlank() }?.let { CardTag(it) }
                 if (entry.sizeBytes > 0) CardTag(formatFileSize(entry.sizeBytes))
                 if (!present) DeletedTag()
@@ -1116,15 +1130,35 @@ private fun HistoryRow(entry: HistoryEntry, present: Boolean, mark: Boolean?, ac
             }
             Spacer(modifier = Modifier.width(8.dp))
             if (mark != null) SelectMark(mark)
-            else Icon(
-                if (entry.isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
-                contentDescription = stringResource(
-                    if (entry.isVideo) R.string.properties_kind_video else R.string.properties_kind_audio
-                ),
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            else KindMark(entry)
         }
+    }
+}
+
+/** The row's audio, video or picture mark on a six-sided cookie in a tint of the accent. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun KindMark(entry: HistoryEntry) {
+    val fill = com.hazel.android.ui.theme.accentTint()
+    val tint = com.hazel.android.ui.theme.accentInk()
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .background(fill, MaterialShapes.Cookie6Sided.toShape()),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            kindIcon(entry),
+            contentDescription = stringResource(
+                when {
+                    entry.isImage -> R.string.properties_kind_image
+                    entry.isVideo -> R.string.properties_kind_video
+                    else -> R.string.properties_kind_audio
+                }
+            ),
+            modifier = Modifier.size(18.dp),
+            tint = tint
+        )
     }
 }
 
@@ -1179,4 +1213,11 @@ private fun DeletedTag() {
         background = MaterialTheme.colorScheme.error,
         foreground = MaterialTheme.colorScheme.onError
     )
+}
+
+/** Audio, video or picture, as the row and the card both mark it. */
+private fun kindIcon(entry: HistoryEntry) = when {
+    entry.isImage -> Icons.Filled.Image
+    entry.isVideo -> Icons.Filled.Videocam
+    else -> Icons.Filled.MusicNote
 }

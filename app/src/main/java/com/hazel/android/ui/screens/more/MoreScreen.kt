@@ -294,6 +294,17 @@ fun MoreScreen(
                 )
                 },
                 {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.more_image_settings)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.PhotoLibrary, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToGallerySettings() }
+                )
+                },
+                {
                 // Processing: what every download starts from
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.more_processing)) },
@@ -338,17 +349,6 @@ fun MoreScreen(
                     trailingContent = { MoreChevron() },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     modifier = Modifier.clickable { onNavigateToStorageLocations() }
-                )
-                },
-                {
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.nav_gallery)) },
-                    leadingContent = {
-                        Icon(Icons.Filled.PhotoLibrary, null, tint = MaterialTheme.colorScheme.primary)
-                    },
-                    trailingContent = { MoreChevron() },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.clickable { onNavigateToGallerySettings() }
                 )
                 },
                 {

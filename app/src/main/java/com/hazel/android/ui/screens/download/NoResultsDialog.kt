@@ -59,7 +59,7 @@ import com.hazel.android.R
  * supported, has no fix to offer, so the dialog only says so.
  */
 @Composable
-fun NoResultsDialog(
+internal fun NoResultsDialog(
     message: String,
     canFetchCookies: Boolean,
     canContinue: Boolean,
@@ -70,9 +70,11 @@ fun NoResultsDialog(
     onCopyLog: () -> Unit,
     onGetCookies: () -> Unit,
     onContinueAnyway: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** The cause when the engine already knows it; read from [message] otherwise. */
+    knownKind: FailureKind? = null
 ) {
-    val kind = remember(message) { failureKind(message) }
+    val kind = remember(message, knownKind) { knownKind ?: failureKind(message) }
     val signIn = kind == FailureKind.SIGN_IN && canFetchCookies
     val addCookies = kind == FailureKind.REFUSED && canAddCookies
     val goAhead = kind == FailureKind.OTHER && canContinue

@@ -1,6 +1,7 @@
 package com.hazel.android.ui.share
 
 import com.hazel.android.ui.theme.glassBackdrop
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -65,7 +66,12 @@ import kotlinx.coroutines.delay
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit, glass: Boolean = false) {
+fun InstantDialog(
+    onConfirm: () -> Unit,
+    onTune: () -> Unit,
+    glass: Boolean = false,
+    @StringRes tuneLabel: Int = R.string.instant_settings
+) {
     val close by rememberUpdatedState(onConfirm)
     var secondsLeft by remember { mutableIntStateOf(AUTO_CLOSE_SECONDS) }
     LaunchedEffect(Unit) {
@@ -125,7 +131,7 @@ fun InstantDialog(onConfirm: () -> Unit, onTune: () -> Unit, glass: Boolean = fa
                     ) {
                         Icon(
                             Icons.Filled.Tune,
-                            contentDescription = stringResource(R.string.instant_settings),
+                            contentDescription = stringResource(tuneLabel),
                             modifier = Modifier.size(IconButtonDefaults.mediumIconSize)
                         )
                     }
