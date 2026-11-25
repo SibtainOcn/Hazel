@@ -1198,6 +1198,7 @@
     <string name="caption_saved">Descripción descargada</string>
     <string name="caption_save_failed">No se pudo guardar la descripción</string>
     <string name="caption_view_full">Ver descripción completa</string>
+    <string name="gallery_caption_tap_hint">Toca la descripción para verla y copiarla</string>
     <string name="caption_save_choices">Qué guardar</string>
     <string name="caption_only">Solo descripción</string>
     <string name="caption_with_file">Todo</string>

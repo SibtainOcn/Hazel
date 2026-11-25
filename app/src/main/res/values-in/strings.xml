@@ -1164,6 +1164,7 @@
     <string name="caption_saved">Keterangan diunduh</string>
     <string name="caption_save_failed">Keterangan tidak dapat disimpan</string>
     <string name="caption_view_full">Lihat keterangan lengkap</string>
+    <string name="gallery_caption_tap_hint">Ketuk keterangan untuk melihat dan menyalin</string>
     <string name="caption_save_choices">Yang disimpan</string>
     <string name="caption_only">Hanya keterangan</string>
     <string name="caption_with_file">Semua</string>

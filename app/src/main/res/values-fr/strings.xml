@@ -1198,6 +1198,7 @@
     <string name="caption_saved">Légende téléchargée</string>
     <string name="caption_save_failed">Impossible d\'enregistrer la légende</string>
     <string name="caption_view_full">Voir toute la légende</string>
+    <string name="gallery_caption_tap_hint">Touchez la légende pour l’afficher et la copier</string>
     <string name="caption_save_choices">Quoi enregistrer</string>
     <string name="caption_only">Légende seule</string>
     <string name="caption_with_file">Tout</string>

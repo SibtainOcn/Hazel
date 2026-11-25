@@ -210,6 +210,39 @@ class GalleryScreenLayoutTest(private val locale: String) {
         saveScreen("gallery-reading-$locale")
     }
 
+    @Test
+    fun `viewer title opens the caption and the hint shows only with a caption`() {
+        RuntimeEnvironment.setQualifiers("$locale-w320dp-h568dp")
+        val items = listOf(
+            GalleryItem(1, "https://x/1.jpg", "jpg", "Cat 1", "nasa", "x", 0, 0, null, caption = "A long caption"),
+            GalleryItem(2, "https://x/2.jpg", "jpg", "Cat 2", "nasa", "x", 0, 0, null)
+        )
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = false) {
+                GalleryViewer(items = items, startIndex = 0, onOpenSheet = {}, onDismiss = {})
+            }
+        }
+        val hint = context.getString(R.string.gallery_caption_tap_hint)
+        compose.onNodeWithText(hint).assertIsDisplayed()
+        saveScreen("gallery-viewer-caption-$locale")
+        compose.onNodeWithText("Cat 1").performClick()
+        compose.waitForIdle()
+        assertTrue(compose.onAllNodesWithText(context.getString(R.string.caption_copy)).fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun `viewer hides the caption hint without a caption`() {
+        RuntimeEnvironment.setQualifiers("$locale-w320dp-h568dp")
+        val items = listOf(GalleryItem(1, "https://x/1.jpg", "jpg", "Cat 1", "nasa", "x", 0, 0, null))
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = false) {
+                GalleryViewer(items = items, startIndex = 0, onOpenSheet = {}, onDismiss = {})
+            }
+        }
+        compose.waitForIdle()
+        assertTrue(compose.onAllNodesWithText(context.getString(R.string.gallery_caption_tap_hint)).fetchSemanticsNodes().isEmpty())
+    }
+
     private fun downloadAllShown(search: Boolean, keys: List<String>): Boolean {
         RuntimeEnvironment.setQualifiers("$locale-w411dp-h891dp")
         val viewModel = GalleryViewModel(ApplicationProvider.getApplicationContext<Application>())

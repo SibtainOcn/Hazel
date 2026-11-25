@@ -106,30 +106,47 @@ fun GalleryViewer(
                 }
             }
 
-            Row(
+            // The results can shrink under an open viewer (a new search), so the page is clamped.
+            val current = items[pager.currentPage.coerceIn(0, items.lastIndex)]
+            val hasCaption = current.caption.isNotBlank() && current.caption != current.title
+            var captionOpen by remember { mutableStateOf(false) }
+            val openCaption = stringResource(R.string.caption_view_full)
+
+            Column(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .fillMaxWidth()
                     .statusBarsPadding()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ShapeIconButton(onClick = onDismiss, size = 44.dp) {
-                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.gallery_close))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ShapeIconButton(onClick = onDismiss, size = 44.dp) {
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.gallery_close))
+                    }
+                    Text(
+                        "${pager.currentPage + 1} / ${items.size}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                    // Keeps the count centred now that the close button has nothing opposite it.
+                    Spacer(modifier = Modifier.size(44.dp))
                 }
-                Text(
-                    "${pager.currentPage + 1} / ${items.size}",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-                // Keeps the count centred now that the close button has nothing opposite it.
-                Spacer(modifier = Modifier.size(44.dp))
+                if (hasCaption) {
+                    Text(
+                        stringResource(R.string.gallery_caption_tap_hint),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.6f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
-            val current = items[pager.currentPage]
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -141,7 +158,10 @@ fun GalleryViewer(
                 // The single sheet's own Download pill: it opens that sheet for the file in view.
                 // It moves under the details only where they would not fit beside it.
                 SheetHeaderLayout(modifier = Modifier.padding(horizontal = 16.dp)) {
-                    Column {
+                    // The title and its details open the caption too, a larger target than its two lines.
+                    Column(
+                        modifier = Modifier.clickable(enabled = hasCaption, onClickLabel = openCaption) { captionOpen = true }
+                    ) {
                         if (current.title.isNotBlank()) {
                             Text(
                                 current.title,
@@ -173,8 +193,7 @@ fun GalleryViewer(
                     )
                 }
                 // The caption's start; a tap opens all of it.
-                var captionOpen by remember { mutableStateOf(false) }
-                if (current.caption.isNotBlank() && current.caption != current.title) {
+                if (hasCaption) {
                     Text(
                         current.caption,
                         style = MaterialTheme.typography.bodySmall,
@@ -183,7 +202,7 @@ fun GalleryViewer(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable(onClickLabel = stringResource(R.string.caption_view_full)) { captionOpen = true }
+                            .clickable(onClickLabel = openCaption) { captionOpen = true }
                             .padding(horizontal = 16.dp, vertical = 6.dp)
                     )
                 }
