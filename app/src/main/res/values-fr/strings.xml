@@ -1193,4 +1193,5 @@
     <string name="gallery_queued">Ajouté à la file de téléchargement</string>
     <string name="gallery_fetched">%1$d fichiers récupérés</string>
     <string name="gallery_saved_before_failure">%1$d enregistrés avant l\'arrêt</string>
+    <string name="properties_kind_image">Image</string>
 </resources>

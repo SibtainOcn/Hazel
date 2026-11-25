@@ -1159,4 +1159,5 @@
     <string name="gallery_queued">已加入下载队列</string>
     <string name="gallery_fetched">已获取 %1$d 个文件</string>
     <string name="gallery_saved_before_failure">停止前已保存 %1$d 个</string>
+    <string name="properties_kind_image">图片</string>
 </resources>

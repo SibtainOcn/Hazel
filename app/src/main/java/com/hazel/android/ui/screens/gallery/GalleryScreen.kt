@@ -2,6 +2,9 @@ package com.hazel.android.ui.screens.gallery
 
 import android.app.Application
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -18,20 +21,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,8 +59,8 @@ import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryItem
-import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.gallery.GalleryOptions
+import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.gallery.GalleryRequest
 import com.hazel.android.gallery.GalleryRequests
 import com.hazel.android.gallery.queue.GalleryDownloadRequest
@@ -67,13 +69,17 @@ import com.hazel.android.ui.components.BetaTag
 import com.hazel.android.ui.components.EmptyState
 import com.hazel.android.ui.components.HazelLoadingIndicator
 import com.hazel.android.ui.screens.download.DownloadAllButton
+import com.hazel.android.ui.screens.download.FailureKind
+import com.hazel.android.ui.screens.download.NoResultsDialog
 import com.hazel.android.ui.screens.download.PasteButton
 import com.hazel.android.ui.screens.download.SearchOptionsSheet
 import com.hazel.android.ui.screens.download.SearchScreen
 import com.hazel.android.ui.screens.download.UrlSearchBar
 import com.hazel.android.ui.screens.download.rememberClipStamp
+import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 import com.hazel.android.ui.screens.queue.FailureLogSheet
 import com.hazel.android.util.copyToClipboard
+import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
@@ -98,6 +104,16 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     /** The last failed run, for the log sheet. */
     var failure by mutableStateOf<FailedDownload?>(null)
         private set
+    /** What the last failure was, so its dialog offers the right way out (such as signing in). */
+    var failureKind by mutableStateOf<GalleryDlException.Kind?>(null)
+        private set
+    /** The failure dialog, shown once per failure, as Home shows a link it could not read. */
+    var failureDialog by mutableStateOf(false)
+        private set
+
+    fun dismissFailureDialog() {
+        failureDialog = false
+    }
 
     /** The post shown as cards: the only one, or the one opened from the list. */
     val post: GalleryPost? get() = posts.singleOrNull() ?: openPost?.let(posts::getOrNull)
@@ -225,6 +241,8 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         val log = (e as? GalleryDlException)?.let { it.log.ifBlank { it.detail } } ?: e.message.orEmpty()
         notice = GalleryNotice((e as? GalleryDlException)?.let { it.kind.message } ?: R.string.gallery_failed)
         failure = FailedDownload(url = url, title = query, author = "", thumbnail = null, isVideo = false, errorLog = log)
+        failureKind = (e as? GalleryDlException)?.kind ?: GalleryDlException.Kind.OTHER
+        failureDialog = true
     }
 
 }
@@ -424,6 +442,30 @@ fun GalleryScreen(
         }
     }
 
+    val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) viewModel.retry()
+    }
+    viewModel.failure?.takeIf { viewModel.failureDialog }?.let { item ->
+        NoResultsDialog(
+            message = item.errorLog,
+            canFetchCookies = true,
+            canContinue = false,
+            canAddCookies = true,
+            link = item.url,
+            knownKind = viewModel.failureKind?.let(::dialogKind),
+            onCopyLog = {
+                copyToClipboard(context, item.errorLog)
+                viewModel.dismissFailureDialog()
+            },
+            onGetCookies = {
+                viewModel.dismissFailureDialog()
+                signInLauncher.launch(CookieWebViewActivity.intent(context, siteRootOf(item.url)))
+            },
+            onContinueAnyway = {},
+            onDismiss = viewModel::dismissFailureDialog
+        )
+    }
+
     viewModel.failure?.takeIf { logOpen }?.let { item ->
         FailureLogSheet(
             item = item,
@@ -488,4 +530,12 @@ fun GalleryScreen(
             imagesFirst = true
         )
     }
+}
+
+/** gallery-dl's own reading of a failure, in the terms of the shared failure dialog. */
+private fun dialogKind(kind: GalleryDlException.Kind): FailureKind = when (kind) {
+    GalleryDlException.Kind.LOGIN_REQUIRED -> FailureKind.SIGN_IN
+    GalleryDlException.Kind.UNSUPPORTED -> FailureKind.UNSUPPORTED
+    GalleryDlException.Kind.NOT_FOUND -> FailureKind.GONE
+    GalleryDlException.Kind.NETWORK, GalleryDlException.Kind.SETUP, GalleryDlException.Kind.OTHER -> FailureKind.OTHER
 }
