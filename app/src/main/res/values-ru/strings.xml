@@ -5,14 +5,10 @@
     <string name="nav_history">Загрузки</string>
     <string name="nav_more">Ещё</string>
     <string name="nav_gallery">Галерея</string>
-    <string name="gallery_paste_hint">Вставьте ссылку на пост</string>
-    <string name="gallery_get">Получить пост</string>
     <string name="gallery_stop">Стоп</string>
     <string name="gallery_download">Скачать</string>
-    <string name="gallery_download_all">Скачать всё</string>
     <string name="gallery_image">Изображение</string>
     <string name="gallery_video">Видео</string>
-    <string name="gallery_found">Найдено %1$d за %2$s с</string>
     <string name="gallery_saved">Сохранено %1$d в Download/Hazel/Gallery за %2$s с</string>
     <string name="gallery_failed">Не удалось прочитать пост</string>
     <string name="gallery_empty">В посте нет файлов</string>
@@ -21,6 +17,16 @@
     <string name="gallery_error_not_found">Пост удалён, скрыт или пуст</string>
     <string name="gallery_error_network">Нет подключения. Проверьте сеть или прокси</string>
     <string name="gallery_error_setup">Галерея не запустилась на этом устройстве</string>
+    <string name="search_source_images">Изображения</string>
+    <string name="search_options_tab_videos">Видео</string>
+    <string name="gallery_posts_per_search">Постов за поиск</string>
+    <string name="gallery_show">Показывать</string>
+    <string name="gallery_show_all">Изображения и видео</string>
+    <string name="gallery_show_images">Только изображения</string>
+    <string name="gallery_show_videos">Только видео</string>
+    <string name="gallery_skip_reposts">Пропускать репосты</string>
+    <string name="gallery_empty_title">Сохраняйте посты и альбомы</string>
+    <string name="gallery_empty_hint">Вставьте ссылку из Instagram, X, Reddit, Pinterest и ещё 1500 сайтов</string>
     <string name="nav_incognito_on">Инкогнито включено, загрузки не сохраняются</string>
     <string name="nav_incognito_off">Инкогнито выключено</string>
 

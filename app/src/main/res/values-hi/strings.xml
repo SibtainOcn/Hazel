@@ -5,14 +5,10 @@
     <string name="nav_history">डाउनलोड</string>
     <string name="nav_more">और</string>
     <string name="nav_gallery">गैलरी</string>
-    <string name="gallery_paste_hint">पोस्ट लिंक पेस्ट करें</string>
-    <string name="gallery_get">पोस्ट लाएँ</string>
     <string name="gallery_stop">रोकें</string>
     <string name="gallery_download">डाउनलोड</string>
-    <string name="gallery_download_all">सब डाउनलोड करें</string>
     <string name="gallery_image">इमेज</string>
     <string name="gallery_video">वीडियो</string>
-    <string name="gallery_found">%2$s s में %1$d आइटम मिले</string>
     <string name="gallery_saved">%2$s s में %1$d Download/Hazel/Gallery में सहेजे गए</string>
     <string name="gallery_failed">यह पोस्ट पढ़ी नहीं जा सकी</string>
     <string name="gallery_empty">इस पोस्ट में कोई फ़ाइल नहीं</string>
@@ -21,6 +17,16 @@
     <string name="gallery_error_not_found">यह पोस्ट हटाई गई, निजी है या खाली है</string>
     <string name="gallery_error_network">कनेक्ट नहीं हो सका। नेटवर्क या प्रॉक्सी जाँचें</string>
     <string name="gallery_error_setup">इस डिवाइस पर गैलरी शुरू नहीं हो सकी</string>
+    <string name="search_source_images">इमेज</string>
+    <string name="search_options_tab_videos">वीडियो</string>
+    <string name="gallery_posts_per_search">हर खोज में पोस्ट</string>
+    <string name="gallery_show">दिखाएँ</string>
+    <string name="gallery_show_all">इमेज और वीडियो</string>
+    <string name="gallery_show_images">सिर्फ़ इमेज</string>
+    <string name="gallery_show_videos">सिर्फ़ वीडियो</string>
+    <string name="gallery_skip_reposts">रीपोस्ट छोड़ें</string>
+    <string name="gallery_empty_title">पोस्ट और एल्बम सहेजें</string>
+    <string name="gallery_empty_hint">Instagram, X, Reddit, Pinterest और 1,500 और साइटों का लिंक पेस्ट करें</string>
     <string name="nav_incognito_on">गुप्त मोड चालू है, डाउनलोड दर्ज नहीं होंगे</string>
     <string name="nav_incognito_off">गुप्त मोड बंद है</string>
 

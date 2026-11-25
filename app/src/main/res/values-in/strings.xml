@@ -5,14 +5,10 @@
     <string name="nav_history">Unduhan</string>
     <string name="nav_more">Lainnya</string>
     <string name="nav_gallery">Galeri</string>
-    <string name="gallery_paste_hint">Tempel tautan postingan</string>
-    <string name="gallery_get">Ambil postingan</string>
     <string name="gallery_stop">Berhenti</string>
     <string name="gallery_download">Unduh</string>
-    <string name="gallery_download_all">Unduh semua</string>
     <string name="gallery_image">Gambar</string>
     <string name="gallery_video">Video</string>
-    <string name="gallery_found">%1$d item ditemukan dalam %2$s d</string>
     <string name="gallery_saved">%1$d disimpan ke Download/Hazel/Gallery dalam %2$s d</string>
     <string name="gallery_failed">Tidak dapat membaca postingan ini</string>
     <string name="gallery_empty">Tidak ada file di postingan ini</string>
@@ -21,6 +17,16 @@
     <string name="gallery_error_not_found">Postingan dihapus, privat, atau kosong</string>
     <string name="gallery_error_network">Tidak dapat terhubung. Periksa jaringan atau proxy</string>
     <string name="gallery_error_setup">Galeri tidak dapat dimulai di perangkat ini</string>
+    <string name="search_source_images">Gambar</string>
+    <string name="search_options_tab_videos">Video</string>
+    <string name="gallery_posts_per_search">Postingan per penelusuran</string>
+    <string name="gallery_show">Tampilkan</string>
+    <string name="gallery_show_all">Gambar dan video</string>
+    <string name="gallery_show_images">Hanya gambar</string>
+    <string name="gallery_show_videos">Hanya video</string>
+    <string name="gallery_skip_reposts">Lewati repost</string>
+    <string name="gallery_empty_title">Simpan postingan dan album</string>
+    <string name="gallery_empty_hint">Tempel tautan dari Instagram, X, Reddit, Pinterest, dan 1.500 situs lain</string>
     <string name="nav_incognito_on">Mode samaran aktif, unduhan tidak dicatat</string>
     <string name="nav_incognito_off">Mode samaran nonaktif</string>
 

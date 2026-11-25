@@ -159,7 +159,8 @@ fun DownloadScreen(
     onSharesConsumed: () -> Unit = {},
     downloadViewModel: DownloadViewModel = viewModel(),
     /** Opens the queue screen, where a download in hand is paused, resumed or cancelled. */
-    onOpenQueue: () -> Unit = {}
+    onOpenQueue: () -> Unit = {},
+    onOpenGallery: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -1003,6 +1004,12 @@ fun DownloadScreen(
                 downloadViewModel.search(query, source)
             },
             onClearResults = downloadViewModel::clearResults,
+            onSearchImages = { request ->
+                searchOpen = false
+                stopPlaying()
+                com.hazel.android.gallery.GalleryRequests.send(request)
+                onOpenGallery()
+            },
             onDismiss = { searchOpen = false }
         )
     }
