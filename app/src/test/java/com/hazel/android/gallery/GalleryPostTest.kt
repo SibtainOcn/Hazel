@@ -75,6 +75,7 @@ class GalleryPostTest {
         assertNull(request.indexes)
         assertEquals(listOf("https://cdn.example/34.jpg", "https://cdn.example/35.jpg"), request.files)
         assertEquals(request.files, GalleryDownloadRequest.fromPayload(request.toPayload())?.files)
+        assertTrue(post.items.all { request.covers(post, it) })
     }
 
     @Test

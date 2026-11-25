@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
@@ -108,7 +109,7 @@ fun DownloadPropertiesSheet(
     // One header read per opening, and none at all for a file that is not there.
     var facts by remember(entry.id) { mutableStateOf(MediaFacts()) }
     LaunchedEffect(entry.id, present) {
-        if (present) facts = runCatching { MediaProbeFacts.read(context, entry.fileUri) }.getOrDefault(MediaFacts())
+        if (present) facts = runCatching { MediaProbeFacts.read(context, entry.fileUri, image = entry.isImage) }.getOrDefault(MediaFacts())
     }
 
     // A new object per message, so the same one twice in a row still restarts its time.
@@ -278,7 +279,12 @@ private fun FileActions(entry: HistoryEntry, present: Boolean) {
     val primary = MaterialTheme.colorScheme.primary
     val neutral = MaterialTheme.colorScheme.surfaceContainerHighest
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-        CookieAction(Icons.Filled.PlayArrow, R.string.format_sheet_play, present, primary, MaterialTheme.colorScheme.onPrimary) {
+        // An image is viewed, not played.
+        CookieAction(
+            if (entry.isImage) Icons.Filled.Image else Icons.Filled.PlayArrow,
+            if (entry.isImage) R.string.gallery_view else R.string.format_sheet_play,
+            present, primary, MaterialTheme.colorScheme.onPrimary
+        ) {
             MediaOpener.play(context, entry.fileUri, entry.mimeType)
         }
         CookieAction(Icons.AutoMirrored.Filled.OpenInNew, R.string.media_open_chooser, present, neutral, MaterialTheme.colorScheme.onSurface) {

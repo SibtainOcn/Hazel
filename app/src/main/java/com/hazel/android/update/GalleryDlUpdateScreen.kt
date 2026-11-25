@@ -98,8 +98,8 @@ fun GalleryDlUpdateScreen(
             JoinedTiles(
                 listOf(
                     installed to stringResource(R.string.upd_tile_version),
-                    "PyPI" to stringResource(R.string.upd_tile_source),
-                    GalleryDlPayload.BUNDLED_VERSION to stringResource(R.string.upd_ytdlp_bundled)
+                    // The copy shipped inside the app: used offline and whenever an update is reset.
+                    GalleryDlPayload.BUNDLED_VERSION to stringResource(R.string.upd_tile_builtin)
                 )
             )
             Spacer(modifier = Modifier.height(20.dp))
@@ -112,7 +112,7 @@ fun GalleryDlUpdateScreen(
                     UpdateAction(Icons.Filled.ContentCopy, R.string.upd_action_copy) {
                         copyAndTell(context, "gallery-dl $installed (${if (usesBundled) "bundled" else "PyPI"})")
                     },
-                    UpdateAction(Icons.Filled.Inventory2, R.string.upd_action_use_bundled, enabled = !usesBundled && !busy) {
+                    UpdateAction(Icons.Filled.Inventory2, R.string.upd_action_use_builtin, enabled = !usesBundled && !busy) {
                         scope.launch {
                             val message = if (viewModel.useBundled()) {
                                 context.getString(R.string.upd_bundled_restored, GalleryDlPayload.BUNDLED_VERSION)
@@ -131,7 +131,7 @@ fun GalleryDlUpdateScreen(
                 UpdateListItem(
                     icon = Icons.Filled.CloudDownload,
                     primary = stringResource(R.string.upd_auto_download_title),
-                    secondary = stringResource(R.string.upd_auto_download_summary),
+                    secondary = stringResource(R.string.upd_gallerydl_auto_summary),
                     trailing = { UpdateSwitch(checked = autoDownload, onCheckedChange = { viewModel.setAutoDownload(it) }) }
                 )
                 UpdateListItem(

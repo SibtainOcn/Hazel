@@ -1182,10 +1182,8 @@
     <string name="upd_notify_engines_summary">Pour les mises à jour de yt-dlp et gallery-dl</string>
     <string name="upd_notify_installed_title">Prévenir après l\'installation</string>
     <string name="upd_notify_failed_title">Prévenir si une mise à jour échoue</string>
-    <string name="upd_action_use_bundled">Intégrée</string>
     <string name="upd_bundled_restored">gallery-dl %1$s intégré est maintenant utilisé</string>
     <string name="upd_busy">Un téléchargement est en cours. Réessayez une fois terminé</string>
-    <string name="gallery_queued">Ajouté à la file de téléchargement</string>
     <string name="gallery_fetched">%1$d fichiers récupérés</string>
     <string name="gallery_saved_before_failure">%1$d enregistrés avant l\'arrêt</string>
     <string name="properties_kind_image">Image</string>
@@ -1193,4 +1191,7 @@
     <string name="gallery_type_sheet_subtitle">Quels fichiers de cette publication télécharger</string>
     <string name="gallery_remove_title">Retirer ce fichier ?</string>
     <string name="incognito_off">Navigation privée désactivée</string>
+    <string name="upd_tile_builtin">Intégrée</string>
+    <string name="upd_action_use_builtin">Utiliser l\'intégrée</string>
+    <string name="upd_gallerydl_auto_summary">Installer les nouvelles versions hors téléchargement</string>
 </resources>

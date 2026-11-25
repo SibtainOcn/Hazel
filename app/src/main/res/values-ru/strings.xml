@@ -1198,10 +1198,8 @@
     <string name="upd_notify_engines_summary">Для обновлений yt-dlp и gallery-dl</string>
     <string name="upd_notify_installed_title">Уведомлять после установки</string>
     <string name="upd_notify_failed_title">Уведомлять о сбое обновления</string>
-    <string name="upd_action_use_bundled">Встроенная</string>
     <string name="upd_bundled_restored">Теперь используется встроенный gallery-dl %1$s</string>
     <string name="upd_busy">Идёт загрузка. Повторите попытку после её завершения</string>
-    <string name="gallery_queued">Добавлено в очередь загрузок</string>
     <string name="gallery_fetched">Получено файлов: %1$d</string>
     <string name="gallery_saved_before_failure">Сохранено до остановки: %1$d</string>
     <string name="properties_kind_image">Изображение</string>
@@ -1209,4 +1207,7 @@
     <string name="gallery_type_sheet_subtitle">Какие файлы этой публикации загрузить</string>
     <string name="gallery_remove_title">Убрать этот файл?</string>
     <string name="incognito_off">Инкогнито выключен</string>
+    <string name="upd_tile_builtin">Встроенная</string>
+    <string name="upd_action_use_builtin">Вернуть встроенную</string>
+    <string name="upd_gallerydl_auto_summary">Ставить новые версии, когда нет загрузок</string>
 </resources>

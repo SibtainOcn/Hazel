@@ -73,6 +73,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hazel.android.R
 import com.hazel.android.download.BatchState
+import com.hazel.android.data.DownloadHistoryRepository
 import com.hazel.android.data.DownloadQueueRepository
 import com.hazel.android.ui.screens.queue.QueueScreen
 import com.hazel.android.ui.components.HazelBottomBar
@@ -203,6 +204,10 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val isSubScreen = currentRoute in subScreenRoutes
+    val historyUnseen by remember(context) { DownloadHistoryRepository.hasUnseen(context) }.collectAsState(initial = false)
+    LaunchedEffect(currentRoute, historyUnseen) {
+        if (historyUnseen && currentRoute == Screen.History.route) DownloadHistoryRepository.markSeen(context)
+    }
 
     val downloadViewModel: com.hazel.android.download.DownloadViewModel =
         remember { com.hazel.android.download.DownloadViewModelHolder.get() }
@@ -377,8 +382,11 @@ fun AppNavigation(
                             route = screen.route,
                             icon = screen.icon,
                             label = screen.titleRes,
-                            showDot = screen == Screen.Queue && queueBusy &&
-                                currentDestination?.route != Screen.Queue.route
+                            showDot = currentDestination?.route != screen.route && when (screen) {
+                                Screen.Queue -> queueBusy
+                                Screen.History -> historyUnseen
+                                else -> false
+                            }
                         )
                     },
                     selectedRoute = bottomNavItems.firstOrNull { screen ->

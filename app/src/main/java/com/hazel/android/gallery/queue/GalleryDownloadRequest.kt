@@ -44,6 +44,10 @@ data class GalleryDownloadRequest(
         }
     }
 
+    /** Whether this request downloads [item] of [post]. */
+    fun covers(post: GalleryPost, item: com.hazel.android.gallery.GalleryItem): Boolean =
+        files?.contains(item.url) ?: (url == post.source && (indexes == null || item.index in indexes))
+
     /** Stored with a failure, so Retry on the Failed tab sends it back to the gallery queue. */
     fun toPayload(): String = PAYLOAD_PREFIX + toJson()
 

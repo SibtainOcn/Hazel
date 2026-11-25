@@ -20,6 +20,7 @@ import com.hazel.android.download.DownloadTurn
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryItem
+import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
@@ -47,6 +48,40 @@ object GalleryQueue {
     enum class State { WAITING, RUNNING }
 
     data class Job(val request: GalleryDownloadRequest, val state: State = State.WAITING, val fetched: Int = 0)
+
+    /** Where a file shown on the Gallery tab stands, for its card. */
+    sealed interface ItemStatus {
+        data object Waiting : ItemStatus
+        /** [progress] is null while the total is unknown. */
+        data class Running(val progress: Float?) : ItemStatus
+        data object Saved : ItemStatus
+        data object Failed : ItemStatus
+    }
+
+    private const val FINISHED_KEPT = 100
+    private val _finished = MutableStateFlow<List<Pair<GalleryDownloadRequest, Boolean>>>(emptyList())
+    /** Jobs that ended this session, newest last, with whether they saved; bounded. */
+    val finished: StateFlow<List<Pair<GalleryDownloadRequest, Boolean>>> = _finished.asStateFlow()
+
+    private fun finish(request: GalleryDownloadRequest, saved: Boolean) {
+        _finished.update { (it + (request to saved)).takeLast(FINISHED_KEPT) }
+    }
+
+    /** The newest state of [item] of [post] across [jobs] and [finished]; null when never queued. */
+    fun statusOf(
+        jobs: List<Job>,
+        finished: List<Pair<GalleryDownloadRequest, Boolean>>,
+        post: GalleryPost,
+        item: GalleryItem
+    ): ItemStatus? {
+        jobs.lastOrNull { it.request.covers(post, item) }?.let { job ->
+            if (job.state == State.WAITING) return ItemStatus.Waiting
+            val total = job.request.files?.size ?: job.request.indexes?.size ?: 0
+            return ItemStatus.Running(if (total > 0) (job.fetched.toFloat() / total).coerceAtMost(1f) else null)
+        }
+        val (_, saved) = finished.lastOrNull { it.first.covers(post, item) } ?: return null
+        return if (saved) ItemStatus.Saved else ItemStatus.Failed
+    }
 
     private const val TAG = "HazelGallery"
     private val QUEUE_KEY = stringPreferencesKey("gallery_queue")
@@ -170,6 +205,7 @@ object GalleryQueue {
             withContext(NonCancellable) {
                 if (!incognito) DownloadHistoryRepository.recordAll(app, entries.asReversed())
                 FailedDownloadRepository.removeByUrl(app, request.url)
+                finish(request, saved = true)
                 DownloadNotificationHelper.showComplete(
                     app, title, isVideo = false, fileUri = firstFile?.first, mimeType = firstFile?.second
                 )
@@ -185,6 +221,7 @@ object GalleryQueue {
             val failure = e as? GalleryDlException
             val reason = app.getString(failure?.kind?.message ?: com.hazel.android.R.string.gallery_failed)
             Log.w(TAG, "Gallery download failed: ${failure?.kind ?: e.javaClass.simpleName}")
+            finish(request, saved = false)
             withContext(NonCancellable) {
                 if (!incognito) DownloadHistoryRepository.recordAll(app, entries.asReversed())
                 FailedDownloadRepository.record(

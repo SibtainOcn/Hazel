@@ -2,6 +2,7 @@ package com.hazel.android.data
 
 import android.content.Context
 import android.net.Uri
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.hazel.android.util.HistoryThumbnails
@@ -121,6 +122,15 @@ object DownloadHistoryRepository {
     private const val LIMIT = 500
 
     private val HISTORY_KEY = stringPreferencesKey("download_history")
+    /** Set when a file is saved, cleared once the Downloads screen is opened: its tab's dot. */
+    private val UNSEEN_KEY = booleanPreferencesKey("history_unseen")
+
+    fun hasUnseen(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { it[UNSEEN_KEY] == true }.distinctUntilChanged()
+
+    suspend fun markSeen(context: Context) {
+        context.dataStore.edit { it.remove(UNSEEN_KEY) }
+    }
 
     fun getHistory(context: Context): Flow<List<HistoryEntry>> =
         context.dataStore.data
@@ -141,6 +151,7 @@ object DownloadHistoryRepository {
             saved = withFreeId(entry, existing)
             kept = (listOf(saved) + existing).take(LIMIT)
             prefs[HISTORY_KEY] = encode(kept)
+            prefs[UNSEEN_KEY] = true
         }
         // Runs after the row is saved and survives the caller being cancelled.
         withContext(NonCancellable) {
@@ -165,6 +176,7 @@ object DownloadHistoryRepository {
             }
             kept = existing.take(LIMIT)
             prefs[HISTORY_KEY] = encode(kept)
+            prefs[UNSEEN_KEY] = true
         }
         withContext(NonCancellable) {
             HistoryThumbnails.prune(context, kept.mapTo(HashSet()) { it.id })
