@@ -113,6 +113,10 @@ data class AccentColor(
 
 val AccentColors = listOf(
     AccentColor("White",      Color(0xFFE0E0E0), Color(0xFF616161), Color(0xFF1A1A1A), Color(0xFFF5F5F5)),
+    AccentColor("Blush",      Color(0xFFFFB1C8), Color(0xFFA3264F), Color(0xFF3A0F1E), Color(0xFFFFE3EC)),
+    AccentColor("Powder",     Color(0xFFA8CBFF), Color(0xFF2B5C9E), Color(0xFF0E2440), Color(0xFFDCEBFF)),
+    AccentColor("Sage",       Color(0xFFA8E0B8), Color(0xFF2F6B45), Color(0xFF0E2A18), Color(0xFFDDF3E3)),
+    AccentColor("Peach",      Color(0xFFFFC8A8), Color(0xFFA4502A), Color(0xFF3A1A0C), Color(0xFFFFE8DA)),
     AccentColor("Cyan",       Color(0xFF00BCD4), Color(0xFF00838F), Color(0xFF002B31), Color(0xFFB2EBF2)),
     AccentColor("Sky",        Color(0xFF38BDF8), Color(0xFF0369A1), Color(0xFF06263A), Color(0xFFD6EFFF)),
     AccentColor("Blue",       Color(0xFF2196F3), Color(0xFF1565C0), Color(0xFF051E33), Color(0xFFBBDEFB)),
