@@ -216,10 +216,10 @@ internal fun GalleryItemSheet(
                             Surface(
                                 onClick = { saveMenu = true },
                                 enabled = options != null,
-                                shape = RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp, topEnd = 28.dp, bottomEnd = 28.dp),
+                                shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 24.dp, bottomEnd = 24.dp),
                                 color = MaterialTheme.colorScheme.primary,
                                 contentColor = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(width = 40.dp, height = 56.dp)
+                                modifier = Modifier.size(width = 40.dp, height = 48.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.caption_save_choices))
