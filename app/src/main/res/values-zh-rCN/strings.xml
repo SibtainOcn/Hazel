@@ -697,7 +697,6 @@
     <string name="storage_locations_no_limit">不限速</string>
     <string name="storage_locations_internal_note">除非选择其他文件夹或 SD 卡，下载会保存到内部存储。</string>
     <string name="storage_locations_gallery">图库</string>
-    <string name="storage_locations_gallery_hint">图片和帖子</string>
     <string name="gallery_settings_description">图片和帖子的保存与搜索方式</string>
     <string name="gallery_settings_save_folder">保存文件夹</string>
     <string name="gallery_settings_image_size">图片尺寸</string>
@@ -1162,4 +1161,7 @@
     <string name="upd_tile_builtin">内置</string>
     <string name="upd_action_use_builtin">使用内置版</string>
     <string name="upd_gallerydl_auto_summary">无下载时安装新版本</string>
+    <string name="gallery_group_by_author">按作者分组</string>
+    <string name="gallery_group_by_author_summary">同一作者的单张图片放进一个轮播</string>
+    <string name="more_image_settings">图片设置</string>
 </resources>

@@ -82,7 +82,7 @@ internal val SETTINGS_INDEX: List<SettingEntry> = buildList {
     on(more, "advanced", R.string.more_advanced to R.string.advanced_description)
     on(more, "backup", R.string.more_backup to R.string.backup_description)
     on(more, "storage_locations", R.string.more_downloads to R.string.storage_locations_subtitle)
-    on(more, "gallery_settings", R.string.nav_gallery to R.string.gallery_settings_description)
+    on(more, "gallery_settings", R.string.more_image_settings to R.string.gallery_settings_description)
     add(SettingEntry(R.string.more_language, null, more, action = SettingAction.LANGUAGE))
     on(more, "cookies", R.string.more_cookies to R.string.cookies_description)
     on(more, "fetch_settings", R.string.more_link_reading to R.string.fetch_settings_screen_description)
@@ -177,7 +177,7 @@ internal val SETTINGS_INDEX: List<SettingEntry> = buildList {
         R.string.fetch_settings_play_audio to null
     )
     on(
-        R.string.nav_gallery, "gallery_settings",
+        R.string.more_image_settings, "gallery_settings",
         R.string.gallery_settings_save_folder to null,
         R.string.gallery_settings_image_size to R.string.gallery_settings_image_size_hint,
         R.string.gallery_settings_video_quality to null,

@@ -83,6 +83,16 @@ class GalleryPostTest {
         assertTrue(GalleryPost.group("https://site/x", emptyList()).isEmpty())
     }
 
+    @Test
+    fun `single images by one author join one post, posts with several files stay apart`() {
+        val posts = GalleryPost.group("https://site/search?q=x", listOf(file(1, "p1"), file(2, "p2"), file(3, "p3"), file(4, "p3")), feed = true)
+        val grouped = GalleryPost.byAuthor(posts)
+        assertEquals(2, grouped.size)
+        assertEquals(listOf("https://cdn.example/1.jpg", "https://cdn.example/2.jpg"), grouped[0].items.map { it.url })
+        assertTrue(grouped[0].direct)
+        assertEquals(2, grouped[1].items.size)
+    }
+
     private fun file(index: Int, post: String, link: String? = null) = GalleryItem(
         index = index, url = "https://cdn.example/$index.jpg", extension = "jpg", title = "", author = "a",
         site = "site", width = 0, height = 0, thumbnail = null, postKey = post, postUrl = link

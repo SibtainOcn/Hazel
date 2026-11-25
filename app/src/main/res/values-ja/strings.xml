@@ -697,7 +697,6 @@
     <string name="storage_locations_no_limit">制限なし</string>
     <string name="storage_locations_internal_note">別のフォルダや SD カードを選ばない限り、内部ストレージに保存されます。</string>
     <string name="storage_locations_gallery">ギャラリー</string>
-    <string name="storage_locations_gallery_hint">画像と投稿</string>
     <string name="gallery_settings_description">画像と投稿の保存と検索の方法</string>
     <string name="gallery_settings_save_folder">保存先フォルダ</string>
     <string name="gallery_settings_image_size">画像サイズ</string>
@@ -1162,4 +1161,7 @@
     <string name="upd_tile_builtin">内蔵</string>
     <string name="upd_action_use_builtin">内蔵版を使う</string>
     <string name="upd_gallerydl_auto_summary">ダウンロードしていない時に新しい版を入れる</string>
+    <string name="gallery_group_by_author">投稿者ごとにまとめる</string>
+    <string name="gallery_group_by_author_summary">同じ投稿者の単体画像を1つのカルーセルに</string>
+    <string name="more_image_settings">画像の設定</string>
 </resources>

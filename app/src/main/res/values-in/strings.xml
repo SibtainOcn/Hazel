@@ -697,7 +697,6 @@
     <string name="storage_locations_no_limit">Tanpa batas</string>
     <string name="storage_locations_internal_note">Disimpan di penyimpanan internal kecuali kamu memilih folder lain atau kartu SD.</string>
     <string name="storage_locations_gallery">Galeri</string>
-    <string name="storage_locations_gallery_hint">Gambar dan postingan</string>
     <string name="gallery_settings_description">Cara gambar dan postingan disimpan dan dicari</string>
     <string name="gallery_settings_save_folder">Folder simpan</string>
     <string name="gallery_settings_image_size">Ukuran gambar</string>
@@ -1162,4 +1161,7 @@
     <string name="upd_tile_builtin">Bawaan</string>
     <string name="upd_action_use_builtin">Pakai bawaan</string>
     <string name="upd_gallerydl_auto_summary">Pasang versi baru saat tidak ada unduhan</string>
+    <string name="gallery_group_by_author">Kelompokkan per pembuat</string>
+    <string name="gallery_group_by_author_summary">Gambar tunggal dari satu pembuat dalam satu korsel</string>
+    <string name="more_image_settings">Setelan gambar</string>
 </resources>

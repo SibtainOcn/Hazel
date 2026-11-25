@@ -742,7 +742,6 @@
     <string name="storage_locations_no_limit">Без лимита</string>
     <string name="storage_locations_internal_note">Загрузки сохраняются во внутреннюю память, если не выбрана другая папка или SD-карта.</string>
     <string name="storage_locations_gallery">Галерея</string>
-    <string name="storage_locations_gallery_hint">Изображения и публикации</string>
     <string name="gallery_settings_description">Как сохраняются и ищутся изображения и публикации</string>
     <string name="gallery_settings_save_folder">Папка сохранения</string>
     <string name="gallery_settings_image_size">Размер изображения</string>
@@ -1212,4 +1211,7 @@
     <string name="upd_tile_builtin">Встроенная</string>
     <string name="upd_action_use_builtin">Вернуть встроенную</string>
     <string name="upd_gallerydl_auto_summary">Ставить новые версии, когда нет загрузок</string>
+    <string name="gallery_group_by_author">Группировать по автору</string>
+    <string name="gallery_group_by_author_summary">Одиночные фото автора в одной карусели</string>
+    <string name="more_image_settings">Настройки изображений</string>
 </resources>

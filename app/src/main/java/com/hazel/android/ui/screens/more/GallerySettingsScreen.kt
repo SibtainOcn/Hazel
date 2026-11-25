@@ -98,7 +98,7 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
     }
 
     SettingsScreen(
-        title = stringResource(R.string.nav_gallery),
+        title = stringResource(R.string.more_image_settings),
         onBack = onBack,
         description = stringResource(R.string.gallery_settings_description)
     ) {

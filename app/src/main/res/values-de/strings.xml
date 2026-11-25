@@ -712,7 +712,6 @@
     <string name="storage_locations_no_limit">Unbegrenzt</string>
     <string name="storage_locations_internal_note">Gespeichert im internen Speicher, außer du wählst einen anderen Ordner oder eine SD-Karte.</string>
     <string name="storage_locations_gallery">Galerie</string>
-    <string name="storage_locations_gallery_hint">Bilder und Beiträge</string>
     <string name="gallery_settings_description">Wie Bilder und Beiträge gespeichert und gesucht werden</string>
     <string name="gallery_settings_save_folder">Speicherordner</string>
     <string name="gallery_settings_image_size">Bildgröße</string>
@@ -1179,4 +1178,7 @@
     <string name="upd_tile_builtin">Integriert</string>
     <string name="upd_action_use_builtin">Integrierte nutzen</string>
     <string name="upd_gallerydl_auto_summary">Neue Versionen installieren, wenn kein Download läuft</string>
+    <string name="gallery_group_by_author">Nach Autor gruppieren</string>
+    <string name="gallery_group_by_author_summary">Einzelbilder eines Autors in einem Karussell</string>
+    <string name="more_image_settings">Bildeinstellungen</string>
 </resources>

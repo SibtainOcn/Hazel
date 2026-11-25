@@ -106,8 +106,11 @@ data class GalleryListing(
             return "$site:id:${info.optString("id")}:${authorOf(info)}"
         }
 
+        // Pinterest search pins mostly leave title and description empty; their alt text reads as one.
+        private val TITLE_KEYS = listOf("title", "grid_title", "description", "content", "caption", "seo_alt_text", "auto_alt_text")
+
         private fun titleOf(info: JSONObject): String =
-            listOf("title", "description", "content", "caption")
+            TITLE_KEYS
                 .firstNotNullOfOrNull { key -> info.optString(key).takeIf { it.isNotBlank() && it != "null" } }
                 ?.lineSequence()?.firstOrNull { it.isNotBlank() }?.trim()?.take(TITLE_MAX)
                 .orEmpty()
@@ -116,7 +119,7 @@ data class GalleryListing(
             listOf("fullname", "username", "uploader").forEach { key ->
                 info.optString(key).takeIf { it.isNotBlank() && it != "null" }?.let { return it }
             }
-            listOf("author", "user").forEach { key ->
+            listOf("author", "user", "pinner").forEach { key ->
                 when (val value = info.opt(key)) {
                     is JSONObject -> listOf("name", "nick", "username").firstNotNullOfOrNull { field ->
                         value.optString(field).takeIf { it.isNotBlank() }
@@ -150,6 +153,31 @@ data class GalleryPost(val key: String, val source: String, val items: List<Gall
          * from 1. A post with its own link is downloaded from it; one read from a [feed] (search,
          * profile, several posts) without a link is fetched file by file, since the feed moves.
          */
+        /**
+         * Single-file posts by one author gathered into one post, where the author first
+         * appears. Posts with several files stay as they are. The gathered files come from
+         * different posts, so they are fetched by their own addresses.
+         */
+        fun byAuthor(posts: List<GalleryPost>): List<GalleryPost> {
+            val shared = posts.filter { it.items.size == 1 && it.author.isNotBlank() }
+                .groupBy { it.site to it.author }
+                .filterValues { it.size > 1 }
+            if (shared.isEmpty()) return posts
+            val placed = HashSet<Pair<String, String>>()
+            return posts.mapNotNull { post ->
+                if (post.items.size != 1) return@mapNotNull post
+                val key = post.site to post.author
+                val group = shared[key] ?: return@mapNotNull post
+                if (!placed.add(key)) return@mapNotNull null
+                GalleryPost(
+                    key = "author:${key.first}:${key.second}",
+                    source = group.first().source,
+                    items = group.flatMap { it.items }.mapIndexed { i, file -> file.copy(index = i + 1) },
+                    direct = true
+                )
+            }
+        }
+
         fun group(source: String, items: List<GalleryItem>, feed: Boolean = false): List<GalleryPost> {
             if (items.isEmpty()) return emptyList()
             val groups = items.groupBy { it.postKey }
