@@ -66,7 +66,15 @@ import com.hazel.android.ui.theme.sheetBlackColor
 import kotlinx.coroutines.launch
 
 /** A preset by name, with the template it fills in. */
-private class Preset(val template: String, @StringRes val name: Int, val icon: ImageVector)
+internal class Preset(val template: String, @StringRes val name: Int, val icon: ImageVector)
+
+/** Which tool's template the sheet edits: its presets, its fields and how it writes and cleans them. */
+internal class TemplateKind(
+    val presets: List<Preset>,
+    val fields: List<String>,
+    val field: (String) -> String,
+    val normalize: (String) -> String
+)
 
 private val Presets = FilenameTemplate.PRESETS.zip(
     listOf(
@@ -80,6 +88,8 @@ private val Presets = FilenameTemplate.PRESETS.zip(
     )
 ) { template, (name, icon) -> Preset(template, name, icon) }
 
+private val YtDlpTemplates = TemplateKind(Presets, FilenameTemplate.FIELDS, FilenameTemplate::field, FilenameTemplate::normalize)
+
 /**
  * The yt-dlp output template that names the saved file, in a sheet.
  *
@@ -91,6 +101,15 @@ private val Presets = FilenameTemplate.PRESETS.zip(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun FilenameTemplateSheet(
+    template: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) = FilenameTemplateSheet(YtDlpTemplates, template, onConfirm, onDismiss)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+internal fun FilenameTemplateSheet(
+    kind: TemplateKind,
     template: String,
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit
@@ -116,7 +135,7 @@ fun FilenameTemplateSheet(
     // Stable callbacks, so the preset and field lists skip while the user types.
     val onInsert: (String) -> Unit = remember {
         { name ->
-            val text = FilenameTemplate.field(name)
+            val text = kind.field(name)
             val start = minOf(draft.selection.start, draft.selection.end)
             val end = maxOf(draft.selection.start, draft.selection.end)
             draft = TextFieldValue(draft.text.replaceRange(start, end, text), TextRange(start + text.length))
@@ -125,12 +144,12 @@ fun FilenameTemplateSheet(
     val onPick: (String) -> Unit = remember {
         { preset -> draft = TextFieldValue(preset, TextRange(preset.length)) }
     }
-    val chosen = Presets.firstOrNull { it.template == draft.text }?.template
+    val chosen = kind.presets.firstOrNull { it.template == draft.text }?.template
 
     fun save() {
         if (closing || draft.text.isBlank()) return
         closing = true
-        val result = FilenameTemplate.normalize(draft.text)
+        val result = kind.normalize(draft.text)
         scope.launch { sheetState.hide() }.invokeOnCompletion { onConfirm(result) }
     }
 
@@ -176,7 +195,7 @@ fun FilenameTemplateSheet(
                 onValueChange = { draft = it },
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
-                placeholder = { Text(FilenameTemplate.PRESETS.first(), fontFamily = FontFamily.Monospace) },
+                placeholder = { Text(kind.presets.first().template, fontFamily = FontFamily.Monospace) },
                 trailingIcon = if (draft.text.isEmpty()) null else {
                     {
                         IconButton(
@@ -194,28 +213,28 @@ fun FilenameTemplateSheet(
             )
 
             SectionLabel(stringResource(R.string.options_filename_presets))
-            PresetList(compact = typing, chosen = chosen, onPick = onPick)
+            PresetList(kind.presets, compact = typing, chosen = chosen, onPick = onPick)
             SectionLabel(stringResource(R.string.options_filename_fields))
-            FieldList(compact = typing, onInsert = onInsert)
+            FieldList(kind.fields, compact = typing, onInsert = onInsert)
         }
     }
 }
 
 /** Cards when there is room, one scrolling row of pills while the keyboard is up. */
 @Composable
-private fun PresetList(compact: Boolean, chosen: String?, onPick: (String) -> Unit) {
+private fun PresetList(presets: List<Preset>, compact: Boolean, chosen: String?, onPick: (String) -> Unit) {
     if (compact) {
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Presets.forEach { preset ->
+            presets.forEach { preset ->
                 PresetPill(stringResource(preset.name), preset.template == chosen) { onPick(preset.template) }
             }
         }
     } else {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Presets.forEach { preset ->
+            presets.forEach { preset ->
                 PresetCard(preset.icon, stringResource(preset.name), preset.template == chosen) { onPick(preset.template) }
             }
         }
@@ -225,20 +244,20 @@ private fun PresetList(compact: Boolean, chosen: String?, onPick: (String) -> Un
 /** Every field, wrapped when there is room and in one scrolling row while typing. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun FieldList(compact: Boolean, onInsert: (String) -> Unit) {
+private fun FieldList(fields: List<String>, compact: Boolean, onInsert: (String) -> Unit) {
     if (compact) {
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            FilenameTemplate.FIELDS.forEach { name -> FieldChip(name) { onInsert(name) } }
+            fields.forEach { name -> FieldChip(name) { onInsert(name) } }
         }
     } else {
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            FilenameTemplate.FIELDS.forEach { name -> FieldChip(name) { onInsert(name) } }
+            fields.forEach { name -> FieldChip(name) { onInsert(name) } }
         }
     }
 }
