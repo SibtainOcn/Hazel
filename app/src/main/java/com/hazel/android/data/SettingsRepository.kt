@@ -345,7 +345,7 @@ object SettingsRepository {
     private val GALLERY_REPOSTS_KEY = booleanPreferencesKey("gallery_skip_reposts")
     private val GALLERY_GROUP_AUTHOR_KEY = booleanPreferencesKey("gallery_group_by_author")
 
-    val GALLERY_POST_COUNTS = listOf(10, 30, 60)
+    val GALLERY_POST_COUNTS = listOf(10, 30, 60, 100)
     const val DEFAULT_GALLERY_POSTS = 30
 
     fun getImageSearch(context: Context): Flow<Boolean> =
