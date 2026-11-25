@@ -73,7 +73,6 @@ import com.hazel.android.ui.components.keepFlingInSheet
 import com.hazel.android.ui.components.keptAboveKeyboard
 import com.hazel.android.ui.components.liftedOverKeyboard
 import com.hazel.android.ui.components.rememberSheetKeyboard
-import com.hazel.android.ui.screens.download.BadgeTone
 import com.hazel.android.ui.screens.download.CookiesDialog
 import com.hazel.android.ui.screens.download.EditableField
 import com.hazel.android.ui.screens.download.FIELD_GROUP_GAP
@@ -272,7 +271,7 @@ internal fun GalleryItemSheet(
                     showChevron = true,
                     pickedShape = false
                 ) {
-                    QualityTags(quality.choice.tags)
+                    QualityTags(quality.choice)
                 }
             }
 
@@ -445,26 +444,23 @@ internal fun sizeChoices(item: GalleryItem): List<QualityChoice<GalleryImageSize
 @Composable
 private fun sizeChoice(item: GalleryItem, size: GalleryImageSize): QualityChoice<GalleryImageSize> {
     val dimensions = "${item.width} × ${item.height}".takeIf { item.width > 0 && item.height > 0 }
-    val tags = if (size == GalleryImageSize.ORIGINAL) {
-        listOfNotNull(
-            dimensions?.let { it to BadgeTone.SIZE },
-            stringResource(R.string.gallery_size_original_hint) to BadgeTone.NEUTRAL
-        )
-    } else {
-        listOf(stringResource(R.string.gallery_size_x_only) to BadgeTone.NEUTRAL)
-    }
-    return QualityChoice(size, item.extension.uppercase().ifBlank { "IMG" }, imageSizeLabel(size).uppercase(), tags)
+    val original = size == GalleryImageSize.ORIGINAL
+    val hint = stringResource(if (original) R.string.gallery_size_original_hint else R.string.gallery_size_x_only)
+    return QualityChoice(
+        size, item.extension.uppercase().ifBlank { "IMG" }, imageSizeLabel(size).uppercase(),
+        pixels = dimensions.takeIf { original }, hints = listOf(hint)
+    )
 }
 
 @Composable
 private fun videoChoices(item: GalleryItem): List<QualityChoice<GalleryVideoMode>> = listOf(
     QualityChoice(
         GalleryVideoMode.BEST, "BEST", videoModeLabel(GalleryVideoMode.BEST).uppercase(),
-        listOf(stringResource(R.string.gallery_video_best_hint) to BadgeTone.NEUTRAL)
+        hints = listOf(stringResource(R.string.gallery_video_best_hint))
     ),
     QualityChoice(
         GalleryVideoMode.SINGLE, item.extension.uppercase().ifBlank { "MP4" }, videoModeLabel(GalleryVideoMode.SINGLE).uppercase(),
-        listOf(stringResource(R.string.gallery_video_single_hint) to BadgeTone.NEUTRAL)
+        hints = listOf(stringResource(R.string.gallery_video_single_hint))
     )
 )
 
