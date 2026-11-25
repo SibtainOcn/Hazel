@@ -2999,6 +2999,8 @@ class DownloadViewModel : ViewModel() {
         // this one, otherwise stuck the card on the stage track while bytes were still
         // arriving.
         var postProcessing = false
+        var shownProcessing = false
+        var lastShownAt = 0L
         _state.update { s -> s.copy(
             processingSteps = steps,
             processingStep = 0,
@@ -3025,23 +3027,31 @@ class DownloadViewModel : ViewModel() {
             val announced = ProcessingStep.announcedBy(line)?.let { steps.indexOf(it) } ?: -1
             val fetched = if (postProcessing && steps.size > 1) 1 else 0
             val unmeasured = liveRun
-            _state.update { current -> current.copy(
-                progress = if (unmeasured) 0f else percent / 100f,
-                unmeasured = unmeasured,
-                totalBytes = if (unmeasured) 0L
-                else if (expectedTotalBytes > 0) expectedTotalBytes
-                else parseTotalBytes(line) ?: current.totalBytes,
-                eta = if (postProcessing) "" else ProgressText.eta(line) ?: current.eta,
-                status = status,
-                isProcessing = postProcessing && !unmeasured,
-                processingStep = maxOf(current.processingStep, announced, fetched)
-            ) }
+            // yt-dlp writes many lines a second; each state change redraws every screen
+            // watching it, so plain progress is passed on a few times a second and a stage
+            // change at once.
+            val now = System.currentTimeMillis()
+            val stageMoved = announced > _state.value.processingStep || postProcessing != shownProcessing
+            if (stageMoved || now - lastShownAt >= UI_INTERVAL_MS) {
+                lastShownAt = now
+                shownProcessing = postProcessing
+                _state.update { current -> current.copy(
+                    progress = if (unmeasured) 0f else percent / 100f,
+                    unmeasured = unmeasured,
+                    totalBytes = if (unmeasured) 0L
+                    else if (expectedTotalBytes > 0) expectedTotalBytes
+                    else parseTotalBytes(line) ?: current.totalBytes,
+                    eta = if (postProcessing) "" else ProgressText.eta(line) ?: current.eta,
+                    status = status,
+                    isProcessing = postProcessing && !unmeasured,
+                    processingStep = maxOf(current.processingStep, announced, fetched)
+                ) }
+            }
 
             // Updates are paced by the clock rather than by the percentage. yt-dlp reports
             // the same percentage for seconds at a time on a large transfer while the speed
             // and ETA behind it keep moving, so pacing on the percentage left the
             // notification showing figures that were already out of date.
-            val now = System.currentTimeMillis()
             if (now - lastNotifiedAt >= NOTIFICATION_INTERVAL_MS) {
                 lastNotifiedAt = now
                 downloadContext?.let {
@@ -3644,6 +3654,7 @@ class DownloadViewModel : ViewModel() {
 
         /** How often the progress notification is redrawn while a transfer runs. */
         const val NOTIFICATION_INTERVAL_MS = 600L
+        const val UI_INTERVAL_MS = 250L
 
         /** How often the temp directory is weighed while a transfer runs. */
         const val FLOOR_INTERVAL_MS = 1000L

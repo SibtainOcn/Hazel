@@ -1,6 +1,7 @@
 package com.hazel.android.ui.components
 
 import com.hazel.android.ui.theme.LocalDarkTheme
+import androidx.compose.animation.core.InfiniteTransition
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -89,25 +91,8 @@ fun FillingDownloadIcon(
         animationSpec = spring(dampingRatio = 0.6f, stiffness = 220f),
         label = "downloadFill"
     )
-    val transition = rememberInfiniteTransition(label = "downloadWave")
-    val phase by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 1100, easing = LinearEasing)),
-        label = "downloadWavePhase"
-    )
-    val slowPhase by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 1900, easing = LinearEasing)),
-        label = "downloadWaveSlowPhase"
-    )
-    val swell by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 2600, easing = LinearEasing)),
-        label = "downloadWaveSwell"
-    )
+    // A held download asks for no frames at all: the waves run only while it flows.
+    val waves = if (flowing) rememberWaves() else null
     val dark = LocalDarkTheme.current
     val top = if (dark) Color(0xFF7CF3FF) else Color(0xFF4FE3F5)
     val bottom = if (dark) Color(0xFF2E8BFF) else Color(0xFF1565E8)
@@ -140,9 +125,11 @@ fun FillingDownloadIcon(
                         drawRect(brush, blendMode = BlendMode.SrcIn)
                         return@drawWithContent
                     }
-                    val bob = if (flowing) 0.8.dp.toPx() * sin(2f * PI.toFloat() * swell) else 0f
+                    val phase = waves?.phase?.value ?: 0f
+                    val slowPhase = waves?.slowPhase?.value ?: 0f
+                    val bob = waves?.let { 0.8.dp.toPx() * sin(2f * PI.toFloat() * it.swell.value) } ?: 0f
                     val surface = size.height * (1f - level) + bob
-                    val amplitude = if (flowing) 2.dp.toPx() else 0f
+                    val amplitude = if (waves != null) 2.dp.toPx() else 0f
                     fun wave(path: Path, ph: Float, amp: Float, cycles: Float) {
                         path.reset()
                         path.moveTo(0f, size.height)
@@ -171,3 +158,22 @@ fun FillingDownloadIcon(
         )
     }
 }
+
+private class Waves(val phase: State<Float>, val slowPhase: State<Float>, val swell: State<Float>)
+
+@Composable
+private fun rememberWaves(): Waves {
+    val transition = rememberInfiniteTransition(label = "downloadWave")
+    val phase = transition.cycle(1100, "downloadWavePhase")
+    val slow = transition.cycle(1900, "downloadWaveSlowPhase")
+    val swell = transition.cycle(2600, "downloadWaveSwell")
+    return remember(phase, slow, swell) { Waves(phase, slow, swell) }
+}
+
+@Composable
+private fun InfiniteTransition.cycle(ms: Int, label: String): State<Float> = animateFloat(
+    initialValue = 0f,
+    targetValue = 1f,
+    animationSpec = infiniteRepeatable(tween(durationMillis = ms, easing = LinearEasing)),
+    label = label
+)
