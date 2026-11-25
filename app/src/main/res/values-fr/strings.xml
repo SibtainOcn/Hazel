@@ -1229,10 +1229,10 @@
     <string name="more_image_settings">Réglages des images</string>
     <string name="caption_copy">Copier</string>
     <string name="caption_save_text">Enregistrer en texte</string>
-    <string name="caption_saved">Légende enregistrée</string>
+    <string name="caption_saved">Légende téléchargée</string>
     <string name="caption_save_failed">Impossible d\'enregistrer la légende</string>
     <string name="caption_view_full">Voir toute la légende</string>
     <string name="caption_save_choices">Quoi enregistrer</string>
     <string name="caption_only">Légende seule</string>
-    <string name="caption_with_file">Fichier et légende</string>
+    <string name="caption_with_file">Tout</string>
 </resources>

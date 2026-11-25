@@ -1245,10 +1245,10 @@
     <string name="more_image_settings">Настройки изображений</string>
     <string name="caption_copy">Копировать</string>
     <string name="caption_save_text">Сохранить как текст</string>
-    <string name="caption_saved">Подпись сохранена</string>
+    <string name="caption_saved">Подпись скачана</string>
     <string name="caption_save_failed">Не удалось сохранить подпись</string>
     <string name="caption_view_full">Показать всю подпись</string>
     <string name="caption_save_choices">Что сохранить</string>
     <string name="caption_only">Только подпись</string>
-    <string name="caption_with_file">Файл и подпись</string>
+    <string name="caption_with_file">Всё</string>
 </resources>

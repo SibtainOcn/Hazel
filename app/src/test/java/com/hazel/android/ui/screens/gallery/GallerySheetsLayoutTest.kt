@@ -130,6 +130,14 @@ class GallerySheetsLayoutTest(private val locale: String) {
     }
 
     @Test
+    fun `caption sheet is solid over the sheet behind it in glass`() {
+        val caption = "Line one of the caption. Line two of it."
+        show { com.hazel.android.ui.components.CaptionSheet(caption = caption, title = "Title", onDismiss = {}) }
+        compose.onNodeWithText(caption).assertIsDisplayed()
+        saveScreen("gallery-caption-sheet-$locale")
+    }
+
+    @Test
     fun `viewer over many single-file results opens`() {
         // Every single-file post numbers its file 1, so the all-results viewer holds repeated indexes.
         val results = POST.map { it.copy(index = 1) }
