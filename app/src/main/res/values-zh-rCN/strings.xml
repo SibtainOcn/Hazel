@@ -718,9 +718,6 @@
     <string name="gallery_settings_x_posts_value">回复、转推、引用</string>
     <string name="gallery_settings_network">网络</string>
     <string name="gallery_settings_retries">重试次数</string>
-    <string name="gallery_settings_extras">其他</string>
-    <string name="gallery_settings_captions">说明文字存为 .txt</string>
-    <string name="gallery_settings_ugoira">Pixiv 动图转为视频</string>
     <string name="storage_locations_wifi_only">仅 Wi-Fi</string>
     <string name="storage_locations_speed_limit">速度限制</string>
 
@@ -1201,4 +1198,6 @@
     <string name="caption_save_choices">保存内容</string>
     <string name="caption_only">仅说明文字</string>
     <string name="caption_with_file">全部</string>
+    <string name="gallery_settings_caption_in_file">在图片文件中写入说明</string>
+    <string name="gallery_settings_caption_in_file_hint">写入保存的 JPEG 和 PNG</string>
 </resources>

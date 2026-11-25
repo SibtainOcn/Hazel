@@ -185,6 +185,7 @@ internal val SETTINGS_INDEX: List<SettingEntry> = buildList {
         R.string.gallery_settings_metadata to null,
         R.string.gallery_settings_post_date to null,
         R.string.gallery_settings_zip to null,
+        R.string.gallery_settings_caption_in_file to R.string.gallery_settings_caption_in_file_hint,
         R.string.gallery_settings_skip_downloaded to R.string.gallery_settings_skip_downloaded_hint,
         R.string.gallery_settings_clear_record to R.string.gallery_settings_clear_record_hint,
         R.string.gallery_posts_per_search to null,

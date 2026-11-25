@@ -46,7 +46,9 @@ data class GalleryOptions(
     val packZip: Boolean = false,
     val skipDownloaded: Boolean = false,
     /** The post's caption is written into each JPEG and PNG saved. */
-    val embedCaption: Boolean = false
+    val embedCaption: Boolean = false,
+    /** How often a failed request is tried again. */
+    val retries: Int = DEFAULT_RETRIES
 ) {
     /** The template is a name, never a path, so files cannot land outside the work folder. */
     val safeTemplate: String?
@@ -60,5 +62,13 @@ data class GalleryOptions(
         if (!keepPostDate) add("--no-mtime")
         if (packZip) add("--zip")
         if (skipDownloaded && archive != null) { add("--download-archive"); add(archive.absolutePath) }
+        if (retries != DEFAULT_RETRIES) { add("--retries"); add(retries.coerceIn(0, MAX_RETRIES).toString()) }
+    }
+
+    companion object {
+        /** gallery-dl's own default, so it is not passed. */
+        const val DEFAULT_RETRIES = 4
+        const val MAX_RETRIES = 10
+        val RETRY_CHOICES = listOf(0, 1, 2, 4, 6, 10)
     }
 }
