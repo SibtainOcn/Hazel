@@ -125,3 +125,8 @@ fun GalleryPost.request(
         save = save
     )
 }
+
+/** What a link shared to Instant Images saves: one post with its details, else the link with the author they share. */
+fun instantRequest(url: String, posts: List<GalleryPost>, options: GalleryOptions?): GalleryDownloadRequest =
+    posts.singleOrNull()?.request(null, options)
+        ?: GalleryDownloadRequest(url, options = options, author = posts.map { it.author }.distinct().singleOrNull().orEmpty())
