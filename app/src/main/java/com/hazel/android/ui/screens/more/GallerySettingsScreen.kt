@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Animation
 import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.DataObject
 import androidx.compose.material.icons.filled.DeleteSweep
@@ -30,9 +30,6 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PhotoSizeSelectLarge
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Subtitles
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -72,7 +69,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private enum class GalleryChoice { IMAGE_SIZE, VIDEO, FILENAME, SITE, POSTS, SHOW, CLEAR_RECORD }
+private enum class GalleryChoice { IMAGE_SIZE, VIDEO, FILENAME, SITE, POSTS, SHOW, CLEAR_RECORD, RETRIES }
 
 /** Defaults for gallery-dl downloads and image search. */
 @Composable
@@ -98,7 +95,7 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
     }
 
     SettingsScreen(
-        title = stringResource(R.string.nav_gallery),
+        title = stringResource(R.string.more_image_settings),
         onBack = onBack,
         description = stringResource(R.string.gallery_settings_description)
     ) {
@@ -143,6 +140,15 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
                         title = stringResource(R.string.gallery_settings_metadata),
                         checked = options.writeMetadata,
                         onCheckedChange = { on -> save { it.copy(writeMetadata = on) } }
+                    )
+                },
+                {
+                    SwitchSettingRow(
+                        icon = Icons.Filled.FormatQuote,
+                        title = stringResource(R.string.gallery_settings_caption_in_file),
+                        summary = stringResource(R.string.gallery_settings_caption_in_file_hint),
+                        checked = options.embedCaption,
+                        onCheckedChange = { on -> save { it.copy(embedCaption = on) } }
                     )
                 },
                 {
@@ -244,19 +250,16 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
         SettingsSection(
             title = stringResource(R.string.gallery_settings_network),
             rows = listOf(
-                { ActionSettingRow(icon = Icons.Filled.Timer, title = stringResource(R.string.advanced_sleep_requests), onClick = later) },
-                { ActionSettingRow(icon = Icons.Filled.Speed, title = stringResource(R.string.storage_locations_speed_limit), onClick = later) },
-                { ActionSettingRow(icon = Icons.Filled.Replay, title = stringResource(R.string.gallery_settings_retries), onClick = later) },
+                {
+                    ValueSettingRow(
+                        icon = Icons.Filled.Replay,
+                        title = stringResource(R.string.gallery_settings_retries),
+                        value = options.retries.toString(),
+                        onClick = { open = GalleryChoice.RETRIES }
+                    )
+                },
                 { ActionSettingRow(icon = Icons.Filled.Cookie, title = stringResource(R.string.more_cookies), onClick = onOpenCookies) },
                 { ActionSettingRow(icon = Icons.Filled.Lan, title = stringResource(R.string.advanced_proxy), onClick = onOpenProxy) }
-            )
-        )
-
-        SettingsSection(
-            title = stringResource(R.string.gallery_settings_extras),
-            rows = listOf(
-                { ActionSettingRow(icon = Icons.Filled.Subtitles, title = stringResource(R.string.gallery_settings_captions), onClick = later) },
-                { ActionSettingRow(icon = Icons.Filled.Animation, title = stringResource(R.string.gallery_settings_ugoira), onClick = later) }
             )
         )
     }
@@ -326,6 +329,13 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
             choices = GalleryShow.entries.map { it to stringResource(showLabel(it)) },
             selected = show,
             onSelect = { scope.launch { SettingsRepository.setGalleryShow(context, it) }; close() },
+            onDismiss = close
+        )
+        GalleryChoice.RETRIES -> SingleChoiceDialog(
+            title = stringResource(R.string.gallery_settings_retries),
+            choices = GalleryOptions.RETRY_CHOICES.map { it to it.toString() },
+            selected = options.retries,
+            onSelect = { count -> save { it.copy(retries = count) }; close() },
             onDismiss = close
         )
         GalleryChoice.CLEAR_RECORD -> ConfirmSettingDialog(

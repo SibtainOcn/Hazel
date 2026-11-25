@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.gallery
 
+import com.hazel.android.ui.components.CaptionSheet
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.widget.Toast
@@ -64,6 +65,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.ui.screens.download.SheetDownloadPill
+import com.hazel.android.ui.components.SheetHeaderLayout
 import com.hazel.android.gallery.GalleryItem
 import com.hazel.android.ui.components.ShapeIconButton
 import kotlinx.coroutines.launch
@@ -77,7 +80,8 @@ private const val MAX_ZOOM = 5f
 fun GalleryViewer(
     items: List<GalleryItem>,
     startIndex: Int,
-    onDownload: (GalleryItem) -> Unit,
+    /** Opens the download sheet for the file in view. */
+    onOpenSheet: (GalleryItem) -> Unit,
     onDismiss: () -> Unit
 ) {
     if (items.isEmpty()) return
@@ -98,7 +102,7 @@ fun GalleryViewer(
                         .fillMaxSize()
                         .graphicsLayer { alpha = 1f - offset.absoluteValue.coerceIn(0f, 1f) * 0.85f }
                 ) {
-                    ViewerPage(item = items[page], active = page == pager.currentPage)
+                    items.getOrNull(page)?.let { ViewerPage(item = it, active = page == pager.currentPage) }
                 }
             }
 
@@ -121,17 +125,12 @@ fun GalleryViewer(
                     modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
-                ShapeIconButton(
-                    onClick = { onDownload(items[pager.currentPage]) },
-                    filled = true,
-                    size = 44.dp,
-                    shape = MaterialShapes.Cookie9Sided.toShape()
-                ) {
-                    Icon(Icons.Filled.Download, contentDescription = stringResource(R.string.gallery_download))
-                }
+                // Keeps the count centred now that the close button has nothing opposite it.
+                Spacer(modifier = Modifier.size(44.dp))
             }
 
-            val current = items[pager.currentPage]
+            // The results can shrink under an open viewer (a new search), so the page is clamped.
+            val current = items[pager.currentPage.coerceIn(0, items.lastIndex)]
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -140,28 +139,56 @@ fun GalleryViewer(
                     .navigationBarsPadding()
                     .padding(top = 12.dp, bottom = 12.dp)
             ) {
-                if (current.title.isNotBlank()) {
-                    Text(
-                        current.title,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                // The single sheet's own Download pill: it opens that sheet for the file in view.
+                // It moves under the details only where they would not fit beside it.
+                SheetHeaderLayout(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Column {
+                        if (current.title.isNotBlank()) {
+                            Text(
+                                current.title,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        Text(
+                            listOfNotNull(
+                                current.author.takeIf { it.isNotBlank() },
+                                current.extension.uppercase().takeIf { it.isNotBlank() },
+                                current.takeIf { it.width > 0 && it.height > 0 }?.let { "${it.width} × ${it.height}" }
+                            ).joinToString(" · "),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.75f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    SheetDownloadPill(
+                        label = stringResource(R.string.format_sheet_download),
+                        icon = Icons.Filled.Download,
+                        enabled = true,
+                        onClick = { onOpenSheet(current) },
+                        iconOnly = true
                     )
                 }
-                Text(
-                    listOfNotNull(
-                        current.author.takeIf { it.isNotBlank() },
-                        current.extension.uppercase().takeIf { it.isNotBlank() },
-                        current.takeIf { it.width > 0 && it.height > 0 }?.let { "${it.width} × ${it.height}" }
-                    ).joinToString(" · "),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.75f),
-                    maxLines = 1,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                // The caption's start; a tap opens all of it.
+                var captionOpen by remember { mutableStateOf(false) }
+                if (current.caption.isNotBlank() && current.caption != current.title) {
+                    Text(
+                        current.caption,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.85f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(onClickLabel = stringResource(R.string.caption_view_full)) { captionOpen = true }
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                    )
+                }
+                if (captionOpen) CaptionSheet(current.caption, current.title, onDismiss = { captionOpen = false })
                 if (items.size > 1) {
                     Spacer(modifier = Modifier.height(10.dp))
                     LazyRow(
@@ -169,7 +196,7 @@ fun GalleryViewer(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        itemsIndexed(items, key = { _, it -> it.index }) { index, item ->
+                        itemsIndexed(items) { index, item ->
                             val selected = index == pager.currentPage
                             val scale by animateFloatAsState(if (selected) 1.1f else 1f, label = "thumb")
                             val fade by animateFloatAsState(if (selected) 1f else 0.5f, label = "thumbAlpha")

@@ -24,8 +24,10 @@ class GalleryOptionsTest {
             writeMetadata = true,
             keepPostDate = false,
             packZip = true,
-            skipDownloaded = true
+            skipDownloaded = true,
+            retries = 2
         ).toArgs(File("/data/archive.sqlite3"))
+        assertEquals("2", args[args.indexOf("--retries") + 1])
         assertTrue("extractor.twitter.size=large,medium,small" in args)
         assertTrue("extractor.instagram.videos=merged" in args)
         assertEquals("{username}_{num}.{extension}", args[args.indexOf("--filename") + 1])

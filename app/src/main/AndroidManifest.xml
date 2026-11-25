@@ -89,6 +89,7 @@
         <activity
             android:name=".ui.share.ShareOverlayActivity"
             android:exported="true"
+            android:label="@string/share_label_video"
             android:excludeFromRecents="true"
             android:taskAffinity=""
             android:launchMode="singleInstance"
@@ -111,6 +112,34 @@
             android:targetActivity=".ui.share.ShareOverlayActivity"
             android:exported="true"
             android:label="@string/instant_label"
+            android:icon="@mipmap/ic_launcher">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Hazel Images: reads the shared link with gallery-dl and opens the gallery sheet. -->
+        <activity-alias
+            android:name=".GalleryShareActivity"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:label="@string/share_label_images"
+            android:icon="@mipmap/ic_launcher">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Instant Images: queues the whole shared post with the saved gallery settings. -->
+        <activity-alias
+            android:name=".InstantGalleryShareActivity"
+            android:targetActivity=".ui.share.ShareOverlayActivity"
+            android:exported="true"
+            android:label="@string/instant_images_label"
             android:icon="@mipmap/ic_launcher">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

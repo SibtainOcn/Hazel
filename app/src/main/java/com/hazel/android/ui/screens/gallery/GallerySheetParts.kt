@@ -2,37 +2,18 @@ package com.hazel.android.ui.screens.gallery
 
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Tag
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.data.SaveKind
@@ -40,12 +21,9 @@ import com.hazel.android.data.SettingsRepository
 import com.hazel.android.gallery.GalleryImageSize
 import com.hazel.android.gallery.GalleryItem
 import com.hazel.android.gallery.GalleryOptions
-import com.hazel.android.gallery.GalleryVideoMode
 import com.hazel.android.ui.screens.download.Preset
 import com.hazel.android.ui.screens.download.SaveLocationScreen
 import com.hazel.android.ui.screens.download.TemplateKind
-import com.hazel.android.ui.screens.download.defaultFieldColor
-import com.hazel.android.ui.screens.download.fieldGroupShape
 import com.hazel.android.util.SdCard
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -92,87 +70,14 @@ internal fun imageSizeLabel(size: GalleryImageSize): String = stringResource(
     }
 )
 
-/** Image size rows: the original, and the smaller sizes only X serves. */
-@Composable
-internal fun ImageSizeChoices(selected: GalleryImageSize, onSelect: (GalleryImageSize) -> Unit) {
-    val sizes = GalleryImageSize.entries
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        sizes.forEachIndexed { i, size ->
-            ChoiceRow(
-                label = imageSizeLabel(size),
-                hint = stringResource(
-                    if (size == GalleryImageSize.ORIGINAL) R.string.gallery_size_original_hint else R.string.gallery_size_x_only
-                ),
-                selected = size == selected,
-                shape = fieldGroupShape(i, sizes.size),
-                onClick = { onSelect(size) }
-            )
-        }
-    }
+/** The title a file's sheet starts with: the site's, else the file's own name. */
+internal fun defaultTitle(item: GalleryItem): String = item.title.ifBlank {
+    runCatching { java.net.URI(item.url).path }.getOrNull().orEmpty()
+        .substringAfterLast('/').substringBeforeLast('.')
 }
 
-@Composable
-internal fun VideoModeChoices(selected: GalleryVideoMode, onSelect: (GalleryVideoMode) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        ChoiceRow(
-            label = stringResource(R.string.gallery_video_best),
-            hint = stringResource(R.string.gallery_video_best_hint),
-            selected = selected == GalleryVideoMode.BEST,
-            shape = fieldGroupShape(0, 2),
-            onClick = { onSelect(GalleryVideoMode.BEST) }
-        )
-        ChoiceRow(
-            label = stringResource(R.string.gallery_video_single),
-            hint = stringResource(R.string.gallery_video_single_hint),
-            selected = selected == GalleryVideoMode.SINGLE,
-            shape = fieldGroupShape(1, 2),
-            onClick = { onSelect(GalleryVideoMode.SINGLE) }
-        )
-    }
-}
-
-/** One choice of a group: the pick takes a tonal accent fill and a check, never a stroke. */
-@Composable
-private fun ChoiceRow(label: String, hint: String, selected: Boolean, shape: Shape, onClick: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = shape,
-        color = if (selected) colors.primary.copy(alpha = 0.16f) else defaultFieldColor()
-    ) {
-        Row(
-            modifier = Modifier
-                .clickable(onClick = onClick)
-                .padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    label,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                    color = if (selected) colors.primary else colors.onSurface
-                )
-                Text(hint, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-            }
-            if (selected) {
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(Icons.Filled.Check, contentDescription = null, tint = colors.primary, modifier = Modifier.size(20.dp))
-            }
-        }
-    }
-}
-
-/** A field that only shows a value, for the details gallery-dl cannot change. */
-@Composable
-internal fun ReadOnlyField(label: String, value: String, shape: Shape) {
-    Surface(modifier = Modifier.fillMaxWidth(), shape = shape, color = defaultFieldColor()) {
-        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
-            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-            Text(value.ifBlank { "-" }, style = MaterialTheme.typography.bodyMedium, maxLines = 3)
-        }
-    }
-}
+/** The author a file's sheet starts with: the site's, else the site itself. */
+internal fun defaultAuthor(item: GalleryItem): String = item.author.ifBlank { item.site }
 
 /** The gallery folder's location screen, the same one More > Storage locations opens. */
 @Composable

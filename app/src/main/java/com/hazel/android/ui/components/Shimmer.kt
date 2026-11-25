@@ -7,6 +7,9 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -567,4 +570,47 @@ fun ShimmerLabel(
 @Composable
 fun LineShimmer(width: Dp, height: Dp = 14.dp, modifier: Modifier = Modifier) {
     Box(modifier = modifier.width(width).height(height).shimmerBlock())
+}
+
+
+/** Gap between skeleton cards, the same as between the result cards they stand in for. */
+val SkeletonSpacing = 20.dp
+
+/** An upper bound on skeleton cards, for a screen taller than any phone's. */
+private const val MAX_VIEWPORT_SKELETONS = 8
+
+/** A row of [columns] skeleton cards, the width the real ones will take. */
+@Composable
+fun MediaCardShimmerRow(columns: Int) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SkeletonSpacing)) {
+        repeat(columns) { MediaCardShimmer(modifier = Modifier.weight(1f)) }
+    }
+}
+
+/**
+ * Skeleton cards filling the space under the search bar while a link or search is read: as
+ * many as fit at their real size, so the last runs off the bottom rather than being squeezed.
+ */
+@Composable
+fun ResultsSkeleton(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.padding(horizontal = 20.dp).clipToBounds()) {
+        Column {
+            Spacer(modifier = Modifier.height(16.dp))
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val columns = gridColumns(maxWidth)
+                val cardWidth = (maxWidth - SkeletonSpacing * (columns - 1)) / columns
+                val cardHeight = cardWidth * 9f / 16f + SkeletonSpacing
+                val count = (maxHeight / cardHeight).toInt().plus(1).coerceIn(1, MAX_VIEWPORT_SKELETONS)
+                ShimmerHost(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(align = Alignment.Top, unbounded = true)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(SkeletonSpacing)) {
+                        repeat(count) { MediaCardShimmerRow(columns) }
+                    }
+                }
+            }
+        }
+    }
 }
