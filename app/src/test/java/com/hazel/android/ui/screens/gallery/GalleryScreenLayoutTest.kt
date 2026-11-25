@@ -13,10 +13,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import com.hazel.android.R
+import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryItem
 import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.ui.saveScreen
@@ -72,6 +75,40 @@ class GalleryScreenLayoutTest(private val locale: String) {
             assertTrue("$text runs off the bottom edge", at.y + node.size.height <= metrics.heightPixels)
         }
         saveScreen("gallery-empty-$locale")
+    }
+
+    @Test
+    fun `a failed run offers its log on the shared sheet`() {
+        RuntimeEnvironment.setQualifiers("$locale-w320dp-h568dp")
+        val viewModel = GalleryViewModel(ApplicationProvider.getApplicationContext<Application>())
+        viewModel.fail(
+            "https://www.instagram.com/p/abc/",
+            GalleryDlException(
+                GalleryDlException.Kind.LOGIN_REQUIRED, "login required",
+                log = "[instagram][info] Requesting post\n[instagram][error] AuthorizationError: Login required"
+            )
+        )
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = true) {
+                val density = LocalDensity.current
+                CompositionLocalProvider(LocalDensity provides Density(density.density, 2f)) {
+                    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+                        GalleryScreen(onVideoLinks = {}, onVideoSearch = { _, _ -> }, viewModel = viewModel)
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        val width = context.resources.displayMetrics.widthPixels
+        val viewLog = compose.onNodeWithText(context.getString(R.string.gallery_view_log)).performScrollTo().assertIsDisplayed()
+        val button = viewLog.fetchSemanticsNode()
+        assertTrue("View log runs off the screen", button.positionOnScreen.x + button.size.width <= width)
+        saveScreen("gallery-failed-$locale")
+        viewLog.performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText(context.getString(R.string.history_failed_retry)).assertIsDisplayed()
+        compose.onNodeWithText("AuthorizationError", substring = true).assertIsDisplayed()
+        saveScreen("gallery-failed-log-$locale")
     }
 
     @Test

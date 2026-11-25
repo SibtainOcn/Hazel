@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Screen changes: the home header and the bottom bar move with their screen, so nothing jumps part way through a transition.
 - Sign-in: one-tap Instagram, YouTube, X, Facebook, TikTok and Reddit in Settings > Cookies, so you can sign in before downloading.
 - Download settings: a Gallery save folder, Download/Hazel/Gallery by default.
+- More > Gallery: defaults for gallery downloads and image search, and clearing the download record.
+- Gallery: View log on a failed run, and a Gallery files row in Temporary files.
 
 ### Fixed
 - Hazel updates: Beta and Nightly find their releases, move from one build to the next, and move onto a newer stable.

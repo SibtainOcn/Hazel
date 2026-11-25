@@ -5,7 +5,9 @@ class GalleryDlException(
     val kind: Kind,
     /** gallery-dl's own last error line, for logs. Not shown as is. */
     val detail: String,
-    cause: Throwable? = null
+    cause: Throwable? = null,
+    /** The end of the run's redacted log, for the log sheet; blank when there is none. */
+    val log: String = ""
 ) : Exception(detail, cause) {
 
     enum class Kind {

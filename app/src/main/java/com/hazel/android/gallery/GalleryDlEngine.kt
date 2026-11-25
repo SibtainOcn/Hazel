@@ -31,10 +31,20 @@ import java.util.concurrent.atomic.AtomicReference
 object GalleryDlEngine {
 
     private const val TAG = "HazelGallery"
-    private const val ERROR_TAIL_BYTES = 8_192L
+    private const val LOG_TAIL_CHARS = 16_000
     private const val LISTING_MAX_CHARS = 16 * 1024 * 1024
     private const val SKIPPED_PREFIX = "# "
     private const val ARCHIVE_FILE = "gallery-dl-archive.sqlite3"
+
+    /** The record of posts already saved, used by Skip already downloaded. */
+    fun archiveFile(context: Context): File = File(context.filesDir, ARCHIVE_FILE)
+
+    /** Forgets every saved post. Blocking; true when nothing is left. */
+    fun clearArchive(context: Context): Boolean {
+        val main = archiveFile(context)
+        return listOf(main, File(main.path + "-journal"), File(main.path + "-wal"), File(main.path + "-shm"))
+            .all { !it.exists() || it.delete() }
+    }
 
     /**
      * Every file of the post at [url]. With [postLimit], the link is a search, profile or tag
@@ -66,7 +76,7 @@ object GalleryDlEngine {
     ): Int {
         val chosen = options ?: SettingsRepository.getGalleryOptions(context).first()
         val incognito = SettingsRepository.getIncognito(context).first()
-        val archive = File(context.filesDir, ARCHIVE_FILE).takeUnless { incognito }
+        val archive = archiveFile(context).takeUnless { incognito }
         val work = File(StoragePaths.tempDownloads, "gallery-${UUID.randomUUID()}")
         try {
             if (!work.mkdirs()) throw GalleryDlException(GalleryDlException.Kind.SETUP, "no work folder")
@@ -116,7 +126,8 @@ object GalleryDlEngine {
                     add("--")
                     add(url)
                 }
-                YtDlpEngine.shared { execute(app, runtime, command, running, job, onLine) }
+                val secrets = listOfNotNull(access.cookieFile?.absolutePath)
+                YtDlpEngine.shared { execute(app, runtime, command, running, job, secrets, onLine) }
             }
             try {
                 work.await()
@@ -153,11 +164,14 @@ object GalleryDlEngine {
         command: List<String>,
         running: AtomicReference<Process?>,
         job: Job?,
+        secrets: List<String>,
         onLine: (String) -> Unit
     ) {
-        val errors = File.createTempFile("gallery-dl", ".log", context.cacheDir)
+        val logs = GalleryLogs.dir(context)
+        var raw: File? = null
         try {
-            val builder = ProcessBuilder(command).redirectError(errors)
+            raw = GalleryLogs.rawFile(logs)
+            val builder = ProcessBuilder(command).redirectError(raw)
             runtime.applyTo(builder.environment(), importPath = listOf(runtime.ytDlp).filter { it.isFile })
             val process = builder.start()
             running.set(process)
@@ -170,9 +184,10 @@ object GalleryDlEngine {
                 val code = process.waitFor()
                 if (job?.isActive == false) throw CancellationException()
                 if (code != 0) {
-                    val last = lastError(errors)
+                    val log = GalleryLogs.keep(logs, raw, secrets)
+                    val last = lastError(log)
                     Log.w(TAG, "gallery-dl exited with $code: $last")
-                    throw GalleryDlException(GalleryDlException.classify(last), last)
+                    throw GalleryDlException(GalleryDlException.classify(last), last, log = log.takeLast(LOG_TAIL_CHARS))
                 }
             } finally {
                 running.set(null)
@@ -185,18 +200,12 @@ object GalleryDlEngine {
         } catch (e: Exception) {
             throw GalleryDlException(GalleryDlException.Kind.SETUP, e.message ?: e.javaClass.simpleName, e)
         } finally {
-            errors.delete()
+            raw?.takeIf { it.exists() }?.let { runCatching { GalleryLogs.keep(logs, it, secrets) } }
         }
     }
 
     /** gallery-dl's last error line, without its `[site][error]` prefix. */
-    private fun lastError(log: File): String {
-        val text = runCatching {
-            log.inputStream().use { input ->
-                input.skip((log.length() - ERROR_TAIL_BYTES).coerceAtLeast(0))
-                input.readBytes().decodeToString()
-            }
-        }.getOrDefault("")
+    private fun lastError(text: String): String {
         val lines = text.lines().map { it.trim() }.filter { it.isNotEmpty() }
         val line = lines.lastOrNull { "error" in it.lowercase() } ?: lines.lastOrNull().orEmpty()
         return line.replace(ERROR_PREFIX, "").trim()
