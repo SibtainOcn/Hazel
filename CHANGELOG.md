@@ -40,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Gallery sheets: saved image options and the cookies choice show on the first frame instead of popping in.
+- Gallery viewer: tapping the title also opens the caption, with a short hint under the count when a caption exists.
+- Player: the mini player keeps playing over every tab and screen instead of stopping when you leave Home.
 - Hazel updates: Beta and Nightly find their releases, move from one build to the next, and move onto a newer stable.
 - Hazel updates: a GitHub install never picks an F-Droid APK, and x86 phones get the x86 APK.
 - Hazel update screen: translated in every language, with clear failure reasons; nothing is cut off at the largest font.

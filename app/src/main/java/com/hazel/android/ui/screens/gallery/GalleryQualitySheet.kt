@@ -41,7 +41,10 @@ internal class QualityChoice<T>(
     /** What the row's cookie says, such as JPG or BEST. */
     val badge: String,
     val headline: String,
-    val tags: List<Pair<String, BadgeTone>> = emptyList()
+    /** Pixel size, drawn in the size tone. */
+    val pixels: String? = null,
+    /** Facts such as Best; always drawn in the crimson id tone. */
+    val hints: List<String> = emptyList()
 )
 
 /**
@@ -101,7 +104,7 @@ internal fun <T> GalleryQualitySheet(
                         compact = true,
                         shape = groupShape(i, choices.size)
                     ) {
-                        QualityTags(choice.tags)
+                        QualityTags(choice)
                     }
                 }
                 Spacer(modifier = Modifier.height(28.dp))
@@ -112,13 +115,14 @@ internal fun <T> GalleryQualitySheet(
 
 /** A choice's facts under its headline, as a format row shows codec and size. */
 @Composable
-internal fun QualityTags(tags: List<Pair<String, BadgeTone>>) {
-    if (tags.isEmpty()) return
+internal fun QualityTags(choice: QualityChoice<*>) {
+    if (choice.pixels == null && choice.hints.isEmpty()) return
     Spacer(modifier = Modifier.height(6.dp))
     Row(
         modifier = Modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        tags.forEach { (text, tone) -> MetaBadge(text, tone = tone) }
+        choice.pixels?.let { MetaBadge(it, tone = BadgeTone.SIZE) }
+        choice.hints.forEach { MetaBadge(it, tone = BadgeTone.ID) }
     }
 }

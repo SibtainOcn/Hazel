@@ -136,4 +136,12 @@ class GallerySheetsLayoutTest(private val locale: String) {
         compose.onNodeWithText(caption).assertIsDisplayed()
         saveScreen("gallery-caption-sheet-$locale")
     }
+
+    @Test
+    fun `viewer over many single-file results opens`() {
+        // Every single-file post numbers its file 1, so the all-results viewer holds repeated indexes.
+        val results = POST.map { it.copy(index = 1) }
+        show { GalleryViewer(items = results, startIndex = 0, onOpenSheet = {}, onDismiss = {}) }
+        compose.onNodeWithText("1 / ${results.size}").assertIsDisplayed()
+    }
 }

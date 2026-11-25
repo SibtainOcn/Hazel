@@ -84,6 +84,8 @@ import com.hazel.android.ui.screens.download.FailureKind
 import com.hazel.android.ui.screens.download.NoResultsDialog
 import com.hazel.android.ui.screens.download.PasteButton
 import com.hazel.android.ui.screens.download.SearchOptionsSheet
+import com.hazel.android.ui.screens.download.StatusToastHost
+import com.hazel.android.ui.screens.download.rememberStatusToastState
 import com.hazel.android.ui.screens.download.SearchScreen
 import com.hazel.android.ui.screens.download.UrlSearchBar
 import com.hazel.android.ui.screens.download.rememberClipStamp
@@ -93,7 +95,12 @@ import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
+import androidx.compose.runtime.snapshotFlow
+import com.hazel.android.gallery.GalleryResultsStore
 import kotlinx.coroutines.launch
 
 /** A line under the search bar, kept as a resource so it follows the app's language. */
@@ -137,6 +144,29 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
 
     private var job: Job? = null
     private var lastRun: (() -> Unit)? = null
+
+    init {
+        val app = getApplication<Application>()
+        viewModelScope.launch {
+            val saved = withContext(Dispatchers.IO) {
+                if (SettingsRepository.getIncognito(app).first()) null else GalleryResultsStore.load(app)
+            }
+            if (saved != null && posts.isEmpty() && !busy) {
+                query = saved.query
+                fromSearch = saved.fromSearch
+                posts = saved.posts
+            }
+            snapshotFlow { GalleryResultsStore.Saved(query, fromSearch, posts) }
+                .distinctUntilChangedBy { it.posts }
+                .drop(1)
+                .collect { current ->
+                    withContext(Dispatchers.IO) {
+                        if (SettingsRepository.getIncognito(app).first()) GalleryResultsStore.clear(app)
+                        else GalleryResultsStore.save(app, current)
+                    }
+                }
+        }
+    }
 
     fun handle(request: GalleryRequest) {
         job?.cancel()
@@ -299,6 +329,7 @@ fun GalleryScreen(
         GalleryRequests.next.collect { if (it != null) GalleryRequests.take()?.let(viewModel::handle) }
     }
 
+    val statusToast = rememberStatusToastState()
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -418,6 +449,12 @@ fun GalleryScreen(
                 DownloadAllButton(onClick = { postSheetFor = currentPost.takeIf { it >= 0 } })
             }
         }
+        StatusToastHost(
+            statusToast,
+            Modifier
+                .align(Alignment.BottomCenter)
+                .padding(start = 20.dp, end = 20.dp, bottom = 104.dp)
+        )
     }
 
     if (searchOpen) {
@@ -551,7 +588,8 @@ fun GalleryScreen(
         SearchOptionsSheet(
             onClearResults = viewModel::clear,
             onDismiss = { menuOpen = false },
-            imagesFirst = true
+            imagesFirst = true,
+            onCleared = statusToast::show
         )
     }
 }

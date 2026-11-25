@@ -168,14 +168,12 @@
 
     <!-- GettingStartedDialog -->
     <string name="guide_step_badge">चरण %1$d का %2$d</string>
-    <string name="guide_step1_title">चिपकाएँ और डाउनलोड करें</string>
+    <string name="guide_step1_title">पेस्ट, खोजें, डाउनलोड</string>
     <string name="guide_step2_title">फ़ॉर्मैट चयन</string>
-    <string name="guide_step3_title">Hazel इंस्टेंट</string>
     <string name="guide_step4_title">बैटरी ऑप्टिमाइज़ेशन</string>
     <string name="guide_step5_title">सूचनाएं</string>
-    <string name="guide_step_paste_link">खोज फ़ील्ड में एक या कई लिंक, या पूरी प्लेलिस्ट पेस्ट करें।</string>
+    <string name="guide_step_paste_link">एक लिंक, कई लिंक या पूरी प्लेलिस्ट। वीडियो, ऑडियो या इमेज।</string>
     <string name="guide_step_pick_format">सटीक फ़ॉर्मेट चुनने के लिए कार्ड टैप करें, हर क्वालिटी के साइज़ और कोडेक के साथ।</string>
-    <string name="guide_step_share_instant">अपनी सेटिंग से तुरंत शुरू करने के लिए Hazel Instant पर शेयर करें। ट्यून बटन सिंथेसाइज़िंग खोलता है।</string>
     <string name="guide_step_battery_unrestricted">बैटरी उपयोग अप्रतिबंधित करें ताकि Android बैकग्राउंड डाउनलोड न रोके।</string>
     <string name="guide_step_notifications">पृष्ठभूमि में डाउनलोड प्रगति और पूरी हुई फ़ाइलों के बारे में सूचनाएं प्राप्त करें।</string>
     <string name="guide_allow">अनुमति दें</string>
@@ -504,17 +502,11 @@
     <string name="cookies_toast_entry_copied">क्लिपबोर्ड में कॉपी हुआ</string>
     <string name="cookies_use_title">कुकीज़ इस्तेमाल करें</string>
     <string name="cookies_use_description">सहेजे गए साइन इन डाउनलोडर को दें</string>
-    <string name="cookies_empty_title">कोई कुकी सहेजी नहीं है</string>
-    <string name="cookies_empty_body">आयु प्रतिबंधित, निजी या सिर्फ़ सदस्यों वाला कंटेंट डाउनलोड करने के लिए एक जोड़ें।</string>
-    <string name="cookies_delete_title">कुकीज़ हटाएँ</string>
-    <string name="cookies_delete_body">%1$s का सहेजा हुआ साइन इन हटाएँ?</string>
-    <string name="cookies_delete_confirm">हटाएँ</string>
     <string name="cookies_delete_all_title">सारी कुकीज़ हटाएँ</string>
     <string name="cookies_delete_all_body">हर सहेजा हुआ साइन इन हटा दिया जाएगा। इसे वापस नहीं लाया जा सकता।</string>
     <string name="cookies_delete_all_confirm">सब हटाएँ</string>
     <string name="cookies_row_fallback_name">कुकीज़</string>
     <string name="cookies_sheet_copy">कुकीज़ कॉपी करें</string>
-    <string name="cookies_sheet_delete">कुकीज़ हटाएँ</string>
     <string name="cookies_field_title">शीर्षक</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">सहेजें</string>
@@ -592,11 +584,8 @@
     <string name="queue_adjust_restart_confirm">फिर से शुरू करें</string>
 
     <!-- Sign-in web view -->
-    <string name="cookie_webview_close">बंद करें</string>
-    <string name="cookie_webview_desktop_site">डेस्कटॉप साइट</string>
     <string name="cookie_webview_no_cookies">कोई कुकी नहीं मिली</string>
     <string name="cookie_webview_crashed">साइन-इन पेज रुक गया। इसे फिर से खोलें।</string>
-    <string name="cookie_webview_done">"  ठीक है"</string>
 
     <!-- FormatSelectionSheet -->
     <string name="format_selection_change">फ़ॉर्मैट बदलें</string>
@@ -614,8 +603,6 @@
     <string name="sheet_link_options">लिंक विकल्प</string>
     <string name="sheet_link_copied">लिंक कॉपी हुआ</string>
     <string name="sheet_link_open_failed">कोई ऐप यह लिंक नहीं खोल सकता</string>
-    <string name="sheet_cookies_site_saved">%1$s में साइन इन है</string>
-    <string name="sheet_cookies_site_missing">%1$s के लिए कोई साइन-इन सहेजा नहीं गया</string>
     <string name="batch_search_open">लिंक खोजें</string>
     <string name="batch_search_hint">इन लिंक में खोजें</string>
     <string name="batch_search_close">खोज बंद करें</string>
@@ -669,7 +656,6 @@
     <string name="glass_style_ocean">समुद्र</string>
     <string name="glass_style_mono">मोनो</string>
     <string name="guide_step_appearance_title">इसे अपना बनाएं</string>
-    <string name="guide_step_appearance_desc">थीम, एक्सेंट रंग और ग्लास लुक चुनें। इन्हें आप कभी भी सेटिंग्स में बदल सकते हैं।</string>
     <string name="whats_new_tag">नया क्या है</string>
     <string name="whats_new_version">संस्करण %1$s</string>
     <string name="whats_new_done">ठीक है</string>
@@ -929,6 +915,7 @@
     <string name="player_play">चलाएं</string>
     <string name="player_pause">रोकें</string>
     <string name="player_close">प्लेयर बंद करें</string>
+    <string name="player_close_short">बंद करें</string>
     <string name="player_fullscreen">पूरी स्क्रीन</string>
     <string name="player_minimize">छोटा करें</string>
     <string name="player_expand">प्लेयर खोलें</string>
@@ -1008,7 +995,6 @@
     <string name="instant_ok">ठीक है</string>
     <string name="instant_settings">सिंथेसाइज़िंग सेटिंग्स</string>
     <string name="guide_step_share_title">Hazel पर शेयर करें</string>
-    <string name="guide_step_share_sheet">किसी भी ऐप से Hazel पर लिंक शेयर करें, फिर तुरंत डाउनलोड करें या हर विकल्प चुनें।</string>
     <string name="instant_closing">%1$d से. में बंद होगा</string>
     <string name="ytdlp_update_channel_name">इंजन अपडेट</string>
     <string name="ytdlp_update_channel_description">yt-dlp इंजन अपडेट की सूचनाएं</string>
@@ -1020,11 +1006,8 @@
     <string name="ytdlp_update_failed_text">Hazel ने मौजूदा इंजन रखा है और बाद में फिर कोशिश करेगा</string>
     <string name="cookies_description">उम्र-प्रतिबंधित, निजी और सदस्य-केवल डाउनलोड के लिए एक बार साइन इन करें।</string>
     <string name="cookies_section_general">सामान्य</string>
-    <string name="cookies_section_add">जोड़ें</string>
-    <string name="cookies_section_saved">सहेजे गए साइन-इन</string>
     <string name="cookies_add_sign_in">किसी साइट में साइन इन करें</string>
     <string name="cookies_add_sign_in_summary">साइट खोलें और उसकी कुकीज़ सहेजें</string>
-    <string name="cookies_add_import_file_summary">ब्राउज़र से एक्सपोर्ट की गई Netscape कुकी फ़ाइल</string>
     <string name="cookies_off_hint">डाउनलोड के साथ इन्हें भेजने के लिए कुकीज़ का उपयोग करें चालू करें।</string>
     <string name="cookies_expires">समाप्ति %1$s</string>
     <string name="cookies_expired">समाप्त</string>
@@ -1100,7 +1083,6 @@
     <string name="hazel_update_available_text">नया क्या है देखने और अपडेट करने के लिए टैप करें।</string>
     <string name="hazel_update_ready_text">डाउनलोड हो गया। इंस्टॉल करने के लिए टैप करें।</string>
     <string name="guide_step_updates_title">अप टू डेट रहें</string>
-    <string name="guide_step_updates_desc">चुनें कि Hazel और yt-dlp कैसे अपडेट हों। इसे कभी भी सॉफ़्टवेयर अपडेट में बदलें।</string>
     <string name="guide_updates_notify">सूचना दें</string>
     <string name="upd_wifi_only_title">सिर्फ़ वाई-फ़ाई पर</string>
     <string name="upd_wifi_only_summary">मोबाइल डेटा पर डाउनलोड नहीं</string>
@@ -1131,7 +1113,6 @@
     <string name="guide_updates_ytdlp">yt-dlp ऑटो</string>
     <string name="guide_updates_hazel">Hazel ऑटो</string>
     <string name="guide_updates_wifi">सिर्फ़ वाई-फ़ाई</string>
-    <string name="guide_updates_more">और</string>
     <string name="upd_failure_no_space">इस डिवाइस पर अपडेट इंस्टॉल करने के लिए पर्याप्त खाली स्टोरेज नहीं है। कुछ जगह खाली करें और फिर कोशिश करें।</string>
     <string name="upd_failure_timeout">GitHub से कनेक्शन का समय समाप्त हो गया। बेहतर नेटवर्क पर जाएँ और फिर कोशिश करें।</string>
     <string name="upd_failure_unreachable">Hazel GitHub तक नहीं पहुँच सका। अपना इंटरनेट कनेक्शन, VPN और निजी DNS सेटिंग जाँचें, फिर कोशिश करें।</string>
@@ -1146,6 +1127,51 @@
     <string name="upd_failure_unknown">अपडेट पूरा नहीं हो सका (%1$s)। थोड़ी देर में फिर कोशिश करें।</string>
     <string name="upd_status_update_failed">अपडेट पूरा नहीं हुआ</string>
     <string name="upd_status_check_failed">जाँच पूरी नहीं हुई</string>
+    <string name="cookie_webview_reload">फिर से लोड करें</string>
+    <string name="cookie_webview_load_failed">यह पेज लोड नहीं हो सका</string>
+    <string name="cookie_webview_clear_site">इस साइट का डेटा मिटाएँ</string>
+    <string name="cookie_webview_cleared">साइट डेटा मिटाया गया</string>
+    <string name="cookie_webview_copy_address">पेज का पता कॉपी करें</string>
+    <string name="cookie_webview_desktop">डेस्कटॉप व्यू</string>
+    <string name="cookie_webview_go_sign_in">साइन-इन पेज पर जाएँ</string>
+    <string name="cookie_webview_load_failed_why">कनेक्शन नहीं, या प्रॉक्सी ने मना किया</string>
+    <string name="cookie_webview_mobile">मोबाइल व्यू</string>
+    <string name="cookie_webview_not_loaded">लोड नहीं हुआ</string>
+    <string name="cookie_webview_off">बंद</string>
+    <string name="cookie_webview_on">चालू</string>
+    <string name="cookie_webview_save">OK</string>
+    <string name="cookie_webview_text_size">टेक्स्ट का आकार</string>
+    <string name="cookies_check">साइन-इन जाँचें</string>
+    <string name="cookies_check_button">जाँचें</string>
+    <string name="cookies_check_failed">साइट तक नहीं पहुँच सके</string>
+    <string name="cookies_check_never">अभी जाँचा नहीं</string>
+    <string name="cookies_check_ok">आख़िरी जाँच %1$s · साइन-इन है</string>
+    <string name="cookies_check_refused">आख़िरी जाँच %1$s · साइट ने साइन आउट किया</string>
+    <string name="cookies_checked">जाँचा %1$s</string>
+    <string name="cookies_dialog_expired_title">साइन-इन की अवधि ख़त्म</string>
+    <string name="cookies_dialog_none_saved">कोई साइन-इन सेव नहीं</string>
+    <string name="cookies_dialog_title">इस लिंक के लिए साइन-इन</string>
+    <string name="cookies_done">हो गया</string>
+    <string name="cookies_expired_ago">ख़त्म %1$s</string>
+    <string name="cookies_import">इंपोर्ट</string>
+    <string name="cookies_login_expires">लॉगिन की अवधि</string>
+    <string name="cookies_no_login">कोई लॉगिन कुकी सेव नहीं</string>
+    <string name="cookies_not_now">अभी नहीं</string>
+    <string name="cookies_section_accounts">खाते</string>
+    <string name="cookies_section_quick">झटपट साइन-इन</string>
+    <string name="cookies_settings">कुकी सेटिंग</string>
+    <string name="cookies_show_summary">सेव कुकी देखें या कॉपी करें</string>
+    <string name="cookies_sign_in_again_summary">सेव कुकी उसी जगह बदलता है</string>
+    <string name="cookies_sign_out">साइन आउट</string>
+    <string name="cookies_sign_out_body">इसकी सेव कुकी मिट जाएँगी और साइन-इन पेज इसे भूल जाएगा।</string>
+    <string name="cookies_sign_out_title">%1$s से साइन आउट करें?</string>
+    <string name="cookies_signed_out_by_site">साइट ने साइन आउट किया</string>
+    <string name="cookies_state_active">सक्रिय</string>
+    <string name="cookies_state_signed_out">साइन आउट</string>
+    <string name="cookies_use_for_downloads">डाउनलोड के लिए उपयोग</string>
+    <string name="cookies_use_for_downloads_summary">बंद होने पर सेव रहेगा, उपयोग नहीं होगा</string>
+    <string name="cookies_dialog_sub">कुछ स्रोत साइन-इन के बिना डाउनलोड नहीं होते</string>
+    <string name="cookies_open">खोलें</string>
     <string name="gallery_dl_update_available_title">gallery-dl %1$s उपलब्ध है</string>
     <string name="gallery_dl_update_available_text">इमेज इंजन अपडेट करने के लिए Hazel खोलें</string>
     <string name="gallery_dl_update_installed_title">gallery-dl %1$s पर अपडेट हुआ</string>
@@ -1176,11 +1202,16 @@
     <string name="gallery_group_by_author">लेखक के हिसाब से समूह</string>
     <string name="gallery_group_by_author_summary">एक लेखक की अकेली तस्वीरें एक कैरोसेल में</string>
     <string name="more_image_settings">इमेज सेटिंग्स</string>
+    <string name="guide_share_from_apps">किसी भी ऐप से लिंक शेयर करें</string>
+    <string name="guide_share_video">हर विकल्प चुनें, फिर डाउनलोड</string>
+    <string name="guide_share_images">इमेज विकल्प चुनें, फिर डाउनलोड</string>
+    <string name="guide_share_instant">सेव की गई क्वालिटी में तुरंत डाउनलोड</string>
     <string name="caption_copy">कॉपी करें</string>
     <string name="caption_save_text">टेक्स्ट के रूप में सेव करें</string>
     <string name="caption_saved">कैप्शन डाउनलोड हो गया</string>
     <string name="caption_save_failed">कैप्शन सेव नहीं हो सका</string>
     <string name="caption_view_full">पूरा कैप्शन देखें</string>
+    <string name="gallery_caption_tap_hint">देखने और कॉपी करने के लिए कैप्शन पर टैप करें</string>
     <string name="caption_save_choices">क्या सेव करें</string>
     <string name="caption_only">सिर्फ़ कैप्शन</string>
     <string name="caption_with_file">सभी</string>

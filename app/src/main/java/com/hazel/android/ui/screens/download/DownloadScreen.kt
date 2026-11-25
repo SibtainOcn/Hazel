@@ -1,10 +1,8 @@
 package com.hazel.android.ui.screens.download
 
 import com.hazel.android.ui.components.player.miniWidth
-import com.hazel.android.ui.components.player.LargePlayer
-import com.hazel.android.ui.components.player.MiniPlayer
 import com.hazel.android.ui.components.player.PlayerPlace
-import com.hazel.android.ui.components.player.PlayerDock
+import com.hazel.android.ui.components.player.PlayerSession
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.ui.platform.LocalDensity
@@ -79,6 +77,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -140,10 +139,9 @@ import com.hazel.android.util.StoragePaths
 import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
-import com.hazel.android.ui.components.player.FullscreenPlayer
 import com.hazel.android.ui.components.player.InlinePlayer
-import com.hazel.android.ui.components.player.rememberPlaybackController
 import com.hazel.android.download.playback.PlaybackController
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.material.icons.filled.PlayArrow
@@ -163,7 +161,10 @@ fun DownloadScreen(
     downloadViewModel: DownloadViewModel = viewModel(),
     /** Opens the queue screen, where a download in hand is paused, resumed or cancelled. */
     onOpenQueue: () -> Unit = {},
-    onOpenGallery: () -> Unit = {}
+    onOpenGallery: () -> Unit = {},
+    /** The playing link and its views, held above the screens so it plays on everywhere. */
+    playerSession: PlayerSession = remember { PlayerSession() },
+    playback: PlaybackController? = null
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -232,20 +233,10 @@ fun DownloadScreen(
     }
 
     var searchOpen by remember { mutableStateOf(false) }
-    // The one card playing, if any. Starting another stops it. The player itself is held
-    // here rather than in the card, so full screen cannot drop it along with the card when
-    // the list lays itself out again.
-    var playingUrl by remember { mutableStateOf<String?>(null) }
-    var playerFullscreen by remember { mutableStateOf(false) }
-    val playback = playingUrl?.let { rememberPlaybackController(it) }
-    // Moves the video between its card, the mini player and the large view, so a scroll or
-    // a download carries on playing instead of stopping it.
-    val dock = remember { PlayerDock() }
-    val stopPlaying = {
-        playingUrl = null
-        playerFullscreen = false
-        dock.start(null)
-    }
+    val playingUrl = playerSession.playingUrl
+    val playerFullscreen = playerSession.fullscreen
+    val dock = playerSession.dock
+    val stopPlaying = playerSession::stop
     var sheetVisible by remember { mutableStateOf(false) }
     // A card held down, for its action dialog, and the saved copy whose properties are open.
     var heldInfo by remember { mutableStateOf<MediaInfo?>(null) }
@@ -253,9 +244,7 @@ fun DownloadScreen(
     // Starts a link straight in the large player, from the sheet or a held card.
     val playLarge: (MediaInfo) -> Unit = { info ->
         sheetVisible = false
-        playerFullscreen = false
-        playingUrl = info.url
-        dock.startLarge(info.url)
+        playerSession.playLarge(info.url)
     }
     var batchSheetVisible by remember { mutableStateOf(false) }
 
@@ -317,11 +306,13 @@ fun DownloadScreen(
     // The records behind the links on screen, so each one can be asked whether the file it
     // produced is still on the device. Only the links being shown are looked up, rather
     // than the whole history, which can run to hundreds of rows.
-    val listedEntries = remember(state.results, history) {
-        state.results.mapNotNull { info ->
-            history.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
-        }
+    // Matched off the main thread through one index of the history, each link reduced once:
+    // comparing every card with every record took seconds on a long playlist and history.
+    val results = state.results
+    val entryFor by produceState(emptyMap<String, HistoryEntry>(), results, history) {
+        value = withContext(Dispatchers.Default) { matchHistory(results, history) }
     }
+    val listedEntries = remember(entryFor) { entryFor.values.distinct() }
     val presence = rememberPresence(listedEntries)
 
     /**
@@ -334,10 +325,7 @@ fun DownloadScreen(
      */
     val savedUrls by remember(state.results, listedEntries) {
         derivedStateOf {
-            state.results.filter { info ->
-                listedEntries.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
-                    ?.let { presence[it.id] == true } == true
-            }.map { it.url }.toSet()
+            entryFor.filterValues { presence[it.id] == true }.keys
         }
     }
 
@@ -595,11 +583,8 @@ fun DownloadScreen(
                                     player = playback?.takeIf { playingUrl == info.url },
                                     playerFullscreen = playerFullscreen,
                                     playerInCard = dock.place == PlayerPlace.CARD && !dock.docking,
-                                    onPlay = {
-                                        playingUrl = info.url
-                                        dock.start(info.url)
-                                    },
-                                    onFullscreen = { playerFullscreen = true },
+                                    onPlay = { playerSession.play(info.url) },
+                                    onFullscreen = { playerSession.fullscreen = true },
                                     onStopPlaying = { if (playingUrl == info.url) stopPlaying() },
                                     onPlayerMoved = { bounds, canDock ->
                                         dock.onCardMoved(info.url, bounds, canDock, playerFullscreen)
@@ -802,16 +787,7 @@ fun DownloadScreen(
         var usedClipStamp by rememberSaveable { mutableStateOf<Long?>(null) }
         val showPaste = clipStamp != null && clipStamp != usedClipStamp && !state.isFetching
 
-        val miniShown = playback != null && (dock.place != PlayerPlace.CARD || dock.docking)
-        if (playback != null) {
-            MiniPlayer(
-                dock = dock,
-                controller = playback,
-                thumbnail = state.results.firstOrNull { it.url == playingUrl }?.thumbnail,
-                fullscreen = playerFullscreen,
-                onClose = stopPlaying
-            )
-        }
+        val miniShown = playerSession.outOfCard
         // The actions stand above the mini player when the screen is too narrow for both.
         var screenWidth by remember { mutableIntStateOf(0) }
         var actionsWidth by remember { mutableIntStateOf(0) }
@@ -867,53 +843,17 @@ fun DownloadScreen(
         )
     }
 
-    // A card that has gone from the results takes its player with it.
-    LaunchedEffect(state.results, playingUrl) {
-        if (playingUrl != null && state.results.none { it.url == playingUrl }) stopPlaying()
-    }
-
-    if (dock.place == PlayerPlace.LARGE && playback != null) {
-        val playingInfo = state.results.firstOrNull { it.url == playingUrl }
-        LargePlayer(
-            dock = dock,
-            controller = playback,
-            title = playingInfo?.title,
-            author = playingInfo?.uploader,
-            thumbnail = playingInfo?.thumbnail,
-            fullscreen = playerFullscreen,
-            onFullscreen = { playerFullscreen = true },
-            onClose = stopPlaying,
-            onDownload = playingInfo?.let { info ->
-                {
-                    dock.collapse()
-                    downloadViewModel.selectResult(info)
-                    downloadViewModel.resolveFormats(info)
-                    sheetVisible = true
-                }
-            }
-        )
-    }
-
-    if (playerFullscreen && playback != null) {
-        val playingInfo = state.results.firstOrNull { it.url == playingUrl }
-        FullscreenPlayer(
-            controller = playback,
-            thumbnail = playingInfo?.thumbnail,
-            onExit = { playerFullscreen = false },
-            onDownload = playingInfo?.let { info ->
-                {
-                    playerFullscreen = false
-                    downloadViewModel.selectResult(info)
-                    downloadViewModel.resolveFormats(info)
-                    sheetVisible = true
-                }
-            }
-        )
+    // The large or full screen view, open over another screen, asked for the download sheet.
+    LaunchedEffect(playerSession.sheetRequested) {
+        if (playerSession.sheetRequested) {
+            playerSession.sheetRequested = false
+            sheetVisible = true
+        }
     }
 
     heldInfo?.let { info ->
         // The saved copy, if its file is still there; presence is already read off the main thread.
-        val entry = listedEntries.firstOrNull { LinkKey.sameMedia(it.url, info.url) }
+        val entry = entryFor[info.url]
         val onDevice = entry?.takeIf { info.url in savedUrls }
         MediaHoldDialog(
             info = info,
@@ -1589,3 +1529,19 @@ private val MediaInfo.canStream: Boolean
  * The site's front page, which is where a sign-in starts. Cookies are stored per site, so
  * the individual media address is trimmed away.
  */
+
+/**
+ * Each listed link's history record, by link. The first record for a media wins, as a scan
+ * of the history in order would find it.
+ */
+internal fun matchHistory(results: List<MediaInfo>, history: List<HistoryEntry>): Map<String, HistoryEntry> {
+    if (results.isEmpty() || history.isEmpty()) return emptyMap()
+    val byKey = HashMap<String, HistoryEntry>(history.size)
+    history.forEach { entry ->
+        val key = LinkKey.canonical(entry.url)
+        if (key.isNotBlank()) byKey.putIfAbsent(key, entry)
+    }
+    val found = HashMap<String, HistoryEntry>()
+    results.forEach { info -> byKey[LinkKey.canonical(info.url)]?.let { found[info.url] = it } }
+    return found
+}

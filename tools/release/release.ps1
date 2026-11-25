@@ -16,7 +16,8 @@
     machine.
 
 .PARAMETER Version
-    The version being cut, without the leading v. For example 1.0.6.
+    The stable version being cut, without the leading v. For example 1.1.18. Betas are not
+    cut here: push a v1.1.18-beta.N tag. Nightlies come from the nightly workflow.
 
 .PARAMETER DryRun
     Print what would happen and change nothing.
@@ -26,14 +27,14 @@
     you want to look at the commit before it becomes a release.
 
 .EXAMPLE
-    .\tools\release.ps1 -Version 1.0.6 -DryRun
-    .\tools\release.ps1 -Version 1.0.6
+    .\tools\release\release.ps1 -Version 1.1.18 -DryRun
+    .\tools\release\release.ps1 -Version 1.1.18
 #>
 
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidatePattern('^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$')]
+    [ValidatePattern('^\d+\.\d+\.\d+$')]
     [string]$Version,
 
     [switch]$DryRun,
@@ -108,8 +109,12 @@ if ($buildText -notmatch '(?m)^\s*versionCode\s*=\s*(\d+)\s*$') {
     Die "A literal 'versionCode = <number>' was not found in app/build.gradle.kts."
 }
 $oldCode = [int]$Matches[1]
-# The last two digits belong to the architecture, so a release moves the hundreds.
-$newCode = $oldCode + 100
+# The release channel formula (app/build.gradle.kts): a stable takes slot 99, so it sits
+# above every nightly and beta of its version. release.yml refuses any other code.
+$parts = $Version.Split('.') | ForEach-Object { [int]$_ }
+if ($parts[0] -gt 200 -or $parts[1] -gt 99 -or $parts[2] -gt 99) { Die "Version $Version is out of range (major up to 200, minor and patch up to 99)." }
+$newCode = (($parts[0] * 10000 + $parts[1] * 100 + $parts[2]) * 1000) + 990
+if ($newCode -le $oldCode) { Die "Version code $newCode for $Version is not above the current $oldCode. Pick a higher version." }
 
 if ($buildText -notmatch '(?m)^\s*versionName\s*=\s*"(.+?)"\s*$') {
     Die "A literal 'versionName = \"x.y.z\"' was not found in app/build.gradle.kts."
@@ -119,7 +124,7 @@ $oldName = $Matches[1]
 Info "version name: $oldName -> $Version"
 Info "version code: $oldCode -> $newCode"
 
-# Each architecture takes the last two digits, so one bump numbers the whole release.
+# Each architecture takes the last digit, so one code numbers the whole release.
 $abis = [ordered]@{ universal = 0; 'armeabi-v7a' = 1; x86 = 2; x86_64 = 3; 'arm64-v8a' = 4 }
 Info "APK version codes:"
 foreach ($abi in $abis.Keys) {
