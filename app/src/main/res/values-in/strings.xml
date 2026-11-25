@@ -660,6 +660,8 @@
     <string name="storage_locations_speed_limit_description">Batas kecepatan unduhan yang diizinkan</string>
     <string name="storage_locations_no_limit">Tanpa batas</string>
     <string name="storage_locations_internal_note">Disimpan di penyimpanan internal kecuali kamu memilih folder lain atau kartu SD.</string>
+    <string name="storage_locations_gallery">Galeri</string>
+    <string name="storage_locations_gallery_hint">Gambar dan postingan</string>
     <string name="storage_locations_wifi_only">Hanya Wi-Fi</string>
     <string name="storage_locations_speed_limit">Batas kecepatan</string>
 

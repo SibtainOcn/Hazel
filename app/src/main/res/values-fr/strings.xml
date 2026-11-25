@@ -688,6 +688,8 @@
     <string name="storage_locations_speed_limit_description">À quelle vitesse un téléchargement peut aller</string>
     <string name="storage_locations_no_limit">Aucune limite</string>
     <string name="storage_locations_internal_note">Enregistré dans le stockage interne, sauf si vous choisissez un autre dossier ou une carte SD.</string>
+    <string name="storage_locations_gallery">Galerie</string>
+    <string name="storage_locations_gallery_hint">Images et publications</string>
     <string name="storage_locations_wifi_only">Wi-Fi uniquement</string>
     <string name="storage_locations_speed_limit">Limite de vitesse</string>
 
