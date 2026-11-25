@@ -1217,7 +1217,7 @@ fun FormatRow(
                         stringResource(R.string.format_generic_badge),
                         tone = if (tagId) BadgeTone.SIZE else BadgeTone.ACCENT
                     )
-                    if (codec.isNotBlank()) MetaBadge(codec)
+                    if (codec.isNotBlank()) MetaBadge(codec, tone = BadgeTone.ID)
                     if (size.isNotBlank()) MetaBadge(size, tone = BadgeTone.SIZE)
                     if (bitrate.isNotBlank()) MetaBadge(bitrate, tone = BadgeTone.ACCENT)
                     idTag?.let { MetaBadge(it, tone = BadgeTone.ID) }
