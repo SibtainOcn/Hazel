@@ -1,10 +1,5 @@
 package com.hazel.android.ui.screens.download
 
-import com.hazel.android.gallery.GalleryShow
-import com.hazel.android.gallery.GallerySearchSite
-import androidx.compose.foundation.layout.offset
-import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,14 +7,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Icon
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextOverflow
-import com.hazel.android.ui.components.ShapeIconButton
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -28,14 +19,16 @@ import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import com.hazel.android.ui.components.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
-import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,29 +36,37 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.data.SearchHistoryRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.ListingSource
 import com.hazel.android.download.extractor.SearchSource
-import com.hazel.android.ui.theme.sheetBlackColor
+import com.hazel.android.gallery.GallerySearchSite
+import com.hazel.android.gallery.GalleryShow
+import com.hazel.android.ui.components.BetaTag
+import com.hazel.android.ui.components.ModalBottomSheet
+import com.hazel.android.ui.components.ShapeIconButton
 import com.hazel.android.ui.screens.more.ConfirmSettingDialog
-import com.hazel.android.ui.screens.more.SuggestionsConsentDialog
 import com.hazel.android.ui.screens.more.SettingsSection
 import com.hazel.android.ui.screens.more.SingleChoiceDialog
+import com.hazel.android.ui.screens.more.SuggestionsConsentDialog
 import com.hazel.android.ui.screens.more.SwitchSettingRow
-import com.hazel.android.ui.screens.more.engineSummary
 import com.hazel.android.ui.screens.more.ValueSettingRow
+import com.hazel.android.ui.screens.more.engineSummary
+import com.hazel.android.ui.theme.sheetBlackColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * The search overflow, opened from the home bar and from the search screen alike, so the two
@@ -193,6 +194,7 @@ fun SearchOptionsSheet(
                     label = stringResource(R.string.search_source_images),
                     selected = imagesTab,
                     enabled = true,
+                    trailing = { BetaTag(small = true) },
                     onClick = { imagesTab = true }
                 )
             }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -30,7 +31,8 @@ fun EmptyState(
     icon: Painter,
     title: String,
     modifier: Modifier = Modifier,
-    hint: String? = null
+    hint: String? = null,
+    badge: (@Composable () -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
     Column(
@@ -38,16 +40,21 @@ fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(84.dp)
-                .clip(MaterialShapes.Cookie9Sided.toShape())
-                .background(colors.surfaceContainerHigh),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(icon, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(34.dp))
+        Box {
+            Box(
+                modifier = Modifier
+                    .size(84.dp)
+                    .clip(MaterialShapes.Cookie9Sided.toShape())
+                    .background(colors.surfaceContainerHigh),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(34.dp))
+            }
+            if (badge != null) {
+                Box(modifier = Modifier.align(Alignment.BottomCenter).offset(y = 12.dp)) { badge() }
+            }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(if (badge != null) 28.dp else 16.dp))
         Text(
             title,
             style = MaterialTheme.typography.titleMedium,

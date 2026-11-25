@@ -873,6 +873,9 @@ object SettingsRepository {
     private val HAZEL_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("hazel_update_available")
     private val HAZEL_UPDATE_VERSION_KEY = stringPreferencesKey("hazel_update_version")
     private val YTDLP_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("ytdlp_update_available")
+    private val GALLERY_DL_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("gallery_dl_update_available")
+    private val GALLERY_DL_AUTO_UPDATE_KEY = booleanPreferencesKey("gallery_dl_auto_update")
+    private val GALLERY_DL_WIFI_ONLY_KEY = booleanPreferencesKey("gallery_dl_wifi_only")
 
     fun getHasUpdateAvailable(context: Context): Flow<Boolean> {
         return context.dataStore.data.map { prefs -> prefs[HAS_UPDATE_AVAILABLE_KEY] ?: false }
@@ -893,8 +896,8 @@ object SettingsRepository {
             prefs[HAZEL_UPDATE_AVAILABLE_KEY] = available
             if (available && version != null) prefs[HAZEL_UPDATE_VERSION_KEY] = version
             else if (!available) prefs.remove(HAZEL_UPDATE_VERSION_KEY)
-            val ytdlpAvail = prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false
-            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || ytdlpAvail
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || (prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false) ||
+                (prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] ?: false)
         }
         if (available) BackupRepository.autoBackupBeforeUpdate(context)
     }
@@ -905,9 +908,34 @@ object SettingsRepository {
     suspend fun setYtDlpUpdateAvailable(context: Context, available: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[YTDLP_UPDATE_AVAILABLE_KEY] = available
-            val hazelAvail = prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false
-            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || hazelAvail
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || (prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false) ||
+                (prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] ?: false)
         }
+    }
+
+    fun getGalleryDlUpdateAvailable(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] ?: false }
+
+    suspend fun setGalleryDlUpdateAvailable(context: Context, available: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] = available
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || (prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false) ||
+                (prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false)
+        }
+    }
+
+    fun getGalleryDlAutoUpdate(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_DL_AUTO_UPDATE_KEY] ?: true }
+
+    suspend fun setGalleryDlAutoUpdate(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_DL_AUTO_UPDATE_KEY] = enabled }
+    }
+
+    fun getGalleryDlWifiOnly(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_DL_WIFI_ONLY_KEY] ?: false }
+
+    suspend fun setGalleryDlWifiOnly(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_DL_WIFI_ONLY_KEY] = enabled }
     }
 }
 
