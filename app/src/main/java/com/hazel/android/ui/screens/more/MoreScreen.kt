@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -87,6 +88,7 @@ fun MoreScreen(
     onNavigateToAppearance: () -> Unit = {},
     onNavigateToConverter: () -> Unit = {},
     onNavigateToStorageLocations: () -> Unit = {},
+    onNavigateToGallerySettings: () -> Unit = {},
     onNavigateToCookies: () -> Unit = {},
     onNavigateToFetchSettings: () -> Unit = {},
     onOpenBatterySettings: () -> Unit = {},
@@ -336,6 +338,17 @@ fun MoreScreen(
                     trailingContent = { MoreChevron() },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     modifier = Modifier.clickable { onNavigateToStorageLocations() }
+                )
+                },
+                {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.nav_gallery)) },
+                    leadingContent = {
+                        Icon(Icons.Filled.PhotoLibrary, null, tint = MaterialTheme.colorScheme.primary)
+                    },
+                    trailingContent = { MoreChevron() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { onNavigateToGallerySettings() }
                 )
                 },
                 {
