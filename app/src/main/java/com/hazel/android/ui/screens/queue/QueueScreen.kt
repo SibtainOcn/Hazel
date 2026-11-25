@@ -86,6 +86,7 @@ import com.hazel.android.download.BatchState
 import com.hazel.android.download.DownloadViewModel
 import com.hazel.android.download.MediaInfo
 import com.hazel.android.download.PausedShares
+import com.hazel.android.gallery.queue.GalleryDownloadRequest
 import com.hazel.android.gallery.queue.GalleryQueue
 import com.hazel.android.ui.components.AlertDialog
 import com.hazel.android.ui.components.DropdownMenu
@@ -252,9 +253,16 @@ fun QueueScreen(
 
     // The link's own sheet, over the queue: it opens at once, fills as the link is read and
     // says so there if the read fails. The failure stays listed until a download settles it.
+    // A gallery-dl failure opens the Hazel Images sheet, so it is read by the engine that failed.
     fun reopen(item: FailedDownload) {
+        val target = if (GalleryDownloadRequest.isPayload(item.queuedPayload)) {
+            android.content.ComponentName(context, "com.hazel.android.${com.hazel.android.ui.share.ShareOverlayActivity.GALLERY_ALIAS}")
+        } else {
+            android.content.ComponentName(context, com.hazel.android.ui.share.ShareOverlayActivity::class.java)
+        }
         context.startActivity(
-            android.content.Intent(context, com.hazel.android.ui.share.ShareOverlayActivity::class.java)
+            android.content.Intent()
+                .setComponent(target)
                 .setAction(android.content.Intent.ACTION_SEND)
                 .setType("text/plain")
                 .putExtra(android.content.Intent.EXTRA_TEXT, item.url)
