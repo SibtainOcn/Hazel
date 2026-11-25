@@ -1136,4 +1136,22 @@
     <string name="upd_failure_unknown">Pembaruan tidak dapat diselesaikan (%1$s). Coba lagi sebentar lagi.</string>
     <string name="upd_status_update_failed">Pembaruan tidak selesai</string>
     <string name="upd_status_check_failed">Pemeriksaan tidak selesai</string>
+    <string name="gallery_dl_update_available_title">gallery-dl %1$s tersedia</string>
+    <string name="gallery_dl_update_available_text">Buka Hazel untuk memperbarui mesin gambar</string>
+    <string name="gallery_dl_update_installed_title">gallery-dl diperbarui ke %1$s</string>
+    <string name="gallery_dl_update_installed_text">Mesin gambar sudah terbaru</string>
+    <string name="gallery_dl_update_failed_title">gallery-dl %1$s tidak dapat dipasang</string>
+    <string name="gallery_dl_update_failed_text">Hazel mempertahankan versi saat ini dan akan mencoba lagi nanti</string>
+    <string name="upd_gallerydl_title">Pembaruan gallery-dl</string>
+    <string name="upd_gallerydl_failure_unreachable">Hazel tidak dapat menjangkau PyPI. Periksa koneksi internet Anda lalu coba lagi.</string>
+    <string name="upd_gallerydl_failure_would_not_start">Versi gallery-dl yang baru tidak dapat berjalan di perangkat ini, jadi versi Anda saat ini dipertahankan.</string>
+    <string name="upd_status_live">Terpasang dan digunakan</string>
+    <string name="upd_btn_done">Selesai</string>
+    <string name="upd_section_notifications">Notifikasi</string>
+    <string name="upd_notify_engines_summary">Untuk pembaruan yt-dlp dan gallery-dl</string>
+    <string name="upd_notify_installed_title">Beri tahu setelah terpasang</string>
+    <string name="upd_notify_failed_title">Beri tahu jika pembaruan gagal</string>
+    <string name="upd_action_use_bundled">Bawaan</string>
+    <string name="upd_bundled_restored">Sekarang memakai gallery-dl %1$s bawaan</string>
+    <string name="upd_busy">Ada unduhan yang berjalan. Coba lagi setelah selesai</string>
 </resources>

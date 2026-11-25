@@ -1170,4 +1170,22 @@
     <string name="upd_failure_unknown">No se pudo completar la actualización (%1$s). Inténtalo de nuevo en un momento.</string>
     <string name="upd_status_update_failed">La actualización no terminó</string>
     <string name="upd_status_check_failed">La comprobación no terminó</string>
+    <string name="gallery_dl_update_available_title">gallery-dl %1$s está disponible</string>
+    <string name="gallery_dl_update_available_text">Abre Hazel para actualizar el motor de imágenes</string>
+    <string name="gallery_dl_update_installed_title">gallery-dl actualizado a %1$s</string>
+    <string name="gallery_dl_update_installed_text">El motor de imágenes está al día</string>
+    <string name="gallery_dl_update_failed_title">No se pudo instalar gallery-dl %1$s</string>
+    <string name="gallery_dl_update_failed_text">Hazel mantuvo la versión actual y lo volverá a intentar más tarde</string>
+    <string name="upd_gallerydl_title">Actualizaciones de gallery-dl</string>
+    <string name="upd_gallerydl_failure_unreachable">Hazel no pudo conectar con PyPI. Comprueba tu conexión a internet e inténtalo de nuevo.</string>
+    <string name="upd_gallerydl_failure_would_not_start">La nueva versión de gallery-dl no pudo iniciarse en este dispositivo, así que se mantuvo tu versión actual.</string>
+    <string name="upd_status_live">Instalado y en uso</string>
+    <string name="upd_btn_done">Listo</string>
+    <string name="upd_section_notifications">Notificaciones</string>
+    <string name="upd_notify_engines_summary">Para las actualizaciones de yt-dlp y gallery-dl</string>
+    <string name="upd_notify_installed_title">Avisar al instalarse</string>
+    <string name="upd_notify_failed_title">Avisar si una actualización falla</string>
+    <string name="upd_action_use_bundled">Incluida</string>
+    <string name="upd_bundled_restored">Ahora se usa gallery-dl %1$s incluido</string>
+    <string name="upd_busy">Hay una descarga en curso. Inténtalo cuando termine</string>
 </resources>

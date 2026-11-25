@@ -1170,4 +1170,22 @@
     <string name="upd_failure_unknown">Não foi possível concluir a atualização (%1$s). Tente de novo em instantes.</string>
     <string name="upd_status_update_failed">A atualização não foi concluída</string>
     <string name="upd_status_check_failed">A verificação não foi concluída</string>
+    <string name="gallery_dl_update_available_title">gallery-dl %1$s está disponível</string>
+    <string name="gallery_dl_update_available_text">Abra o Hazel para atualizar o mecanismo de imagens</string>
+    <string name="gallery_dl_update_installed_title">gallery-dl atualizado para %1$s</string>
+    <string name="gallery_dl_update_installed_text">O mecanismo de imagens está atualizado</string>
+    <string name="gallery_dl_update_failed_title">Não foi possível instalar o gallery-dl %1$s</string>
+    <string name="gallery_dl_update_failed_text">O Hazel manteve a versão atual e tentará de novo mais tarde</string>
+    <string name="upd_gallerydl_title">Atualizações do gallery-dl</string>
+    <string name="upd_gallerydl_failure_unreachable">O Hazel não conseguiu acessar o PyPI. Verifique sua conexão com a internet e tente novamente.</string>
+    <string name="upd_gallerydl_failure_would_not_start">A nova versão do gallery-dl não pôde iniciar neste dispositivo, então sua versão atual foi mantida.</string>
+    <string name="upd_status_live">Instalado e em uso</string>
+    <string name="upd_btn_done">Concluído</string>
+    <string name="upd_section_notifications">Notificações</string>
+    <string name="upd_notify_engines_summary">Para atualizações do yt-dlp e do gallery-dl</string>
+    <string name="upd_notify_installed_title">Avisar após instalar</string>
+    <string name="upd_notify_failed_title">Avisar se uma atualização falhar</string>
+    <string name="upd_action_use_bundled">Incluída</string>
+    <string name="upd_bundled_restored">Agora usando o gallery-dl %1$s incluído</string>
+    <string name="upd_busy">Há um download em andamento. Tente de novo quando terminar</string>
 </resources>

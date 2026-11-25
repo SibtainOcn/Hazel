@@ -9,6 +9,9 @@ import java.io.File
  */
 internal object GalleryDlPayload {
 
+    /** The gallery-dl in the zip; matches `tools/gallery-dl/requirements.txt`. */
+    const val BUNDLED_VERSION = "1.32.21"
+
     private const val ASSET = "gallery-dl.zip"
     private const val DIRECTORY = "gallery-dl"
 

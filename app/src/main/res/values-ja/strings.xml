@@ -1136,4 +1136,22 @@
     <string name="upd_failure_unknown">アップデートを完了できませんでした（%1$s）。しばらくしてからもう一度お試しください。</string>
     <string name="upd_status_update_failed">アップデートが完了しませんでした</string>
     <string name="upd_status_check_failed">確認が完了しませんでした</string>
+    <string name="gallery_dl_update_available_title">gallery-dl %1$s が利用可能です</string>
+    <string name="gallery_dl_update_available_text">Hazel を開いて画像エンジンを更新してください</string>
+    <string name="gallery_dl_update_installed_title">gallery-dl を %1$s に更新しました</string>
+    <string name="gallery_dl_update_installed_text">画像エンジンは最新です</string>
+    <string name="gallery_dl_update_failed_title">gallery-dl %1$s をインストールできませんでした</string>
+    <string name="gallery_dl_update_failed_text">現在のバージョンを維持し、後でもう一度試します</string>
+    <string name="upd_gallerydl_title">gallery-dl の更新</string>
+    <string name="upd_gallerydl_failure_unreachable">PyPI に接続できませんでした。インターネット接続を確認してもう一度お試しください。</string>
+    <string name="upd_gallerydl_failure_would_not_start">新しい gallery-dl をこの端末で起動できなかったため、現在のバージョンを維持しました。</string>
+    <string name="upd_status_live">インストール済み・使用中</string>
+    <string name="upd_btn_done">完了</string>
+    <string name="upd_section_notifications">通知</string>
+    <string name="upd_notify_engines_summary">yt-dlp と gallery-dl の更新用</string>
+    <string name="upd_notify_installed_title">インストール後に通知</string>
+    <string name="upd_notify_failed_title">更新に失敗したら通知</string>
+    <string name="upd_action_use_bundled">同梱版</string>
+    <string name="upd_bundled_restored">同梱の gallery-dl %1$s を使用しています</string>
+    <string name="upd_busy">ダウンロード中です。終了後にもう一度お試しください</string>
 </resources>

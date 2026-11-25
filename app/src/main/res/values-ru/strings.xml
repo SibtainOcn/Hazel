@@ -1186,4 +1186,22 @@
     <string name="upd_failure_unknown">Не удалось завершить обновление (%1$s). Попробуйте снова чуть позже.</string>
     <string name="upd_status_update_failed">Обновление не завершено</string>
     <string name="upd_status_check_failed">Проверка не завершена</string>
+    <string name="gallery_dl_update_available_title">Доступен gallery-dl %1$s</string>
+    <string name="gallery_dl_update_available_text">Откройте Hazel, чтобы обновить движок изображений</string>
+    <string name="gallery_dl_update_installed_title">gallery-dl обновлён до %1$s</string>
+    <string name="gallery_dl_update_installed_text">Движок изображений обновлён</string>
+    <string name="gallery_dl_update_failed_title">Не удалось установить gallery-dl %1$s</string>
+    <string name="gallery_dl_update_failed_text">Hazel оставил текущую версию и попробует позже</string>
+    <string name="upd_gallerydl_title">Обновления gallery-dl</string>
+    <string name="upd_gallerydl_failure_unreachable">Hazel не смог подключиться к PyPI. Проверьте подключение к интернету и повторите попытку.</string>
+    <string name="upd_gallerydl_failure_would_not_start">Новая версия gallery-dl не запустилась на этом устройстве, поэтому текущая версия сохранена.</string>
+    <string name="upd_status_live">Установлено и используется</string>
+    <string name="upd_btn_done">Готово</string>
+    <string name="upd_section_notifications">Уведомления</string>
+    <string name="upd_notify_engines_summary">Для обновлений yt-dlp и gallery-dl</string>
+    <string name="upd_notify_installed_title">Уведомлять после установки</string>
+    <string name="upd_notify_failed_title">Уведомлять о сбое обновления</string>
+    <string name="upd_action_use_bundled">Встроенная</string>
+    <string name="upd_bundled_restored">Теперь используется встроенный gallery-dl %1$s</string>
+    <string name="upd_busy">Идёт загрузка. Повторите попытку после её завершения</string>
 </resources>
