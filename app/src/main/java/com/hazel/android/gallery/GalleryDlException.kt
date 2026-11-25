@@ -1,28 +1,41 @@
 package com.hazel.android.gallery
 
+import androidx.annotation.StringRes
+import com.hazel.android.R
+
 /** A gallery-dl run that did not finish, sorted by what the user can do about it. */
 class GalleryDlException(
     val kind: Kind,
     /** gallery-dl's own last error line, for logs. Not shown as is. */
     val detail: String,
-    cause: Throwable? = null
+    cause: Throwable? = null,
+    /** The end of the run's redacted log, for the log sheet; blank when there is none. */
+    val log: String = ""
 ) : Exception(detail, cause) {
 
-    enum class Kind {
+    enum class Kind(@param:StringRes val message: Int) {
         /** The site wants a sign-in, or the saved one ran out. */
-        LOGIN_REQUIRED,
+        LOGIN_REQUIRED(R.string.gallery_error_login),
         /** No part of gallery-dl reads this kind of link. */
-        UNSUPPORTED,
+        UNSUPPORTED(R.string.gallery_error_unsupported),
         /** The post is gone, private, or holds nothing to save. */
-        NOT_FOUND,
+        NOT_FOUND(R.string.gallery_error_not_found),
         /** The connection or the proxy failed. */
-        NETWORK,
+        NETWORK(R.string.gallery_error_network),
         /** gallery-dl could not be set up on the device. */
-        SETUP,
-        OTHER
+        SETUP(R.string.gallery_error_setup),
+        OTHER(R.string.gallery_failed)
     }
 
     companion object {
+        /** Sorts an error gallery-dl wrote into its `-j` listing, by its class first. */
+        fun classifyError(name: String, message: String): Kind = when (name) {
+            "AuthRequired", "AuthorizationError", "AuthenticationError" -> Kind.LOGIN_REQUIRED
+            "NotFoundError" -> Kind.NOT_FOUND
+            "NoExtractorError" -> Kind.UNSUPPORTED
+            else -> classify("$name $message")
+        }
+
         /** Sorts gallery-dl's last error line into a [Kind]. */
         fun classify(line: String): Kind {
             val text = line.lowercase()

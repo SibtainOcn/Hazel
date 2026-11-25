@@ -6,6 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRowScope
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -62,7 +65,6 @@ import com.hazel.android.ui.screens.download.MetaBadge
  * change common enough to be worth a control of its own on the row. Swiping takes the link
  * out of the results entirely, which is a different thing from unticking it.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun BatchDownloadCard(
     info: MediaInfo,
@@ -77,6 +79,53 @@ fun BatchDownloadCard(
     onTypeClick: () -> Unit,
     removeAsked: Boolean,
     onAskRemove: () -> Unit
+) {
+    BatchRowCard(
+        thumbnail = info.thumbnail,
+        corner = formatDuration(info.durationSeconds),
+        title = info.title,
+        typeIcon = if (isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
+        typeDescription = stringResource(R.string.batch_card_download_type),
+        selectionMode = selectionMode,
+        checked = checked,
+        onClick = onClick,
+        onLongClick = onLongClick,
+        onTypeClick = onTypeClick,
+        removeAsked = removeAsked,
+        onAskRemove = onAskRemove
+    ) {
+        if (formatLabel.isNotBlank()) {
+            // Marked when the link carries a choice of its own, so a set
+            // where one link was changed does not look uniform.
+            MetaBadge(
+                formatLabel.uppercase(),
+                tone = if (isAdjusted) BadgeTone.SOLID else BadgeTone.NEUTRAL
+            )
+        }
+        if (sizeLabel.isNotBlank()) MetaBadge(sizeLabel, tone = BadgeTone.SIZE)
+    }
+}
+
+/**
+ * A row of a set: swipe to ask about removing it, a checkbox only while selecting, the
+ * thumbnail with [corner] text on it, the title, [badges] under it and a type button.
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
+@Composable
+internal fun BatchRowCard(
+    thumbnail: String?,
+    corner: String,
+    title: String,
+    typeIcon: ImageVector,
+    typeDescription: String,
+    selectionMode: Boolean,
+    checked: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    onTypeClick: () -> Unit,
+    removeAsked: Boolean,
+    onAskRemove: () -> Unit,
+    badges: @Composable FlowRowScope.() -> Unit
 ) {
     // Half the row's width before a swipe counts, and only towards the "Remove" label, so a
     // sideways nudge while scrolling the list does not start one.
@@ -138,16 +187,15 @@ fun BatchDownloadCard(
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     com.hazel.android.ui.components.ArtworkPlaceholder(Modifier.matchParentSize())
-                    if (info.thumbnail != null) {
+                    if (thumbnail != null) {
                         AsyncImage(
-                            model = info.thumbnail,
+                            model = thumbnail,
                             contentDescription = null,
                             contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                             modifier = Modifier.matchParentSize()
                         )
                     }
-                    val duration = formatDuration(info.durationSeconds)
-                    if (duration.isNotBlank()) {
+                    if (corner.isNotBlank()) {
                         Surface(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
@@ -156,7 +204,7 @@ fun BatchDownloadCard(
                             color = Color.Black.copy(alpha = 0.7f)
                         ) {
                             Text(
-                                duration,
+                                corner,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.White,
                                 modifier = Modifier.padding(horizontal = 4.dp)
@@ -169,7 +217,7 @@ fun BatchDownloadCard(
 
                 Column(modifier = Modifier.weight(1f).padding(vertical = 10.dp)) {
                     Text(
-                        info.title,
+                        title,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 2,
@@ -182,22 +230,14 @@ fun BatchDownloadCard(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        if (formatLabel.isNotBlank()) {
-                            // Marked when the link carries a choice of its own, so a set
-                            // where one link was changed does not look uniform.
-                            MetaBadge(
-                                formatLabel.uppercase(),
-                                tone = if (isAdjusted) BadgeTone.SOLID else BadgeTone.NEUTRAL
-                            )
-                        }
-                        if (sizeLabel.isNotBlank()) MetaBadge(sizeLabel, tone = BadgeTone.SIZE)
+                        badges()
                     }
                 }
 
                 IconButton(onClick = onTypeClick) {
                     Icon(
-                        if (isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
-                        contentDescription = stringResource(R.string.batch_card_download_type),
+                        typeIcon,
+                        contentDescription = typeDescription,
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )

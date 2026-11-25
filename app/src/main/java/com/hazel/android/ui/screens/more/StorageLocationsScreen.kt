@@ -113,7 +113,7 @@ fun StorageLocationsScreen(onBack: () -> Unit) {
                     icon = Icons.Filled.PhotoLibrary,
                     title = stringResource(R.string.storage_locations_gallery),
                     path = saveDirs.labelOf(SaveKind.GALLERY),
-                    hint = stringResource(R.string.storage_locations_gallery_hint),
+                    tag = stringResource(R.string.search_source_images),
                     onClick = { dirDialogFor = SaveKind.GALLERY }
                 )
             }
@@ -237,29 +237,38 @@ private fun StorageLocationItem(
     icon: ImageVector,
     title: String,
     path: String,
-    hint: String? = null,
+    /** A small tonal tag beside the title, saying what the folder holds. */
+    tag: String? = null,
     onClick: () -> Unit
 ) {
     ListItem(
         headlineContent = {
-            Text(title, fontWeight = FontWeight.Medium)
+            androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(title, fontWeight = FontWeight.Medium)
+                tag?.let {
+                    androidx.compose.material3.Surface(
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Text(
+                            it,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
         },
         supportingContent = {
-            Column {
-                hint?.let {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
-                    )
-                }
-                Text(
-                    path,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-                )
-            }
+            Text(
+                path,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+            )
         },
         leadingContent = {
             Icon(icon, null, tint = MaterialTheme.colorScheme.primary)

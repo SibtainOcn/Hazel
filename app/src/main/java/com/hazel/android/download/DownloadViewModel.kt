@@ -1613,6 +1613,8 @@ class DownloadViewModel : ViewModel() {
             // Asks the system to leave the process alone for the length of the run. Started
             // before the first link rather than per link, so a set of ten is one service for
             // the whole set instead of ten in a row.
+            // One download at a time across engines: a gallery job in progress finishes first.
+            DownloadTurn.acquire(token)
             DownloadService.start(app, firstTitle)
 
             val limits = TransferLimits(
@@ -1929,10 +1931,12 @@ class DownloadViewModel : ViewModel() {
                 if (runOwner === token) runOwner = null
                 more
             }
+            DownloadTurn.release(token)
             if (more) runQueue(app, resumed = false)
         }
         job.invokeOnCompletion {
             synchronized(queue) { if (runOwner === token) runOwner = null }
+            DownloadTurn.release(token)
         }
         downloadJob = job
     }
@@ -2510,6 +2514,10 @@ class DownloadViewModel : ViewModel() {
      * same way left nothing on the list.
      */
     fun retryFailed(context: Context, failed: com.hazel.android.data.FailedDownload) {
+        com.hazel.android.gallery.queue.GalleryDownloadRequest.fromPayload(failed.queuedPayload)?.let { request ->
+            viewModelScope.launch { com.hazel.android.gallery.queue.GalleryQueue.add(context, request.copy(id = com.hazel.android.gallery.queue.GalleryDownloadRequest.nextId())) }
+            return
+        }
         val queued = DownloadQueueRepository.decodeItem(failed.queuedPayload)
         if (queued != null) {
             startBatch(context, listOf(queued.toPlan()), queued.options, queued.treeUri)
@@ -2525,7 +2533,11 @@ class DownloadViewModel : ViewModel() {
      * choice and folder, so each is downloaded as it was asked for and the queue is written
      * once per batch rather than once per link. The rest are read again, a few at a time.
      */
-    fun retryAllFailed(context: Context, failed: List<com.hazel.android.data.FailedDownload>) {
+    fun retryAllFailed(context: Context, all: List<com.hazel.android.data.FailedDownload>) {
+        val (gallery, failed) = all.partition {
+            com.hazel.android.gallery.queue.GalleryDownloadRequest.isPayload(it.queuedPayload)
+        }
+        gallery.forEach { retryFailed(context, it) }
         val queued = failed.mapNotNull { DownloadQueueRepository.decodeItem(it.queuedPayload) }
             .distinctBy { it.url }
         queued.groupBy { it.options to it.treeUri }.forEach { (key, items) ->

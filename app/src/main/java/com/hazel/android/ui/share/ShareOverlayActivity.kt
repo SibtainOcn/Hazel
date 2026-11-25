@@ -62,6 +62,11 @@ import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import com.hazel.android.gallery.queue.GalleryDownloadRequest
+import com.hazel.android.gallery.queue.GalleryQueue
+
+/** The share targets, told apart by the component they were launched through. */
+private enum class ShareMode { VIDEO, INSTANT_VIDEO, IMAGES, INSTANT_IMAGES }
 
 /**
  * Builds a dark-only color scheme using the user's selected accent color.
@@ -135,13 +140,18 @@ class ShareOverlayActivity : ComponentActivity() {
     private var sharedUrl by mutableStateOf("")
 
     /**
-     * Whether the link came through Hazel Instant. Both share targets resolve to this class,
-     * so the component name is the only place the difference shows. Instant does not ask:
-     * it reads the link and downloads it with the saved settings.
+     * Which share target the link came through. Every target resolves to this class, so the
+     * component name is the only place the difference shows. The instant ones do not ask:
+     * they download with the saved settings.
      */
-    private var instant by mutableStateOf(false)
+    private var mode by mutableStateOf(ShareMode.VIDEO)
 
-    private fun Intent.isInstant() = component?.className?.endsWith(INSTANT_ALIAS) == true
+    private fun Intent.shareMode(): ShareMode = when (component?.className?.substringAfterLast('.')) {
+        INSTANT_ALIAS -> ShareMode.INSTANT_VIDEO
+        GALLERY_ALIAS -> ShareMode.IMAGES
+        INSTANT_GALLERY_ALIAS -> ShareMode.INSTANT_IMAGES
+        else -> ShareMode.VIDEO
+    }
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(AppLocale.wrap(newBase))
@@ -171,13 +181,10 @@ class ShareOverlayActivity : ComponentActivity() {
         }
 
         sharedUrl = firstUrl
-        instant = intent.isInstant()
-        if (savedInstanceState == null) com.hazel.android.util.AppShortcuts.reportShared(this, instant)
+        mode = intent.shareMode()
         // Only on a first start: an activity brought back after its process was reclaimed
         // must not download the same link a second time.
-        if (instant && savedInstanceState == null) {
-            DownloadViewModelHolder.get().instantDownload(this, firstUrl, intent.audioOnlyOverride())
-        }
+        if (savedInstanceState == null) startShare(firstUrl, intent)
 
         setContent {
             // Keyed on the link, so a second share delivered to this same sheet starts over
@@ -198,10 +205,10 @@ class ShareOverlayActivity : ComponentActivity() {
                 val glass by remember(this) { SettingsRepository.isGlassEnabled(this) }.collectAsState(initial = false)
                 val glassStyle by remember(this) { SettingsRepository.getGlassStyle(this) }.collectAsState(initial = GlassStyle.DEFAULT.key)
 
-                LaunchedEffect(url) {
+                LaunchedEffect(url, mode) {
                     // Instant was handed its link in onCreate or onNewIntent, outside the
                     // composition, so closing the dialog cannot cancel it.
-                    if (instant) return@LaunchedEffect
+                    if (mode != ShareMode.VIDEO) return@LaunchedEffect
                     downloadViewModel.fetchShare(url)
                     val app = applicationContext
                     scope.launch(Dispatchers.IO) {
@@ -247,19 +254,33 @@ class ShareOverlayActivity : ComponentActivity() {
                         }
 
                         when {
+                            mode == ShareMode.IMAGES -> GalleryShareContent(
+                                url = url,
+                                onDownload = { requests ->
+                                    requests.forEach { request -> queueGallery { request } }
+                                    announceStarted()
+                                    closeOverlay()
+                                },
+                                onVideo = { link ->
+                                    sharedUrl = link
+                                    mode = ShareMode.VIDEO
+                                },
+                                onClose = { closeOverlay() }
+                            )
+
+                            mode == ShareMode.INSTANT_IMAGES -> InstantDialog(
+                                glass = glass,
+                                tuneLabel = R.string.gallery_instant_settings,
+                                onConfirm = { closeOverlay() },
+                                onTune = { openInApp("gallery_settings") }
+                            )
+
                             // A failed read is reported by a notification, as any download
                             // that fails in the background is.
-                            instant -> InstantDialog(
+                            mode == ShareMode.INSTANT_VIDEO -> InstantDialog(
                                 glass = glass,
                                 onConfirm = { closeOverlay() },
-                                onTune = {
-                                    startActivity(
-                                        Intent(this@ShareOverlayActivity, com.hazel.android.MainActivity::class.java)
-                                            .putExtra(com.hazel.android.MainActivity.EXTRA_NAVIGATE_TO, "processing")
-                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                    )
-                                    closeOverlay()
-                                }
+                                onTune = { openInApp("processing") }
                             )
 
                             failure != null -> NoResultsDialog(
@@ -383,10 +404,52 @@ class ShareOverlayActivity : ComponentActivity() {
             Toast.makeText(this, getString(R.string.share_overlay_invalid_link), Toast.LENGTH_SHORT).show()
             return
         }
-        instant = intent.isInstant()
-        com.hazel.android.util.AppShortcuts.reportShared(this, instant)
-        if (instant) DownloadViewModelHolder.get().instantDownload(this, url, intent.audioOnlyOverride())
+        mode = intent.shareMode()
+        startShare(url, intent)
         sharedUrl = url
+    }
+
+    /** Hands an instant share its download, outside the composition so closing cannot cancel it. */
+    private fun startShare(url: String, intent: Intent) {
+        when (mode) {
+            ShareMode.VIDEO -> com.hazel.android.util.AppShortcuts.reportShared(this, instant = false)
+            ShareMode.INSTANT_VIDEO -> {
+                com.hazel.android.util.AppShortcuts.reportShared(this, instant = true)
+                DownloadViewModelHolder.get().instantDownload(this, url, intent.audioOnlyOverride())
+            }
+            ShareMode.IMAGES -> recordLink(url)
+            ShareMode.INSTANT_IMAGES -> {
+                recordLink(url)
+                queueGallery { app ->
+                    GalleryDownloadRequest(url, options = SettingsRepository.getGalleryOptions(app).first())
+                }
+            }
+        }
+    }
+
+    /** Keeps a shared image link in search history, as the video targets do; never in incognito. */
+    private fun recordLink(url: String) {
+        val app = applicationContext
+        HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
+            if (!SettingsRepository.getIncognito(app).first()) SearchHistoryRepository.record(app, url)
+        }
+    }
+
+    private fun queueGallery(build: suspend (Context) -> GalleryDownloadRequest) {
+        val app = applicationContext
+        HazelApp.instance.applicationScope.launch {
+            runCatching { GalleryQueue.add(app, build(app)) }
+                .onFailure { android.util.Log.w("HazelShare", "Could not queue the shared post", it) }
+        }
+    }
+
+    private fun openInApp(route: String) {
+        startActivity(
+            Intent(this, com.hazel.android.MainActivity::class.java)
+                .putExtra(com.hazel.android.MainActivity.EXTRA_NAVIGATE_TO, route)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        )
+        closeOverlay()
     }
 
     private fun announceStarted() {
@@ -395,6 +458,8 @@ class ShareOverlayActivity : ComponentActivity() {
 
     companion object {
         const val INSTANT_ALIAS = "InstantShareActivity"
+        const val GALLERY_ALIAS = "GalleryShareActivity"
+        const val INSTANT_GALLERY_ALIAS = "InstantGalleryShareActivity"
 
         /** Set by the widget's Audio and Video buttons: Instant saves the link as that kind. */
         const val EXTRA_AUDIO_ONLY = "hazel.audio_only"

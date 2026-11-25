@@ -40,6 +40,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -349,48 +350,7 @@ fun FormatSelectionSheet(
 
                     Spacer(modifier = Modifier.width(10.dp))
 
-                    // The accent pill with a six-sided cookie behind the tick, the way
-                    // "Download all" is led: the cookie takes the inverted colour and the
-                    // tick is cut into it in the pill's own. Without a choice it stays
-                    // flat and muted.
-                    val canConfirm = draft != null
-                    val okFill = if (canConfirm) MaterialTheme.colorScheme.primary else tonalFill(0.55f)
-                    val okInk = if (canConfirm) MaterialTheme.colorScheme.onPrimary
-                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    Surface(
-                        onClick = { draft?.let(onConfirm) },
-                        enabled = canConfirm,
-                        shape = RoundedCornerShape(22.dp),
-                        color = okFill,
-                        contentColor = okInk,
-                        modifier = Modifier.height(44.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(start = 5.dp, top = 5.dp, bottom = 5.dp, end = 18.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(34.dp)
-                                    .clip(MaterialShapes.Cookie6Sided.toShape())
-                                    .background(if (canConfirm) okInk else okInk.copy(alpha = 0.18f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    Icons.Filled.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                    tint = if (canConfirm) okFill else okInk
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                stringResource(R.string.format_selection_confirm),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
+                    SheetConfirmPill(enabled = draft != null, onClick = { draft?.let(onConfirm) })
                 }
             }
 
@@ -1089,6 +1049,109 @@ fun FormatRow(
     /** A ladder step's id as a tag after its Auto tag, in the list without the side rail. */
     tagId: Boolean = !compact
 ) {
+    // The plain ladder (no rail) carries the id as a tag after its Auto tag; the sorted list
+    // keeps it beside the headline.
+    val idAsTag = format.isGeneric && tagId
+    FormatRowFrame(
+        badge = badgeTextOf(format),
+        headline = format.label.uppercase(),
+        corner = "id: ${shortId(format.formatId)}".takeIf { !idAsTag },
+        selected = selected,
+        onClick = onClick,
+        showChevron = showChevron,
+        compact = compact,
+        pickedShape = pickedShape,
+        shape = shape
+    ) {
+        // Badges are omitted entirely when the extractor did not report them,
+        // which is common outside the largest sites.
+        val codec = format.codecLabel
+        // The whole file: a video-only stream counts the soundtrack muxed into it.
+        val size = format.sizeLabelWith(mergeAudio)
+        val mergeAudioId = mergeAudio?.formatId?.takeIf { showMergeId && format.needsAudio }
+        // The bitrate says something the resolution does not only for audio; on a
+        // video row it repeats what the size already showed.
+        val generic = format.isGeneric
+        // A ladder row's bitrate is its name already, so it is not repeated as a badge.
+        val bitrate = format.bitrateLabel.takeIf { !format.hasVideo && !generic }.orEmpty()
+
+        val hasBadges = mergeAudioId != null || codec.isNotBlank() ||
+            size.isNotBlank() || bitrate.isNotBlank() || generic
+
+        // Starts small and springs to size once, when this format's badges first show.
+        val pop = remember(format.formatId) { Animatable(if (popBadges) BADGE_POP_FROM else 1f) }
+        LaunchedEffect(format.formatId, popBadges) {
+            if (popBadges && hasBadges) {
+                pop.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessMediumLow))
+            } else {
+                pop.snapTo(1f)
+            }
+        }
+
+        // A ladder row while the formats are read holds the places the real badges will
+        // take, rather than saying it will be matched later.
+        val idTag = "id: ${shortId(format.formatId)}".takeIf { generic && tagId }
+        if (pendingBadges && (generic || !hasBadges)) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                FillingBadges()
+                idTag?.let { MetaBadge(it, tone = BadgeTone.ID) }
+            }
+        } else if (hasBadges) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                modifier = Modifier
+                    .graphicsLayer {
+                        val p = pop.value
+                        scaleX = p
+                        scaleY = p
+                        alpha = ((p - BADGE_POP_FROM) / (1f - BADGE_POP_FROM)).coerceIn(0f, 1f)
+                        transformOrigin = TransformOrigin(0f, 0.5f)
+                    }
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                if (mergeAudioId != null) {
+                    MetaBadge(
+                        text = "id: ${shortId(mergeAudioId)}",
+                        icon = Icons.Filled.MusicNote,
+                        tone = BadgeTone.SOLID
+                    )
+                }
+                // Said once, on the ladder's rows: the step is matched to a real stream
+                // when the download starts, so there is no codec or size to show yet.
+                if (generic) MetaBadge(
+                    stringResource(R.string.format_generic_badge),
+                    tone = if (tagId) BadgeTone.SIZE else BadgeTone.ACCENT
+                )
+                if (codec.isNotBlank()) MetaBadge(codec)
+                if (size.isNotBlank()) MetaBadge(size, tone = BadgeTone.SIZE)
+                if (bitrate.isNotBlank()) MetaBadge(bitrate, tone = BadgeTone.ACCENT)
+                idTag?.let { MetaBadge(it, tone = BadgeTone.ID) }
+            }
+        }
+    }
+}
+
+/**
+ * A quality row's frame: the cookie block it leads with, the headline with an optional note in
+ * its corner, whatever [below] puts under the headline, and the chevron when it opens a list.
+ * Format rows and the gallery's size rows both use it, so the two read and move alike.
+ */
+@Composable
+internal fun FormatRowFrame(
+    badge: String,
+    headline: String,
+    corner: String?,
+    selected: Boolean,
+    onClick: () -> Unit,
+    showChevron: Boolean = false,
+    compact: Boolean = false,
+    /** Whether a picked row's badge turns into the pentagon, which only the list's rows do. */
+    pickedShape: Boolean = true,
+    shape: Shape = RoundedCornerShape(14.dp),
+    below: @Composable ColumnScope.() -> Unit
+) {
     val scheme = MaterialTheme.colorScheme
     val fill by animateColorAsState(
         when {
@@ -1112,13 +1175,12 @@ fun FormatRow(
             .padding(horizontal = if (compact) 10.dp else 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ContainerBadge(text = badgeTextOf(format), compact = compact, selected = selected && pickedShape)
+        ContainerBadge(text = badge, compact = compact, selected = selected && pickedShape)
 
         Spacer(modifier = Modifier.width(if (compact) 10.dp else 12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.Top) {
-                val headline = format.label.uppercase()
                 val long = headline.length > LONG_HEADLINE
                 Text(
                     headline,
@@ -1137,15 +1199,12 @@ fun FormatRow(
                     color = if (selected) scheme.primary else scheme.onSurface,
                     modifier = Modifier.weight(1f, fill = false)
                 )
-                // The plain ladder (no rail) carries the id as a tag after its Auto tag; the
-                // sorted list keeps it beside the headline.
-                val idAsTag = format.isGeneric && tagId
-                if (!idAsTag) {
+                if (corner != null) {
                     Spacer(modifier = Modifier.width(if (compact) 6.dp else 8.dp))
                     // Bounded, so a long DASH id ("dash-1234…") ellipsizes in its own corner
                     // rather than squeezing the headline down to nothing.
                     Text(
-                        "id: ${shortId(format.formatId)}",
+                        corner,
                         style = MaterialTheme.typography.labelMedium,
                         fontSize = if (compact) 10.sp else MaterialTheme.typography.labelMedium.fontSize,
                         color = scheme.onSurface.copy(alpha = if (selected) 0.6f else 0.45f),
@@ -1155,74 +1214,7 @@ fun FormatRow(
                     )
                 }
             }
-
-            // Badges are omitted entirely when the extractor did not report them,
-            // which is common outside the largest sites.
-            val codec = format.codecLabel
-            // The whole file: a video-only stream counts the soundtrack muxed into it.
-            val size = format.sizeLabelWith(mergeAudio)
-            val mergeAudioId = mergeAudio?.formatId?.takeIf { showMergeId && format.needsAudio }
-            // The bitrate says something the resolution does not only for audio; on a
-            // video row it repeats what the size already showed.
-            val generic = format.isGeneric
-            // A ladder row's bitrate is its name already, so it is not repeated as a badge.
-            val bitrate = format.bitrateLabel.takeIf { !format.hasVideo && !generic }.orEmpty()
-
-            val hasBadges = mergeAudioId != null || codec.isNotBlank() ||
-                size.isNotBlank() || bitrate.isNotBlank() || generic
-
-            // Starts small and springs to size once, when this format's badges first show.
-            val pop = remember(format.formatId) { Animatable(if (popBadges) BADGE_POP_FROM else 1f) }
-            LaunchedEffect(format.formatId, popBadges) {
-                if (popBadges && hasBadges) {
-                    pop.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessMediumLow))
-                } else {
-                    pop.snapTo(1f)
-                }
-            }
-
-            // A ladder row while the formats are read holds the places the real badges will
-            // take, rather than saying it will be matched later.
-            val idTag = "id: ${shortId(format.formatId)}".takeIf { generic && tagId }
-            if (pendingBadges && (generic || !hasBadges)) {
-                Spacer(modifier = Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                    FillingBadges()
-                    idTag?.let { MetaBadge(it, tone = BadgeTone.ID) }
-                }
-            } else if (hasBadges) {
-                Spacer(modifier = Modifier.height(6.dp))
-                Row(
-                    modifier = Modifier
-                        .graphicsLayer {
-                            val p = pop.value
-                            scaleX = p
-                            scaleY = p
-                            alpha = ((p - BADGE_POP_FROM) / (1f - BADGE_POP_FROM)).coerceIn(0f, 1f)
-                            transformOrigin = TransformOrigin(0f, 0.5f)
-                        }
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    if (mergeAudioId != null) {
-                        MetaBadge(
-                            text = "id: ${shortId(mergeAudioId)}",
-                            icon = Icons.Filled.MusicNote,
-                            tone = BadgeTone.SOLID
-                        )
-                    }
-                    // Said once, on the ladder's rows: the step is matched to a real stream
-                    // when the download starts, so there is no codec or size to show yet.
-                    if (generic) MetaBadge(
-                        stringResource(R.string.format_generic_badge),
-                        tone = if (tagId) BadgeTone.SIZE else BadgeTone.ACCENT
-                    )
-                    if (codec.isNotBlank()) MetaBadge(codec)
-                    if (size.isNotBlank()) MetaBadge(size, tone = BadgeTone.SIZE)
-                    if (bitrate.isNotBlank()) MetaBadge(bitrate, tone = BadgeTone.ACCENT)
-                    idTag?.let { MetaBadge(it, tone = BadgeTone.ID) }
-                }
-            }
+            below()
         }
 
         if (showChevron) {
@@ -1232,6 +1224,52 @@ fun FormatRow(
                 contentDescription = stringResource(R.string.format_selection_change),
                 modifier = Modifier.size(18.dp),
                 tint = scheme.primary.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+/**
+ * A picker's confirm action: the accent pill led by a six-sided cookie with the tick cut into
+ * it, the way "Download all" is led. Without a choice it stays flat and muted.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun SheetConfirmPill(enabled: Boolean, onClick: () -> Unit) {
+    val okFill = if (enabled) MaterialTheme.colorScheme.primary else tonalFill(0.55f)
+    val okInk = if (enabled) MaterialTheme.colorScheme.onPrimary
+    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(22.dp),
+        color = okFill,
+        contentColor = okInk,
+        modifier = Modifier.height(44.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 5.dp, top = 5.dp, bottom = 5.dp, end = 18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(MaterialShapes.Cookie6Sided.toShape())
+                    .background(if (enabled) okInk else okInk.copy(alpha = 0.18f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = if (enabled) okFill else okInk
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                stringResource(R.string.format_selection_confirm),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
