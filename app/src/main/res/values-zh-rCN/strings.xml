@@ -163,14 +163,12 @@
 
     <!-- GettingStartedDialog -->
     <string name="guide_step_badge">第 %1$d 步（共 %2$d 步）</string>
-    <string name="guide_step1_title">粘贴并下载</string>
+    <string name="guide_step1_title">粘贴、搜索、下载</string>
     <string name="guide_step2_title">格式选择</string>
-    <string name="guide_step3_title">Hazel 快捷下载</string>
     <string name="guide_step4_title">电池优化</string>
     <string name="guide_step5_title">通知权限</string>
-    <string name="guide_step_paste_link">在搜索框中粘贴一个或多个链接，或整个播放列表。</string>
+    <string name="guide_step_paste_link">一个链接、多个链接或整个播放列表。视频、音频或图片。</string>
     <string name="guide_step_pick_format">点按卡片选择具体格式，每种画质都显示大小和编码。</string>
-    <string name="guide_step_share_instant">分享到 Hazel Instant，按你的设置立即开始。调节按钮可打开合成。</string>
     <string name="guide_step_battery_unrestricted">将电池使用设为不受限制，以免 Android 停止后台下载。</string>
     <string name="guide_step_notifications">在后台接收下载进度以及文件完成的即时通知。</string>
     <string name="guide_allow">允许</string>
@@ -492,17 +490,11 @@
     <string name="cookies_toast_entry_copied">已复制到剪贴板</string>
     <string name="cookies_use_title">使用 Cookie</string>
     <string name="cookies_use_description">把已保存的登录信息交给下载器</string>
-    <string name="cookies_empty_title">没有保存任何 Cookie</string>
-    <string name="cookies_empty_body">添加一个，就能下载有年龄限制、私密或仅会员可见的内容。</string>
-    <string name="cookies_delete_title">删除 Cookie</string>
-    <string name="cookies_delete_body">要移除 %1$s 的已保存登录信息吗？</string>
-    <string name="cookies_delete_confirm">删除</string>
     <string name="cookies_delete_all_title">删除全部 Cookie</string>
     <string name="cookies_delete_all_body">所有已保存的登录信息都会被移除。此操作无法撤销。</string>
     <string name="cookies_delete_all_confirm">全部删除</string>
     <string name="cookies_row_fallback_name">Cookie</string>
     <string name="cookies_sheet_copy">复制 Cookie</string>
-    <string name="cookies_sheet_delete">删除 Cookie</string>
     <string name="cookies_field_title">标题</string>
     <string name="cookies_field_url">网址</string>
     <string name="cookies_sheet_save">保存</string>
@@ -578,11 +570,8 @@
     <string name="queue_adjust_restart_confirm">重新开始</string>
 
     <!-- Sign-in web view -->
-    <string name="cookie_webview_close">关闭</string>
-    <string name="cookie_webview_desktop_site">桌面版网站</string>
     <string name="cookie_webview_no_cookies">没有取到任何 Cookie</string>
     <string name="cookie_webview_crashed">登录页面已停止。请重新打开。</string>
-    <string name="cookie_webview_done">"  确定"</string>
 
     <!-- FormatSelectionSheet -->
     <string name="format_selection_change">更改格式</string>
@@ -600,8 +589,6 @@
     <string name="sheet_link_options">链接选项</string>
     <string name="sheet_link_copied">链接已复制</string>
     <string name="sheet_link_open_failed">没有可打开此链接的应用</string>
-    <string name="sheet_cookies_site_saved">已登录 %1$s</string>
-    <string name="sheet_cookies_site_missing">未保存 %1$s 的登录</string>
     <string name="batch_search_open">搜索链接</string>
     <string name="batch_search_hint">在这些链接中搜索</string>
     <string name="batch_search_close">关闭搜索</string>
@@ -655,7 +642,6 @@
     <string name="glass_style_ocean">海洋</string>
     <string name="glass_style_mono">单色</string>
     <string name="guide_step_appearance_title">按你的喜好</string>
-    <string name="guide_step_appearance_desc">选择主题、强调色和玻璃效果，之后可随时在设置中更改。</string>
     <string name="whats_new_tag">新功能</string>
     <string name="whats_new_version">版本 %1$s</string>
     <string name="whats_new_done">知道了</string>
@@ -729,9 +715,6 @@
     <string name="gallery_settings_x_posts_value">回复、转推、引用</string>
     <string name="gallery_settings_network">网络</string>
     <string name="gallery_settings_retries">重试次数</string>
-    <string name="gallery_settings_extras">其他</string>
-    <string name="gallery_settings_captions">说明文字存为 .txt</string>
-    <string name="gallery_settings_ugoira">Pixiv 动图转为视频</string>
     <string name="storage_locations_wifi_only">仅 Wi-Fi</string>
     <string name="storage_locations_speed_limit">速度限制</string>
 
@@ -995,7 +978,6 @@
     <string name="instant_ok">确定</string>
     <string name="instant_settings">合成设置</string>
     <string name="guide_step_share_title">分享到 Hazel</string>
-    <string name="guide_step_share_sheet">从任意应用把链接分享到 Hazel，立即下载或选择所有选项。</string>
     <string name="instant_closing">%1$d 秒后关闭</string>
     <string name="ytdlp_update_channel_name">引擎更新</string>
     <string name="ytdlp_update_channel_description">yt-dlp 引擎更新提醒</string>
@@ -1007,11 +989,8 @@
     <string name="ytdlp_update_failed_text">Hazel 保留了当前引擎，稍后会重试</string>
     <string name="cookies_description">登录一次，即可下载年龄限制、私密和会员专属内容。</string>
     <string name="cookies_section_general">常规</string>
-    <string name="cookies_section_add">添加</string>
-    <string name="cookies_section_saved">已保存的登录</string>
     <string name="cookies_add_sign_in">登录网站</string>
     <string name="cookies_add_sign_in_summary">打开网站并保存其 Cookie</string>
-    <string name="cookies_add_import_file_summary">从浏览器导出的 Netscape Cookie 文件</string>
     <string name="cookies_off_hint">开启“使用 Cookie”即可在下载时发送它们。</string>
     <string name="cookies_expires">到期 %1$s</string>
     <string name="cookies_expired">已过期</string>
@@ -1086,7 +1065,6 @@
     <string name="hazel_update_available_text">点按查看新内容并更新。</string>
     <string name="hazel_update_ready_text">已下载完成，点按即可安装。</string>
     <string name="guide_step_updates_title">保持最新</string>
-    <string name="guide_step_updates_desc">选择 Hazel 和 yt-dlp 的更新方式。可随时在软件更新中更改。</string>
     <string name="guide_updates_notify">通知我</string>
     <string name="upd_wifi_only_title">仅限 Wi-Fi</string>
     <string name="upd_wifi_only_summary">不使用移动数据下载</string>
@@ -1117,7 +1095,6 @@
     <string name="guide_updates_ytdlp">yt-dlp 自动</string>
     <string name="guide_updates_hazel">Hazel 自动</string>
     <string name="guide_updates_wifi">仅限 Wi-Fi</string>
-    <string name="guide_updates_more">更多</string>
     <string name="upd_failure_no_space">此设备的可用存储空间不足，无法安装更新。请清理一些空间后重试。</string>
     <string name="upd_failure_timeout">连接 GitHub 超时。请切换到信号更好的网络后重试。</string>
     <string name="upd_failure_unreachable">Hazel 无法连接到 GitHub。请检查网络连接以及 VPN 和私人 DNS 设置，然后重试。</string>
@@ -1132,6 +1109,51 @@
     <string name="upd_failure_unknown">未能完成更新（%1$s）。请稍后重试。</string>
     <string name="upd_status_update_failed">更新未完成</string>
     <string name="upd_status_check_failed">检查未完成</string>
+    <string name="cookie_webview_reload">重新加载</string>
+    <string name="cookie_webview_load_failed">无法加载此页面</string>
+    <string name="cookie_webview_clear_site">清除此网站数据</string>
+    <string name="cookie_webview_cleared">已清除网站数据</string>
+    <string name="cookie_webview_copy_address">复制页面地址</string>
+    <string name="cookie_webview_desktop">桌面版</string>
+    <string name="cookie_webview_go_sign_in">前往登录页</string>
+    <string name="cookie_webview_load_failed_why">无网络连接，或被代理拒绝</string>
+    <string name="cookie_webview_mobile">移动版</string>
+    <string name="cookie_webview_not_loaded">未加载</string>
+    <string name="cookie_webview_off">关</string>
+    <string name="cookie_webview_on">开</string>
+    <string name="cookie_webview_save">OK</string>
+    <string name="cookie_webview_text_size">文字大小</string>
+    <string name="cookies_check">检查登录</string>
+    <string name="cookies_check_button">检查</string>
+    <string name="cookies_check_failed">无法连接网站</string>
+    <string name="cookies_check_never">尚未检查</string>
+    <string name="cookies_check_ok">上次检查 %1$s · 仍已登录</string>
+    <string name="cookies_check_refused">上次检查 %1$s · 已被网站退出</string>
+    <string name="cookies_checked">已检查 %1$s</string>
+    <string name="cookies_dialog_expired_title">登录已过期</string>
+    <string name="cookies_dialog_none_saved">未保存登录</string>
+    <string name="cookies_dialog_title">此链接的登录</string>
+    <string name="cookies_done">完成</string>
+    <string name="cookies_expired_ago">已过期 %1$s</string>
+    <string name="cookies_import">导入</string>
+    <string name="cookies_login_expires">登录到期</string>
+    <string name="cookies_no_login">未保存登录 Cookie</string>
+    <string name="cookies_not_now">以后再说</string>
+    <string name="cookies_section_accounts">账号</string>
+    <string name="cookies_section_quick">快速登录</string>
+    <string name="cookies_settings">Cookie 设置</string>
+    <string name="cookies_show_summary">查看或复制已保存的 Cookie</string>
+    <string name="cookies_sign_in_again_summary">原地替换已保存的 Cookie</string>
+    <string name="cookies_sign_out">退出登录</string>
+    <string name="cookies_sign_out_body">将删除其已保存的 Cookie，登录页也会忘记它。</string>
+    <string name="cookies_sign_out_title">退出 %1$s？</string>
+    <string name="cookies_signed_out_by_site">已被网站退出</string>
+    <string name="cookies_state_active">有效</string>
+    <string name="cookies_state_signed_out">已退出</string>
+    <string name="cookies_use_for_downloads">用于下载</string>
+    <string name="cookies_use_for_downloads_summary">关闭后仍保存但不使用</string>
+    <string name="cookies_dialog_sub">部分来源需要登录才能下载</string>
+    <string name="cookies_open">打开</string>
     <string name="gallery_dl_update_available_title">gallery-dl %1$s 可用</string>
     <string name="gallery_dl_update_available_text">打开 Hazel 更新图片引擎</string>
     <string name="gallery_dl_update_installed_title">gallery-dl 已更新到 %1$s</string>
@@ -1162,4 +1184,18 @@
     <string name="gallery_group_by_author">按作者分组</string>
     <string name="gallery_group_by_author_summary">同一作者的单张图片放进一个轮播</string>
     <string name="more_image_settings">图片设置</string>
+    <string name="guide_share_from_apps">从任意应用分享链接</string>
+    <string name="guide_share_video">选择所有选项后下载</string>
+    <string name="guide_share_images">选择图片选项后下载</string>
+    <string name="guide_share_instant">按已保存的画质立即下载</string>
+    <string name="caption_copy">复制</string>
+    <string name="caption_save_text">另存为文本</string>
+    <string name="caption_saved">已下载说明文字</string>
+    <string name="caption_save_failed">无法保存说明文字</string>
+    <string name="caption_view_full">查看完整说明文字</string>
+    <string name="caption_save_choices">保存内容</string>
+    <string name="caption_only">仅说明文字</string>
+    <string name="caption_with_file">全部</string>
+    <string name="gallery_settings_caption_in_file">在图片文件中写入说明</string>
+    <string name="gallery_settings_caption_in_file_hint">写入保存的 JPEG 和 PNG</string>
 </resources>

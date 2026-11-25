@@ -168,14 +168,12 @@
 
     <!-- GettingStartedDialog -->
     <string name="guide_step_badge">Schritt %1$d von %2$d</string>
-    <string name="guide_step1_title">Einfügen &amp; Herunterladen</string>
+    <string name="guide_step1_title">Einfügen, suchen, laden</string>
     <string name="guide_step2_title">Formatauswahl</string>
-    <string name="guide_step3_title">Hazel Sofort</string>
     <string name="guide_step4_title">Akku-Optimierung</string>
     <string name="guide_step5_title">Benachrichtigungen</string>
-    <string name="guide_step_paste_link">Füge einen oder mehrere Links oder eine ganze Playlist ins Suchfeld ein.</string>
+    <string name="guide_step_paste_link">Ein Link, mehrere oder eine ganze Playlist. Video, Audio oder Bilder.</string>
     <string name="guide_step_pick_format">Tippe auf eine Karte für ein genaues Format, mit Größe und Codec je Qualität.</string>
-    <string name="guide_step_share_instant">Teile an Hazel Instant, um sofort mit deinen Einstellungen zu starten. Der Regler öffnet Synthese.</string>
     <string name="guide_step_battery_unrestricted">Stelle die Akkunutzung auf uneingeschränkt, damit Android Hintergrund-Downloads nicht stoppt.</string>
     <string name="guide_step_notifications">Erhalte Benachrichtigungen über den Downloadfortschritt und abgeschlossene Dateien im Hintergrund.</string>
     <string name="guide_allow">Zulassen</string>
@@ -504,17 +502,11 @@
     <string name="cookies_toast_entry_copied">In die Zwischenablage kopiert</string>
     <string name="cookies_use_title">Cookies verwenden</string>
     <string name="cookies_use_description">Gespeicherte Anmeldungen an den Downloader geben</string>
-    <string name="cookies_empty_title">Keine Cookies gespeichert</string>
-    <string name="cookies_empty_body">Füge eines hinzu, um Inhalte mit Altersfreigabe, private oder nur für Mitglieder herunterzuladen.</string>
-    <string name="cookies_delete_title">Cookies löschen</string>
-    <string name="cookies_delete_body">Die gespeicherte Anmeldung für %1$s entfernen?</string>
-    <string name="cookies_delete_confirm">Löschen</string>
     <string name="cookies_delete_all_title">Alle Cookies löschen</string>
     <string name="cookies_delete_all_body">Jede gespeicherte Anmeldung wird entfernt. Das lässt sich nicht rückgängig machen.</string>
     <string name="cookies_delete_all_confirm">Alle löschen</string>
     <string name="cookies_row_fallback_name">Cookies</string>
     <string name="cookies_sheet_copy">Cookies kopieren</string>
-    <string name="cookies_sheet_delete">Cookies löschen</string>
     <string name="cookies_field_title">Titel</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">Speichern</string>
@@ -592,11 +584,8 @@
     <string name="queue_adjust_restart_confirm">Neu starten</string>
 
     <!-- Sign-in web view -->
-    <string name="cookie_webview_close">Schließen</string>
-    <string name="cookie_webview_desktop_site">Desktop-Version</string>
     <string name="cookie_webview_no_cookies">Es wurden keine Cookies gesammelt</string>
     <string name="cookie_webview_crashed">Die Anmeldeseite wurde beendet. Bitte erneut öffnen.</string>
-    <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->
     <string name="format_selection_change">Format wechseln</string>
@@ -614,8 +603,6 @@
     <string name="sheet_link_options">Link-Optionen</string>
     <string name="sheet_link_copied">Link kopiert</string>
     <string name="sheet_link_open_failed">Keine App kann diesen Link öffnen</string>
-    <string name="sheet_cookies_site_saved">Angemeldet bei %1$s</string>
-    <string name="sheet_cookies_site_missing">Keine Anmeldung für %1$s gespeichert</string>
     <string name="batch_search_open">Links durchsuchen</string>
     <string name="batch_search_hint">Diese Links durchsuchen</string>
     <string name="batch_search_close">Suche schließen</string>
@@ -669,7 +656,6 @@
     <string name="glass_style_ocean">Ozean</string>
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Mach es zu deinem</string>
-    <string name="guide_step_appearance_desc">Wähle ein Design, eine Akzentfarbe und den Glas-Look. Du kannst das jederzeit in den Einstellungen ändern.</string>
     <string name="whats_new_tag">Neu</string>
     <string name="whats_new_version">Version %1$s</string>
     <string name="whats_new_done">Verstanden</string>
@@ -744,9 +730,6 @@
     <string name="gallery_settings_x_posts_value">Antworten, Retweets, Zitate</string>
     <string name="gallery_settings_network">Netzwerk</string>
     <string name="gallery_settings_retries">Wiederholungen</string>
-    <string name="gallery_settings_extras">Extras</string>
-    <string name="gallery_settings_captions">Bildtexte als .txt</string>
-    <string name="gallery_settings_ugoira">Pixiv-Animationen als Video</string>
     <string name="storage_locations_wifi_only">Nur WLAN</string>
     <string name="storage_locations_speed_limit">Geschwindigkeitsgrenze</string>
 
@@ -1011,7 +994,6 @@
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Synthese-Einstellungen</string>
     <string name="guide_step_share_title">An Hazel teilen</string>
-    <string name="guide_step_share_sheet">Teile einen Link aus jeder App an Hazel und lade sofort oder wähle jede Option.</string>
     <string name="instant_closing">Schließt in %1$d s</string>
     <string name="ytdlp_update_channel_name">Engine-Updates</string>
     <string name="ytdlp_update_channel_description">Hinweise zu Updates der yt-dlp-Engine</string>
@@ -1023,11 +1005,8 @@
     <string name="ytdlp_update_failed_text">Hazel behält die aktuelle Engine und versucht es später erneut</string>
     <string name="cookies_description">Einmal anmelden für altersbeschränkte, private und Mitglieder-Downloads.</string>
     <string name="cookies_section_general">Allgemein</string>
-    <string name="cookies_section_add">Hinzufügen</string>
-    <string name="cookies_section_saved">Gespeicherte Anmeldungen</string>
     <string name="cookies_add_sign_in">Bei einer Website anmelden</string>
     <string name="cookies_add_sign_in_summary">Website öffnen und ihre Cookies speichern</string>
-    <string name="cookies_add_import_file_summary">Eine aus einem Browser exportierte Netscape-Cookie-Datei</string>
     <string name="cookies_off_hint">Aktiviere „Cookies verwenden“, um sie bei Downloads mitzusenden.</string>
     <string name="cookies_expires">Läuft ab %1$s</string>
     <string name="cookies_expired">Abgelaufen</string>
@@ -1103,7 +1082,6 @@
     <string name="hazel_update_available_text">Tippen, um Neuerungen zu sehen und zu aktualisieren.</string>
     <string name="hazel_update_ready_text">Geladen und bereit. Zum Installieren tippen.</string>
     <string name="guide_step_updates_title">Immer aktuell</string>
-    <string name="guide_step_updates_desc">Wähle, wie Hazel und yt-dlp aktualisieren. Jederzeit änderbar unter Software-Update.</string>
     <string name="guide_updates_notify">Melden</string>
     <string name="upd_wifi_only_title">Nur im WLAN laden</string>
     <string name="upd_wifi_only_summary">Keine Downloads über mobile Daten</string>
@@ -1134,7 +1112,6 @@
     <string name="guide_updates_ytdlp">yt-dlp auto</string>
     <string name="guide_updates_hazel">Hazel auto</string>
     <string name="guide_updates_wifi">Nur WLAN</string>
-    <string name="guide_updates_more">Mehr</string>
     <string name="upd_failure_no_space">Auf diesem Gerät ist nicht genug freier Speicher vorhanden, um das Update zu installieren. Gib etwas Speicherplatz frei und versuche es erneut.</string>
     <string name="upd_failure_timeout">Die Verbindung zu GitHub hat zu lange gedauert. Wechsle zu einem stärkeren Netzwerk und versuche es erneut.</string>
     <string name="upd_failure_unreachable">Hazel konnte GitHub nicht erreichen. Prüfe deine Internetverbindung sowie die Einstellungen für VPN und Privates DNS und versuche es dann erneut.</string>
@@ -1149,6 +1126,51 @@
     <string name="upd_failure_unknown">Das Update konnte nicht abgeschlossen werden (%1$s). Versuche es gleich noch einmal.</string>
     <string name="upd_status_update_failed">Update nicht abgeschlossen</string>
     <string name="upd_status_check_failed">Prüfung nicht abgeschlossen</string>
+    <string name="cookie_webview_reload">Neu laden</string>
+    <string name="cookie_webview_load_failed">Diese Seite konnte nicht laden</string>
+    <string name="cookie_webview_clear_site">Daten dieser Website löschen</string>
+    <string name="cookie_webview_cleared">Website-Daten gelöscht</string>
+    <string name="cookie_webview_copy_address">Seitenadresse kopieren</string>
+    <string name="cookie_webview_desktop">Desktopansicht</string>
+    <string name="cookie_webview_go_sign_in">Zur Anmeldeseite</string>
+    <string name="cookie_webview_load_failed_why">Keine Verbindung oder vom Proxy abgelehnt</string>
+    <string name="cookie_webview_mobile">Mobilansicht</string>
+    <string name="cookie_webview_not_loaded">Nicht geladen</string>
+    <string name="cookie_webview_off">Aus</string>
+    <string name="cookie_webview_on">An</string>
+    <string name="cookie_webview_save">OK</string>
+    <string name="cookie_webview_text_size">Textgröße</string>
+    <string name="cookies_check">Anmeldung prüfen</string>
+    <string name="cookies_check_button">Prüfen</string>
+    <string name="cookies_check_failed">Website nicht erreichbar</string>
+    <string name="cookies_check_never">Noch nicht geprüft</string>
+    <string name="cookies_check_ok">Zuletzt geprüft %1$s · noch angemeldet</string>
+    <string name="cookies_check_refused">Zuletzt geprüft %1$s · von der Website abgemeldet</string>
+    <string name="cookies_checked">Geprüft %1$s</string>
+    <string name="cookies_dialog_expired_title">Anmeldung abgelaufen</string>
+    <string name="cookies_dialog_none_saved">Keine Anmeldung gespeichert</string>
+    <string name="cookies_dialog_title">Anmeldung für diesen Link</string>
+    <string name="cookies_done">Fertig</string>
+    <string name="cookies_expired_ago">Abgelaufen %1$s</string>
+    <string name="cookies_import">Importieren</string>
+    <string name="cookies_login_expires">Anmeldung läuft ab</string>
+    <string name="cookies_no_login">Kein Login-Cookie gespeichert</string>
+    <string name="cookies_not_now">Nicht jetzt</string>
+    <string name="cookies_section_accounts">Konten</string>
+    <string name="cookies_section_quick">Schnell anmelden</string>
+    <string name="cookies_settings">Cookie-Einstellungen</string>
+    <string name="cookies_show_summary">Gespeicherte Cookies ansehen oder kopieren</string>
+    <string name="cookies_sign_in_again_summary">Ersetzt die gespeicherten Cookies</string>
+    <string name="cookies_sign_out">Abmelden</string>
+    <string name="cookies_sign_out_body">Die gespeicherten Cookies werden gelöscht und die Anmeldeseite vergisst sie.</string>
+    <string name="cookies_sign_out_title">Von %1$s abmelden?</string>
+    <string name="cookies_signed_out_by_site">Von der Website abgemeldet</string>
+    <string name="cookies_state_active">Aktiv</string>
+    <string name="cookies_state_signed_out">Abgemeldet</string>
+    <string name="cookies_use_for_downloads">Für Downloads verwenden</string>
+    <string name="cookies_use_for_downloads_summary">Aus: bleibt gespeichert, wird nicht genutzt</string>
+    <string name="cookies_dialog_sub">Manche Quellen laden nur mit Anmeldung</string>
+    <string name="cookies_open">Öffnen</string>
     <string name="gallery_dl_update_available_title">gallery-dl %1$s ist verfügbar</string>
     <string name="gallery_dl_update_available_text">Öffne Hazel, um die Bild-Engine zu aktualisieren</string>
     <string name="gallery_dl_update_installed_title">gallery-dl auf %1$s aktualisiert</string>
@@ -1179,4 +1201,18 @@
     <string name="gallery_group_by_author">Nach Autor gruppieren</string>
     <string name="gallery_group_by_author_summary">Einzelbilder eines Autors in einem Karussell</string>
     <string name="more_image_settings">Bildeinstellungen</string>
+    <string name="guide_share_from_apps">Teile einen Link aus jeder App</string>
+    <string name="guide_share_video">Alle Optionen wählen, dann laden</string>
+    <string name="guide_share_images">Bildoptionen wählen, dann laden</string>
+    <string name="guide_share_instant">Lädt sofort in deiner gespeicherten Qualität</string>
+    <string name="caption_copy">Kopieren</string>
+    <string name="caption_save_text">Als Text speichern</string>
+    <string name="caption_saved">Beschriftung heruntergeladen</string>
+    <string name="caption_save_failed">Beschriftung konnte nicht gespeichert werden</string>
+    <string name="caption_view_full">Ganze Beschriftung zeigen</string>
+    <string name="caption_save_choices">Was gespeichert wird</string>
+    <string name="caption_only">Nur Beschriftung</string>
+    <string name="caption_with_file">Alle</string>
+    <string name="gallery_settings_caption_in_file">Beschriftung im Bild</string>
+    <string name="gallery_settings_caption_in_file_hint">In JPEG und PNG</string>
 </resources>

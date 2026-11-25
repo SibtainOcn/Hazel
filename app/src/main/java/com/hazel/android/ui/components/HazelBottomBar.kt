@@ -145,7 +145,7 @@ private val INDICATOR_SIZE = 46.dp
 /** Home, History, Queue, More, in the bar's order. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private val TabShapes = listOf(
-    MaterialShapes.Cookie7Sided,
+    MaterialShapes.Cookie6Sided,
     MaterialShapes.Pentagon,
     MaterialShapes.Clover4Leaf,
     MaterialShapes.Gem

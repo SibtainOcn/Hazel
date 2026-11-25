@@ -88,6 +88,66 @@ object CookieExtractor {
         }
     }
 
+    /** Puts a saved Netscape cookie set into the WebView store, so a page opens signed in. */
+    fun load(content: String) {
+        runCatching {
+            val manager = CookieManager.getInstance()
+            content.lineSequence().forEach { raw ->
+                val line = raw.trim()
+                val httpOnly = line.startsWith("#HttpOnly_")
+                if (line.isEmpty() || (line.startsWith("#") && !httpOnly)) return@forEach
+                val fields = line.removePrefix("#HttpOnly_").split('\t')
+                if (fields.size < 7) return@forEach
+                val domain = fields[0]
+                val host = domain.removePrefix(".").takeIf { it.isNotBlank() } ?: return@forEach
+                val cookie = buildString {
+                    append(fields[5]).append('=').append(fields[6])
+                    if (domain.startsWith(".")) append("; Domain=").append(domain)
+                    append("; Path=").append(fields[2].ifBlank { "/" })
+                    fields[4].toLongOrNull()?.takeIf { it > 0 }?.let { append("; Max-Age=").append(it - System.currentTimeMillis() / 1000) }
+                    if (fields[3].equals("TRUE", ignoreCase = true)) append("; Secure")
+                    if (httpOnly) append("; HttpOnly")
+                }
+                manager.setCookie("https://$host", cookie)
+            }
+            manager.flush()
+        }
+    }
+
+    /** Expires the given cookies (domain, name) in the WebView store. Main thread. */
+    fun clearCookies(keys: List<Pair<String, String>>) {
+        if (keys.isEmpty()) return
+        runCatching {
+            val manager = CookieManager.getInstance()
+            keys.distinct().forEach { (domain, name) ->
+                val host = domain.removePrefix(".")
+                manager.setCookie("https://$host", "$name=; Max-Age=0; Path=/")
+                manager.setCookie("https://$host", "$name=; Max-Age=0; Path=/; Domain=.$host")
+            }
+            manager.flush()
+        }
+    }
+
+    /** Clears the cookies and stored data the WebView holds for the page [url]'s site. */
+    fun clearSite(url: String) {
+        runCatching {
+            val host = java.net.URI(url).host?.lowercase() ?: return
+            val root = host.split('.').takeLast(2).joinToString(".")
+            val manager = CookieManager.getInstance()
+            val keys = listOf(host, root).distinct().flatMap { domain ->
+                manager.getCookie("https://$domain").orEmpty().split(';')
+                    .map { it.substringBefore('=').trim() }.filter { it.isNotEmpty() }
+                    .map { domain to it }
+            }
+            clearCookies(keys)
+            android.webkit.WebStorage.getInstance().apply {
+                deleteOrigin("https://$host")
+                deleteOrigin("https://$root")
+                deleteOrigin("https://www.$root")
+            }
+        }
+    }
+
     /**
      * One tab separated cookie record.
      *

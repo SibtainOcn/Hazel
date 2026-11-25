@@ -345,7 +345,7 @@ object SettingsRepository {
     private val GALLERY_REPOSTS_KEY = booleanPreferencesKey("gallery_skip_reposts")
     private val GALLERY_GROUP_AUTHOR_KEY = booleanPreferencesKey("gallery_group_by_author")
 
-    val GALLERY_POST_COUNTS = listOf(10, 30, 60)
+    val GALLERY_POST_COUNTS = listOf(10, 30, 60, 100)
     const val DEFAULT_GALLERY_POSTS = 30
 
     fun getImageSearch(context: Context): Flow<Boolean> =
@@ -394,9 +394,11 @@ object SettingsRepository {
     private val GALLERY_VIDEO_MODE_KEY = stringPreferencesKey("gallery_video_mode")
     private val GALLERY_FILENAME_KEY = stringPreferencesKey("gallery_filename_template")
     private val GALLERY_METADATA_KEY = booleanPreferencesKey("gallery_write_metadata")
+    private val GALLERY_EMBED_CAPTION_KEY = booleanPreferencesKey("gallery_embed_caption")
     private val GALLERY_POST_DATE_KEY = booleanPreferencesKey("gallery_keep_post_date")
     private val GALLERY_ZIP_KEY = booleanPreferencesKey("gallery_pack_zip")
     private val GALLERY_ARCHIVE_KEY = booleanPreferencesKey("gallery_skip_downloaded")
+    private val GALLERY_RETRIES_KEY = intPreferencesKey("gallery_retries")
 
     /** The defaults every gallery download starts from. */
     fun getGalleryOptions(context: Context): Flow<com.hazel.android.gallery.GalleryOptions> =
@@ -408,7 +410,9 @@ object SettingsRepository {
                 writeMetadata = prefs[GALLERY_METADATA_KEY] ?: false,
                 keepPostDate = prefs[GALLERY_POST_DATE_KEY] ?: true,
                 packZip = prefs[GALLERY_ZIP_KEY] ?: false,
-                skipDownloaded = prefs[GALLERY_ARCHIVE_KEY] ?: false
+                skipDownloaded = prefs[GALLERY_ARCHIVE_KEY] ?: false,
+                embedCaption = prefs[GALLERY_EMBED_CAPTION_KEY] ?: false,
+                retries = prefs[GALLERY_RETRIES_KEY] ?: com.hazel.android.gallery.GalleryOptions.DEFAULT_RETRIES
             )
         }
 
@@ -421,6 +425,8 @@ object SettingsRepository {
             prefs[GALLERY_POST_DATE_KEY] = options.keepPostDate
             prefs[GALLERY_ZIP_KEY] = options.packZip
             prefs[GALLERY_ARCHIVE_KEY] = options.skipDownloaded
+            prefs[GALLERY_EMBED_CAPTION_KEY] = options.embedCaption
+            prefs[GALLERY_RETRIES_KEY] = options.retries
         }
     }
 
@@ -550,7 +556,10 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[INCOGNITO_KEY] = enabled }
         // In force at once, so a read finishing a moment later is not written to disk.
         com.hazel.android.download.ReadProfile.incognito = enabled
-        if (enabled) HomeResultsRepository.clear(context)
+        if (enabled) {
+            HomeResultsRepository.clear(context)
+            com.hazel.android.gallery.GalleryResultsStore.clear(context)
+        }
     }
 
     // ── Downloads list ──
