@@ -132,6 +132,7 @@ object TempStorage {
         when (id) {
             // gallery-dl runs hold the engine's shared lock while they use these files.
             GALLERY -> return@withContext YtDlpEngine.whenIdle {
+                com.hazel.android.gallery.GallerySpare.discard()
                 galleryFiles(SdCards.workRoots(context), cache).forEach { runCatching { it.deleteRecursively() } }
             } != null
             "ytdlp_cache" -> wipe(File(cache, "yt-dlp"))

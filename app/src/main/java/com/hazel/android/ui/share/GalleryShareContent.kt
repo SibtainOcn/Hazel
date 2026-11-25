@@ -39,6 +39,7 @@ import com.hazel.android.R
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryPost
+import com.hazel.android.gallery.GallerySpare
 import com.hazel.android.gallery.queue.GalleryDownloadRequest
 import com.hazel.android.ui.components.ArtworkPlaceholder
 import com.hazel.android.ui.components.ModalBottomSheet
@@ -142,6 +143,7 @@ internal fun GalleryShareContent(
 
 /** The first post the link holds; a profile or tag page is followed to its first post. */
 private suspend fun readFirstPost(context: Context, url: String): GalleryPost {
+    GallerySpare.warm(context)
     val listing = GalleryDlEngine.list(context, url)
     val post = GalleryPost.group(url, listing.items).firstOrNull()
         ?: listing.posts.firstOrNull()?.let { link ->

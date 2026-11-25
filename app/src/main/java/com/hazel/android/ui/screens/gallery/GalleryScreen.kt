@@ -263,6 +263,7 @@ fun GalleryScreen(
     val currentPost = viewModel.posts.indexOf(viewModel.post)
 
     LaunchedEffect(Unit) {
+        com.hazel.android.gallery.GallerySpare.warm(context)
         GalleryRequests.next.collect { if (it != null) GalleryRequests.take()?.let(viewModel::handle) }
     }
     BackHandler(enabled = viewModel.posts.size > 1 && viewModel.openPost != null, onBack = viewModel::closePost)
