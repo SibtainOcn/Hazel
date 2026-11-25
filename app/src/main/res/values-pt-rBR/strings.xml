@@ -1164,7 +1164,7 @@
     <string name="cookie_webview_not_loaded">Não carregada</string>
     <string name="cookie_webview_off">Desligada</string>
     <string name="cookie_webview_on">Ligada</string>
-    <string name="cookie_webview_save">Salvar login</string>
+    <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">Tamanho do texto</string>
     <string name="cookies_check">Verificar login</string>
     <string name="cookies_check_button">Verificar</string>

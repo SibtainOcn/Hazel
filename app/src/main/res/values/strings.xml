@@ -1203,7 +1203,7 @@
     <string name="cookie_webview_not_loaded">Not loaded</string>
     <string name="cookie_webview_off">Off</string>
     <string name="cookie_webview_on">On</string>
-    <string name="cookie_webview_save">Save sign-in</string>
+    <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">Text size</string>
     <string name="cookies_check">Check sign-in</string>
     <string name="cookies_check_button">Check</string>

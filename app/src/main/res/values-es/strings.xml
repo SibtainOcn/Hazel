@@ -1164,7 +1164,7 @@
     <string name="cookie_webview_not_loaded">No cargada</string>
     <string name="cookie_webview_off">No</string>
     <string name="cookie_webview_on">Sí</string>
-    <string name="cookie_webview_save">Guardar sesión</string>
+    <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">Tamaño del texto</string>
     <string name="cookies_check">Comprobar sesión</string>
     <string name="cookies_check_button">Comprobar</string>

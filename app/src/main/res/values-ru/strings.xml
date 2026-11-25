@@ -1180,7 +1180,7 @@
     <string name="cookie_webview_not_loaded">Не загружено</string>
     <string name="cookie_webview_off">Выкл</string>
     <string name="cookie_webview_on">Вкл</string>
-    <string name="cookie_webview_save">Сохранить вход</string>
+    <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">Размер текста</string>
     <string name="cookies_check">Проверить вход</string>
     <string name="cookies_check_button">Проверить</string>

@@ -1147,7 +1147,7 @@
     <string name="cookie_webview_not_loaded">Nicht geladen</string>
     <string name="cookie_webview_off">Aus</string>
     <string name="cookie_webview_on">An</string>
-    <string name="cookie_webview_save">Anmeldung speichern</string>
+    <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">Textgröße</string>
     <string name="cookies_check">Anmeldung prüfen</string>
     <string name="cookies_check_button">Prüfen</string>

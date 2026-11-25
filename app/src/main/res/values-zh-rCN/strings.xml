@@ -1130,7 +1130,7 @@
     <string name="cookie_webview_not_loaded">未加载</string>
     <string name="cookie_webview_off">关</string>
     <string name="cookie_webview_on">开</string>
-    <string name="cookie_webview_save">保存登录</string>
+    <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">文字大小</string>
     <string name="cookies_check">检查登录</string>
     <string name="cookies_check_button">检查</string>

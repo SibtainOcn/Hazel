@@ -232,6 +232,25 @@ class CookieWebViewActivity : ComponentActivity() {
                             )
                         }
                     }
+                    // Saves the sign-in; dim until the site has set its login cookie, still tappable.
+                    Surface(
+                        onClick = {
+                            if (!saving) {
+                                saving = true
+                                saveCookies(url, title, siteName) { saving = false }
+                            }
+                        },
+                        enabled = !saving && !loadFailed,
+                        shape = RoundedCornerShape(23.dp),
+                        color = if (signedIn) scheme.primary else scheme.primary.copy(alpha = 0.45f),
+                        contentColor = scheme.onPrimary,
+                        modifier = Modifier.heightIn(min = 46.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 16.dp)) {
+                            if (saving) CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = scheme.onPrimary)
+                            else Text(stringResource(R.string.cookie_webview_save), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                        }
+                    }
                     ShapeIconButton(onClick = { loadFailed = false; webView?.reload() }, size = 46.dp, shape = MaterialShapes.Cookie6Sided.toShape()) {
                         Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.cookie_webview_reload))
                     }
@@ -433,34 +452,6 @@ class CookieWebViewActivity : ComponentActivity() {
                 }
                 if (!firstPaint) {
                     HazelLoadingIndicator(size = 48.dp, modifier = Modifier.align(Alignment.Center))
-                }
-                if (!loadFailed) {
-                    Surface(
-                        onClick = {
-                            if (!saving) {
-                                saving = true
-                                saveCookies(url, title, siteName) { saving = false }
-                            }
-                        },
-                        enabled = !saving,
-                        shape = RoundedCornerShape(28.dp),
-                        color = if (signedIn) scheme.primary else scheme.primary.copy(alpha = 0.45f),
-                        contentColor = scheme.onPrimary,
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .navigationBarsPadding()
-                            .padding(end = 16.dp, bottom = 18.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
-                            if (saving) {
-                                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = scheme.onPrimary)
-                            } else {
-                                Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(18.dp))
-                            }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(R.string.cookie_webview_save), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
-                        }
-                    }
                 }
             }
         }

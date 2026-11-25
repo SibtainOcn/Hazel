@@ -1130,7 +1130,7 @@
     <string name="cookie_webview_not_loaded">Tidak dimuat</string>
     <string name="cookie_webview_off">Mati</string>
     <string name="cookie_webview_on">Nyala</string>
-    <string name="cookie_webview_save">Simpan login</string>
+    <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">Ukuran teks</string>
     <string name="cookies_check">Periksa login</string>
     <string name="cookies_check_button">Periksa</string>

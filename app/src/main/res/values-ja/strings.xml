@@ -1130,7 +1130,7 @@
     <string name="cookie_webview_not_loaded">未読み込み</string>
     <string name="cookie_webview_off">オフ</string>
     <string name="cookie_webview_on">オン</string>
-    <string name="cookie_webview_save">ログインを保存</string>
+    <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">文字サイズ</string>
     <string name="cookies_check">ログインを確認</string>
     <string name="cookies_check_button">確認</string>

@@ -1147,7 +1147,7 @@
     <string name="cookie_webview_not_loaded">लोड नहीं हुआ</string>
     <string name="cookie_webview_off">बंद</string>
     <string name="cookie_webview_on">चालू</string>
-    <string name="cookie_webview_save">साइन-इन सेव करें</string>
+    <string name="cookie_webview_save">OK</string>
     <string name="cookie_webview_text_size">टेक्स्ट का आकार</string>
     <string name="cookies_check">साइन-इन जाँचें</string>
     <string name="cookies_check_button">जाँचें</string>
