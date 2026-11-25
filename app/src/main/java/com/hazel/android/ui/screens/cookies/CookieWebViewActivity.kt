@@ -28,6 +28,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DesktopWindows
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconToggleButton
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -136,6 +143,8 @@ class CookieWebViewActivity : ComponentActivity() {
         }
         var desktopMode by remember { mutableStateOf(false) }
         var saving by remember { mutableStateOf(false) }
+        // The main page failed to load (offline, refused): shown with Retry instead of a blank page.
+        var loadFailed by remember { mutableStateOf(false) }
 
         BackHandler(enabled = true) {
             val view = webView
@@ -162,20 +171,23 @@ class CookieWebViewActivity : ComponentActivity() {
                         )
                     },
                     actions = {
-                        IconButton(
-                            onClick = {
-                                desktopMode = !desktopMode
+                        IconButton(onClick = { loadFailed = false; webView?.reload() }) {
+                            Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.cookie_webview_reload))
+                        }
+                        // Filled while on, so the state reads at a glance.
+                        FilledTonalIconToggleButton(
+                            checked = desktopMode,
+                            onCheckedChange = { on ->
+                                desktopMode = on
                                 webView?.let {
-                                    applyDesktopMode(it, desktopMode)
+                                    applyDesktopMode(it, on)
                                     it.reload()
                                 }
                             }
                         ) {
                             Icon(
                                 Icons.Filled.DesktopWindows,
-                                contentDescription = stringResource(R.string.cookie_webview_desktop_site),
-                                tint = if (desktopMode) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurface
+                                contentDescription = stringResource(R.string.cookie_webview_desktop_site)
                             )
                         }
 
@@ -229,12 +241,6 @@ class CookieWebViewActivity : ComponentActivity() {
             val background = MaterialTheme.colorScheme.background.toArgb()
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    if (firstPaint && progress in 1..99) {
-                        LinearProgressIndicator(
-                            progress = { progress / 100f },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
                     if (browserReady) AndroidView(
                         modifier = Modifier.fillMaxSize(),
                         factory = { context ->
@@ -257,7 +263,30 @@ class CookieWebViewActivity : ComponentActivity() {
                                     override fun shouldOverrideUrlLoading(
                                         view: WebView?,
                                         request: android.webkit.WebResourceRequest?
-                                    ): Boolean = !SignInBrowser.opensInPage(request?.url?.toString())
+                                    ): Boolean {
+                                        val target = request?.url?.toString()
+                                        if (SignInBrowser.opensInPage(target)) return false
+                                        // An "open the app" link: show the web page it stands for.
+                                        SignInBrowser.webFallback(target)?.let { view?.loadUrl(it) }
+                                        return true
+                                    }
+
+                                    override fun onPageStarted(view: WebView?, startedUrl: String?, favicon: android.graphics.Bitmap?) {
+                                        super.onPageStarted(view, startedUrl, favicon)
+                                        loadFailed = false
+                                    }
+
+                                    override fun onReceivedError(
+                                        view: WebView?,
+                                        request: android.webkit.WebResourceRequest?,
+                                        error: android.webkit.WebResourceError?
+                                    ) {
+                                        super.onReceivedError(view, request, error)
+                                        if (request?.isForMainFrame != true) return
+                                        android.util.Log.w("HazelSignIn", "Page failed: ${error?.errorCode} ${error?.description}")
+                                        loadFailed = true
+                                        firstPaint = true
+                                    }
 
                                     override fun onRenderProcessGone(
                                         view: WebView?,
@@ -297,6 +326,32 @@ class CookieWebViewActivity : ComponentActivity() {
                             }
                         }
                     )
+                }
+                // Over the page rather than above it, so the page is not resized while it loads.
+                if (firstPaint && progress in 1..99 && !loadFailed) {
+                    LinearProgressIndicator(
+                        progress = { progress / 100f },
+                        modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter)
+                    )
+                }
+                if (loadFailed) {
+                    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(32.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                stringResource(R.string.cookie_webview_load_failed),
+                                style = MaterialTheme.typography.titleMedium,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            FilledTonalButton(onClick = { loadFailed = false; webView?.reload() }) {
+                                Text(stringResource(R.string.history_failed_retry))
+                            }
+                        }
+                    }
                 }
                 if (!firstPaint) {
                     HazelLoadingIndicator(size = 48.dp, modifier = Modifier.align(Alignment.Center))
