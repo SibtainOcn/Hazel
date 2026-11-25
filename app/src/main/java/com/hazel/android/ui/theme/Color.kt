@@ -92,8 +92,8 @@ val InfoBlue = Color(0xFF64B5F6)
 // enough that its pale label holds on the paper ground of the light theme as well as on black.
 val SizeBadgeContainer = Color(0xFF1F3A5C)
 val SizeBadgeContent = Color(0xFFD3E5FF)
-val IdBadgeContainer = Color(0xFF3B2F5E)
-val IdBadgeContent = Color(0xFFE3DAFF)
+val IdBadgeContainer = Color(0xFF5E1A33)
+val IdBadgeContent = Color(0xFFFFD9E3)
 
 // Progress
 val ProgressTrackDark = Color(0xFF1A1A1A)
