@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import androidx.datastore.preferences.preferencesDataStore
 import com.hazel.android.data.RecentFolders.with
 import kotlinx.coroutines.flow.map
+import java.util.Locale
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = "hazel_settings",
@@ -624,31 +625,45 @@ object SettingsRepository {
     // Audio and video each have their own destination. Unset, a kind takes the single
     // folder older versions kept for both, so a folder picked before the split stays in use;
     // set to blank, it is the built-in Download/Hazel/Audio or Download/Hazel/Video.
-    private fun treeUriKey(isVideo: Boolean) =
-        stringPreferencesKey(if (isVideo) "download_tree_uri_video" else "download_tree_uri_audio")
+    // Gallery has no legacy folder. The download_tree_ prefix keeps these keys out of backups.
+    private fun treeUriKey(kind: SaveKind) =
+        stringPreferencesKey("download_tree_uri_" + kind.name.lowercase(Locale.ROOT))
 
-    private fun treeLabelKey(isVideo: Boolean) =
-        stringPreferencesKey(if (isVideo) "download_tree_label_video" else "download_tree_label_audio")
+    private fun treeLabelKey(kind: SaveKind) =
+        stringPreferencesKey("download_tree_label_" + kind.name.lowercase(Locale.ROOT))
 
-    private fun Preferences.saveDir(isVideo: Boolean): SaveDir {
-        val uri = this[treeUriKey(isVideo)]
-        return if (uri != null) SaveDir(uri, this[treeLabelKey(isVideo)].orEmpty())
-        else SaveDir(this[DOWNLOAD_TREE_URI_KEY].orEmpty(), this[DOWNLOAD_TREE_LABEL_KEY].orEmpty())
+    private fun Preferences.saveDir(kind: SaveKind): SaveDir {
+        val uri = this[treeUriKey(kind)]
+        return when {
+            uri != null -> SaveDir(uri, this[treeLabelKey(kind)].orEmpty())
+            kind == SaveKind.GALLERY -> SaveDir()
+            else -> SaveDir(this[DOWNLOAD_TREE_URI_KEY].orEmpty(), this[DOWNLOAD_TREE_LABEL_KEY].orEmpty())
+        }
     }
 
-    fun getSaveDirs(context: Context): Flow<SaveDirs> =
-        context.dataStore.data.map { prefs -> SaveDirs(audio = prefs.saveDir(false), video = prefs.saveDir(true)) }
+    internal fun saveDirsOf(prefs: Preferences) = SaveDirs(
+        audio = prefs.saveDir(SaveKind.AUDIO),
+        video = prefs.saveDir(SaveKind.VIDEO),
+        gallery = prefs.saveDir(SaveKind.GALLERY)
+    )
 
-    suspend fun setSaveDir(context: Context, isVideo: Boolean, uri: String, label: String) {
+    fun getSaveDirs(context: Context): Flow<SaveDirs> = context.dataStore.data.map(::saveDirsOf)
+
+    suspend fun setSaveDir(context: Context, isVideo: Boolean, uri: String, label: String) =
+        setSaveDir(context, SaveKind.of(isVideo), uri, label)
+
+    suspend fun setSaveDir(context: Context, kind: SaveKind, uri: String, label: String) {
         context.dataStore.edit { prefs ->
-            prefs[treeUriKey(isVideo)] = uri
-            prefs[treeLabelKey(isVideo)] = label
+            prefs[treeUriKey(kind)] = uri
+            prefs[treeLabelKey(kind)] = label
             if (uri.isNotBlank()) prefs[RECENT_FOLDERS_KEY] = RecentFolders.encode(RecentFolders.decode(prefs[RECENT_FOLDERS_KEY]).with(uri, label))
         }
     }
 
     /** Back to the built-in folder for that kind. */
     suspend fun resetSaveDir(context: Context, isVideo: Boolean) = setSaveDir(context, isVideo, "", "")
+
+    suspend fun resetSaveDir(context: Context, kind: SaveKind) = setSaveDir(context, kind, "", "")
 
     // The last folders picked anywhere in the app (downloads of either kind, backups), newest
     // first, so one can be chosen again without the document picker.
