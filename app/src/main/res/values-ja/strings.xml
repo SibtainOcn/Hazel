@@ -1162,4 +1162,12 @@
     <string name="gallery_group_by_author">投稿者ごとにまとめる</string>
     <string name="gallery_group_by_author_summary">同じ投稿者の単体画像を1つのカルーセルに</string>
     <string name="more_image_settings">画像の設定</string>
+    <string name="caption_copy">コピー</string>
+    <string name="caption_save_text">テキストで保存</string>
+    <string name="caption_saved">キャプションを保存しました</string>
+    <string name="caption_save_failed">キャプションを保存できませんでした</string>
+    <string name="caption_view_full">キャプションをすべて表示</string>
+    <string name="caption_save_choices">保存する内容</string>
+    <string name="caption_only">キャプションのみ</string>
+    <string name="caption_with_file">ファイルとキャプション</string>
 </resources>

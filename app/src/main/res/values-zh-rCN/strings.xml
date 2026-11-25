@@ -1162,4 +1162,12 @@
     <string name="gallery_group_by_author">按作者分组</string>
     <string name="gallery_group_by_author_summary">同一作者的单张图片放进一个轮播</string>
     <string name="more_image_settings">图片设置</string>
+    <string name="caption_copy">复制</string>
+    <string name="caption_save_text">另存为文本</string>
+    <string name="caption_saved">已保存说明文字</string>
+    <string name="caption_save_failed">无法保存说明文字</string>
+    <string name="caption_view_full">查看完整说明文字</string>
+    <string name="caption_save_choices">保存内容</string>
+    <string name="caption_only">仅说明文字</string>
+    <string name="caption_with_file">文件和说明文字</string>
 </resources>

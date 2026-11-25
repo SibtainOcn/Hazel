@@ -1196,4 +1196,12 @@
     <string name="gallery_group_by_author">Agrupar por autor</string>
     <string name="gallery_group_by_author_summary">Imágenes sueltas de un autor en un carrusel</string>
     <string name="more_image_settings">Ajustes de imágenes</string>
+    <string name="caption_copy">Copiar</string>
+    <string name="caption_save_text">Guardar como texto</string>
+    <string name="caption_saved">Descripción guardada</string>
+    <string name="caption_save_failed">No se pudo guardar la descripción</string>
+    <string name="caption_view_full">Ver descripción completa</string>
+    <string name="caption_save_choices">Qué guardar</string>
+    <string name="caption_only">Solo descripción</string>
+    <string name="caption_with_file">Archivo y descripción</string>
 </resources>

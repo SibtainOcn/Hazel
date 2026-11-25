@@ -1179,4 +1179,12 @@
     <string name="gallery_group_by_author">Nach Autor gruppieren</string>
     <string name="gallery_group_by_author_summary">Einzelbilder eines Autors in einem Karussell</string>
     <string name="more_image_settings">Bildeinstellungen</string>
+    <string name="caption_copy">Kopieren</string>
+    <string name="caption_save_text">Als Text speichern</string>
+    <string name="caption_saved">Beschriftung gespeichert</string>
+    <string name="caption_save_failed">Beschriftung konnte nicht gespeichert werden</string>
+    <string name="caption_view_full">Ganze Beschriftung zeigen</string>
+    <string name="caption_save_choices">Was gespeichert wird</string>
+    <string name="caption_only">Nur Beschriftung</string>
+    <string name="caption_with_file">Datei und Beschriftung</string>
 </resources>
