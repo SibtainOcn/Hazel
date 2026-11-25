@@ -30,6 +30,7 @@
     <string name="gallery_view">Ansehen</string>
     <string name="gallery_close">Schließen</string>
     <string name="gallery_no_player">Keine App kann dieses Video abspielen</string>
+    <string name="gallery_all_posts">Alle Beiträge</string>
     <string name="gallery_under_maintenance">In Wartung</string>
     <string name="gallery_sheet_image_of">Bild %1$d von %2$d</string>
     <string name="gallery_sheet_video_of">Video %1$d von %2$d</string>
@@ -108,7 +109,7 @@
     <string name="search_under_maintenance">Wird gerade überarbeitet</string>
     <string name="search_options_title">Suchoptionen</string>
     <string name="search_web_title">Im Web suchen</string>
-    <string name="search_web_beta">Beta</string>
+    <string name="label_beta">Beta</string>
     <string name="search_web_notice">Findet Videos auf jeder Website, von der Hazel laden kann. Wiedergabe und Downloads funktionieren möglicherweise nicht auf jeder Website.</string>
     <string name="search_web_continue">Weiter</string>
     <string name="search_empty_history">Deine Suchen und Links erscheinen hier</string>

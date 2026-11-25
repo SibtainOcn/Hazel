@@ -41,6 +41,7 @@
     <string name="gallery_view">View</string>
     <string name="gallery_close">Close</string>
     <string name="gallery_no_player">No app can play this video</string>
+    <string name="gallery_all_posts">All posts</string>
     <string name="gallery_under_maintenance">Under maintenance</string>
     <string name="gallery_sheet_image_of">Image %1$d of %2$d</string>
     <string name="gallery_sheet_video_of">Video %1$d of %2$d</string>
@@ -119,7 +120,7 @@
     <string name="search_under_maintenance">Under maintenance</string>
     <string name="search_options_title">Search options</string>
     <string name="search_web_title">Search the Web</string>
-    <string name="search_web_beta">Beta</string>
+    <string name="label_beta">Beta</string>
     <string name="search_web_notice">Finds videos on any site Hazel can download. Playback and downloads may not work on every site.</string>
     <string name="search_web_continue">Continue</string>
     <string name="search_empty_history">Your searches and links will appear here</string>

@@ -1085,7 +1085,13 @@ internal val SHEET_TAB_PADDING = 12.dp
 
 /** One of the sheet's Audio / Video tabs: its word, and a short bar under it when chosen. */
 @Composable
-internal fun SheetTab(label: String, selected: Boolean, enabled: Boolean, onClick: () -> Unit) {
+internal fun SheetTab(
+    label: String,
+    selected: Boolean,
+    enabled: Boolean,
+    trailing: (@Composable () -> Unit)? = null,
+    onClick: () -> Unit
+) {
     val colors = MaterialTheme.colorScheme
     val textColor by animateColorAsState(
         targetValue = when {
@@ -1107,12 +1113,18 @@ internal fun SheetTab(label: String, selected: Boolean, enabled: Boolean, onClic
             .padding(horizontal = SHEET_TAB_PADDING, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = textColor
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                label,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = textColor
+            )
+            if (trailing != null) {
+                Spacer(modifier = Modifier.width(6.dp))
+                trailing()
+            }
+        }
         Spacer(modifier = Modifier.height(6.dp))
         Box(
             modifier = Modifier

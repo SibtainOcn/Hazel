@@ -5,20 +5,25 @@ import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import com.hazel.android.R
 import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryItem
+import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.ui.saveScreen
 import com.hazel.android.ui.theme.HazelTheme
 import org.junit.Assert.assertTrue
@@ -133,5 +138,85 @@ class GalleryScreenLayoutTest(private val locale: String) {
             assertTrue("$text runs off the right edge", node.positionOnScreen.x + node.size.width <= metrics.widthPixels)
         }
         saveScreen("gallery-card-$locale")
+    }
+
+    @Test
+    fun `carousel post card keeps its author, count and download inside`() {
+        RuntimeEnvironment.setQualifiers("$locale-w320dp-h568dp")
+        val post = GalleryPost(
+            key = "p1",
+            source = "https://www.instagram.com/p/AAA/",
+            items = (1..4).map { i ->
+                GalleryItem(
+                    index = i, url = "https://cdn.example/$i.jpg", extension = if (i == 2) "mp4" else "jpg",
+                    title = "", author = "spacebrief_with_a_long_name", site = "instagram",
+                    width = 1080, height = 1350, thumbnail = null, postKey = "p1"
+                )
+            }
+        )
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = true) {
+                val density = LocalDensity.current
+                CompositionLocalProvider(LocalDensity provides Density(density.density, 2f)) {
+                    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).padding(horizontal = 20.dp)) {
+                        GalleryPostCard(post = post, onOpen = {}, onDownloadAll = {})
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        saveScreen("gallery-post-card-$locale")
+        val width = context.resources.displayMetrics.widthPixels
+        listOf(
+            "spacebrief_with_a_long_name",
+            context.resources.getQuantityString(R.plurals.gallery_items, 4, 4),
+            "1 / 4"
+        ).forEach { text ->
+            val node = compose.onNodeWithText(text).assertIsDisplayed().fetchSemanticsNode()
+            assertTrue("$text runs off the right edge", node.positionOnScreen.x + node.size.width <= width)
+        }
+    }
+
+    @Test
+    fun `tapping a card opens its download sheet, not the viewer`() {
+        RuntimeEnvironment.setQualifiers("$locale-w411dp-h891dp")
+        val viewModel = GalleryViewModel(ApplicationProvider.getApplicationContext<Application>())
+        val items = (1..2).map { GalleryItem(it, "https://x/$it.jpg", "jpg", "Cat $it", "nasa", "x", 0, 0, null, postKey = "p") }
+        viewModel.show(GalleryPost.group("https://x/post", items))
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = false) {
+                GalleryScreen(onVideoLinks = {}, onVideoSearch = { _, _ -> }, viewModel = viewModel)
+            }
+        }
+        compose.onNodeWithText("Cat 1").performClick()
+        compose.waitForIdle()
+        assertTrue(compose.onAllNodesWithText(context.getString(R.string.format_sheet_section_details), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithContentDescription(context.getString(R.string.gallery_close)).fetchSemanticsNodes().isEmpty())
+    }
+
+    private fun downloadAllShown(search: Boolean, keys: List<String>): Boolean {
+        RuntimeEnvironment.setQualifiers("$locale-w411dp-h891dp")
+        val viewModel = GalleryViewModel(ApplicationProvider.getApplicationContext<Application>())
+        val items = keys.mapIndexed { i, key -> GalleryItem(i + 1, "https://x/$i.jpg", "jpg", "Cat $i", "nasa", "x", 0, 0, null, postKey = key) }
+        viewModel.fromSearch = search
+        viewModel.show(GalleryPost.group("https://x/source", items))
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = false) {
+                GalleryScreen(onVideoLinks = {}, onVideoSearch = { _, _ -> }, viewModel = viewModel)
+            }
+        }
+        compose.waitForIdle()
+        return compose.onAllNodesWithText(context.getString(R.string.download_download_all)).fetchSemanticsNodes().isNotEmpty()
+    }
+
+    @Test
+    fun `search results of single files offer no download all`() {
+        assertTrue(!downloadAllShown(search = true, keys = listOf("a", "b", "c")))
+        assertTrue(compose.onAllNodesWithText("Cat 0").fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun `one pasted post with several files offers download all`() {
+        assertTrue(downloadAllShown(search = false, keys = listOf("p", "p", "p")))
     }
 }

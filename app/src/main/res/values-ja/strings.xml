@@ -30,6 +30,7 @@
     <string name="gallery_view">表示</string>
     <string name="gallery_close">閉じる</string>
     <string name="gallery_no_player">この動画を再生できるアプリがありません</string>
+    <string name="gallery_all_posts">すべての投稿</string>
     <string name="gallery_under_maintenance">メンテナンス中</string>
     <string name="gallery_sheet_image_of">画像 %1$d / %2$d</string>
     <string name="gallery_sheet_video_of">動画 %1$d / %2$d</string>
@@ -107,7 +108,7 @@
     <string name="search_under_maintenance">メンテナンス中</string>
     <string name="search_options_title">検索オプション</string>
     <string name="search_web_title">ウェブで検索</string>
-    <string name="search_web_beta">ベータ</string>
+    <string name="label_beta">ベータ</string>
     <string name="search_web_notice">Hazel がダウンロードできるすべてのサイトから動画を探します。一部のサイトでは再生やダウンロードができない場合があります。</string>
     <string name="search_web_continue">続ける</string>
     <string name="search_empty_history">検索とリンクの履歴がここに表示されます</string>

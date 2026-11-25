@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search: an Images chip with a Search on row of sites, and an Images tab in the search options.
 - Gallery: post files land as cards like videos, with a fullscreen viewer to swipe, zoom and save each one.
 - Gallery: an item sheet and a Download all sheet with image size, video quality, save folder and file options.
+- Gallery: searches, profiles and several pasted links show one carousel card per post; tapping opens the post.
 - Release channels: Beta and Nightly builds on GitHub, a daily nightly from the nightly branch, and one-step switching on the Hazel update screen.
 - Hazel update screen: the build's commit and date on beta and nightly builds.
 - Hazel updates: optional notification for new versions, opening the Hazel update screen.
