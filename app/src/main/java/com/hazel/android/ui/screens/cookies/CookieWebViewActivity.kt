@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.cookies
 
+import androidx.compose.material3.ButtonDefaults
 import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Slider
@@ -420,7 +421,7 @@ class CookieWebViewActivity : ComponentActivity() {
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                FilledTonalButton(onClick = { setDesktop(!desktopMode) }) {
+                                FilledTonalButton(onClick = { setDesktop(!desktopMode) }, colors = ButtonDefaults.filledTonalButtonColors(containerColor = sheetButtonColor, contentColor = MaterialTheme.colorScheme.onSurface)) {
                                     Text(stringResource(if (desktopMode) R.string.cookie_webview_mobile else R.string.cookie_webview_desktop))
                                 }
                                 Button(onClick = { loadFailed = false; webView?.reload() }, shape = RoundedCornerShape(16.dp)) {

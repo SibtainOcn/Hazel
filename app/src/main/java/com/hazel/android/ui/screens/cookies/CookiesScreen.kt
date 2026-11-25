@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.cookies
 
+import androidx.compose.material3.ButtonDefaults
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -706,7 +707,7 @@ private fun AccountSheet(
                                 if (checking) {
                                     HazelLoadingIndicator(size = 28.dp)
                                 } else {
-                                    FilledTonalButton(onClick = {
+                                    FilledTonalButton(colors = ButtonDefaults.filledTonalButtonColors(containerColor = sheetButtonColor, contentColor = MaterialTheme.colorScheme.onSurface), onClick = {
                                         checking = true
                                         scope.launch {
                                             SignInCheck.run(context, entry)
