@@ -643,6 +643,8 @@
     <string name="storage_locations_speed_limit_description">ダウンロードの最大許容速度</string>
     <string name="storage_locations_no_limit">制限なし</string>
     <string name="storage_locations_internal_note">別のフォルダや SD カードを選ばない限り、内部ストレージに保存されます。</string>
+    <string name="storage_locations_gallery">ギャラリー</string>
+    <string name="storage_locations_gallery_hint">画像と投稿</string>
     <string name="storage_locations_wifi_only">Wi-Fi のみ</string>
     <string name="storage_locations_speed_limit">速度制限</string>
 

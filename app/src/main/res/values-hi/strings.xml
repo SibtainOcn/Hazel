@@ -657,6 +657,8 @@
     <string name="storage_locations_speed_limit_description">डाउनलोड कितनी तेज़ी से चल सकता है</string>
     <string name="storage_locations_no_limit">कोई सीमा नहीं</string>
     <string name="storage_locations_internal_note">जब तक आप कोई दूसरा फ़ोल्डर या SD कार्ड न चुनें, डाउनलोड आंतरिक स्टोरेज में सहेजे जाते हैं।</string>
+    <string name="storage_locations_gallery">गैलरी</string>
+    <string name="storage_locations_gallery_hint">तस्वीरें और पोस्ट</string>
     <string name="storage_locations_wifi_only">सिर्फ़ वाई-फ़ाई</string>
     <string name="storage_locations_speed_limit">गति सीमा</string>
 

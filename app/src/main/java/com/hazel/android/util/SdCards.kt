@@ -174,18 +174,6 @@ object SdCards {
     fun isRemovable(file: File): Boolean =
         runCatching { Environment.isExternalStorageRemovable(file) }.getOrDefault(false)
 
-    /**
-     * The folder downloads of one kind go to inside a picked folder on a card.
-     *
-     * Picking a card usually means picking its root, and a root filling up with downloads
-     * is not what anyone wants, so the root gets Hazel/Audio or Hazel/Video made inside it,
-     * the same layout the built-in folder uses. A folder below the root was chosen on
-     * purpose and is used as it is, and comes back unchanged. Null when the folders were
-     * needed but the card would not make them, so the caller can say so.
-     */
-    fun kindFolderIn(context: Context, treeUri: Uri, isVideo: Boolean): Uri? =
-        hazelFolderIn(context, treeUri, kindFolderName(isVideo))
-
     /** Hazel/[name] on a card's root, found or made; any other folder is used as it is. */
     fun hazelFolderIn(context: Context, treeUri: Uri, name: String): Uri? = runCatching {
         val rootId = DocumentsContract.getTreeDocumentId(treeUri)

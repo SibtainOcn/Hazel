@@ -643,6 +643,8 @@
     <string name="storage_locations_speed_limit_description">允许下载达到多快</string>
     <string name="storage_locations_no_limit">不限速</string>
     <string name="storage_locations_internal_note">除非选择其他文件夹或 SD 卡，下载会保存到内部存储。</string>
+    <string name="storage_locations_gallery">图库</string>
+    <string name="storage_locations_gallery_hint">图片和帖子</string>
     <string name="storage_locations_wifi_only">仅 Wi-Fi</string>
     <string name="storage_locations_speed_limit">速度限制</string>
 

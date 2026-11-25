@@ -736,6 +736,8 @@
     <string name="storage_locations_speed_limit_description">How fast a download is allowed to go</string>
     <string name="storage_locations_no_limit">No limit</string>
     <string name="storage_locations_internal_note">Saved to internal storage unless you pick another folder or an SD card.</string>
+    <string name="storage_locations_gallery">Gallery</string>
+    <string name="storage_locations_gallery_hint">Images and posts</string>
     <string name="storage_locations_wifi_only">Wi-Fi only</string>
     <string name="storage_locations_speed_limit">Speed limit</string>
 

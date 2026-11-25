@@ -685,6 +685,8 @@
     <string name="storage_locations_speed_limit_description">Максимально допустимая скорость загрузки</string>
     <string name="storage_locations_no_limit">Без лимита</string>
     <string name="storage_locations_internal_note">Загрузки сохраняются во внутреннюю память, если не выбрана другая папка или SD-карта.</string>
+    <string name="storage_locations_gallery">Галерея</string>
+    <string name="storage_locations_gallery_hint">Изображения и публикации</string>
     <string name="storage_locations_wifi_only">Только по Wi-Fi</string>
     <string name="storage_locations_speed_limit">Ограничение скорости</string>
 
