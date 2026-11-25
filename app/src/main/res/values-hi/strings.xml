@@ -1177,4 +1177,6 @@
     <string name="upd_tile_builtin">बिल्ट-इन</string>
     <string name="upd_action_use_builtin">बिल्ट-इन चलाएं</string>
     <string name="upd_gallerydl_auto_summary">कोई डाउनलोड न चलने पर नया वर्शन इंस्टॉल करें</string>
+    <string name="gallery_group_by_author">लेखक के हिसाब से समूह</string>
+    <string name="gallery_group_by_author_summary">एक लेखक की अकेली तस्वीरें एक कैरोसेल में</string>
 </resources>

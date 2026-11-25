@@ -1160,4 +1160,6 @@
     <string name="upd_tile_builtin">内置</string>
     <string name="upd_action_use_builtin">使用内置版</string>
     <string name="upd_gallerydl_auto_summary">无下载时安装新版本</string>
+    <string name="gallery_group_by_author">按作者分组</string>
+    <string name="gallery_group_by_author_summary">同一作者的单张图片放进一个轮播</string>
 </resources>

@@ -1177,4 +1177,6 @@
     <string name="upd_tile_builtin">Integriert</string>
     <string name="upd_action_use_builtin">Integrierte nutzen</string>
     <string name="upd_gallerydl_auto_summary">Neue Versionen installieren, wenn kein Download läuft</string>
+    <string name="gallery_group_by_author">Nach Autor gruppieren</string>
+    <string name="gallery_group_by_author_summary">Einzelbilder eines Autors in einem Karussell</string>
 </resources>

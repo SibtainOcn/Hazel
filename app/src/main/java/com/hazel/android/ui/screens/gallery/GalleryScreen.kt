@@ -156,7 +156,9 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
                 val url = request.site.urlFor(request.query)
                 launchRun(url) {
                     val limit = SettingsRepository.getGalleryPostsPerSearch(getApplication()).first()
-                    show(GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items, feed = true))
+                    val found = GalleryPost.group(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items, feed = true)
+                    val byAuthor = SettingsRepository.getGalleryGroupByAuthor(getApplication()).first()
+                    show(if (byAuthor) GalleryPost.byAuthor(found) else found)
                 }
             }
         }

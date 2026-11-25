@@ -1160,4 +1160,6 @@
     <string name="upd_tile_builtin">内蔵</string>
     <string name="upd_action_use_builtin">内蔵版を使う</string>
     <string name="upd_gallerydl_auto_summary">ダウンロードしていない時に新しい版を入れる</string>
+    <string name="gallery_group_by_author">投稿者ごとにまとめる</string>
+    <string name="gallery_group_by_author_summary">同じ投稿者の単体画像を1つのカルーセルに</string>
 </resources>

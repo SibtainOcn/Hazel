@@ -343,6 +343,7 @@ object SettingsRepository {
     private val GALLERY_POSTS_KEY = intPreferencesKey("gallery_search_posts")
     private val GALLERY_SHOW_KEY = stringPreferencesKey("gallery_show")
     private val GALLERY_REPOSTS_KEY = booleanPreferencesKey("gallery_skip_reposts")
+    private val GALLERY_GROUP_AUTHOR_KEY = booleanPreferencesKey("gallery_group_by_author")
 
     val GALLERY_POST_COUNTS = listOf(10, 30, 60)
     const val DEFAULT_GALLERY_POSTS = 30
@@ -380,6 +381,13 @@ object SettingsRepository {
 
     suspend fun setGallerySkipReposts(context: Context, skip: Boolean) {
         context.dataStore.edit { prefs -> prefs[GALLERY_REPOSTS_KEY] = skip }
+    }
+
+    fun getGalleryGroupByAuthor(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_GROUP_AUTHOR_KEY] ?: false }
+
+    suspend fun setGalleryGroupByAuthor(context: Context, group: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_GROUP_AUTHOR_KEY] = group }
     }
 
     private val GALLERY_IMAGE_SIZE_KEY = stringPreferencesKey("gallery_image_size")

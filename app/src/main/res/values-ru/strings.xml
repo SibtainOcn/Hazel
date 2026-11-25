@@ -1210,4 +1210,6 @@
     <string name="upd_tile_builtin">Встроенная</string>
     <string name="upd_action_use_builtin">Вернуть встроенную</string>
     <string name="upd_gallerydl_auto_summary">Ставить новые версии, когда нет загрузок</string>
+    <string name="gallery_group_by_author">Группировать по автору</string>
+    <string name="gallery_group_by_author_summary">Одиночные фото автора в одной карусели</string>
 </resources>

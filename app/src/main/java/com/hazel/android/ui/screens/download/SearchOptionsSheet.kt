@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -126,6 +127,7 @@ fun SearchOptionsSheet(
             SettingsRepository.getGalleryPostsPerSearch(context),
             SettingsRepository.getGalleryShow(context),
             SettingsRepository.getGallerySkipReposts(context),
+            SettingsRepository.getGalleryGroupByAuthor(context),
             ::GalleryPrefs
         )
     }.collectAsState(initial = null)
@@ -233,6 +235,15 @@ fun SearchOptionsSheet(
                                 title = stringResource(R.string.gallery_skip_reposts),
                                 checked = gallery.skipReposts,
                                 onCheckedChange = { on -> scope.launch { SettingsRepository.setGallerySkipReposts(context, on) } }
+                            )
+                        },
+                        {
+                            SwitchSettingRow(
+                                icon = Icons.Filled.ViewCarousel,
+                                title = stringResource(R.string.gallery_group_by_author),
+                                summary = stringResource(R.string.gallery_group_by_author_summary),
+                                checked = gallery.groupByAuthor,
+                                onCheckedChange = { on -> scope.launch { SettingsRepository.setGalleryGroupByAuthor(context, on) } }
                             )
                         }
                     )
@@ -401,7 +412,8 @@ private data class GalleryPrefs(
     val site: GallerySearchSite,
     val posts: Int,
     val show: GalleryShow,
-    val skipReposts: Boolean
+    val skipReposts: Boolean,
+    val groupByAuthor: Boolean
 )
 
 private fun showLabel(show: GalleryShow): Int = when (show) {

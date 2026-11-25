@@ -1160,4 +1160,6 @@
     <string name="upd_tile_builtin">Bawaan</string>
     <string name="upd_action_use_builtin">Pakai bawaan</string>
     <string name="upd_gallerydl_auto_summary">Pasang versi baru saat tidak ada unduhan</string>
+    <string name="gallery_group_by_author">Kelompokkan per pembuat</string>
+    <string name="gallery_group_by_author_summary">Gambar tunggal dari satu pembuat dalam satu korsel</string>
 </resources>
