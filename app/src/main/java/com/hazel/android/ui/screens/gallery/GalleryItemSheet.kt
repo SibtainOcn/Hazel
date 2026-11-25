@@ -1,11 +1,11 @@
 package com.hazel.android.ui.screens.gallery
 
-import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Surface
-import androidx.compose.material3.DropdownMenuItem
+import com.hazel.android.ui.components.DropdownMenuItem
+import com.hazel.android.ui.components.MenuTone
 import androidx.compose.material3.Icon
-import androidx.compose.material3.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenu
 import androidx.compose.material.icons.filled.LibraryAdd
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -65,6 +65,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -226,19 +227,16 @@ internal fun GalleryItemSheet(
                                     Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.caption_save_choices))
                                 }
                             }
-                            DropdownMenu(
-                                expanded = saveMenu,
-                                onDismissRequest = { saveMenu = false },
-                                shape = RoundedCornerShape(20.dp)
-                            ) {
+                            DropdownMenu(expanded = saveMenu, onDismissRequest = { saveMenu = false }) {
                                 listOf(
                                     Triple(GallerySave.MEDIA, if (item.isVideo) R.string.format_sheet_tab_video else R.string.gallery_image, Icons.Filled.Image),
                                     Triple(GallerySave.CAPTION, R.string.caption_only, Icons.Filled.FormatQuote),
                                     Triple(GallerySave.BOTH, R.string.caption_with_file, Icons.Filled.LibraryAdd)
-                                ).forEach { (save, label, icon) ->
+                                ).forEachIndexed { index, (save, label, icon) ->
                                     DropdownMenuItem(
                                         text = { Text(stringResource(label)) },
-                                        leadingIcon = { Icon(icon, contentDescription = null) },
+                                        icon = icon,
+                                        tone = listOf(MenuTone.Accent, MenuTone.Info, MenuTone.Neutral)[index],
                                         onClick = {
                                             saveMenu = false
                                             options?.let { onDownload(it, title.trim(), author.trim(), save) }
@@ -554,14 +552,14 @@ private fun CaptionField(caption: String, color: androidx.compose.ui.graphics.Co
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    caption,
+                    caption.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty(),
                     style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
             }
             androidx.compose.material3.IconButton(onClick = onOpen) {
-                Icon(Icons.Filled.OpenInFull, contentDescription = stringResource(R.string.caption_view_full))
+                Icon(painterResource(R.drawable.ic_expand_all), contentDescription = stringResource(R.string.caption_view_full))
             }
         }
     }

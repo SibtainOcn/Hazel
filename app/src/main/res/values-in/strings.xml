@@ -163,14 +163,12 @@
 
     <!-- GettingStartedDialog -->
     <string name="guide_step_badge">Langkah %1$d dari %2$d</string>
-    <string name="guide_step1_title">Tempel &amp; Unduh</string>
+    <string name="guide_step1_title">Tempel, cari, unduh</string>
     <string name="guide_step2_title">Pilihan Format</string>
-    <string name="guide_step3_title">Hazel Instan</string>
     <string name="guide_step4_title">Optimalisasi Baterai</string>
     <string name="guide_step5_title">Notifikasi</string>
-    <string name="guide_step_paste_link">Tempel satu atau beberapa tautan, atau seluruh playlist, ke kolom pencarian.</string>
+    <string name="guide_step_paste_link">Satu tautan, banyak tautan, atau satu playlist. Video, audio, atau gambar.</string>
     <string name="guide_step_pick_format">Ketuk kartu untuk memilih format tepat, dengan ukuran dan codec tiap kualitas.</string>
-    <string name="guide_step_share_instant">Bagikan ke Hazel Instant untuk langsung mulai dengan pengaturanmu. Tombol setel membuka Sintesis.</string>
     <string name="guide_step_battery_unrestricted">Atur penggunaan baterai ke tanpa batasan agar Android tidak menghentikan unduhan latar.</string>
     <string name="guide_step_notifications">Dapatkan pemberitahuan tentang kemajuan unduhan dan file yang selesai di latar belakang.</string>
     <string name="guide_allow">Izinkan</string>
@@ -492,17 +490,11 @@
     <string name="cookies_toast_entry_copied">Disalin ke papan klip</string>
     <string name="cookies_use_title">Gunakan cookie</string>
     <string name="cookies_use_description">Teruskan sesi masuk yang tersimpan ke pengunduh</string>
-    <string name="cookies_empty_title">Belum ada cookie yang tersimpan</string>
-    <string name="cookies_empty_body">Tambahkan untuk mengunduh media dengan pembatasan usia, privat, atau khusus anggota.</string>
-    <string name="cookies_delete_title">Hapus cookie</string>
-    <string name="cookies_delete_body">Hapus informasi masuk yang tersimpan untuk %1$s?</string>
-    <string name="cookies_delete_confirm">Hapus</string>
     <string name="cookies_delete_all_title">Hapus semua cookie</string>
     <string name="cookies_delete_all_body">Semua sesi masuk yang tersimpan akan dihapus. Tindakan ini tidak dapat dibatalkan.</string>
     <string name="cookies_delete_all_confirm">Hapus semua</string>
     <string name="cookies_row_fallback_name">Cookie</string>
     <string name="cookies_sheet_copy">Salin cookie</string>
-    <string name="cookies_sheet_delete">Hapus cookie</string>
     <string name="cookies_field_title">Judul</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">Simpan</string>
@@ -578,11 +570,8 @@
     <string name="queue_adjust_restart_confirm">Mulai lagi</string>
 
     <!-- Sign-in web view -->
-    <string name="cookie_webview_close">Tutup</string>
-    <string name="cookie_webview_desktop_site">Situs desktop</string>
     <string name="cookie_webview_no_cookies">Tidak ada cookie yang dikumpulkan</string>
     <string name="cookie_webview_crashed">Halaman masuk berhenti. Buka lagi.</string>
-    <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->
     <string name="format_selection_change">Ubah format</string>
@@ -600,8 +589,6 @@
     <string name="sheet_link_options">Opsi tautan</string>
     <string name="sheet_link_copied">Tautan disalin</string>
     <string name="sheet_link_open_failed">Tidak ada aplikasi yang dapat membuka tautan ini</string>
-    <string name="sheet_cookies_site_saved">Masuk ke %1$s</string>
-    <string name="sheet_cookies_site_missing">Tidak ada login tersimpan untuk %1$s</string>
     <string name="batch_search_open">Cari tautan</string>
     <string name="batch_search_hint">Cari di tautan ini</string>
     <string name="batch_search_close">Tutup pencarian</string>
@@ -655,7 +642,6 @@
     <string name="glass_style_ocean">Samudra</string>
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Buat sesuai seleramu</string>
-    <string name="guide_step_appearance_desc">Pilih tema, warna aksen, dan tampilan kaca. Kamu bisa mengubahnya kapan saja di pengaturan.</string>
     <string name="whats_new_tag">Yang baru</string>
     <string name="whats_new_version">Versi %1$s</string>
     <string name="whats_new_done">Mengerti</string>
@@ -729,9 +715,6 @@
     <string name="gallery_settings_x_posts_value">Balasan, retweet, kutipan</string>
     <string name="gallery_settings_network">Jaringan</string>
     <string name="gallery_settings_retries">Percobaan ulang</string>
-    <string name="gallery_settings_extras">Ekstra</string>
-    <string name="gallery_settings_captions">Keterangan ke .txt</string>
-    <string name="gallery_settings_ugoira">Animasi Pixiv ke video</string>
     <string name="storage_locations_wifi_only">Hanya Wi-Fi</string>
     <string name="storage_locations_speed_limit">Batas kecepatan</string>
 
@@ -995,7 +978,6 @@
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Pengaturan sintesis</string>
     <string name="guide_step_share_title">Bagikan ke Hazel</string>
-    <string name="guide_step_share_sheet">Bagikan tautan ke Hazel dari aplikasi mana pun, lalu unduh langsung atau pilih setiap opsi.</string>
     <string name="instant_closing">Ditutup dalam %1$d dtk</string>
     <string name="ytdlp_update_channel_name">Pembaruan mesin</string>
     <string name="ytdlp_update_channel_description">Pemberitahuan pembaruan mesin yt-dlp</string>
@@ -1007,11 +989,8 @@
     <string name="ytdlp_update_failed_text">Hazel mempertahankan mesin saat ini dan akan mencoba lagi nanti</string>
     <string name="cookies_description">Masuk sekali untuk unduhan dengan batasan usia, pribadi, dan khusus anggota.</string>
     <string name="cookies_section_general">Umum</string>
-    <string name="cookies_section_add">Tambah</string>
-    <string name="cookies_section_saved">Login tersimpan</string>
     <string name="cookies_add_sign_in">Masuk ke situs</string>
     <string name="cookies_add_sign_in_summary">Buka situs dan simpan cookie-nya</string>
-    <string name="cookies_add_import_file_summary">File cookie Netscape yang diekspor dari browser</string>
     <string name="cookies_off_hint">Aktifkan Gunakan cookie untuk mengirimnya bersama unduhan.</string>
     <string name="cookies_expires">Kedaluwarsa %1$s</string>
     <string name="cookies_expired">Kedaluwarsa</string>
@@ -1086,7 +1065,6 @@
     <string name="hazel_update_available_text">Ketuk untuk melihat yang baru dan memperbarui.</string>
     <string name="hazel_update_ready_text">Sudah diunduh dan siap. Ketuk untuk memasang.</string>
     <string name="guide_step_updates_title">Selalu terbaru</string>
-    <string name="guide_step_updates_desc">Pilih cara Hazel dan yt-dlp diperbarui. Ubah kapan saja di Pembaruan perangkat lunak.</string>
     <string name="guide_updates_notify">Beri tahu</string>
     <string name="upd_wifi_only_title">Hanya lewat Wi-Fi</string>
     <string name="upd_wifi_only_summary">Tanpa unduhan lewat data seluler</string>
@@ -1117,7 +1095,6 @@
     <string name="guide_updates_ytdlp">yt-dlp otomatis</string>
     <string name="guide_updates_hazel">Hazel otomatis</string>
     <string name="guide_updates_wifi">Hanya Wi-Fi</string>
-    <string name="guide_updates_more">Lainnya</string>
     <string name="upd_failure_no_space">Penyimpanan kosong di perangkat ini tidak cukup untuk memasang pembaruan. Kosongkan sebagian ruang lalu coba lagi.</string>
     <string name="upd_failure_timeout">Koneksi ke GitHub habis waktu. Beralih ke jaringan yang lebih kuat lalu coba lagi.</string>
     <string name="upd_failure_unreachable">Hazel tidak dapat menjangkau GitHub. Periksa koneksi internet serta pengaturan VPN dan DNS pribadi, lalu coba lagi.</string>
@@ -1132,6 +1109,51 @@
     <string name="upd_failure_unknown">Pembaruan tidak dapat diselesaikan (%1$s). Coba lagi sebentar lagi.</string>
     <string name="upd_status_update_failed">Pembaruan tidak selesai</string>
     <string name="upd_status_check_failed">Pemeriksaan tidak selesai</string>
+    <string name="cookie_webview_reload">Muat ulang</string>
+    <string name="cookie_webview_load_failed">Halaman ini tidak dapat dimuat</string>
+    <string name="cookie_webview_clear_site">Hapus data situs ini</string>
+    <string name="cookie_webview_cleared">Data situs dihapus</string>
+    <string name="cookie_webview_copy_address">Salin alamat halaman</string>
+    <string name="cookie_webview_desktop">Tampilan desktop</string>
+    <string name="cookie_webview_go_sign_in">Ke halaman masuk</string>
+    <string name="cookie_webview_load_failed_why">Tidak ada koneksi, atau ditolak proxy</string>
+    <string name="cookie_webview_mobile">Tampilan seluler</string>
+    <string name="cookie_webview_not_loaded">Tidak dimuat</string>
+    <string name="cookie_webview_off">Mati</string>
+    <string name="cookie_webview_on">Nyala</string>
+    <string name="cookie_webview_save">OK</string>
+    <string name="cookie_webview_text_size">Ukuran teks</string>
+    <string name="cookies_check">Periksa login</string>
+    <string name="cookies_check_button">Periksa</string>
+    <string name="cookies_check_failed">Situs tidak dapat dihubungi</string>
+    <string name="cookies_check_never">Belum diperiksa</string>
+    <string name="cookies_check_ok">Terakhir diperiksa %1$s · masih masuk</string>
+    <string name="cookies_check_refused">Terakhir diperiksa %1$s · dikeluarkan oleh situs</string>
+    <string name="cookies_checked">Diperiksa %1$s</string>
+    <string name="cookies_dialog_expired_title">Login kedaluwarsa</string>
+    <string name="cookies_dialog_none_saved">Tidak ada login tersimpan</string>
+    <string name="cookies_dialog_title">Login untuk tautan ini</string>
+    <string name="cookies_done">Selesai</string>
+    <string name="cookies_expired_ago">Kedaluwarsa %1$s</string>
+    <string name="cookies_import">Impor</string>
+    <string name="cookies_login_expires">Login berakhir</string>
+    <string name="cookies_no_login">Tidak ada cookie login</string>
+    <string name="cookies_not_now">Nanti</string>
+    <string name="cookies_section_accounts">Akun</string>
+    <string name="cookies_section_quick">Masuk cepat</string>
+    <string name="cookies_settings">Pengaturan cookie</string>
+    <string name="cookies_show_summary">Lihat atau salin cookie</string>
+    <string name="cookies_sign_in_again_summary">Mengganti cookie tersimpan</string>
+    <string name="cookies_sign_out">Keluar</string>
+    <string name="cookies_sign_out_body">Cookie-nya dihapus dan halaman masuk melupakannya.</string>
+    <string name="cookies_sign_out_title">Keluar dari %1$s?</string>
+    <string name="cookies_signed_out_by_site">Dikeluarkan oleh situs</string>
+    <string name="cookies_state_active">Aktif</string>
+    <string name="cookies_state_signed_out">Keluar</string>
+    <string name="cookies_use_for_downloads">Pakai untuk unduhan</string>
+    <string name="cookies_use_for_downloads_summary">Mati: tetap tersimpan tapi tidak dipakai</string>
+    <string name="cookies_dialog_sub">Beberapa sumber hanya bisa diunduh setelah masuk</string>
+    <string name="cookies_open">Buka</string>
     <string name="gallery_dl_update_available_title">gallery-dl %1$s tersedia</string>
     <string name="gallery_dl_update_available_text">Buka Hazel untuk memperbarui mesin gambar</string>
     <string name="gallery_dl_update_installed_title">gallery-dl diperbarui ke %1$s</string>
@@ -1162,12 +1184,18 @@
     <string name="gallery_group_by_author">Kelompokkan per pembuat</string>
     <string name="gallery_group_by_author_summary">Gambar tunggal dari satu pembuat dalam satu korsel</string>
     <string name="more_image_settings">Setelan gambar</string>
+    <string name="guide_share_from_apps">Bagikan tautan dari aplikasi apa pun</string>
+    <string name="guide_share_video">Pilih semua opsi, lalu unduh</string>
+    <string name="guide_share_images">Pilih opsi gambar, lalu unduh</string>
+    <string name="guide_share_instant">Langsung diunduh dengan kualitas tersimpan</string>
     <string name="caption_copy">Salin</string>
     <string name="caption_save_text">Simpan sebagai teks</string>
-    <string name="caption_saved">Keterangan disimpan</string>
+    <string name="caption_saved">Keterangan diunduh</string>
     <string name="caption_save_failed">Keterangan tidak dapat disimpan</string>
     <string name="caption_view_full">Lihat keterangan lengkap</string>
     <string name="caption_save_choices">Yang disimpan</string>
     <string name="caption_only">Hanya keterangan</string>
-    <string name="caption_with_file">File dan keterangan</string>
+    <string name="caption_with_file">Semua</string>
+    <string name="gallery_settings_caption_in_file">Keterangan di file gambar</string>
+    <string name="gallery_settings_caption_in_file_hint">Ditulis ke JPEG dan PNG yang disimpan</string>
 </resources>

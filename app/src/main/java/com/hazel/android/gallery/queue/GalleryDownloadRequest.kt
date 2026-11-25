@@ -47,6 +47,7 @@ data class GalleryDownloadRequest(
                 put("packZip", o.packZip)
                 put("skipDownloaded", o.skipDownloaded)
                 put("embedCaption", o.embedCaption)
+                put("retries", o.retries)
             })
         }
     }
@@ -89,7 +90,8 @@ data class GalleryDownloadRequest(
                         keepPostDate = o.optBoolean("keepPostDate", true),
                         packZip = o.optBoolean("packZip"),
                         skipDownloaded = o.optBoolean("skipDownloaded"),
-                        embedCaption = o.optBoolean("embedCaption")
+                        embedCaption = o.optBoolean("embedCaption"),
+                        retries = o.optInt("retries", GalleryOptions.DEFAULT_RETRIES)
                     )
                 },
                 title = json.optString("title"),
@@ -123,3 +125,8 @@ fun GalleryPost.request(
         save = save
     )
 }
+
+/** What a link shared to Instant Images saves: one post with its details, else the link with the author they share. */
+fun instantRequest(url: String, posts: List<GalleryPost>, options: GalleryOptions?): GalleryDownloadRequest =
+    posts.singleOrNull()?.request(null, options)
+        ?: GalleryDownloadRequest(url, options = options, author = posts.map { it.author }.distinct().singleOrNull().orEmpty())

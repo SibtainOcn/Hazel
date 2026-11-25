@@ -398,6 +398,7 @@ object SettingsRepository {
     private val GALLERY_POST_DATE_KEY = booleanPreferencesKey("gallery_keep_post_date")
     private val GALLERY_ZIP_KEY = booleanPreferencesKey("gallery_pack_zip")
     private val GALLERY_ARCHIVE_KEY = booleanPreferencesKey("gallery_skip_downloaded")
+    private val GALLERY_RETRIES_KEY = intPreferencesKey("gallery_retries")
 
     /** The defaults every gallery download starts from. */
     fun getGalleryOptions(context: Context): Flow<com.hazel.android.gallery.GalleryOptions> =
@@ -410,7 +411,8 @@ object SettingsRepository {
                 keepPostDate = prefs[GALLERY_POST_DATE_KEY] ?: true,
                 packZip = prefs[GALLERY_ZIP_KEY] ?: false,
                 skipDownloaded = prefs[GALLERY_ARCHIVE_KEY] ?: false,
-                embedCaption = prefs[GALLERY_EMBED_CAPTION_KEY] ?: false
+                embedCaption = prefs[GALLERY_EMBED_CAPTION_KEY] ?: false,
+                retries = prefs[GALLERY_RETRIES_KEY] ?: com.hazel.android.gallery.GalleryOptions.DEFAULT_RETRIES
             )
         }
 
@@ -424,6 +426,7 @@ object SettingsRepository {
             prefs[GALLERY_ZIP_KEY] = options.packZip
             prefs[GALLERY_ARCHIVE_KEY] = options.skipDownloaded
             prefs[GALLERY_EMBED_CAPTION_KEY] = options.embedCaption
+            prefs[GALLERY_RETRIES_KEY] = options.retries
         }
     }
 

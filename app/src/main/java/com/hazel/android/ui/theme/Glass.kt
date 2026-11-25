@@ -6,7 +6,6 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.runtime.remember
 import androidx.compose.material3.dynamicDarkColorScheme
 import android.os.Build
-import androidx.compose.foundation.border
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -34,8 +33,8 @@ val LocalDarkTheme = staticCompositionLocalOf { true }
 val LocalGlassSolid = staticCompositionLocalOf { false }
 
 enum class GlassStyle(val key: String) {
-    AURORA("aurora"), OCEAN("ocean"), ACCENT("accent"), WALLPAPER("wallpaper"),
-    SUNSET("sunset"), NEBULA("nebula"), FOREST("forest"), MONO("mono");
+    MONO("mono"), AURORA("aurora"), OCEAN("ocean"), ACCENT("accent"), WALLPAPER("wallpaper"),
+    SUNSET("sunset"), NEBULA("nebula"), FOREST("forest");
 
     companion object {
         val DEFAULT = FOREST
@@ -241,7 +240,6 @@ fun Modifier.glassBackdrop(shape: Shape, solid: Boolean = false, enabled: Boolea
     val base = if (solid) (if (dark) GlassDarkBase else GlassLightBase) else overlayBase(dark, solidGlass)
     val scale = overlayScale(dark, solidGlass)
     val palette = LocalGlassPalette.current
-    val edge = if (dark) Color.White.copy(alpha = 0.09f) else Color.White.copy(alpha = 0.9f)
     return this
         .clip(shape)
         .drawWithCache {
@@ -251,7 +249,6 @@ fun Modifier.glassBackdrop(shape: Shape, solid: Boolean = false, enabled: Boolea
                 drawAurora(layer)
             }
         }
-        .border(1.dp, edge, shape)
 }
 
 fun ColorScheme.toGlass(dark: Boolean): ColorScheme = if (dark) {

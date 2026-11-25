@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.border
 import com.hazel.android.ui.theme.glassBackdrop
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -141,16 +140,13 @@ internal fun FeedbackToast(
     iconTint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary
 ) {
     // Sized to its words, like a system toast, so a one-word message is not a banner.
-    // Drawn on the same glass and theme surface as the dialogs, edged in the accent, so it
-    // reads on every theme, accent and glass style.
+    // Drawn on the same glass and theme surface as the dialogs: flat, no edge or shadow.
     val shape = if (icon != null) RoundedCornerShape(50) else RoundedCornerShape(12.dp)
     Surface(
         modifier = modifier
-            .glassBackdrop(shape)
-            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), shape),
+            .glassBackdrop(shape),
         shape = shape,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        shadowElevation = 4.dp
+        color = MaterialTheme.colorScheme.surfaceContainerHighest
     ) {
         androidx.compose.foundation.layout.Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),

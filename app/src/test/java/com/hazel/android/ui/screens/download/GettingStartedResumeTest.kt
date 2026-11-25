@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import com.hazel.android.R
 import com.hazel.android.ui.theme.HazelTheme
@@ -25,7 +26,7 @@ class GettingStartedResumeTest {
     private val context get() = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
-    fun `guide returns to its step after leaving for Software update`() {
+    fun `guide keeps its step when the screen is rebuilt`() {
         var dismissed = 0
         val restore = StateRestorationTester(compose)
         restore.setContent {
@@ -33,11 +34,10 @@ class GettingStartedResumeTest {
                 GettingStartedDialog(onOpenBatterySettings = {}, onDismiss = { dismissed++ })
             }
         }
-        repeat(2) { compose.onNodeWithText(context.getString(R.string.guide_next)).performClick() }
-        val stepThree = context.getString(R.string.guide_step_badge, 3, 8)
+        repeat(2) { compose.onNodeWithText(context.getString(R.string.guide_next)).performScrollTo().performClick() }
+        val stepThree = context.getString(R.string.guide_step_badge, 3, 7)
         compose.onNodeWithText(stepThree).assertExists()
 
-        compose.onNodeWithText(context.getString(R.string.guide_updates_more)).performClick()
         restore.emulateSavedInstanceStateRestore()
 
         compose.onNodeWithText(stepThree).assertExists()

@@ -1,5 +1,7 @@
 package com.hazel.android.ui.components
 
+import com.hazel.android.ui.theme.sheetButtonColor
+import androidx.compose.material3.ButtonDefaults
 import android.content.ClipData
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -40,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hazel.android.R
@@ -59,8 +61,7 @@ fun CaptionSheet(caption: String, title: String, onDismiss: () -> Unit) {
     var saving by remember { mutableStateOf(false) }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
-        containerColor = MaterialTheme.colorScheme.background
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     ) {
         Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 24.dp)) {
             Text(
@@ -98,12 +99,11 @@ fun CaptionSheet(caption: String, title: String, onDismiss: () -> Unit) {
                         scope.launch { clipboard.setClipEntry(ClipData.newPlainText(title, caption).toClipEntry()) }
                         Toast.makeText(context, R.string.properties_copied, Toast.LENGTH_SHORT).show()
                     },
+                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = sheetButtonColor, contentColor = MaterialTheme.colorScheme.onSurface),
                     shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 8.dp, bottomEnd = 8.dp),
-                    modifier = Modifier.weight(1f).height(52.dp)
+                    modifier = Modifier.weight(1f).heightIn(min = 52.dp)
                 ) {
-                    Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.caption_copy))
+                    Text(stringResource(R.string.caption_copy), textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
                 Button(
                     onClick = {
@@ -117,11 +117,9 @@ fun CaptionSheet(caption: String, title: String, onDismiss: () -> Unit) {
                     },
                     enabled = !saving,
                     shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 24.dp, bottomEnd = 24.dp),
-                    modifier = Modifier.weight(1f).height(52.dp)
+                    modifier = Modifier.weight(1f).heightIn(min = 52.dp)
                 ) {
-                    Icon(Icons.Filled.Download, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.caption_save_text), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(stringResource(R.string.caption_save_text), textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
