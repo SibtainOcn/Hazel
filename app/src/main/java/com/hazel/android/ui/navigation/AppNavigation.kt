@@ -261,7 +261,7 @@ fun AppNavigation(
                         painter = painterResource(R.drawable.update),
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onBackground
+                        tint = com.hazel.android.ui.theme.accentInk()
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -452,6 +452,10 @@ fun AppNavigation(
             }
             screen(Screen.History.route) {
                 HistoryScreen(
+                    onOpenRunning = {
+                        queueTab = "running"
+                        openTab(Screen.Queue.route)
+                    },
                     onDownloadAgain = { entry ->
                         downloadViewModel.instantDownload(context, entry.url, audioOnlyOverride = !entry.isVideo)
                     },

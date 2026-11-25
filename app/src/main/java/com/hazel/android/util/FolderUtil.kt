@@ -104,8 +104,19 @@ object FolderUtil {
         val documentUri = runCatching {
             MediaStoreHelper.folderDocument(treeUri)
         }.getOrDefault(treeUri)
+        // A folder on the built-in storage opens by its path: some file managers read a
+        // tree link as a broken archive.
+        localFolderOf(documentUri)?.let { if (tryOpen(context, it)) return true }
         return openDocument(context, documentUri)
     }
+
+    /** The folder on the built-in storage a document link points at, or null for any other. */
+    internal fun localFolderOf(documentUri: Uri): File? = runCatching {
+        if (documentUri.authority != EXTERNAL_STORAGE_PROVIDER) return@runCatching null
+        val id = DocumentsContract.getDocumentId(documentUri)
+        if (!id.startsWith("primary:")) return@runCatching null
+        File(Environment.getExternalStorageDirectory(), id.removePrefix("primary:")).takeIf { it.isDirectory }
+    }.getOrNull()
 
     /** Opens the top of a removable volume, such as an SD card, by its UUID. False when nothing did. */
     fun tryOpenVolume(context: Context, uuid: String): Boolean {

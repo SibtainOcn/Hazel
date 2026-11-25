@@ -93,6 +93,15 @@ class GalleryPostTest {
         assertEquals(2, grouped[1].items.size)
     }
 
+    @Test
+    fun `instant images keeps the post's author, and the shared author over several posts`() {
+        val one = GalleryPost.group("https://x/p", listOf(file(1, "p"), file(2, "p")))
+        assertEquals("a", com.hazel.android.gallery.queue.instantRequest("https://x/p", one, null).author)
+        val several = GalleryPost.group("https://x/u", listOf(file(1, "p", "https://x/1"), file(2, "q", "https://x/2")))
+        val request = com.hazel.android.gallery.queue.instantRequest("https://x/u", several, null)
+        assertEquals("https://x/u" to "a", request.url to request.author)
+    }
+
     private fun file(index: Int, post: String, link: String? = null) = GalleryItem(
         index = index, url = "https://cdn.example/$index.jpg", extension = "jpg", title = "", author = "a",
         site = "site", width = 0, height = 0, thumbnail = null, postKey = post, postUrl = link
