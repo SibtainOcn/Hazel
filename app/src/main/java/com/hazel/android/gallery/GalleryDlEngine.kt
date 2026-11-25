@@ -8,6 +8,7 @@ import com.hazel.android.data.SaveKind
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.NetworkProxy
 import com.hazel.android.download.YtDlpEngine
+import com.hazel.android.update.GalleryDlUpdater
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.StoragePaths
 import kotlinx.coroutines.CancellationException
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -116,7 +118,7 @@ object GalleryDlEngine {
                 val runtime = PythonRuntime.ready(app)
                 val command = buildList {
                     add(runtime.python.absolutePath)
-                    add(GalleryDlPayload.file(app).absolutePath)
+                    add("-m"); add("gallery_dl")
                     addAll(fixedOptions(app, runtime))
                     access.cookieFile?.let { add("--cookies"); add(it.absolutePath) }
                     access.userAgent.takeIf { access.hasCookies && it.isNotBlank() }?.let { add("--user-agent"); add(it) }
@@ -127,7 +129,12 @@ object GalleryDlEngine {
                     add(url)
                 }
                 val secrets = listOfNotNull(access.cookieFile?.absolutePath)
-                YtDlpEngine.shared { execute(app, runtime, command, running, job, secrets, onLine) }
+                try {
+                    YtDlpEngine.shared { execute(app, runtime, command, running, job, secrets, onLine) }
+                } finally {
+                    // A gallery-dl update fetched during this run goes live once nothing runs.
+                    runCatching { GalleryDlUpdater.applyStagedUpdate(app) }
+                }
             }
             try {
                 work.await()
@@ -151,6 +158,34 @@ object GalleryDlEngine {
         add("--option"); add("extractor.bluesky.reposts=$reposts")
     }
 
+    /** The downloaded gallery-dl update first, then the bundled one, then yt-dlp for post videos. */
+    private fun importPath(context: Context, runtime: PythonRuntime, wheel: File? = GalleryDlUpdater.liveWheel(context)): List<File> =
+        listOfNotNull(wheel, GalleryDlPayload.file(context), runtime.ytDlp.takeIf { it.isFile })
+
+    /**
+     * Whether gallery-dl from [wheel] starts here and reports [version]. Runs outside the engine
+     * lock, so only call it while that lock is held exclusively, as an update swap does.
+     */
+    internal fun probe(context: Context, wheel: File, version: String): Boolean = runCatching {
+        val runtime = PythonRuntime.ready(context)
+        val builder = ProcessBuilder(runtime.python.absolutePath, "-c", PROBE).redirectErrorStream(true)
+        runtime.applyTo(builder.environment(), importPath = importPath(context, runtime, wheel))
+        val process = builder.start()
+        try {
+            process.outputStream.close()
+            if (!process.waitFor(PROBE_TIMEOUT_S, TimeUnit.SECONDS)) return@runCatching false
+            val output = process.inputStream.bufferedReader().readText()
+            val reported = output.lines().map { it.trim() }.lastOrNull { it.isNotEmpty() }
+            if (reported != version) Log.w(TAG, "gallery-dl probe: ${output.takeLast(400)}")
+            process.exitValue() == 0 && reported == version
+        } finally {
+            process.destroyForcibly()
+        }
+    }.getOrDefault(false)
+
+    private const val PROBE = "import gallery_dl, gallery_dl.extractor, gallery_dl.job, gallery_dl.version as v; print(v.__version__)"
+    private const val PROBE_TIMEOUT_S = 60L
+
     private fun fixedOptions(context: Context, runtime: PythonRuntime): List<String> = listOf(
         "--config-ignore",
         "--cache-file", File(context.cacheDir, "gallery-dl.sqlite3").absolutePath,
@@ -172,7 +207,7 @@ object GalleryDlEngine {
         try {
             raw = GalleryLogs.rawFile(logs)
             val builder = ProcessBuilder(command).redirectError(raw)
-            runtime.applyTo(builder.environment(), importPath = listOf(runtime.ytDlp).filter { it.isFile })
+            runtime.applyTo(builder.environment(), importPath = importPath(context, runtime))
             val process = builder.start()
             running.set(process)
             try {

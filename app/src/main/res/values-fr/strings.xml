@@ -1170,4 +1170,22 @@
     <string name="upd_failure_unknown">La mise à jour n\'a pas pu être terminée (%1$s). Réessayez dans un instant.</string>
     <string name="upd_status_update_failed">La mise à jour n\'a pas abouti</string>
     <string name="upd_status_check_failed">La vérification n\'a pas abouti</string>
+    <string name="gallery_dl_update_available_title">gallery-dl %1$s est disponible</string>
+    <string name="gallery_dl_update_available_text">Ouvrez Hazel pour mettre à jour le moteur d\'images</string>
+    <string name="gallery_dl_update_installed_title">gallery-dl mis à jour vers %1$s</string>
+    <string name="gallery_dl_update_installed_text">Le moteur d\'images est à jour</string>
+    <string name="gallery_dl_update_failed_title">Impossible d\'installer gallery-dl %1$s</string>
+    <string name="gallery_dl_update_failed_text">Hazel a conservé la version actuelle et réessaiera plus tard</string>
+    <string name="upd_gallerydl_title">Mises à jour de gallery-dl</string>
+    <string name="upd_gallerydl_failure_unreachable">Hazel n\'a pas pu joindre PyPI. Vérifiez votre connexion internet et réessayez.</string>
+    <string name="upd_gallerydl_failure_would_not_start">La nouvelle version de gallery-dl n\'a pas pu démarrer sur cet appareil, votre version actuelle a donc été conservée.</string>
+    <string name="upd_status_live">Installé et utilisé</string>
+    <string name="upd_btn_done">Terminé</string>
+    <string name="upd_section_notifications">Notifications</string>
+    <string name="upd_notify_engines_summary">Pour les mises à jour de yt-dlp et gallery-dl</string>
+    <string name="upd_notify_installed_title">Prévenir après l\'installation</string>
+    <string name="upd_notify_failed_title">Prévenir si une mise à jour échoue</string>
+    <string name="upd_action_use_bundled">Intégrée</string>
+    <string name="upd_bundled_restored">gallery-dl %1$s intégré est maintenant utilisé</string>
+    <string name="upd_busy">Un téléchargement est en cours. Réessayez une fois terminé</string>
 </resources>

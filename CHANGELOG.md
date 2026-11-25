@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Gallery tab: saves images and videos from posts on Instagram, X, Reddit and 1,500 more sites through gallery-dl.
+- gallery-dl updates itself from PyPI, with its own screen under Software update.
 - Search: an Images chip with a Search on row of sites, and an Images tab in the search options.
 - Gallery: post files land as cards like videos, with a fullscreen viewer to swipe, zoom and save each one.
 - Gallery: an item sheet and a Download all sheet with image size, video quality, save folder and file options.

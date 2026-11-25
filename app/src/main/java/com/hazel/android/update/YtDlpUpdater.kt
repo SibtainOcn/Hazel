@@ -1,8 +1,6 @@
 package com.hazel.android.update
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.storage.StorageManager
 import android.util.Log
@@ -404,7 +402,7 @@ object YtDlpUpdater {
                 }.apply()
                 clearFailure(context)
                 Log.i("Hazel", "yt-dlp ${tag.ifBlank { "update" }} is now live")
-                if (tag.isNotBlank()) YtDlpUpdateNotifier.post(context, YtDlpUpdateNotifier.Event.INSTALLED, tag)
+                if (tag.isNotBlank()) EngineUpdateNotifier.post(context, EngineUpdateNotifier.Engine.YT_DLP, EngineUpdateNotifier.Event.INSTALLED, tag)
                 true
             }
         } ?: run {
@@ -468,7 +466,7 @@ object YtDlpUpdater {
     }.getOrNull()
 
     private fun notifyFailed(context: Context, tag: String) {
-        if (tag.isNotBlank()) YtDlpUpdateNotifier.post(context, YtDlpUpdateNotifier.Event.FAILED, tag)
+        if (tag.isNotBlank()) EngineUpdateNotifier.post(context, EngineUpdateNotifier.Engine.YT_DLP, EngineUpdateNotifier.Event.FAILED, tag)
     }
 
     /**
@@ -856,7 +854,7 @@ object YtDlpUpdater {
             val autoDownload = SettingsRepository.getUpdateAutoDownload(context).first()
             val wifiOnly = SettingsRepository.getUpdateWifiOnly(context).first()
             if (!autoDownload || (wifiOnly && !onUnmeteredNetwork(context))) {
-                YtDlpUpdateNotifier.post(context, YtDlpUpdateNotifier.Event.AVAILABLE, remote.version)
+                EngineUpdateNotifier.post(context, EngineUpdateNotifier.Engine.YT_DLP, EngineUpdateNotifier.Event.AVAILABLE, remote.version)
                 return@withContext false
             }
             val rejected = runCatching { rejectedTag(context).readText().trim() }.getOrNull()
@@ -880,13 +878,6 @@ object YtDlpUpdater {
         } finally {
             isUpdating.set(false)
         }
-    }
-
-    private fun onUnmeteredNetwork(context: Context): Boolean {
-        val manager = context.getSystemService(ConnectivityManager::class.java) ?: return false
-        val caps = manager.getNetworkCapabilities(manager.activeNetwork) ?: return false
-        return caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-            caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
     }
 
     /** How often a manual install checks whether the engine has come free. */

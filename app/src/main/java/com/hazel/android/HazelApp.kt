@@ -10,6 +10,7 @@ import android.util.Log
 import com.hazel.android.download.NetworkProxy
 import com.hazel.android.download.NetworkProxy.throughProxy
 import com.hazel.android.download.WebViewProxy
+import com.hazel.android.update.GalleryDlUpdater
 import com.hazel.android.update.YtDlpUpdater
 import com.hazel.android.utils.CrashLogger
 import com.yausername.ffmpeg.FFmpeg
@@ -131,6 +132,8 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
             // Fetched in the background and swapped in only while nothing is running, so
             // a download started meanwhile keeps the binary it started with.
             YtDlpUpdater.autoUpdateIfAvailable(this@HazelApp)
+            GalleryDlUpdater.applyStagedUpdate(this@HazelApp)
+            GalleryDlUpdater.autoUpdateIfAvailable(this@HazelApp)
         }
     }
 

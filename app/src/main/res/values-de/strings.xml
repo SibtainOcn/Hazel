@@ -1153,4 +1153,22 @@
     <string name="upd_failure_unknown">Das Update konnte nicht abgeschlossen werden (%1$s). Versuche es gleich noch einmal.</string>
     <string name="upd_status_update_failed">Update nicht abgeschlossen</string>
     <string name="upd_status_check_failed">Prüfung nicht abgeschlossen</string>
+    <string name="gallery_dl_update_available_title">gallery-dl %1$s ist verfügbar</string>
+    <string name="gallery_dl_update_available_text">Öffne Hazel, um die Bild-Engine zu aktualisieren</string>
+    <string name="gallery_dl_update_installed_title">gallery-dl auf %1$s aktualisiert</string>
+    <string name="gallery_dl_update_installed_text">Die Bild-Engine ist aktuell</string>
+    <string name="gallery_dl_update_failed_title">gallery-dl %1$s konnte nicht installiert werden</string>
+    <string name="gallery_dl_update_failed_text">Hazel behält die aktuelle Version und versucht es später erneut</string>
+    <string name="upd_gallerydl_title">gallery-dl-Updates</string>
+    <string name="upd_gallerydl_failure_unreachable">Hazel konnte PyPI nicht erreichen. Prüfe deine Internetverbindung und versuche es erneut.</string>
+    <string name="upd_gallerydl_failure_would_not_start">Die neue gallery-dl-Version ließ sich auf diesem Gerät nicht starten, daher wurde deine aktuelle Version behalten.</string>
+    <string name="upd_status_live">Installiert und in Verwendung</string>
+    <string name="upd_btn_done">Fertig</string>
+    <string name="upd_section_notifications">Benachrichtigungen</string>
+    <string name="upd_notify_engines_summary">Für yt-dlp- und gallery-dl-Updates</string>
+    <string name="upd_notify_installed_title">Nach der Installation benachrichtigen</string>
+    <string name="upd_notify_failed_title">Benachrichtigen, wenn ein Update fehlschlägt</string>
+    <string name="upd_action_use_bundled">Mitgeliefert</string>
+    <string name="upd_bundled_restored">Jetzt wird das mitgelieferte gallery-dl %1$s verwendet</string>
+    <string name="upd_busy">Ein Download läuft. Versuche es nach dessen Ende erneut</string>
 </resources>

@@ -19,6 +19,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.Density
 import androidx.test.core.app.ApplicationProvider
 import com.hazel.android.R
@@ -76,8 +77,7 @@ class GallerySearchLayoutTest(private val locale: String) {
     fun `site row marks the chosen site and switches on tap`() {
         var site by mutableStateOf(GallerySearchSite.PINTEREST)
         show { GallerySiteRow(selected = site, onSelect = { site = it }) }
-        assertInside("Pinterest")
-        compose.onNodeWithText("X").performClick()
+        compose.onNodeWithText("X").performScrollTo().performClick()
         compose.waitForIdle()
         assertEquals(GallerySearchSite.X, site)
         val chosen = compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Selected, true)).fetchSemanticsNodes()

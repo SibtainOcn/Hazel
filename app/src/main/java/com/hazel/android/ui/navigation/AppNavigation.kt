@@ -99,6 +99,7 @@ import com.hazel.android.ui.screens.more.BackupScreen
 import com.hazel.android.ui.screens.more.ToolsScreen
 import com.hazel.android.ui.screens.more.SoftwareUpdateScreen
 import com.hazel.android.ui.screens.more.HazelUpdateScreen
+import com.hazel.android.update.GalleryDlUpdateScreen
 import com.hazel.android.update.YtDlpUpdateScreen
 import com.hazel.android.update.UpdateScreen
 
@@ -126,7 +127,7 @@ private val tabRoutes = bottomNavItems.map { it.route }.toSet()
 
 /** Screens shown without the bottom bar. */
 private val subScreenRoutes = setOf(
-    "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "sponsor", "software_update", "hazel_update", "ytdlp_update",
+    "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "sponsor", "software_update", "hazel_update", "ytdlp_update", "gallery_dl_update",
     "processing", "advanced", "proxy", "gallery_settings"
 )
 
@@ -585,6 +586,7 @@ fun AppNavigation(
                     onBack = { navController.popBackStack() },
                     onNavigateToHazelUpdate = { navController.navigate("hazel_update") },
                     onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") },
+                    onNavigateToGalleryDlUpdate = { navController.navigate("gallery_dl_update") },
                     onOpenWhatsNew = { version ->
                         navController.navigate(
                             "docs/${com.hazel.android.ui.screens.more.DocPage.CHANGELOG.name}?version=${android.net.Uri.encode(version)}"
@@ -605,11 +607,15 @@ fun AppNavigation(
             screen("ytdlp_update") {
                 YtDlpUpdateScreen(onBack = { navController.popBackStack() })
             }
+            screen("gallery_dl_update") {
+                GalleryDlUpdateScreen(onBack = { navController.popBackStack() })
+            }
             screen("update") {
                 SoftwareUpdateScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToHazelUpdate = { navController.navigate("hazel_update") },
                     onNavigateToYtDlpUpdate = { navController.navigate("ytdlp_update") },
+                    onNavigateToGalleryDlUpdate = { navController.navigate("gallery_dl_update") },
                     onOpenWhatsNew = { version ->
                         navController.navigate(
                             "docs/${com.hazel.android.ui.screens.more.DocPage.CHANGELOG.name}?version=${android.net.Uri.encode(version)}"
