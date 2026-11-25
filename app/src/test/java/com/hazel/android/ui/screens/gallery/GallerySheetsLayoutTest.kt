@@ -6,7 +6,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Density
 import androidx.test.core.app.ApplicationProvider
 import com.hazel.android.R
@@ -36,7 +38,8 @@ class GallerySheetsLayoutTest(private val locale: String) {
         private fun item(index: Int, extension: String, title: String) = GalleryItem(
             index = index, url = "https://cdn.example/$index.$extension", extension = extension,
             title = title, author = "spacebrief", site = "instagram",
-            width = 1080, height = 1350, thumbnail = null
+            width = 1080, height = 1350, thumbnail = null,
+            caption = "$title. A long caption the author wrote under the post, with #tags and a second sentence."
         )
 
         private val POST = listOf(
@@ -73,35 +76,56 @@ class GallerySheetsLayoutTest(private val locale: String) {
     }
 
     @Test
-    fun `image item sheet keeps its header and size choice inside`() {
-        show { GalleryItemSheet(item = POST[0], total = POST.size, postUrl = "", onDownload = {}, onDismiss = {}) }
+    fun `image item sheet keeps its header and size row inside, and the row opens the size picker`() {
+        show { GalleryItemSheet(item = POST[0], postUrl = "https://x.com/a/status/1", onDownload = { _, _, _, _ -> }, onDismiss = {}) }
         saveScreen("gallery-item-image-$locale")
-        assertInside(
-            context.getString(R.string.gallery_sheet_image_of, 1, POST.size),
-            context.getString(R.string.gallery_image_size)
-        )
+        assertInside(context.getString(R.string.gallery_image_size))
+        compose.onNodeWithContentDescription(context.getString(R.string.format_selection_change)).performClick()
+        compose.waitForIdle()
+        saveScreen("gallery-item-picker-$locale")
+        assertInside(context.getString(R.string.format_selection_subtitle), context.getString(R.string.format_selection_confirm))
     }
 
     @Test
     fun `video item sheet offers the video quality instead`() {
-        show { GalleryItemSheet(item = POST[2], total = POST.size, postUrl = "", onDownload = {}, onDismiss = {}) }
+        show { GalleryItemSheet(item = POST[2], postUrl = "", onDownload = { _, _, _, _ -> }, onDismiss = {}) }
         saveScreen("gallery-item-video-$locale")
+        assertInside(context.getString(R.string.format_sheet_video_quality))
+    }
+
+    @Test
+    fun `download all sheet keeps the list bar, adjust section and buttons in view`() {
+        show { GalleryPostSheet(items = POST, postUrl = "", onDownload = {}, onDismiss = {}) }
+        saveScreen("gallery-post-$locale")
         assertInside(
-            context.getString(R.string.gallery_sheet_video_of, 3, POST.size),
-            context.getString(R.string.format_sheet_video_quality)
+            context.resources.getQuantityString(R.plurals.gallery_items, POST.size, POST.size),
+            context.getString(R.string.gallery_adjust_all),
+            context.getString(R.string.gallery_size_original).uppercase()
         )
     }
 
     @Test
-    fun `download all sheet keeps the filter, adjust section and bar in view`() {
-        show { GalleryPostSheet(items = POST, postUrl = "", onDownload = { _, _ -> }, onDismiss = {}) }
-        saveScreen("gallery-post-$locale")
+    fun `download all sheet splits into two panes on a phone held sideways`() {
+        RuntimeEnvironment.setQualifiers("$locale-w800dp-h360dp-land")
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = true) {
+                GalleryPostSheet(items = POST, postUrl = "", onDownload = {}, onDismiss = {})
+            }
+        }
+        compose.waitForIdle()
+        saveScreen("gallery-post-land-$locale")
         assertInside(
             context.resources.getQuantityString(R.plurals.gallery_items, POST.size, POST.size),
-            context.getString(R.string.gallery_filter_all, POST.size),
-            context.getString(R.string.gallery_filter_videos, 1),
-            context.getString(R.string.gallery_adjust_all),
-            context.getString(R.string.gallery_size_original).uppercase()
+            context.getString(R.string.gallery_adjust_all)
         )
+    }
+
+    @Test
+    fun `viewer's bottom download opens the sheet for the file in view`() {
+        var opened: Int? = null
+        show { GalleryViewer(items = POST, startIndex = 1, onOpenSheet = { opened = it.index }, onDismiss = {}) }
+        saveScreen("gallery-viewer-$locale")
+        compose.onNodeWithContentDescription(context.getString(R.string.format_sheet_download)).assertIsDisplayed().performClick()
+        assertTrue(opened == 2)
     }
 }

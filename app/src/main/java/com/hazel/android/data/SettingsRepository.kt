@@ -343,6 +343,7 @@ object SettingsRepository {
     private val GALLERY_POSTS_KEY = intPreferencesKey("gallery_search_posts")
     private val GALLERY_SHOW_KEY = stringPreferencesKey("gallery_show")
     private val GALLERY_REPOSTS_KEY = booleanPreferencesKey("gallery_skip_reposts")
+    private val GALLERY_GROUP_AUTHOR_KEY = booleanPreferencesKey("gallery_group_by_author")
 
     val GALLERY_POST_COUNTS = listOf(10, 30, 60)
     const val DEFAULT_GALLERY_POSTS = 30
@@ -382,10 +383,18 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[GALLERY_REPOSTS_KEY] = skip }
     }
 
+    fun getGalleryGroupByAuthor(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_GROUP_AUTHOR_KEY] ?: false }
+
+    suspend fun setGalleryGroupByAuthor(context: Context, group: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_GROUP_AUTHOR_KEY] = group }
+    }
+
     private val GALLERY_IMAGE_SIZE_KEY = stringPreferencesKey("gallery_image_size")
     private val GALLERY_VIDEO_MODE_KEY = stringPreferencesKey("gallery_video_mode")
     private val GALLERY_FILENAME_KEY = stringPreferencesKey("gallery_filename_template")
     private val GALLERY_METADATA_KEY = booleanPreferencesKey("gallery_write_metadata")
+    private val GALLERY_EMBED_CAPTION_KEY = booleanPreferencesKey("gallery_embed_caption")
     private val GALLERY_POST_DATE_KEY = booleanPreferencesKey("gallery_keep_post_date")
     private val GALLERY_ZIP_KEY = booleanPreferencesKey("gallery_pack_zip")
     private val GALLERY_ARCHIVE_KEY = booleanPreferencesKey("gallery_skip_downloaded")
@@ -400,7 +409,8 @@ object SettingsRepository {
                 writeMetadata = prefs[GALLERY_METADATA_KEY] ?: false,
                 keepPostDate = prefs[GALLERY_POST_DATE_KEY] ?: true,
                 packZip = prefs[GALLERY_ZIP_KEY] ?: false,
-                skipDownloaded = prefs[GALLERY_ARCHIVE_KEY] ?: false
+                skipDownloaded = prefs[GALLERY_ARCHIVE_KEY] ?: false,
+                embedCaption = prefs[GALLERY_EMBED_CAPTION_KEY] ?: false
             )
         }
 
@@ -413,6 +423,7 @@ object SettingsRepository {
             prefs[GALLERY_POST_DATE_KEY] = options.keepPostDate
             prefs[GALLERY_ZIP_KEY] = options.packZip
             prefs[GALLERY_ARCHIVE_KEY] = options.skipDownloaded
+            prefs[GALLERY_EMBED_CAPTION_KEY] = options.embedCaption
         }
     }
 
@@ -873,6 +884,9 @@ object SettingsRepository {
     private val HAZEL_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("hazel_update_available")
     private val HAZEL_UPDATE_VERSION_KEY = stringPreferencesKey("hazel_update_version")
     private val YTDLP_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("ytdlp_update_available")
+    private val GALLERY_DL_UPDATE_AVAILABLE_KEY = booleanPreferencesKey("gallery_dl_update_available")
+    private val GALLERY_DL_AUTO_UPDATE_KEY = booleanPreferencesKey("gallery_dl_auto_update")
+    private val GALLERY_DL_WIFI_ONLY_KEY = booleanPreferencesKey("gallery_dl_wifi_only")
 
     fun getHasUpdateAvailable(context: Context): Flow<Boolean> {
         return context.dataStore.data.map { prefs -> prefs[HAS_UPDATE_AVAILABLE_KEY] ?: false }
@@ -893,8 +907,8 @@ object SettingsRepository {
             prefs[HAZEL_UPDATE_AVAILABLE_KEY] = available
             if (available && version != null) prefs[HAZEL_UPDATE_VERSION_KEY] = version
             else if (!available) prefs.remove(HAZEL_UPDATE_VERSION_KEY)
-            val ytdlpAvail = prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false
-            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || ytdlpAvail
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || (prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false) ||
+                (prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] ?: false)
         }
         if (available) BackupRepository.autoBackupBeforeUpdate(context)
     }
@@ -905,9 +919,34 @@ object SettingsRepository {
     suspend fun setYtDlpUpdateAvailable(context: Context, available: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[YTDLP_UPDATE_AVAILABLE_KEY] = available
-            val hazelAvail = prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false
-            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || hazelAvail
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || (prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false) ||
+                (prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] ?: false)
         }
+    }
+
+    fun getGalleryDlUpdateAvailable(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] ?: false }
+
+    suspend fun setGalleryDlUpdateAvailable(context: Context, available: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[GALLERY_DL_UPDATE_AVAILABLE_KEY] = available
+            prefs[HAS_UPDATE_AVAILABLE_KEY] = available || (prefs[HAZEL_UPDATE_AVAILABLE_KEY] ?: false) ||
+                (prefs[YTDLP_UPDATE_AVAILABLE_KEY] ?: false)
+        }
+    }
+
+    fun getGalleryDlAutoUpdate(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_DL_AUTO_UPDATE_KEY] ?: true }
+
+    suspend fun setGalleryDlAutoUpdate(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_DL_AUTO_UPDATE_KEY] = enabled }
+    }
+
+    fun getGalleryDlWifiOnly(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_DL_WIFI_ONLY_KEY] ?: false }
+
+    suspend fun setGalleryDlWifiOnly(context: Context, enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_DL_WIFI_ONLY_KEY] = enabled }
     }
 }
 

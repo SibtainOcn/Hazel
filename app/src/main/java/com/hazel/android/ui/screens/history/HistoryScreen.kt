@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Videocam
@@ -166,6 +167,7 @@ fun HistoryScreen(
     var searchOpen by remember { mutableStateOf(false) }
     var showAudio by remember { mutableStateOf(false) }
     var showVideo by remember { mutableStateOf(false) }
+    var showImages by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf(HistoryStatus.ALL) }
 
     var sortMenuOpen by remember { mutableStateOf(false) }
@@ -187,11 +189,15 @@ fun HistoryScreen(
         searchOpen = false
     }
 
-    val visible = remember(history, sort, reversed, query, showAudio, showVideo, status, presence.toMap()) {
+    val visible = remember(history, sort, reversed, query, showAudio, showVideo, showImages, status, presence.toMap()) {
         history
             .asSequence()
             // Neither chip on, or both, is everything; one on narrows to that kind.
-            .filter { showAudio == showVideo || it.isVideo == showVideo }
+            .filter { entry ->
+                val none = !showAudio && !showVideo && !showImages
+                none || (showImages && entry.isImage) || (showVideo && entry.isVideo) ||
+                    (showAudio && !entry.isVideo && !entry.isImage)
+            }
             .filter { entry ->
                 val present = presence[entry.id] ?: true
                 when (status) {
@@ -469,6 +475,12 @@ fun HistoryScreen(
                 selected = showVideo,
                 onClick = { showVideo = !showVideo }
             )
+            KindChip(
+                label = stringResource(R.string.properties_kind_image),
+                icon = Icons.Filled.Image,
+                selected = showImages,
+                onClick = { showImages = !showImages }
+            )
         }
 
         // ── The list ──
@@ -516,7 +528,7 @@ fun HistoryScreen(
                         val open: () -> Unit = {
                             scope.launch {
                                 if (MediaPresence.refresh(context, entry.fileUri)) {
-                                    MediaOpener.play(context, entry.fileUri, entry.isVideo)
+                                    MediaOpener.play(context, entry.fileUri, entry.mimeType)
                                 } else {
                                     presence[entry.id] = false
                                     toast(resources.getString(R.string.history_toast_file_gone), ok = false)
@@ -1033,7 +1045,7 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, mark: Boolean?, a
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    if (entry.isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
+                    kindIcon(entry),
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
                     tint = Color.White
@@ -1117,9 +1129,13 @@ private fun HistoryRow(entry: HistoryEntry, present: Boolean, mark: Boolean?, ac
             Spacer(modifier = Modifier.width(8.dp))
             if (mark != null) SelectMark(mark)
             else Icon(
-                if (entry.isVideo) Icons.Filled.Videocam else Icons.Filled.MusicNote,
+                kindIcon(entry),
                 contentDescription = stringResource(
-                    if (entry.isVideo) R.string.properties_kind_video else R.string.properties_kind_audio
+                    when {
+                        entry.isImage -> R.string.properties_kind_image
+                        entry.isVideo -> R.string.properties_kind_video
+                        else -> R.string.properties_kind_audio
+                    }
                 ),
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1179,4 +1195,11 @@ private fun DeletedTag() {
         background = MaterialTheme.colorScheme.error,
         foreground = MaterialTheme.colorScheme.onError
     )
+}
+
+/** Audio, video or picture, as the row and the card both mark it. */
+private fun kindIcon(entry: HistoryEntry) = when {
+    entry.isImage -> Icons.Filled.Image
+    entry.isVideo -> Icons.Filled.Videocam
+    else -> Icons.Filled.MusicNote
 }
