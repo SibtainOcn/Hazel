@@ -77,6 +77,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -224,6 +225,10 @@ fun CookiesScreen(onBack: () -> Unit) {
             },
             onEnabledChange = { on -> scope.launch { CookieRepository.setEnabled(context, entry.id, on) } },
             onSignOut = { pendingSignOut = entry },
+            onOpen = {
+                openId = null
+                signInLauncher.launch(CookieWebViewActivity.openIntent(context, entry))
+            },
             onDismiss = { openId = null }
         )
     }
@@ -392,28 +397,23 @@ internal fun CookiesBody(
     }
 }
 
-/** Sign in (filled) and Import (tonal, file or clipboard) as one connected button group. */
+/** Sign in (filled) and Import (tonal, file or clipboard) as one connected pair of equal buttons. */
 @Composable
 private fun AddButtons(importing: Boolean, onSignIn: () -> Unit, onImportFile: () -> Unit, onImportClipboard: () -> Unit) {
     var importMenu by remember { mutableStateOf(false) }
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
         GroupButton(
-            label = stringResource(R.string.cookies_add_sign_in),
-            icon = { Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null, modifier = Modifier.size(18.dp)) },
+            label = stringResource(R.string.no_results_sign_in),
             filled = true,
             shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 8.dp, bottomEnd = 8.dp),
             onClick = onSignIn,
-            modifier = Modifier.weight(1.4f)
+            modifier = Modifier.weight(1f)
         )
         Box(modifier = Modifier.weight(1f)) {
             GroupButton(
                 label = stringResource(R.string.cookies_import),
-                icon = {
-                    if (importing) HazelLoadingIndicator(size = 18.dp)
-                    else Icon(Icons.Filled.Download, contentDescription = null, modifier = Modifier.size(18.dp))
-                },
                 filled = false,
-                enabled = !importing,
+                busy = importing,
                 shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 24.dp, bottomEnd = 24.dp),
                 onClick = { importMenu = true },
                 modifier = Modifier.fillMaxWidth()
@@ -439,31 +439,25 @@ private fun AddButtons(importing: Boolean, onSignIn: () -> Unit, onImportFile: (
 @Composable
 private fun GroupButton(
     label: String,
-    icon: @Composable () -> Unit,
     filled: Boolean,
     shape: RoundedCornerShape,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    busy: Boolean = false
 ) {
     val scheme = MaterialTheme.colorScheme
     val ink = if (filled) scheme.onPrimary else scheme.onSurface
     Surface(
         onClick = onClick,
-        enabled = enabled,
+        enabled = !busy,
         shape = shape,
         color = if (filled) scheme.primary else sheetButtonColor,
         contentColor = ink,
         modifier = modifier.heightIn(min = 48.dp)
     ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
-        ) {
-            icon()
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+            if (busy) HazelLoadingIndicator(size = 22.dp)
+            else Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -518,32 +512,39 @@ private fun displayName(entry: CookieEntry): String {
     return entry.title.ifBlank { site.ifBlank { stringResource(R.string.cookies_row_fallback_name) } }
 }
 
-/** Common sites as one-tap sign-ins, so signing in never has to wait for a failed download. */
-@OptIn(ExperimentalLayoutApi::class)
+/** Common sites as one-tap sign-ins, three to a connected row. */
 @Composable
 internal fun QuickSiteChips(
     sites: List<Pair<String, String>> = SignInBrowser.QUICK_SITES,
     onPick: (name: String, home: String) -> Unit
 ) {
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        sites.forEach { (name, home) ->
-            Surface(onClick = { onPick(name, home) }, shape = CircleShape, color = tonalFill(0.6f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(start = 6.dp, end = 14.dp, top = 6.dp, bottom = 6.dp)
-                ) {
-                    SiteMark(site = CookieRepository.siteOfUrl(home), name = name, size = 26.dp)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(name, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, maxLines = 1)
+    // One label size for every button, growing with the system font only up to 1.2x; a large font gets two per row.
+    val fontScale = LocalDensity.current.fontScale
+    val base = MaterialTheme.typography.labelLarge
+    val style = base.copy(fontSize = base.fontSize * (minOf(fontScale, 1.2f) / fontScale), fontWeight = FontWeight.SemiBold)
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
+        sites.chunked(if (fontScale > 1.15f) QUICK_PER_ROW - 1 else QUICK_PER_ROW).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
+                row.forEachIndexed { index, (name, home) ->
+                    val start = if (index == 0) 24.dp else 8.dp
+                    val end = if (index == row.lastIndex) 24.dp else 8.dp
+                    Surface(
+                        onClick = { onPick(name, home) },
+                        shape = RoundedCornerShape(topStart = start, bottomStart = start, topEnd = end, bottomEnd = end),
+                        color = sheetButtonColor,
+                        modifier = Modifier.weight(1f).height(48.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 6.dp)) {
+                            Text(name, style = style, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
                 }
             }
         }
     }
 }
+
+private const val QUICK_PER_ROW = 3
 
 /** Takes a site address, or one tap on a common site, and opens its sign-in page. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -607,6 +608,7 @@ private fun AccountSheet(
     onCopy: () -> Unit,
     onEnabledChange: (Boolean) -> Unit,
     onSignOut: () -> Unit,
+    onOpen: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -772,6 +774,8 @@ private fun AccountSheet(
                 startLabel = stringResource(R.string.cookies_sign_out),
                 onStart = onSignOut,
                 startDanger = true,
+                middleLabel = stringResource(R.string.cookies_open),
+                onMiddle = onOpen,
                 endLabel = stringResource(R.string.cookies_sheet_save),
                 onEnd = {
                     onSave(entry.copy(url = url.trim().let { if (it.isBlank()) it else withScheme(it) }, title = title.trim()))

@@ -144,7 +144,7 @@ internal fun accountLine(status: AccountStatus, entry: CookieEntry?): String {
 internal fun relative(atMs: Long, now: Long): String =
     DateUtils.getRelativeTimeSpanString(atMs, now, DateUtils.MINUTE_IN_MILLIS).toString()
 
-/** Two buttons as one connected M3 group: round outer ends, tight where they meet. */
+/** Two or three buttons as one connected M3 group: round outer ends, tight where they meet. */
 @Composable
 internal fun SplitButtons(
     startLabel: String,
@@ -154,7 +154,9 @@ internal fun SplitButtons(
     modifier: Modifier = Modifier,
     startDanger: Boolean = false,
     endEnabled: Boolean = true,
-    startEnabled: Boolean = true
+    startEnabled: Boolean = true,
+    middleLabel: String? = null,
+    onMiddle: () -> Unit = {}
 ) {
     val scheme = MaterialTheme.colorScheme
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -165,6 +167,14 @@ internal fun SplitButtons(
             shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 8.dp, bottomEnd = 8.dp),
             fill = if (startDanger) scheme.error.copy(alpha = 0.18f) else sheetButtonColor,
             ink = if (startDanger) scheme.error else scheme.onSurface
+        )
+        if (middleLabel != null) SplitHalf(
+            label = middleLabel,
+            onClick = onMiddle,
+            enabled = true,
+            shape = RoundedCornerShape(8.dp),
+            fill = sheetButtonColor,
+            ink = scheme.onSurface
         )
         SplitHalf(
             label = endLabel,

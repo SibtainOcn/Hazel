@@ -1162,4 +1162,5 @@
     <string name="cookies_use_for_downloads">Pakai untuk unduhan</string>
     <string name="cookies_use_for_downloads_summary">Mati: tetap tersimpan tapi tidak dipakai</string>
     <string name="cookies_dialog_sub">Beberapa sumber hanya bisa diunduh setelah masuk</string>
+    <string name="cookies_open">Buka</string>
 </resources>

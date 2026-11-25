@@ -1196,4 +1196,5 @@
     <string name="cookies_use_for_downloads">Utiliser pour les téléchargements</string>
     <string name="cookies_use_for_downloads_summary">Désactivé : gardé mais non utilisé</string>
     <string name="cookies_dialog_sub">Certaines sources ne se téléchargent qu\'avec une connexion</string>
+    <string name="cookies_open">Ouvrir</string>
 </resources>

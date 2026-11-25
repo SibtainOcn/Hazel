@@ -1196,4 +1196,5 @@
     <string name="cookies_use_for_downloads">Usar nos downloads</string>
     <string name="cookies_use_for_downloads_summary">Desligado fica salvo, mas sem uso</string>
     <string name="cookies_dialog_sub">Algumas fontes só baixam com login</string>
+    <string name="cookies_open">Abrir</string>
 </resources>

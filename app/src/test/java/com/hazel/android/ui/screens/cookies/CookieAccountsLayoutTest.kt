@@ -91,7 +91,7 @@ class CookieAccountsLayoutTest(private val locale: String, private val theme: St
                 onOpen = {}, onSignInAgain = {}, onQuickSite = { _, _ -> }
             )
         }
-        assertFits(context.getString(R.string.cookies_add_sign_in))
+        assertFits(context.getString(R.string.no_results_sign_in))
         assertFits(context.getString(R.string.cookies_import))
         assertFits(context.getString(R.string.cookies_state_active))
         assertFits(context.getString(R.string.cookies_expired))

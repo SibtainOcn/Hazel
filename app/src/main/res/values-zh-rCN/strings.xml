@@ -1162,4 +1162,5 @@
     <string name="cookies_use_for_downloads">用于下载</string>
     <string name="cookies_use_for_downloads_summary">关闭后仍保存但不使用</string>
     <string name="cookies_dialog_sub">部分来源需要登录才能下载</string>
+    <string name="cookies_open">打开</string>
 </resources>

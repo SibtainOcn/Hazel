@@ -1179,4 +1179,5 @@
     <string name="cookies_use_for_downloads">Für Downloads verwenden</string>
     <string name="cookies_use_for_downloads_summary">Aus: bleibt gespeichert, wird nicht genutzt</string>
     <string name="cookies_dialog_sub">Manche Quellen laden nur mit Anmeldung</string>
+    <string name="cookies_open">Öffnen</string>
 </resources>

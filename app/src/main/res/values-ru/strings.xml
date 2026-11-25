@@ -1212,4 +1212,5 @@
     <string name="cookies_use_for_downloads">Для загрузок</string>
     <string name="cookies_use_for_downloads_summary">Выкл: хранится, но не используется</string>
     <string name="cookies_dialog_sub">Некоторые источники скачиваются только после входа</string>
+    <string name="cookies_open">Открыть</string>
 </resources>

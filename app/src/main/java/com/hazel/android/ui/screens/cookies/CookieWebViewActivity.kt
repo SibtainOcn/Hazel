@@ -1,5 +1,8 @@
 package com.hazel.android.ui.screens.cookies
 
+import kotlin.math.roundToInt
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Slider
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ClipData
@@ -137,14 +140,16 @@ class CookieWebViewActivity : ComponentActivity() {
                 darkTheme = savedTheme ?: true,
                 accentName = accentName ?: return@setContent
             ) {
-                CookieWebViewScreen(url = url, title = title, clearFirst = clearFirst)
+                CookieWebViewScreen(url = url, title = title, clearFirst = clearFirst, openEntry = intent.getLongExtra(EXTRA_OPEN_ENTRY, 0L))
             }
         }
     }
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    private fun CookieWebViewScreen(url: String, title: String, clearFirst: Boolean) {
+    private fun CookieWebViewScreen(url: String, title: String, clearFirst: Boolean, openEntry: Long) {
+        // An account opened from the Cookies screen starts on its site with its saved cookies.
+        val firstPage = if (openEntry != 0L) url else SignInBrowser.startUrl(url)
         val siteKey = remember(url) { CookieRepository.siteOfUrl(url) }
         val siteName = title.ifBlank { SignInBrowser.nameOf(siteKey) ?: url }
         var currentUrl by remember { mutableStateOf(url) }
@@ -163,7 +168,14 @@ class CookieWebViewActivity : ComponentActivity() {
                 finish()
                 return@LaunchedEffect
             }
-            if (clearFirst) CookieExtractor.clearAll()
+            if (clearFirst) {
+                CookieExtractor.clearAll()
+                if (openEntry != 0L) {
+                    CookieRepository.getEntries(this@CookieWebViewActivity).first()
+                        .firstOrNull { it.id == openEntry }
+                        ?.let { CookieExtractor.load(it.content) }
+                }
+            }
             browserReady = true
         }
         var desktopMode by remember { mutableStateOf(false) }
@@ -243,17 +255,10 @@ class CookieWebViewActivity : ComponentActivity() {
                                 trailingIcon = { MenuValue(stringResource(if (desktopMode) R.string.cookie_webview_on else R.string.cookie_webview_off)) },
                                 onClick = { menuOpen = false; setDesktop(!desktopMode) }
                             )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.cookie_webview_text_size)) },
-                                icon = Icons.Filled.FormatSize,
-                                tone = MenuTone.Info,
-                                trailingIcon = { MenuValue("$textZoom%") },
-                                // Steps through the sizes and stays open, so the change shows at once.
-                                onClick = {
-                                    textZoom = TEXT_SIZES[(TEXT_SIZES.indexOf(textZoom) + 1) % TEXT_SIZES.size]
-                                    webView?.settings?.textZoom = textZoom
-                                }
-                            )
+                            TextSizeRow(textZoom) { size ->
+                                textZoom = size
+                                webView?.settings?.textZoom = size
+                            }
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.cookie_webview_go_sign_in)) },
                                 icon = Icons.AutoMirrored.Filled.Login,
@@ -372,7 +377,7 @@ class CookieWebViewActivity : ComponentActivity() {
                                 }
                             }
                             webView = this
-                            loadUrl(SignInBrowser.startUrl(url))
+                            loadUrl(firstPage)
                         }
                     }
                 )
@@ -457,6 +462,26 @@ class CookieWebViewActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    /** Text size as a slider inside the menu, so a page can be sized while it stays in view. */
+    @Composable
+    private fun TextSizeRow(size: Int, onChange: (Int) -> Unit) {
+        val scheme = MaterialTheme.colorScheme
+        Column(modifier = Modifier.widthIn(min = 240.dp).padding(horizontal = 16.dp, vertical = 6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.FormatSize, contentDescription = null, tint = scheme.primary, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(stringResource(R.string.cookie_webview_text_size), modifier = Modifier.weight(1f))
+                MenuValue("$size%")
+            }
+            Slider(
+                value = size.toFloat(),
+                onValueChange = { onChange((it / TEXT_STEP).roundToInt() * TEXT_STEP) },
+                valueRange = TEXT_MIN.toFloat()..TEXT_MAX.toFloat(),
+                steps = (TEXT_MAX - TEXT_MIN) / TEXT_STEP - 1
+            )
         }
     }
 
@@ -608,7 +633,10 @@ class CookieWebViewActivity : ComponentActivity() {
         private const val PROXY_WAIT_STEPS = 20
         private const val PROXY_WAIT_STEP_MS = 100L
 
-        private val TEXT_SIZES = listOf(100, 110, 125, 150, 90)
+        private const val TEXT_MIN = 50
+        private const val TEXT_MAX = 200
+        private const val TEXT_STEP = 10
+        const val EXTRA_OPEN_ENTRY = "open_entry"
 
         /** Hosts a site keeps its login cookie on, besides its own key. */
         private val LOGIN_HOSTS = mapOf(
@@ -621,6 +649,10 @@ class CookieWebViewActivity : ComponentActivity() {
         )
 
         /** Intent that opens the sign-in page for [url]. */
+        /** Intent that opens a saved account's site with its cookies, to browse or refresh it. */
+        fun openIntent(context: Context, entry: CookieEntry): Intent =
+            intent(context, entry.url, entry.title).putExtra(EXTRA_OPEN_ENTRY, entry.id)
+
         fun intent(context: Context, url: String, title: String = ""): Intent =
             Intent(context, CookieWebViewActivity::class.java)
                 .putExtra(EXTRA_URL, url)

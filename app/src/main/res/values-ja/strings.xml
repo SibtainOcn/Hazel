@@ -1162,4 +1162,5 @@
     <string name="cookies_use_for_downloads">ダウンロードに使用</string>
     <string name="cookies_use_for_downloads_summary">オフでも保存はされます</string>
     <string name="cookies_dialog_sub">一部のソースはログインしないとダウンロードできません</string>
+    <string name="cookies_open">開く</string>
 </resources>

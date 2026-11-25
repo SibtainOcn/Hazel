@@ -1179,4 +1179,5 @@
     <string name="cookies_use_for_downloads">डाउनलोड के लिए उपयोग</string>
     <string name="cookies_use_for_downloads_summary">बंद होने पर सेव रहेगा, उपयोग नहीं होगा</string>
     <string name="cookies_dialog_sub">कुछ स्रोत साइन-इन के बिना डाउनलोड नहीं होते</string>
+    <string name="cookies_open">खोलें</string>
 </resources>

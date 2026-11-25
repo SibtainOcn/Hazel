@@ -1235,4 +1235,5 @@
     <string name="cookies_use_for_downloads">Use for downloads</string>
     <string name="cookies_use_for_downloads_summary">Off keeps it saved but unused</string>
     <string name="cookies_dialog_sub">Some sources only download when signed in</string>
+    <string name="cookies_open">Open</string>
 </resources>

@@ -1196,4 +1196,5 @@
     <string name="cookies_use_for_downloads">Usar para descargas</string>
     <string name="cookies_use_for_downloads_summary">Desactivada se guarda pero no se usa</string>
     <string name="cookies_dialog_sub">Algunas fuentes solo se descargan con sesión iniciada</string>
+    <string name="cookies_open">Abrir</string>
 </resources>
