@@ -43,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -246,6 +247,8 @@ fun GalleryScreen(
     var menuOpen by remember { mutableStateOf(false) }
     // Post index and file position, so a file of any post on a list of several can be opened.
     var viewing by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
+    val galleryJobs by GalleryQueue.jobs.collectAsState()
+    val galleryFinished by GalleryQueue.finished.collectAsState()
     var logOpen by rememberSaveable { mutableStateOf(false) }
     var sheetFor by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
     var postSheetFor by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -329,6 +332,7 @@ fun GalleryScreen(
                                     GalleryCard(
                                         item = single,
                                         total = 1,
+                                        status = GalleryQueue.statusOf(galleryJobs, galleryFinished, post, post.items.first()),
                                         onOpen = { openItem(i, 0) },
                                         onView = { viewing = i to 0 }
                                     )
@@ -348,6 +352,7 @@ fun GalleryScreen(
                                 GalleryCard(
                                     item = item,
                                     total = viewModel.items.size,
+                                    status = viewModel.post?.let { GalleryQueue.statusOf(galleryJobs, galleryFinished, it, item) },
                                     onOpen = { openItem(currentPost, position) },
                                     onView = { viewing = currentPost to position }
                                 )
@@ -418,13 +423,24 @@ fun GalleryScreen(
 
     viewing?.let { (postIndex, start) ->
         viewModel.posts.getOrNull(postIndex)?.let { post ->
+            // A post with several files is browsed on its own; a single result swipes through
+            // every result, so the strip and Download reach the rest of the list too.
+            val places = remember(viewModel.posts, postIndex) {
+                if (post.items.size == 1 && viewModel.posts.size > 1) {
+                    viewModel.posts.flatMapIndexed { p, each -> each.items.indices.map { p to it } }
+                } else {
+                    post.items.indices.map { postIndex to it }
+                }
+            }
+            val items = remember(places) { places.map { (p, i) -> viewModel.posts[p].items[i] } }
             GalleryViewer(
-                items = post.items,
-                startIndex = start,
+                items = items,
+                startIndex = places.indexOf(postIndex to start).coerceAtLeast(0),
                 onOpenSheet = { item ->
+                    val (p, i) = places.getOrNull(items.indexOfFirst { it === item }) ?: return@GalleryViewer
                     // A video goes to the video sheet on Home, so the viewer closes first.
                     if (item.isVideo) viewing = null
-                    openItem(postIndex, post.items.indexOf(item))
+                    openItem(p, i)
                 },
                 onDismiss = { viewing = null }
             )
