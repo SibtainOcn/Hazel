@@ -124,7 +124,7 @@ class GallerySheetsLayoutTest(private val locale: String) {
         var opened: Int? = null
         show { GalleryViewer(items = POST, startIndex = 1, onOpenSheet = { opened = it.index }, onDismiss = {}) }
         saveScreen("gallery-viewer-$locale")
-        compose.onNodeWithText(context.getString(R.string.format_sheet_download)).assertIsDisplayed().performClick()
+        compose.onNodeWithContentDescription(context.getString(R.string.format_sheet_download)).assertIsDisplayed().performClick()
         assertTrue(opened == 2)
     }
 }

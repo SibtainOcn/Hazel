@@ -167,7 +167,8 @@ fun GalleryViewer(
                         label = stringResource(R.string.format_sheet_download),
                         icon = Icons.Filled.Download,
                         enabled = true,
-                        onClick = { onOpenSheet(current) }
+                        onClick = { onOpenSheet(current) },
+                        iconOnly = true
                     )
                 }
                 if (items.size > 1) {

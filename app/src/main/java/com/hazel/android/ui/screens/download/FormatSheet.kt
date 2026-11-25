@@ -1350,7 +1350,9 @@ internal fun SheetDownloadPill(
     icon: ImageVector,
     enabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Only the cookie and its icon, with [label] read out instead of shown. */
+    iconOnly: Boolean = false
 ) {
     val colors = MaterialTheme.colorScheme
     val fill = if (enabled) colors.primary else colors.primary.copy(alpha = 0.12f)
@@ -1367,9 +1369,10 @@ internal fun SheetDownloadPill(
         modifier = modifier
             .pressScale(interaction, pressed = 0.94f)
             .height(48.dp)
+            .then(if (iconOnly) Modifier.semantics { contentDescription = label } else Modifier)
     ) {
         Row(
-            modifier = Modifier.padding(start = 5.dp, end = 18.dp),
+            modifier = Modifier.padding(start = 5.dp, end = if (iconOnly) 5.dp else 18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -1381,8 +1384,10 @@ internal fun SheetDownloadPill(
             ) {
                 Icon(icon, null, modifier = Modifier.size(18.dp), tint = if (enabled) fill else colors.surface)
             }
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+            if (!iconOnly) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+            }
         }
     }
 }
