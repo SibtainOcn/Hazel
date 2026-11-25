@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - More > Gallery: defaults for gallery downloads and image search, and clearing the download record.
 
 ### Fixed
+- Player: the mini player keeps playing over every tab and screen instead of stopping when you leave Home.
 - Hazel updates: Beta and Nightly find their releases, move from one build to the next, and move onto a newer stable.
 - Hazel updates: a GitHub install never picks an F-Droid APK, and x86 phones get the x86 APK.
 - Hazel update screen: translated in every language, with clear failure reasons; nothing is cut off at the largest font.
