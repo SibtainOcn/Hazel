@@ -1091,9 +1091,12 @@
     <string name="home_empty_title">Save videos and music</string>
     <string name="home_empty_hint">Paste a link from YouTube, SoundCloud, Instagram Reels and 1,700 more sites</string>
     <string name="more_getting_started">Getting started</string>
-    <string name="instant_label">Instant</string>
+    <string name="instant_label">Instant Video</string>
+    <string name="instant_images_label">Instant Images</string>
+    <string name="share_label_video">Hazel Video</string>
+    <string name="share_label_images">Hazel Images</string>
+    <string name="gallery_instant_settings">Gallery settings</string>
     <string name="shortcut_search">Search</string>
-    <string name="share_shortcut_download">Download</string>
     <string name="instant_started">Download started</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Synthesizing settings</string>

@@ -991,9 +991,12 @@
     <string name="home_empty_title">Simpan video dan musik</string>
     <string name="home_empty_hint">Tempel tautan dari YouTube, SoundCloud, Instagram Reels, dan 1.700 situs lainnya</string>
     <string name="more_getting_started">Memulai</string>
-    <string name="instant_label">Instant</string>
+    <string name="instant_label">Instant Video</string>
+    <string name="instant_images_label">Instant Gambar</string>
+    <string name="share_label_video">Hazel Video</string>
+    <string name="share_label_images">Hazel Gambar</string>
+    <string name="gallery_instant_settings">Setelan Galeri</string>
     <string name="shortcut_search">Cari</string>
-    <string name="share_shortcut_download">Unduh</string>
     <string name="instant_started">Unduhan dimulai</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Pengaturan sintesis</string>

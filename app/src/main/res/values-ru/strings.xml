@@ -1038,9 +1038,12 @@
     <string name="home_empty_title">Сохраняйте видео и музыку</string>
     <string name="home_empty_hint">Вставьте ссылку с YouTube, SoundCloud, Instagram Reels и ещё 1700 сайтов</string>
     <string name="more_getting_started">Начало работы</string>
-    <string name="instant_label">Instant</string>
+    <string name="instant_label">Instant Видео</string>
+    <string name="instant_images_label">Instant Изображения</string>
+    <string name="share_label_video">Hazel Видео</string>
+    <string name="share_label_images">Hazel Изображения</string>
+    <string name="gallery_instant_settings">Настройки галереи</string>
     <string name="shortcut_search">Поиск</string>
-    <string name="share_shortcut_download">Скачать</string>
     <string name="instant_started">Загрузка началась</string>
     <string name="instant_ok">ОК</string>
     <string name="instant_settings">Настройки обработки</string>

@@ -991,9 +991,12 @@
     <string name="home_empty_title">動画と音楽を保存</string>
     <string name="home_empty_hint">YouTube、SoundCloud、Instagram リールなど 1,700 以上のサイトのリンクを貼り付けてください</string>
     <string name="more_getting_started">はじめに</string>
-    <string name="instant_label">Instant</string>
+    <string name="instant_label">Instant 動画</string>
+    <string name="instant_images_label">Instant 画像</string>
+    <string name="share_label_video">Hazel 動画</string>
+    <string name="share_label_images">Hazel 画像</string>
+    <string name="gallery_instant_settings">ギャラリーの設定</string>
     <string name="shortcut_search">検索</string>
-    <string name="share_shortcut_download">ダウンロード</string>
     <string name="instant_started">ダウンロードを開始しました</string>
     <string name="instant_ok">OK</string>
     <string name="instant_settings">合成の設定</string>

@@ -67,6 +67,8 @@ fun NoResultsDialog(
     canAddCookies: Boolean = false,
     /** The link that failed, copied by the link button. No button without one. */
     link: String? = null,
+    /** Shown in place of the sentence read from [message], for an engine that sorts its own failures. */
+    summary: String? = null,
     onCopyLog: () -> Unit,
     onGetCookies: () -> Unit,
     onContinueAnyway: () -> Unit,
@@ -109,7 +111,7 @@ fun NoResultsDialog(
         text = {
             Column {
                 Text(
-                    stringResource(
+                    summary ?: stringResource(
                         when {
                             signIn -> R.string.no_results_sign_in_body
                             kind == FailureKind.GONE -> R.string.no_results_gone_body
