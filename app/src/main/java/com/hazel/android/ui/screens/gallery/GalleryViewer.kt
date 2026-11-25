@@ -64,6 +64,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.ui.screens.download.SheetDownloadPill
+import com.hazel.android.ui.components.SheetHeaderLayout
 import com.hazel.android.gallery.GalleryItem
 import com.hazel.android.ui.components.ShapeIconButton
 import kotlinx.coroutines.launch
@@ -77,7 +79,8 @@ private const val MAX_ZOOM = 5f
 fun GalleryViewer(
     items: List<GalleryItem>,
     startIndex: Int,
-    onDownload: (GalleryItem) -> Unit,
+    /** Opens the download sheet for the file in view. */
+    onOpenSheet: (GalleryItem) -> Unit,
     onDismiss: () -> Unit
 ) {
     if (items.isEmpty()) return
@@ -121,14 +124,8 @@ fun GalleryViewer(
                     modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
-                ShapeIconButton(
-                    onClick = { onDownload(items[pager.currentPage]) },
-                    filled = true,
-                    size = 44.dp,
-                    shape = MaterialShapes.Cookie9Sided.toShape()
-                ) {
-                    Icon(Icons.Filled.Download, contentDescription = stringResource(R.string.gallery_download))
-                }
+                // Keeps the count centred now that the close button has nothing opposite it.
+                Spacer(modifier = Modifier.size(44.dp))
             }
 
             val current = items[pager.currentPage]
@@ -140,28 +137,39 @@ fun GalleryViewer(
                     .navigationBarsPadding()
                     .padding(top = 12.dp, bottom = 12.dp)
             ) {
-                if (current.title.isNotBlank()) {
-                    Text(
-                        current.title,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                // The single sheet's own Download pill: it opens that sheet for the file in view.
+                // It moves under the details only where they would not fit beside it.
+                SheetHeaderLayout(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Column {
+                        if (current.title.isNotBlank()) {
+                            Text(
+                                current.title,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        Text(
+                            listOfNotNull(
+                                current.author.takeIf { it.isNotBlank() },
+                                current.extension.uppercase().takeIf { it.isNotBlank() },
+                                current.takeIf { it.width > 0 && it.height > 0 }?.let { "${it.width} × ${it.height}" }
+                            ).joinToString(" · "),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.75f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    SheetDownloadPill(
+                        label = stringResource(R.string.format_sheet_download),
+                        icon = Icons.Filled.Download,
+                        enabled = true,
+                        onClick = { onOpenSheet(current) }
                     )
                 }
-                Text(
-                    listOfNotNull(
-                        current.author.takeIf { it.isNotBlank() },
-                        current.extension.uppercase().takeIf { it.isNotBlank() },
-                        current.takeIf { it.width > 0 && it.height > 0 }?.let { "${it.width} × ${it.height}" }
-                    ).joinToString(" · "),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.75f),
-                    maxLines = 1,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
                 if (items.size > 1) {
                     Spacer(modifier = Modifier.height(10.dp))
                     LazyRow(

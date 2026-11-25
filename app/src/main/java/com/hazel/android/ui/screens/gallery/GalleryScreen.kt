@@ -448,7 +448,11 @@ fun GalleryScreen(
             GalleryViewer(
                 items = post.items,
                 startIndex = start,
-                onDownload = { item -> viewModel.download(listOf(item.index), post = post) },
+                onOpenSheet = { item ->
+                    // A video goes to the video sheet on Home, so the viewer closes first.
+                    if (item.isVideo) viewing = null
+                    openItem(postIndex, post.items.indexOf(item))
+                },
                 onDismiss = { viewing = null }
             )
         }

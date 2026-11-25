@@ -5,7 +5,6 @@
     <string name="nav_history">Downloads</string>
     <string name="nav_more">Mehr</string>
     <string name="nav_gallery">Galerie</string>
-    <string name="gallery_download">Herunterladen</string>
     <string name="gallery_image">Bild</string>
     <string name="gallery_video">Video</string>
     <string name="gallery_failed">Beitrag konnte nicht gelesen werden</string>

@@ -16,7 +16,6 @@
     <string name="nav_history">Downloads</string>
     <string name="nav_more">More</string>
     <string name="nav_gallery">Gallery</string>
-    <string name="gallery_download">Download</string>
     <string name="gallery_image">Image</string>
     <string name="gallery_video">Video</string>
     <string name="gallery_failed">Could not read this post</string>

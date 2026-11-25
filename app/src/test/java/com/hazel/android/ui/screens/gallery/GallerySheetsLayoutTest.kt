@@ -118,4 +118,13 @@ class GallerySheetsLayoutTest(private val locale: String) {
             context.getString(R.string.gallery_adjust_all)
         )
     }
+
+    @Test
+    fun `viewer's bottom download opens the sheet for the file in view`() {
+        var opened: Int? = null
+        show { GalleryViewer(items = POST, startIndex = 1, onOpenSheet = { opened = it.index }, onDismiss = {}) }
+        saveScreen("gallery-viewer-$locale")
+        compose.onNodeWithText(context.getString(R.string.format_sheet_download)).assertIsDisplayed().performClick()
+        assertTrue(opened == 2)
+    }
 }

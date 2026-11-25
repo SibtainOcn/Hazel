@@ -5,7 +5,6 @@
     <string name="nav_history">Загрузки</string>
     <string name="nav_more">Ещё</string>
     <string name="nav_gallery">Галерея</string>
-    <string name="gallery_download">Скачать</string>
     <string name="gallery_image">Изображение</string>
     <string name="gallery_video">Видео</string>
     <string name="gallery_failed">Не удалось прочитать пост</string>

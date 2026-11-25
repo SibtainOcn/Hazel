@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import com.hazel.android.ui.components.pressScale
 import com.hazel.android.data.SaveDirs
 import com.hazel.android.util.SdCard
 import com.hazel.android.ui.components.FittedPolygonShape
@@ -1353,13 +1354,19 @@ internal fun SheetDownloadPill(
 ) {
     val colors = MaterialTheme.colorScheme
     val fill = if (enabled) colors.primary else colors.primary.copy(alpha = 0.12f)
+    // The M3 Expressive press: squeezed a little and its corners tightened, sprung back on release.
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val corner by com.hazel.android.ui.components.pressCorner(interaction, resting = 24.dp, pressed = 14.dp)
     Surface(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(corner),
         color = fill,
         contentColor = if (enabled) colors.onPrimary else colors.primary.copy(alpha = 0.5f),
-        modifier = modifier.height(48.dp)
+        interactionSource = interaction,
+        modifier = modifier
+            .pressScale(interaction, pressed = 0.94f)
+            .height(48.dp)
     ) {
         Row(
             modifier = Modifier.padding(start = 5.dp, end = 18.dp),
