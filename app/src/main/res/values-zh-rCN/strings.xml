@@ -647,6 +647,21 @@
     <string name="whats_new_done">知道了</string>
     <string name="whats_new_glass_title">全新玻璃效果</string>
     <string name="whats_new_glass_desc">玻璃效果、新样式和强调色。</string>
+    <string name="whats_new_highlights_title">本次更新</string>
+    <string name="whats_new_gallery_title">图库标签页</string>
+    <string name="whats_new_gallery_desc">保存 Instagram、X、Pinterest、Reddit 等网站的照片、视频和说明文字。</string>
+    <string name="whats_new_search_title">图片搜索</string>
+    <string name="whats_new_search_desc">搜索七个网站，可按作者分组。</string>
+    <string name="whats_new_trim_title">下载后裁剪</string>
+    <string name="whats_new_trim_desc">全速下载，然后在手机上裁剪。</string>
+    <string name="whats_new_player_title">随处可用的迷你播放器</string>
+    <string name="whats_new_player_desc">在每个标签页和界面都会继续播放。</string>
+    <string name="whats_new_accounts_title">登录账号</string>
+    <string name="whats_new_accounts_desc">一键登录，并显示每个账号的状态。</string>
+    <string name="whats_new_channels_title">更新渠道</string>
+    <string name="whats_new_channels_desc">Stable、Beta 或 Nightly，可选更新提醒。</string>
+    <string name="whats_new_fixes_title">修复</string>
+    <string name="whats_new_fixes_desc">Instagram 登录、裁剪进度、-o 文件夹，以及低内存手机上的 yt-dlp 更新。</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">强调色</string>

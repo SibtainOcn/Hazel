@@ -675,6 +675,21 @@
     <string name="whats_new_done">Entendi</string>
     <string name="whats_new_glass_title">Um novo visual de vidro</string>
     <string name="whats_new_glass_desc">Efeito de vidro, novos estilos e cores de destaque.</string>
+    <string name="whats_new_highlights_title">Nesta atualização</string>
+    <string name="whats_new_gallery_title">Aba Galeria</string>
+    <string name="whats_new_gallery_desc">Salve fotos, vídeos e legendas do Instagram, X, Pinterest, Reddit e mais.</string>
+    <string name="whats_new_search_title">Busca de imagens</string>
+    <string name="whats_new_search_desc">Busque em sete sites, com resultados agrupados por autor se quiser.</string>
+    <string name="whats_new_trim_title">Cortar após baixar</string>
+    <string name="whats_new_trim_desc">Baixe em velocidade máxima e corte no celular.</string>
+    <string name="whats_new_player_title">Miniplayer em todo lugar</string>
+    <string name="whats_new_player_desc">Continua tocando em todas as abas e telas.</string>
+    <string name="whats_new_accounts_title">Contas de login</string>
+    <string name="whats_new_accounts_desc">Login com um toque e o status de cada conta.</string>
+    <string name="whats_new_channels_title">Canais de atualização</string>
+    <string name="whats_new_channels_desc">Stable, Beta ou Nightly, com avisos de atualização opcionais.</string>
+    <string name="whats_new_fixes_title">Correções</string>
+    <string name="whats_new_fixes_desc">Login no Instagram, progresso de cortes, pastas com -o e atualizações do yt-dlp em celulares com pouca memória.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Cor de destaque</string>

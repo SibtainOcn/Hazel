@@ -675,6 +675,21 @@
     <string name="whats_new_done">Compris</string>
     <string name="whats_new_glass_title">Un nouvel effet verre</string>
     <string name="whats_new_glass_desc">Effet verre, nouveaux styles et couleurs d\'accent.</string>
+    <string name="whats_new_highlights_title">Dans cette mise à jour</string>
+    <string name="whats_new_gallery_title">Onglet Galerie</string>
+    <string name="whats_new_gallery_desc">Enregistrez photos, vidéos et légendes depuis Instagram, X, Pinterest, Reddit et plus.</string>
+    <string name="whats_new_search_title">Recherche d’images</string>
+    <string name="whats_new_search_desc">Cherchez sur sept sites, avec des résultats groupés par auteur si vous voulez.</string>
+    <string name="whats_new_trim_title">Couper après téléchargement</string>
+    <string name="whats_new_trim_desc">Téléchargez à pleine vitesse, puis coupez sur le téléphone.</string>
+    <string name="whats_new_player_title">Mini-lecteur partout</string>
+    <string name="whats_new_player_desc">Continue la lecture sur chaque onglet et écran.</string>
+    <string name="whats_new_accounts_title">Comptes connectés</string>
+    <string name="whats_new_accounts_desc">Connexion en un geste, avec l’état de chaque compte.</string>
+    <string name="whats_new_channels_title">Canaux de mise à jour</string>
+    <string name="whats_new_channels_desc">Stable, Beta ou Nightly, avec des avis de mise à jour en option.</string>
+    <string name="whats_new_fixes_title">Corrections</string>
+    <string name="whats_new_fixes_desc">Connexion Instagram, progression des coupes, dossiers -o et mises à jour de yt-dlp sur les téléphones avec peu de mémoire.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Couleur d\'accent</string>

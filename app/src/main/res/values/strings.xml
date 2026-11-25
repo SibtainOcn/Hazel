@@ -732,6 +732,21 @@
     <string name="whats_new_done">Got it</string>
     <string name="whats_new_glass_title">A new glass look</string>
     <string name="whats_new_glass_desc">Glass effect, new styles and accents.</string>
+    <string name="whats_new_highlights_title">In this update</string>
+    <string name="whats_new_gallery_title">Gallery tab</string>
+    <string name="whats_new_gallery_desc">Save photos, videos and captions from Instagram, X, Pinterest, Reddit and more.</string>
+    <string name="whats_new_search_title">Image search</string>
+    <string name="whats_new_search_desc">Search seven sites, with results grouped by author if you like.</string>
+    <string name="whats_new_trim_title">Trim after download</string>
+    <string name="whats_new_trim_desc">Download at full speed, then cut on your phone.</string>
+    <string name="whats_new_player_title">Mini player everywhere</string>
+    <string name="whats_new_player_desc">Keeps playing on every tab and screen.</string>
+    <string name="whats_new_accounts_title">Sign-in accounts</string>
+    <string name="whats_new_accounts_desc">One-tap sign-in, with each account\'s status.</string>
+    <string name="whats_new_channels_title">Update channels</string>
+    <string name="whats_new_channels_desc">Stable, Beta or Nightly, with optional update notices.</string>
+    <string name="whats_new_fixes_title">Fixes</string>
+    <string name="whats_new_fixes_desc">Instagram sign-in, cut progress, -o folders and yt-dlp updates on low-memory phones.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Accent Color</string>

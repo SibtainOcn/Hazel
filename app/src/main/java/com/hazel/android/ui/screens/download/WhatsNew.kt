@@ -26,13 +26,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.ContentCut
+import androidx.compose.material.icons.outlined.Cookie
+import androidx.compose.material.icons.outlined.ImageSearch
+import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material.icons.outlined.PictureInPictureAlt
+import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -46,6 +55,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.annotation.StringRes
+import com.hazel.android.ui.screens.more.ShapedIcon
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.hazel.android.BuildConfig
@@ -54,7 +67,7 @@ import com.hazel.android.ui.motion.M3Motion
 import com.hazel.android.ui.theme.LocalGlass
 import com.hazel.android.ui.theme.glassBackdrop
 
-enum class WhatsNewCard { APPEARANCE }
+enum class WhatsNewCard { APPEARANCE, HIGHLIGHTS }
 
 /**
  * What's new, shown once to people who update into a release that has something to tell.
@@ -64,8 +77,8 @@ enum class WhatsNewCard { APPEARANCE }
  * installs never see it: the getting-started guide records the id as seen when it closes.
  */
 object WhatsNew {
-    const val RELEASE_ID = "1.1.15"
-    val cards: List<WhatsNewCard> = listOf(WhatsNewCard.APPEARANCE)
+    const val RELEASE_ID = "1.2.17"
+    val cards: List<WhatsNewCard> = listOf(WhatsNewCard.HIGHLIGHTS)
 
     /** Null while either stored value is still loading, so nothing is decided early. */
     fun shouldShow(guideSeen: Boolean?, seenId: String?): Boolean? {
@@ -161,6 +174,7 @@ fun WhatsNewDialog(onDismiss: () -> Unit) {
                             title = stringResource(R.string.whats_new_glass_title),
                             description = stringResource(R.string.whats_new_glass_desc)
                         )
+                        WhatsNewCard.HIGHLIGHTS -> HighlightsStep()
                     }
                 }
 
@@ -206,6 +220,48 @@ fun WhatsNewDialog(onDismiss: () -> Unit) {
                             text = stringResource(if (last) R.string.whats_new_done else R.string.guide_next),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private class Highlight(val icon: ImageVector, val shape: Shape, @StringRes val title: Int, @StringRes val desc: Int)
+
+/** The release's main features and fixes, one short row each. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun HighlightsStep() {
+    val items = listOf(
+        Highlight(Icons.Outlined.PhotoLibrary, MaterialShapes.Cookie9Sided.toShape(), R.string.whats_new_gallery_title, R.string.whats_new_gallery_desc),
+        Highlight(Icons.Outlined.ImageSearch, MaterialShapes.Cookie6Sided.toShape(), R.string.whats_new_search_title, R.string.whats_new_search_desc),
+        Highlight(Icons.Outlined.ContentCut, MaterialShapes.Pentagon.toShape(), R.string.whats_new_trim_title, R.string.whats_new_trim_desc),
+        Highlight(Icons.Outlined.PictureInPictureAlt, MaterialShapes.Cookie7Sided.toShape(), R.string.whats_new_player_title, R.string.whats_new_player_desc),
+        Highlight(Icons.Outlined.Cookie, MaterialShapes.Sunny.toShape(), R.string.whats_new_accounts_title, R.string.whats_new_accounts_desc),
+        Highlight(Icons.Outlined.SystemUpdate, MaterialShapes.Cookie4Sided.toShape(), R.string.whats_new_channels_title, R.string.whats_new_channels_desc),
+        Highlight(Icons.Outlined.Build, MaterialShapes.Clover4Leaf.toShape(), R.string.whats_new_fixes_title, R.string.whats_new_fixes_desc)
+    )
+    Column(modifier = Modifier.fillMaxWidth()) {
+        StepTitle(stringResource(R.string.whats_new_highlights_title))
+        Spacer(modifier = Modifier.height(18.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            items.forEach { item ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ShapedIcon(item.icon, item.shape, 40.dp)
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            stringResource(item.title),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            stringResource(item.desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }

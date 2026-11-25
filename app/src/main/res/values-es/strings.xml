@@ -675,6 +675,21 @@
     <string name="whats_new_done">Entendido</string>
     <string name="whats_new_glass_title">Un nuevo aspecto de cristal</string>
     <string name="whats_new_glass_desc">Efecto cristal, nuevos estilos y colores de acento.</string>
+    <string name="whats_new_highlights_title">En esta actualización</string>
+    <string name="whats_new_gallery_title">Pestaña Galería</string>
+    <string name="whats_new_gallery_desc">Guarda fotos, vídeos y descripciones de Instagram, X, Pinterest, Reddit y más.</string>
+    <string name="whats_new_search_title">Búsqueda de imágenes</string>
+    <string name="whats_new_search_desc">Busca en siete sitios, con resultados agrupados por autor si quieres.</string>
+    <string name="whats_new_trim_title">Recortar tras descargar</string>
+    <string name="whats_new_trim_desc">Descarga a toda velocidad y recorta en el teléfono.</string>
+    <string name="whats_new_player_title">Minirreproductor en todas partes</string>
+    <string name="whats_new_player_desc">Sigue sonando en cada pestaña y pantalla.</string>
+    <string name="whats_new_accounts_title">Cuentas de inicio de sesión</string>
+    <string name="whats_new_accounts_desc">Inicio de sesión con un toque y el estado de cada cuenta.</string>
+    <string name="whats_new_channels_title">Canales de actualización</string>
+    <string name="whats_new_channels_desc">Stable, Beta o Nightly, con avisos de actualización opcionales.</string>
+    <string name="whats_new_fixes_title">Correcciones</string>
+    <string name="whats_new_fixes_desc">Inicio de sesión en Instagram, progreso de recortes, carpetas con -o y actualizaciones de yt-dlp en móviles con poca memoria.</string>
 
     <!-- AccentPickerDialog -->
     <string name="accent_picker_title">Color de acento</string>
