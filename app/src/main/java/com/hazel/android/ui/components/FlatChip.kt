@@ -37,7 +37,7 @@ private fun restingFill(): Color = MaterialTheme.colorScheme.onSurface.copy(alph
 
 /** A resting chip in the accent's own tone, for rows that should carry the accent while idle. */
 @Composable
-private fun tonalRest(): Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+private fun tonalRest(): Color = com.hazel.android.ui.theme.accentTint()
 
 /**
  * A setting that is on or off, or opens its own choices: an icon and a name on a flat
@@ -64,7 +64,7 @@ fun FlatChip(
     val scheme = MaterialTheme.colorScheme
     val content = when {
         tonal && selected -> scheme.onPrimary
-        tonal -> scheme.onPrimaryContainer
+        tonal -> com.hazel.android.ui.theme.accentInk()
         selected -> scheme.primary
         else -> scheme.onSurface
     }
@@ -131,7 +131,7 @@ fun FlatIconButton(
         onClick = onClick,
         shape = ChipShape,
         color = if (tonal) tonalRest() else restingFill(),
-        contentColor = if (tonal) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+        contentColor = if (tonal) com.hazel.android.ui.theme.accentInk() else MaterialTheme.colorScheme.onSurface,
         modifier = modifier.size(36.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
