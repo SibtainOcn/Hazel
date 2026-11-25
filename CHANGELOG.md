@@ -81,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Trim after download no longer crashes on Android 7.
 
 ### Changed
+- Home and Queue: a calm empty state with a cookie icon, title and short hint replaces the twinkling stars.
 - Support Hazel: the Developer tag and name sit beside the avatar on the developer card.
 - Storage cleanup lists the saved download thumbnails as "Downloads artwork", so they can be cleared.
 - The bottom bar's selected-tab shape is easier to see.
