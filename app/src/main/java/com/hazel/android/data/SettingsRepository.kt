@@ -382,6 +382,40 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[GALLERY_REPOSTS_KEY] = skip }
     }
 
+    private val GALLERY_IMAGE_SIZE_KEY = stringPreferencesKey("gallery_image_size")
+    private val GALLERY_VIDEO_MODE_KEY = stringPreferencesKey("gallery_video_mode")
+    private val GALLERY_FILENAME_KEY = stringPreferencesKey("gallery_filename_template")
+    private val GALLERY_METADATA_KEY = booleanPreferencesKey("gallery_write_metadata")
+    private val GALLERY_POST_DATE_KEY = booleanPreferencesKey("gallery_keep_post_date")
+    private val GALLERY_ZIP_KEY = booleanPreferencesKey("gallery_pack_zip")
+    private val GALLERY_ARCHIVE_KEY = booleanPreferencesKey("gallery_skip_downloaded")
+
+    /** The defaults every gallery download starts from. */
+    fun getGalleryOptions(context: Context): Flow<com.hazel.android.gallery.GalleryOptions> =
+        context.dataStore.data.map { prefs ->
+            com.hazel.android.gallery.GalleryOptions(
+                imageSize = com.hazel.android.gallery.GalleryImageSize.fromName(prefs[GALLERY_IMAGE_SIZE_KEY]),
+                videoMode = com.hazel.android.gallery.GalleryVideoMode.fromName(prefs[GALLERY_VIDEO_MODE_KEY]),
+                filenameTemplate = prefs[GALLERY_FILENAME_KEY].orEmpty(),
+                writeMetadata = prefs[GALLERY_METADATA_KEY] ?: false,
+                keepPostDate = prefs[GALLERY_POST_DATE_KEY] ?: true,
+                packZip = prefs[GALLERY_ZIP_KEY] ?: false,
+                skipDownloaded = prefs[GALLERY_ARCHIVE_KEY] ?: false
+            )
+        }
+
+    suspend fun setGalleryOptions(context: Context, options: com.hazel.android.gallery.GalleryOptions) {
+        context.dataStore.edit { prefs ->
+            prefs[GALLERY_IMAGE_SIZE_KEY] = options.imageSize.name
+            prefs[GALLERY_VIDEO_MODE_KEY] = options.videoMode.name
+            prefs[GALLERY_FILENAME_KEY] = options.filenameTemplate
+            prefs[GALLERY_METADATA_KEY] = options.writeMetadata
+            prefs[GALLERY_POST_DATE_KEY] = options.keepPostDate
+            prefs[GALLERY_ZIP_KEY] = options.packZip
+            prefs[GALLERY_ARCHIVE_KEY] = options.skipDownloaded
+        }
+    }
+
     fun getSearchSource(context: Context): Flow<SearchSource> =
         context.dataStore.data.map { prefs -> SearchSource.fromName(prefs[SEARCH_SOURCE_KEY]) }
 
