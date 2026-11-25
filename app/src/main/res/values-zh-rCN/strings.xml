@@ -163,14 +163,12 @@
 
     <!-- GettingStartedDialog -->
     <string name="guide_step_badge">第 %1$d 步（共 %2$d 步）</string>
-    <string name="guide_step1_title">粘贴并下载</string>
+    <string name="guide_step1_title">粘贴、搜索、下载</string>
     <string name="guide_step2_title">格式选择</string>
-    <string name="guide_step3_title">Hazel 快捷下载</string>
     <string name="guide_step4_title">电池优化</string>
     <string name="guide_step5_title">通知权限</string>
-    <string name="guide_step_paste_link">在搜索框中粘贴一个或多个链接，或整个播放列表。</string>
+    <string name="guide_step_paste_link">一个链接、多个链接或整个播放列表。视频、音频或图片。</string>
     <string name="guide_step_pick_format">点按卡片选择具体格式，每种画质都显示大小和编码。</string>
-    <string name="guide_step_share_instant">分享到 Hazel Instant，按你的设置立即开始。调节按钮可打开合成。</string>
     <string name="guide_step_battery_unrestricted">将电池使用设为不受限制，以免 Android 停止后台下载。</string>
     <string name="guide_step_notifications">在后台接收下载进度以及文件完成的即时通知。</string>
     <string name="guide_allow">允许</string>
@@ -655,7 +653,6 @@
     <string name="glass_style_ocean">海洋</string>
     <string name="glass_style_mono">单色</string>
     <string name="guide_step_appearance_title">按你的喜好</string>
-    <string name="guide_step_appearance_desc">选择主题、强调色和玻璃效果，之后可随时在设置中更改。</string>
     <string name="whats_new_tag">新功能</string>
     <string name="whats_new_version">版本 %1$s</string>
     <string name="whats_new_done">知道了</string>
@@ -995,7 +992,6 @@
     <string name="instant_ok">确定</string>
     <string name="instant_settings">合成设置</string>
     <string name="guide_step_share_title">分享到 Hazel</string>
-    <string name="guide_step_share_sheet">从任意应用把链接分享到 Hazel，立即下载或选择所有选项。</string>
     <string name="instant_closing">%1$d 秒后关闭</string>
     <string name="ytdlp_update_channel_name">引擎更新</string>
     <string name="ytdlp_update_channel_description">yt-dlp 引擎更新提醒</string>
@@ -1086,7 +1082,6 @@
     <string name="hazel_update_available_text">点按查看新内容并更新。</string>
     <string name="hazel_update_ready_text">已下载完成，点按即可安装。</string>
     <string name="guide_step_updates_title">保持最新</string>
-    <string name="guide_step_updates_desc">选择 Hazel 和 yt-dlp 的更新方式。可随时在软件更新中更改。</string>
     <string name="guide_updates_notify">通知我</string>
     <string name="upd_wifi_only_title">仅限 Wi-Fi</string>
     <string name="upd_wifi_only_summary">不使用移动数据下载</string>
@@ -1117,7 +1112,6 @@
     <string name="guide_updates_ytdlp">yt-dlp 自动</string>
     <string name="guide_updates_hazel">Hazel 自动</string>
     <string name="guide_updates_wifi">仅限 Wi-Fi</string>
-    <string name="guide_updates_more">更多</string>
     <string name="upd_failure_no_space">此设备的可用存储空间不足，无法安装更新。请清理一些空间后重试。</string>
     <string name="upd_failure_timeout">连接 GitHub 超时。请切换到信号更好的网络后重试。</string>
     <string name="upd_failure_unreachable">Hazel 无法连接到 GitHub。请检查网络连接以及 VPN 和私人 DNS 设置，然后重试。</string>
@@ -1162,4 +1156,8 @@
     <string name="gallery_group_by_author">按作者分组</string>
     <string name="gallery_group_by_author_summary">同一作者的单张图片放进一个轮播</string>
     <string name="more_image_settings">图片设置</string>
+    <string name="guide_share_from_apps">从任意应用分享链接</string>
+    <string name="guide_share_video">选择所有选项后下载</string>
+    <string name="guide_share_images">选择图片选项后下载</string>
+    <string name="guide_share_instant">按已保存的画质立即下载</string>
 </resources>

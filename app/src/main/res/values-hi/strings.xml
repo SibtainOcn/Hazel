@@ -168,14 +168,12 @@
 
     <!-- GettingStartedDialog -->
     <string name="guide_step_badge">चरण %1$d का %2$d</string>
-    <string name="guide_step1_title">चिपकाएँ और डाउनलोड करें</string>
+    <string name="guide_step1_title">पेस्ट, खोजें, डाउनलोड</string>
     <string name="guide_step2_title">फ़ॉर्मैट चयन</string>
-    <string name="guide_step3_title">Hazel इंस्टेंट</string>
     <string name="guide_step4_title">बैटरी ऑप्टिमाइज़ेशन</string>
     <string name="guide_step5_title">सूचनाएं</string>
-    <string name="guide_step_paste_link">खोज फ़ील्ड में एक या कई लिंक, या पूरी प्लेलिस्ट पेस्ट करें।</string>
+    <string name="guide_step_paste_link">एक लिंक, कई लिंक या पूरी प्लेलिस्ट। वीडियो, ऑडियो या इमेज।</string>
     <string name="guide_step_pick_format">सटीक फ़ॉर्मेट चुनने के लिए कार्ड टैप करें, हर क्वालिटी के साइज़ और कोडेक के साथ।</string>
-    <string name="guide_step_share_instant">अपनी सेटिंग से तुरंत शुरू करने के लिए Hazel Instant पर शेयर करें। ट्यून बटन सिंथेसाइज़िंग खोलता है।</string>
     <string name="guide_step_battery_unrestricted">बैटरी उपयोग अप्रतिबंधित करें ताकि Android बैकग्राउंड डाउनलोड न रोके।</string>
     <string name="guide_step_notifications">पृष्ठभूमि में डाउनलोड प्रगति और पूरी हुई फ़ाइलों के बारे में सूचनाएं प्राप्त करें।</string>
     <string name="guide_allow">अनुमति दें</string>
@@ -669,7 +667,6 @@
     <string name="glass_style_ocean">समुद्र</string>
     <string name="glass_style_mono">मोनो</string>
     <string name="guide_step_appearance_title">इसे अपना बनाएं</string>
-    <string name="guide_step_appearance_desc">थीम, एक्सेंट रंग और ग्लास लुक चुनें। इन्हें आप कभी भी सेटिंग्स में बदल सकते हैं।</string>
     <string name="whats_new_tag">नया क्या है</string>
     <string name="whats_new_version">संस्करण %1$s</string>
     <string name="whats_new_done">ठीक है</string>
@@ -1011,7 +1008,6 @@
     <string name="instant_ok">ठीक है</string>
     <string name="instant_settings">सिंथेसाइज़िंग सेटिंग्स</string>
     <string name="guide_step_share_title">Hazel पर शेयर करें</string>
-    <string name="guide_step_share_sheet">किसी भी ऐप से Hazel पर लिंक शेयर करें, फिर तुरंत डाउनलोड करें या हर विकल्प चुनें।</string>
     <string name="instant_closing">%1$d से. में बंद होगा</string>
     <string name="ytdlp_update_channel_name">इंजन अपडेट</string>
     <string name="ytdlp_update_channel_description">yt-dlp इंजन अपडेट की सूचनाएं</string>
@@ -1103,7 +1099,6 @@
     <string name="hazel_update_available_text">नया क्या है देखने और अपडेट करने के लिए टैप करें।</string>
     <string name="hazel_update_ready_text">डाउनलोड हो गया। इंस्टॉल करने के लिए टैप करें।</string>
     <string name="guide_step_updates_title">अप टू डेट रहें</string>
-    <string name="guide_step_updates_desc">चुनें कि Hazel और yt-dlp कैसे अपडेट हों। इसे कभी भी सॉफ़्टवेयर अपडेट में बदलें।</string>
     <string name="guide_updates_notify">सूचना दें</string>
     <string name="upd_wifi_only_title">सिर्फ़ वाई-फ़ाई पर</string>
     <string name="upd_wifi_only_summary">मोबाइल डेटा पर डाउनलोड नहीं</string>
@@ -1134,7 +1129,6 @@
     <string name="guide_updates_ytdlp">yt-dlp ऑटो</string>
     <string name="guide_updates_hazel">Hazel ऑटो</string>
     <string name="guide_updates_wifi">सिर्फ़ वाई-फ़ाई</string>
-    <string name="guide_updates_more">और</string>
     <string name="upd_failure_no_space">इस डिवाइस पर अपडेट इंस्टॉल करने के लिए पर्याप्त खाली स्टोरेज नहीं है। कुछ जगह खाली करें और फिर कोशिश करें।</string>
     <string name="upd_failure_timeout">GitHub से कनेक्शन का समय समाप्त हो गया। बेहतर नेटवर्क पर जाएँ और फिर कोशिश करें।</string>
     <string name="upd_failure_unreachable">Hazel GitHub तक नहीं पहुँच सका। अपना इंटरनेट कनेक्शन, VPN और निजी DNS सेटिंग जाँचें, फिर कोशिश करें।</string>
@@ -1179,4 +1173,8 @@
     <string name="gallery_group_by_author">लेखक के हिसाब से समूह</string>
     <string name="gallery_group_by_author_summary">एक लेखक की अकेली तस्वीरें एक कैरोसेल में</string>
     <string name="more_image_settings">इमेज सेटिंग्स</string>
+    <string name="guide_share_from_apps">किसी भी ऐप से लिंक शेयर करें</string>
+    <string name="guide_share_video">हर विकल्प चुनें, फिर डाउनलोड</string>
+    <string name="guide_share_images">इमेज विकल्प चुनें, फिर डाउनलोड</string>
+    <string name="guide_share_instant">सेव की गई क्वालिटी में तुरंत डाउनलोड</string>
 </resources>

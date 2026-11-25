@@ -163,14 +163,12 @@
 
     <!-- GettingStartedDialog -->
     <string name="guide_step_badge">Langkah %1$d dari %2$d</string>
-    <string name="guide_step1_title">Tempel &amp; Unduh</string>
+    <string name="guide_step1_title">Tempel, cari, unduh</string>
     <string name="guide_step2_title">Pilihan Format</string>
-    <string name="guide_step3_title">Hazel Instan</string>
     <string name="guide_step4_title">Optimalisasi Baterai</string>
     <string name="guide_step5_title">Notifikasi</string>
-    <string name="guide_step_paste_link">Tempel satu atau beberapa tautan, atau seluruh playlist, ke kolom pencarian.</string>
+    <string name="guide_step_paste_link">Satu tautan, banyak tautan, atau satu playlist. Video, audio, atau gambar.</string>
     <string name="guide_step_pick_format">Ketuk kartu untuk memilih format tepat, dengan ukuran dan codec tiap kualitas.</string>
-    <string name="guide_step_share_instant">Bagikan ke Hazel Instant untuk langsung mulai dengan pengaturanmu. Tombol setel membuka Sintesis.</string>
     <string name="guide_step_battery_unrestricted">Atur penggunaan baterai ke tanpa batasan agar Android tidak menghentikan unduhan latar.</string>
     <string name="guide_step_notifications">Dapatkan pemberitahuan tentang kemajuan unduhan dan file yang selesai di latar belakang.</string>
     <string name="guide_allow">Izinkan</string>
@@ -655,7 +653,6 @@
     <string name="glass_style_ocean">Samudra</string>
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Buat sesuai seleramu</string>
-    <string name="guide_step_appearance_desc">Pilih tema, warna aksen, dan tampilan kaca. Kamu bisa mengubahnya kapan saja di pengaturan.</string>
     <string name="whats_new_tag">Yang baru</string>
     <string name="whats_new_version">Versi %1$s</string>
     <string name="whats_new_done">Mengerti</string>
@@ -995,7 +992,6 @@
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Pengaturan sintesis</string>
     <string name="guide_step_share_title">Bagikan ke Hazel</string>
-    <string name="guide_step_share_sheet">Bagikan tautan ke Hazel dari aplikasi mana pun, lalu unduh langsung atau pilih setiap opsi.</string>
     <string name="instant_closing">Ditutup dalam %1$d dtk</string>
     <string name="ytdlp_update_channel_name">Pembaruan mesin</string>
     <string name="ytdlp_update_channel_description">Pemberitahuan pembaruan mesin yt-dlp</string>
@@ -1086,7 +1082,6 @@
     <string name="hazel_update_available_text">Ketuk untuk melihat yang baru dan memperbarui.</string>
     <string name="hazel_update_ready_text">Sudah diunduh dan siap. Ketuk untuk memasang.</string>
     <string name="guide_step_updates_title">Selalu terbaru</string>
-    <string name="guide_step_updates_desc">Pilih cara Hazel dan yt-dlp diperbarui. Ubah kapan saja di Pembaruan perangkat lunak.</string>
     <string name="guide_updates_notify">Beri tahu</string>
     <string name="upd_wifi_only_title">Hanya lewat Wi-Fi</string>
     <string name="upd_wifi_only_summary">Tanpa unduhan lewat data seluler</string>
@@ -1117,7 +1112,6 @@
     <string name="guide_updates_ytdlp">yt-dlp otomatis</string>
     <string name="guide_updates_hazel">Hazel otomatis</string>
     <string name="guide_updates_wifi">Hanya Wi-Fi</string>
-    <string name="guide_updates_more">Lainnya</string>
     <string name="upd_failure_no_space">Penyimpanan kosong di perangkat ini tidak cukup untuk memasang pembaruan. Kosongkan sebagian ruang lalu coba lagi.</string>
     <string name="upd_failure_timeout">Koneksi ke GitHub habis waktu. Beralih ke jaringan yang lebih kuat lalu coba lagi.</string>
     <string name="upd_failure_unreachable">Hazel tidak dapat menjangkau GitHub. Periksa koneksi internet serta pengaturan VPN dan DNS pribadi, lalu coba lagi.</string>
@@ -1162,4 +1156,8 @@
     <string name="gallery_group_by_author">Kelompokkan per pembuat</string>
     <string name="gallery_group_by_author_summary">Gambar tunggal dari satu pembuat dalam satu korsel</string>
     <string name="more_image_settings">Setelan gambar</string>
+    <string name="guide_share_from_apps">Bagikan tautan dari aplikasi apa pun</string>
+    <string name="guide_share_video">Pilih semua opsi, lalu unduh</string>
+    <string name="guide_share_images">Pilih opsi gambar, lalu unduh</string>
+    <string name="guide_share_instant">Langsung diunduh dengan kualitas tersimpan</string>
 </resources>

@@ -173,14 +173,12 @@
 
     <!-- GettingStartedDialog -->
     <string name="guide_step_badge">Passo %1$d de %2$d</string>
-    <string name="guide_step1_title">Colar e baixar</string>
+    <string name="guide_step1_title">Cole, busque, baixe</string>
     <string name="guide_step2_title">Seleção de formato</string>
-    <string name="guide_step3_title">Hazel Instantâneo</string>
     <string name="guide_step4_title">Otimização de bateria</string>
     <string name="guide_step5_title">Notificações</string>
-    <string name="guide_step_paste_link">Cole um ou mais links, ou uma playlist inteira, no campo de busca.</string>
+    <string name="guide_step_paste_link">Um link, vários ou uma playlist inteira. Vídeo, áudio ou imagens.</string>
     <string name="guide_step_pick_format">Toque num cartão para escolher o formato exato, com tamanho e codec de cada qualidade.</string>
-    <string name="guide_step_share_instant">Compartilhe com o Hazel Instant para começar já com seus ajustes. O botão de ajuste abre Síntese.</string>
     <string name="guide_step_battery_unrestricted">Deixe o uso de bateria irrestrito para o Android não parar downloads em segundo plano.</string>
     <string name="guide_step_notifications">Receba avisos sobre o progresso dos downloads e arquivos concluídos em segundo plano.</string>
     <string name="guide_allow">Permitir</string>
@@ -683,7 +681,6 @@
     <string name="glass_style_ocean">Oceano</string>
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Do seu jeito</string>
-    <string name="guide_step_appearance_desc">Escolha o tema, a cor de destaque e o visual de vidro. Você pode mudar isso quando quiser nas configurações.</string>
     <string name="whats_new_tag">Novidades</string>
     <string name="whats_new_version">Versão %1$s</string>
     <string name="whats_new_done">Entendi</string>
@@ -1027,7 +1024,6 @@
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Configurações de síntese</string>
     <string name="guide_step_share_title">Compartilhar com o Hazel</string>
-    <string name="guide_step_share_sheet">Compartilhe um link com o Hazel de qualquer app e baixe na hora ou escolha cada opção.</string>
     <string name="instant_closing">Fecha em %1$d s</string>
     <string name="ytdlp_update_channel_name">Atualizações do mecanismo</string>
     <string name="ytdlp_update_channel_description">Alertas de atualização do mecanismo yt-dlp</string>
@@ -1120,7 +1116,6 @@
     <string name="hazel_update_available_text">Toque para ver as novidades e atualizar.</string>
     <string name="hazel_update_ready_text">Baixada e pronta. Toque para instalar.</string>
     <string name="guide_step_updates_title">Fique em dia</string>
-    <string name="guide_step_updates_desc">Escolha como o Hazel e o yt-dlp se atualizam. Mude quando quiser em Atualização de software.</string>
     <string name="guide_updates_notify">Avisar</string>
     <string name="upd_wifi_only_title">Só no Wi-Fi</string>
     <string name="upd_wifi_only_summary">Sem downloads nos dados móveis</string>
@@ -1151,7 +1146,6 @@
     <string name="guide_updates_ytdlp">yt-dlp auto</string>
     <string name="guide_updates_hazel">Hazel auto</string>
     <string name="guide_updates_wifi">Só Wi-Fi</string>
-    <string name="guide_updates_more">Mais</string>
     <string name="upd_failure_no_space">Não há armazenamento livre suficiente neste aparelho para instalar a atualização. Libere espaço e tente de novo.</string>
     <string name="upd_failure_timeout">A conexão com o GitHub expirou. Mude para uma rede com sinal melhor e tente de novo.</string>
     <string name="upd_failure_unreachable">O Hazel não conseguiu acessar o GitHub. Verifique sua conexão com a internet e as configurações de VPN e DNS privado, e tente de novo.</string>
@@ -1196,4 +1190,8 @@
     <string name="gallery_group_by_author">Agrupar por autor</string>
     <string name="gallery_group_by_author_summary">Imagens soltas de um autor em um carrossel</string>
     <string name="more_image_settings">Configurações de imagens</string>
+    <string name="guide_share_from_apps">Compartilhe um link de qualquer app</string>
+    <string name="guide_share_video">Escolha cada opção e baixe</string>
+    <string name="guide_share_images">Escolha as opções de imagem e baixe</string>
+    <string name="guide_share_instant">Baixa na hora na qualidade salva</string>
 </resources>
