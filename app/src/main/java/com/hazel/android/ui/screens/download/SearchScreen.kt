@@ -246,12 +246,6 @@ fun SearchScreen(
         }
         val links = (queued + typedLinks()).filter { it.isNotBlank() }.distinct()
         if (links.isEmpty()) return
-        HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
-            val app = context.applicationContext
-            if (!SettingsRepository.getIncognito(app).first()) {
-                links.forEach { SearchHistoryRepository.record(app, it) }
-            }
-        }
         onSearchImages(GalleryRequest.Links(links))
     }
 

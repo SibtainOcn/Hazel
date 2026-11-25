@@ -32,7 +32,7 @@
     <string name="gallery_size_original">Оригинал</string>
     <string name="gallery_size_large">Большой</string>
     <string name="gallery_size_medium">Средний</string>
-    <string name="gallery_size_original_hint">Самый большой, что даёт сайт</string>
+    <string name="gallery_size_original_hint">Лучшее</string>
     <string name="gallery_size_x_only">Только X</string>
     <string name="gallery_video_best">Лучшее (объединённое)</string>
     <string name="gallery_video_best_hint">Через yt-dlp</string>

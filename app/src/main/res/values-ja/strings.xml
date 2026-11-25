@@ -32,7 +32,7 @@
     <string name="gallery_size_original">オリジナル</string>
     <string name="gallery_size_large">大</string>
     <string name="gallery_size_medium">中</string>
-    <string name="gallery_size_original_hint">サイトが提供する最大サイズ</string>
+    <string name="gallery_size_original_hint">最高</string>
     <string name="gallery_size_x_only">X のみ</string>
     <string name="gallery_video_best">最高 (結合)</string>
     <string name="gallery_video_best_hint">yt-dlp を使用</string>

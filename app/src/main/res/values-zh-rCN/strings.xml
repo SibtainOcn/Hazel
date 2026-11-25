@@ -32,7 +32,7 @@
     <string name="gallery_size_original">原图</string>
     <string name="gallery_size_large">大</string>
     <string name="gallery_size_medium">中</string>
-    <string name="gallery_size_original_hint">网站提供的最大尺寸</string>
+    <string name="gallery_size_original_hint">最佳</string>
     <string name="gallery_size_x_only">仅 X</string>
     <string name="gallery_video_best">最佳（合并）</string>
     <string name="gallery_video_best_hint">通过 yt-dlp</string>

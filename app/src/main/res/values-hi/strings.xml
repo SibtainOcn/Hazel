@@ -32,7 +32,7 @@
     <string name="gallery_size_original">मूल</string>
     <string name="gallery_size_large">बड़ा</string>
     <string name="gallery_size_medium">मध्यम</string>
-    <string name="gallery_size_original_hint">साइट का सबसे बड़ा आकार</string>
+    <string name="gallery_size_original_hint">सबसे अच्छी</string>
     <string name="gallery_size_x_only">केवल X</string>
     <string name="gallery_video_best">सर्वश्रेष्ठ (मर्ज किया)</string>
     <string name="gallery_video_best_hint">yt-dlp से</string>

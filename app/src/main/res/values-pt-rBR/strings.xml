@@ -32,7 +32,7 @@
     <string name="gallery_size_original">Original</string>
     <string name="gallery_size_large">Grande</string>
     <string name="gallery_size_medium">Média</string>
-    <string name="gallery_size_original_hint">A maior que o site oferece</string>
+    <string name="gallery_size_original_hint">Melhor</string>
     <string name="gallery_size_x_only">Só no X</string>
     <string name="gallery_video_best">Melhor (mesclado)</string>
     <string name="gallery_video_best_hint">Via yt-dlp</string>

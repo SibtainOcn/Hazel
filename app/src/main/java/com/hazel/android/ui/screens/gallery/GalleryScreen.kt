@@ -1,6 +1,9 @@
 package com.hazel.android.ui.screens.gallery
 
 import android.app.Application
+import kotlinx.coroutines.Dispatchers
+import com.hazel.android.data.SearchHistoryRepository
+import com.hazel.android.HazelApp
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -139,6 +142,7 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         job?.cancel()
         lastRun = { handle(request) }
         posts = emptyList()
+        recordInHistory(request)
         when (request) {
             is GalleryRequest.Links -> {
                 fromSearch = false
@@ -187,6 +191,18 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch { GalleryQueue.add(getApplication(), request) }
     }
 
+
+    /** Saves what was asked to the shared search history up front, so a read that fails is still there. */
+    private fun recordInHistory(request: GalleryRequest) {
+        val app = getApplication<Application>()
+        val entries = when (request) {
+            is GalleryRequest.Links -> request.urls
+            is GalleryRequest.Search -> listOf(request.query)
+        }
+        HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
+            if (!SettingsRepository.getIncognito(app).first()) entries.forEach { SearchHistoryRepository.record(app, it) }
+        }
+    }
 
     /** Runs the failed request again. */
     fun retry() {

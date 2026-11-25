@@ -32,7 +32,7 @@
     <string name="gallery_size_original">Asli</string>
     <string name="gallery_size_large">Besar</string>
     <string name="gallery_size_medium">Sedang</string>
-    <string name="gallery_size_original_hint">Terbesar yang diberikan situs</string>
+    <string name="gallery_size_original_hint">Terbaik</string>
     <string name="gallery_size_x_only">Hanya X</string>
     <string name="gallery_video_best">Terbaik (digabung)</string>
     <string name="gallery_video_best_hint">Lewat yt-dlp</string>

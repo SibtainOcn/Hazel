@@ -32,7 +32,7 @@
     <string name="gallery_size_original">Original</string>
     <string name="gallery_size_large">Groß</string>
     <string name="gallery_size_medium">Mittel</string>
-    <string name="gallery_size_original_hint">Die größte, die die Seite liefert</string>
+    <string name="gallery_size_original_hint">Beste</string>
     <string name="gallery_size_x_only">Nur X</string>
     <string name="gallery_video_best">Beste (zusammengeführt)</string>
     <string name="gallery_video_best_hint">Über yt-dlp</string>
