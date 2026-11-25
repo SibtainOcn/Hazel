@@ -420,7 +420,10 @@ fun FormatSheet(
 
                 // The one filled control on the sheet, in the accent, so the thing the
                 // sheet is for is never mistaken for one of the settings around it.
-                Surface(
+                SheetDownloadPill(
+                    label = if (confirmAsApply) stringResource(R.string.format_sheet_ok) else stringResource(R.string.format_sheet_download),
+                    icon = if (confirmAsApply) Icons.Filled.Check else Icons.Filled.Download,
+                    enabled = selected != null,
                     onClick = {
                         selected?.let {
                             // Live options only reach a download that can use them.
@@ -428,45 +431,8 @@ fun FormatSheet(
                             else oneOff.copy(liveFromStart = false, waitForVideo = false)
                             onDownload(it, audioLanguage, title.trim(), author.trim(), sent)
                         }
-                    },
-                    enabled = selected != null,
-                    // Matches Download all: an accent pill led by a cookie in the ink colour,
-                    // the arrow cut into it in the pill's own colour.
-                    shape = RoundedCornerShape(24.dp),
-                    color = if (selected != null) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    contentColor = if (selected != null) MaterialTheme.colorScheme.onPrimary
-                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    modifier = Modifier.height(48.dp)
-                ) {
-                    val fill = if (selected != null) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                    Row(
-                        modifier = Modifier.padding(start = 5.dp, end = 18.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(38.dp)
-                                .clip(MaterialShapes.Cookie7Sided.toShape())
-                                .background(androidx.compose.material3.LocalContentColor.current),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                if (confirmAsApply) Icons.Filled.Check else Icons.Filled.Download,
-                                null,
-                                modifier = Modifier.size(18.dp),
-                                tint = if (selected != null) fill else MaterialTheme.colorScheme.surface
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            if (confirmAsApply) stringResource(R.string.format_sheet_ok) else stringResource(R.string.format_sheet_download),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
                     }
-                }
+                )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -1353,6 +1319,48 @@ internal fun SaveDirField(
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
+        }
+    }
+}
+
+/**
+ * A download sheet's action: an accent pill led by a cookie in the ink colour, the icon cut
+ * into it in the pill's own colour. Matches Download all.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun SheetDownloadPill(
+    label: String,
+    icon: ImageVector,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colors = MaterialTheme.colorScheme
+    val fill = if (enabled) colors.primary else colors.primary.copy(alpha = 0.12f)
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(24.dp),
+        color = fill,
+        contentColor = if (enabled) colors.onPrimary else colors.primary.copy(alpha = 0.5f),
+        modifier = modifier.height(48.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 5.dp, end = 18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(MaterialShapes.Cookie7Sided.toShape())
+                    .background(androidx.compose.material3.LocalContentColor.current),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, null, modifier = Modifier.size(18.dp), tint = if (enabled) fill else colors.surface)
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
         }
     }
 }

@@ -30,6 +30,37 @@
     <string name="gallery_view">Ansehen</string>
     <string name="gallery_close">Schließen</string>
     <string name="gallery_no_player">Keine App kann dieses Video abspielen</string>
+    <string name="gallery_under_maintenance">In Wartung</string>
+    <string name="gallery_sheet_image_of">Bild %1$d von %2$d</string>
+    <string name="gallery_sheet_video_of">Video %1$d von %2$d</string>
+    <string name="gallery_image_size">Bildgröße</string>
+    <string name="gallery_size_original">Original</string>
+    <string name="gallery_size_large">Groß</string>
+    <string name="gallery_size_medium">Mittel</string>
+    <string name="gallery_size_original_hint">Die größte, die die Seite liefert</string>
+    <string name="gallery_size_x_only">Nur X</string>
+    <string name="gallery_video_best">Beste (zusammengeführt)</string>
+    <string name="gallery_video_best_hint">Über yt-dlp</string>
+    <string name="gallery_video_single">Einzelne Datei</string>
+    <string name="gallery_video_single_hint">Ohne Zusammenführen</string>
+    <string name="gallery_adjust_image">Bild anpassen</string>
+    <string name="gallery_adjust_all">Alle anpassen</string>
+    <string name="gallery_metadata">Metadaten</string>
+    <string name="gallery_post_date">Beitragsdatum</string>
+    <string name="gallery_caption">Bildtext</string>
+    <string name="gallery_video_options">Videooptionen</string>
+    <string name="gallery_skip_downloaded">Geladene überspringen</string>
+    <string name="gallery_pack_zip">Als ZIP packen</string>
+    <string name="gallery_filter_all">Alle %d</string>
+    <string name="gallery_filter_images">Bilder %d</string>
+    <string name="gallery_filter_videos">Videos %d</string>
+    <string name="gallery_filename_preset_user_num">Nutzername und Nummer</string>
+    <string name="gallery_filename_preset_id_num">Beitrags-ID und Nummer</string>
+    <string name="gallery_filename_preset_original">Originaler Dateiname</string>
+    <plurals name="gallery_items">
+        <item quantity="one">%d Element</item>
+        <item quantity="other">%d Elemente</item>
+    </plurals>
     <string name="nav_incognito_on">Inkognito an, Downloads werden nicht aufgezeichnet</string>
     <string name="nav_incognito_off">Inkognito aus</string>
 

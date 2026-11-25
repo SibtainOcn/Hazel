@@ -68,13 +68,7 @@ fun BatchActionBar(
     val accent = MaterialTheme.colorScheme.primary
 
     // layout-safe: icons and a short quality label, each segment sharing the width
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(GROUP_HEIGHT),
-        horizontalArrangement = Arrangement.spacedBy(GROUP_GAP),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    SheetButtonGroup(modifier) {
         Segment(
             position = 0, count = 5, weight = 1f,
             description = stringResource(R.string.batch_bar_download_type),
@@ -111,9 +105,25 @@ fun BatchActionBar(
     }
 }
 
+/** A row of [Segment]s spanning the width, read as one connected control. */
+@Composable
+internal fun SheetButtonGroup(
+    modifier: Modifier = Modifier,
+    content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(GROUP_HEIGHT),
+        horizontalArrangement = Arrangement.spacedBy(GROUP_GAP),
+        verticalAlignment = Alignment.CenterVertically,
+        content = content
+    )
+}
+
 /** One button of the group: round on the group's outer ends, tight where it meets the next. */
 @Composable
-private fun androidx.compose.foundation.layout.RowScope.Segment(
+internal fun androidx.compose.foundation.layout.RowScope.Segment(
     position: Int,
     count: Int,
     weight: Float,

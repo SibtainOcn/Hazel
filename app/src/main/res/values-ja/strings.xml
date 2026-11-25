@@ -30,6 +30,36 @@
     <string name="gallery_view">表示</string>
     <string name="gallery_close">閉じる</string>
     <string name="gallery_no_player">この動画を再生できるアプリがありません</string>
+    <string name="gallery_under_maintenance">メンテナンス中</string>
+    <string name="gallery_sheet_image_of">画像 %1$d / %2$d</string>
+    <string name="gallery_sheet_video_of">動画 %1$d / %2$d</string>
+    <string name="gallery_image_size">画像サイズ</string>
+    <string name="gallery_size_original">オリジナル</string>
+    <string name="gallery_size_large">大</string>
+    <string name="gallery_size_medium">中</string>
+    <string name="gallery_size_original_hint">サイトが提供する最大サイズ</string>
+    <string name="gallery_size_x_only">X のみ</string>
+    <string name="gallery_video_best">最高 (結合)</string>
+    <string name="gallery_video_best_hint">yt-dlp を使用</string>
+    <string name="gallery_video_single">単一ファイル</string>
+    <string name="gallery_video_single_hint">結合なし</string>
+    <string name="gallery_adjust_image">画像を調整</string>
+    <string name="gallery_adjust_all">すべて調整</string>
+    <string name="gallery_metadata">メタデータ</string>
+    <string name="gallery_post_date">投稿日</string>
+    <string name="gallery_caption">キャプション</string>
+    <string name="gallery_video_options">動画オプション</string>
+    <string name="gallery_skip_downloaded">ダウンロード済みをスキップ</string>
+    <string name="gallery_pack_zip">ZIP にまとめる</string>
+    <string name="gallery_filter_all">すべて %d</string>
+    <string name="gallery_filter_images">画像 %d</string>
+    <string name="gallery_filter_videos">動画 %d</string>
+    <string name="gallery_filename_preset_user_num">ユーザー名と番号</string>
+    <string name="gallery_filename_preset_id_num">投稿 ID と番号</string>
+    <string name="gallery_filename_preset_original">元のファイル名</string>
+    <plurals name="gallery_items">
+        <item quantity="other">%d 件</item>
+    </plurals>
     <string name="nav_incognito_on">シークレットモード有効、ダウンロードは記録されません</string>
     <string name="nav_incognito_off">シークレットモード無効</string>
 

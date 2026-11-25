@@ -46,6 +46,7 @@ import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryItem
+import com.hazel.android.gallery.GalleryOptions
 import com.hazel.android.gallery.GalleryRequest
 import com.hazel.android.gallery.GalleryRequests
 import com.hazel.android.ui.components.EmptyState
@@ -99,11 +100,15 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun download(index: Int?) {
+    /** The post's link, for the sheets' sign-in. */
+    val link: String get() = source
+
+    /** Saves the files at [indexes] (counted from 1), or the whole post when null. */
+    fun download(indexes: List<Int>?, options: GalleryOptions? = null) {
         val link = source.takeIf { it.isNotEmpty() } ?: return
         launchRun {
             val started = System.currentTimeMillis()
-            val saved = GalleryDlEngine.download(getApplication(), link, index?.let(::listOf))
+            val saved = GalleryDlEngine.download(getApplication(), link, indexes, options)
             notice = GalleryNotice(R.string.gallery_saved, listOf(saved, secondsSince(started)))
         }
     }
@@ -168,6 +173,8 @@ fun GalleryScreen(
     var searchOpen by rememberSaveable { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
     var viewing by rememberSaveable { mutableStateOf<Int?>(null) }
+    var sheetFor by rememberSaveable { mutableStateOf<Int?>(null) }
+    var postSheetOpen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         GalleryRequests.next.collect { if (it != null) GalleryRequests.take()?.let(viewModel::handle) }
@@ -224,7 +231,7 @@ fun GalleryScreen(
                         GalleryCard(
                             item = item,
                             total = viewModel.items.size,
-                            onOpen = { viewing = position },
+                            onOpen = { sheetFor = position },
                             onView = { viewing = position }
                         )
                     }
@@ -263,7 +270,7 @@ fun GalleryScreen(
                 )
             }
             if (viewModel.items.size > 1 && !viewModel.busy) {
-                DownloadAllButton(onClick = { viewModel.download(null) })
+                DownloadAllButton(onClick = { postSheetOpen = true })
             }
         }
     }
@@ -293,8 +300,44 @@ fun GalleryScreen(
         GalleryViewer(
             items = viewModel.items,
             startIndex = start,
-            onDownload = { item -> viewModel.download(item.index) },
+            onDownload = { item -> viewModel.download(listOf(item.index)) },
             onDismiss = { viewing = null }
+        )
+    }
+
+    // New results close the sheets that were open on the old ones.
+    val items = viewModel.items
+    var sheetsBelongTo by remember { mutableStateOf(items) }
+    LaunchedEffect(items) {
+        if (sheetsBelongTo !== items) {
+            sheetsBelongTo = items
+            sheetFor = null
+            postSheetOpen = false
+        }
+    }
+
+    sheetFor?.let(items::getOrNull)?.let { item ->
+        GalleryItemSheet(
+            item = item,
+            total = items.size,
+            postUrl = viewModel.link,
+            onDownload = { options ->
+                sheetFor = null
+                viewModel.download(listOf(item.index), options)
+            },
+            onDismiss = { sheetFor = null }
+        )
+    }
+
+    if (postSheetOpen && items.isNotEmpty()) {
+        GalleryPostSheet(
+            items = items,
+            postUrl = viewModel.link,
+            onDownload = { indexes, options ->
+                postSheetOpen = false
+                viewModel.download(indexes, options)
+            },
+            onDismiss = { postSheetOpen = false }
         )
     }
 
