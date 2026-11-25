@@ -34,6 +34,7 @@ object GalleryDlEngine {
     private const val ERROR_TAIL_BYTES = 8_192L
     private const val LISTING_MAX_CHARS = 16 * 1024 * 1024
     private const val SKIPPED_PREFIX = "# "
+    private const val ARCHIVE_FILE = "gallery-dl-archive.sqlite3"
 
     /**
      * Every file of the post at [url]. With [postLimit], the link is a search, profile or tag
@@ -53,16 +54,19 @@ object GalleryDlEngine {
     }
 
     /**
-     * Downloads the post at [url] into the public gallery folder: only the files at
-     * [indexes] (counted from 1) when given, else all of them. [onSaved] hears each file
-     * as it is published. Returns how many were saved.
+     * Downloads the post at [url] into the gallery save folder: only the files at [indexes]
+     * (counted from 1) when given, else all of them. Returns how many were saved.
      */
     suspend fun download(
         context: Context,
         url: String,
         indexes: List<Int>? = null,
+        options: GalleryOptions? = null,
         onSaved: (Uri) -> Unit = {}
     ): Int {
+        val chosen = options ?: SettingsRepository.getGalleryOptions(context).first()
+        val incognito = SettingsRepository.getIncognito(context).first()
+        val archive = File(context.filesDir, ARCHIVE_FILE).takeUnless { incognito }
         val work = File(StoragePaths.tempDownloads, "gallery-${UUID.randomUUID()}")
         try {
             if (!work.mkdirs()) throw GalleryDlException(GalleryDlException.Kind.SETUP, "no work folder")
@@ -70,6 +74,7 @@ object GalleryDlEngine {
                 add("--directory"); add(work.absolutePath)
                 add("--no-part")
                 if (!indexes.isNullOrEmpty()) { add("--range"); add(indexes.sorted().joinToString(",")) }
+                addAll(chosen.toArgs(archive))
             }
             run(context, url, args) { }
             val target = SettingsRepository.getSaveDirs(context).first().of(SaveKind.GALLERY)
