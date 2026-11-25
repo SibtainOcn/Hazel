@@ -87,7 +87,7 @@ Hazel が役に立ったら、開発の支援をご検討ください。皆さ�
 ---
 ## ✨ Hazel を選ぶ理由
 
-Hazel は **yt-dlp** を搭載した無料・オープンソースの Android 向けダウンローダーです。**1500 以上のサイト**から動画、音楽、プレイリストを、広告なし・追跡なし・アカウント不要で保存できます。
+Hazel は **yt-dlp** & **gallery-dl** を搭載した無料・オープンソースの Android 向けダウンローダーです。**1500 以上のサイト**から動画、音楽、プレイリストを、広告なし・追跡なし・アカウント不要で保存できます。
 
 <table>
   <tr><th width="50%" align="left">📥 ダウンロード</th><th width="50%" align="left">🔍 検索と再生</th></tr>
@@ -95,6 +95,7 @@ Hazel は **yt-dlp** を搭載した無料・オープンソースの Android �
   <tr><td><b>一括：</b>リンク 1 つ、複数同時、またはプレイリスト / チャンネル全体。</td><td><b>まず再生：</b>どの結果もカード上でシーク、ダブルタップでスキップ、全画面で再生。</td></tr>
   <tr><td><b>Hazel Instant：</b>任意のアプリからリンクを共有すると、保存した画質ですぐ開始。</td><td><b>切り抜き：</b>ライブプレビューで選んだ部分だけを保存。クイック、正確、またはダウンロード後にトリミング：ファイル全体を全速で取得し、端末上で切り出します。</td></tr>
   <tr><td><b>好きな形式：</b>画質、コンテナ、音声トラックを選び、タイトル / メタデータを編集。</td><td><b>ライブ配信：</b>最初から録画、またはプレミア公開を待機。</td></tr>
+  <tr><td><b>画像：</b>Instagram、X、Pinterest、Reddit などの投稿、プロフィール、画像検索。キャプションにも対応。</td><td><b>ログイン：</b>Instagram、YouTube、X などにワンタップでログイン。各アカウントの状態も表示。</td></tr>
 </table>
 
 <table>
@@ -195,6 +196,7 @@ MD5:        3bcce9e14c616a9087766563875978e6
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - F-Droid リポジトリの管理
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Hazel を支える強力なダウンロードエンジン
 * [youtubedl-android](https://github.com/yausername/youtubedl-android) - Android 向け yt-dlp バインディング
+* [gallery-dl](https://github.com/mikf/gallery-dl) - 画像とギャラリーのダウンロード
 * [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - 高速なリスト、検索、再生ストリーム
 * [Media3 ExoPlayer](https://github.com/androidx/media) - アプリ内のなめらかな再生
 

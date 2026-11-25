@@ -5,8 +5,9 @@ name: Nightly
 # releases list stays short: Hazel 1.1.17 and older read only the first page of releases to
 # find the stable one.
 #
-# Version: the next patch after the stable in app/build.gradle.kts, numbered per build:
-# 1.1.18-nightly.1, 1.1.18-nightly.2, ... The number restarts when that stable moves on.
+# Version: the repository variable HAZEL_NEXT_VERSION (for example 1.2.17) when set and above
+# the stable in app/build.gradle.kts, else the next patch after that stable, numbered per
+# build: 1.2.17-nightly.1, 1.2.17-nightly.2, ... The number restarts when the version moves on.
 # The tag never matches F-Droid's update pattern (^v[0-9.]+$), so F-Droid ignores it.
 #
 # Scheduled runs only start from the default branch; workflow_dispatch builds one now.
@@ -65,6 +66,14 @@ jobs:
           STABLE=$(sed -n 's/^[[:space:]]*versionName[[:space:]]*=[[:space:]]*"\(.*\)".*$/\1/p' app/build.gradle.kts | head -n 1)
           IFS=. read -r MAJOR MINOR PATCH <<< "${STABLE%%-*}"
           NEXT="$MAJOR.$MINOR.$((PATCH + 1))"
+          PLANNED="${{ vars.HAZEL_NEXT_VERSION }}"
+          if [ -n "$PLANNED" ]; then
+            if [[ "$PLANNED" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [ "$(printf '%s\n%s\n' "$STABLE" "$PLANNED" | sort -V | tail -n 1)" = "$PLANNED" ] && [ "$PLANNED" != "$STABLE" ]; then
+              NEXT="$PLANNED"
+            else
+              echo "::warning::HAZEL_NEXT_VERSION '$PLANNED' is not a version above $STABLE; using $NEXT."
+            fi
+          fi
 
           PREVIOUS=$(gh release view nightly --json name --jq .name 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+-nightly\.[0-9]+' || true)
           if [ "${PREVIOUS%-nightly.*}" = "$NEXT" ]; then

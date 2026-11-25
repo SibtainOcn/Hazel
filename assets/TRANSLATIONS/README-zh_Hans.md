@@ -87,7 +87,7 @@
 ---
 ## ✨ 为什么选择 Hazel？
 
-Hazel 是一款由 **yt-dlp** 驱动的免费开源 Android 下载器。从 **1500+ 个网站** 保存视频、音乐和播放列表，无广告、无追踪、无需账号。
+Hazel 是一款由 **yt-dlp** & **gallery-dl** 驱动的免费开源 Android 下载器。从 **1500+ 个网站** 保存视频、音乐和播放列表，无广告、无追踪、无需账号。
 
 <table>
   <tr><th width="50%" align="left">📥 下载</th><th width="50%" align="left">🔍 搜索与播放</th></tr>
@@ -95,6 +95,7 @@ Hazel 是一款由 **yt-dlp** 驱动的免费开源 Android 下载器。从 **15
   <tr><td><b>批量：</b>一个链接、多个链接或整个播放列表 / 频道。</td><td><b>先播放：</b>在卡片上直接播放任意结果，支持拖动进度、双击快进和全屏。</td></tr>
   <tr><td><b>Hazel Instant：</b>从任意应用分享链接，即按已保存的画质开始下载。</td><td><b>剪辑：</b>在实时预览中选择，只保存你想要的部分。可选快速、精确，或下载后裁剪：全速下载整个文件，再在手机上剪出片段。</td></tr>
   <tr><td><b>你的格式：</b>选择画质、容器、音轨，并编辑标题 / 元数据。</td><td><b>直播：</b>从头录制，或等待首映。</td></tr>
+  <tr><td><b>图片：</b>Instagram、X、Pinterest、Reddit 等网站的帖子、主页和图片搜索，并保留说明文字。</td><td><b>登录：</b>一键登录 Instagram、YouTube、X 等网站，并显示每个账号的状态。</td></tr>
 </table>
 
 <table>
@@ -195,6 +196,7 @@ MD5:        3bcce9e14c616a9087766563875978e6
 * [linsui](https://github.com/linsui) & [Licaon_Kter](https://github.com/licaon-kter) - F-Droid 仓库管理
 * [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Hazel 背后强大的下载引擎
 * [youtubedl-android](https://github.com/yausername/youtubedl-android) - Android 版 yt-dlp 绑定
+* [gallery-dl](https://github.com/mikf/gallery-dl) - 图片与图集下载
 * [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) - 快速的列表、搜索与播放流
 * [Media3 ExoPlayer](https://github.com/androidx/media) - 流畅的应用内播放
 

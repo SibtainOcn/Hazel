@@ -16,8 +16,8 @@
     machine.
 
 .PARAMETER Version
-    The stable version being cut, without the leading v. For example 1.1.18. Betas are not
-    cut here: push a v1.1.18-beta.N tag. Nightlies come from the nightly workflow.
+    The stable version being cut, without the leading v. For example 1.2.17. Betas are not
+    cut here: push a v1.2.17-beta.N tag. Nightlies come from the nightly workflow.
 
 .PARAMETER DryRun
     Print what would happen and change nothing.
@@ -27,8 +27,8 @@
     you want to look at the commit before it becomes a release.
 
 .EXAMPLE
-    .\tools\release\release.ps1 -Version 1.1.18 -DryRun
-    .\tools\release\release.ps1 -Version 1.1.18
+    .\tools\release\release.ps1 -Version 1.2.17 -DryRun
+    .\tools\release\release.ps1 -Version 1.2.17
 #>
 
 [CmdletBinding()]
