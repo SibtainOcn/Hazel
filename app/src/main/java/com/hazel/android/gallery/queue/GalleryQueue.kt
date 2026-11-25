@@ -179,6 +179,9 @@ object GalleryQueue {
                 val work = async {
                     GalleryDlEngine.download(
                         app, request.url, request.indexes, request.options, request.files,
+                        caption = request.caption,
+                        captionName = title.takeIf { request.save.caption },
+                        media = request.save.media,
                         onFetched = { count ->
                             setFetched(request.id, count)
                             val now = System.currentTimeMillis()
@@ -193,9 +196,11 @@ object GalleryQueue {
                             }
                         },
                         onSaved = { uri ->
-                            val entry = historyEntry(app, request, uri, savedPath)
-                            if (firstFile == null) firstFile = uri to entry.mimeType
-                            entries += entry
+                            // Sidecar text and metadata files are saved but are not downloads of their own.
+                            historyEntry(app, request, uri, savedPath)?.let { entry ->
+                                if (firstFile == null) firstFile = uri to entry.mimeType
+                                entries += entry
+                            }
                         }
                     )
                 }
@@ -250,7 +255,7 @@ object GalleryQueue {
         }
     }
 
-    private fun historyEntry(app: Context, request: GalleryDownloadRequest, uri: Uri, savedPath: String): HistoryEntry {
+    private fun historyEntry(app: Context, request: GalleryDownloadRequest, uri: Uri, savedPath: String): HistoryEntry? {
         var name = ""
         var size = 0L
         runCatching {
@@ -263,6 +268,7 @@ object GalleryQueue {
         }
         val extension = name.substringAfterLast('.', "").lowercase()
         val isVideo = extension in GalleryItem.VIDEO_EXTENSIONS
+        if (!isVideo && extension != "zip" && extension !in GalleryItem.IMAGE_EXTENSIONS) return null
         return HistoryEntry(
             id = System.currentTimeMillis(),
             url = request.url,

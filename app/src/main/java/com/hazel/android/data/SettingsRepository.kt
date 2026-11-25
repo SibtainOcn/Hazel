@@ -394,6 +394,7 @@ object SettingsRepository {
     private val GALLERY_VIDEO_MODE_KEY = stringPreferencesKey("gallery_video_mode")
     private val GALLERY_FILENAME_KEY = stringPreferencesKey("gallery_filename_template")
     private val GALLERY_METADATA_KEY = booleanPreferencesKey("gallery_write_metadata")
+    private val GALLERY_EMBED_CAPTION_KEY = booleanPreferencesKey("gallery_embed_caption")
     private val GALLERY_POST_DATE_KEY = booleanPreferencesKey("gallery_keep_post_date")
     private val GALLERY_ZIP_KEY = booleanPreferencesKey("gallery_pack_zip")
     private val GALLERY_ARCHIVE_KEY = booleanPreferencesKey("gallery_skip_downloaded")
@@ -408,7 +409,8 @@ object SettingsRepository {
                 writeMetadata = prefs[GALLERY_METADATA_KEY] ?: false,
                 keepPostDate = prefs[GALLERY_POST_DATE_KEY] ?: true,
                 packZip = prefs[GALLERY_ZIP_KEY] ?: false,
-                skipDownloaded = prefs[GALLERY_ARCHIVE_KEY] ?: false
+                skipDownloaded = prefs[GALLERY_ARCHIVE_KEY] ?: false,
+                embedCaption = prefs[GALLERY_EMBED_CAPTION_KEY] ?: false
             )
         }
 
@@ -421,6 +423,7 @@ object SettingsRepository {
             prefs[GALLERY_POST_DATE_KEY] = options.keepPostDate
             prefs[GALLERY_ZIP_KEY] = options.packZip
             prefs[GALLERY_ARCHIVE_KEY] = options.skipDownloaded
+            prefs[GALLERY_EMBED_CAPTION_KEY] = options.embedCaption
         }
     }
 

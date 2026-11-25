@@ -23,6 +23,18 @@ enum class GalleryVideoMode {
     }
 }
 
+/** What a download saves: the files, the caption as a text file, or both. */
+enum class GallerySave {
+    MEDIA, CAPTION, BOTH;
+
+    val media: Boolean get() = this != CAPTION
+    val caption: Boolean get() = this != MEDIA
+
+    companion object {
+        fun fromName(name: String?): GallerySave = entries.firstOrNull { it.name == name } ?: MEDIA
+    }
+}
+
 /** Choices for one gallery download; the saved defaults come from settings. */
 data class GalleryOptions(
     val imageSize: GalleryImageSize = GalleryImageSize.ORIGINAL,
@@ -32,7 +44,9 @@ data class GalleryOptions(
     val writeMetadata: Boolean = false,
     val keepPostDate: Boolean = true,
     val packZip: Boolean = false,
-    val skipDownloaded: Boolean = false
+    val skipDownloaded: Boolean = false,
+    /** The post's caption is written into each JPEG and PNG saved. */
+    val embedCaption: Boolean = false
 ) {
     /** The template is a name, never a path, so files cannot land outside the work folder. */
     val safeTemplate: String?
