@@ -1206,4 +1206,8 @@
     <string name="gallery_fetched">Получено файлов: %1$d</string>
     <string name="gallery_saved_before_failure">Сохранено до остановки: %1$d</string>
     <string name="properties_kind_image">Изображение</string>
+    <string name="gallery_search_files">Поиск по этим файлам</string>
+    <string name="gallery_type_sheet_subtitle">Какие файлы этой публикации загрузить</string>
+    <string name="gallery_remove_title">Убрать этот файл?</string>
+    <string name="incognito_off">Инкогнито выключен</string>
 </resources>

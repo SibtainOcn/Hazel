@@ -69,7 +69,7 @@ private sealed interface GalleryRead {
 @Composable
 internal fun GalleryShareContent(
     url: String,
-    onDownload: (GalleryDownloadRequest) -> Unit,
+    onDownload: (List<GalleryDownloadRequest>) -> Unit,
     /** A post that is one video goes to the video sheet, with this link. */
     onVideo: (String) -> Unit,
     onClose: () -> Unit
@@ -130,7 +130,7 @@ internal fun GalleryShareContent(
                     item = single,
                     postUrl = post.source,
                     onDownload = { options, title, author ->
-                        onDownload(requestFor(post, listOf(single.index), options, title, author))
+                        onDownload(listOf(requestFor(post, listOf(single.index), options, title, author)))
                     },
                     onDismiss = onClose
                 )
@@ -138,7 +138,9 @@ internal fun GalleryShareContent(
                 GalleryPostSheet(
                     items = post.items,
                     postUrl = post.source,
-                    onDownload = { indexes, options, title, author -> onDownload(requestFor(post, indexes, options, title, author)) },
+                    onDownload = { picks ->
+                        onDownload(picks.map { requestFor(post, it.indexes, it.options, it.title, it.author) })
+                    },
                     onDismiss = onClose
                 )
             }

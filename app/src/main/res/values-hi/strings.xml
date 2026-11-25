@@ -1173,4 +1173,8 @@
     <string name="gallery_fetched">%1$d फ़ाइलें प्राप्त हुईं</string>
     <string name="gallery_saved_before_failure">रुकने से पहले %1$d सेव हुईं</string>
     <string name="properties_kind_image">इमेज</string>
+    <string name="gallery_search_files">इन फ़ाइलों में खोजें</string>
+    <string name="gallery_type_sheet_subtitle">इस पोस्ट की कौन सी फ़ाइलें डाउनलोड हों</string>
+    <string name="gallery_remove_title">यह फ़ाइल हटाएँ?</string>
+    <string name="incognito_off">इनकॉग्निटो बंद</string>
 </resources>

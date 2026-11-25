@@ -1229,4 +1229,8 @@
     <string name="gallery_fetched">%1$d files fetched</string>
     <string name="gallery_saved_before_failure">%1$d saved before it stopped</string>
     <string name="properties_kind_image">Image</string>
+    <string name="gallery_search_files">Search these files</string>
+    <string name="gallery_type_sheet_subtitle">Which files of this post download</string>
+    <string name="gallery_remove_title">Remove this file?</string>
+    <string name="incognito_off">Incognito off</string>
 </resources>

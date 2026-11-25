@@ -1,220 +1,426 @@
 package com.hazel.android.ui.screens.gallery
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
+import com.hazel.android.ui.screens.download.batch.TWO_PANE_MIN_WIDTH_DP
+import com.hazel.android.ui.screens.download.batch.TWO_PANE_MAX_HEIGHT_DP
+import androidx.compose.ui.unit.Dp
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.DataObject
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.hazel.android.R
+import com.hazel.android.ui.components.SheetHeaderLayout
 import com.hazel.android.data.SaveDirs
+import com.hazel.android.data.SaveKind
 import com.hazel.android.data.SettingsRepository
-import com.hazel.android.gallery.GalleryImageSize
 import com.hazel.android.gallery.GalleryItem
 import com.hazel.android.gallery.GalleryOptions
-import com.hazel.android.ui.components.ArtworkPlaceholder
+import com.hazel.android.ui.components.DropdownMenu
+import com.hazel.android.ui.components.DropdownMenuItem
+import com.hazel.android.ui.components.FlatChip
+import com.hazel.android.ui.components.MenuTone
 import com.hazel.android.ui.components.ModalBottomSheet
-import com.hazel.android.ui.components.SheetHeaderLayout
 import com.hazel.android.ui.components.ShapeIconButton
+import com.hazel.android.ui.components.keepFlingInSheet
+import com.hazel.android.ui.components.rememberScrollShrink
+import com.hazel.android.ui.components.scrollShrink
+import com.hazel.android.ui.screens.download.BadgeTone
 import com.hazel.android.ui.screens.download.CookiesDialog
+import com.hazel.android.ui.screens.download.FEEDBACK_MS
+import com.hazel.android.ui.screens.download.Feedback
+import com.hazel.android.ui.screens.download.FeedbackToast
 import com.hazel.android.ui.screens.download.FilenameTemplateSheet
+import com.hazel.android.ui.screens.download.LinkOptionsDialog
 import com.hazel.android.ui.screens.download.MetaBadge
 import com.hazel.android.ui.screens.download.OptionChip
-import com.hazel.android.ui.screens.download.SHEET_TAB_PADDING
-import com.hazel.android.ui.screens.download.SheetDownloadPill
 import com.hazel.android.ui.screens.download.SheetSection
-import com.hazel.android.ui.screens.download.SheetTab
+import com.hazel.android.ui.screens.download.batch.BATCH_SIDE
+import com.hazel.android.ui.screens.download.batch.BatchDownloadButton
+import com.hazel.android.ui.screens.download.batch.BatchRowCard
+import com.hazel.android.ui.screens.download.batch.ChoiceRow
+import com.hazel.android.ui.screens.download.batch.ChoiceSheet
+import com.hazel.android.ui.screens.download.batch.KeyboardOverSheet
+import com.hazel.android.ui.screens.download.batch.LinkSearchField
+import com.hazel.android.ui.screens.download.batch.SearchBounds
 import com.hazel.android.ui.screens.download.batch.Segment
 import com.hazel.android.ui.screens.download.batch.SheetButtonGroup
+import com.hazel.android.ui.screens.download.batch.endsSearchOnTouchOutside
+import com.hazel.android.ui.screens.download.rememberIncognitoSwitch
 import com.hazel.android.ui.screens.download.rememberSaveKindPicker
 import com.hazel.android.ui.screens.download.rememberUseCookies
 import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.ui.theme.sheetRaisedColor
+import kotlinx.coroutines.delay
 
 internal enum class GalleryFilter { ALL, IMAGES, VIDEOS }
 
-private enum class PostDialog { NONE, FILENAME, COOKIES, SAVE_DIR }
+/** One download the sheet hands back: files counted from 1 (null for the whole post) and their settings. */
+internal class GalleryPick(
+    val indexes: List<Int>?,
+    val options: GalleryOptions,
+    val title: String? = null,
+    val author: String? = null
+)
+
+/** A file adjusted on its own sheet: its settings, title and author, for that file alone. */
+private class FileChoice(val options: GalleryOptions, val title: String, val author: String)
+
+private enum class PostDialog { NONE, KIND, SIZE, FILENAME, COOKIES, SAVE_DIR, LINK }
 
 /**
- * Download all for a post, in the multi download sheet's shell: the post's files under a type
- * filter, ticked by default, the options that apply to all of them and the quick settings bar.
- * A row opens that file's own sheet. The choices apply to this download only.
+ * Download all for a post, laid out as the video sheet for a set of links is: the header and
+ * Download, the count with search, selection and the list menu, the files (ticked only once
+ * selecting starts, swiped to be removed), the options for all of them and the button group.
+ * A file's row opens that file's own sheet, whose OK keeps its choice for this download.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 internal fun GalleryPostSheet(
     items: List<GalleryItem>,
     postUrl: String,
-    /** The files to save, counted from 1, or null for the whole post. */
-    /** [title] and [author] are set when one file was adjusted on its own sheet. */
-    onDownload: (indexes: List<Int>?, options: GalleryOptions, title: String?, author: String?) -> Unit,
+    onDownload: (List<GalleryPick>) -> Unit,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    // Opens at its usual height; the list is dragged up to full screen when it is long.
-    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
+    // Expanded to its content, as the set-of-links sheet is: the list is held to a few rows,
+    // so the sheet stops at its usual height and does not cover the screen.
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
     var options by rememberGalleryOptions()
     val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }
         .collectAsState(initial = SaveDirs())
     val pickSaveDir = rememberSaveKindPicker(saveDirs)
     val cookiesOn = rememberUseCookies()
     var dialog by remember { mutableStateOf(PostDialog.NONE) }
-    var filter by remember { mutableStateOf(GalleryFilter.ALL) }
-    var ticked by remember(items) { mutableStateOf(items.map { it.index }.toSet()) }
-    var adjustOpen by remember { mutableStateOf(false) }
-    var opened by remember { mutableStateOf<GalleryItem?>(null) }
+    var listMenuOpen by remember { mutableStateOf(false) }
     val current = options ?: GalleryOptions()
     val update: (GalleryOptions) -> Unit = { options = it }
 
-    val images = items.count { !it.isVideo }
-    val videos = items.size - images
-    val shown = when (filter) {
-        GalleryFilter.ALL -> items
-        GalleryFilter.IMAGES -> items.filter { !it.isVideo }
-        GalleryFilter.VIDEOS -> items.filter { it.isVideo }
-    }
-    val chosen = shown.map { it.index }.filter { it in ticked }
-    val allShownTicked = shown.isNotEmpty() && shown.all { it.index in ticked }
+    var kept by remember(items) { mutableStateOf(items) }
+    var filter by remember { mutableStateOf(GalleryFilter.ALL) }
+    var selecting by remember { mutableStateOf(false) }
+    var selected by remember(items) { mutableStateOf(emptySet<Int>()) }
+    var choices by remember(items) { mutableStateOf(emptyMap<Int, FileChoice>()) }
+    var opened by remember { mutableStateOf<GalleryItem?>(null) }
+    var pendingRemove by remember { mutableStateOf<GalleryItem?>(null) }
+    var adjustOpen by rememberSaveable { mutableStateOf(false) }
 
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = sheetBlackColor) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-            SheetHeaderLayout {
-                Column {
-                    Text(
-                        stringResource(R.string.batch_header_title),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        stringResource(R.string.batch_header_subtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                SheetDownloadPill(
-                    label = stringResource(R.string.batch_download_action),
-                    icon = Icons.Filled.Download,
-                    enabled = options != null && chosen.isNotEmpty(),
-                    onClick = {
-                        val whole = filter == GalleryFilter.ALL && chosen.size == items.size
-                        options?.let { onDownload(if (whole) null else chosen, it, null, null) }
-                    }
+    val images = kept.count { !it.isVideo }
+    val videos = kept.size - images
+    val ofKind = when (filter) {
+        GalleryFilter.ALL -> kept
+        GalleryFilter.IMAGES -> kept.filter { !it.isVideo }
+        GalleryFilter.VIDEOS -> kept.filter { it.isVideo }
+    }
+
+    var searchOpen by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
+    val shown = remember(ofKind, query) {
+        val q = query.trim()
+        if (q.isEmpty()) ofKind else ofKind.filter { it.matches(q) }
+    }
+    val closeSearch = {
+        query = ""
+        searchOpen = false
+    }
+    val focusManager = LocalFocusManager.current
+    val bounds = remember { SearchBounds() }
+
+    // What Download takes: the ticked files, or every file of the chosen kind when none are.
+    val targets = ofKind.filter { selected.isEmpty() || it.index in selected }
+    fun picks(base: GalleryOptions): List<GalleryPick> {
+        val (own, shared) = targets.partition { it.index in choices }
+        val whole = shared.size == items.size
+        return buildList {
+            if (shared.isNotEmpty()) add(GalleryPick(if (whole) null else shared.map { it.index }, base))
+            own.forEach { file ->
+                val choice = choices.getValue(file.index)
+                add(GalleryPick(listOf(file.index), choice.options, choice.title, choice.author))
+            }
+        }
+    }
+    fun endSelection() {
+        selecting = false
+        selected = emptySet()
+    }
+    fun toggle(item: GalleryItem) {
+        selected = if (item.index in selected) selected - item.index else selected + item.index
+    }
+
+    var feedback by remember { mutableStateOf<Feedback?>(null) }
+    var shownFeedback by remember { mutableStateOf("") }
+    LaunchedEffect(feedback) {
+        val shownNow = feedback ?: return@LaunchedEffect
+        shownFeedback = shownNow.message
+        delay(FEEDBACK_MS)
+        feedback = null
+    }
+    // A phone on its side is wide and short: the sheet takes the width and splits in two.
+    val configuration = LocalConfiguration.current
+    val twoPane = configuration.screenWidthDp >= TWO_PANE_MIN_WIDTH_DP &&
+        configuration.screenHeightDp < TWO_PANE_MAX_HEIGHT_DP
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = sheetBlackColor,
+        sheetMaxWidth = if (twoPane) Dp.Unspecified else BottomSheetDefaults.SheetMaxWidth
+    ) {
+        Box(
+            modifier = Modifier.endsSearchOnTouchOutside(searchOpen, bounds) {
+                if (query.isBlank()) closeSearch() else focusManager.clearFocus()
+            }
+        ) {
+        KeyboardOverSheet()
+
+        // The sheet's parts, each written once and placed by the layout below: stacked, or
+        // side by side on a phone held sideways, as the set-of-links sheet does.
+        val titleBlock: @Composable (Modifier) -> Unit = { modifier ->
+            Column(modifier = modifier) {
+                Text(
+                    stringResource(R.string.batch_header_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    stringResource(R.string.batch_header_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
+        }
+        val downloadButton: @Composable (Modifier) -> Unit = { modifier ->
+            BatchDownloadButton(
+                enabled = options != null && targets.isNotEmpty(),
+                onClick = { options?.let { onDownload(picks(it)) } },
+                modifier = modifier
+            )
+        }
+        val listBar: @Composable () -> Unit = {
+            // The count, and the controls that act on the list itself.
             Row(
-                modifier = Modifier.fillMaxWidth().height(48.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .padding(start = BATCH_SIDE, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    pluralStringResource(R.plurals.gallery_items, items.size, items.size),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
+                if (searchOpen) {
+                    LinkSearchField(
+                        query = query,
+                        onQueryChange = { query = it },
+                        onClose = closeSearch,
+                        hint = stringResource(R.string.gallery_search_files),
+                        modifier = Modifier
+                            .weight(1f)
+                            .onGloballyPositioned { bounds.field = it }
+                    )
+                } else {
+                    Text(
+                        if (selecting) pluralStringResource(R.plurals.batch_selected, selected.size, selected.size)
+                        else pluralStringResource(R.plurals.gallery_items, ofKind.size, ofKind.size),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    ShapeIconButton(onClick = { searchOpen = true }) {
+                        Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.batch_search_open), modifier = Modifier.size(20.dp))
+                    }
+                }
+                Spacer(modifier = Modifier.width(6.dp))
                 ShapeIconButton(
-                    onClick = {
-                        val ids = shown.map { it.index }
-                        ticked = if (allShownTicked) ticked - ids.toSet() else ticked + ids
-                    },
-                    active = allShownTicked
+                    onClick = { if (selecting) endSelection() else selecting = true },
+                    active = selecting
                 ) {
                     Icon(
                         Icons.Filled.SelectAll,
-                        contentDescription = stringResource(R.string.batch_menu_select_all),
+                        contentDescription = stringResource(if (selecting) R.string.batch_stop_selecting else R.string.batch_start_selecting),
                         modifier = Modifier.size(20.dp)
                     )
                 }
+                Spacer(modifier = Modifier.width(6.dp))
+                Box {
+                    ShapeIconButton(onClick = { listMenuOpen = true }) {
+                        Icon(
+                            painterResource(R.drawable.ic_more_vert),
+                            contentDescription = stringResource(R.string.batch_list_options),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    DropdownMenu(expanded = listMenuOpen, onDismissRequest = { listMenuOpen = false }) {
+                        if (!selecting) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.batch_menu_select_links)) },
+                                icon = Icons.Filled.Checklist,
+                                tone = MenuTone.Accent,
+                                onClick = {
+                                    listMenuOpen = false
+                                    selecting = true
+                                }
+                            )
+                        } else {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.batch_menu_select_all)) },
+                                icon = Icons.Filled.SelectAll,
+                                tone = MenuTone.Accent,
+                                onClick = {
+                                    listMenuOpen = false
+                                    selected = ofKind.map { it.index }.toSet()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.batch_menu_invert)) },
+                                icon = Icons.Filled.SwapVert,
+                                tone = MenuTone.Info,
+                                onClick = {
+                                    listMenuOpen = false
+                                    selected = ofKind.map { it.index }.toSet() - selected
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.batch_menu_remove_selected)) },
+                                icon = Icons.Filled.Delete,
+                                tone = MenuTone.Danger,
+                                enabled = selected.isNotEmpty(),
+                                onClick = {
+                                    listMenuOpen = false
+                                    kept = kept.filter { it.index !in selected }
+                                    endSelection()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.batch_menu_done)) },
+                                icon = Icons.Filled.Done,
+                                tone = MenuTone.Neutral,
+                                onClick = {
+                                    listMenuOpen = false
+                                    endSelection()
+                                }
+                            )
+                        }
+                    }
+                }
             }
 
-            // layout-safe: three short tab labels with a count each
-            Row(
-                modifier = Modifier.offset(x = -SHEET_TAB_PADDING),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                SheetTab(stringResource(R.string.gallery_filter_all, items.size), filter == GalleryFilter.ALL, true) {
-                    filter = GalleryFilter.ALL
-                }
-                SheetTab(stringResource(R.string.gallery_filter_images, images), filter == GalleryFilter.IMAGES, images > 0) {
-                    filter = GalleryFilter.IMAGES
-                }
-                SheetTab(stringResource(R.string.gallery_filter_videos, videos), filter == GalleryFilter.VIDEOS, videos > 0) {
-                    filter = GalleryFilter.VIDEOS
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+        }
 
+        val listState = rememberLazyListState()
+        val shrink = rememberScrollShrink()
+        LaunchedEffect(query) { if (query.isNotEmpty()) listState.scrollToItem(0) }
+        val fileList: @Composable (Modifier) -> Unit = { modifier ->
+            if (searchOpen && shown.isEmpty()) {
+                Text(
+                    stringResource(R.string.batch_search_none),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = BATCH_SIDE + 4.dp, vertical = 16.dp)
+                )
+            }
             LazyColumn(
-                modifier = Modifier.weight(1f, fill = false),
+                state = listState,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .keepFlingInSheet()
+                    .nestedScroll(shrink),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = BATCH_SIDE),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(shown, key = { it.index }) { item ->
-                    GalleryPostRow(
-                        item = item,
-                        checked = item.index in ticked,
-                        onCheckedChange = { on -> ticked = if (on) ticked + item.index else ticked - item.index },
-                        onOpen = { opened = item }
-                    )
+                    Box(modifier = Modifier.scrollShrink(shrink)) {
+                        BatchRowCard(
+                            thumbnail = item.thumbnail ?: item.url.takeUnless { item.isVideo },
+                            corner = "#${item.index}",
+                            title = choices[item.index]?.title?.takeIf { it.isNotBlank() } ?: defaultTitle(item),
+                            typeIcon = if (item.isVideo) Icons.Filled.Videocam else Icons.Filled.Image,
+                            typeDescription = stringResource(if (item.isVideo) R.string.gallery_video else R.string.gallery_image),
+                            selectionMode = selecting,
+                            checked = item.index in selected,
+                            onClick = { if (selecting) toggle(item) else opened = item },
+                            onLongClick = {
+                                if (!selecting) selecting = true
+                                toggle(item)
+                            },
+                            onTypeClick = { if (selecting) toggle(item) else opened = item },
+                            removeAsked = pendingRemove?.index == item.index,
+                            onAskRemove = { pendingRemove = item }
+                        ) {
+                            // Marked when the file carries a choice of its own, as an adjusted link is.
+                            MetaBadge(galleryTag(item), tone = if (item.index in choices) BadgeTone.SOLID else BadgeTone.NEUTRAL)
+                        }
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
-
+        }
+        val adjustSection: @Composable () -> Unit = {
             val filenameLabel = stringResource(R.string.format_sheet_filename_template)
             val skipLabel = stringResource(R.string.gallery_skip_downloaded)
             val metadataLabel = stringResource(R.string.gallery_metadata)
@@ -222,71 +428,66 @@ internal fun GalleryPostSheet(
             val zipLabel = stringResource(R.string.gallery_pack_zip)
             val cookiesLabel = stringResource(R.string.cookies_title)
             val filenameOn = current.safeTemplate != null
-            SheetSection(
-                icon = Icons.Outlined.Tune,
-                iconPill = true,
-                title = stringResource(R.string.gallery_adjust_all),
-                summary = listOfNotNull(
-                    filenameLabel.takeIf { filenameOn },
-                    skipLabel.takeIf { current.skipDownloaded },
-                    metadataLabel.takeIf { current.writeMetadata },
-                    postDateLabel.takeIf { current.keepPostDate },
-                    zipLabel.takeIf { current.packZip },
-                    cookiesLabel.takeIf { cookiesOn }
-                ).joinToString(", "),
-                expanded = adjustOpen,
-                onToggle = { adjustOpen = !adjustOpen },
-                color = sheetRaisedColor
-            ) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+            Box(modifier = Modifier.padding(horizontal = BATCH_SIDE)) {
+                SheetSection(
+                    icon = Icons.Outlined.Tune,
+                    iconPill = true,
+                    title = stringResource(R.string.gallery_adjust_all),
+                    summary = listOfNotNull(
+                        filenameLabel.takeIf { filenameOn },
+                        skipLabel.takeIf { current.skipDownloaded },
+                        metadataLabel.takeIf { current.writeMetadata },
+                        postDateLabel.takeIf { current.keepPostDate },
+                        zipLabel.takeIf { current.packZip },
+                        cookiesLabel.takeIf { cookiesOn }
+                    ).joinToString(", "),
+                    expanded = adjustOpen,
+                    onToggle = { adjustOpen = !adjustOpen },
+                    color = sheetRaisedColor
                 ) {
-                    OptionChip(filenameLabel, Icons.Filled.Edit, active = filenameOn, compact = true) {
-                        dialog = PostDialog.FILENAME
-                    }
-                    OptionChip(skipLabel, Icons.Filled.SkipNext, active = current.skipDownloaded, compact = true) {
-                        update(current.copy(skipDownloaded = !current.skipDownloaded))
-                    }
-                    OptionChip(metadataLabel, Icons.Filled.DataObject, active = current.writeMetadata, compact = true) {
-                        update(current.copy(writeMetadata = !current.writeMetadata))
-                    }
-                    OptionChip(postDateLabel, Icons.Filled.Schedule, active = current.keepPostDate, compact = true) {
-                        update(current.copy(keepPostDate = !current.keepPostDate))
-                    }
-                    OptionChip(zipLabel, Icons.Filled.FolderZip, active = current.packZip, compact = true) {
-                        update(current.copy(packZip = !current.packZip))
-                    }
-                    OptionChip(cookiesLabel, Icons.Filled.Cookie, active = cookiesOn, compact = true) {
-                        dialog = PostDialog.COOKIES
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        OptionChip(filenameLabel, Icons.Filled.Edit, active = filenameOn, compact = true) {
+                            dialog = PostDialog.FILENAME
+                        }
+                        OptionChip(skipLabel, Icons.Filled.SkipNext, active = current.skipDownloaded, compact = true) {
+                            update(current.copy(skipDownloaded = !current.skipDownloaded))
+                        }
+                        OptionChip(metadataLabel, Icons.Filled.DataObject, active = current.writeMetadata, compact = true) {
+                            update(current.copy(writeMetadata = !current.writeMetadata))
+                        }
+                        OptionChip(postDateLabel, Icons.Filled.Schedule, active = current.keepPostDate, compact = true) {
+                            update(current.copy(keepPostDate = !current.keepPostDate))
+                        }
+                        OptionChip(zipLabel, Icons.Filled.FolderZip, active = current.packZip, compact = true) {
+                            update(current.copy(packZip = !current.packZip))
+                        }
+                        OptionChip(cookiesLabel, Icons.Filled.Cookie, active = cookiesOn, compact = true) {
+                            dialog = PostDialog.COOKIES
+                        }
                     }
                 }
             }
 
+        }
+        val actionBar: @Composable () -> Unit = {
+            // Kind, size and folder, with the link and incognito at the end: the set sheet's order.
+            val incognito = rememberIncognitoSwitch { message -> feedback = Feedback(message) }
             val accent = MaterialTheme.colorScheme.primary
-            SheetButtonGroup {
+            // layout-safe: icons and a short size label, each segment sharing the width
+            SheetButtonGroup(modifier = Modifier.padding(horizontal = BATCH_SIDE)) {
                 Segment(
                     position = 0, count = 5, weight = 1f,
                     description = stringResource(R.string.batch_bar_download_type),
-                    onClick = {
-                        filter = GalleryFilter.entries[(filter.ordinal + 1) % GalleryFilter.entries.size]
-                            .let { next -> if (next.isEmptyIn(images, videos)) GalleryFilter.ALL else next }
-                    },
-                    icon = rememberVectorPainter(
-                        when (filter) {
-                            GalleryFilter.ALL -> Icons.Filled.Collections
-                            GalleryFilter.IMAGES -> Icons.Filled.Image
-                            GalleryFilter.VIDEOS -> Icons.Filled.Videocam
-                        }
-                    )
+                    onClick = { dialog = PostDialog.KIND },
+                    icon = rememberVectorPainter(filter.icon)
                 )
                 Segment(
                     position = 1, count = 5, weight = 1.6f,
                     description = stringResource(R.string.gallery_image_size),
-                    onClick = {
-                        val sizes = GalleryImageSize.entries
-                        update(current.copy(imageSize = sizes[(current.imageSize.ordinal + 1) % sizes.size]))
-                    },
+                    onClick = { dialog = PostDialog.SIZE },
                     text = imageSizeLabel(current.imageSize).uppercase()
                 )
                 Segment(
@@ -297,31 +498,130 @@ internal fun GalleryPostSheet(
                 )
                 Segment(
                     position = 3, count = 5, weight = 1f,
-                    description = zipLabel,
-                    onClick = { update(current.copy(packZip = !current.packZip)) },
-                    icon = rememberVectorPainter(Icons.Filled.FolderZip),
-                    fill = if (current.packZip) accent.copy(alpha = 0.22f) else null,
-                    tint = if (current.packZip) accent else null
+                    description = stringResource(R.string.sheet_link_options),
+                    onClick = { dialog = PostDialog.LINK },
+                    enabled = postUrl.isNotBlank(),
+                    icon = rememberVectorPainter(Icons.Filled.Link)
                 )
                 Segment(
                     position = 4, count = 5, weight = 1f,
-                    description = cookiesLabel,
-                    onClick = { dialog = PostDialog.COOKIES },
-                    icon = rememberVectorPainter(Icons.Filled.Cookie),
-                    tint = if (cookiesOn) accent else null
+                    description = stringResource(if (incognito.on) R.string.nav_incognito_on else R.string.incognito_off),
+                    onClick = incognito.toggle,
+                    icon = painterResource(R.drawable.incognito),
+                    fill = if (incognito.on) accent.copy(alpha = 0.22f) else null,
+                    tint = if (incognito.on) accent else null
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+
         }
+
+        if (twoPane) {
+            // The list down one side, as tall as the sheet; the heading, the settings and the
+            // buttons down the other, with Download kept in view under them.
+            Row(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+                Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                    listBar()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    fileList(Modifier.weight(1f))
+                    Spacer(modifier = Modifier.navigationBarsPadding().height(12.dp))
+                }
+                Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                    Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                        titleBlock(Modifier.padding(horizontal = BATCH_SIDE))
+                        Spacer(modifier = Modifier.height(12.dp))
+                        adjustSection()
+                        Spacer(modifier = Modifier.height(12.dp))
+                        actionBar()
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    downloadButton(
+                        Modifier
+                            .padding(horizontal = BATCH_SIDE)
+                            .fillMaxWidth()
+                            .height(48.dp)
+                    )
+                    Spacer(modifier = Modifier.navigationBarsPadding().height(12.dp))
+                }
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // The button moves under the heading only where a word of it would otherwise break.
+                SheetHeaderLayout(modifier = Modifier.padding(horizontal = BATCH_SIDE)) {
+                    titleBlock(Modifier)
+                    downloadButton(Modifier.height(44.dp))
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                listBar()
+                Spacer(modifier = Modifier.height(8.dp))
+                // A few rows on a phone, more on a tablet; while searching the list keeps its
+                // full height so the sheet does not shrink and drop the field behind the keyboard.
+                val listMaxHeight = if (configuration.smallestScreenWidthDp >= 600) {
+                    maxOf((configuration.screenHeightDp * 0.45f).dp, 280.dp)
+                } else {
+                    280.dp
+                }
+                fileList(
+                    Modifier
+                        .weight(1f, fill = false)
+                        .heightIn(min = if (searchOpen) listMaxHeight else 0.dp, max = listMaxHeight)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                adjustSection()
+                Spacer(modifier = Modifier.height(4.dp))
+                actionBar()
+                Spacer(modifier = Modifier.navigationBarsPadding().height(12.dp))
+            }
+        }
+
+        androidx.compose.animation.AnimatedVisibility(
+            visible = feedback != null,
+            enter = fadeIn() + scaleIn(initialScale = 0.9f),
+            exit = fadeOut() + scaleOut(targetScale = 0.9f),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = BATCH_SIDE)
+        ) {
+            FeedbackToast(shownFeedback)
+        }
+        }
+    }
+
+    pendingRemove?.let { item ->
+        val keep = { pendingRemove = null }
+        AlertDialog(
+            onDismissRequest = keep,
+            title = { Text(stringResource(R.string.gallery_remove_title), fontWeight = FontWeight.Bold) },
+            text = {
+                Text(
+                    stringResource(R.string.batch_remove_body, "#${item.index} · ${defaultTitle(item)}"),
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            confirmButton = {
+                FlatChip(
+                    label = stringResource(R.string.batch_card_remove),
+                    selected = true,
+                    onClick = {
+                        pendingRemove = null
+                        kept = kept - item
+                        selected = selected - item.index
+                        choices = choices - item.index
+                    }
+                )
+            },
+            dismissButton = { FlatChip(label = stringResource(R.string.options_text_input_cancel), onClick = keep) }
+        )
     }
 
     opened?.let { item ->
         GalleryItemSheet(
             item = item,
             postUrl = postUrl,
+            confirmAsApply = true,
             onDownload = { chosenOptions, title, author ->
+                choices = choices + (item.index to FileChoice(chosenOptions, title, author))
                 opened = null
-                onDownload(listOf(item.index), chosenOptions, title, author)
             },
             onDismiss = { opened = null }
         )
@@ -329,6 +629,53 @@ internal fun GalleryPostSheet(
 
     when (dialog) {
         PostDialog.NONE -> Unit
+        PostDialog.KIND -> ChoiceSheet(
+            title = stringResource(R.string.batch_type_sheet_title),
+            subtitle = stringResource(R.string.gallery_type_sheet_subtitle),
+            onDismiss = { dialog = PostDialog.NONE }
+        ) { close ->
+            GalleryFilter.entries.forEach { kind ->
+                val count = when (kind) {
+                    GalleryFilter.ALL -> kept.size
+                    GalleryFilter.IMAGES -> images
+                    GalleryFilter.VIDEOS -> videos
+                }
+                if (kind == GalleryFilter.ALL || count > 0) {
+                    ChoiceRow(
+                        label = stringResource(kind.label, count),
+                        icon = kind.icon,
+                        selected = filter == kind,
+                        onClick = {
+                            close {
+                                filter = kind
+                                dialog = PostDialog.NONE
+                            }
+                        }
+                    )
+                }
+            }
+        }
+        PostDialog.SIZE -> {
+            val sample = kept.firstOrNull { !it.isVideo } ?: kept.firstOrNull()
+            if (sample == null) {
+                dialog = PostDialog.NONE
+            } else {
+                GalleryQualitySheet(
+                    choices = sizeChoices(sample),
+                    selected = current.imageSize,
+                    onConfirm = {
+                        update(current.copy(imageSize = it))
+                        dialog = PostDialog.NONE
+                    },
+                    onDismiss = { dialog = PostDialog.NONE }
+                )
+            }
+        }
+        PostDialog.LINK -> LinkOptionsDialog(
+            links = listOf(postUrl),
+            onFeedback = { message -> feedback = Feedback(message) },
+            onDismiss = { dialog = PostDialog.NONE }
+        )
         PostDialog.FILENAME -> FilenameTemplateSheet(
             kind = GalleryTemplates,
             template = current.filenameTemplate,
@@ -347,70 +694,22 @@ internal fun GalleryPostSheet(
     }
 }
 
-private fun GalleryFilter.isEmptyIn(images: Int, videos: Int): Boolean = when (this) {
-    GalleryFilter.ALL -> false
-    GalleryFilter.IMAGES -> images == 0
-    GalleryFilter.VIDEOS -> videos == 0
-}
-
-/** One file of the post: tick, thumbnail, `#n · title`, its type and size, and a type icon. */
-@Composable
-private fun GalleryPostRow(
-    item: GalleryItem,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    onOpen: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        color = sheetRaisedColor
-    ) {
-        Row(
-            modifier = Modifier
-                .clickable(onClick = onOpen)
-                .padding(start = 4.dp, end = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(checked = checked, onCheckedChange = onCheckedChange)
-            Box(
-                modifier = Modifier
-                    .width(88.dp)
-                    .aspectRatio(16f / 9f)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                ArtworkPlaceholder(Modifier.fillMaxSize())
-                item.thumbnail?.let {
-                    AsyncImage(
-                        model = it,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(10.dp))
-            Column(modifier = Modifier.weight(1f).padding(vertical = 10.dp)) {
-                Text(
-                    "#${item.index} · " + item.title.ifBlank {
-                        stringResource(if (item.isVideo) R.string.gallery_video else R.string.gallery_image)
-                    },
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                MetaBadge(galleryTag(item))
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                if (item.isVideo) Icons.Filled.Videocam else Icons.Filled.Image,
-                contentDescription = stringResource(if (item.isVideo) R.string.gallery_video else R.string.gallery_image),
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+private val GalleryFilter.icon
+    get() = when (this) {
+        GalleryFilter.ALL -> Icons.Filled.Collections
+        GalleryFilter.IMAGES -> Icons.Filled.Image
+        GalleryFilter.VIDEOS -> Icons.Filled.Videocam
     }
-}
+
+private val GalleryFilter.label
+    get() = when (this) {
+        GalleryFilter.ALL -> R.string.gallery_filter_all
+        GalleryFilter.IMAGES -> R.string.gallery_filter_images
+        GalleryFilter.VIDEOS -> R.string.gallery_filter_videos
+    }
+
+/** Whether a file's title, author or number holds [query], ignoring case. */
+private fun GalleryItem.matches(query: String): Boolean =
+    title.contains(query, ignoreCase = true) ||
+        author.contains(query, ignoreCase = true) ||
+        "#$index" == query.trim() || index.toString() == query.trim()

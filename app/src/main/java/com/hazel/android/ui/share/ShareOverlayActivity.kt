@@ -256,8 +256,8 @@ class ShareOverlayActivity : ComponentActivity() {
                         when {
                             mode == ShareMode.IMAGES -> GalleryShareContent(
                                 url = url,
-                                onDownload = { request ->
-                                    queueGallery { request }
+                                onDownload = { requests ->
+                                    requests.forEach { request -> queueGallery { request } }
                                     announceStarted()
                                     closeOverlay()
                                 },

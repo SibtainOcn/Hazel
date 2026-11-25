@@ -1190,4 +1190,8 @@
     <string name="gallery_fetched">%1$d arquivos obtidos</string>
     <string name="gallery_saved_before_failure">%1$d salvos antes de parar</string>
     <string name="properties_kind_image">Imagem</string>
+    <string name="gallery_search_files">Pesquisar nestes arquivos</string>
+    <string name="gallery_type_sheet_subtitle">Quais arquivos desta publicação baixar</string>
+    <string name="gallery_remove_title">Remover este arquivo?</string>
+    <string name="incognito_off">Anônimo desativado</string>
 </resources>

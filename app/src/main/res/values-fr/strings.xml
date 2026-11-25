@@ -1190,4 +1190,8 @@
     <string name="gallery_fetched">%1$d fichiers récupérés</string>
     <string name="gallery_saved_before_failure">%1$d enregistrés avant l\'arrêt</string>
     <string name="properties_kind_image">Image</string>
+    <string name="gallery_search_files">Rechercher dans ces fichiers</string>
+    <string name="gallery_type_sheet_subtitle">Quels fichiers de cette publication télécharger</string>
+    <string name="gallery_remove_title">Retirer ce fichier ?</string>
+    <string name="incognito_off">Navigation privée désactivée</string>
 </resources>

@@ -1173,4 +1173,8 @@
     <string name="gallery_fetched">%1$d Dateien abgerufen</string>
     <string name="gallery_saved_before_failure">%1$d gespeichert, bevor es abbrach</string>
     <string name="properties_kind_image">Bild</string>
+    <string name="gallery_search_files">Diese Dateien durchsuchen</string>
+    <string name="gallery_type_sheet_subtitle">Welche Dateien dieses Beitrags geladen werden</string>
+    <string name="gallery_remove_title">Diese Datei entfernen?</string>
+    <string name="incognito_off">Inkognito aus</string>
 </resources>

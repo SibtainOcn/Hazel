@@ -6,6 +6,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import com.hazel.android.ui.components.gridItems
+import com.hazel.android.ui.components.gridColumns
+import androidx.compose.foundation.layout.BoxWithConstraints
 import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.SkeletonSpacing
 import com.hazel.android.ui.components.ArrivingCard
@@ -321,8 +324,11 @@ fun GalleryScreen(
                         }
                     }
                 }
-                else -> LazyColumn(
-                    modifier = Modifier.weight(1f).nestedScroll(shrink),
+                // A wide screen lays the cards side by side, as Home and History do.
+                else -> BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                val columns = gridColumns(maxWidth - 40.dp)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().nestedScroll(shrink),
                     contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 96.dp),
                     verticalArrangement = Arrangement.spacedBy(SkeletonSpacing)
                 ) {
@@ -342,7 +348,8 @@ fun GalleryScreen(
                         }
                     }
                     if (viewModel.showsList) {
-                        itemsIndexed(viewModel.posts, key = { i, _ -> "post-$i" }) { i, post ->
+                        gridItems(viewModel.posts.indices.toList(), columns, SkeletonSpacing, key = { "post-$it" }) { i ->
+                            val post = viewModel.posts[i]
                             val single = post.items.singleOrNull()
                             ArrivingCard(post.source to i, shrink) {
                                 if (single != null) {
@@ -362,7 +369,8 @@ fun GalleryScreen(
                             }
                         }
                     } else {
-                        itemsIndexed(viewModel.items, key = { _, it -> it.index }) { position, item ->
+                        gridItems(viewModel.items.indices.toList(), columns, SkeletonSpacing, key = { viewModel.items[it].index }) { position ->
+                            val item = viewModel.items[position]
                             ArrivingCard(item.url, shrink) {
                                 GalleryCard(
                                     item = item,
@@ -373,6 +381,7 @@ fun GalleryScreen(
                             }
                         }
                     }
+                }
                 }
             }
         }
@@ -517,9 +526,9 @@ fun GalleryScreen(
         GalleryPostSheet(
             items = post.items,
             postUrl = post.source,
-            onDownload = { indexes, options, title, author ->
+            onDownload = { picks ->
                 postSheetFor = null
-                viewModel.download(indexes, options, post, title, author)
+                picks.forEach { viewModel.download(it.indexes, it.options, post, it.title, it.author) }
             },
             onDismiss = { postSheetFor = null }
         )

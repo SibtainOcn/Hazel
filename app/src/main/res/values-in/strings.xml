@@ -1156,4 +1156,8 @@
     <string name="gallery_fetched">%1$d file diambil</string>
     <string name="gallery_saved_before_failure">%1$d tersimpan sebelum berhenti</string>
     <string name="properties_kind_image">Gambar</string>
+    <string name="gallery_search_files">Cari di file ini</string>
+    <string name="gallery_type_sheet_subtitle">File mana dari postingan ini yang diunduh</string>
+    <string name="gallery_remove_title">Hapus file ini?</string>
+    <string name="incognito_off">Mode penyamaran mati</string>
 </resources>

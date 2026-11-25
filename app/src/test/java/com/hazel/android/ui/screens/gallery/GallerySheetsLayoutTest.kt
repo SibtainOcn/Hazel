@@ -93,13 +93,29 @@ class GallerySheetsLayoutTest(private val locale: String) {
     }
 
     @Test
-    fun `download all sheet opens at its usual height with the count and filter in view`() {
-        show { GalleryPostSheet(items = POST, postUrl = "", onDownload = { _, _, _, _ -> }, onDismiss = {}) }
+    fun `download all sheet keeps the list bar, adjust section and buttons in view`() {
+        show { GalleryPostSheet(items = POST, postUrl = "", onDownload = {}, onDismiss = {}) }
         saveScreen("gallery-post-$locale")
         assertInside(
             context.resources.getQuantityString(R.plurals.gallery_items, POST.size, POST.size),
-            context.getString(R.string.gallery_filter_all, POST.size),
-            context.getString(R.string.gallery_filter_videos, 1)
+            context.getString(R.string.gallery_adjust_all),
+            context.getString(R.string.gallery_size_original).uppercase()
+        )
+    }
+
+    @Test
+    fun `download all sheet splits into two panes on a phone held sideways`() {
+        RuntimeEnvironment.setQualifiers("$locale-w800dp-h360dp-land")
+        compose.setContent {
+            HazelTheme(darkTheme = true, glass = true) {
+                GalleryPostSheet(items = POST, postUrl = "", onDownload = {}, onDismiss = {})
+            }
+        }
+        compose.waitForIdle()
+        saveScreen("gallery-post-land-$locale")
+        assertInside(
+            context.resources.getQuantityString(R.plurals.gallery_items, POST.size, POST.size),
+            context.getString(R.string.gallery_adjust_all)
         )
     }
 }

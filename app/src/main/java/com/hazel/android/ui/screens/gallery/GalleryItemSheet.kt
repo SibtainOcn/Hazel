@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.DataObject
@@ -117,7 +118,9 @@ internal fun GalleryItemSheet(
     /** The post's link, for the link dialog and the cookies dialog's site. */
     postUrl: String,
     onDownload: (options: GalleryOptions, title: String, author: String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** Opened from a set: the action reads OK and hands the choice back instead of downloading. */
+    confirmAsApply: Boolean = false
 ) {
     val context = LocalContext.current
     val sheetState = rememberBottomSheetState(
@@ -186,8 +189,8 @@ internal fun GalleryItemSheet(
                     )
                 }
                 SheetDownloadPill(
-                    label = stringResource(R.string.format_sheet_download),
-                    icon = Icons.Filled.Download,
+                    label = stringResource(if (confirmAsApply) R.string.format_sheet_ok else R.string.format_sheet_download),
+                    icon = if (confirmAsApply) Icons.Filled.Check else Icons.Filled.Download,
                     enabled = options != null,
                     onClick = { options?.let { onDownload(it, title.trim(), author.trim()) } }
                 )
@@ -434,7 +437,7 @@ private fun qualityRow(item: GalleryItem, options: GalleryOptions): QualityRow =
 
 /** The sizes this file can come in: the original, and on X its smaller ones. */
 @Composable
-private fun sizeChoices(item: GalleryItem): List<QualityChoice<GalleryImageSize>> =
+internal fun sizeChoices(item: GalleryItem): List<QualityChoice<GalleryImageSize>> =
     GalleryImageSize.entries
         .filter { it == GalleryImageSize.ORIGINAL || item.site == X_SITE }
         .map { sizeChoice(item, it) }
