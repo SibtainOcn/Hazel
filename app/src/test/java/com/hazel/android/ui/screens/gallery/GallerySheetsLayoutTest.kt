@@ -38,7 +38,8 @@ class GallerySheetsLayoutTest(private val locale: String) {
         private fun item(index: Int, extension: String, title: String) = GalleryItem(
             index = index, url = "https://cdn.example/$index.$extension", extension = extension,
             title = title, author = "spacebrief", site = "instagram",
-            width = 1080, height = 1350, thumbnail = null
+            width = 1080, height = 1350, thumbnail = null,
+            caption = "$title. A long caption the author wrote under the post, with #tags and a second sentence."
         )
 
         private val POST = listOf(
@@ -76,7 +77,7 @@ class GallerySheetsLayoutTest(private val locale: String) {
 
     @Test
     fun `image item sheet keeps its header and size row inside, and the row opens the size picker`() {
-        show { GalleryItemSheet(item = POST[0], postUrl = "https://x.com/a/status/1", onDownload = { _, _, _ -> }, onDismiss = {}) }
+        show { GalleryItemSheet(item = POST[0], postUrl = "https://x.com/a/status/1", onDownload = { _, _, _, _ -> }, onDismiss = {}) }
         saveScreen("gallery-item-image-$locale")
         assertInside(context.getString(R.string.gallery_image_size))
         compose.onNodeWithContentDescription(context.getString(R.string.format_selection_change)).performClick()
@@ -87,7 +88,7 @@ class GallerySheetsLayoutTest(private val locale: String) {
 
     @Test
     fun `video item sheet offers the video quality instead`() {
-        show { GalleryItemSheet(item = POST[2], postUrl = "", onDownload = { _, _, _ -> }, onDismiss = {}) }
+        show { GalleryItemSheet(item = POST[2], postUrl = "", onDownload = { _, _, _, _ -> }, onDismiss = {}) }
         saveScreen("gallery-item-video-$locale")
         assertInside(context.getString(R.string.format_sheet_video_quality))
     }

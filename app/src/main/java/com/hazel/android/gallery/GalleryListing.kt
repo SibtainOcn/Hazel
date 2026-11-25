@@ -17,12 +17,15 @@ data class GalleryItem(
     /** Which post the file belongs to; files of one post share it. */
     val postKey: String = "",
     /** The post's own link, when the site gives one. */
-    val postUrl: String? = null
+    val postUrl: String? = null,
+    /** The post's full text as its author wrote it (caption, description); blank when there is none. */
+    val caption: String = ""
 ) {
     val isVideo: Boolean get() = extension.lowercase() in VIDEO_EXTENSIONS
 
     companion object {
         val VIDEO_EXTENSIONS = setOf("mp4", "webm", "mov", "m4v", "mkv", "m3u8")
+        val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "webp", "avif", "heic", "bmp")
     }
 }
 
@@ -43,6 +46,8 @@ data class GalleryListing(
         private const val MESSAGE_QUEUE = 6
         private const val MESSAGE_ERROR = -1
         private const val TITLE_MAX = 140
+        private const val CAPTION_MAX = 20_000
+        private val CAPTION_KEYS = listOf("description", "content", "caption", "title")
         private val POST_KEYS = listOf("post_url", "post_id", "tweet_id", "post_shortcode", "shortcode")
 
         /** Reads the output of `gallery-dl -j`. */
@@ -77,7 +82,10 @@ data class GalleryListing(
                 height = info.optInt("height"),
                 thumbnail = thumbnailOf(url, extension, info),
                 postKey = postKeyOf(info),
-                postUrl = postLinkOf(info)
+                postUrl = postLinkOf(info),
+                caption = CAPTION_KEYS
+                    .firstNotNullOfOrNull { key -> info.optString(key).trim().takeIf { it.isNotEmpty() && it != "null" } }
+                    ?.take(CAPTION_MAX).orEmpty()
             )
         }
 
