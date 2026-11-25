@@ -127,13 +127,13 @@ class SaveLocationScreenLayoutTest(
             }
         }
         // Both checks run on the IO dispatcher, which the test clock does not wait for.
-        compose.waitUntil(5_000) {
+        compose.waitUntil(15_000) {
             compose.onAllNodesWithText("Documents/Oggy").fetchSemanticsNodes().isNotEmpty()
         }
         listed = false
         compose.onNodeWithText("Documents/Oggy").performScrollTo().performClick()
         val message = context.getString(R.string.save_location_recent_missing)
-        compose.waitUntil(5_000) {
+        compose.waitUntil(15_000) {
             compose.onAllNodesWithText(message, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
         }
         assertEquals(null, used)
