@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.queue
 
+import com.hazel.android.gallery.queue.GalleryDownloadRequest
 import com.hazel.android.ui.theme.tonalFill
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MultiContentMeasurePolicy
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
@@ -187,6 +189,7 @@ fun FailedCard(
             .filter { it.isNotBlank() }.joinToString(" · ")
     }
     val thumbnail = item.thumbnail ?: remember(item.url) { youtubeThumbnail(item.url) }
+    val gallery = remember(item.queuedPayload) { GalleryDownloadRequest.isPayload(item.queuedPayload) }
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -255,13 +258,24 @@ fun FailedCard(
                         )
                         if (author.isNotBlank()) {
                             Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                author,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.White.copy(alpha = 0.82f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    author,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White.copy(alpha = 0.82f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false)
+                                )
+                                // Only gallery-dl's failures are marked; a video's engine goes without saying.
+                                if (gallery) {
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    CardTag(
+                                        text = stringResource(R.string.engine_gallery_dl),
+                                        background = Color.White.copy(alpha = 0.2f)
+                                    )
+                                }
+                            }
                         }
                         if (reason.isNotBlank()) {
                             Spacer(modifier = Modifier.height(6.dp))
@@ -291,7 +305,7 @@ fun FailedCard(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                KindIcon(item.isVideo)
+                                KindIcon(item.isVideo, image = gallery)
                                 if (retrying) CardTag(
                                     text = stringResource(R.string.queue_failed_retrying),
                                     background = MaterialTheme.colorScheme.primary,
@@ -614,9 +628,13 @@ private fun DismissButton(description: String, onClick: () -> Unit, modifier: Mo
 }
 
 @Composable
-private fun KindIcon(hasVideo: Boolean) {
+private fun KindIcon(hasVideo: Boolean, image: Boolean = false) {
     Icon(
-        if (hasVideo) Icons.Filled.PlayArrow else Icons.Filled.MusicNote,
+        when {
+            image -> Icons.Filled.Image
+            hasVideo -> Icons.Filled.PlayArrow
+            else -> Icons.Filled.MusicNote
+        },
         contentDescription = null,
         modifier = Modifier.size(16.dp),
         tint = Color.White
