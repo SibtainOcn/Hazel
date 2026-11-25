@@ -1133,6 +1133,8 @@
     <string name="upd_failure_unknown">アップデートを完了できませんでした（%1$s）。しばらくしてからもう一度お試しください。</string>
     <string name="upd_status_update_failed">アップデートが完了しませんでした</string>
     <string name="upd_status_check_failed">確認が完了しませんでした</string>
+    <string name="cookie_webview_reload">再読み込み</string>
+    <string name="cookie_webview_load_failed">このページを読み込めませんでした</string>
     <string name="gallery_dl_update_available_title">gallery-dl %1$s が利用可能です</string>
     <string name="gallery_dl_update_available_text">Hazel を開いて画像エンジンを更新してください</string>
     <string name="gallery_dl_update_installed_title">gallery-dl を %1$s に更新しました</string>
