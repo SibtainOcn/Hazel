@@ -338,6 +338,50 @@ object SettingsRepository {
     val PLAY_QUALITIES = listOf(144, 240, 360, 480, 720, 1080)
     const val DEFAULT_PLAY_QUALITY = 720
 
+    private val IMAGE_SEARCH_KEY = booleanPreferencesKey("image_search")
+    private val GALLERY_SITE_KEY = stringPreferencesKey("gallery_search_site")
+    private val GALLERY_POSTS_KEY = intPreferencesKey("gallery_search_posts")
+    private val GALLERY_SHOW_KEY = stringPreferencesKey("gallery_show")
+    private val GALLERY_REPOSTS_KEY = booleanPreferencesKey("gallery_skip_reposts")
+
+    val GALLERY_POST_COUNTS = listOf(10, 30, 60)
+    const val DEFAULT_GALLERY_POSTS = 30
+
+    fun getImageSearch(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[IMAGE_SEARCH_KEY] ?: false }
+
+    suspend fun setImageSearch(context: Context, on: Boolean) {
+        context.dataStore.edit { prefs -> prefs[IMAGE_SEARCH_KEY] = on }
+    }
+
+    fun getGallerySearchSite(context: Context): Flow<com.hazel.android.gallery.GallerySearchSite> =
+        context.dataStore.data.map { prefs -> com.hazel.android.gallery.GallerySearchSite.fromName(prefs[GALLERY_SITE_KEY]) }
+
+    suspend fun setGallerySearchSite(context: Context, site: com.hazel.android.gallery.GallerySearchSite) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_SITE_KEY] = site.name }
+    }
+
+    fun getGalleryPostsPerSearch(context: Context): Flow<Int> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_POSTS_KEY] ?: DEFAULT_GALLERY_POSTS }
+
+    suspend fun setGalleryPostsPerSearch(context: Context, count: Int) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_POSTS_KEY] = count }
+    }
+
+    fun getGalleryShow(context: Context): Flow<com.hazel.android.gallery.GalleryShow> =
+        context.dataStore.data.map { prefs -> com.hazel.android.gallery.GalleryShow.fromName(prefs[GALLERY_SHOW_KEY]) }
+
+    suspend fun setGalleryShow(context: Context, show: com.hazel.android.gallery.GalleryShow) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_SHOW_KEY] = show.name }
+    }
+
+    fun getGallerySkipReposts(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_REPOSTS_KEY] ?: true }
+
+    suspend fun setGallerySkipReposts(context: Context, skip: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_REPOSTS_KEY] = skip }
+    }
+
     fun getSearchSource(context: Context): Flow<SearchSource> =
         context.dataStore.data.map { prefs -> SearchSource.fromName(prefs[SEARCH_SOURCE_KEY]) }
 
