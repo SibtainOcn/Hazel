@@ -38,6 +38,9 @@
     <string name="gallery_skip_reposts">Skip reposts</string>
     <string name="gallery_empty_title">Save posts and albums</string>
     <string name="gallery_empty_hint">Paste a link from Instagram, X, Reddit, Pinterest and 1,500 more sites</string>
+    <string name="gallery_view">View</string>
+    <string name="gallery_close">Close</string>
+    <string name="gallery_no_player">No app can play this video</string>
     <string name="nav_incognito_on">Incognito on, downloads are not recorded</string>
     <string name="nav_incognito_off">Incognito off</string>
 

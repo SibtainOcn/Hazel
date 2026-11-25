@@ -1618,7 +1618,7 @@ private fun OverlayChip(text: String, bold: Boolean = false) {
 
 /** Flat tag in the thumbnail's corner, for the duration and the state marker. */
 @Composable
-private fun CornerTag(
+internal fun CornerTag(
     text: String,
     background: Color = Color.Black.copy(alpha = 0.7f),
     foreground: Color = Color.White

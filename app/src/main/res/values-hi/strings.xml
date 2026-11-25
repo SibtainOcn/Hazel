@@ -27,6 +27,9 @@
     <string name="gallery_skip_reposts">रीपोस्ट छोड़ें</string>
     <string name="gallery_empty_title">पोस्ट और एल्बम सहेजें</string>
     <string name="gallery_empty_hint">Instagram, X, Reddit, Pinterest और 1,500 और साइटों का लिंक पेस्ट करें</string>
+    <string name="gallery_view">देखें</string>
+    <string name="gallery_close">बंद करें</string>
+    <string name="gallery_no_player">कोई ऐप यह वीडियो नहीं चला सकता</string>
     <string name="nav_incognito_on">गुप्त मोड चालू है, डाउनलोड दर्ज नहीं होंगे</string>
     <string name="nav_incognito_off">गुप्त मोड बंद है</string>
 

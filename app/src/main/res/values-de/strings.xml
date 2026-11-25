@@ -27,6 +27,9 @@
     <string name="gallery_skip_reposts">Reposts überspringen</string>
     <string name="gallery_empty_title">Beiträge und Alben speichern</string>
     <string name="gallery_empty_hint">Füge einen Link von Instagram, X, Reddit, Pinterest und 1.500 weiteren Seiten ein</string>
+    <string name="gallery_view">Ansehen</string>
+    <string name="gallery_close">Schließen</string>
+    <string name="gallery_no_player">Keine App kann dieses Video abspielen</string>
     <string name="nav_incognito_on">Inkognito an, Downloads werden nicht aufgezeichnet</string>
     <string name="nav_incognito_off">Inkognito aus</string>
 

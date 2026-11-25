@@ -27,6 +27,9 @@
     <string name="gallery_skip_reposts">Pular reposts</string>
     <string name="gallery_empty_title">Salve postagens e álbuns</string>
     <string name="gallery_empty_hint">Cole um link do Instagram, X, Reddit, Pinterest e mais 1.500 sites</string>
+    <string name="gallery_view">Ver</string>
+    <string name="gallery_close">Fechar</string>
+    <string name="gallery_no_player">Nenhum app pode reproduzir este vídeo</string>
     <string name="nav_incognito_on">Anônimo ativado, os downloads não são registrados</string>
     <string name="nav_incognito_off">Anônimo desativado</string>
 
