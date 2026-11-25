@@ -1135,12 +1135,12 @@ private fun HistoryRow(entry: HistoryEntry, present: Boolean, mark: Boolean?, ac
     }
 }
 
-/** The row's audio, video or picture mark on a six-sided cookie in the accent's tone. */
+/** The row's audio, video or picture mark on a six-sided cookie in a tint of the accent. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun KindMark(entry: HistoryEntry) {
-    val fill = MaterialTheme.colorScheme.primaryContainer
-    val tint = MaterialTheme.colorScheme.onPrimaryContainer
+    val fill = com.hazel.android.ui.theme.accentTint()
+    val tint = com.hazel.android.ui.theme.accentInk()
     Box(
         modifier = Modifier
             .size(36.dp)
