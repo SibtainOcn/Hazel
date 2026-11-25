@@ -128,4 +128,12 @@ class GallerySheetsLayoutTest(private val locale: String) {
         compose.onNodeWithContentDescription(context.getString(R.string.format_sheet_download)).assertIsDisplayed().performClick()
         assertTrue(opened == 2)
     }
+
+    @Test
+    fun `caption sheet is solid over the sheet behind it in glass`() {
+        val caption = "Line one of the caption. Line two of it."
+        show { com.hazel.android.ui.components.CaptionSheet(caption = caption, title = "Title", onDismiss = {}) }
+        compose.onNodeWithText(caption).assertIsDisplayed()
+        saveScreen("gallery-caption-sheet-$locale")
+    }
 }
