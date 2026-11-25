@@ -61,6 +61,7 @@ import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.gallery.GalleryOptions
 import com.hazel.android.gallery.GalleryRequest
 import com.hazel.android.gallery.GalleryRequests
+import com.hazel.android.ui.components.BetaTag
 import com.hazel.android.ui.components.EmptyState
 import com.hazel.android.ui.components.HazelLoadingIndicator
 import com.hazel.android.ui.screens.download.DownloadAllButton
@@ -286,7 +287,8 @@ fun GalleryScreen(
                             icon = painterResource(R.drawable.gallery_tab),
                             title = viewModel.notice?.let { stringResource(it.text, *it.args.toTypedArray()) }
                                 ?: stringResource(R.string.gallery_empty_title),
-                            hint = stringResource(R.string.gallery_empty_hint).takeIf { viewModel.failure == null }
+                            hint = stringResource(R.string.gallery_empty_hint).takeIf { viewModel.failure == null },
+                            badge = { BetaTag() }
                         )
                         if (viewModel.failure != null) {
                             TextButton(onClick = { logOpen = true }) { Text(stringResource(R.string.gallery_view_log)) }
