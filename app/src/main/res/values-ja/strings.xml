@@ -1132,4 +1132,6 @@
     <string name="upd_failure_unknown">アップデートを完了できませんでした（%1$s）。しばらくしてからもう一度お試しください。</string>
     <string name="upd_status_update_failed">アップデートが完了しませんでした</string>
     <string name="upd_status_check_failed">確認が完了しませんでした</string>
+    <string name="cookie_webview_reload">再読み込み</string>
+    <string name="cookie_webview_load_failed">このページを読み込めませんでした</string>
 </resources>

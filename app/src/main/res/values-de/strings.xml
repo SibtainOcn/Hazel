@@ -1149,4 +1149,6 @@
     <string name="upd_failure_unknown">Das Update konnte nicht abgeschlossen werden (%1$s). Versuche es gleich noch einmal.</string>
     <string name="upd_status_update_failed">Update nicht abgeschlossen</string>
     <string name="upd_status_check_failed">Prüfung nicht abgeschlossen</string>
+    <string name="cookie_webview_reload">Neu laden</string>
+    <string name="cookie_webview_load_failed">Diese Seite konnte nicht laden</string>
 </resources>

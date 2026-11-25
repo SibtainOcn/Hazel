@@ -1166,4 +1166,6 @@
     <string name="upd_failure_unknown">Não foi possível concluir a atualização (%1$s). Tente de novo em instantes.</string>
     <string name="upd_status_update_failed">A atualização não foi concluída</string>
     <string name="upd_status_check_failed">A verificação não foi concluída</string>
+    <string name="cookie_webview_reload">Recarregar</string>
+    <string name="cookie_webview_load_failed">Não foi possível carregar esta página</string>
 </resources>

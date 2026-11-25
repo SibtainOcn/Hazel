@@ -79,6 +79,19 @@ internal object SignInBrowser {
     }
 
     private val WEB_SCHEMES = setOf("http", "https", "about", "data", "blob", "javascript")
+    private val FALLBACK = Regex(""";S\.browser_fallback_url=([^;]+)""")
+
+    /**
+     * The web page an app link stands in for: an `intent://` link's `browser_fallback_url`.
+     * Sites such as Instagram send the page to one to open their app; without following its
+     * fallback the navigation is dropped and the page stays blank.
+     */
+    fun webFallback(url: String?): String? {
+        if (url == null || !url.startsWith("intent:", ignoreCase = true)) return null
+        val raw = FALLBACK.find(url)?.groupValues?.get(1) ?: return null
+        return runCatching { java.net.URLDecoder.decode(raw, "UTF-8") }.getOrNull()
+            ?.takeIf { it.startsWith("https://") || it.startsWith("http://") }
+    }
 
     private val LOGIN_PAGES = mapOf(
         "instagram.com" to "https://www.instagram.com/accounts/login/",

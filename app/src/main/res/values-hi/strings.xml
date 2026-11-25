@@ -1149,4 +1149,6 @@
     <string name="upd_failure_unknown">अपडेट पूरा नहीं हो सका (%1$s)। थोड़ी देर में फिर कोशिश करें।</string>
     <string name="upd_status_update_failed">अपडेट पूरा नहीं हुआ</string>
     <string name="upd_status_check_failed">जाँच पूरी नहीं हुई</string>
+    <string name="cookie_webview_reload">फिर से लोड करें</string>
+    <string name="cookie_webview_load_failed">यह पेज लोड नहीं हो सका</string>
 </resources>

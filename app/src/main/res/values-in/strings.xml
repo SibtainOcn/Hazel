@@ -1132,4 +1132,6 @@
     <string name="upd_failure_unknown">Pembaruan tidak dapat diselesaikan (%1$s). Coba lagi sebentar lagi.</string>
     <string name="upd_status_update_failed">Pembaruan tidak selesai</string>
     <string name="upd_status_check_failed">Pemeriksaan tidak selesai</string>
+    <string name="cookie_webview_reload">Muat ulang</string>
+    <string name="cookie_webview_load_failed">Halaman ini tidak dapat dimuat</string>
 </resources>
