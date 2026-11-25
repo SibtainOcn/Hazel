@@ -1100,7 +1100,6 @@
     <string name="upd_ytdlp_bundled">Bundled</string>
     <string name="upd_tile_hazel">Hazel</string>
     <string name="upd_tile_cpu">CPU</string>
-    <string name="upd_tile_android">Android</string>
     <string name="upd_tile_channel">Channel</string>
     <string name="upd_tile_code">Code</string>
     <string name="upd_tile_installed">Installed</string>

@@ -78,9 +78,7 @@ fun SoftwareUpdateScreen(
             JoinedTiles(
                 listOf(
                     hazelVersion to stringResource(R.string.upd_tile_hazel),
-                    ytdlpVersion to "yt-dlp",
-                    DebugInfo.primaryAbi().substringBefore('-') to stringResource(R.string.upd_tile_cpu),
-                    "API ${android.os.Build.VERSION.SDK_INT}" to stringResource(R.string.upd_tile_android)
+                    ytdlpVersion to "yt-dlp"
                 )
             )
 
