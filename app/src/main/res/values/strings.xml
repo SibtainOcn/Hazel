@@ -44,7 +44,7 @@
     <string name="gallery_size_original">Original</string>
     <string name="gallery_size_large">Large</string>
     <string name="gallery_size_medium">Medium</string>
-    <string name="gallery_size_original_hint">Largest the site serves</string>
+    <string name="gallery_size_original_hint">Best</string>
     <string name="gallery_size_x_only">X only</string>
     <string name="gallery_video_best">Best (merged)</string>
     <string name="gallery_video_best_hint">Via yt-dlp</string>
