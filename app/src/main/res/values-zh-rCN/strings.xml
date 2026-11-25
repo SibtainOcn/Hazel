@@ -368,6 +368,7 @@
     <string name="history_delete_dialog_confirm">删除</string>
     <string name="history_delete_dialog_cancel">取消</string>
     <string name="history_card_options">选项</string>
+    <string name="history_recent">最近下载</string>
     <string name="history_card_properties">属性</string>
     <string name="history_card_remove">从列表中移除</string>
     <string name="history_card_delete">删除文件</string>

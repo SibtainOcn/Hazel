@@ -378,6 +378,7 @@
     <string name="history_delete_dialog_confirm">Supprimer</string>
     <string name="history_delete_dialog_cancel">Annuler</string>
     <string name="history_card_options">Options</string>
+    <string name="history_recent">Reprendre</string>
     <string name="history_card_properties">Propriétés</string>
     <string name="history_card_remove">Retirer de la liste</string>
     <string name="history_card_delete">Supprimer le fichier</string>
