@@ -34,8 +34,8 @@ val LocalDarkTheme = staticCompositionLocalOf { true }
 val LocalGlassSolid = staticCompositionLocalOf { false }
 
 enum class GlassStyle(val key: String) {
-    AURORA("aurora"), OCEAN("ocean"), ACCENT("accent"), WALLPAPER("wallpaper"),
-    SUNSET("sunset"), NEBULA("nebula"), FOREST("forest"), MONO("mono");
+    MONO("mono"), AURORA("aurora"), OCEAN("ocean"), ACCENT("accent"), WALLPAPER("wallpaper"),
+    SUNSET("sunset"), NEBULA("nebula"), FOREST("forest");
 
     companion object {
         val DEFAULT = FOREST
