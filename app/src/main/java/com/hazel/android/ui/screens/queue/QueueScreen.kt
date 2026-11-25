@@ -20,7 +20,7 @@ import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import com.hazel.android.ui.components.AmbientStarField
+import com.hazel.android.ui.components.EmptyState
 import com.hazel.android.ui.components.ScrollShrink
 import com.hazel.android.ui.components.rememberScrollShrink
 import com.hazel.android.ui.components.scrollShrink
@@ -76,6 +76,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
@@ -487,8 +488,7 @@ fun QueueScreen(
                 QueueTab.RUNNING -> QueueList(
                     isEmpty = running.isEmpty(),
                     emptyIcon = Icons.Filled.Download,
-                    emptyText = stringResource(R.string.queue_empty_running),
-                    inView = pagerState.currentPage == page
+                    emptyText = stringResource(R.string.queue_empty_running)
                 ) { shrink, columns ->
                     gridItems(running, columns, CARD_SPACING, key = { "running_${it.info.url}" }) { item ->
                         val paused = item.batchItem?.state == BatchState.PAUSED
@@ -542,8 +542,7 @@ fun QueueScreen(
                 QueueTab.QUEUED -> QueueList(
                     isEmpty = waiting.isEmpty(),
                     emptyIcon = Icons.Filled.HourglassEmpty,
-                    emptyText = stringResource(R.string.queue_empty_queued),
-                    inView = pagerState.currentPage == page
+                    emptyText = stringResource(R.string.queue_empty_queued)
                 ) { shrink, columns ->
                     gridItems(waiting, columns, CARD_SPACING, key = { "queued_${it.url}" }) { item ->
                         Box(modifier = Modifier.scrollShrink(shrink)) {
@@ -559,8 +558,7 @@ fun QueueScreen(
                 QueueTab.FAILED -> QueueList(
                     isEmpty = failed.isEmpty(),
                     emptyIcon = Icons.Filled.ErrorOutline,
-                    emptyText = stringResource(R.string.history_empty_failed),
-                    inView = pagerState.currentPage == page
+                    emptyText = stringResource(R.string.history_empty_failed)
                 ) { shrink, columns ->
                     gridItems(failed, columns, CARD_SPACING, key = { "failed_${it.id}" }) { item ->
                         Box(modifier = Modifier.scrollShrink(shrink)) {
@@ -788,34 +786,14 @@ private fun QueueList(
     isEmpty: Boolean,
     emptyIcon: ImageVector,
     emptyText: String,
-    /** Whether this tab is the one in view; the others keep their grid still. */
-    inView: Boolean,
     content: androidx.compose.foundation.lazy.LazyListScope.(shrink: ScrollShrink, columns: Int) -> Unit
 ) {
     if (isEmpty) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            AmbientStarField(Modifier.matchParentSize(), paused = !inView)
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    emptyIcon,
-                    contentDescription = null,
-                    modifier = Modifier.size(52.dp),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                )
-                Spacer(modifier = Modifier.height(14.dp))
-                Text(
-                    emptyText,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+        EmptyState(
+            icon = rememberVectorPainter(emptyIcon),
+            title = emptyText,
+            modifier = Modifier.fillMaxSize()
+        )
     } else {
         val listState = rememberLazyListState()
         val shrink = rememberScrollShrink()
