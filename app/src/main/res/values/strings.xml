@@ -522,28 +522,19 @@
     <string name="cookies_toast_entry_copied">Copied to clipboard</string>
     <string name="cookies_use_title">Use cookies</string>
     <string name="cookies_use_description">Pass saved sign-ins to the downloader</string>
-    <string name="cookies_empty_title">No cookies saved</string>
-    <string name="cookies_empty_body">Add one to download age-restricted, private, or members-only media.</string>
-    <string name="cookies_delete_title">Delete cookies</string>
-    <string name="cookies_delete_body">Remove the saved sign-in for %1$s?</string>
-    <string name="cookies_delete_confirm">Delete</string>
     <string name="cookies_delete_all_title">Delete all cookies</string>
     <string name="cookies_delete_all_body">Every saved sign-in will be removed. This cannot be undone.</string>
     <string name="cookies_delete_all_confirm">Delete all</string>
     <!-- Stands in for the address on a row that has neither an address nor a label. -->
     <string name="cookies_row_fallback_name">Cookies</string>
     <string name="cookies_sheet_copy">Copy cookies</string>
-    <string name="cookies_sheet_delete">Delete cookies</string>
     <string name="cookies_field_title">Title</string>
     <string name="cookies_field_url">URL</string>
     <string name="cookies_sheet_save">Save</string>
     <string name="cookies_description">Sign in once for age-restricted, private and members-only downloads.</string>
     <string name="cookies_section_general">General</string>
-    <string name="cookies_section_add">Add</string>
-    <string name="cookies_section_saved">Saved sign-ins</string>
     <string name="cookies_add_sign_in">Sign in to a site</string>
     <string name="cookies_add_sign_in_summary">Open the site and save its cookies</string>
-    <string name="cookies_add_import_file_summary">A Netscape cookie file exported from a browser</string>
     <string name="cookies_off_hint">Turn on Use cookies to send these with downloads.</string>
     <plurals name="cookies_count">
         <item quantity="one">%d cookie</item>
@@ -661,12 +652,9 @@
     <string name="queue_adjust_restart_confirm">Start again</string>
 
     <!-- Sign-in web view -->
-    <string name="cookie_webview_close">Close</string>
-    <string name="cookie_webview_desktop_site">Desktop site</string>
     <string name="cookie_webview_no_cookies">No cookies were collected</string>
     <string name="cookie_webview_crashed">The sign-in page stopped. Open it again.</string>
     <!-- The leading spaces sit the label off the icon beside it in the button. -->
-    <string name="cookie_webview_done">"  OK"</string>
 
     <!-- FormatSelectionSheet -->
     <string name="format_selection_change">Change format</string>
@@ -684,8 +672,6 @@
     <string name="sheet_link_options">Link options</string>
     <string name="sheet_link_copied">Link copied</string>
     <string name="sheet_link_open_failed">No app can open this link</string>
-    <string name="sheet_cookies_site_saved">Signed in to %1$s</string>
-    <string name="sheet_cookies_site_missing">No sign-in saved for %1$s</string>
     <string name="batch_search_open">Search links</string>
     <string name="batch_search_hint">Search these links</string>
     <string name="batch_search_close">Close search</string>
@@ -821,9 +807,6 @@
     <string name="gallery_settings_x_posts_value">Replies, retweets, quotes</string>
     <string name="gallery_settings_network">Network</string>
     <string name="gallery_settings_retries">Retries</string>
-    <string name="gallery_settings_extras">Extras</string>
-    <string name="gallery_settings_captions">Captions to .txt</string>
-    <string name="gallery_settings_ugoira">Pixiv animations to video</string>
     <string name="storage_locations_wifi_only">Wi-Fi only</string>
     <string name="storage_locations_speed_limit">Speed limit</string>
 
@@ -1200,6 +1183,51 @@
     <string name="upd_failure_unknown">The update couldn\'t be completed (%1$s). Please try again in a moment.</string>
     <string name="upd_status_update_failed">Update couldn\'t finish</string>
     <string name="upd_status_check_failed">Check couldn\'t finish</string>
+    <string name="cookie_webview_reload">Reload</string>
+    <string name="cookie_webview_load_failed">This page could not load</string>
+    <string name="cookie_webview_clear_site">Clear this site\'s data</string>
+    <string name="cookie_webview_cleared">Site data cleared</string>
+    <string name="cookie_webview_copy_address">Copy page address</string>
+    <string name="cookie_webview_desktop">Desktop view</string>
+    <string name="cookie_webview_go_sign_in">Go to sign-in page</string>
+    <string name="cookie_webview_load_failed_why">No connection, or the proxy refused it</string>
+    <string name="cookie_webview_mobile">Mobile view</string>
+    <string name="cookie_webview_not_loaded">Not loaded</string>
+    <string name="cookie_webview_off">Off</string>
+    <string name="cookie_webview_on">On</string>
+    <string name="cookie_webview_save">OK</string>
+    <string name="cookie_webview_text_size">Text size</string>
+    <string name="cookies_check">Check sign-in</string>
+    <string name="cookies_check_button">Check</string>
+    <string name="cookies_check_failed">Could not reach the site</string>
+    <string name="cookies_check_never">Not checked yet</string>
+    <string name="cookies_check_ok">Last checked %1$s · still signed in</string>
+    <string name="cookies_check_refused">Last checked %1$s · signed out by the site</string>
+    <string name="cookies_checked">Checked %1$s</string>
+    <string name="cookies_dialog_expired_title">Sign-in expired</string>
+    <string name="cookies_dialog_none_saved">No sign-in saved</string>
+    <string name="cookies_dialog_title">Sign-in for this link</string>
+    <string name="cookies_done">Done</string>
+    <string name="cookies_expired_ago">Expired %1$s</string>
+    <string name="cookies_import">Import</string>
+    <string name="cookies_login_expires">Login expires</string>
+    <string name="cookies_no_login">No login cookie saved</string>
+    <string name="cookies_not_now">Not now</string>
+    <string name="cookies_section_accounts">Accounts</string>
+    <string name="cookies_section_quick">Quick sign-in</string>
+    <string name="cookies_settings">Cookie settings</string>
+    <string name="cookies_show_summary">View or copy the saved set</string>
+    <string name="cookies_sign_in_again_summary">Refreshes the saved cookies in place</string>
+    <string name="cookies_sign_out">Sign out</string>
+    <string name="cookies_sign_out_body">Its saved cookies are deleted and the sign-in page forgets it.</string>
+    <string name="cookies_sign_out_title">Sign out of %1$s?</string>
+    <string name="cookies_signed_out_by_site">Signed out by the site</string>
+    <string name="cookies_state_active">Active</string>
+    <string name="cookies_state_signed_out">Signed out</string>
+    <string name="cookies_use_for_downloads">Use for downloads</string>
+    <string name="cookies_use_for_downloads_summary">Off keeps it saved but unused</string>
+    <string name="cookies_dialog_sub">Some sources only download when signed in</string>
+    <string name="cookies_open">Open</string>
     <string name="gallery_dl_update_available_title">gallery-dl %1$s is available</string>
     <string name="gallery_dl_update_available_text">Open Hazel to update the image engine</string>
     <string name="gallery_dl_update_installed_title">gallery-dl updated to %1$s</string>
@@ -1234,4 +1262,14 @@
     <string name="guide_share_video">Choose every option, then download</string>
     <string name="guide_share_images">Choose image options, then download</string>
     <string name="guide_share_instant">Downloads at once in your saved quality</string>
+    <string name="caption_copy">Copy</string>
+    <string name="caption_save_text">Save as text</string>
+    <string name="caption_saved">Caption downloaded</string>
+    <string name="caption_save_failed">Caption could not be saved</string>
+    <string name="caption_view_full">Show full caption</string>
+    <string name="caption_save_choices">What to save</string>
+    <string name="caption_only">Caption only</string>
+    <string name="caption_with_file">All</string>
+    <string name="gallery_settings_caption_in_file">Caption in image files</string>
+    <string name="gallery_settings_caption_in_file_hint">Written into saved JPEG and PNG</string>
 </resources>

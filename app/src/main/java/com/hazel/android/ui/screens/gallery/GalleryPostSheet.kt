@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Link
@@ -47,7 +48,7 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material3.AlertDialog
+import com.hazel.android.ui.components.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -458,6 +459,11 @@ internal fun GalleryPostSheet(
                         OptionChip(metadataLabel, Icons.Filled.DataObject, active = current.writeMetadata, compact = true) {
                             update(current.copy(writeMetadata = !current.writeMetadata))
                         }
+                        if (items.any { it.caption.isNotBlank() }) {
+                            OptionChip(stringResource(R.string.gallery_caption), Icons.Filled.FormatQuote, active = current.embedCaption, compact = true) {
+                                update(current.copy(embedCaption = !current.embedCaption))
+                            }
+                        }
                         OptionChip(postDateLabel, Icons.Filled.Schedule, active = current.keepPostDate, compact = true) {
                             update(current.copy(keepPostDate = !current.keepPostDate))
                         }
@@ -619,7 +625,7 @@ internal fun GalleryPostSheet(
             item = item,
             postUrl = postUrl,
             confirmAsApply = true,
-            onDownload = { chosenOptions, title, author ->
+            onDownload = { chosenOptions, title, author, _ ->
                 choices = choices + (item.index to FileChoice(chosenOptions, title, author))
                 opened = null
             },
