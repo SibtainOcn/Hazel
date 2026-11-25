@@ -1,5 +1,16 @@
 package com.hazel.android.ui.screens.gallery
 
+import androidx.compose.material.icons.filled.OpenInFull
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Surface
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material.icons.filled.LibraryAdd
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import com.hazel.android.ui.components.CaptionSheet
+import com.hazel.android.gallery.GallerySave
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -117,7 +128,7 @@ internal fun GalleryItemSheet(
     item: GalleryItem,
     /** The post's link, for the link dialog and the cookies dialog's site. */
     postUrl: String,
-    onDownload: (options: GalleryOptions, title: String, author: String) -> Unit,
+    onDownload: (options: GalleryOptions, title: String, author: String, save: GallerySave) -> Unit,
     onDismiss: () -> Unit,
     /** Opened from a set: the action reads OK and hands the choice back instead of downloading. */
     confirmAsApply: Boolean = false
@@ -137,6 +148,9 @@ internal fun GalleryItemSheet(
     val update: (GalleryOptions) -> Unit = { options = it }
 
     var title by rememberSaveable(item.url) { mutableStateOf(defaultTitle(item)) }
+    var captionOpen by remember { mutableStateOf(false) }
+    var saveMenu by remember { mutableStateOf(false) }
+    val hasCaption = item.caption.isNotBlank()
     var author by rememberSaveable(item.url) { mutableStateOf(defaultAuthor(item)) }
 
     // Only Quality starts open; past two open sections the oldest closes, as in the video sheet.
@@ -188,12 +202,53 @@ internal fun GalleryItemSheet(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                 }
-                SheetDownloadPill(
-                    label = stringResource(if (confirmAsApply) R.string.format_sheet_ok else R.string.format_sheet_download),
-                    icon = if (confirmAsApply) Icons.Filled.Check else Icons.Filled.Download,
-                    enabled = options != null,
-                    onClick = { options?.let { onDownload(it, title.trim(), author.trim()) } }
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SheetDownloadPill(
+                        label = stringResource(if (confirmAsApply) R.string.format_sheet_ok else R.string.format_sheet_download),
+                        icon = if (confirmAsApply) Icons.Filled.Check else Icons.Filled.Download,
+                        enabled = options != null,
+                        onClick = { options?.let { onDownload(it, title.trim(), author.trim(), GallerySave.MEDIA) } },
+                        joinedEnd = 8.dp.takeIf { hasCaption && !confirmAsApply }
+                    )
+                    // With a caption, the arrow beside Download chooses what is saved: one split button.
+                    if (hasCaption && !confirmAsApply) {
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Box {
+                            Surface(
+                                onClick = { saveMenu = true },
+                                enabled = options != null,
+                                shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 24.dp, bottomEnd = 24.dp),
+                                color = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(width = 40.dp, height = 48.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.caption_save_choices))
+                                }
+                            }
+                            DropdownMenu(
+                                expanded = saveMenu,
+                                onDismissRequest = { saveMenu = false },
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                listOf(
+                                    Triple(GallerySave.MEDIA, if (item.isVideo) R.string.format_sheet_tab_video else R.string.gallery_image, Icons.Filled.Image),
+                                    Triple(GallerySave.CAPTION, R.string.caption_only, Icons.Filled.FormatQuote),
+                                    Triple(GallerySave.BOTH, R.string.caption_with_file, Icons.Filled.LibraryAdd)
+                                ).forEach { (save, label, icon) ->
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(label)) },
+                                        leadingIcon = { Icon(icon, contentDescription = null) },
+                                        onClick = {
+                                            saveMenu = false
+                                            options?.let { onDownload(it, title.trim(), author.trim(), save) }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -241,7 +296,7 @@ internal fun GalleryItemSheet(
                         onValueChange = { title = it },
                         color = fieldColor,
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                        shape = fieldGroupShape(0, 2)
+                        shape = fieldGroupShape(0, if (hasCaption) 3 else 2)
                     )
                     EditableField(
                         label = stringResource(R.string.format_sheet_label_author),
@@ -249,8 +304,11 @@ internal fun GalleryItemSheet(
                         onValueChange = { author = it },
                         color = fieldColor,
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
-                        shape = fieldGroupShape(1, 2)
+                        shape = fieldGroupShape(1, if (hasCaption) 3 else 2)
                     )
+                    if (hasCaption) {
+                        CaptionField(item.caption, fieldColor, fieldGroupShape(2, 3)) { captionOpen = true }
+                    }
                 }
             }
 
@@ -294,6 +352,7 @@ internal fun GalleryItemSheet(
             val filenameLabel = stringResource(R.string.format_sheet_filename_template)
             val metadataLabel = stringResource(R.string.gallery_metadata)
             val postDateLabel = stringResource(R.string.gallery_post_date)
+            val captionLabel = stringResource(R.string.gallery_caption)
             val cookiesLabel = stringResource(R.string.cookies_title)
             val filenameOn = current.safeTemplate != null
             SheetSection(
@@ -303,6 +362,7 @@ internal fun GalleryItemSheet(
                 summary = listOfNotNull(
                     filenameLabel.takeIf { filenameOn },
                     metadataLabel.takeIf { current.writeMetadata },
+                    captionLabel.takeIf { current.embedCaption && !item.isVideo },
                     postDateLabel.takeIf { current.keepPostDate },
                     cookiesLabel.takeIf { cookiesOn }
                 ).joinToString(", "),
@@ -333,10 +393,12 @@ internal fun GalleryItemSheet(
                         onClick = { update(current.copy(writeMetadata = !current.writeMetadata)) }
                     )
                     if (!item.isVideo) {
+                        // Writes the caption into each JPEG or PNG saved.
                         OptionChip(
-                            label = stringResource(R.string.gallery_caption),
+                            label = captionLabel,
                             icon = Icons.Filled.FormatQuote,
-                            onClick = { showUnderMaintenance(context) }
+                            active = current.embedCaption,
+                            onClick = { update(current.copy(embedCaption = !current.embedCaption)) }
                         )
                     }
                     OptionChip(
@@ -360,6 +422,7 @@ internal fun GalleryItemSheet(
             }
             Spacer(modifier = Modifier.height(28.dp))
         }
+        if (captionOpen) CaptionSheet(item.caption, title.trim(), onDismiss = { captionOpen = false })
 
         // What the link and incognito buttons did, over the sheet, wherever it is scrolled.
         androidx.compose.animation.AnimatedVisibility(
@@ -475,3 +538,31 @@ private fun videoModeLabel(mode: GalleryVideoMode): String = stringResource(
 
 /** gallery-dl's name for X, the one site whose files come in smaller sizes. */
 private const val X_SITE = "twitter"
+
+/** The caption's start in the Details group, with a button that opens all of it. */
+@Composable
+private fun CaptionField(caption: String, color: androidx.compose.ui.graphics.Color, shape: androidx.compose.ui.graphics.Shape, onOpen: () -> Unit) {
+    Surface(onClick = onOpen, shape = shape, color = color, modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, top = 10.dp, bottom = 10.dp, end = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.gallery_caption),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    caption,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+            }
+            androidx.compose.material3.IconButton(onClick = onOpen) {
+                Icon(Icons.Filled.OpenInFull, contentDescription = stringResource(R.string.caption_view_full))
+            }
+        }
+    }
+}

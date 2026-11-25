@@ -3,6 +3,7 @@ package com.hazel.android.gallery.queue
 import com.hazel.android.gallery.GalleryImageSize
 import com.hazel.android.gallery.GalleryOptions
 import com.hazel.android.gallery.GalleryPost
+import com.hazel.android.gallery.GallerySave
 import com.hazel.android.gallery.GalleryVideoMode
 import org.json.JSONArray
 import org.json.JSONObject
@@ -21,7 +22,10 @@ data class GalleryDownloadRequest(
     val thumbnail: String? = null,
     val id: Long = nextId(),
     /** File addresses fetched one by one instead of [url], for a post without a link of its own. */
-    val files: List<String>? = null
+    val files: List<String>? = null,
+    /** The post's caption, saved as a text file or written into the images as [save] and the options ask. */
+    val caption: String = "",
+    val save: GallerySave = GallerySave.MEDIA
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("url", url)
@@ -31,6 +35,8 @@ data class GalleryDownloadRequest(
         put("id", id)
         indexes?.let { put("indexes", JSONArray(it)) }
         files?.let { put("files", JSONArray(it)) }
+        if (caption.isNotEmpty()) put("caption", caption)
+        put("save", save.name)
         options?.let { o ->
             put("options", JSONObject().apply {
                 put("imageSize", o.imageSize.name)
@@ -40,6 +46,7 @@ data class GalleryDownloadRequest(
                 put("keepPostDate", o.keepPostDate)
                 put("packZip", o.packZip)
                 put("skipDownloaded", o.skipDownloaded)
+                put("embedCaption", o.embedCaption)
             })
         }
     }
@@ -71,6 +78,8 @@ data class GalleryDownloadRequest(
                 indexes = json.optJSONArray("indexes")?.let { a -> List(a.length()) { a.getInt(it) } },
                 files = json.optJSONArray("files")?.let { a -> List(a.length()) { a.getString(it) } }
                     ?.filter { it.startsWith("http") || it.startsWith("ytdl:") }?.takeIf { it.isNotEmpty() },
+                caption = json.optString("caption"),
+                save = GallerySave.fromName(json.optString("save")),
                 options = json.optJSONObject("options")?.let { o ->
                     GalleryOptions(
                         imageSize = runCatching { GalleryImageSize.valueOf(o.optString("imageSize")) }.getOrDefault(GalleryImageSize.ORIGINAL),
@@ -79,7 +88,8 @@ data class GalleryDownloadRequest(
                         writeMetadata = o.optBoolean("writeMetadata"),
                         keepPostDate = o.optBoolean("keepPostDate", true),
                         packZip = o.optBoolean("packZip"),
-                        skipDownloaded = o.optBoolean("skipDownloaded")
+                        skipDownloaded = o.optBoolean("skipDownloaded"),
+                        embedCaption = o.optBoolean("embedCaption")
                     )
                 },
                 title = json.optString("title"),
@@ -96,7 +106,8 @@ fun GalleryPost.request(
     indexes: List<Int>?,
     options: GalleryOptions?,
     title: String? = null,
-    author: String? = null
+    author: String? = null,
+    save: GallerySave = GallerySave.MEDIA
 ): GalleryDownloadRequest {
     val chosen = indexes?.toSet()?.let { wanted -> items.filter { it.index in wanted } } ?: items
     val first = chosen.firstOrNull()
@@ -107,6 +118,8 @@ fun GalleryPost.request(
         title = title ?: first?.title.orEmpty(),
         author = author ?: this.author,
         thumbnail = first?.thumbnail ?: first?.url?.takeUnless { first.isVideo },
-        files = chosen.map { it.url }.takeIf { direct }
+        files = chosen.map { it.url }.takeIf { direct },
+        caption = first?.caption.orEmpty(),
+        save = save
     )
 }
