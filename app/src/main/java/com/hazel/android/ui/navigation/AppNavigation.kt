@@ -127,7 +127,7 @@ private val tabRoutes = bottomNavItems.map { it.route }.toSet()
 /** Screens shown without the bottom bar. */
 private val subScreenRoutes = setOf(
     "storage_locations", "appearance", "tools", "converter", "update", "cookies", "fetch_settings", "storage_cleanup", "sponsor", "software_update", "hazel_update", "ytdlp_update",
-    "processing", "advanced", "proxy"
+    "processing", "advanced", "proxy", "gallery_settings"
 )
 
 /**
@@ -486,6 +486,7 @@ fun AppNavigation(
                     onNavigateToAppearance = { navController.navigate("appearance") },
                     onNavigateToConverter = { navController.navigate("converter") },
                     onNavigateToStorageLocations = { navController.navigate("storage_locations") },
+                    onNavigateToGallerySettings = { navController.navigate("gallery_settings") },
                     onNavigateToProcessing = { navController.navigate("processing") },
                     onNavigateToAdvanced = { navController.navigate("advanced") },
                     onNavigateToBackup = { navController.navigate("backup") },
@@ -549,6 +550,13 @@ fun AppNavigation(
             }
             screen("backup") {
                 BackupScreen(onBack = { navController.popBackStack() })
+            }
+            screen("gallery_settings") {
+                com.hazel.android.ui.screens.more.GallerySettingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenCookies = { navController.navigate("cookies") },
+                    onOpenProxy = { navController.navigate("proxy") }
+                )
             }
             screen("storage_locations") {
                 StorageLocationsScreen(onBack = { navController.popBackStack() })

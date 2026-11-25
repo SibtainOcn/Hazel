@@ -82,6 +82,7 @@ internal val SETTINGS_INDEX: List<SettingEntry> = buildList {
     on(more, "advanced", R.string.more_advanced to R.string.advanced_description)
     on(more, "backup", R.string.more_backup to R.string.backup_description)
     on(more, "storage_locations", R.string.more_downloads to R.string.storage_locations_subtitle)
+    on(more, "gallery_settings", R.string.nav_gallery to R.string.gallery_settings_description)
     add(SettingEntry(R.string.more_language, null, more, action = SettingAction.LANGUAGE))
     on(more, "cookies", R.string.more_cookies to R.string.cookies_description)
     on(more, "fetch_settings", R.string.more_link_reading to R.string.fetch_settings_screen_description)
@@ -174,6 +175,21 @@ internal val SETTINGS_INDEX: List<SettingEntry> = buildList {
         R.string.fetch_settings_play_with to null,
         R.string.fetch_settings_play_quality to null,
         R.string.fetch_settings_play_audio to null
+    )
+    on(
+        R.string.nav_gallery, "gallery_settings",
+        R.string.gallery_settings_save_folder to null,
+        R.string.gallery_settings_image_size to R.string.gallery_settings_image_size_hint,
+        R.string.gallery_settings_video_quality to null,
+        R.string.options_filename_title to null,
+        R.string.gallery_settings_metadata to null,
+        R.string.gallery_settings_post_date to null,
+        R.string.gallery_settings_zip to null,
+        R.string.gallery_settings_skip_downloaded to R.string.gallery_settings_skip_downloaded_hint,
+        R.string.gallery_settings_clear_record to R.string.gallery_settings_clear_record_hint,
+        R.string.gallery_posts_per_search to null,
+        R.string.gallery_show to null,
+        R.string.gallery_skip_reposts to null
     )
     on(R.string.cleanup_title, "storage_cleanup", R.string.cleanup_action_clear_everything to null)
     DocPage.entries.forEach { page ->
