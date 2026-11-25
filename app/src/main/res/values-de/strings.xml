@@ -168,14 +168,12 @@
 
     <!-- GettingStartedDialog -->
     <string name="guide_step_badge">Schritt %1$d von %2$d</string>
-    <string name="guide_step1_title">Einfügen &amp; Herunterladen</string>
+    <string name="guide_step1_title">Einfügen, suchen, laden</string>
     <string name="guide_step2_title">Formatauswahl</string>
-    <string name="guide_step3_title">Hazel Sofort</string>
     <string name="guide_step4_title">Akku-Optimierung</string>
     <string name="guide_step5_title">Benachrichtigungen</string>
-    <string name="guide_step_paste_link">Füge einen oder mehrere Links oder eine ganze Playlist ins Suchfeld ein.</string>
+    <string name="guide_step_paste_link">Ein Link, mehrere oder eine ganze Playlist. Video, Audio oder Bilder.</string>
     <string name="guide_step_pick_format">Tippe auf eine Karte für ein genaues Format, mit Größe und Codec je Qualität.</string>
-    <string name="guide_step_share_instant">Teile an Hazel Instant, um sofort mit deinen Einstellungen zu starten. Der Regler öffnet Synthese.</string>
     <string name="guide_step_battery_unrestricted">Stelle die Akkunutzung auf uneingeschränkt, damit Android Hintergrund-Downloads nicht stoppt.</string>
     <string name="guide_step_notifications">Erhalte Benachrichtigungen über den Downloadfortschritt und abgeschlossene Dateien im Hintergrund.</string>
     <string name="guide_allow">Zulassen</string>
@@ -658,7 +656,6 @@
     <string name="glass_style_ocean">Ozean</string>
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Mach es zu deinem</string>
-    <string name="guide_step_appearance_desc">Wähle ein Design, eine Akzentfarbe und den Glas-Look. Du kannst das jederzeit in den Einstellungen ändern.</string>
     <string name="whats_new_tag">Neu</string>
     <string name="whats_new_version">Version %1$s</string>
     <string name="whats_new_done">Verstanden</string>
@@ -997,7 +994,6 @@
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Synthese-Einstellungen</string>
     <string name="guide_step_share_title">An Hazel teilen</string>
-    <string name="guide_step_share_sheet">Teile einen Link aus jeder App an Hazel und lade sofort oder wähle jede Option.</string>
     <string name="instant_closing">Schließt in %1$d s</string>
     <string name="ytdlp_update_channel_name">Engine-Updates</string>
     <string name="ytdlp_update_channel_description">Hinweise zu Updates der yt-dlp-Engine</string>
@@ -1086,7 +1082,6 @@
     <string name="hazel_update_available_text">Tippen, um Neuerungen zu sehen und zu aktualisieren.</string>
     <string name="hazel_update_ready_text">Geladen und bereit. Zum Installieren tippen.</string>
     <string name="guide_step_updates_title">Immer aktuell</string>
-    <string name="guide_step_updates_desc">Wähle, wie Hazel und yt-dlp aktualisieren. Jederzeit änderbar unter Software-Update.</string>
     <string name="guide_updates_notify">Melden</string>
     <string name="upd_wifi_only_title">Nur im WLAN laden</string>
     <string name="upd_wifi_only_summary">Keine Downloads über mobile Daten</string>
@@ -1117,7 +1112,6 @@
     <string name="guide_updates_ytdlp">yt-dlp auto</string>
     <string name="guide_updates_hazel">Hazel auto</string>
     <string name="guide_updates_wifi">Nur WLAN</string>
-    <string name="guide_updates_more">Mehr</string>
     <string name="upd_failure_no_space">Auf diesem Gerät ist nicht genug freier Speicher vorhanden, um das Update zu installieren. Gib etwas Speicherplatz frei und versuche es erneut.</string>
     <string name="upd_failure_timeout">Die Verbindung zu GitHub hat zu lange gedauert. Wechsle zu einem stärkeren Netzwerk und versuche es erneut.</string>
     <string name="upd_failure_unreachable">Hazel konnte GitHub nicht erreichen. Prüfe deine Internetverbindung sowie die Einstellungen für VPN und Privates DNS und versuche es dann erneut.</string>
@@ -1207,6 +1201,10 @@
     <string name="gallery_group_by_author">Nach Autor gruppieren</string>
     <string name="gallery_group_by_author_summary">Einzelbilder eines Autors in einem Karussell</string>
     <string name="more_image_settings">Bildeinstellungen</string>
+    <string name="guide_share_from_apps">Teile einen Link aus jeder App</string>
+    <string name="guide_share_video">Alle Optionen wählen, dann laden</string>
+    <string name="guide_share_images">Bildoptionen wählen, dann laden</string>
+    <string name="guide_share_instant">Lädt sofort in deiner gespeicherten Qualität</string>
     <string name="caption_copy">Kopieren</string>
     <string name="caption_save_text">Als Text speichern</string>
     <string name="caption_saved">Beschriftung heruntergeladen</string>

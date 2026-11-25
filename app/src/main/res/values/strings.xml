@@ -180,14 +180,12 @@
 
     <!-- GettingStartedDialog -->
     <string name="guide_step_badge">Step %1$d of %2$d</string>
-    <string name="guide_step1_title">Paste &amp; Download</string>
+    <string name="guide_step1_title">Paste, search, download</string>
     <string name="guide_step2_title">Format Selection</string>
-    <string name="guide_step3_title">Hazel Instant</string>
     <string name="guide_step4_title">Battery Optimization</string>
     <string name="guide_step5_title">Notifications</string>
-    <string name="guide_step_paste_link">Paste one or more links, or a whole playlist, into the search field.</string>
+    <string name="guide_step_paste_link">One link, many links or a whole playlist. Video, audio or images.</string>
     <string name="guide_step_pick_format">Tap a card to pick an exact format, with size and codec for each quality.</string>
-    <string name="guide_step_share_instant">Share to Hazel Instant to start right away with your settings. Tune opens Synthesizing.</string>
     <string name="guide_step_battery_unrestricted">Set battery use to unrestricted so Android won\'t stop background downloads.</string>
     <string name="guide_step_notifications">Get notified about download progress and completions in the background.</string>
     <string name="guide_allow">Allow</string>
@@ -729,7 +727,6 @@
     <string name="glass_style_ocean">Ocean</string>
     <string name="glass_style_mono">Mono</string>
     <string name="guide_step_appearance_title">Make it yours</string>
-    <string name="guide_step_appearance_desc">Pick a theme, an accent and the glass look. You can change them any time in settings.</string>
     <string name="whats_new_tag">What\'s new</string>
     <string name="whats_new_version">Version %1$s</string>
     <string name="whats_new_done">Got it</string>
@@ -1079,7 +1076,6 @@
     <string name="instant_ok">OK</string>
     <string name="instant_settings">Synthesizing settings</string>
     <string name="guide_step_share_title">Share to Hazel</string>
-    <string name="guide_step_share_sheet">Share a link to Hazel from any app, then download now or choose every option.</string>
     <string name="instant_closing">Closing in %1$d s</string>
     <string name="advanced_section_network">Network</string>
     <string name="advanced_proxy">Proxy</string>
@@ -1143,7 +1139,6 @@
     <string name="hazel_update_available_text">Tap to see what\'s new and update.</string>
     <string name="hazel_update_ready_text">Downloaded and ready. Tap to install.</string>
     <string name="guide_step_updates_title">Stay up to date</string>
-    <string name="guide_step_updates_desc">Choose how Hazel and yt-dlp update. Change it any time in Software update.</string>
     <string name="guide_updates_notify">Notify me</string>
     <string name="upd_wifi_only_title">Download on Wi-Fi only</string>
     <string name="upd_wifi_only_summary">Skip downloads on mobile data</string>
@@ -1174,7 +1169,6 @@
     <string name="guide_updates_ytdlp">Auto yt-dlp</string>
     <string name="guide_updates_hazel">Auto Hazel</string>
     <string name="guide_updates_wifi">Wi-Fi only</string>
-    <string name="guide_updates_more">More</string>
     <string name="upd_failure_no_space">There isn\'t enough free storage on this device to install the update. Free up some space and try again.</string>
     <string name="upd_failure_timeout">The connection to GitHub timed out. Switch to a stronger network and try again.</string>
     <string name="upd_failure_unreachable">Hazel couldn\'t reach GitHub. Check your internet connection, VPN and Private DNS settings, then try again.</string>
@@ -1264,6 +1258,10 @@
     <string name="gallery_group_by_author">Group by author</string>
     <string name="gallery_group_by_author_summary">Single images from one author in one carousel</string>
     <string name="more_image_settings">Image settings</string>
+    <string name="guide_share_from_apps">Share a link from any app</string>
+    <string name="guide_share_video">Choose every option, then download</string>
+    <string name="guide_share_images">Choose image options, then download</string>
+    <string name="guide_share_instant">Downloads at once in your saved quality</string>
     <string name="caption_copy">Copy</string>
     <string name="caption_save_text">Save as text</string>
     <string name="caption_saved">Caption downloaded</string>
