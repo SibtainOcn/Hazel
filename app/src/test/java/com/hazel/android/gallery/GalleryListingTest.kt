@@ -15,7 +15,7 @@ class GalleryListingTest {
               [3, "https://cdn.example/a.jpg", {"category": "instagram", "extension": "jpg",
                   "username": "spacebrief", "description": "First line\nsecond", "width": 1080, "height": 1350}],
               [3, "https://cdn.example/b.mp4", {"category": "instagram", "extension": "mp4",
-                  "username": "spacebrief", "display_url": "https://cdn.example/b.jpg"}]
+                  "username": "spacebrief", "display_url": "https://cdn.example/b.jpg", "title": "", "seo_alt_text": "a cat"}]
             ]
         """.trimIndent()
 
@@ -32,6 +32,7 @@ class GalleryListingTest {
         assertEquals(2, video.index)
         assertTrue(video.isVideo)
         assertEquals("https://cdn.example/b.jpg", video.thumbnail)
+        assertEquals("a cat", video.title)
     }
 
     @Test

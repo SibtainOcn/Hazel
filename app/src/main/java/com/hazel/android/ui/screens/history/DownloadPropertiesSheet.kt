@@ -34,6 +34,10 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.OpenInFull
+import com.hazel.android.ui.components.CaptionSheet
+import com.hazel.android.util.CaptionMetadata
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
@@ -108,7 +112,17 @@ fun DownloadPropertiesSheet(
     // One header read per opening, and none at all for a file that is not there.
     var facts by remember(entry.id) { mutableStateOf(MediaFacts()) }
     LaunchedEffect(entry.id, present) {
-        if (present) facts = runCatching { MediaProbeFacts.read(context, entry.fileUri) }.getOrDefault(MediaFacts())
+        if (present) facts = runCatching { MediaProbeFacts.read(context, entry.fileUri, image = entry.isImage) }.getOrDefault(MediaFacts())
+    }
+    // The caption written into the image itself, read from the file on disk.
+    var caption by remember(entry.id) { mutableStateOf<String?>(null) }
+    var captionOpen by remember { mutableStateOf(false) }
+    LaunchedEffect(entry.id, present) {
+        if (present && entry.isImage) caption = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching {
+                context.contentResolver.openInputStream(android.net.Uri.parse(entry.fileUri))?.use(CaptionMetadata::read)
+            }.getOrNull()
+        }
     }
 
     // A new object per message, so the same one twice in a row still restarts its time.
@@ -141,7 +155,7 @@ fun DownloadPropertiesSheet(
                 Header(entry, present, facts)
                 StatTiles(entry, facts)
                 FileActions(entry, present)
-                Details(entry, facts, onCopy = copy)
+                Details(entry, facts, caption, onOpenCaption = { captionOpen = true }, onCopy = copy)
                 if (entry.url.isNotBlank() && (onDownloadAgain != null || onFetchAgain != null)) {
                     AgainGroup(onDownloadAgain, onFetchAgain)
                 }
@@ -160,6 +174,7 @@ fun DownloadPropertiesSheet(
             }
         }
     }
+    caption?.takeIf { captionOpen }?.let { CaptionSheet(it, entry.title, onDismiss = { captionOpen = false }) }
 }
 
 private class PropertiesFeedback(val message: String)
@@ -278,17 +293,22 @@ private fun FileActions(entry: HistoryEntry, present: Boolean) {
     val primary = MaterialTheme.colorScheme.primary
     val neutral = MaterialTheme.colorScheme.surfaceContainerHighest
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-        CookieAction(Icons.Filled.PlayArrow, R.string.format_sheet_play, present, primary, MaterialTheme.colorScheme.onPrimary) {
-            MediaOpener.play(context, entry.fileUri, entry.isVideo)
+        // An image is viewed, not played.
+        CookieAction(
+            if (entry.isImage) Icons.Filled.Image else Icons.Filled.PlayArrow,
+            if (entry.isImage) R.string.gallery_view else R.string.format_sheet_play,
+            present, primary, MaterialTheme.colorScheme.onPrimary
+        ) {
+            MediaOpener.play(context, entry.fileUri, entry.mimeType)
         }
         CookieAction(Icons.AutoMirrored.Filled.OpenInNew, R.string.media_open_chooser, present, neutral, MaterialTheme.colorScheme.onSurface) {
-            MediaOpener.openWith(context, entry.fileUri, entry.isVideo)
+            MediaOpener.openWith(context, entry.fileUri, entry.mimeType)
         }
         CookieAction(Icons.Filled.FolderOpen, R.string.properties_show_file, true, neutral, MaterialTheme.colorScheme.onSurface) {
-            MediaOpener.showFile(context, entry.fileUri, entry.isVideo)
+            MediaOpener.showFile(context, entry.fileUri, entry.isVideo, entry.isImage)
         }
         CookieAction(Icons.Filled.Share, R.string.properties_share, present, neutral, MaterialTheme.colorScheme.onSurface) {
-            MediaOpener.share(context, entry.fileUri, entry.isVideo)
+            MediaOpener.share(context, entry.fileUri, entry.mimeType)
         }
     }
 }
@@ -335,9 +355,29 @@ internal fun CookieAction(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Details(entry: HistoryEntry, facts: MediaFacts, onCopy: (String) -> Unit) {
+private fun Details(
+    entry: HistoryEntry,
+    facts: MediaFacts,
+    caption: String?,
+    onOpenCaption: () -> Unit,
+    onCopy: (String) -> Unit
+) {
     val context = LocalContext.current
     val media = buildList<@Composable () -> Unit> {
+        caption?.let { text ->
+            add {
+                Row(
+                    modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenCaption),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Label(stringResource(R.string.gallery_caption))
+                        Text(text, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    }
+                    SquareIcon(Icons.Filled.OpenInFull, R.string.caption_view_full, onOpenCaption)
+                }
+            }
+        }
         entry.formatLabel.ifBlank { null }?.let { add { FactRow(stringResource(R.string.properties_quality), it) } }
         formatDuration(entry.durationSeconds.takeIf { it > 0 } ?: facts.durationSeconds).ifBlank { null }
             ?.let { add { FactRow(stringResource(R.string.properties_length), it) } }
@@ -365,7 +405,7 @@ private fun Details(entry: HistoryEntry, facts: MediaFacts, onCopy: (String) -> 
         entry.savedPath.ifBlank { null }?.let { path ->
             add {
                 StackedRow(stringResource(R.string.properties_saved_to), path, Icons.Filled.FolderOpen, R.string.properties_show_file) {
-                    MediaOpener.showFile(context, entry.fileUri, entry.isVideo)
+                    MediaOpener.showFile(context, entry.fileUri, entry.isVideo, entry.isImage)
                 }
             }
         }

@@ -86,7 +86,7 @@ fun HazelBottomBar(
                 spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
                 label = "tabShape"
             )
-            val tone = MaterialTheme.colorScheme.onSurface.copy(alpha = INDICATOR_ALPHA)
+            val tone = com.hazel.android.ui.theme.accentTint()
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -117,7 +117,8 @@ fun HazelBottomBar(
                         painter = painterResource(item.icon),
                         contentDescription = stringResource(item.label),
                         modifier = Modifier.size(ICON_SIZE),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (selected) 1f else UNSELECTED_ALPHA)
+                        tint = if (selected) com.hazel.android.ui.theme.accentInk()
+                        else MaterialTheme.colorScheme.onSurface.copy(alpha = UNSELECTED_ALPHA)
                     )
                     if (item.showDot) {
                         Box(
@@ -144,10 +145,9 @@ private val INDICATOR_SIZE = 46.dp
 /** Home, History, Queue, More, in the bar's order. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private val TabShapes = listOf(
-    MaterialShapes.Cookie7Sided,
+    MaterialShapes.Cookie6Sided,
     MaterialShapes.Pentagon,
     MaterialShapes.Clover4Leaf,
     MaterialShapes.Gem
 )
 private const val UNSELECTED_ALPHA = 0.55f
-private const val INDICATOR_ALPHA = 0.2f

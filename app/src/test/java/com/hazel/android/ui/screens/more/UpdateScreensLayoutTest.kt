@@ -67,8 +67,9 @@ class UpdateScreensLayoutTest(private val qualifiers: String, private val fontSc
     }
 
     private fun softwareScreen() {
-        show { SoftwareUpdateScreen(onBack = {}, onNavigateToHazelUpdate = {}, onNavigateToYtDlpUpdate = {}) }
+        show { SoftwareUpdateScreen(onBack = {}, onNavigateToHazelUpdate = {}, onNavigateToYtDlpUpdate = {}, onNavigateToGalleryDlUpdate = {}) }
         listOf(R.string.upd_action_releases, R.string.upd_label_arch, R.string.upd_section_components).forEach { assertInside(context.getString(it)) }
+        assertInside("gallery-dl")
     }
 
     private fun everyState() {

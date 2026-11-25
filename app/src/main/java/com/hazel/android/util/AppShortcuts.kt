@@ -42,7 +42,7 @@ object AppShortcuts {
                     .build()
             }
             val share = listOf(
-                shareTarget(app, "share_download", app.getString(R.string.share_shortcut_download), ShareOverlayActivity::class.java.name),
+                shareTarget(app, "share_download", app.getString(R.string.share_label_video), ShareOverlayActivity::class.java.name),
                 shareTarget(app, "share_instant", app.getString(R.string.instant_label), "${app.packageName}.InstantShareActivity")
             )
             val max = ShortcutManagerCompat.getMaxShortcutCountPerActivity(app).coerceAtLeast(1)

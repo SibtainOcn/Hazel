@@ -1613,6 +1613,8 @@ class DownloadViewModel : ViewModel() {
             // Asks the system to leave the process alone for the length of the run. Started
             // before the first link rather than per link, so a set of ten is one service for
             // the whole set instead of ten in a row.
+            // One download at a time across engines: a gallery job in progress finishes first.
+            DownloadTurn.acquire(token)
             DownloadService.start(app, firstTitle)
 
             val limits = TransferLimits(
@@ -1929,10 +1931,12 @@ class DownloadViewModel : ViewModel() {
                 if (runOwner === token) runOwner = null
                 more
             }
+            DownloadTurn.release(token)
             if (more) runQueue(app, resumed = false)
         }
         job.invokeOnCompletion {
             synchronized(queue) { if (runOwner === token) runOwner = null }
+            DownloadTurn.release(token)
         }
         downloadJob = job
     }
@@ -2510,6 +2514,10 @@ class DownloadViewModel : ViewModel() {
      * same way left nothing on the list.
      */
     fun retryFailed(context: Context, failed: com.hazel.android.data.FailedDownload) {
+        com.hazel.android.gallery.queue.GalleryDownloadRequest.fromPayload(failed.queuedPayload)?.let { request ->
+            viewModelScope.launch { com.hazel.android.gallery.queue.GalleryQueue.add(context, request.copy(id = com.hazel.android.gallery.queue.GalleryDownloadRequest.nextId())) }
+            return
+        }
         val queued = DownloadQueueRepository.decodeItem(failed.queuedPayload)
         if (queued != null) {
             startBatch(context, listOf(queued.toPlan()), queued.options, queued.treeUri)
@@ -2525,7 +2533,11 @@ class DownloadViewModel : ViewModel() {
      * choice and folder, so each is downloaded as it was asked for and the queue is written
      * once per batch rather than once per link. The rest are read again, a few at a time.
      */
-    fun retryAllFailed(context: Context, failed: List<com.hazel.android.data.FailedDownload>) {
+    fun retryAllFailed(context: Context, all: List<com.hazel.android.data.FailedDownload>) {
+        val (gallery, failed) = all.partition {
+            com.hazel.android.gallery.queue.GalleryDownloadRequest.isPayload(it.queuedPayload)
+        }
+        gallery.forEach { retryFailed(context, it) }
         val queued = failed.mapNotNull { DownloadQueueRepository.decodeItem(it.queuedPayload) }
             .distinctBy { it.url }
         queued.groupBy { it.options to it.treeUri }.forEach { (key, items) ->
@@ -2987,6 +2999,8 @@ class DownloadViewModel : ViewModel() {
         // this one, otherwise stuck the card on the stage track while bytes were still
         // arriving.
         var postProcessing = false
+        var shownProcessing = false
+        var lastShownAt = 0L
         _state.update { s -> s.copy(
             processingSteps = steps,
             processingStep = 0,
@@ -3013,23 +3027,31 @@ class DownloadViewModel : ViewModel() {
             val announced = ProcessingStep.announcedBy(line)?.let { steps.indexOf(it) } ?: -1
             val fetched = if (postProcessing && steps.size > 1) 1 else 0
             val unmeasured = liveRun
-            _state.update { current -> current.copy(
-                progress = if (unmeasured) 0f else percent / 100f,
-                unmeasured = unmeasured,
-                totalBytes = if (unmeasured) 0L
-                else if (expectedTotalBytes > 0) expectedTotalBytes
-                else parseTotalBytes(line) ?: current.totalBytes,
-                eta = if (postProcessing) "" else ProgressText.eta(line) ?: current.eta,
-                status = status,
-                isProcessing = postProcessing && !unmeasured,
-                processingStep = maxOf(current.processingStep, announced, fetched)
-            ) }
+            // yt-dlp writes many lines a second; each state change redraws every screen
+            // watching it, so plain progress is passed on a few times a second and a stage
+            // change at once.
+            val now = System.currentTimeMillis()
+            val stageMoved = announced > _state.value.processingStep || postProcessing != shownProcessing
+            if (stageMoved || now - lastShownAt >= UI_INTERVAL_MS) {
+                lastShownAt = now
+                shownProcessing = postProcessing
+                _state.update { current -> current.copy(
+                    progress = if (unmeasured) 0f else percent / 100f,
+                    unmeasured = unmeasured,
+                    totalBytes = if (unmeasured) 0L
+                    else if (expectedTotalBytes > 0) expectedTotalBytes
+                    else parseTotalBytes(line) ?: current.totalBytes,
+                    eta = if (postProcessing) "" else ProgressText.eta(line) ?: current.eta,
+                    status = status,
+                    isProcessing = postProcessing && !unmeasured,
+                    processingStep = maxOf(current.processingStep, announced, fetched)
+                ) }
+            }
 
             // Updates are paced by the clock rather than by the percentage. yt-dlp reports
             // the same percentage for seconds at a time on a large transfer while the speed
             // and ETA behind it keep moving, so pacing on the percentage left the
             // notification showing figures that were already out of date.
-            val now = System.currentTimeMillis()
             if (now - lastNotifiedAt >= NOTIFICATION_INTERVAL_MS) {
                 lastNotifiedAt = now
                 downloadContext?.let {
@@ -3632,6 +3654,7 @@ class DownloadViewModel : ViewModel() {
 
         /** How often the progress notification is redrawn while a transfer runs. */
         const val NOTIFICATION_INTERVAL_MS = 600L
+        const val UI_INTERVAL_MS = 250L
 
         /** How often the temp directory is weighed while a transfer runs. */
         const val FLOOR_INTERVAL_MS = 1000L

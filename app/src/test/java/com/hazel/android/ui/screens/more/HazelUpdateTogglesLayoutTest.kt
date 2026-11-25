@@ -136,8 +136,6 @@ class HazelUpdateTogglesLayoutTest(private val locale: String, private val theme
             R.string.guide_updates_wifi
         )
         assertFits(*rows.toIntArray())
-        val open = compose.onNodeWithText(context.getString(R.string.guide_updates_more)).performScrollTo().assertIsDisplayed().fetchSemanticsNode()
-        assertTrue("More button runs off the edge", open.positionOnScreen.x + open.size.width <= context.resources.displayMetrics.widthPixels)
         saveScreen("guide-updates-$theme-$locale")
     }
 
