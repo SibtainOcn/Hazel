@@ -101,7 +101,7 @@ fun GalleryViewer(
                         .fillMaxSize()
                         .graphicsLayer { alpha = 1f - offset.absoluteValue.coerceIn(0f, 1f) * 0.85f }
                 ) {
-                    ViewerPage(item = items[page], active = page == pager.currentPage)
+                    items.getOrNull(page)?.let { ViewerPage(item = it, active = page == pager.currentPage) }
                 }
             }
 
@@ -128,7 +128,8 @@ fun GalleryViewer(
                 Spacer(modifier = Modifier.size(44.dp))
             }
 
-            val current = items[pager.currentPage]
+            // The results can shrink under an open viewer (a new search), so the page is clamped.
+            val current = items[pager.currentPage.coerceIn(0, items.lastIndex)]
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -178,7 +179,7 @@ fun GalleryViewer(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        itemsIndexed(items, key = { _, it -> it.index }) { index, item ->
+                        itemsIndexed(items) { index, item ->
                             val selected = index == pager.currentPage
                             val scale by animateFloatAsState(if (selected) 1.1f else 1f, label = "thumb")
                             val fade by animateFloatAsState(if (selected) 1f else 0.5f, label = "thumbAlpha")
