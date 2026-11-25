@@ -44,11 +44,31 @@ internal val GalleryTemplates = TemplateKind(
 @Composable
 internal fun rememberGalleryOptions(): MutableState<GalleryOptions?> {
     val context = LocalContext.current
-    val state = remember { mutableStateOf<GalleryOptions?>(null) }
+    val cached = SavedGalleryOptions.value
+    val state = remember { mutableStateOf(cached) }
     LaunchedEffect(Unit) {
-        if (state.value == null) state.value = SettingsRepository.getGalleryOptions(context).first()
+        val saved = SettingsRepository.getGalleryOptions(context).first()
+        SavedGalleryOptions.value = saved
+        // Settings may have changed since the copy was kept; an edit made in the sheet stays.
+        if (state.value == cached) state.value = saved
     }
     return state
+}
+
+/** The saved options, kept once read so a sheet has them on its first frame instead of popping them in. */
+private object SavedGalleryOptions {
+    @Volatile var value: GalleryOptions? = null
+}
+
+/** Reads the saved options ahead of the first sheet. */
+@Composable
+internal fun WarmGalleryOptions() {
+    val context = LocalContext.current
+    LaunchedEffect(context) {
+        if (SavedGalleryOptions.value == null) {
+            SavedGalleryOptions.value = SettingsRepository.getGalleryOptions(context).first()
+        }
+    }
 }
 
 internal fun showUnderMaintenance(context: Context) {

@@ -297,6 +297,7 @@ fun GalleryScreen(
     // Post index and file position, so a file of any post on a list of several can be opened.
     var viewing by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }
     val galleryJobs by GalleryQueue.jobs.collectAsState()
+    WarmGalleryOptions()
     val galleryFinished by GalleryQueue.finished.collectAsState()
     var logOpen by rememberSaveable { mutableStateOf(false) }
     var sheetFor by rememberSaveable { mutableStateOf<Pair<Int, Int>?>(null) }

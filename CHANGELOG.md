@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Gallery: View log on a failed run, and a Gallery files row in Temporary files.
 
 ### Fixed
+- Gallery sheets: saved image options and the cookies choice show on the first frame instead of popping in.
 - Gallery viewer: tapping the title also opens the caption, with a short hint under the count when a caption exists.
 - Player: the mini player keeps playing over every tab and screen instead of stopping when you leave Home.
 - Hazel updates: Beta and Nightly find their releases, move from one build to the next, and move onto a newer stable.

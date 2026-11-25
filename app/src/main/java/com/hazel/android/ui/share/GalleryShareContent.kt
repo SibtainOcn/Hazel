@@ -50,6 +50,7 @@ import com.hazel.android.ui.screens.download.NoResultsDialog
 import com.hazel.android.ui.screens.download.SheetDownloadPill
 import com.hazel.android.ui.screens.gallery.GalleryItemSheet
 import com.hazel.android.ui.screens.gallery.GalleryPostSheet
+import com.hazel.android.ui.screens.gallery.WarmGalleryOptions
 import com.hazel.android.ui.screens.gallery.dialogKind
 import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 import com.hazel.android.ui.theme.sheetBlackColor
@@ -76,6 +77,7 @@ internal fun GalleryShareContent(
     onClose: () -> Unit
 ) {
     val context = LocalContext.current
+    WarmGalleryOptions()
     var read by remember(url) { mutableStateOf<GalleryRead>(GalleryRead.Reading) }
     var attempt by remember(url) { mutableIntStateOf(0) }
     // Signing in from the failure dialog reads the link again with the new cookies.
