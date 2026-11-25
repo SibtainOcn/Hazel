@@ -188,10 +188,11 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         options: GalleryOptions? = null,
         post: GalleryPost? = this.post,
         title: String? = null,
-        author: String? = null
+        author: String? = null,
+        save: com.hazel.android.gallery.GallerySave = com.hazel.android.gallery.GallerySave.MEDIA
     ) {
         if (post == null || post.source.isEmpty()) return
-        val request = post.request(indexes, options, title, author)
+        val request = post.request(indexes, options, title, author, save)
         viewModelScope.launch { GalleryQueue.add(getApplication(), request) }
     }
 
@@ -534,9 +535,9 @@ fun GalleryScreen(
         GalleryItemSheet(
             item = item,
             postUrl = post.source,
-            onDownload = { options, title, author ->
+            onDownload = { options, title, author, save ->
                 sheetFor = null
-                viewModel.download(listOf(item.index), options, post, title, author)
+                viewModel.download(listOf(item.index), options, post, title, author, save)
             },
             onDismiss = { sheetFor = null }
         )

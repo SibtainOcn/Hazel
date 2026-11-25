@@ -41,7 +41,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
+import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.BatteryChargingFull
 import androidx.compose.material.icons.rounded.BlurOn
@@ -90,7 +92,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -119,7 +120,6 @@ import com.hazel.android.ui.theme.GlassStyle
 import com.hazel.android.ui.theme.LocalDarkTheme
 import com.hazel.android.ui.theme.LocalGlass
 import com.hazel.android.ui.theme.glassBackdrop
-import com.hazel.android.MainActivity
 import com.hazel.android.update.HazelUpdater
 import com.hazel.android.util.PermissionHelper
 import kotlinx.coroutines.launch
@@ -139,6 +139,7 @@ import kotlinx.coroutines.launch
  *
  * Follows the app theme: accent coloured Material 3 actions on the glass surface when glass is on.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GettingStartedDialog(
     onOpenBatterySettings: () -> Unit,
@@ -206,11 +207,17 @@ fun GettingStartedDialog(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
+                TallestStep(
+                    sizers = listOf(
+                        { AppearanceStep(appearance) },
+                        { UpdatesStep() },
+                        { ShareStep() },
+                        { StepHeader(rememberVectorPainter(Icons.Rounded.BatteryChargingFull), MaterialShapes.Gem.toShape(), stringResource(R.string.guide_step4_title), stringResource(R.string.guide_step_battery_unrestricted)) }
+                    )
+                ) {
                 AnimatedContent(
                     targetState = currentStep,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .steadyHeight(StepMinHeight),
+                    modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                     transitionSpec = {
                         val dir = if (targetState > initialState) 1 else -1
@@ -225,17 +232,9 @@ fun GettingStartedDialog(
                     if (step == APPEARANCE_STEP) {
                         AppearanceStep(appearance)
                     } else if (step == UPDATES_STEP) {
-                        UpdatesStep(onOpenUpdates = {
-                            // The guide stays open underneath; back returns to this step.
-                            // The app's own deep route, so it works from every screen that shows this guide.
-                            runCatching {
-                                context.startActivity(
-                                    Intent(context, MainActivity::class.java)
-                                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                        .putExtra(MainActivity.EXTRA_NAVIGATE_TO, "software_update")
-                                )
-                            }
-                        })
+                        UpdatesStep()
+                    } else if (step == SHARE_STEP) {
+                        ShareStep()
                     } else {
                         val data = stepData(step)
                         StepHeader(
@@ -245,6 +244,7 @@ fun GettingStartedDialog(
                             description = stringResource(data.descRes)
                         )
                     }
+                }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -444,19 +444,7 @@ internal const val StepMillis = 300
 internal const val FadeOutMillis = 90
 internal const val FadeInMillis = 210
 internal val StepSlide = 30.dp
-internal val StepMinHeight = 292.dp
 internal val ActionPadding = PaddingValues(horizontal = 16.dp)
-
-@Composable
-internal fun Modifier.steadyHeight(min: Dp): Modifier {
-    val tallest = remember { IntArray(1) }
-    return layout { measurable, constraints ->
-        val placeable = measurable.measure(constraints)
-        val height = maxOf(placeable.height, min.roundToPx(), tallest[0])
-        tallest[0] = height
-        layout(placeable.width, height) { placeable.place(0, (height - placeable.height) / 2) }
-    }
-}
 
 /**
  * Appearance choices for the guide. Read once when the guide opens, and switches flip
@@ -504,7 +492,7 @@ internal fun rememberAppearanceState(): AppearanceState {
 internal fun AppearanceStep(
     state: AppearanceState,
     title: String = stringResource(R.string.guide_step_appearance_title),
-    description: String = stringResource(R.string.guide_step_appearance_desc),
+    description: String = "",
 ) {
     val colors = MaterialTheme.colorScheme
     val accent = state.accent()
@@ -516,9 +504,13 @@ internal fun AppearanceStep(
     var stylePicker by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        StepIcon(rememberVectorPainter(Icons.Rounded.Palette), MaterialShapes.Cookie9Sided.toShape(), size = 64.dp)
+        Spacer(modifier = Modifier.height(12.dp))
         StepTitle(title)
-        Spacer(modifier = Modifier.height(6.dp))
-        StepDescription(description)
+        if (description.isNotBlank()) {
+            Spacer(modifier = Modifier.height(6.dp))
+            StepDescription(description)
+        }
         Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier = Modifier
@@ -568,7 +560,7 @@ internal fun AppearanceStep(
 /** How Hazel keeps itself current, the same two switches as on the Hazel update screen. */
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-internal fun UpdatesStep(onOpenUpdates: () -> Unit = {}) {
+internal fun UpdatesStep() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val notify by remember(context) { SettingsRepository.getHazelUpdateNotify(context) }.collectAsState(initial = false)
@@ -580,49 +572,10 @@ internal fun UpdatesStep(onOpenUpdates: () -> Unit = {}) {
     val fdroid = remember { HazelUpdater.isFdroid() }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        // The update icon and the way to the full screen share one row, so the card keeps its height.
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            StepIcon(rememberVectorPainter(Icons.Rounded.SystemUpdate), MaterialShapes.Cookie12Sided.toShape(), size = 64.dp)
-            val openLabel = stringResource(R.string.more_software_update)
-            FilledTonalButton(
-                onClick = onOpenUpdates,
-                modifier = Modifier
-                    .weight(1f, fill = false)
-                    .heightIn(min = 48.dp)
-                    .semantics(mergeDescendants = true) { contentDescription = openLabel },
-                contentPadding = PaddingValues(start = 6.dp, end = 14.dp, top = 6.dp, bottom = 6.dp)
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(MaterialShapes.Cookie9Sided.toShape())
-                        .background(MaterialTheme.colorScheme.primary)
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Rounded.ArrowForwardIos,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    stringResource(R.string.guide_updates_more),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1
-                )
-            }
-        }
+        StepIcon(rememberVectorPainter(Icons.Rounded.SystemUpdate), MaterialShapes.Cookie12Sided.toShape(), size = 64.dp)
         Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         StepTitle(stringResource(R.string.guide_step_updates_title))
-        Spacer(modifier = Modifier.height(6.dp))
-        StepDescription(stringResource(R.string.guide_step_updates_desc))
         Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier = Modifier
@@ -661,6 +614,93 @@ internal fun UpdatesStep(onOpenUpdates: () -> Unit = {}) {
                     if (!fdroid) SettingsRepository.setHazelUpdateWifiOnly(context, on)
                 }
             }
+        }
+    }
+}
+
+/** Every way to share a link into Hazel, one row each. */
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+internal fun ShareStep() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        StepIcon(rememberVectorPainter(Icons.Rounded.Share), MaterialShapes.Sunny.toShape(), size = 64.dp)
+        Spacer(modifier = Modifier.height(12.dp))
+        StepTitle(stringResource(R.string.guide_step_share_title))
+        Spacer(modifier = Modifier.height(6.dp))
+        StepDescription(stringResource(R.string.guide_share_from_apps))
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+        ) {
+            ShareRow(stringResource(R.string.share_label_video), stringResource(R.string.guide_share_video), Icons.Rounded.VideoSettings, MaterialShapes.Cookie9Sided.toShape())
+            RowDivider()
+            ShareRow(stringResource(R.string.instant_label), stringResource(R.string.guide_share_instant), painterResource(R.drawable.ic_hazel_bolt), MaterialShapes.Cookie7Sided.toShape())
+            RowDivider()
+            ShareRow(stringResource(R.string.share_label_images), stringResource(R.string.guide_share_images), Icons.Rounded.Image, MaterialShapes.Cookie6Sided.toShape())
+            RowDivider()
+            ShareRow(stringResource(R.string.instant_images_label), stringResource(R.string.guide_share_instant), Icons.Rounded.Bolt, MaterialShapes.Cookie4Sided.toShape())
+        }
+    }
+}
+
+@Composable
+private fun ShareRow(name: String, hint: String, icon: ImageVector, shape: Shape) =
+    ShareRow(name, hint, rememberVectorPainter(icon), shape)
+
+@Composable
+private fun ShareRow(name: String, hint: String, icon: Painter, shape: Shape) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .padding(end = 12.dp)
+                .size(34.dp)
+                .clip(shape)
+                .background(colors.primary.copy(alpha = 0.16f))
+        ) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp), tint = colors.primary)
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            RowLabel(name, Modifier)
+            Text(
+                hint,
+                style = MaterialTheme.typography.bodySmall.copy(hyphens = Hyphens.Auto),
+                color = colors.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/**
+ * Sizes [content] to the tallest of [sizers], so every step uses the same card height. The
+ * sizers are measured once per width, never drawn or touched, and dropped once measured.
+ */
+@Composable
+private fun TallestStep(sizers: List<@Composable () -> Unit>, content: @Composable () -> Unit) {
+    val measured = remember { IntArray(2) { -1 } }
+    SubcomposeLayout(Modifier.fillMaxWidth()) { constraints ->
+        val loose = constraints.copy(minHeight = 0)
+        if (measured[0] != constraints.maxWidth) {
+            measured[1] = sizers.mapIndexed { i, sizer ->
+                subcompose("sizer$i", sizer).maxOfOrNull { it.measure(loose).height } ?: 0
+            }.maxOrNull() ?: 0
+            measured[0] = constraints.maxWidth
+        }
+        val tallest = measured[1]
+        val placeables = subcompose("content", content).map { it.measure(loose) }
+        val height = maxOf(tallest, placeables.maxOfOrNull { it.height } ?: 0)
+        layout(constraints.maxWidth, height) {
+            placeables.forEach { it.place(0, (height - it.height) / 2) }
         }
     }
 }
@@ -757,8 +797,9 @@ private data class StepInfo(
 
 private const val APPEARANCE_STEP = 2
 private const val UPDATES_STEP = 3
-private const val BATTERY_STEP = 7
-private const val TOTAL_STEPS = 8
+private const val SHARE_STEP = 5
+private const val BATTERY_STEP = 6
+private const val TOTAL_STEPS = 7
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -775,25 +816,13 @@ private fun stepData(step: Int): StepInfo = when (step) {
         shape = MaterialShapes.Clover4Leaf.toShape(),
         icon = Icons.Rounded.VideoSettings
     )
-    5 -> StepInfo(
-        titleRes = R.string.guide_step_share_title,
-        descRes = R.string.guide_step_share_sheet,
-        shape = MaterialShapes.Sunny.toShape(),
-        icon = Icons.Rounded.Share
-    )
     6 -> StepInfo(
-        titleRes = R.string.guide_step3_title,
-        descRes = R.string.guide_step_share_instant,
-        shape = MaterialShapes.Cookie9Sided.toShape(),
-        iconRes = R.drawable.ic_hazel_bolt
-    )
-    7 -> StepInfo(
         titleRes = R.string.guide_step4_title,
         descRes = R.string.guide_step_battery_unrestricted,
         shape = MaterialShapes.Gem.toShape(),
         icon = Icons.Rounded.BatteryChargingFull
     )
-    8 -> StepInfo(
+    7 -> StepInfo(
         titleRes = R.string.guide_step5_title,
         descRes = R.string.guide_step_notifications,
         shape = MaterialShapes.SoftBurst.toShape(),

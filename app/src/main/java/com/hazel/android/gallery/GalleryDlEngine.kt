@@ -9,6 +9,7 @@ import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.NetworkProxy
 import com.hazel.android.download.YtDlpEngine
 import com.hazel.android.update.GalleryDlUpdater
+import com.hazel.android.util.CaptionMetadata
 import com.hazel.android.util.MediaStoreHelper
 import com.hazel.android.util.StoragePaths
 import kotlinx.coroutines.CancellationException
@@ -96,6 +97,11 @@ object GalleryDlEngine {
         indexes: List<Int>? = null,
         options: GalleryOptions? = null,
         files: List<String>? = null,
+        /** The post's caption: written into the images when the options ask, and saved as [captionName].txt when that is given. */
+        caption: String = "",
+        captionName: String? = null,
+        /** False when only the caption is saved. */
+        media: Boolean = true,
         onFetched: (Int) -> Unit = {},
         onSaved: (Uri) -> Unit = {}
     ): Int {
@@ -115,22 +121,57 @@ object GalleryDlEngine {
                 }
             }
             var fetched = 0
-            run(context, files?.takeIf { it.isNotEmpty() } ?: listOf(url), args) { onFetched(++fetched) }
-            val target = SettingsRepository.getSaveDirs(context).first().of(SaveKind.GALLERY)
-            return withContext(Dispatchers.IO) {
-                var saved = 0
-                val count: (Uri) -> Unit = { saved++; onSaved(it) }
-                val inTree = target.isCustom && runCatching {
-                    MediaStoreHelper.moveToTree(context, work, Uri.parse(target.uri), onMoved = count)
-                }.onFailure { Log.w(TAG, "Picked gallery folder failed, using the built-in one", it) }
-                    .getOrDefault(false)
-                if (!inTree) {
-                    MediaStoreHelper.moveToPublicStorage(context, work, StoragePaths.DOWNLOAD_GALLERY_RELATIVE_PATH, onMoved = count)
+            if (media) run(context, files?.takeIf { it.isNotEmpty() } ?: listOf(url), args) { onFetched(++fetched) }
+            withContext(Dispatchers.IO) {
+                if (chosen.embedCaption && caption.isNotBlank()) {
+                    work.walkTopDown().filter { it.isFile && CaptionMetadata.canEmbed(it) }.forEach { file ->
+                        runCatching { CaptionMetadata.embed(file, caption) }
+                            .onFailure { Log.w(TAG, "Caption not written into ${file.extension}", it) }
+                    }
                 }
-                saved
+                if (captionName != null && caption.isNotBlank()) File(work, captionFileName(captionName)).writeText(caption)
             }
+            return moveToSaveFolder(context, work, onSaved)
         } finally {
             withContext(Dispatchers.IO) { work.deleteRecursively() }
+        }
+    }
+
+    /** A text file name for [title]: no path characters, a short readable stem. */
+    internal fun captionFileName(title: String): String =
+        title.replace(Regex("""[\\/:*?"<>|\n\r\t]"""), " ").trim().take(80).ifBlank { "caption" } + ".txt"
+
+    /** Saves [text] as [name].txt in the gallery save folder, as a download would. True when it landed. */
+    suspend fun saveCaptionText(context: Context, name: String, text: String): Boolean {
+        val work = File(StoragePaths.tempDownloads, "caption-${UUID.randomUUID()}")
+        return try {
+            withContext(Dispatchers.IO) {
+                if (!work.mkdirs()) return@withContext false
+                File(work, captionFileName(name)).writeText(text)
+                true
+            } && moveToSaveFolder(context, work) {} > 0
+        } catch (e: Exception) {
+            Log.w(TAG, "Caption text not saved", e)
+            false
+        } finally {
+            withContext(Dispatchers.IO) { work.deleteRecursively() }
+        }
+    }
+
+    /** Moves everything in [work] into the gallery save folder; [onSaved] gets each file. Returns how many. */
+    private suspend fun moveToSaveFolder(context: Context, work: File, onSaved: (Uri) -> Unit): Int {
+        val target = SettingsRepository.getSaveDirs(context).first().of(SaveKind.GALLERY)
+        return withContext(Dispatchers.IO) {
+            var saved = 0
+            val count: (Uri) -> Unit = { saved++; onSaved(it) }
+            val inTree = target.isCustom && runCatching {
+                MediaStoreHelper.moveToTree(context, work, Uri.parse(target.uri), onMoved = count)
+            }.onFailure { Log.w(TAG, "Picked gallery folder failed, using the built-in one", it) }
+                .getOrDefault(false)
+            if (!inTree) {
+                MediaStoreHelper.moveToPublicStorage(context, work, StoragePaths.DOWNLOAD_GALLERY_RELATIVE_PATH, onMoved = count)
+            }
+            saved
         }
     }
 
