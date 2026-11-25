@@ -151,6 +151,7 @@ import com.hazel.android.util.MediaDeleter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
+    onOpenRunning: () -> Unit = {},
     onDownloadAgain: ((com.hazel.android.data.HistoryEntry) -> Unit)? = null,
     onFetchAgain: ((com.hazel.android.data.HistoryEntry) -> Unit)? = null
 ) {
@@ -485,6 +486,13 @@ fun HistoryScreen(
                 icon = Icons.Filled.Image,
                 selected = showImages,
                 onClick = { showImages = !showImages }
+            )
+        }
+
+        if (!selecting) {
+            ActiveDownloadCard(
+                onClick = onOpenRunning,
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 8.dp)
             )
         }
 
@@ -1003,7 +1011,7 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, mark: Boolean?, a
                     )
             )
 
-            Column(modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 48.dp)) {
+            Column(modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 56.dp)) {
                 Text(
                     entry.title,
                     style = MaterialTheme.typography.titleSmall,
@@ -1028,14 +1036,8 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, mark: Boolean?, a
             }
             if (mark != null) {
                 SelectMark(mark, Modifier.align(Alignment.TopEnd).padding(12.dp), onImage = true)
-            } else Box(modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
-                IconButton(onClick = { menuOpen = true }) {
-                    Icon(
-                        painterResource(R.drawable.ic_more_vert),
-                        contentDescription = stringResource(R.string.history_card_options),
-                        tint = Color.White
-                    )
-                }
+            } else Box(modifier = Modifier.align(Alignment.TopEnd).padding(10.dp)) {
+                CookieMenuButton(onClick = { menuOpen = true })
                 EntryMenu(menuOpen, present, actions) { menuOpen = false }
             }
 
@@ -1049,12 +1051,7 @@ private fun HistoryCard(entry: HistoryEntry, present: Boolean, mark: Boolean?, a
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    kindIcon(entry),
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = Color.White
-                )
+                CardKindMark(kindIcon(entry))
                 formatDuration(entry.durationSeconds).takeIf { it.isNotBlank() }?.let { CardTag(it) }
                 if (entry.sizeBytes > 0) CardTag(formatFileSize(entry.sizeBytes))
                 if (!present) DeletedTag()

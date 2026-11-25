@@ -452,6 +452,10 @@ fun AppNavigation(
             }
             screen(Screen.History.route) {
                 HistoryScreen(
+                    onOpenRunning = {
+                        queueTab = "running"
+                        openTab(Screen.Queue.route)
+                    },
                     onDownloadAgain = { entry ->
                         downloadViewModel.instantDownload(context, entry.url, audioOnlyOverride = !entry.isVideo)
                     },
