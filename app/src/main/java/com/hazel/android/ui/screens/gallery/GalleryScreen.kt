@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,9 +20,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,6 +45,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hazel.android.R
+import com.hazel.android.data.FailedDownload
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.SearchSource
 import com.hazel.android.gallery.GalleryDlEngine
@@ -57,6 +62,8 @@ import com.hazel.android.ui.screens.download.SearchOptionsSheet
 import com.hazel.android.ui.screens.download.SearchScreen
 import com.hazel.android.ui.screens.download.UrlSearchBar
 import com.hazel.android.ui.screens.download.rememberClipStamp
+import com.hazel.android.ui.screens.queue.FailureLogSheet
+import com.hazel.android.util.copyToClipboard
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
@@ -75,24 +82,29 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         private set
     var notice by mutableStateOf<GalleryNotice?>(null)
         private set
+    /** The last failed run, for the log sheet. */
+    var failure by mutableStateOf<FailedDownload?>(null)
+        private set
 
     private var job: Job? = null
     private var source = ""
+    private var lastRun: (() -> Unit)? = null
 
     fun handle(request: GalleryRequest) {
         job?.cancel()
+        lastRun = { handle(request) }
         when (request) {
             is GalleryRequest.Links -> {
                 val link = request.urls.firstOrNull() ?: return
                 query = link
-                launchRun {
+                launchRun(link) {
                     show(link, GalleryDlEngine.list(getApplication(), link).items)
                 }
             }
             is GalleryRequest.Search -> {
                 query = request.query
-                launchRun {
-                    val url = request.site.urlFor(request.query)
+                val url = request.site.urlFor(request.query)
+                launchRun(url) {
                     val limit = SettingsRepository.getGalleryPostsPerSearch(getApplication()).first()
                     show(url, GalleryDlEngine.list(getApplication(), url, postLimit = limit).items)
                 }
@@ -106,7 +118,8 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     /** Saves the files at [indexes] (counted from 1), or the whole post when null. */
     fun download(indexes: List<Int>?, options: GalleryOptions? = null) {
         val link = source.takeIf { it.isNotEmpty() } ?: return
-        launchRun {
+        lastRun = { download(indexes, options) }
+        launchRun(link) {
             val started = System.currentTimeMillis()
             val saved = GalleryDlEngine.download(getApplication(), link, indexes, options)
             notice = GalleryNotice(R.string.gallery_saved, listOf(saved, secondsSince(started)))
@@ -117,10 +130,17 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         job?.cancel()
     }
 
+    /** Runs the failed request again. */
+    fun retry() {
+        lastRun?.invoke()
+    }
+
     fun clear() {
         job?.cancel()
         items = emptyList()
         notice = null
+        failure = null
+        lastRun = null
         query = ""
         source = ""
     }
@@ -131,22 +151,27 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         notice = if (found.isEmpty()) GalleryNotice(R.string.gallery_empty) else null
     }
 
-    private fun launchRun(block: suspend () -> Unit) {
+    private fun launchRun(url: String, block: suspend () -> Unit) {
         busy = true
         notice = null
+        failure = null
         job = viewModelScope.launch {
             try {
                 block()
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: GalleryDlException) {
-                notice = GalleryNotice(messageFor(e.kind))
             } catch (e: Exception) {
-                notice = GalleryNotice(R.string.gallery_failed)
+                fail(url, e)
             } finally {
                 busy = false
             }
         }
+    }
+
+    internal fun fail(url: String, e: Exception) {
+        val log = (e as? GalleryDlException)?.let { it.log.ifBlank { it.detail } } ?: e.message.orEmpty()
+        notice = GalleryNotice((e as? GalleryDlException)?.let { messageFor(it.kind) } ?: R.string.gallery_failed)
+        failure = FailedDownload(url = url, title = query, author = "", thumbnail = null, isVideo = false, errorLog = log)
     }
 
     private fun secondsSince(start: Long): String = "%.1f".format((System.currentTimeMillis() - start) / 1000f)
@@ -173,6 +198,7 @@ fun GalleryScreen(
     var searchOpen by rememberSaveable { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
     var viewing by rememberSaveable { mutableStateOf<Int?>(null) }
+    var logOpen by rememberSaveable { mutableStateOf(false) }
     var sheetFor by rememberSaveable { mutableStateOf<Int?>(null) }
     var postSheetOpen by rememberSaveable { mutableStateOf(false) }
 
@@ -206,12 +232,20 @@ fun GalleryScreen(
                     modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    EmptyState(
-                        icon = painterResource(R.drawable.gallery_tab),
-                        title = viewModel.notice?.let { stringResource(it.text, *it.args.toTypedArray()) }
-                            ?: stringResource(R.string.gallery_empty_title),
-                        hint = stringResource(R.string.gallery_empty_hint)
-                    )
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        EmptyState(
+                            icon = painterResource(R.drawable.gallery_tab),
+                            title = viewModel.notice?.let { stringResource(it.text, *it.args.toTypedArray()) }
+                                ?: stringResource(R.string.gallery_empty_title),
+                            hint = stringResource(R.string.gallery_empty_hint).takeIf { viewModel.failure == null }
+                        )
+                        if (viewModel.failure != null) {
+                            TextButton(onClick = { logOpen = true }) { Text(stringResource(R.string.gallery_view_log)) }
+                        }
+                    }
                 }
                 else -> LazyColumn(
                     modifier = Modifier.weight(1f),
@@ -220,11 +254,17 @@ fun GalleryScreen(
                 ) {
                     viewModel.notice?.let { notice ->
                         item(key = "notice") {
-                            Text(
-                                stringResource(notice.text, *notice.args.toTypedArray()),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    stringResource(notice.text, *notice.args.toTypedArray()),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                if (viewModel.failure != null) {
+                                    TextButton(onClick = { logOpen = true }) { Text(stringResource(R.string.gallery_view_log)) }
+                                }
+                            }
                         }
                     }
                     itemsIndexed(viewModel.items, key = { _, it -> it.index }) { position, item ->
@@ -302,6 +342,25 @@ fun GalleryScreen(
             startIndex = start,
             onDownload = { item -> viewModel.download(listOf(item.index)) },
             onDismiss = { viewing = null }
+        )
+    }
+
+    viewModel.failure?.takeIf { logOpen }?.let { item ->
+        FailureLogSheet(
+            item = item,
+            onCopy = {
+                copyToClipboard(context, item.errorLog)
+                Toast.makeText(context, R.string.history_failed_log_copied, Toast.LENGTH_SHORT).show()
+            },
+            onCopyUrl = {
+                copyToClipboard(context, item.url)
+                Toast.makeText(context, R.string.sheet_link_copied, Toast.LENGTH_SHORT).show()
+            },
+            onRetry = {
+                logOpen = false
+                viewModel.retry()
+            },
+            onDismiss = { logOpen = false }
         )
     }
 

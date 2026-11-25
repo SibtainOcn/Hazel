@@ -336,6 +336,8 @@
     <string name="cleanup_category_link_data_description">yt-dlp 保留的播放器数据，让同一个链接第二次读取时更快。清除是安全的。</string>
     <string name="cleanup_category_partial_downloads_label">未完成的下载</string>
     <string name="cleanup_category_partial_downloads_description">已取消或失败的下载留下的片段。</string>
+    <string name="cleanup_category_gallery_label">图库文件</string>
+    <string name="cleanup_category_gallery_description">图库下载留下的工作文件夹、缓存和日志。</string>
     <string name="cleanup_category_conversions_label">未完成的转换</string>
     <string name="cleanup_category_conversions_description">音频转换器遗留的工作文件。</string>
     <string name="cleanup_category_other_cache_label">其他缓存文件</string>
@@ -725,6 +727,7 @@
     <string name="gallery_settings_clear_record_done">下载记录已清除</string>
     <string name="gallery_settings_clear_record_failed">无法清除下载记录</string>
     <string name="gallery_settings_clear_record_busy">正在下载，请在完成后重试</string>
+    <string name="gallery_view_log">查看日志</string>
     <string name="gallery_settings_profiles">个人主页</string>
     <string name="gallery_settings_instagram_sections">Instagram 分区</string>
     <string name="gallery_settings_instagram_sections_value">帖子、Reels、快拍、精选、被标记</string>

@@ -336,6 +336,8 @@
     <string name="cleanup_category_link_data_description">Data pemutar yang disimpan yt-dlp agar pembacaan tautan untuk kedua kalinya lebih cepat. Aman untuk dihapus.</string>
     <string name="cleanup_category_partial_downloads_label">Unduhan belum selesai</string>
     <string name="cleanup_category_partial_downloads_description">Sisa unduhan yang dibatalkan atau gagal.</string>
+    <string name="cleanup_category_gallery_label">File galeri</string>
+    <string name="cleanup_category_gallery_description">Folder kerja, cache, dan log dari unduhan galeri.</string>
     <string name="cleanup_category_conversions_label">Konversi belum selesai</string>
     <string name="cleanup_category_conversions_description">Sisa file kerja dari konverter audio.</string>
     <string name="cleanup_category_other_cache_label">File cache lainnya</string>
@@ -725,6 +727,7 @@
     <string name="gallery_settings_clear_record_done">Catatan unduhan dihapus</string>
     <string name="gallery_settings_clear_record_failed">Tidak bisa menghapus catatan unduhan</string>
     <string name="gallery_settings_clear_record_busy">Ada unduhan berjalan. Coba lagi setelah selesai</string>
+    <string name="gallery_view_log">Lihat log</string>
     <string name="gallery_settings_profiles">Profil</string>
     <string name="gallery_settings_instagram_sections">Bagian Instagram</string>
     <string name="gallery_settings_instagram_sections_value">Postingan, reels, story, sorotan, tag</string>

@@ -364,9 +364,9 @@ fun FailureLogSheet(
             lines.forEachIndexed { index, line ->
                 val trimmed = line.trimStart()
                 when {
-                    trimmed.startsWith("ERROR:") ->
+                    trimmed.startsWith("ERROR:") || "][error]" in trimmed ->
                         withStyle(SpanStyle(color = errorColor, fontWeight = FontWeight.SemiBold)) { append(line) }
-                    trimmed.startsWith("WARNING:") ->
+                    trimmed.startsWith("WARNING:") || "][warning]" in trimmed ->
                         withStyle(SpanStyle(color = warningColor)) { append(line) }
                     else -> append(line)
                 }

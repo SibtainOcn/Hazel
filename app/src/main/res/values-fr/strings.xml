@@ -346,6 +346,8 @@
     <string name="cleanup_category_link_data_description">Les données de lecteur que yt-dlp conserve pour qu\'un lien relu une deuxième fois soit plus rapide. Sans risque à effacer.</string>
     <string name="cleanup_category_partial_downloads_label">Téléchargements inachevés</string>
     <string name="cleanup_category_partial_downloads_description">Restes de téléchargements annulés ou échoués.</string>
+    <string name="cleanup_category_gallery_label">Fichiers de la galerie</string>
+    <string name="cleanup_category_gallery_description">Dossiers de travail, cache et journaux des téléchargements de la galerie.</string>
     <string name="cleanup_category_conversions_label">Conversions inachevées</string>
     <string name="cleanup_category_conversions_description">Fichiers de travail restants du convertisseur audio.</string>
     <string name="cleanup_category_other_cache_label">Autres fichiers en cache</string>
@@ -755,6 +757,7 @@
     <string name="gallery_settings_clear_record_done">Historique des téléchargements effacé</string>
     <string name="gallery_settings_clear_record_failed">Impossible d\'effacer l\'historique des téléchargements</string>
     <string name="gallery_settings_clear_record_busy">Un téléchargement est en cours. Réessayez une fois terminé</string>
+    <string name="gallery_view_log">Voir le journal</string>
     <string name="gallery_settings_profiles">Profils</string>
     <string name="gallery_settings_instagram_sections">Sections Instagram</string>
     <string name="gallery_settings_instagram_sections_value">Publications, reels, stories, à la une, identifications</string>
