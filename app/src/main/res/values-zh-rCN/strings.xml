@@ -1133,6 +1133,8 @@
     <string name="upd_failure_unknown">未能完成更新（%1$s）。请稍后重试。</string>
     <string name="upd_status_update_failed">更新未完成</string>
     <string name="upd_status_check_failed">检查未完成</string>
+    <string name="cookie_webview_reload">重新加载</string>
+    <string name="cookie_webview_load_failed">无法加载此页面</string>
     <string name="gallery_dl_update_available_title">gallery-dl %1$s 可用</string>
     <string name="gallery_dl_update_available_text">打开 Hazel 更新图片引擎</string>
     <string name="gallery_dl_update_installed_title">gallery-dl 已更新到 %1$s</string>

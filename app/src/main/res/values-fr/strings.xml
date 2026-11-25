@@ -1167,6 +1167,8 @@
     <string name="upd_failure_unknown">La mise à jour n\'a pas pu être terminée (%1$s). Réessayez dans un instant.</string>
     <string name="upd_status_update_failed">La mise à jour n\'a pas abouti</string>
     <string name="upd_status_check_failed">La vérification n\'a pas abouti</string>
+    <string name="cookie_webview_reload">Recharger</string>
+    <string name="cookie_webview_load_failed">Impossible de charger cette page</string>
     <string name="gallery_dl_update_available_title">gallery-dl %1$s est disponible</string>
     <string name="gallery_dl_update_available_text">Ouvrez Hazel pour mettre à jour le moteur d\'images</string>
     <string name="gallery_dl_update_installed_title">gallery-dl mis à jour vers %1$s</string>
