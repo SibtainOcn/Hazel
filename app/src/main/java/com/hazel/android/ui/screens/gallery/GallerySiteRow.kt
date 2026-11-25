@@ -79,12 +79,12 @@ private fun SiteChip(label: String, selected: Boolean, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val resting by animateDpAsState(if (selected) 12.dp else 20.dp, label = "siteChip")
     val radius by pressCorner(interaction, resting = resting, pressed = 8.dp)
-    val container by animateColorAsState(if (selected) colors.secondaryContainer else colors.surfaceContainerHigh, label = "siteFill")
+    val container by animateColorAsState(if (selected) colors.primary.copy(alpha = 0.22f) else colors.surfaceContainerHigh, label = "siteFill")
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(radius),
         color = container,
-        contentColor = if (selected) colors.onSecondaryContainer else colors.onSurface,
+        contentColor = if (selected) colors.primary else colors.onSurface,
         interactionSource = interaction,
         modifier = Modifier
             .pressScale(interaction)
@@ -100,10 +100,10 @@ private fun SiteChip(label: String, selected: Boolean, onClick: () -> Unit) {
                     modifier = Modifier
                         .size(28.dp)
                         .clip(MaterialShapes.Cookie7Sided.toShape())
-                        .background(colors.onSecondaryContainer),
+                        .background(colors.primary),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.secondaryContainer)
+                    Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.onPrimary)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }
