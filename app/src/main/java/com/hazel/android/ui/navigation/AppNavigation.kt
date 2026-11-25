@@ -364,7 +364,8 @@ fun AppNavigation(
                     .collectAsState(initial = emptyList())
                 // Lit while anything is downloading, paused part way or waiting its turn,
                 // so the queue is found without having to go and look.
-                val queueBusy = downloadState.isDownloading || savedQueue.isNotEmpty() ||
+                val galleryJobs by com.hazel.android.gallery.queue.GalleryQueue.jobs.collectAsState()
+                val queueBusy = downloadState.isDownloading || savedQueue.isNotEmpty() || galleryJobs.isNotEmpty() ||
                     downloadState.batch.any {
                         it.state == BatchState.DOWNLOADING || it.state == BatchState.PAUSED ||
                             it.state == BatchState.QUEUED

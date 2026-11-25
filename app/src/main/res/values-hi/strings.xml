@@ -9,7 +9,6 @@
     <string name="gallery_download">डाउनलोड</string>
     <string name="gallery_image">इमेज</string>
     <string name="gallery_video">वीडियो</string>
-    <string name="gallery_saved">%2$s s में %1$d Download/Hazel/Gallery में सहेजे गए</string>
     <string name="gallery_failed">यह पोस्ट पढ़ी नहीं जा सकी</string>
     <string name="gallery_empty">इस पोस्ट में कोई फ़ाइल नहीं</string>
     <string name="gallery_error_login">Cookies में इस साइट पर साइन इन करें, फिर दोबारा कोशिश करें</string>
@@ -1171,4 +1170,8 @@
     <string name="upd_action_use_bundled">बंडल</string>
     <string name="upd_bundled_restored">अब बंडल gallery-dl %1$s उपयोग हो रहा है</string>
     <string name="upd_busy">एक डाउनलोड चल रहा है। उसके खत्म होने के बाद फिर कोशिश करें</string>
+    <string name="gallery_queued">डाउनलोड कतार में जोड़ा गया</string>
+    <string name="gallery_fetched">%1$d फ़ाइलें प्राप्त हुईं</string>
+    <string name="gallery_saved_before_failure">रुकने से पहले %1$d सेव हुईं</string>
+    <string name="properties_kind_image">इमेज</string>
 </resources>

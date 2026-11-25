@@ -67,13 +67,15 @@ object GalleryDlEngine {
 
     /**
      * Downloads the post at [url] into the gallery save folder: only the files at [indexes]
-     * (counted from 1) when given, else all of them. Returns how many were saved.
+     * (counted from 1) when given, else all of them. [onFetched] gets the count of files fetched
+     * so far, [onSaved] each file once it is in the save folder. Returns how many were saved.
      */
     suspend fun download(
         context: Context,
         url: String,
         indexes: List<Int>? = null,
         options: GalleryOptions? = null,
+        onFetched: (Int) -> Unit = {},
         onSaved: (Uri) -> Unit = {}
     ): Int {
         val chosen = options ?: SettingsRepository.getGalleryOptions(context).first()
@@ -88,7 +90,8 @@ object GalleryDlEngine {
                 if (!indexes.isNullOrEmpty()) { add("--range"); add(indexes.sorted().joinToString(",")) }
                 addAll(chosen.toArgs(archive))
             }
-            run(context, url, args) { }
+            var fetched = 0
+            run(context, url, args) { onFetched(++fetched) }
             val target = SettingsRepository.getSaveDirs(context).first().of(SaveKind.GALLERY)
             return withContext(Dispatchers.IO) {
                 var saved = 0

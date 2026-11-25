@@ -10,6 +10,7 @@ import android.util.Log
 import com.hazel.android.download.NetworkProxy
 import com.hazel.android.download.NetworkProxy.throughProxy
 import com.hazel.android.download.WebViewProxy
+import com.hazel.android.gallery.queue.GalleryQueue
 import com.hazel.android.update.GalleryDlUpdater
 import com.hazel.android.update.YtDlpUpdater
 import com.hazel.android.utils.CrashLogger
@@ -133,6 +134,7 @@ class HazelApp : Application(), SingletonImageLoader.Factory {
             // a download started meanwhile keeps the binary it started with.
             YtDlpUpdater.autoUpdateIfAvailable(this@HazelApp)
             GalleryDlUpdater.applyStagedUpdate(this@HazelApp)
+            GalleryQueue.restore(this@HazelApp)
             GalleryDlUpdater.autoUpdateIfAvailable(this@HazelApp)
         }
     }

@@ -9,7 +9,6 @@
     <string name="gallery_download">下载</string>
     <string name="gallery_image">图片</string>
     <string name="gallery_video">视频</string>
-    <string name="gallery_saved">%2$s 秒内已将 %1$d 项保存到 Download/Hazel/Gallery</string>
     <string name="gallery_failed">无法读取此帖子</string>
     <string name="gallery_empty">此帖子中没有文件</string>
     <string name="gallery_error_login">请在 Cookies 中登录此网站后重试</string>
@@ -1154,4 +1153,8 @@
     <string name="upd_action_use_bundled">内置版</string>
     <string name="upd_bundled_restored">现在使用内置的 gallery-dl %1$s</string>
     <string name="upd_busy">有下载正在进行。请在完成后重试</string>
+    <string name="gallery_queued">已加入下载队列</string>
+    <string name="gallery_fetched">已获取 %1$d 个文件</string>
+    <string name="gallery_saved_before_failure">停止前已保存 %1$d 个</string>
+    <string name="properties_kind_image">图片</string>
 </resources>
