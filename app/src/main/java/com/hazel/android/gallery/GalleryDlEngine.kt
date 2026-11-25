@@ -36,6 +36,16 @@ object GalleryDlEngine {
     private const val SKIPPED_PREFIX = "# "
     private const val ARCHIVE_FILE = "gallery-dl-archive.sqlite3"
 
+    /** The record of posts already saved, used by Skip already downloaded. */
+    fun archiveFile(context: Context): File = File(context.filesDir, ARCHIVE_FILE)
+
+    /** Forgets every saved post. Blocking; true when nothing is left. */
+    fun clearArchive(context: Context): Boolean {
+        val main = archiveFile(context)
+        return listOf(main, File(main.path + "-journal"), File(main.path + "-wal"), File(main.path + "-shm"))
+            .all { !it.exists() || it.delete() }
+    }
+
     /**
      * Every file of the post at [url]. With [postLimit], the link is a search, profile or tag
      * page, and the files of its first [postLimit] posts are read.
@@ -66,7 +76,7 @@ object GalleryDlEngine {
     ): Int {
         val chosen = options ?: SettingsRepository.getGalleryOptions(context).first()
         val incognito = SettingsRepository.getIncognito(context).first()
-        val archive = File(context.filesDir, ARCHIVE_FILE).takeUnless { incognito }
+        val archive = archiveFile(context).takeUnless { incognito }
         val work = File(StoragePaths.tempDownloads, "gallery-${UUID.randomUUID()}")
         try {
             if (!work.mkdirs()) throw GalleryDlException(GalleryDlException.Kind.SETUP, "no work folder")
