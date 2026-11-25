@@ -80,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Trim after download no longer crashes on Android 7.
 
 ### Changed
+- Support Hazel: the Developer tag and name sit beside the avatar on the developer card.
 - Storage cleanup lists the saved download thumbnails as "Downloads artwork", so they can be cleared.
 - The bottom bar's selected-tab shape is easier to see.
 - Format sheet: the quality rail is one connected group with round outer ends and tight inner corners; the chosen stop fills with the accent and lifts out of the group on a spring.

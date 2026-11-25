@@ -47,8 +47,10 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hazel.android.R
 import com.hazel.android.util.openInAppBrowser
 
@@ -209,7 +211,38 @@ internal fun DeveloperCard(onClick: () -> Unit) {
                 ) {
                     Icon(Icons.Filled.Person, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(28.dp))
                 }
-                Spacer(modifier = Modifier.weight(1f))
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.sponsor_section_developer),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onPrimary,
+                        maxLines = 1,
+                        autoSize = TextAutoSize.StepBased(
+                            minFontSize = 5.sp,
+                            maxFontSize = MaterialTheme.typography.labelMedium.fontSize
+                        ),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(colors.primary)
+                            .padding(horizontal = 10.dp, vertical = 3.dp)
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        stringResource(R.string.sponsor_developer_name),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        autoSize = TextAutoSize.StepBased(
+                            minFontSize = 8.sp,
+                            maxFontSize = MaterialTheme.typography.headlineSmall.fontSize
+                        )
+                    )
+                }
                 Box(
                     modifier = Modifier
                         .size(44.dp)
@@ -220,24 +253,7 @@ internal fun DeveloperCard(onClick: () -> Unit) {
                     Icon(Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(16.dp))
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                stringResource(R.string.sponsor_section_developer),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = colors.onPrimary,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(colors.primary)
-                    .padding(horizontal = 10.dp, vertical = 3.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                stringResource(R.string.sponsor_developer_name),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 stringResource(R.string.sponsor_developer_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
