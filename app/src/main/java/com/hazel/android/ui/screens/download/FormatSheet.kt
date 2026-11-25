@@ -1352,7 +1352,9 @@ internal fun SheetDownloadPill(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     /** Only the cookie and its icon, with [label] read out instead of shown. */
-    iconOnly: Boolean = false
+    iconOnly: Boolean = false,
+    /** The leading half of a split button: its end corners stay this small, next to the other half. */
+    joinedEnd: androidx.compose.ui.unit.Dp? = null
 ) {
     val colors = MaterialTheme.colorScheme
     val fill = if (enabled) colors.primary else colors.primary.copy(alpha = 0.12f)
@@ -1362,7 +1364,10 @@ internal fun SheetDownloadPill(
     Surface(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(corner),
+        shape = RoundedCornerShape(
+            topStart = corner, bottomStart = corner,
+            topEnd = joinedEnd ?: corner, bottomEnd = joinedEnd ?: corner
+        ),
         color = fill,
         contentColor = if (enabled) colors.onPrimary else colors.primary.copy(alpha = 0.5f),
         interactionSource = interaction,

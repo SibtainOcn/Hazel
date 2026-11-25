@@ -207,11 +207,12 @@ internal fun GalleryItemSheet(
                         label = stringResource(if (confirmAsApply) R.string.format_sheet_ok else R.string.format_sheet_download),
                         icon = if (confirmAsApply) Icons.Filled.Check else Icons.Filled.Download,
                         enabled = options != null,
-                        onClick = { options?.let { onDownload(it, title.trim(), author.trim(), GallerySave.MEDIA) } }
+                        onClick = { options?.let { onDownload(it, title.trim(), author.trim(), GallerySave.MEDIA) } },
+                        joinedEnd = 8.dp.takeIf { hasCaption && !confirmAsApply }
                     )
-                    // With a caption, the arrow beside Download chooses what is saved.
+                    // With a caption, the arrow beside Download chooses what is saved: one split button.
                     if (hasCaption && !confirmAsApply) {
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
                         Box {
                             Surface(
                                 onClick = { saveMenu = true },
