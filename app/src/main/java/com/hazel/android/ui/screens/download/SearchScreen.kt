@@ -860,14 +860,14 @@ private fun HistoryRow(
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)),
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.Filled.History,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
         Spacer(modifier = Modifier.width(14.dp))
@@ -892,7 +892,7 @@ private fun FillArrow(onFill: () -> Unit) {
             modifier = Modifier
                 .size(22.dp)
                 .rotate(-90f),
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            tint = MaterialTheme.colorScheme.primary
         )
     }
 }

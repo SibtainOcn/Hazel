@@ -6,11 +6,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.Role
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
-import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
 import com.hazel.android.ui.components.MenuTone
@@ -74,6 +70,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.material3.toShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -110,6 +110,15 @@ import kotlinx.coroutines.withContext
  * tight until it is chosen, when it rounds out into an accent pill. Pressed, it squeezes. A
  * count shows in a small badge, red for failures.
  */
+/** Each tab's count sits on a shape of its own. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun badgeShapeOf(tab: QueueTab): Shape = when (tab) {
+    QueueTab.RUNNING -> MaterialShapes.Cookie6Sided
+    QueueTab.QUEUED -> MaterialShapes.Pentagon
+    QueueTab.FAILED -> MaterialShapes.Triangle
+}.toShape()
+
 @Composable
 private fun QueueTabSegment(
     label: String,
@@ -118,21 +127,19 @@ private fun QueueTabSegment(
     selected: Boolean,
     first: Boolean,
     last: Boolean,
+    badgeShape: Shape,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    // Fixed joins on every segment, so the group keeps its symmetry whichever tab is chosen.
     val outer = 25.dp
-    val inner by androidx.compose.animation.core.animateDpAsState(
-        if (selected) outer else 8.dp,
-        androidx.compose.animation.core.spring(dampingRatio = 0.6f, stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow),
-        label = "segment"
-    )
+    val inner = 8.dp
     val fill by androidx.compose.animation.animateColorAsState(
-        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
+        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
         label = "segmentFill"
     )
-    val ink = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val ink = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer
     val start = if (first) outer else inner
     val end = if (last) outer else inner
     Surface(
@@ -166,21 +173,19 @@ private fun QueueTabSegment(
                 Spacer(Modifier.width(6.dp))
                 Box(
                     modifier = Modifier
-                        .heightIn(min = 22.dp)
-                        .widthIn(min = 22.dp)
-                        .clip(CircleShape)
+                        .size(26.dp)
                         .background(
                             when {
                                 alarm -> MaterialTheme.colorScheme.error
                                 selected -> MaterialTheme.colorScheme.onPrimary
                                 else -> MaterialTheme.colorScheme.primary
-                            }
-                        )
-                        .padding(horizontal = 6.dp),
+                            },
+                            badgeShape
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        count.toString(),
+                        if (count > 99) "99+" else count.toString(),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = when {
@@ -471,6 +476,7 @@ fun QueueScreen(
                     selected = pagerState.currentPage == index,
                     first = index == 0,
                     last = index == last,
+                    badgeShape = badgeShapeOf(tab),
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                     modifier = Modifier.weight(1f)
                 )
