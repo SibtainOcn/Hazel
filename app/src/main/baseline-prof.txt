@@ -1,6 +1,6 @@
 HSPLcom/hazel/android/HazelApp;->**(**)**
-HSPLcom/hazel/android/MainActivity;->**(**)**
-HSPLcom/hazel/android/MainActivity$**;->**(**)**
+HSPLcom/hazel/android/HazelActivity;->**(**)**
+HSPLcom/hazel/android/HazelActivity$**;->**(**)**
 HSPLcom/hazel/android/ui/screens/SplashScreenKt**;->**(**)**
 HSPLcom/hazel/android/ui/screens/SplashHandoff;->**(**)**
 HSPLcom/hazel/android/ui/theme/**;->**(**)**
@@ -17,8 +17,8 @@ HSPLcom/hazel/android/download/DownloadOptions**;->**(**)**
 HSPLcom/hazel/android/download/InfoCache**;->**(**)**
 HSPLcom/hazel/android/data/**;->**(**)**
 Lcom/hazel/android/HazelApp;
-Lcom/hazel/android/MainActivity;
-Lcom/hazel/android/MainActivity$**;
+Lcom/hazel/android/HazelActivity;
+Lcom/hazel/android/HazelActivity$**;
 Lcom/hazel/android/ui/screens/SplashScreenKt**;
 Lcom/hazel/android/ui/screens/SplashHandoff;
 Lcom/hazel/android/ui/theme/**;

@@ -34,7 +34,7 @@ import com.hazel.android.util.AppLocale
 import com.hazel.android.util.PermissionHelper
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class HazelActivity : ComponentActivity() {
 
     /**
      * Shares waiting to be picked up, oldest first.
@@ -150,19 +150,19 @@ class MainActivity : ComponentActivity() {
                                 onSharesConsumed = { pendingShares.clear() },
                                 isDarkTheme = isDark,
                                 onToggleTheme = {
-                                    scope.launch { SettingsRepository.setDarkTheme(this@MainActivity, !isDark) }
+                                    scope.launch { SettingsRepository.setDarkTheme(this@HazelActivity, !isDark) }
                                 },
                                 accentName = resolvedAccent,
                                 onAccentChanged = { name ->
-                                    scope.launch { SettingsRepository.setAccentColor(this@MainActivity, name) }
+                                    scope.launch { SettingsRepository.setAccentColor(this@HazelActivity, name) }
                                 },
                                 glassEnabled = glass,
                                 onToggleGlass = {
-                                    scope.launch { SettingsRepository.setGlassEnabled(this@MainActivity, !glass) }
+                                    scope.launch { SettingsRepository.setGlassEnabled(this@HazelActivity, !glass) }
                                 },
                                 glassStyle = glassStyle,
                                 onGlassStyleChanged = { style ->
-                                    scope.launch { SettingsRepository.setGlassStyle(this@MainActivity, style.key) }
+                                    scope.launch { SettingsRepository.setGlassStyle(this@HazelActivity, style.key) }
                                 }
                             )
                         }

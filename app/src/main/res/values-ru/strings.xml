@@ -901,6 +901,15 @@
     <string name="appearance_reset">Сбросить оформление</string>
     <string name="appearance_reset_title">Сбросить оформление?</string>
     <string name="appearance_reset_body">Тема, акцент и стекло вернутся к тёмной теме, White и «Лесу».</string>
+    <string name="app_icon_title">Значок приложения</string>
+    <string name="app_icon_classic">Классический</string>
+    <string name="app_icon_white">Белый</string>
+    <string name="app_icon_glass">Стекло</string>
+    <string name="app_icon_restart_title">Перезапустить Hazel?</string>
+    <string name="app_icon_restart_body">Hazel перезапустится, чтобы сменить значок на главном экране и в меню «Поделиться». Некоторые лаунчеры убирают старый значок — добавьте Hazel снова из списка приложений.</string>
+    <string name="app_icon_restart">Перезапустить</string>
+    <string name="app_icon_busy_title">Идёт загрузка</string>
+    <string name="app_icon_busy_body">Смените значок после её завершения, чтобы загрузка не прервалась.</string>
     <string name="processing_step_fetch">Загрузка</string>
     <string name="processing_step_merge">Слияние</string>
     <string name="processing_step_extract">Извлечение</string>

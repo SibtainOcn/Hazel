@@ -18,7 +18,7 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.ui.graphics.toArgb
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.toPath
-import com.hazel.android.MainActivity
+import com.hazel.android.HazelActivity
 import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.ui.theme.AccentColors
@@ -110,9 +110,9 @@ class QuickActionsWidget : AppWidgetProvider() {
         private fun openApp(context: Context, route: String, requestCode: Int): PendingIntent =
             PendingIntent.getActivity(
                 context, requestCode,
-                Intent(context, MainActivity::class.java)
+                Intent(context, HazelActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    .putExtra(MainActivity.EXTRA_NAVIGATE_TO, route),
+                    .putExtra(HazelActivity.EXTRA_NAVIGATE_TO, route),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 

@@ -13,6 +13,9 @@ object DownloadTurn {
 
     suspend fun acquire(owner: Any) = mutex.lock(owner)
 
+    /** Whether a download of either engine is running now. */
+    val busy: Boolean get() = mutex.isLocked
+
     /** Safe to call more than once, and by an owner that never got the turn. */
     fun release(owner: Any) {
         if (mutex.holdsLock(owner)) mutex.unlock(owner)

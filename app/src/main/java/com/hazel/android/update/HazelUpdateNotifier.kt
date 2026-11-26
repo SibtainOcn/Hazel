@@ -11,7 +11,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.hazel.android.MainActivity
+import com.hazel.android.HazelActivity
 import com.hazel.android.R
 import com.hazel.android.data.SettingsRepository
 import kotlinx.coroutines.flow.first
@@ -63,9 +63,9 @@ object HazelUpdateNotifier {
             Event.AVAILABLE -> R.string.hazel_update_available_text
             Event.READY -> R.string.hazel_update_ready_text
         }
-        val open = Intent(context, MainActivity::class.java).apply {
+        val open = Intent(context, HazelActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra(MainActivity.EXTRA_NAVIGATE_TO, ROUTE)
+            putExtra(HazelActivity.EXTRA_NAVIGATE_TO, ROUTE)
         }
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
