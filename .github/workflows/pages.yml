@@ -81,8 +81,12 @@ jobs:
           cp pages/index.html _site/
           cp assets/Haze.svg _site/
           cp -r website _site/hazel
+      # Named per attempt: a re-run would otherwise find two "github-pages" artifacts and stop.
       - uses: actions/upload-pages-artifact@v5
         with:
+          name: github-pages-${{ github.run_attempt }}
           path: _site
       - id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
