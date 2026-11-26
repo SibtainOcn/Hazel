@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.gallery
 
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
@@ -54,6 +55,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.hazel.android.R
 import com.hazel.android.download.extractor.ListingSource
+import com.hazel.android.gallery.FileLinks
 import com.hazel.android.download.playback.PlayableStream
 import com.hazel.android.download.playback.PlayerFactory
 import com.hazel.android.download.playback.StreamResolver
@@ -89,6 +91,8 @@ internal fun GalleryVideo(
     direct: String?,
     page: String?,
     active: Boolean,
+    /** A fresh file link, given the one that just failed; null when there is none. */
+    refresh: suspend (failed: String?) -> String?,
     /** Given the player while it exists, so the viewer can draw its seek bar; null once released. */
     onPlayer: (ExoPlayer?) -> Unit,
     modifier: Modifier = Modifier
@@ -101,6 +105,8 @@ internal fun GalleryVideo(
     var buffering by remember(key) { mutableStateOf(false) }
     var failed by remember(key) { mutableStateOf(false) }
     var directFailed by remember(key) { mutableStateOf(false) }
+    var file by remember(key) { mutableStateOf(direct?.takeUnless(FileLinks::isStale)) }
+    var refreshed by remember(key) { mutableStateOf(false) }
     var reading by remember(key) { mutableStateOf<Job?>(null) }
     var readId by remember(key) { mutableStateOf<String?>(null) }
 
@@ -125,39 +131,55 @@ internal fun GalleryVideo(
                     }
                 }
                 override fun onPlayerError(error: PlaybackException) {
-                    if (stream(created) == direct) directFailed = true
-                    failed = true
-                    buffering = false
+                    Log.w("Hazel", "Gallery video failed: ${error.errorCodeName}")
+                    val wasFile = stream(created) == file
+                    if (wasFile) directFailed = true
+                    // A file link that stopped working is read again once before giving up.
+                    if (wasFile && !refreshed) start() else {
+                        failed = true
+                        buffering = false
+                    }
                 }
             })
             player = created
             onPlayer(created)
         }
         made.volume = if (muted) 0f else 1f
-        val file = direct?.takeUnless { directFailed && page != null }
-        if (file != null) {
-            made.setMediaSource(PlayerFactory.sourceFor(PlayableStream(url = file, headers = HEADERS, engine = ListingSource.YT_DLP)))
-            made.prepare()
-            made.play()
+        val ready = file?.takeUnless { directFailed }
+        if (ready != null) {
+            playFile(made, ready)
             return
         }
-        val link = page ?: return
         buffering = true
-        val id = StreamResolver.newReadId().also { readId = it }
         reading = scope.launch {
             try {
-                val stream = StreamResolver.resolve(link, processId = id)
-                made.setMediaSource(PlayerFactory.sourceFor(stream))
-                PlayerFactory.applyAudio(made, stream)
-                made.prepare()
-                made.play()
+                if (!refreshed) {
+                    refreshed = true
+                    val fresh = refresh(file.takeIf { directFailed })
+                    if (fresh != null) {
+                        file = fresh
+                        directFailed = false
+                        playFile(made, fresh)
+                        return@launch
+                    }
+                }
+                val link = page ?: error("No link to read")
+                val id = StreamResolver.newReadId().also { readId = it }
+                try {
+                    val stream = StreamResolver.resolve(link, processId = id)
+                    made.setMediaSource(PlayerFactory.sourceFor(stream))
+                    PlayerFactory.applyAudio(made, stream)
+                    made.prepare()
+                    made.play()
+                } finally {
+                    if (readId == id) readId = null
+                }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.w("Hazel", "Gallery video read failed: ${e.javaClass.simpleName}")
                 failed = true
                 buffering = false
-            } finally {
-                if (readId == id) readId = null
             }
         }
     }
@@ -203,7 +225,7 @@ internal fun GalleryVideo(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(stringResource(R.string.player_failed), color = Color.White, style = MaterialTheme.typography.bodyLarge)
-                ShapeIconButton(onClick = ::start, filled = true, size = 56.dp) {
+                ShapeIconButton(onClick = { refreshed = false; directFailed = false; start() }, filled = true, size = 56.dp) {
                     Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.player_retry))
                 }
             }
@@ -243,6 +265,13 @@ private val HEADERS = mapOf("User-Agent" to "Mozilla/5.0")
 
 /** Kept while the app runs, so a muted viewer stays muted from one video to the next. */
 private var muted by mutableStateOf(false)
+
+@OptIn(UnstableApi::class)
+private fun playFile(player: ExoPlayer, url: String) {
+    player.setMediaSource(PlayerFactory.sourceFor(PlayableStream(url = url, headers = HEADERS, engine = ListingSource.YT_DLP)))
+    player.prepare()
+    player.play()
+}
 
 /** The address the player was last given, to tell a failed direct file from a read page. */
 private fun stream(player: ExoPlayer): String? = player.currentMediaItem?.localConfiguration?.uri?.toString()

@@ -25,12 +25,17 @@ data class GalleryItem(
 ) {
     val isVideo: Boolean get() = extension.lowercase() in VIDEO_EXTENSIONS
 
-    /** The page gallery-dl hands to yt-dlp for this file (`ytdl:<page>`); null for a plain file. */
+    /**
+     * The page gallery-dl hands to yt-dlp for this file (`ytdl:<page>`); null for a plain file
+     * and for Instagram's made-up `<post>/<n>.mp4`, which no reader opens.
+     */
     val ytdlPage: String?
-        get() = url.takeIf { it.startsWith(YTDL_PREFIX) }?.removePrefix(YTDL_PREFIX)?.takeIf { it.startsWith("http") }
+        get() = url.takeIf { it.startsWith(YTDL_PREFIX) }?.removePrefix(YTDL_PREFIX)
+            ?.takeIf { it.startsWith("http") && !NUMBERED_FILE.containsMatchIn(it) }
 
     companion object {
         private const val YTDL_PREFIX = "ytdl:"
+        private val NUMBERED_FILE = Regex("/\\d+\\.mp4$")
         val VIDEO_EXTENSIONS = setOf("mp4", "webm", "mov", "m4v", "mkv", "m3u8")
         val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "webp", "avif", "heic", "bmp")
     }

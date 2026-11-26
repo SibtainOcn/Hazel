@@ -76,6 +76,8 @@ fun GalleryViewer(
     startIndex: Int,
     /** Opens the download sheet for the file in view. */
     onOpenSheet: (GalleryItem) -> Unit,
+    /** A fresh file link for a video, given the one that just failed; null when there is none. */
+    onRefresh: suspend (GalleryItem, String?) -> String? = { _, _ -> null },
     onDismiss: () -> Unit
 ) {
     if (items.isEmpty()) return
@@ -100,7 +102,7 @@ fun GalleryViewer(
                 ) {
                     items.getOrNull(page)?.let { item ->
                         val active = page == pager.currentPage
-                        ViewerPage(item = item, active = active, onPlayer = { if (active || it == null) activePlayer = it })
+                        ViewerPage(item = item, active = active, onRefresh = onRefresh, onPlayer = { if (active || it == null) activePlayer = it })
                     }
                 }
             }
@@ -239,7 +241,11 @@ fun GalleryViewer(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ViewerPage(item: GalleryItem, active: Boolean, onPlayer: (androidx.media3.exoplayer.ExoPlayer?) -> Unit) {
+private fun ViewerPage(
+    item: GalleryItem,
+    active: Boolean,
+    onRefresh: suspend (GalleryItem, String?) -> String? = { _, _ -> null },
+    onPlayer: (androidx.media3.exoplayer.ExoPlayer?) -> Unit) {
     var zoom by remember { mutableFloatStateOf(1f) }
     var pan by remember { mutableStateOf(Offset.Zero) }
     LaunchedEffect(active) {
@@ -280,7 +286,7 @@ private fun ViewerPage(item: GalleryItem, active: Boolean, onPlayer: (androidx.m
         if (item.isVideo) {
             val direct = item.playUrl ?: item.url.takeIf { it.startsWith("http") }
             val page = item.ytdlPage
-            if (direct != null || page != null) GalleryVideo(direct = direct, page = page, active = active, onPlayer = onPlayer)
+            GalleryVideo(direct = direct, page = page, active = active, refresh = { failed -> onRefresh(item, failed) }, onPlayer = onPlayer)
         }
     }
 }
