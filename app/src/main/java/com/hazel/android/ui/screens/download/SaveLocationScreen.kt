@@ -85,6 +85,7 @@ import com.hazel.android.util.SdCard
 import com.hazel.android.util.SdCards
 import com.hazel.android.util.StoragePaths
 import com.hazel.android.util.StorageSpace
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -119,7 +120,9 @@ internal fun SaveLocationScreen(
     internalFolder: () -> File = { StoragePaths.finalDownloads(isAudio = !isVideo) },
     cardFolder: String = "Hazel/" + SdCards.kindFolderName(isVideo),
     /** Whether a picked folder can still be saved into. Blocking; run off the main thread. */
-    usable: (Context, String) -> Boolean = FolderCheck::usable
+    usable: (Context, String) -> Boolean = FolderCheck::usable,
+    /** Where the blocking folder and storage checks run; tests pass one that runs them in place. */
+    io: CoroutineDispatcher = Dispatchers.IO
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -129,13 +132,13 @@ internal fun SaveLocationScreen(
     val onCard = remember(saveDir.uri) { SdCards.cardOf(saveDir.uri, context) }
     val folderBytes by produceState<Long?>(null, saveDir.uri, onCard) {
         if (saveDir.isCustom && onCard == null) {
-            value = withContext(Dispatchers.IO) { runCatching { FolderSize.of(context, saveDir.uri) }.getOrNull() }
+            value = withContext(io) { runCatching { FolderSize.of(context, saveDir.uri) }.getOrNull() }
         }
     }
     val firstCards = remember { SdCards.list(context) }
     val volumes by produceState(Volumes(null, firstCards.map { it to null })) {
         while (true) {
-            withContext(Dispatchers.IO) { runCatching { Volumes.read(context) }.getOrNull() }?.let { value = it }
+            withContext(io) { runCatching { Volumes.read(context) }.getOrNull() }?.let { value = it }
             delay(SPACE_REFRESH_MS)
         }
     }
@@ -143,7 +146,7 @@ internal fun SaveLocationScreen(
         .collectAsState(initial = emptyList())
     // Checked off the main thread: each one asks its document provider.
     val recents by produceState(emptyList<Recent>(), stored) {
-        value = withContext(Dispatchers.IO) {
+        value = withContext(io) {
             stored.filter { usable(context, it.uri) }
                 .map { Recent(it, SdCards.cardOf(it.uri, context) != null) }
         }
@@ -152,7 +155,7 @@ internal fun SaveLocationScreen(
     // The folder in use is checked once as the screen opens, so a deleted or unreachable
     // folder is pointed out before anything is saved there.
     LaunchedEffect(saveDir.uri) {
-        if (saveDir.isCustom && !withContext(Dispatchers.IO) { usable(context, saveDir.uri) }) {
+        if (saveDir.isCustom && !withContext(io) { usable(context, saveDir.uri) }) {
             problem = Problem(R.string.save_location_error_title, R.string.save_location_current_missing, label)
         }
     }
@@ -161,7 +164,7 @@ internal fun SaveLocationScreen(
     // takes it off the list.
     fun withRecent(dir: SaveDir, action: suspend () -> Unit) {
         scope.launch {
-            val ok = withContext(Dispatchers.IO) { usable(context, dir.uri) }
+            val ok = withContext(io) { usable(context, dir.uri) }
             if (ok) {
                 action()
             } else {
@@ -175,7 +178,7 @@ internal fun SaveLocationScreen(
     // and a device with nothing to open it are each said in the screen's own dialog.
     fun reveal(path: String, there: () -> Boolean, open: () -> Boolean) {
         scope.launch {
-            val found = withContext(Dispatchers.IO) { runCatching(there).getOrDefault(false) }
+            val found = withContext(io) { runCatching(there).getOrDefault(false) }
             problem = when {
                 !found -> Problem(R.string.save_location_open_title, R.string.save_location_open_missing, path)
                 !runCatching(open).getOrDefault(false) ->

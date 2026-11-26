@@ -13,6 +13,7 @@ import com.hazel.android.data.SaveDir
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.ui.saveScreen
 import com.hazel.android.ui.theme.HazelTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -75,7 +76,8 @@ class SaveLocationScreenLayoutTest(
                         onReset = {},
                         onUseRecent = { used = it },
                         onDismiss = { closed = true },
-                        usable = { _, _ -> true }
+                        usable = { _, _ -> true },
+                        io = Dispatchers.Unconfined
                     )
                 }
             }
@@ -122,11 +124,12 @@ class SaveLocationScreenLayoutTest(
                     onUseRecent = { used = it },
                     onDismiss = {},
                     // Usable while listing, gone by the time it is tapped.
-                    usable = { _, _ -> listed }
+                    usable = { _, _ -> listed },
+                    io = Dispatchers.Unconfined
                 )
             }
         }
-        // Both checks run on the IO dispatcher, which the test clock does not wait for.
+        // The checks run in place (io = Unconfined), so only the DataStore read is left to wait for.
         compose.waitUntil(15_000) {
             compose.onAllNodesWithText("Documents/Oggy").fetchSemanticsNodes().isNotEmpty()
         }
@@ -155,7 +158,8 @@ class SaveLocationScreenLayoutTest(
                     onReset = {},
                     onUseRecent = {},
                     onDismiss = {},
-                    usable = { _, _ -> false }
+                    usable = { _, _ -> false },
+                    io = Dispatchers.Unconfined
                 )
             }
         }
