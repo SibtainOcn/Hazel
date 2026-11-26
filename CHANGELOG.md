@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search opens on Media from Home and on Gallery from the Gallery tab.
 - Search: Search all is a cookie icon button; the field's search cookie also runs the search.
 - Image search site is picked only from the chips; the old Search on row is removed.
+- Tonal buttons, chips and tabs are see-through on Glass and calmer on Dark; the search Media | Gallery switch matches the Queue tabs.
 - Choice dialogs and sheets mark the pick with a cookie check.
 - Tests: only core unit tests kept (230); layout and screenshot tests and the offline Python harnesses removed.
 ### Fixed
