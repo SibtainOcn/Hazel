@@ -39,6 +39,7 @@ import com.hazel.android.download.DownloadViewModelHolder
 import com.hazel.android.gallery.queue.GalleryQueue
 import com.hazel.android.ui.theme.accentInk
 import com.hazel.android.ui.theme.accentTint
+import com.hazel.android.ui.theme.accentTintSolid
 
 /** What is downloading now, from either engine: its title and share done, null while unknown. */
 internal data class ActiveDownload(val title: String, val progress: Float?)
@@ -131,7 +132,7 @@ internal fun CookieMenuButton(onClick: () -> Unit) {
         modifier = Modifier
             .size(36.dp)
             .clip(MaterialShapes.Cookie7Sided.toShape())
-            .background(accentTint())
+            .background(accentTintSolid())
             .clickable(onClick = onClick, onClickLabel = stringResource(R.string.history_card_options)),
         contentAlignment = Alignment.Center
     ) {
@@ -152,7 +153,7 @@ internal fun CardKindMark(icon: ImageVector) {
     Box(
         modifier = Modifier
             .size(28.dp)
-            .background(accentTint(), MaterialShapes.Cookie7Sided.toShape()),
+            .background(accentTintSolid(), MaterialShapes.Cookie7Sided.toShape()),
         contentAlignment = Alignment.Center
     ) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp), tint = accentInk())

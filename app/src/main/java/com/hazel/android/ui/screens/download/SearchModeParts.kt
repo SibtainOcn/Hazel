@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.ToggleButtonShapes
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
@@ -61,10 +62,16 @@ internal fun MediaGallerySwitch(gallery: Boolean, onGallery: (Boolean) -> Unit, 
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
     ) {
+        // The unpicked side takes the same tint as the Queue tabs; M3's own is opaque on glass.
+        val colors = ToggleButtonDefaults.colors(
+            containerColor = com.hazel.android.ui.theme.accentTint(),
+            contentColor = com.hazel.android.ui.theme.accentInk()
+        )
         ToggleButton(
             checked = !gallery,
             onCheckedChange = { if (gallery) onGallery(false) },
             shapes = ButtonGroupDefaults.connectedLeadingButtonShapes().let { ToggleButtonShapes(it.shape, it.pressedShape, it.shape) },
+            colors = colors,
             modifier = Modifier.weight(1f).heightIn(min = 48.dp).semantics { role = Role.RadioButton }
         ) {
             Text(stringResource(R.string.search_mode_media), fontWeight = FontWeight.Bold, maxLines = 1)
@@ -73,6 +80,7 @@ internal fun MediaGallerySwitch(gallery: Boolean, onGallery: (Boolean) -> Unit, 
             checked = gallery,
             onCheckedChange = { if (!gallery) onGallery(true) },
             shapes = ButtonGroupDefaults.connectedTrailingButtonShapes().let { ToggleButtonShapes(it.shape, it.pressedShape, it.shape) },
+            colors = colors,
             modifier = Modifier.weight(1f).heightIn(min = 48.dp).semantics { role = Role.RadioButton }
         ) {
             Text(stringResource(R.string.nav_gallery), fontWeight = FontWeight.Bold, maxLines = 1)
@@ -162,7 +170,7 @@ internal fun SearchGuideScreen(onBack: () -> Unit) {
                                 bottomStart = if (index == parts.lastIndex) outer else inner,
                                 bottomEnd = if (index == parts.lastIndex) outer else inner
                             ),
-                            color = MaterialTheme.colorScheme.surfaceContainer,
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(modifier = Modifier.padding(16.dp)) {

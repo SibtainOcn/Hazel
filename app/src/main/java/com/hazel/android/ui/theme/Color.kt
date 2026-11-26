@@ -113,6 +113,7 @@ data class AccentColor(
 
 val AccentColors = listOf(
     AccentColor("White",      Color(0xFFE0E0E0), Color(0xFF616161), Color(0xFF1A1A1A), Color(0xFFF5F5F5)),
+    AccentColor("Teal",       Color(0xFF009688), Color(0xFF00695C), Color(0xFF001F1B), Color(0xFFB2DFDB)),
     AccentColor("Blush",      Color(0xFFFFB1C8), Color(0xFFA3264F), Color(0xFF3A0F1E), Color(0xFFFFE3EC)),
     AccentColor("Powder",     Color(0xFFA8CBFF), Color(0xFF2B5C9E), Color(0xFF0E2440), Color(0xFFDCEBFF)),
     AccentColor("Sage",       Color(0xFFA8E0B8), Color(0xFF2F6B45), Color(0xFF0E2A18), Color(0xFFDDF3E3)),
@@ -135,7 +136,6 @@ val AccentColors = listOf(
     AccentColor("Lime",       Color(0xFFA3E635), Color(0xFF4D7C0F), Color(0xFF1E2B06), Color(0xFFECFCCB)),
     AccentColor("Green",      Color(0xFF4CAF50), Color(0xFF2E7D32), Color(0xFF0A290B), Color(0xFFC8E6C9)),
     AccentColor("Mint",       Color(0xFF34D399), Color(0xFF047857), Color(0xFF052E22), Color(0xFFD1FAE8)),
-    AccentColor("Teal",       Color(0xFF009688), Color(0xFF00695C), Color(0xFF001F1B), Color(0xFFB2DFDB)),
     AccentColor("Mocha",      Color(0xFFBCAAA4), Color(0xFF6D4C41), Color(0xFF2A1F1B), Color(0xFFEFE6E2)),
     AccentColor("Slate",      Color(0xFF94A3B8), Color(0xFF475569), Color(0xFF151B24), Color(0xFFE2E8F0)),
 )
