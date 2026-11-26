@@ -49,7 +49,6 @@ import coil3.compose.AsyncImage
 import com.hazel.android.R
 import com.hazel.android.gallery.GalleryPost
 import com.hazel.android.ui.components.ArtworkPlaceholder
-import com.hazel.android.ui.screens.download.CornerTag
 import com.hazel.android.ui.theme.tonalFill
 
 /**
@@ -67,6 +66,9 @@ internal fun GalleryPostCard(
 ) {
     val colors = MaterialTheme.colorScheme
     val count = post.items.size
+    // A highlight is named after itself, not its author.
+    val highlight = post.section == com.hazel.android.gallery.ProfileSection.IG_HIGHLIGHTS
+    val heading = post.items.firstOrNull()?.title?.takeIf { highlight && it.isNotBlank() } ?: post.author.ifBlank { post.site }
     Surface(
         onClick = { onOpen(0) },
         modifier = modifier.fillMaxWidth(),
@@ -83,7 +85,7 @@ internal fun GalleryPostCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        post.author.firstOrNull()?.uppercase() ?: "#",
+                        heading.firstOrNull()?.uppercase() ?: "#",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = colors.onSurfaceVariant
@@ -92,7 +94,7 @@ internal fun GalleryPostCard(
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        post.author.ifBlank { post.site },
+                        heading,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
@@ -100,13 +102,18 @@ internal fun GalleryPostCard(
                     )
                     if (post.site.isNotBlank()) {
                         Text(
-                            post.site.replaceFirstChar { it.uppercase() },
+                            if (highlight) stringResource(R.string.profile_highlight_of, post.site.replaceFirstChar { it.uppercase() })
+                            else post.site.replaceFirstChar { it.uppercase() },
                             style = MaterialTheme.typography.bodySmall,
                             color = colors.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
+                }
+                post.section?.let {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    SectionTag(stringResource(it.label))
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -137,11 +144,6 @@ internal fun GalleryPostCard(
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
-                        if (i == 0) {
-                            Box(modifier = Modifier.align(Alignment.BottomStart).padding(10.dp)) {
-                                CornerTag(text = "1 / $count")
-                            }
-                        }
                         if (item.isVideo) {
                             Box(
                                 modifier = Modifier
@@ -170,7 +172,18 @@ internal fun GalleryPostCard(
             ) {
                 PostDownloadAllChip(onClick = onDownloadAll, modifier = Modifier.weight(1f, fill = false))
                 Spacer(modifier = Modifier.width(12.dp))
-                PageDots(count = count, current = state.currentItem)
+                // Under the carousel, not on the artwork, so it reads on any picture and follows the scroll.
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "${state.currentItem + 1} / $count",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    PageDots(count = count, current = state.currentItem)
+                }
             }
         }
     }

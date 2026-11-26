@@ -485,6 +485,7 @@ fun AppNavigation(
                     homeTopBar()
                     Box(modifier = Modifier.weight(1f)) {
                         com.hazel.android.ui.screens.gallery.GalleryScreen(
+                            onOpenImageSettings = { navController.navigate("gallery_settings") { launchSingleTop = true } },
                             onVideoLinks = { links ->
                                 downloadViewModel.fetchAll(links)
                                 openTab(Screen.Download.route)

@@ -338,7 +338,6 @@ object SettingsRepository {
     val PLAY_QUALITIES = listOf(144, 240, 360, 480, 720, 1080)
     const val DEFAULT_PLAY_QUALITY = 720
 
-    private val IMAGE_SEARCH_KEY = booleanPreferencesKey("image_search")
     private val GALLERY_SITE_KEY = stringPreferencesKey("gallery_search_site")
     private val GALLERY_POSTS_KEY = intPreferencesKey("gallery_search_posts")
     private val GALLERY_SHOW_KEY = stringPreferencesKey("gallery_show")
@@ -348,18 +347,14 @@ object SettingsRepository {
     val GALLERY_POST_COUNTS = listOf(10, 30, 60, 100)
     const val DEFAULT_GALLERY_POSTS = 30
 
-    fun getImageSearch(context: Context): Flow<Boolean> =
-        context.dataStore.data.map { prefs -> prefs[IMAGE_SEARCH_KEY] ?: false }
+    /** The site picked on the search screen for image word searches; null until one is picked. */
+    fun getGallerySearchSitePicked(context: Context): Flow<com.hazel.android.gallery.GallerySearchSite?> =
+        context.dataStore.data.map { prefs ->
+            prefs[GALLERY_SITE_KEY]?.let { name -> com.hazel.android.gallery.GallerySearchSite.entries.firstOrNull { it.name == name } }
+        }
 
-    suspend fun setImageSearch(context: Context, on: Boolean) {
-        context.dataStore.edit { prefs -> prefs[IMAGE_SEARCH_KEY] = on }
-    }
-
-    fun getGallerySearchSite(context: Context): Flow<com.hazel.android.gallery.GallerySearchSite> =
-        context.dataStore.data.map { prefs -> com.hazel.android.gallery.GallerySearchSite.fromName(prefs[GALLERY_SITE_KEY]) }
-
-    suspend fun setGallerySearchSite(context: Context, site: com.hazel.android.gallery.GallerySearchSite) {
-        context.dataStore.edit { prefs -> prefs[GALLERY_SITE_KEY] = site.name }
+    suspend fun setGallerySearchSitePicked(context: Context, site: com.hazel.android.gallery.GallerySearchSite?) {
+        context.dataStore.edit { prefs -> if (site == null) prefs.remove(GALLERY_SITE_KEY) else prefs[GALLERY_SITE_KEY] = site.name }
     }
 
     fun getGalleryPostsPerSearch(context: Context): Flow<Int> =
@@ -388,6 +383,42 @@ object SettingsRepository {
 
     suspend fun setGalleryGroupByAuthor(context: Context, group: Boolean) {
         context.dataStore.edit { prefs -> prefs[GALLERY_GROUP_AUTHOR_KEY] = group }
+    }
+
+    private val GALLERY_PROFILE_ASK_KEY = booleanPreferencesKey("gallery_profile_ask")
+    private val GALLERY_X_QUOTES_KEY = booleanPreferencesKey("gallery_x_quotes")
+
+    private fun profileKey(site: com.hazel.android.gallery.ProfileSite) =
+        stringPreferencesKey("gallery_profile_" + site.name.lowercase())
+
+    /** Whether a pasted profile link asks which sections to fetch first. */
+    fun getGalleryProfileAsk(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_PROFILE_ASK_KEY] ?: true }
+
+    suspend fun setGalleryProfileAsk(context: Context, ask: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_PROFILE_ASK_KEY] = ask }
+    }
+
+    fun getGalleryProfileSections(
+        context: Context,
+        site: com.hazel.android.gallery.ProfileSite
+    ): Flow<List<com.hazel.android.gallery.ProfileSection>> =
+        context.dataStore.data.map { prefs -> com.hazel.android.gallery.ProfileSection.parse(site, prefs[profileKey(site)]) }
+
+    suspend fun setGalleryProfileSections(
+        context: Context,
+        site: com.hazel.android.gallery.ProfileSite,
+        sections: List<com.hazel.android.gallery.ProfileSection>
+    ) {
+        context.dataStore.edit { prefs -> prefs[profileKey(site)] = com.hazel.android.gallery.ProfileSection.keys(sections) }
+    }
+
+    /** Whether X reads also fetch the post a post quotes. */
+    fun getGalleryXQuotes(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_X_QUOTES_KEY] ?: false }
+
+    suspend fun setGalleryXQuotes(context: Context, on: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_X_QUOTES_KEY] = on }
     }
 
     private val GALLERY_IMAGE_SIZE_KEY = stringPreferencesKey("gallery_image_size")

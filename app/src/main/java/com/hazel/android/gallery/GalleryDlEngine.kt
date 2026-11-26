@@ -279,6 +279,7 @@ object GalleryDlEngine {
         val reposts = !SettingsRepository.getGallerySkipReposts(context).first()
         add("--option"); add("extractor.twitter.retweets=$reposts")
         add("--option"); add("extractor.bluesky.reposts=$reposts")
+        add("--option"); add("extractor.twitter.quoted=${SettingsRepository.getGalleryXQuotes(context).first()}")
     }
 
     /** The downloaded gallery-dl update first, then the bundled one, then yt-dlp for post videos. */

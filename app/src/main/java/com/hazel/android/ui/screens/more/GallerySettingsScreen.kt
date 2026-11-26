@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.DataObject
 import androidx.compose.material.icons.filled.DeleteSweep
@@ -30,7 +28,6 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PhotoSizeSelectLarge
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -56,7 +53,6 @@ import com.hazel.android.download.YtDlpEngine
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryImageSize
 import com.hazel.android.gallery.GalleryOptions
-import com.hazel.android.gallery.GallerySearchSite
 import com.hazel.android.gallery.GalleryShow
 import com.hazel.android.gallery.GalleryVideoMode
 import com.hazel.android.ui.components.AlertDialog
@@ -69,7 +65,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private enum class GalleryChoice { IMAGE_SIZE, VIDEO, FILENAME, SITE, POSTS, SHOW, CLEAR_RECORD, RETRIES }
+private enum class GalleryChoice { IMAGE_SIZE, VIDEO, FILENAME, POSTS, SHOW, CLEAR_RECORD, RETRIES }
 
 /** Defaults for gallery-dl downloads and image search. */
 @Composable
@@ -78,18 +74,17 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
     val scope = rememberCoroutineScope()
     val options by remember(context) { SettingsRepository.getGalleryOptions(context) }.collectAsState(initial = GalleryOptions())
     val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }.collectAsState(initial = SaveDirs())
-    val site by remember(context) { SettingsRepository.getGallerySearchSite(context) }.collectAsState(initial = GallerySearchSite.DEFAULT)
     val posts by remember(context) { SettingsRepository.getGalleryPostsPerSearch(context) }.collectAsState(initial = SettingsRepository.DEFAULT_GALLERY_POSTS)
     val show by remember(context) { SettingsRepository.getGalleryShow(context) }.collectAsState(initial = GalleryShow.ALL)
     val skipReposts by remember(context) { SettingsRepository.getGallerySkipReposts(context) }.collectAsState(initial = true)
+    val profileAsk by remember(context) { SettingsRepository.getGalleryProfileAsk(context) }.collectAsState(initial = true)
+    var profileSheet by remember { mutableStateOf<com.hazel.android.gallery.ProfileSite?>(null) }
 
     var open by rememberSaveable { mutableStateOf<GalleryChoice?>(null) }
     var folderOpen by rememberSaveable { mutableStateOf(false) }
     val pickSaveDir = rememberSaveKindPicker(saveDirs)
     val close = { open = null }
 
-    val maintenance = stringResource(R.string.search_under_maintenance)
-    val later = { Toast.makeText(context, maintenance, Toast.LENGTH_SHORT).show() }
     fun save(change: (GalleryOptions) -> GalleryOptions) {
         scope.launch { SettingsRepository.setGalleryOptions(context, change(options)) }
     }
@@ -192,14 +187,6 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
             rows = listOf(
                 {
                     ValueSettingRow(
-                        icon = Icons.Filled.TravelExplore,
-                        title = stringResource(R.string.fetch_settings_search_on),
-                        value = site.label,
-                        onClick = { open = GalleryChoice.SITE }
-                    )
-                },
-                {
-                    ValueSettingRow(
                         icon = Icons.Filled.FormatListNumbered,
                         title = stringResource(R.string.gallery_posts_per_search),
                         value = posts.toString(),
@@ -227,25 +214,11 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
 
         SettingsSection(
             title = stringResource(R.string.gallery_settings_profiles),
-            rows = listOf(
-                {
-                    ValueSettingRow(
-                        icon = Icons.Filled.AccountCircle,
-                        title = stringResource(R.string.gallery_settings_instagram_sections),
-                        value = stringResource(R.string.gallery_settings_instagram_sections_value),
-                        onClick = later
-                    )
-                },
-                {
-                    ValueSettingRow(
-                        icon = Icons.Filled.Forum,
-                        title = stringResource(R.string.gallery_settings_x_posts),
-                        value = stringResource(R.string.gallery_settings_x_posts_value),
-                        onClick = later
-                    )
-                }
-            )
+            rows = com.hazel.android.ui.screens.download.profileRows(profileAsk, onOpen = { profileSheet = it })
         )
+        profileSheet?.let { site ->
+            com.hazel.android.ui.screens.gallery.SavedProfileSectionsSheet(site = site, onDismiss = { profileSheet = null })
+        }
 
         SettingsSection(
             title = stringResource(R.string.gallery_settings_network),
@@ -308,13 +281,6 @@ fun GallerySettingsScreen(onBack: () -> Unit, onOpenCookies: () -> Unit, onOpenP
         GalleryChoice.FILENAME -> GalleryTemplateDialog(
             current = options.filenameTemplate,
             onSave = { template -> save { it.copy(filenameTemplate = template) }; close() },
-            onDismiss = close
-        )
-        GalleryChoice.SITE -> SingleChoiceDialog(
-            title = stringResource(R.string.fetch_settings_search_on),
-            choices = GallerySearchSite.entries.map { it to it.label },
-            selected = site,
-            onSelect = { scope.launch { SettingsRepository.setGallerySearchSite(context, it) }; close() },
             onDismiss = close
         )
         GalleryChoice.POSTS -> SingleChoiceDialog(
