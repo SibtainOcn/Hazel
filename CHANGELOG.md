@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search: Search all is a cookie icon button; the field's search cookie also runs the search.
 - Image search site is picked only from the chips; the old Search on row is removed.
 - Choice dialogs and sheets mark the pick with a cookie check.
+- Tests: only core unit tests kept (230); layout and screenshot tests and the offline Python harnesses removed.
 ### Fixed
 - Gallery: videos play inside the viewer in Hazel's own player, with a seek bar and mute button; Instagram stories and reels no longer say no app can play them, and links only yt-dlp can read (Reddit) play too.
 - Gallery: videos in saved results or with expired links are read again as soon as they show, before Play.

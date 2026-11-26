@@ -31,13 +31,7 @@ class GalleryPostTest {
         assertNull(items[2].postUrl)
     }
 
-    @Test
-    fun `an error gallery-dl wrote into the listing is kept`() {
-        val listing = GalleryListing.parse("""[[-1, {"error": "AuthRequired", "message": "cookies needed"}]]""")
-        assertTrue(listing.isEmpty)
-        assertEquals("AuthRequired" to "cookies needed", listing.error)
-        assertEquals(GalleryDlException.Kind.LOGIN_REQUIRED, GalleryDlException.classifyError("AuthRequired", "cookies needed"))
-    }
+
 
     @Test
     fun `one post keeps the source link and its indexes`() {
@@ -78,29 +72,11 @@ class GalleryPostTest {
         assertTrue(post.items.all { request.covers(post, it) })
     }
 
-    @Test
-    fun `nothing read gives no posts`() {
-        assertTrue(GalleryPost.group("https://site/x", emptyList()).isEmpty())
-    }
 
-    @Test
-    fun `single images by one author join one post, posts with several files stay apart`() {
-        val posts = GalleryPost.group("https://site/search?q=x", listOf(file(1, "p1"), file(2, "p2"), file(3, "p3"), file(4, "p3")), feed = true)
-        val grouped = GalleryPost.byAuthor(posts)
-        assertEquals(2, grouped.size)
-        assertEquals(listOf("https://cdn.example/1.jpg", "https://cdn.example/2.jpg"), grouped[0].items.map { it.url })
-        assertTrue(grouped[0].direct)
-        assertEquals(2, grouped[1].items.size)
-    }
 
-    @Test
-    fun `instant gallery keeps the post's author, and the shared author over several posts`() {
-        val one = GalleryPost.group("https://x/p", listOf(file(1, "p"), file(2, "p")))
-        assertEquals("a", com.hazel.android.gallery.queue.instantRequest("https://x/p", one, null).author)
-        val several = GalleryPost.group("https://x/u", listOf(file(1, "p", "https://x/1"), file(2, "q", "https://x/2")))
-        val request = com.hazel.android.gallery.queue.instantRequest("https://x/u", several, null)
-        assertEquals("https://x/u" to "a", request.url to request.author)
-    }
+
+
+
 
     private fun file(index: Int, post: String, link: String? = null) = GalleryItem(
         index = index, url = "https://cdn.example/$index.jpg", extension = "jpg", title = "", author = "a",

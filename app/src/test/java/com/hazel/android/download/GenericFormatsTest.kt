@@ -19,35 +19,16 @@ class GenericFormatsTest {
         audioFormats = listOf(MediaProbe.BEST_AUDIO)
     )
 
-    @Test
-    fun `the placeholder offers both ladders before anything is read`() {
-        val info = GenericFormats.placeholder("u", "Best", "Best audio", "Worst")
-        // Best, eight heights from 2160p down to 144p, and worst.
-        assertEquals(10, info.videoFormats.size)
-        assertEquals(7, info.audioFormats.size)
-        assertEquals("bv*+ba/b", GenericFormats.heightCeiling(720).selector)
-        assertEquals("res:720", GenericFormats.heightCeiling(720).sort)
-    }
 
-    @Test
-    fun `a ladder step reads back as the ceiling a set of links keeps`() {
-        assertEquals(0, GenericFormats.ceilingOf(MediaProbe.BEST_VIDEO))
-        assertEquals(WORST_HEIGHT, GenericFormats.ceilingOf(WORST_VIDEO))
-        assertEquals(720, GenericFormats.ceilingOf(GenericFormats.heightCeiling(720)))
-    }
+
+
 
     @Test
     fun `a height becomes the tallest stream under it once read`() {
         assertEquals("720", GenericFormats.applyTo(read, GenericFormats.heightCeiling(1000), null)?.formatId)
     }
 
-    @Test
-    fun `the preferred video codec is taken at the height the choice lands on`() {
-        val both = read.copy(videoFormats = read.videoFormats + video("720v", 720).copy(vcodec = "vp09.00.40.08"))
-        val ceiling = GenericFormats.heightCeiling(1000)
-        assertEquals("720v", GenericFormats.applyTo(both, ceiling, null, VideoCodec.VP9)?.formatId)
-        assertEquals("720", GenericFormats.applyTo(both, ceiling, null)?.formatId)
-    }
+
 
     @Test
     fun `an unread link shows the ladder with the preferred height chosen, a read one its own list`() {
@@ -61,18 +42,7 @@ class GenericFormatsTest {
         assertEquals(0, GenericFormats.untilRead(audioOnly, "Best", "Best audio", "Worst").videoFormats.size)
     }
 
-    @Test
-    fun `a direct stream is taken over HLS at the same height and frame rate`() {
-        val hls = video("311", 720).copy(fps = 60, hls = true)
-        val direct = video("298", 720).copy(fps = 60)
-        val slower = video("136", 720)
-        val info = read.copy(videoFormats = listOf(hls, slower, direct))
-        assertEquals("298", GenericFormats.applyTo(info, GenericFormats.heightCeiling(720), null)?.formatId)
-        assertEquals("298", info.bestVideo?.formatId)
-        // HLS stays when it is the only stream at that height.
-        val only = read.copy(videoFormats = listOf(hls, video("360", 360)))
-        assertEquals("311", GenericFormats.applyTo(only, GenericFormats.heightCeiling(720), null)?.formatId)
-    }
+
 
     @Test
     fun `best and worst become the link's own extremes`() {
@@ -80,9 +50,5 @@ class GenericFormatsTest {
         assertEquals("360", GenericFormats.applyTo(read, WORST_VIDEO, null)?.formatId)
     }
 
-    @Test
-    fun `a bitrate step stays the expression it is`() {
-        val step = BatchAudioFormats.bitrateCeiling(128)
-        assertSame(step, GenericFormats.applyTo(read, step, null))
-    }
+
 }

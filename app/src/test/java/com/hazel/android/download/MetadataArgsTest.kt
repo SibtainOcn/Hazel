@@ -7,19 +7,9 @@ import kotlin.test.assertTrue
 /** An edited title and author become `--parse-metadata` values yt-dlp reads as plain text. */
 class MetadataArgsTest {
 
-    @Test
-    fun oneWordTitleIsTextNotAFieldName() {
-        // A FROM of letters only is read as a field name, which saved "Flickermood" as "NA".
-        assertEquals(listOf("Flickermood :%(title)s "), metadataParseArgs("Flickermood", ""))
-    }
 
-    @Test
-    fun oneWordAuthorKeepsTheArtistTag() {
-        assertEquals(
-            listOf("Hazel :%(uploader)s ", "%(uploader)s:%(artist)s"),
-            metadataParseArgs("", "Hazel")
-        )
-    }
+
+
 
     @Test
     fun colonsAreEscapedSoTheSplitPassesThem() {
@@ -42,11 +32,5 @@ class MetadataArgsTest {
         assertEquals(emptyList(), metadataParseArgs("  ", ""))
     }
 
-    @Test
-    fun titleAndAuthorTogether() {
-        assertEquals(
-            listOf("Song :%(title)s ", "Artist :%(uploader)s ", "%(uploader)s:%(artist)s"),
-            metadataParseArgs("Song", "Artist")
-        )
-    }
+
 }

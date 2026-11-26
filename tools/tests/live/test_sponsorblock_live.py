@@ -14,7 +14,7 @@ flags DownloadViewModel builds, and checks what comes out.
 Without the network it checks that the category ids the app offers are ones yt-dlp accepts,
 and that the flags below are the ones the Kotlin passes.
 
-Needs network, yt-dlp and ffmpeg/ffprobe, so it is not part of test_all.py:
+Needs network, yt-dlp and ffmpeg/ffprobe, so it is run by hand:
 
     pip install -U yt-dlp
     python tools/tests/live/test_sponsorblock_live.py            # full run

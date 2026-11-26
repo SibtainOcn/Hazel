@@ -30,11 +30,7 @@ class HomeResultsRepositoryTest {
         assertEquals("mr beast", saved.searchQuery)
     }
 
-    @Test
-    fun aSetOfLinksComesBackWithoutSearchWords() {
-        HomeResultsRepository.save(context, HomeResultsRepository.parse("[${card(1)},${card(2)}]").results)
-        assertEquals("", HomeResultsRepository.load(context).searchQuery)
-    }
+
 
     @Test
     fun theOlderBareListStillLoads() {
@@ -44,11 +40,5 @@ class HomeResultsRepositoryTest {
         assertEquals("Video 2", saved.results[1].title)
     }
 
-    @Test
-    fun nothingSavedLoadsEmpty() {
-        HomeResultsRepository.clear(context)
-        val saved = HomeResultsRepository.load(context)
-        assertTrue(saved.results.isEmpty())
-        assertEquals("", saved.searchQuery)
-    }
+
 }

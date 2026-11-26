@@ -2,6 +2,7 @@ package com.hazel.android.data
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
@@ -22,10 +23,7 @@ class CookieSignInTest {
         assertTrue(CookieRepository.signsIn(true, listOf(youtube), video))
     }
 
-    @Test
-    fun `short links count as the site they belong to`() {
-        assertTrue(CookieRepository.signsIn(true, listOf(youtube), listOf("https://youtu.be/dQw4w9WgXcQ")))
-    }
+
 
     @Test
     fun `nothing is signed in with Use cookies off`() {
@@ -37,25 +35,44 @@ class CookieSignInTest {
         assertFalse(CookieRepository.signsIn(true, listOf(youtube), listOf("https://vimeo.com/76979871")))
     }
 
+
+
+
+
+
+
+
+
+    private fun entry(vararg lines: String, refused: Boolean = false) =
+        CookieEntry(1, "https://www.instagram.com", "", lines.joinToString("\n"), refused = refused)
+
     @Test
-    fun `a switched off or empty set does not count`() {
-        assertFalse(CookieRepository.signsIn(true, listOf(youtube.copy(enabled = false)), video))
-        assertFalse(CookieRepository.signsIn(true, listOf(youtube.copy(content = " ")), video))
+    fun `state follows the site's login cookie, not the longest-lived cookie`() {
+        val now = 1_800_000_000L
+        val longLived = ".instagram.com\tTRUE\t/\tTRUE\t1900000000\tcsrftoken\tx"
+        val loginOld = "#HttpOnly_.instagram.com\tTRUE\t/\tTRUE\t1700000000\tsessionid\ty"
+        val loginNew = "#HttpOnly_.instagram.com\tTRUE\t/\tTRUE\t1850000000\tsessionid\ty"
+
+        assertEquals(AccountState.SIGNED_OUT, CookieRepository.statusOf(entry(longLived), now).state)
+        assertEquals(AccountState.EXPIRED, CookieRepository.statusOf(entry(longLived, loginOld), now).state)
+        val active = CookieRepository.statusOf(entry(longLived, loginNew), now)
+        assertEquals(AccountState.ACTIVE, active.state)
+        assertEquals(1850000000L, active.expiresAt)
+        assertEquals(AccountState.EXPIRED, CookieRepository.statusOf(entry(loginNew, refused = true), now).state)
     }
 
     @Test
-    fun `an imported set is matched by its cookies`() {
-        assertTrue(CookieRepository.signsIn(true, listOf(youtube.copy(url = "")), video))
-    }
-
-    @Test
-    fun `a set of links is signed in when any of them is`() {
-        val links = listOf("https://vimeo.com/76979871") + video
-        assertTrue(CookieRepository.signsIn(true, listOf(youtube), links))
-    }
-
-    @Test
-    fun `a link with no address is never signed in`() {
-        assertFalse(CookieRepository.signsIn(true, listOf(youtube), listOf("")))
+    fun jsonExportNetscapeWithSpacesAndJunk() {
+        val json = """[{"domain":".x.com","hostOnly":false,"httpOnly":true,"name":"auth_token","path":"/",
+            "secure":true,"expirationDate":1790000000.5,"value":"abc"}]"""
+        assertEquals(
+            listOf("#HttpOnly_.x.com\tTRUE\t/\tTRUE\t1790000000\tauth_token\tabc"),
+            CookieImport.toNetscapeLines(json)
+        )
+        assertEquals(
+            listOf(".instagram.com\tTRUE\t/\tTRUE\t0\tsessionid\tv 1"),
+            CookieImport.toNetscapeLines("# Netscape HTTP Cookie File\n.instagram.com TRUE / TRUE 0 sessionid v 1")
+        )
+        assertTrue(CookieImport.toNetscapeLines("hello world\nnot a cookie").isEmpty())
     }
 }

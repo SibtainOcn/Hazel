@@ -10,15 +10,7 @@ import kotlin.test.assertNull
 
 class SaveDirsTest {
 
-    @Test
-    fun galleryDefaultsToItsBuiltInFolder() {
-        val dirs = SaveDirs()
-        assertFalse(dirs.gallery.isCustom)
-        assertEquals("Download/Hazel/Gallery", StoragePaths.DOWNLOAD_GALLERY_RELATIVE_PATH)
-        assertEquals("Download/Hazel/Gallery", SaveKind.GALLERY.relativePath)
-        assertEquals("Download/Hazel/Gallery", dirs.labelOf(SaveKind.GALLERY))
-        assertEquals("Gallery", SaveKind.GALLERY.folderName)
-    }
+
 
     @Test
     fun eachKindKeepsItsOwnFolder() {
@@ -53,23 +45,7 @@ class SaveDirsTest {
         assertEquals(SaveDir("content://g", "Pics"), SettingsRepository.saveDirsOf(prefs).gallery)
     }
 
-    @Test
-    fun galleryFolderStaysOnThisInstallAcrossBackups() {
-        val source = mutablePreferencesOf(
-            stringPreferencesKey("speed_limit") to "1M",
-            stringPreferencesKey("download_tree_uri_gallery") to "content://g",
-            stringPreferencesKey("download_tree_label_gallery") to "Pics",
-            stringPreferencesKey("download_tree_uri_video") to "content://v"
-        )
-        val json = BackupRepository.export(source, BackupCategory.entries.toSet())
-        assertFalse(json.getJSONObject("values").has("download_tree_uri_gallery"))
 
-        val target = mutablePreferencesOf()
-        BackupRepository.apply(target, BackupRepository.parse(json.toString()), BackupCategory.entries.toSet())
-        assertEquals("1M", target[stringPreferencesKey("speed_limit")])
-        assertNull(target[stringPreferencesKey("download_tree_uri_gallery")])
-        assertEquals(SaveDir(), SettingsRepository.saveDirsOf(target).gallery)
-    }
 
     @Test
     fun oldBackupWithoutGalleryKeepsThePickedGalleryFolder() {

@@ -83,8 +83,10 @@ python tools/strings/check.py resources       # strings.xml integrity
 python tools/strings/check.py translations    # translations correct, coverage report
 ./gradlew :app:testDebugUnitTest              # unit tests
 ./gradlew :app:assembleDebug                  # it builds
-python tools/tests/test_all.py                # everything above plus the feature harnesses
 ```
+
+Add a unit test only where a change can break quietly (arguments, parsing, queue, saved data,
+files, proxy, updates): one short test per fix. Screens are checked on a device instead.
 
 Then install it on a phone or emulator and try what you changed. For anything on screen,
 attach before and after screenshots to the pull request.

@@ -23,7 +23,7 @@ It also checks, without the network, that the flags and the Instant wiring below
 ones the Kotlin has, so the two cannot drift apart.
 
 Needs the yt-dlp and ffmpeg/ffprobe executables on the PATH, and the network for the
-real sites. Not part of test_all.py; run it by hand when Instant or the download flags
+real sites. Run it by hand when Instant or the download flags
 change:
 
     python tools/tests/live/test_instant_live.py              # full matrix
