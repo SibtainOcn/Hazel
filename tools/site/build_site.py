@@ -10,8 +10,8 @@ Then every page is checked: plain punctuation only, no unfilled placeholder, and
 local link, image and #anchor resolves. Any failure exits non-zero, which fails CI.
 
 The site search reads search.json, written here from the built pages: one entry for each
-guide section, FAQ question, home page section and card, support heading and the latest
-release notes. Every entry's link is checked like any other link.
+guide section, FAQ question, home page section and card, support heading and each
+release's notes. Every entry's link is checked like any other link.
 
     python tools/site/build_site.py
 """
@@ -153,6 +153,24 @@ def release_notes_path():
     if not path.exists():
         sys.exit(f'build_site: {path.relative_to(ROOT).as_posix()} is missing')
     return path
+
+
+def release_notes_all():
+    """Every docs/release-notes/v<version>.md, newest first, as (version, repo-relative path)."""
+    found = []
+    for path in (ROOT / 'docs' / 'release-notes').glob('v*.md'):
+        name = path.stem[1:]
+        if re.fullmatch(r'\d+\.\d+\.\d+', name):
+            found.append((tuple(int(p) for p in name.split('.')), name, path.relative_to(ROOT).as_posix()))
+    return [(name, rel) for _, name, rel in sorted(found, reverse=True)]
+
+
+def release_notes_html():
+    """One section per release, id="v<version>", so each release page can link to its own."""
+    return ''.join(
+        f'<section class="notes-release" id="v{name}"><h2>Hazel {name}</h2>{md_html(rel)}</section>'
+        for name, rel in release_notes_all()
+    )
 
 
 def whats_new(limit=6):
@@ -308,7 +326,8 @@ def search_index(pages, version):
             add(h2.group(1), 'Support', 'support.html', part[h2.end():])
 
     notes = re.search(r'<main>(.*?)</main>', pages['whats-new'], re.S).group(1)
-    add(f"What's new in {version}", "What's new", 'whats-new.html', notes)
+    for m in re.finditer(r'<section class="notes-release" id="v([\d.]+)">(.*?)</section>', notes, re.S):
+        add(f"What's new in {m.group(1)}", "What's new", f'whats-new.html#v{m.group(1)}', m.group(2))
     return entries
 
 
@@ -418,7 +437,7 @@ def main():
         'language_chips': ''.join(f'<span>{l}</span>' for l in langs),
         'whats_new': ''.join(f'<span class="line">{html_escape(t)}</span>' for t in whats_new()),
         'changelog': md_html('CHANGELOG.md'),
-        'release_notes': md_html(release_notes_path().relative_to(ROOT).as_posix()),
+        'release_notes': release_notes_html(),
     }
 
     pages = {
@@ -427,7 +446,7 @@ def main():
                       'home', 'home.css', facts),
         'guide': page('guide', 'Guide | Hazel', 'How to use Hazel: your first download, playlists, sharing from other apps, stories and highlights, where files go and more.', 'guide', 'pages.css', facts),
         'faq': page('faq', 'FAQ | Hazel', 'Answers to common questions about Hazel.', 'faq', 'pages.css', facts),
-        'whats-new': page('whats-new', "What's new | Hazel", 'The highlights of the latest Hazel release.', 'whats-new', 'pages.css', facts),
+        'whats-new': page('whats-new', "What's new | Hazel", 'The highlights of every Hazel release, newest first.', 'whats-new', 'pages.css', facts),
         'changelog': page('changelog', 'Changelog | Hazel', 'Every change to Hazel, newest first.', 'changelog', 'pages.css', facts),
         'support': page('support', 'Support | Hazel', 'Help keep Hazel free: sponsor, buy a coffee, translate, or spread the word.', 'support', 'pages.css', facts),
     }

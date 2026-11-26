@@ -55,7 +55,6 @@ google-services.json
 build_output.txt
 artifacts/
 release-notes.md
-!/RELEASE-NOTES.md
 
 # ── Reference checkouts and scratch ──
 /temp/
