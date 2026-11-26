@@ -97,6 +97,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Temporary tests prove a fix while it is worked on and never reach main: each is
+      # deleted, or moved into the core tests, before nightly is merged.
+      - name: No temporary tests on the way to main
+        if: github.base_ref == 'main'
+        run: |
+          left=$(find app/src/test/java/com/hazel/android/temp -type f 2>/dev/null || true)
+          if [ -n "$left" ]; then
+            echo "::error::Temporary tests must be deleted or moved into the core tests before main:"
+            echo "$left"
+            exit 1
+          fi
+
       - name: Set up JDK 17
         uses: actions/setup-java@v6
         with:
