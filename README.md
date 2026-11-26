@@ -91,11 +91,11 @@ Hazel is a free, open-source downloader for Android powered by **yt-dlp** & **ga
 
 <table>
   <tr><th width="50%" align="left">📥 Downloading</th><th width="50%" align="left">🔍 Search & Play</th></tr>
-  <tr><td><b>1500+ sites:</b> YouTube, Instagram, TikTok, X, Reddit, SoundCloud and <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">more</a>.</td><td><b>Search:</b> YouTube, YouTube Music, SoundCloud or Bandcamp, with optional suggestions.</td></tr>
+  <tr><td><b>1500+ sites:</b> YouTube, Instagram, TikTok, X, SoundCloud and <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">more</a>.</td><td><b>Search:</b> YouTube, YouTube Music, SoundCloud or Bandcamp, with optional suggestions.</td></tr>
   <tr><td><b>Batch:</b> one link, many at once, or a whole playlist / channel.</td><td><b>Play first:</b> stream any result on its card with seek, double tap skip and full screen.</td></tr>
   <tr><td><b>Share to Hazel:</b> from any app, <b>Hazel Video</b> or <b>Hazel Gallery</b> opens a sheet to choose; <b>Instant Video</b> or <b>Instant Gallery</b> saves at once with your saved settings, stories and highlights included.</td><td><b>Cut:</b> save only the part you want, chosen on a live preview. Quick, precise, or trim after download: the whole file at full speed, cut on your phone.</td></tr>
   <tr><td><b>Your format:</b> pick quality, container, audio track, and edit title / metadata.</td><td><b>Live streams:</b> record from the start, or wait for a premiere.</td></tr>
-  <tr><td><b>Gallery:</b> stories, highlights, posts, reels and carousels from Instagram, X, Pinterest, Reddit and more. A profile link asks which sections to save; image search and captions too.</td><td><b>Sign-in:</b> one-tap sign-in for Instagram, YouTube, X and more, with each account's status.</td></tr>
+  <tr><td><b>Gallery:</b> stories, highlights, posts, reels and carousels from Instagram, X, Pinterest and more. A profile link asks which sections to save; image search and captions too.</td><td><b>Sign-in:</b> one-tap sign-in for Instagram, YouTube, X and more, with each account's status.</td></tr>
 </table>
 
 <table>
