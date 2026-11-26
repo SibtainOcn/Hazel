@@ -14,6 +14,7 @@
     <string name="gallery_error_unsupported">गैलरी यह लिंक नहीं पढ़ सकती</string>
     <string name="gallery_links_skipped">कुछ लिंक पढ़े नहीं जा सके</string>
     <string name="gallery_video_unavailable">यह वीडियो नहीं मिल सका</string>
+    <string name="format_sheet_not_for_file">इस फ़ाइल के लिए उपलब्ध नहीं</string>
     <string name="search_fetching">ला रहे हैं</string>
     <string name="gallery_error_not_found">यह पोस्ट हटाई गई, निजी है या खाली है</string>
     <string name="gallery_error_network">कनेक्ट नहीं हो सका। नेटवर्क या प्रॉक्सी जाँचें</string>
@@ -1020,9 +1021,9 @@
     <string name="home_empty_hint">YouTube, SoundCloud, Instagram Reels और 1,700 अन्य साइटों से लिंक पेस्ट करें</string>
     <string name="more_getting_started">शुरुआत करें</string>
     <string name="instant_label">Instant वीडियो</string>
-    <string name="instant_images_label">Instant इमेज</string>
+    <string name="instant_gallery_label">Instant गैलरी</string>
     <string name="share_label_video">Hazel वीडियो</string>
-    <string name="share_label_images">Hazel इमेज</string>
+    <string name="share_label_gallery">Hazel गैलरी</string>
     <string name="gallery_instant_settings">गैलरी सेटिंग्स</string>
     <string name="shortcut_search">खोजें</string>
     <string name="instant_started">डाउनलोड शुरू हुआ</string>
@@ -1238,7 +1239,7 @@
     <string name="more_image_settings">इमेज सेटिंग्स</string>
     <string name="guide_share_from_apps">किसी भी ऐप से लिंक शेयर करें</string>
     <string name="guide_share_video">हर विकल्प चुनें, फिर डाउनलोड</string>
-    <string name="guide_share_images">इमेज विकल्प चुनें, फिर डाउनलोड</string>
+    <string name="guide_share_gallery">क्या सहेजना है चुनें, फिर डाउनलोड</string>
     <string name="guide_share_instant">सेव की गई क्वालिटी में तुरंत डाउनलोड</string>
     <string name="caption_copy">कॉपी करें</string>
     <string name="caption_save_text">टेक्स्ट के रूप में सेव करें</string>

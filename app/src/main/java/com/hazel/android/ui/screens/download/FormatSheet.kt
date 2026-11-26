@@ -9,6 +9,8 @@ import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.ui.theme.sheetButtonColor
 import com.hazel.android.ui.theme.sheetRaisedColor
 import com.hazel.android.ui.theme.tonalFill
+import com.hazel.android.ui.components.ShimmerHost
+import com.hazel.android.ui.components.shimmerBlock
 import com.hazel.android.ui.components.SheetHeaderLayout
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -631,6 +633,11 @@ fun FormatSheet(
             // A live option only does anything on a stream that is live or scheduled, the
             // only links yt-dlp can use it on, so elsewhere the chip is shown but quiet.
             val liveApplies = info.isLive || info.isUpcoming
+            // A site's plain file (a story, a video in a carousel) has no page for these to read.
+            val fileOnly = info.pageUrl != null
+            val notForFile = stringResource(R.string.format_sheet_not_for_file)
+            fun forPage(dialog: SheetDialog): () -> Unit =
+                if (fileOnly) ({ feedback = Feedback(notForFile) }) else ({ openDialog = dialog })
 
             SheetSection(
                 icon = Icons.Outlined.Tune,
@@ -638,14 +645,14 @@ fun FormatSheet(
                 title = if (videoTab) stringResource(R.string.format_sheet_adjust_video)
                 else stringResource(R.string.format_sheet_adjust_audio),
                 summary = listOfNotNull(
-                    thumbnailLabel.takeIf { thumbnailOn },
+                    thumbnailLabel.takeIf { thumbnailOn && !fileOnly },
                     bitrateLabel.takeIf { bitrateOn },
-                    chaptersLabel.takeIf { chaptersOn },
-                    subtitlesLabel.takeIf { subtitlesOn },
-                    sponsorBlockLabel.takeIf { sponsorBlockOn },
+                    chaptersLabel.takeIf { chaptersOn && !fileOnly },
+                    subtitlesLabel.takeIf { subtitlesOn && !fileOnly },
+                    sponsorBlockLabel.takeIf { sponsorBlockOn && !fileOnly },
                     cutLabel.takeIf { cutOn },
-                    liveLabel.takeIf { liveOn },
-                    cookiesLabel.takeIf { cookiesOn },
+                    liveLabel.takeIf { liveOn && !fileOnly },
+                    cookiesLabel.takeIf { cookiesOn && !fileOnly },
                     extraArgsLabel.takeIf { extraArgsOn }
                 ).joinToString(", "),
                 expanded = adjustOpen,
@@ -661,7 +668,8 @@ fun FormatSheet(
                         label = thumbnailLabel,
                         icon = Icons.Filled.Image,
                         active = thumbnailOn,
-                        onClick = { openDialog = SheetDialog.THUMBNAIL }
+                        quiet = fileOnly,
+                        onClick = forPage(SheetDialog.THUMBNAIL)
                     )
                     // Named rather than valued: the bitrate belongs to a conversion, not to
                     // the stream picked above, and the chip is lit while one is set.
@@ -677,21 +685,24 @@ fun FormatSheet(
                         label = chaptersLabel,
                         icon = Icons.Filled.Book,
                         active = chaptersOn,
-                        onClick = { openDialog = SheetDialog.CHAPTERS }
+                        quiet = fileOnly,
+                        onClick = forPage(SheetDialog.CHAPTERS)
                     )
                     if (videoTab) {
                         OptionChip(
                             label = subtitlesLabel,
                             icon = Icons.Filled.ClosedCaption,
                             active = subtitlesOn,
-                            onClick = { openDialog = SheetDialog.SUBTITLES }
+                            quiet = fileOnly,
+                            onClick = forPage(SheetDialog.SUBTITLES)
                         )
                     }
                     OptionChip(
                         label = sponsorBlockLabel,
                         icon = Icons.Filled.Paid,
                         active = sponsorBlockOn,
-                        onClick = { openDialog = SheetDialog.SPONSORBLOCK }
+                        quiet = fileOnly,
+                        onClick = forPage(SheetDialog.SPONSORBLOCK)
                     )
                     OptionChip(
                         label = filenameLabel,
@@ -703,7 +714,8 @@ fun FormatSheet(
                         label = cookiesLabel,
                         icon = Icons.Filled.Cookie,
                         active = cookiesOn,
-                        onClick = { openDialog = SheetDialog.COOKIES }
+                        quiet = fileOnly,
+                        onClick = forPage(SheetDialog.COOKIES)
                     )
                     OptionChip(
                         label = extraArgsLabel,
@@ -724,8 +736,8 @@ fun FormatSheet(
                             label = liveLabel,
                             icon = Icons.Filled.LiveTv,
                             active = liveOn,
-                            quiet = !liveApplies,
-                            onClick = { openDialog = SheetDialog.LIVE }
+                            quiet = !liveApplies || fileOnly,
+                            onClick = forPage(SheetDialog.LIVE)
                         )
                     }
                 }
@@ -980,6 +992,8 @@ internal fun SheetSection(
     color: Color = sheetRaisedColor,
     iconShape: RoundedPolygon? = null,
     iconPill: Boolean = false,
+    /** The summary is still on its way: a shimmering line stands in for it. */
+    loading: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val badge: Shape? = if (iconPill) CircleShape
@@ -1031,7 +1045,11 @@ internal fun SheetSection(
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold
                     )
-                    if (summary.isNotBlank()) {
+                    if (loading) {
+                        ShimmerHost(modifier = Modifier.padding(top = 5.dp), fast = true) {
+                            Box(modifier = Modifier.width(120.dp).height(11.dp).shimmerBlock())
+                        }
+                    } else if (summary.isNotBlank()) {
                         Text(
                             summary,
                             style = MaterialTheme.typography.bodySmall,

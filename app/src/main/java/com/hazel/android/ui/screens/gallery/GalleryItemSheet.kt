@@ -50,9 +50,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -79,7 +77,6 @@ import com.hazel.android.gallery.GalleryItem
 import com.hazel.android.gallery.GalleryOptions
 import com.hazel.android.gallery.GalleryVideoMode
 import com.hazel.android.ui.components.KeyboardOverSheet
-import com.hazel.android.ui.components.ModalBottomSheet
 import com.hazel.android.ui.components.SheetHeaderLayout
 import com.hazel.android.ui.components.keepFlingInSheet
 import com.hazel.android.ui.components.keptAboveKeyboard
@@ -106,7 +103,6 @@ import com.hazel.android.ui.screens.download.fieldGroupShape
 import com.hazel.android.ui.screens.download.rememberSaveKindPicker
 import com.hazel.android.ui.screens.download.rememberUseCookies
 import com.hazel.android.ui.screens.download.withSectionToggled
-import com.hazel.android.ui.theme.sheetBlackColor
 import com.hazel.android.ui.theme.sheetButtonColor
 import kotlinx.coroutines.delay
 
@@ -134,10 +130,6 @@ internal fun GalleryItemSheet(
     confirmAsApply: Boolean = false
 ) {
     val context = LocalContext.current
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
     var options by rememberGalleryOptions()
     val saveDirs by remember(context) { SettingsRepository.getSaveDirs(context) }
         .collectAsState(initial = SaveDirs())
@@ -145,7 +137,11 @@ internal fun GalleryItemSheet(
     val cookiesOn = rememberUseCookies()
     var dialog by remember { mutableStateOf(ItemDialog.NONE) }
     val current = options ?: GalleryOptions()
-    val update: (GalleryOptions) -> Unit = { options = it }
+    // A choice for one file of a set stays with that file; anything else becomes the default.
+    val update: (GalleryOptions) -> Unit = {
+        options = it
+        if (!confirmAsApply) saveGalleryOptions(context, it)
+    }
 
     var title by rememberSaveable(item.url) { mutableStateOf(defaultTitle(item)) }
     var captionOpen by remember { mutableStateOf(false) }
@@ -175,12 +171,7 @@ internal fun GalleryItemSheet(
     val keyboard = rememberSheetKeyboard()
     val fieldColor = sheetButtonColor
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        modifier = Modifier.liftedOverKeyboard(keyboard),
-        sheetState = sheetState,
-        containerColor = sheetBlackColor
-    ) {
+    GallerySheetFrame(onDismiss = onDismiss, modifier = Modifier.liftedOverKeyboard(keyboard)) {
       KeyboardOverSheet(keyboard)
       Box {
         Column(

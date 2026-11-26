@@ -94,7 +94,7 @@ class GalleryPostTest {
     }
 
     @Test
-    fun `instant images keeps the post's author, and the shared author over several posts`() {
+    fun `instant gallery keeps the post's author, and the shared author over several posts`() {
         val one = GalleryPost.group("https://x/p", listOf(file(1, "p"), file(2, "p")))
         assertEquals("a", com.hazel.android.gallery.queue.instantRequest("https://x/p", one, null).author)
         val several = GalleryPost.group("https://x/u", listOf(file(1, "p", "https://x/1"), file(2, "q", "https://x/2")))

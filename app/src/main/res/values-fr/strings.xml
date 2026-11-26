@@ -14,6 +14,7 @@
     <string name="gallery_error_unsupported">Galerie ne peut pas lire ce lien</string>
     <string name="gallery_links_skipped">Certains liens n\'ont pas pu être lus</string>
     <string name="gallery_video_unavailable">Impossible de récupérer cette vidéo</string>
+    <string name="format_sheet_not_for_file">Indisponible pour ce fichier</string>
     <string name="search_fetching">Récupération</string>
     <string name="gallery_error_not_found">Publication supprimée, privée ou vide</string>
     <string name="gallery_error_network">Connexion impossible. Vérifiez le réseau ou le proxy</string>
@@ -1036,9 +1037,9 @@
     <string name="home_empty_hint">Collez un lien de YouTube, SoundCloud, Instagram Reels et 1 700 autres sites</string>
     <string name="more_getting_started">Prise en main</string>
     <string name="instant_label">Instant Vidéo</string>
-    <string name="instant_images_label">Instant Images</string>
+    <string name="instant_gallery_label">Instant Galerie</string>
     <string name="share_label_video">Hazel Vidéo</string>
-    <string name="share_label_images">Hazel Images</string>
+    <string name="share_label_gallery">Hazel Galerie</string>
     <string name="gallery_instant_settings">Paramètres de la Galerie</string>
     <string name="shortcut_search">Rechercher</string>
     <string name="instant_started">Téléchargement lancé</string>
@@ -1255,7 +1256,7 @@
     <string name="more_image_settings">Réglages des images</string>
     <string name="guide_share_from_apps">Partagez un lien depuis n\'importe quelle app</string>
     <string name="guide_share_video">Choisissez chaque option, puis téléchargez</string>
-    <string name="guide_share_images">Choisissez les options d\'image, puis téléchargez</string>
+    <string name="guide_share_gallery">Choisissez quoi enregistrer, puis téléchargez</string>
     <string name="guide_share_instant">Télécharge aussitôt dans votre qualité enregistrée</string>
     <string name="caption_copy">Copier</string>
     <string name="caption_save_text">Enregistrer en texte</string>

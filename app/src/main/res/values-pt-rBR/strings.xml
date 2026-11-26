@@ -14,6 +14,7 @@
     <string name="gallery_error_unsupported">A Galeria não consegue ler este link</string>
     <string name="gallery_links_skipped">Alguns links não puderam ser lidos</string>
     <string name="gallery_video_unavailable">Não foi possível obter este vídeo</string>
+    <string name="format_sheet_not_for_file">Indisponível para este arquivo</string>
     <string name="search_fetching">Buscando</string>
     <string name="gallery_error_not_found">Postagem removida, privada ou vazia</string>
     <string name="gallery_error_network">Sem conexão. Verifique a rede ou o proxy</string>
@@ -1036,9 +1037,9 @@
     <string name="home_empty_hint">Cole um link do YouTube, SoundCloud, Instagram Reels e de mais 1.700 sites</string>
     <string name="more_getting_started">Primeiros passos</string>
     <string name="instant_label">Instant Vídeo</string>
-    <string name="instant_images_label">Instant Imagens</string>
+    <string name="instant_gallery_label">Instant Galeria</string>
     <string name="share_label_video">Hazel Vídeo</string>
-    <string name="share_label_images">Hazel Imagens</string>
+    <string name="share_label_gallery">Hazel Galeria</string>
     <string name="gallery_instant_settings">Configurações da Galeria</string>
     <string name="shortcut_search">Pesquisar</string>
     <string name="instant_started">Download iniciado</string>
@@ -1255,7 +1256,7 @@
     <string name="more_image_settings">Configurações de imagens</string>
     <string name="guide_share_from_apps">Compartilhe um link de qualquer app</string>
     <string name="guide_share_video">Escolha cada opção e baixe</string>
-    <string name="guide_share_images">Escolha as opções de imagem e baixe</string>
+    <string name="guide_share_gallery">Escolha o que salvar e baixe</string>
     <string name="guide_share_instant">Baixa na hora na qualidade salva</string>
     <string name="caption_copy">Copiar</string>
     <string name="caption_save_text">Salvar como texto</string>

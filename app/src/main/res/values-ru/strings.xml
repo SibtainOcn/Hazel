@@ -14,6 +14,7 @@
     <string name="gallery_error_unsupported">Галерея не может прочитать эту ссылку</string>
     <string name="gallery_links_skipped">Некоторые ссылки не удалось прочитать</string>
     <string name="gallery_video_unavailable">Не удалось получить это видео</string>
+    <string name="format_sheet_not_for_file">Недоступно для этого файла</string>
     <string name="search_fetching">Загрузка</string>
     <string name="gallery_error_not_found">Пост удалён, скрыт или пуст</string>
     <string name="gallery_error_network">Нет подключения. Проверьте сеть или прокси</string>
@@ -1051,9 +1052,9 @@
     <string name="home_empty_hint">Вставьте ссылку с YouTube, SoundCloud, Instagram Reels и ещё 1700 сайтов</string>
     <string name="more_getting_started">Начало работы</string>
     <string name="instant_label">Instant Видео</string>
-    <string name="instant_images_label">Instant Изображения</string>
+    <string name="instant_gallery_label">Instant Галерея</string>
     <string name="share_label_video">Hazel Видео</string>
-    <string name="share_label_images">Hazel Изображения</string>
+    <string name="share_label_gallery">Hazel Галерея</string>
     <string name="gallery_instant_settings">Настройки галереи</string>
     <string name="shortcut_search">Поиск</string>
     <string name="instant_started">Загрузка началась</string>
@@ -1271,7 +1272,7 @@
     <string name="more_image_settings">Настройки изображений</string>
     <string name="guide_share_from_apps">Поделитесь ссылкой из любого приложения</string>
     <string name="guide_share_video">Выберите все параметры и скачайте</string>
-    <string name="guide_share_images">Выберите параметры изображения и скачайте</string>
+    <string name="guide_share_gallery">Выберите, что сохранить, и скачайте</string>
     <string name="guide_share_instant">Скачивает сразу в сохранённом качестве</string>
     <string name="caption_copy">Копировать</string>
     <string name="caption_save_text">Сохранить как текст</string>

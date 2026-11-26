@@ -120,12 +120,12 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Hazel Images: reads the shared link with gallery-dl and opens the gallery sheet. -->
+        <!-- Hazel Gallery: reads the shared link with gallery-dl and opens the gallery sheet. -->
         <activity-alias
             android:name=".GalleryShareActivity"
             android:targetActivity=".ui.share.ShareOverlayActivity"
             android:exported="true"
-            android:label="@string/share_label_images"
+            android:label="@string/share_label_gallery"
             android:icon="@mipmap/ic_launcher">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -134,12 +134,12 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Instant Images: queues the whole shared post with the saved gallery settings. -->
+        <!-- Instant Gallery: queues the whole shared post with the saved gallery settings. -->
         <activity-alias
             android:name=".InstantGalleryShareActivity"
             android:targetActivity=".ui.share.ShareOverlayActivity"
             android:exported="true"
-            android:label="@string/instant_images_label"
+            android:label="@string/instant_gallery_label"
             android:icon="@mipmap/ic_launcher">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

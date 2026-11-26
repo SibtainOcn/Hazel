@@ -14,6 +14,7 @@
     <string name="gallery_error_unsupported">ギャラリーはこのリンクを読み込めません</string>
     <string name="gallery_links_skipped">読み込めなかったリンクがあります</string>
     <string name="gallery_video_unavailable">この動画を取得できませんでした</string>
+    <string name="format_sheet_not_for_file">このファイルでは使用できません</string>
     <string name="search_fetching">取得中</string>
     <string name="gallery_error_not_found">投稿は削除済み、非公開、または空です</string>
     <string name="gallery_error_network">接続できません。ネットワークまたはプロキシを確認してください</string>
@@ -1004,9 +1005,9 @@
     <string name="home_empty_hint">YouTube、SoundCloud、Instagram リールなど 1,700 以上のサイトのリンクを貼り付けてください</string>
     <string name="more_getting_started">はじめに</string>
     <string name="instant_label">Instant 動画</string>
-    <string name="instant_images_label">Instant 画像</string>
+    <string name="instant_gallery_label">Instant ギャラリー</string>
     <string name="share_label_video">Hazel 動画</string>
-    <string name="share_label_images">Hazel 画像</string>
+    <string name="share_label_gallery">Hazel ギャラリー</string>
     <string name="gallery_instant_settings">ギャラリーの設定</string>
     <string name="shortcut_search">検索</string>
     <string name="instant_started">ダウンロードを開始しました</string>
@@ -1221,7 +1222,7 @@
     <string name="more_image_settings">画像の設定</string>
     <string name="guide_share_from_apps">どのアプリからでもリンクを共有</string>
     <string name="guide_share_video">すべてのオプションを選んでダウンロード</string>
-    <string name="guide_share_images">画像のオプションを選んでダウンロード</string>
+    <string name="guide_share_gallery">保存するものを選んでダウンロード</string>
     <string name="guide_share_instant">保存した画質ですぐにダウンロード</string>
     <string name="caption_copy">コピー</string>
     <string name="caption_save_text">テキストで保存</string>
