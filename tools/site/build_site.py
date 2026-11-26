@@ -147,13 +147,21 @@ def languages():
     return [NATIVE.get(c, c) for c in codes]
 
 
+def release_notes_path():
+    """The notes of the version in app/build.gradle.kts: docs/release-notes/v<version>.md."""
+    path = ROOT / 'docs' / 'release-notes' / f'v{version()}.md'
+    if not path.exists():
+        sys.exit(f'build_site: {path.relative_to(ROOT).as_posix()} is missing')
+    return path
+
+
 def whats_new(limit=6):
     """
-    The lines the home page ticker flips through: RELEASE-NOTES.md bullets that open with a
+    The lines the home page ticker flips through: release notes bullets that open with a
     bold lead of three words or more, that lead alone. Shorter leads ("New setting") say
     nothing on their own, and a lead with a character the copy check bans is skipped.
     """
-    text = (ROOT / 'RELEASE-NOTES.md').read_text(encoding='utf-8')
+    text = release_notes_path().read_text(encoding='utf-8')
     items = []
     for lead in re.findall(r'^- \*\*(.+?)\*\*', text, re.M):
         lead = re.sub(r'[*`]', '', lead).strip().rstrip('.:')
@@ -351,7 +359,7 @@ def check(pages, index=()):
     # A search result is a link like any other.
     pages = dict(pages, search=' '.join(f'href="{e["u"]}"' for e in index))
     for name, html in pages.items():
-        # These pages carry CHANGELOG.md and RELEASE-NOTES.md word for word, so their text
+        # These pages carry CHANGELOG.md and the release notes word for word, so their text
         # is not policed here.
         for ch in set() if name in ('changelog', 'whats-new') else set(BANNED.findall(html)):
             problems.append(f'{name}: plain copy only, found {ch!r} (U+{ord(ch):04X})')
@@ -410,7 +418,7 @@ def main():
         'language_chips': ''.join(f'<span>{l}</span>' for l in langs),
         'whats_new': ''.join(f'<span class="line">{html_escape(t)}</span>' for t in whats_new()),
         'changelog': md_html('CHANGELOG.md'),
-        'release_notes': md_html('RELEASE-NOTES.md'),
+        'release_notes': md_html(release_notes_path().relative_to(ROOT).as_posix()),
     }
 
     pages = {

@@ -206,7 +206,7 @@ details.q:hover, details.q[open] { background: var(--surface-2); }
 .md a { color: var(--accent); }
 .md h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 
-/* What's new, drawn from RELEASE-NOTES.md: one release, so it sits close under its head */
+/* What's new, drawn from docs/release-notes/v<version>.md: one release, so it sits close under its head */
 .page-head.notes-head { padding-bottom: 20px; }
 .md.notes { padding-bottom: 64px; }
 .md.notes > h3:first-child { margin-top: 8px; }

@@ -13,7 +13,7 @@ on:
       - 'assets/Haze.svg'
       - 'fastlane/metadata/android/en-US/images/phoneScreenshots/**'
       - 'CHANGELOG.md'
-      - 'RELEASE-NOTES.md'
+      - 'docs/release-notes/**'
       - 'app/build.gradle.kts'
       - 'app/src/main/res/xml/locales_config.xml'
       - '.github/workflows/pages.yml'
