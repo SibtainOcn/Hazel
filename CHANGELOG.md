@@ -5,7 +5,7 @@ All notable changes to Hazel are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.17] - 2026-11-26
 ### Added
 - Gallery tab powered by gallery-dl: save photos, videos and captions from posts, profiles and galleries on Instagram, X, Reddit, Pinterest, Tumblr and many more sites.
 - Image search on Pinterest, X, Bluesky, Tumblr, DeviantArt, Instagram and Pixiv, with an optional Group by author.
