@@ -192,6 +192,7 @@
         <activity
             android:name=".ui.screens.cookies.CookieWebViewActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:theme="@style/Theme.Hazel" />
 

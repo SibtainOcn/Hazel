@@ -6,12 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Cookies: Quick sign-in card on top, with a check on signed-in sites and help for sign-in pages that do not work.
+- Cookies: export chosen accounts to the clipboard or as a cookie file.
+- Cookies: delete chosen accounts from the menu.
+- Sign-in page: page zoom slider and a help item in the menu.
 ### Changed
+- Cookie import reads JSON exports (Cookie-Editor and similar) and ignores text that is not cookies.
+- Delete all cookies also clears saved site data and gallery-dl sessions.
+- Image search offers Pinterest, Bluesky, Tumblr and DeviantArt; X, Instagram and Pixiv need a sign-in to search and are removed.
 - Search: a Media | Gallery switch picks the engine; Gallery sites start unpicked and tap again to unpick.
 - Search: video sources and image sites share one chip style, dim while a link is in the field, and wave now and then.
 - Search: an "i" button (also Info in Search options) opens a guide screen to what each side finds.
 - Search options: one fixed height for both tabs; rows scroll inside it.
-
 ### Fixed
 - Gallery: several pasted links are read in one pass, keep their order and layout, and a link that fails is reported.
 - Search bar on Home and Gallery shows Fetching with a link count and a shine while several links are read.
@@ -19,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Gallery: carousels drop the duplicate item count tag.
 - Gallery: Instagram and X profile links ask which sections to fetch (stories, highlights, posts, reels, tagged; media, replies, likes), two at a time, with labels, highlight names and a sign-in row.
 - Gallery: a saved sign-in the site turns away now asks to sign in again instead of a generic read error.
+- Sign-in page: X, Instagram and other sign-in forms no longer load blank; pages fit, zoom and stay above the keyboard, and sign-in popups open.
 
 ## [1.2.17] - 2026-11-26
 ### Added

@@ -1,6 +1,5 @@
 package com.hazel.android.ui.screens.cookies
 
-import androidx.compose.material3.ButtonDefaults
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -22,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,7 +39,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.SaveAlt
+import androidx.compose.material.icons.outlined.Circle
+import com.hazel.android.ui.theme.accentTint
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.DeleteForever
@@ -52,6 +57,7 @@ import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
@@ -95,6 +101,7 @@ import androidx.compose.ui.unit.dp
 import com.hazel.android.R
 import com.hazel.android.data.AccountState
 import com.hazel.android.data.CookieEntry
+import com.hazel.android.data.CookieImport
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SignInCheck
 import com.hazel.android.ui.components.DropdownMenu
@@ -138,6 +145,20 @@ fun CookiesScreen(onBack: () -> Unit) {
     var adding by remember { mutableStateOf(false) }
     var pendingSignOut by remember { mutableStateOf<CookieEntry?>(null) }
     var confirmDeleteAll by remember { mutableStateOf(false) }
+    var exporting by remember { mutableStateOf(false) }
+    var deleting by remember { mutableStateOf(false) }
+    var exportText by remember { mutableStateOf("") }
+    val saveLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri: Uri? ->
+        val text = exportText
+        exportText = ""
+        if (uri == null || text.isEmpty()) return@rememberLauncherForActivityResult
+        scope.launch {
+            val saved = withContext(Dispatchers.IO) {
+                runCatching { context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(text.toByteArray()) } != null }.getOrDefault(false)
+            }
+            toast(context, resources.getString(if (saved) R.string.cookies_toast_saved_file else R.string.cookies_toast_export_failed))
+        }
+    }
     var importing by remember { mutableStateOf(false) }
 
     // The list follows the store, so the result only lets the sign-in page close.
@@ -152,7 +173,7 @@ fun CookiesScreen(onBack: () -> Unit) {
                     val (fileName, text) = withContext(Dispatchers.IO) {
                         (queryFileName(context, uri) ?: "cookies.txt") to
                             context.contentResolver.openInputStream(uri)?.use { stream ->
-                                stream.bufferedReader(Charsets.UTF_8).readText()
+                                CookieImport.readLimited(stream.bufferedReader(Charsets.UTF_8))
                             }.orEmpty()
                     }
                     val imported = text.isNotBlank() && CookieRepository.importText(context, text, fileName)
@@ -182,17 +203,8 @@ fun CookiesScreen(onBack: () -> Unit) {
                 toast(context, resources.getString(if (imported) R.string.cookies_toast_imported else R.string.cookies_toast_no_data))
             }
         },
-        onExport = {
-            scope.launch {
-                val text = CookieRepository.exportText(context)
-                if (text.isBlank()) {
-                    toast(context, resources.getString(R.string.cookies_toast_nothing_to_export))
-                } else {
-                    writeClipboard(context, text)
-                    toast(context, resources.getString(R.string.cookies_toast_exported))
-                }
-            }
-        },
+        onExport = { exporting = true },
+        onDelete = { deleting = true },
         onDeleteAll = { confirmDeleteAll = true },
         onOpen = { openId = it.id },
         onSignInAgain = { entry -> signIn(entry.url, entry.title) },
@@ -249,6 +261,38 @@ fun CookiesScreen(onBack: () -> Unit) {
         )
     }
 
+    if (deleting) {
+        DeleteSheet(
+            entries = entries.orEmpty(),
+            onDelete = { chosen ->
+                deleting = false
+                chosen.forEach { CookieExtractor.clearCookies(CookieRepository.cookieKeys(it)) }
+                scope.launch {
+                    CookieRepository.delete(context, chosen.map { it.id }.toSet())
+                    toast(context, resources.getString(R.string.cookies_toast_deleted))
+                }
+            },
+            onDismiss = { deleting = false }
+        )
+    }
+
+    if (exporting) {
+        ExportSheet(
+            entries = entries.orEmpty(),
+            onCopy = { chosen ->
+                exporting = false
+                writeClipboard(context, CookieRepository.exportText(chosen), sensitive = true)
+                toast(context, resources.getString(R.string.cookies_toast_exported))
+            },
+            onSave = { chosen ->
+                exporting = false
+                exportText = CookieRepository.exportText(chosen)
+                saveLauncher.launch("cookies.txt")
+            },
+            onDismiss = { exporting = false }
+        )
+    }
+
     if (confirmDeleteAll) {
         ConfirmSettingDialog(
             title = stringResource(R.string.cookies_delete_all_title),
@@ -257,6 +301,7 @@ fun CookiesScreen(onBack: () -> Unit) {
             onConfirm = {
                 confirmDeleteAll = false
                 CookieExtractor.clearAll()
+                android.webkit.WebStorage.getInstance().deleteAllData()
                 scope.launch { CookieRepository.deleteAll(context) }
             },
             onDismiss = { confirmDeleteAll = false }
@@ -276,6 +321,7 @@ internal fun CookiesBody(
     onImportFile: () -> Unit,
     onImportClipboard: () -> Unit,
     onExport: () -> Unit,
+    onDelete: () -> Unit,
     onDeleteAll: () -> Unit,
     onOpen: (CookieEntry) -> Unit,
     onSignInAgain: (CookieEntry) -> Unit,
@@ -314,6 +360,13 @@ internal fun CookiesBody(
                         onClick = { menuOpen = false; onExport() }
                     )
                     DropdownMenuItem(
+                        text = { Text(stringResource(R.string.cookies_menu_delete)) },
+                        icon = Icons.Filled.Delete,
+                        tone = MenuTone.Danger,
+                        enabled = !entries.isNullOrEmpty(),
+                        onClick = { menuOpen = false; onDelete() }
+                    )
+                    DropdownMenuItem(
                         text = { Text(stringResource(R.string.cookies_menu_delete_all), color = MaterialTheme.colorScheme.error) },
                         icon = Icons.Filled.DeleteForever,
                         tone = MenuTone.Danger,
@@ -330,12 +383,16 @@ internal fun CookiesBody(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            Text(
-                stringResource(R.string.cookies_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                modifier = Modifier.padding(start = 4.dp, bottom = 16.dp)
+            val activeHomes = remember(entries) {
+                SignInBrowser.QUICK_SITES.map { it.second }.filter { home ->
+                    CookieRepository.entryFor(entries.orEmpty(), home)?.let { CookieRepository.statusOf(it).state == AccountState.ACTIVE } == true
+                }.toSet()
+            }
+            QuickSignInCard(
+                signedIn = { home -> home in activeHomes },
+                onPick = onQuickSite
             )
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 stringResource(R.string.cookies_section_general),
@@ -380,17 +437,6 @@ internal fun CookiesBody(
                             { AccountCard(entry, dimmed = !useCookies || !entry.enabled, onClick = { onOpen(entry) }, onSignInAgain = { onSignInAgain(entry) }) }
                         }
                     )
-                }
-                val unsaved = SignInBrowser.QUICK_SITES.filter { (_, home) -> CookieRepository.entryFor(saved, home) == null }
-                if (unsaved.isNotEmpty()) {
-                    Text(
-                        stringResource(R.string.cookies_section_quick),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(top = 8.dp, bottom = 8.dp, start = 4.dp)
-                    )
-                    QuickSiteChips(sites = unsaved, onPick = onQuickSite)
                 }
             }
             Spacer(modifier = Modifier.height(32.dp))
@@ -517,6 +563,7 @@ private fun displayName(entry: CookieEntry): String {
 @Composable
 internal fun QuickSiteChips(
     sites: List<Pair<String, String>> = SignInBrowser.QUICK_SITES,
+    signedIn: (home: String) -> Boolean = { false },
     onPick: (name: String, home: String) -> Unit
 ) {
     // One label size for every button, growing with the system font only up to 1.2x; a large font gets two per row.
@@ -535,7 +582,19 @@ internal fun QuickSiteChips(
                         color = sheetButtonColor,
                         modifier = Modifier.weight(1f).height(48.dp)
                     ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 6.dp)) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 6.dp)
+                        ) {
+                            if (signedIn(home)) {
+                                Icon(
+                                    Icons.Filled.CheckCircle,
+                                    contentDescription = stringResource(R.string.cookies_quick_signed_in),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(end = 4.dp).size(16.dp)
+                                )
+                            }
                             Text(name, style = style, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
@@ -801,9 +860,14 @@ private fun readClipboard(context: Context): String {
     return clipboard?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString().orEmpty()
 }
 
-private fun writeClipboard(context: Context, text: String) {
+private fun writeClipboard(context: Context, text: String, sensitive: Boolean = false) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-    clipboard?.setPrimaryClip(ClipData.newPlainText("Hazel cookies", text))
+    val clip = ClipData.newPlainText("Hazel cookies", text)
+    // Keeps sign-ins out of the clipboard preview and keyboard suggestions.
+    if (sensitive) clip.description.extras = android.os.PersistableBundle().apply {
+        putBoolean("android.content.extra.IS_SENSITIVE", true)
+    }
+    clipboard?.setPrimaryClip(clip)
 }
 
 private fun toast(context: Context, message: String) {
@@ -818,4 +882,134 @@ private fun queryFileName(context: Context, uri: Uri): String? {
         }
     }
     return uri.lastPathSegment?.substringAfterLast('/')
+}
+
+
+/** Pick which saved sign-ins to export, then copy them or save them as a cookie file. */
+@Composable
+internal fun ExportSheet(
+    entries: List<CookieEntry>,
+    onCopy: (List<CookieEntry>) -> Unit,
+    onSave: (List<CookieEntry>) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AccountPickSheet(
+        title = stringResource(R.string.cookies_export_title),
+        body = stringResource(R.string.cookies_export_body),
+        entries = entries,
+        allChosen = true,
+        onDismiss = onDismiss
+    ) { picked ->
+        FilledTonalButton(
+            onClick = { onCopy(picked) },
+            enabled = picked.isNotEmpty(),
+            colors = ButtonDefaults.filledTonalButtonColors(containerColor = sheetButtonColor, contentColor = MaterialTheme.colorScheme.onSurface),
+            shape = RoundedCornerShape(topStart = 26.dp, bottomStart = 26.dp, topEnd = 8.dp, bottomEnd = 8.dp),
+            modifier = Modifier.weight(1f).height(52.dp)
+        ) {
+            Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.cookies_export_copy), fontWeight = FontWeight.SemiBold)
+        }
+        Button(
+            onClick = { onSave(picked) },
+            enabled = picked.isNotEmpty(),
+            shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 26.dp, bottomEnd = 26.dp),
+            modifier = Modifier.weight(1f).height(52.dp)
+        ) {
+            Icon(Icons.Filled.SaveAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.cookies_export_save), fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+/** Pick which saved sign-ins to delete; they are signed out of the sign-in page too. */
+@Composable
+internal fun DeleteSheet(entries: List<CookieEntry>, onDelete: (List<CookieEntry>) -> Unit, onDismiss: () -> Unit) {
+    AccountPickSheet(
+        title = stringResource(R.string.cookies_menu_delete),
+        body = stringResource(R.string.cookies_delete_body),
+        entries = entries,
+        allChosen = false,
+        onDismiss = onDismiss
+    ) { picked ->
+        Button(
+            onClick = { onDelete(picked) },
+            enabled = picked.isNotEmpty(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError),
+            shape = RoundedCornerShape(26.dp),
+            modifier = Modifier.weight(1f).height(52.dp)
+        ) {
+            Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.cookies_delete_button, picked.size), fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+/** Saved sign-ins to tick, with [actions] for the ticked ones under them. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AccountPickSheet(
+    title: String,
+    body: String,
+    entries: List<CookieEntry>,
+    allChosen: Boolean,
+    onDismiss: () -> Unit,
+    actions: @Composable RowScope.(List<CookieEntry>) -> Unit
+) {
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
+    var chosen by remember(entries) { mutableStateOf(if (allChosen) entries.map { it.id }.toSet() else emptySet()) }
+    val picked = entries.filter { it.id in chosen }
+    val scheme = MaterialTheme.colorScheme
+
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 28.dp)) {
+            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                body,
+                style = MaterialTheme.typography.bodyMedium,
+                color = scheme.onSurface.copy(alpha = 0.65f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.heightIn(max = 320.dp).verticalScroll(rememberScrollState())
+            ) {
+                entries.forEachIndexed { index, entry ->
+                    val on = entry.id in chosen
+                    val top = if (index == 0) 20.dp else 6.dp
+                    val bottom = if (index == entries.lastIndex) 20.dp else 6.dp
+                    Surface(
+                        onClick = { chosen = if (on) chosen - entry.id else chosen + entry.id },
+                        shape = RoundedCornerShape(topStart = top, topEnd = top, bottomStart = bottom, bottomEnd = bottom),
+                        color = if (on) accentTint() else sheetButtonColor,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+                            Text(
+                                displayName(entry),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = if (on) FontWeight.SemiBold else FontWeight.Normal,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Icon(
+                                if (on) Icons.Filled.CheckCircle else Icons.Outlined.Circle,
+                                contentDescription = null,
+                                tint = if (on) scheme.primary else scheme.onSurface.copy(alpha = 0.4f)
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
+                actions(picked)
+            }
+        }
+    }
 }
