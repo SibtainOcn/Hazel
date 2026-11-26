@@ -14,6 +14,8 @@
     <string name="gallery_error_unsupported">गैलरी यह लिंक नहीं पढ़ सकती</string>
     <string name="gallery_links_skipped">कुछ लिंक पढ़े नहीं जा सके</string>
     <string name="gallery_video_unavailable">यह वीडियो नहीं मिल सका</string>
+    <string name="profile_turned_away_title">प्रोफ़ाइल अभी लौटा दी गई</string>
+    <string name="profile_turned_away_body">कम समय में बहुत ज़्यादा अनुरोधों से ऐसा हो सकता है। कुछ मिनट रुककर फिर कोशिश करें, या बार-बार हो तो फिर से साइन इन करें।</string>
     <string name="format_sheet_not_for_file">इस फ़ाइल के लिए उपलब्ध नहीं</string>
     <string name="search_options_info">जानकारी</string>
     <string name="search_guide_title">Hazel क्या ढूँढ सकता है</string>

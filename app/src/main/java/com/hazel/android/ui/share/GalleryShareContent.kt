@@ -57,7 +57,7 @@ private sealed interface GalleryRead {
     data object Reading : GalleryRead
     data class Asking(val profile: GalleryProfile) : GalleryRead
     data class Ready(val posts: List<GalleryPost>, val profile: Boolean) : GalleryRead
-    data class Failed(val error: GalleryDlException) : GalleryRead
+    data class Failed(val error: GalleryDlException, val profile: Boolean = false) : GalleryRead
 }
 
 /**
@@ -95,8 +95,8 @@ internal fun GalleryShareContent(
     }
     LaunchedEffect(url, attempt, sections) {
         val app = context.applicationContext
+        val profile = GalleryProfiles.detect(url)
         read = try {
-            val profile = GalleryProfiles.detect(url)
             if (profile == null) {
                 GalleryRead.Ready(listOf(readFirstPost(app, url)), profile = false)
             } else {
@@ -107,11 +107,11 @@ internal fun GalleryShareContent(
         } catch (e: CancellationException) {
             throw e
         } catch (e: GalleryDlException) {
-            GalleryRead.Failed(e)
+            GalleryRead.Failed(e, profile = profile != null)
         } catch (e: Exception) {
-            GalleryRead.Failed(GalleryDlException(GalleryDlException.Kind.OTHER, e.javaClass.simpleName, e))
+            GalleryRead.Failed(GalleryDlException(GalleryDlException.Kind.OTHER, e.javaClass.simpleName, e), profile = profile != null)
         }
-        (read as? GalleryRead.Failed)?.let { recordGalleryRead(app, url, "", it.error) }
+        (read as? GalleryRead.Failed)?.let { recordGalleryRead(app, url, profile?.user.orEmpty(), it.error) }
     }
     val links = GalleryVideoLinks.forShares
     val onMissed: (Int) -> Unit = {
@@ -127,10 +127,14 @@ internal fun GalleryShareContent(
     when {
         state is GalleryRead.Failed -> {
             val log = state.error.log.ifBlank { stringResource(state.error.kind.message) }
+            // A profile the site turns away with a saved sign-in is most often too many requests.
+            val turnedAway = state.profile && state.error.kind == GalleryDlException.Kind.SIGN_IN_REFUSED
             NoResultsDialog(
                 message = log,
                 link = url,
                 knownKind = dialogKind(state.error.kind),
+                title = if (turnedAway) stringResource(R.string.profile_turned_away_title) else null,
+                body = if (turnedAway) stringResource(R.string.profile_turned_away_body) else null,
                 canFetchCookies = true,
                 canAddCookies = true,
                 canContinue = false,

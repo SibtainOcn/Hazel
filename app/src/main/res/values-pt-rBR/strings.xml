@@ -14,6 +14,8 @@
     <string name="gallery_error_unsupported">A Galeria não consegue ler este link</string>
     <string name="gallery_links_skipped">Alguns links não puderam ser lidos</string>
     <string name="gallery_video_unavailable">Não foi possível obter este vídeo</string>
+    <string name="profile_turned_away_title">Perfil recusado por enquanto</string>
+    <string name="profile_turned_away_body">Muitas solicitações em pouco tempo podem causar isso. Aguarde alguns minutos e tente de novo, ou entre novamente se continuar.</string>
     <string name="format_sheet_not_for_file">Indisponível para este arquivo</string>
     <string name="search_options_info">Info</string>
     <string name="search_guide_title">O que o Hazel pode encontrar</string>

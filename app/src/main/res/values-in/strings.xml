@@ -14,6 +14,8 @@
     <string name="gallery_error_unsupported">Galeri tidak dapat membaca tautan ini</string>
     <string name="gallery_links_skipped">Beberapa tautan tidak bisa dibaca</string>
     <string name="gallery_video_unavailable">Video ini tidak bisa diambil</string>
+    <string name="profile_turned_away_title">Profil ditolak untuk saat ini</string>
+    <string name="profile_turned_away_body">Terlalu banyak permintaan dalam waktu singkat bisa menyebabkannya. Tunggu beberapa menit lalu coba lagi, atau masuk lagi jika terus terjadi.</string>
     <string name="format_sheet_not_for_file">Tidak tersedia untuk file ini</string>
     <string name="search_options_info">Info</string>
     <string name="search_guide_title">Yang bisa ditemukan Hazel</string>
