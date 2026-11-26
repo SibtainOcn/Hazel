@@ -1,5 +1,6 @@
 package com.hazel.android.ui.screens.gallery
 
+import android.util.Log
 import android.app.Application
 import kotlinx.coroutines.Dispatchers
 import com.hazel.android.data.SearchHistoryRepository
@@ -69,6 +70,7 @@ import com.hazel.android.data.FailedDownload
 import com.hazel.android.data.CookieRepository
 import com.hazel.android.data.SettingsRepository
 import com.hazel.android.download.extractor.SearchSource
+import com.hazel.android.gallery.FileLinks
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryDlException
 import com.hazel.android.gallery.GalleryItem
@@ -101,6 +103,8 @@ import com.hazel.android.util.copyToClipboard
 import com.hazel.android.util.siteRootOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
@@ -366,6 +370,38 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
                 busy = false
             }
         }
+    }
+
+    /** Fresh video links by the file's listed url, kept while the app runs; the saved results keep theirs. */
+    private val freshLinks = mutableMapOf<String, String>()
+    private val linkReads = mutableMapOf<String, Deferred<Map<String, String>>>()
+
+    /**
+     * A playable link for [item] that has not expired: the one it was listed with, or one from
+     * reading its post again (saved results can predate the link, and the sites' links expire).
+     * [failed] is a link that just stopped working. A post is read once for all its files, and
+     * once at a time. Null when none can be had.
+     */
+    suspend fun playableUrl(item: GalleryItem, failed: String? = null): String? {
+        (freshLinks[item.url] ?: item.playUrl)?.takeUnless { FileLinks.isStale(it) || it == failed }?.let { return it }
+        val post = posts.firstOrNull { item in it.items } ?: return null
+        // Kept in the view model's scope, so a viewer page left mid-read still gets the links.
+        val read = linkReads[post.source]?.takeIf { it.isActive } ?: viewModelScope.async {
+            val fresh = try {
+                withContext(Dispatchers.IO) {
+                    FileLinks.freshLinks(post.items, GalleryDlEngine.list(getApplication(), post.source).items)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Hazel", "Gallery link refresh failed: ${e.javaClass.simpleName}")
+                emptyMap()
+            }
+            freshLinks.putAll(fresh)
+            linkReads.remove(post.source)
+            fresh
+        }.also { linkReads[post.source] = it }
+        return read.await()[item.url]
     }
 
     internal fun fail(url: String, e: Exception) {
@@ -642,6 +678,7 @@ fun GalleryScreen(
                     if (item.isVideo) viewing = null
                     openItem(p, i)
                 },
+                onRefresh = viewModel::playableUrl,
                 onDismiss = { viewing = null }
             )
         }

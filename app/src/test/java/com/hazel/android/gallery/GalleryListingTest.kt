@@ -52,6 +52,15 @@ class GalleryListingTest {
     }
 
     @Test
+    fun `a video handed to yt-dlp plays from the site's own file`() {
+        val output = """
+            [[3, "ytdl:https://www.instagram.com/stories/user/1.mp4",
+              {"extension": "mp4", "video_url": "https://cdn.example/story.mp4"}]]
+        """
+        assertEquals("https://cdn.example/story.mp4", GalleryListing.parse(output).items.single().playUrl)
+    }
+
+    @Test
     fun `empty listing is empty`() {
         assertTrue(GalleryListing.parse("[]").isEmpty)
     }
