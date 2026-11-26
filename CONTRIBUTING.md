@@ -86,7 +86,10 @@ python tools/strings/check.py translations    # translations correct, coverage r
 ```
 
 Add a unit test only where a change can break quietly (arguments, parsing, queue, saved data,
-files, proxy, updates): one short test per fix. Screens are checked on a device instead.
+files, proxy, updates): one short test per fix. Screens are checked on a device instead. A test
+that only proves a one-off fix goes in `app/src/test/java/com/hazel/android/temp/`; it is deleted
+or moved into the core tests before nightly is merged into main, and CI holds that pull request
+until it is.
 
 Then install it on a phone or emulator and try what you changed. For anything on screen,
 attach before and after screenshots to the pull request.

@@ -34,6 +34,8 @@ check the same commit twice.
 - **Unit tests:** `:app:testDebugUnitTest`, the Kotlin tests in `app/src/test`. They cover only
   what breaks without showing on screen: arguments for yt-dlp and gallery-dl, parsing their
   output, queue and resume, saved data, file locations and cleanup, proxy, updates, sheet routing.
+  On a pull request into `main` it also fails while `app/src/test/java/com/hazel/android/temp/`
+  holds any file: temporary tests are deleted or moved into the core tests before a release.
   [scripts/test_summary.py](../scripts/test_summary.py) writes the counts to the job summary
   and posts them as the **Test results** check, e.g. `230/230 passed · 10s`, with each failing
   test flagged on its file.
