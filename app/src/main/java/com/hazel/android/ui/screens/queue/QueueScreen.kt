@@ -262,7 +262,7 @@ fun QueueScreen(
     // says so there if the read fails. The failure stays listed until a download settles it.
     // A gallery-dl failure opens the Hazel Gallery sheet, so it is read by the engine that failed.
     fun reopen(item: FailedDownload) {
-        val target = if (GalleryDownloadRequest.isPayload(item.queuedPayload)) {
+        val target = if (GalleryDownloadRequest.isGallery(item.queuedPayload)) {
             android.content.ComponentName(context, "com.hazel.android.${com.hazel.android.ui.share.ShareOverlayActivity.GALLERY_ALIAS}")
         } else {
             android.content.ComponentName(context, com.hazel.android.ui.share.ShareOverlayActivity::class.java)

@@ -24,6 +24,9 @@ import com.hazel.android.ui.screens.cookies.CookieWebViewActivity
 import com.hazel.android.ui.screens.gallery.ProfileSectionsSheet
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import com.hazel.android.gallery.queue.GalleryDownloadRequest
+import com.hazel.android.data.FailedDownloadRepository
+import com.hazel.android.data.FailedDownload
 
 /**
  * The profile sections sheet over the app a profile was shared from, as the Gallery tab asks
@@ -95,4 +98,27 @@ internal suspend fun readProfileSections(
         throw failure ?: GalleryDlException(GalleryDlException.Kind.NOT_FOUND, "no files")
     }
     return posts
+}
+
+/**
+ * Lists a link the gallery sheet could not read in the Failed tab with gallery-dl's log;
+ * retrying it opens the sheet on the link again rather than downloading it blind.
+ */
+internal fun recordGalleryRead(context: Context, url: String, author: String, error: Throwable) {
+    val log = (error as? GalleryDlException)?.let { it.log.ifBlank { it.detail } } ?: error.message.orEmpty()
+    val app = context.applicationContext
+    HazelApp.instance.applicationScope.launch {
+        FailedDownloadRepository.recordRead(
+            app,
+            FailedDownload(
+                url = url,
+                title = url,
+                author = author,
+                thumbnail = null,
+                isVideo = false,
+                errorLog = log.ifBlank { error.javaClass.simpleName },
+                queuedPayload = GalleryDownloadRequest.READ_MARK
+            )
+        )
+    }
 }

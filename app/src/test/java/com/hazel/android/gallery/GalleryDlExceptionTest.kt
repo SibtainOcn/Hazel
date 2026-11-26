@@ -14,5 +14,7 @@ class GalleryDlExceptionTest {
         assertEquals(Kind.SIGN_IN_REFUSED, GalleryDlException.withSignIn(kind, instagram400, signedIn = true))
         assertEquals(Kind.LOGIN_REQUIRED, GalleryDlException.withSignIn(kind, instagram400, signedIn = false))
         assertEquals(Kind.NOT_FOUND, GalleryDlException.withSignIn(Kind.NOT_FOUND, "NotFoundError: post", signedIn = true))
+        val home = "HTTP redirect to home page (https://www.instagram.com/)"
+        assertEquals(Kind.SIGN_IN_REFUSED, GalleryDlException.withSignIn(GalleryDlException.classifyError("AbortExtraction", home), home, signedIn = true))
     }
 }

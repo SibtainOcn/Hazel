@@ -257,7 +257,10 @@ class ShareOverlayActivity : ComponentActivity() {
                         // with this attempt's log in place of the last one.
                         LaunchedEffect(failure) {
                             val log = failure ?: return@LaunchedEffect
-                            com.hazel.android.data.FailedDownloadRepository.refreshLog(applicationContext, url, log)
+                            com.hazel.android.data.FailedDownloadRepository.recordRead(
+                                applicationContext,
+                                com.hazel.android.data.FailedDownload(url = url, title = url, author = "", thumbnail = null, isVideo = true, errorLog = log)
+                            )
                         }
 
                         when {
@@ -472,7 +475,10 @@ class ShareOverlayActivity : ComponentActivity() {
         HazelApp.instance.applicationScope.launch {
             val options = SettingsRepository.getGalleryOptions(app).first()
             val posts = runCatching { readProfileSections(app, profile, sections) }
-                .onFailure { android.util.Log.w("HazelShare", "Could not read the shared profile", it) }
+                .onFailure { e ->
+                    android.util.Log.w("HazelShare", "Could not read the shared profile: ${e.javaClass.simpleName}")
+                    recordGalleryRead(app, url, profile.user, e)
+                }
                 .getOrDefault(emptyList())
             posts.forEach { post ->
                 runCatching { GalleryQueue.add(app, post.request(post.items.map { it.index }, options, author = profile.user)) }
@@ -510,6 +516,17 @@ class ShareOverlayActivity : ComponentActivity() {
     companion object {
         const val INSTANT_ALIAS = "InstantShareActivity"
         const val GALLERY_ALIAS = "GalleryShareActivity"
+
+        /** Opens the Hazel Gallery sheet on [url], as sharing it there does. */
+        fun openGallery(context: Context, url: String) {
+            context.startActivity(
+                Intent(Intent.ACTION_SEND)
+                    .setComponent(android.content.ComponentName(context, "com.hazel.android.$GALLERY_ALIAS"))
+                    .setType("text/plain")
+                    .putExtra(Intent.EXTRA_TEXT, url)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+        }
         const val INSTANT_GALLERY_ALIAS = "InstantGalleryShareActivity"
 
         /** Set by the widget's Audio and Video buttons: Instant saves the link as that kind. */

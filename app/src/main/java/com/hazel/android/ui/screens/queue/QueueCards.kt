@@ -189,7 +189,7 @@ fun FailedCard(
             .filter { it.isNotBlank() }.joinToString(" · ")
     }
     val thumbnail = item.thumbnail ?: remember(item.url) { youtubeThumbnail(item.url) }
-    val gallery = remember(item.queuedPayload) { GalleryDownloadRequest.isPayload(item.queuedPayload) }
+    val gallery = remember(item.queuedPayload) { GalleryDownloadRequest.isGallery(item.queuedPayload) }
 
     Surface(
         modifier = Modifier.fillMaxWidth(),

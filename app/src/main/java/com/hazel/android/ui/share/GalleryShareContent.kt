@@ -111,6 +111,7 @@ internal fun GalleryShareContent(
         } catch (e: Exception) {
             GalleryRead.Failed(GalleryDlException(GalleryDlException.Kind.OTHER, e.javaClass.simpleName, e))
         }
+        (read as? GalleryRead.Failed)?.let { recordGalleryRead(app, url, "", it.error) }
     }
     val links = GalleryVideoLinks.forShares
     val onMissed: (Int) -> Unit = {
