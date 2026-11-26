@@ -1,6 +1,7 @@
 package com.hazel.android.ui.screens.more
 
 import androidx.compose.ui.draw.alpha
+import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.AutoAwesome
 import com.hazel.android.ui.components.glassStyleLabel
 import com.hazel.android.ui.components.GlassStyleSwatch
@@ -174,22 +175,15 @@ fun AppearanceScreen(
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     modifier = Modifier.clickable { accentPickerVisible = true }
                 )
-            }
-        ))
-
-        ConnectedRows(listOf(
+            },
             {
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.app_icon_title)) },
                     supportingContent = { Text(stringResource(appIcon.label)) },
-                    leadingContent = { AppIconPreview(appIcon, 40.dp) },
-                    trailingContent = {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                            modifier = Modifier.size(16.dp)
-                        )
+                    leadingContent = {
+                        ShapedIcon(Icons.Outlined.Apps, MaterialShapes.Pentagon.toShape(), 40.dp)
                     },
+                    trailingContent = { AppIconPreview(appIcon, 28.dp) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     modifier = Modifier.clickable { iconPickerVisible = true }
                 )
