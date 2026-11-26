@@ -332,20 +332,23 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     suspend fun playableUrl(item: GalleryItem, failed: String? = null): String? {
         (freshLinks[item.url] ?: item.playUrl)?.takeUnless { FileLinks.isStale(it) || it == failed }?.let { return it }
         val post = posts.firstOrNull { item in it.items } ?: return null
-        val read = linkReads[post.source]?.takeIf { it.isActive } ?: viewModelScope.async(Dispatchers.IO) {
-            try {
-                FileLinks.freshLinks(post.items, GalleryDlEngine.list(getApplication(), post.source).items)
+        // Kept in the view model's scope, so a viewer page left mid-read still gets the links.
+        val read = linkReads[post.source]?.takeIf { it.isActive } ?: viewModelScope.async {
+            val fresh = try {
+                withContext(Dispatchers.IO) {
+                    FileLinks.freshLinks(post.items, GalleryDlEngine.list(getApplication(), post.source).items)
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.w("Hazel", "Gallery link refresh failed: ${e.javaClass.simpleName}")
                 emptyMap()
             }
+            freshLinks.putAll(fresh)
+            linkReads.remove(post.source)
+            fresh
         }.also { linkReads[post.source] = it }
-        val fresh = read.await()
-        linkReads.remove(post.source, read)
-        freshLinks.putAll(fresh)
-        return fresh[item.url]
+        return read.await()[item.url]
     }
 
     internal fun fail(url: String, e: Exception) {

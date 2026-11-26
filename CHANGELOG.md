@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Image search offers Pinterest, Bluesky, Tumblr and DeviantArt; X, Instagram and Pixiv need a sign-in to search and are removed.
 ### Fixed
 - Gallery: videos play inside the viewer in Hazel's own player, with a seek bar and mute button; Instagram stories and reels no longer say no app can play them, and links only yt-dlp can read (Reddit) play too.
-- Gallery: videos in saved results or with expired links are read again before playing.
+- Gallery: videos in saved results or with expired links are read again as soon as they show, before Play.
 - Gallery: several pasted links are read in one pass, keep their order and layout, and a link that fails is reported.
 - Search bar on Home and Gallery shows Fetching with a link count and a shine while several links are read.
 - Gallery: saved results reopen at once without replaying.

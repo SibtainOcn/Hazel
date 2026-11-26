@@ -197,6 +197,13 @@ internal fun GalleryVideo(
             buffering = false
         }
     }
+    // A missing or expired link is read again as soon as its page shows, so Play rarely waits.
+    LaunchedEffect(key, active) {
+        if (!active || file != null || refreshed) return@LaunchedEffect
+        val fresh = refresh(null)
+        if (file == null) file = fresh
+        refreshed = true
+    }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) player?.pause() }
