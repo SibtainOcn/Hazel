@@ -944,6 +944,15 @@
     <string name="appearance_reset">Reset appearance</string>
     <string name="appearance_reset_title">Reset appearance?</string>
     <string name="appearance_reset_body">Theme, accent and glass go back to dark, White and Forest.</string>
+    <string name="app_icon_title">App icon</string>
+    <string name="app_icon_classic">Classic</string>
+    <string name="app_icon_white">White</string>
+    <string name="app_icon_glass">Glass</string>
+    <string name="app_icon_restart_title">Restart Hazel?</string>
+    <string name="app_icon_restart_body">Hazel restarts to change its icon on the home screen and in the share menu. Some home screens remove the old icon; add Hazel again from the app list.</string>
+    <string name="app_icon_restart">Restart</string>
+    <string name="app_icon_busy_title">A download is running</string>
+    <string name="app_icon_busy_body">Change the icon after it finishes, so the download isn\'t cut off.</string>
     <string name="processing_step_fetch">Fetch</string>
     <string name="processing_step_merge">Merge</string>
     <string name="processing_step_extract">Extract</string>

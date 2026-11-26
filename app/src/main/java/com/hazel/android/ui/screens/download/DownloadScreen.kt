@@ -156,7 +156,7 @@ import androidx.compose.material.icons.filled.PlayArrow
  */
 @Composable
 fun DownloadScreen(
-    pendingShares: List<com.hazel.android.MainActivity.SharedLink> = emptyList(),
+    pendingShares: List<com.hazel.android.HazelActivity.SharedLink> = emptyList(),
     pendingFailure: com.hazel.android.download.FailureNotice? = null,
     onPendingFailureConsumed: () -> Unit = {},
     onSharesConsumed: () -> Unit = {},

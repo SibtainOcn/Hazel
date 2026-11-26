@@ -852,6 +852,15 @@
     <string name="appearance_reset">Atur ulang tampilan</string>
     <string name="appearance_reset_title">Atur ulang tampilan?</string>
     <string name="appearance_reset_body">Tema, aksen, dan kaca kembali ke gelap, White, dan Hutan.</string>
+    <string name="app_icon_title">Ikon aplikasi</string>
+    <string name="app_icon_classic">Klasik</string>
+    <string name="app_icon_white">Putih</string>
+    <string name="app_icon_glass">Kaca</string>
+    <string name="app_icon_restart_title">Mulai ulang Hazel?</string>
+    <string name="app_icon_restart_body">Hazel dimulai ulang untuk mengganti ikonnya di layar utama dan menu bagikan. Beberapa layar utama menghapus ikon lama; tambahkan Hazel lagi dari daftar aplikasi.</string>
+    <string name="app_icon_restart">Mulai ulang</string>
+    <string name="app_icon_busy_title">Ada unduhan berjalan</string>
+    <string name="app_icon_busy_body">Ganti ikon setelah selesai, agar unduhan tidak terputus.</string>
     <string name="processing_step_fetch">Ambil</string>
     <string name="processing_step_merge">Gabung</string>
     <string name="processing_step_extract">Ekstrak</string>

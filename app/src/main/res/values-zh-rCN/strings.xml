@@ -852,6 +852,15 @@
     <string name="appearance_reset">重置外观</string>
     <string name="appearance_reset_title">重置外观？</string>
     <string name="appearance_reset_body">主题、强调色和玻璃效果将恢复为深色、White和森林。</string>
+    <string name="app_icon_title">应用图标</string>
+    <string name="app_icon_classic">经典</string>
+    <string name="app_icon_white">白色</string>
+    <string name="app_icon_glass">玻璃</string>
+    <string name="app_icon_restart_title">重启 Hazel？</string>
+    <string name="app_icon_restart_body">Hazel 将重启以更换主屏幕和分享菜单中的图标。部分主屏幕会移除旧图标，请从应用列表重新添加 Hazel。</string>
+    <string name="app_icon_restart">重启</string>
+    <string name="app_icon_busy_title">正在下载</string>
+    <string name="app_icon_busy_body">请在下载完成后再更换图标，以免中断下载。</string>
     <string name="processing_step_fetch">获取</string>
     <string name="processing_step_merge">合并</string>
     <string name="processing_step_extract">提取</string>

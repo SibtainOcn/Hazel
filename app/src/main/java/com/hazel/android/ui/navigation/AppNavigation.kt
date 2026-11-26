@@ -155,7 +155,7 @@ private fun androidx.compose.animation.AnimatedContentTransitionScope<androidx.n
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(
-    pendingShares: List<com.hazel.android.MainActivity.SharedLink> = emptyList(),
+    pendingShares: List<com.hazel.android.HazelActivity.SharedLink> = emptyList(),
     pendingFailure: com.hazel.android.download.FailureNotice? = null,
     pendingRoute: String? = null,
     onPendingRouteConsumed: () -> Unit = {},

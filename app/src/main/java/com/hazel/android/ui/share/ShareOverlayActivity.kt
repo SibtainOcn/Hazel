@@ -153,7 +153,7 @@ class ShareOverlayActivity : ComponentActivity() {
     /** A profile shared to Instant Gallery, while it asks once which sections to save. */
     private var instantProfile by mutableStateOf<com.hazel.android.gallery.GalleryProfile?>(null)
 
-    private fun Intent.shareMode(): ShareMode = when (component?.className?.substringAfterLast('.')) {
+    private fun Intent.shareMode(): ShareMode = when (component?.className?.let(com.hazel.android.util.AppIcon::baseName)) {
         INSTANT_ALIAS -> ShareMode.INSTANT_VIDEO
         GALLERY_ALIAS -> ShareMode.GALLERY
         INSTANT_GALLERY_ALIAS -> ShareMode.INSTANT_GALLERY
@@ -502,8 +502,8 @@ class ShareOverlayActivity : ComponentActivity() {
 
     private fun openInApp(route: String) {
         startActivity(
-            Intent(this, com.hazel.android.MainActivity::class.java)
-                .putExtra(com.hazel.android.MainActivity.EXTRA_NAVIGATE_TO, route)
+            Intent(this, com.hazel.android.HazelActivity::class.java)
+                .putExtra(com.hazel.android.HazelActivity.EXTRA_NAVIGATE_TO, route)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         )
         closeOverlay()
@@ -514,20 +514,20 @@ class ShareOverlayActivity : ComponentActivity() {
     }
 
     companion object {
-        const val INSTANT_ALIAS = "InstantShareActivity"
-        const val GALLERY_ALIAS = "GalleryShareActivity"
+        const val INSTANT_ALIAS = com.hazel.android.util.AppIcon.INSTANT
+        const val GALLERY_ALIAS = com.hazel.android.util.AppIcon.GALLERY
 
         /** Opens the Hazel Gallery sheet on [url], as sharing it there does. */
         fun openGallery(context: Context, url: String) {
             context.startActivity(
                 Intent(Intent.ACTION_SEND)
-                    .setComponent(android.content.ComponentName(context, "com.hazel.android.$GALLERY_ALIAS"))
+                    .setComponent(com.hazel.android.util.AppIcon.current(context).shareComponent(context, GALLERY_ALIAS))
                     .setType("text/plain")
                     .putExtra(Intent.EXTRA_TEXT, url)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
         }
-        const val INSTANT_GALLERY_ALIAS = "InstantGalleryShareActivity"
+        const val INSTANT_GALLERY_ALIAS = com.hazel.android.util.AppIcon.INSTANT_GALLERY
 
         /** Set by the widget's Audio and Video buttons: Instant saves the link as that kind. */
         const val EXTRA_AUDIO_ONLY = "hazel.audio_only"

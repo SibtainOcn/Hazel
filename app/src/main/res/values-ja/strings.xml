@@ -852,6 +852,15 @@
     <string name="appearance_reset">外観をリセット</string>
     <string name="appearance_reset_title">外観をリセットしますか？</string>
     <string name="appearance_reset_body">テーマ、アクセント、ガラスがダーク、White、フォレストに戻ります。</string>
+    <string name="app_icon_title">アプリアイコン</string>
+    <string name="app_icon_classic">クラシック</string>
+    <string name="app_icon_white">ホワイト</string>
+    <string name="app_icon_glass">ガラス</string>
+    <string name="app_icon_restart_title">Hazel を再起動しますか？</string>
+    <string name="app_icon_restart_body">ホーム画面と共有メニューのアイコンを変えるため Hazel を再起動します。一部のホーム画面では古いアイコンが消えるので、アプリ一覧から Hazel を追加し直してください。</string>
+    <string name="app_icon_restart">再起動</string>
+    <string name="app_icon_busy_title">ダウンロード中です</string>
+    <string name="app_icon_busy_body">ダウンロードが途切れないよう、完了してからアイコンを変更してください。</string>
     <string name="processing_step_fetch">取得</string>
     <string name="processing_step_merge">結合</string>
     <string name="processing_step_extract">抽出</string>
