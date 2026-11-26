@@ -170,7 +170,7 @@ internal fun SearchGuideScreen(onBack: () -> Unit) {
                                 bottomStart = if (index == parts.lastIndex) outer else inner,
                                 bottomEnd = if (index == parts.lastIndex) outer else inner
                             ),
-                            color = MaterialTheme.colorScheme.surfaceContainer,
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(modifier = Modifier.padding(16.dp)) {
