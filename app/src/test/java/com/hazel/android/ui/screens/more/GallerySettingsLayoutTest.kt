@@ -64,7 +64,7 @@ class GallerySettingsLayoutTest(private val locale: String) {
             R.string.gallery_settings_skip_downloaded_hint,
             R.string.gallery_settings_clear_record,
             R.string.gallery_skip_reposts,
-            R.string.gallery_settings_instagram_sections_value,
+            R.string.profile_ask,
             R.string.gallery_settings_retries,
             R.string.gallery_settings_caption_in_file
         ).forEach { id ->

@@ -390,6 +390,42 @@ object SettingsRepository {
         context.dataStore.edit { prefs -> prefs[GALLERY_GROUP_AUTHOR_KEY] = group }
     }
 
+    private val GALLERY_PROFILE_ASK_KEY = booleanPreferencesKey("gallery_profile_ask")
+    private val GALLERY_X_QUOTES_KEY = booleanPreferencesKey("gallery_x_quotes")
+
+    private fun profileKey(site: com.hazel.android.gallery.ProfileSite) =
+        stringPreferencesKey("gallery_profile_" + site.name.lowercase())
+
+    /** Whether a pasted profile link asks which sections to fetch first. */
+    fun getGalleryProfileAsk(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_PROFILE_ASK_KEY] ?: true }
+
+    suspend fun setGalleryProfileAsk(context: Context, ask: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_PROFILE_ASK_KEY] = ask }
+    }
+
+    fun getGalleryProfileSections(
+        context: Context,
+        site: com.hazel.android.gallery.ProfileSite
+    ): Flow<List<com.hazel.android.gallery.ProfileSection>> =
+        context.dataStore.data.map { prefs -> com.hazel.android.gallery.ProfileSection.parse(site, prefs[profileKey(site)]) }
+
+    suspend fun setGalleryProfileSections(
+        context: Context,
+        site: com.hazel.android.gallery.ProfileSite,
+        sections: List<com.hazel.android.gallery.ProfileSection>
+    ) {
+        context.dataStore.edit { prefs -> prefs[profileKey(site)] = com.hazel.android.gallery.ProfileSection.keys(sections) }
+    }
+
+    /** Whether X reads also fetch the post a post quotes. */
+    fun getGalleryXQuotes(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[GALLERY_X_QUOTES_KEY] ?: false }
+
+    suspend fun setGalleryXQuotes(context: Context, on: Boolean) {
+        context.dataStore.edit { prefs -> prefs[GALLERY_X_QUOTES_KEY] = on }
+    }
+
     private val GALLERY_IMAGE_SIZE_KEY = stringPreferencesKey("gallery_image_size")
     private val GALLERY_VIDEO_MODE_KEY = stringPreferencesKey("gallery_video_mode")
     private val GALLERY_FILENAME_KEY = stringPreferencesKey("gallery_filename_template")
