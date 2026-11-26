@@ -300,7 +300,8 @@
     <string name="docs_guide">使い方ガイド</string>
     <string name="docs_features">機能</string>
     <string name="docs_faq">よくある質問</string>
-    <string name="docs_changelog">新機能</string>
+    <string name="docs_changelog">変更履歴</string>
+    <string name="docs_whats_new">新機能</string>
     <string name="docs_license">ライセンス</string>
     <string name="docs_open_in_browser">ブラウザで開く</string>
     <string name="docs_error_title">このページを読み込めませんでした</string>

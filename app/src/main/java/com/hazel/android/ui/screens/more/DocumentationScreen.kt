@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +48,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.hazel.android.ui.screens.download.WhatsNewDialog
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -134,6 +137,7 @@ fun DocumentationScreen(
     onBack: () -> Unit,
     onOpen: (DocPage) -> Unit
 ) {
+    var whatsNewVisible by rememberSaveable { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.padding(horizontal = 20.dp)) {
             DocsHeader(title = stringResource(R.string.docs_title), onBack = onBack)
@@ -145,26 +149,33 @@ fun DocumentationScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            ConnectedRows(DocPage.entries.map { page ->
-                {
-                    ListItem(
-                        headlineContent = { Text(stringResource(page.labelRes)) },
-                        leadingContent = { Icon(page.icon, null, tint = MaterialTheme.colorScheme.primary) },
-                        trailingContent = {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowForwardIos, null,
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                modifier = Modifier.size(16.dp)
-                            )
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        modifier = Modifier.clickable { onOpen(page) }
-                    )
-                }
+            ConnectedRows(DocPage.entries.flatMap { page ->
+                val row: @Composable () -> Unit = { DocRow(page.labelRes, page.icon) { onOpen(page) } }
+                if (page != DocPage.CHANGELOG) listOf(row)
+                else listOf(row, { DocRow(R.string.docs_whats_new, Icons.Filled.NewReleases) { whatsNewVisible = true } })
             })
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
+
+    if (whatsNewVisible) WhatsNewDialog(onDismiss = { whatsNewVisible = false })
+}
+
+@Composable
+private fun DocRow(@androidx.annotation.StringRes label: Int, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(stringResource(label)) },
+        leadingContent = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
+        trailingContent = {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowForwardIos, null,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                modifier = Modifier.size(16.dp)
+            )
+        },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        modifier = Modifier.clickable(onClick = onClick)
+    )
 }
 
 /**

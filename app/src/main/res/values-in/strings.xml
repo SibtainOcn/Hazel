@@ -300,7 +300,8 @@
     <string name="docs_guide">Panduan</string>
     <string name="docs_features">Fitur</string>
     <string name="docs_faq">FAQ</string>
-    <string name="docs_changelog">Yang baru</string>
+    <string name="docs_changelog">Perubahan</string>
+    <string name="docs_whats_new">Yang baru</string>
     <string name="docs_license">Lisensi</string>
     <string name="docs_open_in_browser">Buka di browser</string>
     <string name="docs_error_title">Halaman ini tidak dapat dimuat</string>

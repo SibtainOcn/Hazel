@@ -315,7 +315,8 @@
     <string name="docs_guide">Руководство</string>
     <string name="docs_features">Возможности</string>
     <string name="docs_faq">Вопросы и ответы</string>
-    <string name="docs_changelog">Что нового</string>
+    <string name="docs_changelog">Изменения</string>
+    <string name="docs_whats_new">Что нового</string>
     <string name="docs_license">Лицензия</string>
     <string name="docs_open_in_browser">Открыть в браузере</string>
     <string name="docs_error_title">Не удалось загрузить страницу</string>

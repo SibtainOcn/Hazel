@@ -310,7 +310,8 @@
     <string name="docs_guide">Guide</string>
     <string name="docs_features">Fonctionnalités</string>
     <string name="docs_faq">FAQ</string>
-    <string name="docs_changelog">Nouveautés</string>
+    <string name="docs_changelog">Journal des modifications</string>
+    <string name="docs_whats_new">Nouveautés</string>
     <string name="docs_license">Licence</string>
     <string name="docs_open_in_browser">Ouvrir dans le navigateur</string>
     <string name="docs_error_title">Impossible de charger cette page</string>

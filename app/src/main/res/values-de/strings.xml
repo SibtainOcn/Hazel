@@ -305,7 +305,8 @@
     <string name="docs_guide">Anleitung</string>
     <string name="docs_features">Funktionen</string>
     <string name="docs_faq">FAQ</string>
-    <string name="docs_changelog">Neuigkeiten</string>
+    <string name="docs_changelog">Änderungen</string>
+    <string name="docs_whats_new">Neuerungen</string>
     <string name="docs_license">Lizenz</string>
     <string name="docs_open_in_browser">Im Browser öffnen</string>
     <string name="docs_error_title">Seite konnte nicht geladen werden</string>

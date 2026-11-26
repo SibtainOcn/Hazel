@@ -300,7 +300,8 @@
     <string name="docs_guide">使用指南</string>
     <string name="docs_features">功能</string>
     <string name="docs_faq">常见问题</string>
-    <string name="docs_changelog">新功能</string>
+    <string name="docs_changelog">更新日志</string>
+    <string name="docs_whats_new">新功能</string>
     <string name="docs_license">许可证</string>
     <string name="docs_open_in_browser">在浏览器中打开</string>
     <string name="docs_error_title">无法加载此页面</string>
