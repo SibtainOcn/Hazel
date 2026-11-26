@@ -528,6 +528,10 @@
     <string name="cookies_export_copy">Copy</string>
     <string name="cookies_export_save">Save as file</string>
     <string name="cookies_quick_signed_in">Signed in</string>
+    <string name="cookies_menu_delete">Delete accounts</string>
+    <string name="cookies_delete_body">Choose the accounts to remove. Their cookies are deleted from Hazel and the sign-in page.</string>
+    <string name="cookies_delete_button">Delete (%1$d)</string>
+    <string name="cookies_toast_deleted">Accounts deleted</string>
     <string name="cookies_toast_entry_copied">Copied to clipboard</string>
     <string name="cookies_use_title">Use cookies</string>
     <string name="cookies_use_description">Pass saved sign-ins to the downloader</string>

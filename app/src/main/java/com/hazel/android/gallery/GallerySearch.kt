@@ -5,21 +5,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.net.URLEncoder
 
-/** A site gallery-dl can search, as the search page address it reads. */
-enum class GallerySearchSite(val label: String, private val template: String, private val tagOnly: Boolean = false) {
+/** A site gallery-dl can search without a sign-in, as the search page address it reads. */
+enum class GallerySearchSite(val label: String, private val template: String) {
     PINTEREST("Pinterest", "https://www.pinterest.com/search/pins/?q=%s"),
-    X("X", "https://x.com/search?q=%s"),
     BLUESKY("Bluesky", "https://bsky.app/search?q=%s"),
     TUMBLR("Tumblr", "https://www.tumblr.com/search/%s"),
-    DEVIANTART("DeviantArt", "https://www.deviantart.com/search?q=%s"),
-    INSTAGRAM("Instagram", "https://www.instagram.com/explore/tags/%s/", tagOnly = true),
-    PIXIV("Pixiv", "https://www.pixiv.net/en/tags/%s/artworks");
+    DEVIANTART("DeviantArt", "https://www.deviantart.com/search?q=%s");
 
-    fun urlFor(query: String): String {
-        val words = query.trim()
-        val term = if (tagOnly) words.replace(Regex("[\\s#]+"), "").lowercase() else words
-        return template.format(URLEncoder.encode(term, "UTF-8").replace("+", "%20"))
-    }
+    fun urlFor(query: String): String =
+        template.format(URLEncoder.encode(query.trim(), "UTF-8").replace("+", "%20"))
 
     companion object {
         val DEFAULT = PINTEREST

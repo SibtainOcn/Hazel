@@ -87,7 +87,7 @@ class CookieAccountsLayoutTest(private val locale: String, private val theme: St
         show {
             CookiesBody(
                 useCookies = true, entries = ENTRIES, importing = false, onBack = {}, onUseCookies = {},
-                onSignIn = {}, onImportFile = {}, onImportClipboard = {}, onExport = {}, onDeleteAll = {},
+                onSignIn = {}, onImportFile = {}, onImportClipboard = {}, onExport = {}, onDelete = {}, onDeleteAll = {},
                 onOpen = {}, onSignInAgain = {}, onQuickSite = { _, _ -> }
             )
         }
@@ -114,5 +114,41 @@ class CookieAccountsLayoutTest(private val locale: String, private val theme: St
         assertFits(context.getString(R.string.cookies_not_now))
         assertFits(context.getString(R.string.cookies_sign_in_again))
         saveScreen("cookie-dialog-$theme-$locale")
+    }
+
+    @Test
+    fun `quick sign-in card fits`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        show { QuickSignInCard(signedIn = { it.contains("instagram") }, onPick = { _, _ -> }) }
+        assertFits(context.getString(R.string.cookies_section_quick))
+        assertFits("Facebook")
+        assertFits(context.getString(R.string.cookies_help_title))
+        saveScreen("cookie-quick-card-$theme-$locale")
+    }
+
+    @Test
+    fun `sign-in help dialog fits`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        show { SignInHelpDialog(onDismiss = {}) }
+        assertFits(context.getString(R.string.cookies_help_step_export))
+        assertFits(context.getString(R.string.cookies_help_get_addon))
+        saveScreen("cookie-help-dialog-$theme-$locale")
+    }
+
+    @Test
+    fun `export sheet fits`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        show { ExportSheet(entries = ENTRIES, onCopy = {}, onSave = {}, onDismiss = {}) }
+        assertFits(context.getString(R.string.cookies_export_copy))
+        assertFits(context.getString(R.string.cookies_export_save))
+        saveScreen("cookie-export-sheet-$theme-$locale")
+    }
+
+    @Test
+    fun `delete sheet fits`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        show { DeleteSheet(entries = ENTRIES, onDelete = {}, onDismiss = {}) }
+        assertFits(context.getString(R.string.cookies_menu_delete))
+        saveScreen("cookie-delete-sheet-$theme-$locale")
     }
 }

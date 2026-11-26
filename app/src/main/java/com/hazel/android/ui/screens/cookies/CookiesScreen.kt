@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,6 +44,7 @@ import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.outlined.Circle
 import com.hazel.android.ui.theme.accentTint
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.DeleteForever
@@ -144,6 +146,7 @@ fun CookiesScreen(onBack: () -> Unit) {
     var pendingSignOut by remember { mutableStateOf<CookieEntry?>(null) }
     var confirmDeleteAll by remember { mutableStateOf(false) }
     var exporting by remember { mutableStateOf(false) }
+    var deleting by remember { mutableStateOf(false) }
     var exportText by remember { mutableStateOf("") }
     val saveLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri: Uri? ->
         val text = exportText
@@ -201,6 +204,7 @@ fun CookiesScreen(onBack: () -> Unit) {
             }
         },
         onExport = { exporting = true },
+        onDelete = { deleting = true },
         onDeleteAll = { confirmDeleteAll = true },
         onOpen = { openId = it.id },
         onSignInAgain = { entry -> signIn(entry.url, entry.title) },
@@ -257,6 +261,21 @@ fun CookiesScreen(onBack: () -> Unit) {
         )
     }
 
+    if (deleting) {
+        DeleteSheet(
+            entries = entries.orEmpty(),
+            onDelete = { chosen ->
+                deleting = false
+                chosen.forEach { CookieExtractor.clearCookies(CookieRepository.cookieKeys(it)) }
+                scope.launch {
+                    CookieRepository.delete(context, chosen.map { it.id }.toSet())
+                    toast(context, resources.getString(R.string.cookies_toast_deleted))
+                }
+            },
+            onDismiss = { deleting = false }
+        )
+    }
+
     if (exporting) {
         ExportSheet(
             entries = entries.orEmpty(),
@@ -302,6 +321,7 @@ internal fun CookiesBody(
     onImportFile: () -> Unit,
     onImportClipboard: () -> Unit,
     onExport: () -> Unit,
+    onDelete: () -> Unit,
     onDeleteAll: () -> Unit,
     onOpen: (CookieEntry) -> Unit,
     onSignInAgain: (CookieEntry) -> Unit,
@@ -338,6 +358,13 @@ internal fun CookiesBody(
                         tone = MenuTone.Info,
                         enabled = !entries.isNullOrEmpty(),
                         onClick = { menuOpen = false; onExport() }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.cookies_menu_delete)) },
+                        icon = Icons.Filled.Delete,
+                        tone = MenuTone.Danger,
+                        enabled = !entries.isNullOrEmpty(),
+                        onClick = { menuOpen = false; onDelete() }
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.cookies_menu_delete_all), color = MaterialTheme.colorScheme.error) },
@@ -859,25 +886,90 @@ private fun queryFileName(context: Context, uri: Uri): String? {
 
 
 /** Pick which saved sign-ins to export, then copy them or save them as a cookie file. */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ExportSheet(
+internal fun ExportSheet(
     entries: List<CookieEntry>,
     onCopy: (List<CookieEntry>) -> Unit,
     onSave: (List<CookieEntry>) -> Unit,
     onDismiss: () -> Unit
 ) {
+    AccountPickSheet(
+        title = stringResource(R.string.cookies_export_title),
+        body = stringResource(R.string.cookies_export_body),
+        entries = entries,
+        allChosen = true,
+        onDismiss = onDismiss
+    ) { picked ->
+        FilledTonalButton(
+            onClick = { onCopy(picked) },
+            enabled = picked.isNotEmpty(),
+            colors = ButtonDefaults.filledTonalButtonColors(containerColor = sheetButtonColor, contentColor = MaterialTheme.colorScheme.onSurface),
+            shape = RoundedCornerShape(topStart = 26.dp, bottomStart = 26.dp, topEnd = 8.dp, bottomEnd = 8.dp),
+            modifier = Modifier.weight(1f).height(52.dp)
+        ) {
+            Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.cookies_export_copy), fontWeight = FontWeight.SemiBold)
+        }
+        Button(
+            onClick = { onSave(picked) },
+            enabled = picked.isNotEmpty(),
+            shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 26.dp, bottomEnd = 26.dp),
+            modifier = Modifier.weight(1f).height(52.dp)
+        ) {
+            Icon(Icons.Filled.SaveAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.cookies_export_save), fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+/** Pick which saved sign-ins to delete; they are signed out of the sign-in page too. */
+@Composable
+internal fun DeleteSheet(entries: List<CookieEntry>, onDelete: (List<CookieEntry>) -> Unit, onDismiss: () -> Unit) {
+    AccountPickSheet(
+        title = stringResource(R.string.cookies_menu_delete),
+        body = stringResource(R.string.cookies_delete_body),
+        entries = entries,
+        allChosen = false,
+        onDismiss = onDismiss
+    ) { picked ->
+        Button(
+            onClick = { onDelete(picked) },
+            enabled = picked.isNotEmpty(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError),
+            shape = RoundedCornerShape(26.dp),
+            modifier = Modifier.weight(1f).height(52.dp)
+        ) {
+            Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.cookies_delete_button, picked.size), fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+/** Saved sign-ins to tick, with [actions] for the ticked ones under them. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AccountPickSheet(
+    title: String,
+    body: String,
+    entries: List<CookieEntry>,
+    allChosen: Boolean,
+    onDismiss: () -> Unit,
+    actions: @Composable RowScope.(List<CookieEntry>) -> Unit
+) {
     val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden, enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded))
-    var chosen by remember(entries) { mutableStateOf(entries.map { it.id }.toSet()) }
+    var chosen by remember(entries) { mutableStateOf(if (allChosen) entries.map { it.id }.toSet() else emptySet()) }
     val picked = entries.filter { it.id in chosen }
     val scheme = MaterialTheme.colorScheme
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 28.dp)) {
-            Text(stringResource(R.string.cookies_export_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                stringResource(R.string.cookies_export_body),
+                body,
                 style = MaterialTheme.typography.bodyMedium,
                 color = scheme.onSurface.copy(alpha = 0.65f)
             )
@@ -916,27 +1008,7 @@ private fun ExportSheet(
             }
             Spacer(modifier = Modifier.height(20.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
-                FilledTonalButton(
-                    onClick = { onCopy(picked) },
-                    enabled = picked.isNotEmpty(),
-                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = sheetButtonColor, contentColor = scheme.onSurface),
-                    shape = RoundedCornerShape(topStart = 26.dp, bottomStart = 26.dp, topEnd = 8.dp, bottomEnd = 8.dp),
-                    modifier = Modifier.weight(1f).height(52.dp)
-                ) {
-                    Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.cookies_export_copy), fontWeight = FontWeight.SemiBold)
-                }
-                Button(
-                    onClick = { onSave(picked) },
-                    enabled = picked.isNotEmpty(),
-                    shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp, topEnd = 26.dp, bottomEnd = 26.dp),
-                    modifier = Modifier.weight(1f).height(52.dp)
-                ) {
-                    Icon(Icons.Filled.SaveAlt, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.cookies_export_save), fontWeight = FontWeight.SemiBold)
-                }
+                actions(picked)
             }
         }
     }

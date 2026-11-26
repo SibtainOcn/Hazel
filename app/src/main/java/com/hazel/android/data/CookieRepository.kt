@@ -179,25 +179,22 @@ object CookieRepository {
             if (fields.size < 7) null else domainOf(line) to fields[5]
         }.toList()
 
-    suspend fun delete(context: Context, id: Long) {
+    suspend fun delete(context: Context, id: Long) = delete(context, setOf(id))
+
+    suspend fun delete(context: Context, ids: Set<Long>) {
         var remainingEntries: List<CookieEntry> = emptyList()
         var remainingUseCookies: Boolean = false
-        var deletedSite: String? = null
+        val deletedSites = mutableSetOf<String>()
         context.dataStore.edit { prefs ->
             val existing = decode(prefs[COOKIES_KEY])
-            val deleted = existing.find { it.id == id }
-            if (deleted != null) {
-                val site = siteKeyOf(hostOf(deleted.url))
-                if (site != null) {
-                    deletedSite = site
-                } else {
-                    val firstDomain = deleted.content.lineSequence()
-                        .map { it.substringBefore('\t').trim().removePrefix(".") }
-                        .firstOrNull { it.isNotBlank() }
-                    deletedSite = firstDomain?.let { siteKeyOf(it) ?: it }
-                }
+            existing.filter { it.id in ids }.forEach { deleted ->
+                val site = siteKeyOf(hostOf(deleted.url)) ?: deleted.content.lineSequence()
+                    .map { it.substringBefore('\t').trim().removePrefix(".") }
+                    .firstOrNull { it.isNotBlank() }
+                    ?.let { siteKeyOf(it) ?: it }
+                site?.let(deletedSites::add)
             }
-            val remaining = existing.filter { it.id != id }
+            val remaining = existing.filter { it.id !in ids }
             prefs[COOKIES_KEY] = encode(remaining)
             if (remaining.isEmpty()) {
                 prefs[USE_COOKIES_KEY] = false
@@ -206,7 +203,7 @@ object CookieRepository {
             remainingUseCookies = prefs[USE_COOKIES_KEY] ?: false
         }
         withContext(Dispatchers.IO) {
-            deletedSite?.let { site ->
+            deletedSites.forEach { site ->
                 runCatching { File(context.cacheDir, "cookies-$site.txt").delete() }
             }
         }
