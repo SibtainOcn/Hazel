@@ -13,6 +13,10 @@
     <string name="gallery_error_sign_in_refused">Die Seite hat deine gespeicherte Anmeldung abgelehnt. Melde dich unter Cookies erneut an</string>
     <string name="gallery_error_unsupported">Galerie kann diesen Link nicht lesen</string>
     <string name="gallery_links_skipped">Einige Links konnten nicht gelesen werden</string>
+    <string name="gallery_video_unavailable">Dieses Video konnte nicht geladen werden</string>
+    <string name="profile_turned_away_title">Profil gerade abgewiesen</string>
+    <string name="profile_turned_away_body">Zu viele Anfragen in kurzer Zeit können das auslösen. Warte ein paar Minuten und versuche es erneut, oder melde dich neu an, wenn es bleibt.</string>
+    <string name="format_sheet_not_for_file">Für diese Datei nicht verfügbar</string>
     <string name="search_options_info">Info</string>
     <string name="search_guide_title">Was Hazel finden kann</string>
     <string name="search_guide_media_title">Medien · Ergebnisse auf Start</string>
@@ -26,8 +30,6 @@
     <string name="search_guide_sign_in_title">Anmelden</string>
     <string name="search_guide_sign_in_body">Private Beiträge, Storys, Highlights und Gefällt mir brauchen eine Anmeldung bei der Seite. Hazel fragt, wenn es nötig ist, oder melde dich jederzeit über Cookies unter Mehr an.</string>
     <string name="search_mode_media">Medien</string>
-    <string name="gallery_video_unavailable">Dieses Video konnte nicht geladen werden</string>
-    <string name="format_sheet_not_for_file">Für diese Datei nicht verfügbar</string>
     <string name="profile_stories">Storys</string>
     <string name="profile_highlights">Highlights</string>
     <string name="profile_posts">Beiträge</string>

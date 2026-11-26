@@ -137,7 +137,15 @@ private class FileChoice(val options: GalleryOptions, val title: String, val aut
  * What lets Download all hand a post's videos to yt-dlp: a video's row opens yt-dlp's sheet,
  * and a video adjusted there downloads with yt-dlp, apart from the files left to gallery-dl.
  */
-internal class PostVideos(val post: GalleryPost, val links: GalleryVideoLinks, val onMissed: (Int) -> Unit)
+internal class PostVideos(
+    /** The post a listed file belongs to, and the file as listed there. */
+    val originOf: (GalleryItem) -> Pair<GalleryPost, GalleryItem>?,
+    val links: GalleryVideoLinks,
+    val onMissed: (Int) -> Unit
+) {
+    constructor(post: GalleryPost, links: GalleryVideoLinks, onMissed: (Int) -> Unit) :
+        this({ item -> post to item }, links, onMissed)
+}
 
 private enum class PostDialog { NONE, KIND, SIZE, FILENAME, COOKIES, SAVE_DIR, LINK }
 
@@ -662,22 +670,22 @@ internal fun GalleryPostSheet(
         )
     }
 
-    postVideos?.let { shared -> openedVideo?.let { item ->
+    postVideos?.let { shared -> openedVideo?.let { listed -> shared.originOf(listed)?.let { (post, item) ->
         GalleryVideoSheet(
-            post = shared.post,
+            post = post,
             items = listOf(item),
             links = shared.links,
             onQueued = {},
             onMissed = shared.onMissed,
             onDismiss = { openedVideo = null },
-            initial = videoPicks[item.index],
+            initial = videoPicks[listed.index],
             onApply = { pick ->
-                videoPicks[item.index]?.read?.takeIf { it !== pick.read }?.cancel()
-                videoPicks = videoPicks + (item.index to pick)
+                videoPicks[listed.index]?.read?.takeIf { it !== pick.read }?.cancel()
+                videoPicks = videoPicks + (listed.index to pick)
                 openedVideo = null
             }
         )
-    } }
+    } } }
 
     when (dialog) {
         PostDialog.NONE -> Unit

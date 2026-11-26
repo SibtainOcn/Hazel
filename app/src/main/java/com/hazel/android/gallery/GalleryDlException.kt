@@ -61,7 +61,10 @@ class GalleryDlException(
             else -> kind
         }
 
-        private val REFUSED_SIGNS = listOf("400 bad request", "403 forbidden")
+        // Instagram sends a session it turns away (flagged, or too many requests) to its home or challenge page.
+        private val REFUSED_SIGNS = listOf(
+            "400 bad request", "403 forbidden", "redirect to home page", "redirect to challenge page"
+        )
         private val LOGIN_SIGNS = listOf(
             "login required", "authorizationerror", "authentication", "401 unauthorized",
             "redirect to login", "cookies", "log in", "login"

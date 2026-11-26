@@ -13,6 +13,10 @@
     <string name="gallery_error_sign_in_refused">网站拒绝了已保存的登录。请在 Cookies 中重新登录</string>
     <string name="gallery_error_unsupported">图库无法读取此链接</string>
     <string name="gallery_links_skipped">部分链接无法读取</string>
+    <string name="gallery_video_unavailable">无法获取此视频</string>
+    <string name="profile_turned_away_title">该主页暂时被拒绝</string>
+    <string name="profile_turned_away_body">短时间内请求过多可能导致此问题。请等几分钟后重试；若一直如此，请重新登录。</string>
+    <string name="format_sheet_not_for_file">此文件不可用</string>
     <string name="search_options_info">说明</string>
     <string name="search_guide_title">Hazel 能找到什么</string>
     <string name="search_guide_media_title">媒体 · 结果在首页</string>
@@ -26,8 +30,6 @@
     <string name="search_guide_sign_in_title">登录</string>
     <string name="search_guide_sign_in_body">私密帖子、快拍、精选和喜欢需要先登录该网站。需要时 Hazel 会提示，你也可以随时在“更多”的 Cookie 中登录。</string>
     <string name="search_mode_media">媒体</string>
-    <string name="gallery_video_unavailable">无法获取此视频</string>
-    <string name="format_sheet_not_for_file">此文件不可用</string>
     <string name="profile_stories">快拍</string>
     <string name="profile_highlights">精选</string>
     <string name="profile_posts">帖子</string>

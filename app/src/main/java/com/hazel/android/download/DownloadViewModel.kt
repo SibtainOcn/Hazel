@@ -2520,6 +2520,10 @@ class DownloadViewModel : ViewModel() {
      * same way left nothing on the list.
      */
     fun retryFailed(context: Context, failed: com.hazel.android.data.FailedDownload) {
+        if (com.hazel.android.gallery.queue.GalleryDownloadRequest.isRead(failed.queuedPayload)) {
+            com.hazel.android.ui.share.ShareOverlayActivity.openGallery(context, failed.url)
+            return
+        }
         com.hazel.android.gallery.queue.GalleryDownloadRequest.fromPayload(failed.queuedPayload)?.let { request ->
             viewModelScope.launch { com.hazel.android.gallery.queue.GalleryQueue.add(context, request.copy(id = com.hazel.android.gallery.queue.GalleryDownloadRequest.nextId())) }
             return
@@ -2540,9 +2544,9 @@ class DownloadViewModel : ViewModel() {
      * once per batch rather than once per link. The rest are read again, a few at a time.
      */
     fun retryAllFailed(context: Context, all: List<com.hazel.android.data.FailedDownload>) {
-        val (gallery, failed) = all.partition {
-            com.hazel.android.gallery.queue.GalleryDownloadRequest.isPayload(it.queuedPayload)
-        }
+        // A link that failed to read needs its sheet and a choice, so it stays listed for its own Retry.
+        val (gallery, failed) = all.filterNot { com.hazel.android.gallery.queue.GalleryDownloadRequest.isRead(it.queuedPayload) }
+            .partition { com.hazel.android.gallery.queue.GalleryDownloadRequest.isPayload(it.queuedPayload) }
         gallery.forEach { retryFailed(context, it) }
         val queued = failed.mapNotNull { DownloadQueueRepository.decodeItem(it.queuedPayload) }
             .distinctBy { it.url }

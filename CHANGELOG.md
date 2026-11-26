@@ -32,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Gallery: image sheet and Download all settings are kept for the next download.
 - Video download sheet: options a site's plain file can't use are greyed out with a short reason.
 - Share targets Hazel Images and Instant Images are now Hazel Gallery and Instant Gallery.
+- Gallery share: a shared profile asks which sections to fetch; one file opens its sheet, more open Download all with every file. Instant Gallery asks once, then saves the files those sections list.
+- Share: a link that can't be read is listed in the Failed tab with its log; Retry opens the sheet on it again. Instagram turning a saved sign-in away now asks to sign in again.
+- Gallery share: a profile the site turns away says it may be too many requests, to wait or sign in again.
 - Gallery: several pasted links are read in one pass, keep their order and layout, and a link that fails is reported.
 - Search bar on Home and Gallery shows Fetching with a link count and a shine while several links are read.
 - Gallery: saved results reopen at once without replaying.

@@ -13,6 +13,10 @@
     <string name="gallery_error_sign_in_refused">साइट ने आपका सहेजा गया साइन-इन ठुकरा दिया। Cookies में फिर से साइन इन करें</string>
     <string name="gallery_error_unsupported">गैलरी यह लिंक नहीं पढ़ सकती</string>
     <string name="gallery_links_skipped">कुछ लिंक पढ़े नहीं जा सके</string>
+    <string name="gallery_video_unavailable">यह वीडियो नहीं मिल सका</string>
+    <string name="profile_turned_away_title">प्रोफ़ाइल अभी लौटा दी गई</string>
+    <string name="profile_turned_away_body">कम समय में बहुत ज़्यादा अनुरोधों से ऐसा हो सकता है। कुछ मिनट रुककर फिर कोशिश करें, या बार-बार हो तो फिर से साइन इन करें।</string>
+    <string name="format_sheet_not_for_file">इस फ़ाइल के लिए उपलब्ध नहीं</string>
     <string name="search_options_info">जानकारी</string>
     <string name="search_guide_title">Hazel क्या ढूँढ सकता है</string>
     <string name="search_guide_media_title">मीडिया · नतीजे होम पर</string>
@@ -26,8 +30,6 @@
     <string name="search_guide_sign_in_title">साइन इन</string>
     <string name="search_guide_sign_in_body">निजी पोस्ट, स्टोरीज़, हाइलाइट्स और लाइक के लिए उस साइट पर साइन इन ज़रूरी है। ज़रूरत होने पर Hazel पूछता है, या कभी भी और में कुकीज़ से साइन इन करें।</string>
     <string name="search_mode_media">मीडिया</string>
-    <string name="gallery_video_unavailable">यह वीडियो नहीं मिल सका</string>
-    <string name="format_sheet_not_for_file">इस फ़ाइल के लिए उपलब्ध नहीं</string>
     <string name="profile_stories">स्टोरीज़</string>
     <string name="profile_highlights">हाइलाइट्स</string>
     <string name="profile_posts">पोस्ट</string>

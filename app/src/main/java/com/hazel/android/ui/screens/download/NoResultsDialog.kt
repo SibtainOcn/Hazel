@@ -72,7 +72,10 @@ internal fun NoResultsDialog(
     onContinueAnyway: () -> Unit,
     onDismiss: () -> Unit,
     /** The cause when the engine already knows it; read from [message] otherwise. */
-    knownKind: FailureKind? = null
+    knownKind: FailureKind? = null,
+    /** Title and line in place of the kind's own, for a case the caller can name better. */
+    title: String? = null,
+    body: String? = null
 ) {
     val kind = remember(message, knownKind) { knownKind ?: failureKind(message) }
     val again = kind == FailureKind.SIGN_IN_AGAIN
@@ -104,7 +107,7 @@ internal fun NoResultsDialog(
         },
         title = {
             Text(
-                stringResource(
+                title ?: stringResource(
                     when {
                         signIn && again -> R.string.no_results_sign_in_again_title
                         signIn -> R.string.no_results_sign_in_title
@@ -118,7 +121,7 @@ internal fun NoResultsDialog(
         text = {
             Column {
                 Text(
-                    stringResource(
+                    body ?: stringResource(
                         when {
                             signIn && again -> R.string.no_results_sign_in_again_body
                             signIn -> R.string.no_results_sign_in_body

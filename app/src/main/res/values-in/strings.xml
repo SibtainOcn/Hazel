@@ -13,6 +13,10 @@
     <string name="gallery_error_sign_in_refused">Situs menolak login yang tersimpan. Masuk lagi di Cookies</string>
     <string name="gallery_error_unsupported">Galeri tidak dapat membaca tautan ini</string>
     <string name="gallery_links_skipped">Beberapa tautan tidak bisa dibaca</string>
+    <string name="gallery_video_unavailable">Video ini tidak bisa diambil</string>
+    <string name="profile_turned_away_title">Profil ditolak untuk saat ini</string>
+    <string name="profile_turned_away_body">Terlalu banyak permintaan dalam waktu singkat bisa menyebabkannya. Tunggu beberapa menit lalu coba lagi, atau masuk lagi jika terus terjadi.</string>
+    <string name="format_sheet_not_for_file">Tidak tersedia untuk file ini</string>
     <string name="search_options_info">Info</string>
     <string name="search_guide_title">Yang bisa ditemukan Hazel</string>
     <string name="search_guide_media_title">Media · hasil di Beranda</string>
@@ -26,8 +30,6 @@
     <string name="search_guide_sign_in_title">Masuk</string>
     <string name="search_guide_sign_in_body">Postingan pribadi, cerita, sorotan, dan suka memerlukan kamu masuk ke situs itu. Hazel akan menanyakan saat diperlukan, atau masuk kapan saja dari Cookie di Lainnya.</string>
     <string name="search_mode_media">Media</string>
-    <string name="gallery_video_unavailable">Video ini tidak bisa diambil</string>
-    <string name="format_sheet_not_for_file">Tidak tersedia untuk file ini</string>
     <string name="profile_stories">Cerita</string>
     <string name="profile_highlights">Sorotan</string>
     <string name="profile_posts">Postingan</string>

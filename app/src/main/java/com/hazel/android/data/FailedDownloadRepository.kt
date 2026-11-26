@@ -73,6 +73,13 @@ object FailedDownloadRepository {
         }
     }
 
+    /** Lists a link that could not be read, or brings its listed failure up to date with this log. */
+    suspend fun recordRead(context: Context, entry: FailedDownload) = withContext(Dispatchers.IO) {
+        val listed = unsaved.value.any { same(it.url, entry.url) } ||
+            decode(context.dataStore.data.first()[FAILED_KEY]).any { same(it.url, entry.url) }
+        if (listed) refreshLog(context, entry.url, entry.errorLog) else record(context, entry)
+    }
+
     /**
      * Gives a listed failure of [url] the log of a newer attempt that failed too, keeping its
      * title and artwork, and moves it to the top. A link not listed is left unlisted: this

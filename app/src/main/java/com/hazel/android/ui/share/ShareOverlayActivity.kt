@@ -64,6 +64,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import com.hazel.android.gallery.queue.GalleryDownloadRequest
 import com.hazel.android.gallery.queue.GalleryQueue
+import com.hazel.android.gallery.queue.request
 import com.hazel.android.gallery.queue.instantRequest
 import com.hazel.android.gallery.GalleryDlEngine
 import com.hazel.android.gallery.GalleryPost
@@ -148,6 +149,9 @@ class ShareOverlayActivity : ComponentActivity() {
      * they download with the saved settings.
      */
     private var mode by mutableStateOf(ShareMode.VIDEO)
+
+    /** A profile shared to Instant Gallery, while it asks once which sections to save. */
+    private var instantProfile by mutableStateOf<com.hazel.android.gallery.GalleryProfile?>(null)
 
     private fun Intent.shareMode(): ShareMode = when (component?.className?.substringAfterLast('.')) {
         INSTANT_ALIAS -> ShareMode.INSTANT_VIDEO
@@ -253,7 +257,10 @@ class ShareOverlayActivity : ComponentActivity() {
                         // with this attempt's log in place of the last one.
                         LaunchedEffect(failure) {
                             val log = failure ?: return@LaunchedEffect
-                            com.hazel.android.data.FailedDownloadRepository.refreshLog(applicationContext, url, log)
+                            com.hazel.android.data.FailedDownloadRepository.recordRead(
+                                applicationContext,
+                                com.hazel.android.data.FailedDownload(url = url, title = url, author = "", thumbnail = null, isVideo = true, errorLog = log)
+                            )
                         }
 
                         when {
@@ -268,8 +275,21 @@ class ShareOverlayActivity : ComponentActivity() {
                                         closeOverlay()
                                     }
                                 },
+                                onTune = { openInApp("gallery_settings") },
                                 onClose = { closeOverlay() }
                             )
+
+                            mode == ShareMode.INSTANT_GALLERY && instantProfile != null -> instantProfile?.let { profile ->
+                                ProfileAskSheet(
+                                    profile = profile,
+                                    onFetch = { chosen ->
+                                        queueProfile(url, profile, chosen)
+                                        instantProfile = null
+                                    },
+                                    onTune = { openInApp("gallery_settings") },
+                                    onDismiss = { closeOverlay() }
+                                )
+                            }
 
                             mode == ShareMode.INSTANT_GALLERY -> InstantDialog(
                                 glass = glass,
@@ -423,6 +443,8 @@ class ShareOverlayActivity : ComponentActivity() {
             ShareMode.GALLERY -> recordLink(url)
             ShareMode.INSTANT_GALLERY -> {
                 recordLink(url)
+                instantProfile = com.hazel.android.gallery.GalleryProfiles.detect(url)
+                if (instantProfile != null) return
                 queueGallery { app ->
                     val options = SettingsRepository.getGalleryOptions(app).first()
                     // A link that can't be read is still queued, so its failure shows in the Failed tab.
@@ -440,6 +462,33 @@ class ShareOverlayActivity : ComponentActivity() {
         val app = applicationContext
         HazelApp.instance.applicationScope.launch(Dispatchers.IO) {
             if (!SettingsRepository.getIncognito(app).first()) SearchHistoryRepository.record(app, url)
+        }
+    }
+
+    /**
+     * Queues the files of a shared profile's chosen sections, read first so exactly the files a
+     * search would list are saved, never a profile's whole history. A section that can't be
+     * read is left out and a toast says so.
+     */
+    private fun queueProfile(url: String, profile: com.hazel.android.gallery.GalleryProfile, sections: List<com.hazel.android.gallery.ProfileSection>) {
+        val app = applicationContext
+        HazelApp.instance.applicationScope.launch {
+            val options = SettingsRepository.getGalleryOptions(app).first()
+            val posts = runCatching { readProfileSections(app, profile, sections) }
+                .onFailure { e ->
+                    android.util.Log.w("HazelShare", "Could not read the shared profile: ${e.javaClass.simpleName}")
+                    recordGalleryRead(app, url, profile.user, e)
+                }
+                .getOrDefault(emptyList())
+            posts.forEach { post ->
+                runCatching { GalleryQueue.add(app, post.request(post.items.map { it.index }, options, author = profile.user)) }
+                    .onFailure { android.util.Log.w("HazelShare", "Could not queue a profile section", it) }
+            }
+            if (posts.size < sections.size) {
+                kotlinx.coroutines.withContext(Dispatchers.Main) {
+                    Toast.makeText(app, R.string.gallery_links_skipped, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -467,6 +516,17 @@ class ShareOverlayActivity : ComponentActivity() {
     companion object {
         const val INSTANT_ALIAS = "InstantShareActivity"
         const val GALLERY_ALIAS = "GalleryShareActivity"
+
+        /** Opens the Hazel Gallery sheet on [url], as sharing it there does. */
+        fun openGallery(context: Context, url: String) {
+            context.startActivity(
+                Intent(Intent.ACTION_SEND)
+                    .setComponent(android.content.ComponentName(context, "com.hazel.android.$GALLERY_ALIAS"))
+                    .setType("text/plain")
+                    .putExtra(Intent.EXTRA_TEXT, url)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+        }
         const val INSTANT_GALLERY_ALIAS = "InstantGalleryShareActivity"
 
         /** Set by the widget's Audio and Video buttons: Instant saves the link as that kind. */

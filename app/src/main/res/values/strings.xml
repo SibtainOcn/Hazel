@@ -25,6 +25,10 @@
     <string name="gallery_error_sign_in_refused">The site turned away your saved sign-in. Sign in again under Cookies</string>
     <string name="gallery_error_unsupported">Gallery can\'t read this link</string>
     <string name="gallery_links_skipped">Some links couldn\'t be read</string>
+    <string name="gallery_video_unavailable">Couldn\'t get this video</string>
+    <string name="profile_turned_away_title">Profile turned away for now</string>
+    <string name="profile_turned_away_body">Too many requests in a short time can cause this. Wait a few minutes and try again, or sign in again if it keeps happening.</string>
+    <string name="format_sheet_not_for_file">Not available for this file</string>
     <string name="search_options_info">Info</string>
     <string name="search_mode_media">Media</string>
     <string name="search_guide_title">What Hazel can find</string>
@@ -38,8 +42,6 @@
     <string name="search_guide_links_body">A link goes to the side that is on, Media or Gallery, as it is. Sources and sites are only for searching words, so they step back while a link is in the field.</string>
     <string name="search_guide_sign_in_title">Signing in</string>
     <string name="search_guide_sign_in_body">Private posts, stories, highlights and likes need you signed in to that site. Hazel asks when it is needed, or sign in any time from Cookies in More.</string>
-    <string name="gallery_video_unavailable">Couldn\'t get this video</string>
-    <string name="format_sheet_not_for_file">Not available for this file</string>
     <string name="profile_stories">Stories</string>
     <string name="profile_highlights">Highlights</string>
     <string name="profile_posts">Posts</string>

@@ -13,6 +13,10 @@
     <string name="gallery_error_sign_in_refused">Сайт отклонил сохранённый вход. Войдите заново в разделе Cookies</string>
     <string name="gallery_error_unsupported">Галерея не может прочитать эту ссылку</string>
     <string name="gallery_links_skipped">Некоторые ссылки не удалось прочитать</string>
+    <string name="gallery_video_unavailable">Не удалось получить это видео</string>
+    <string name="profile_turned_away_title">Профиль пока недоступен</string>
+    <string name="profile_turned_away_body">Так бывает из-за слишком частых запросов. Подождите несколько минут и попробуйте снова или войдите заново, если это повторяется.</string>
+    <string name="format_sheet_not_for_file">Недоступно для этого файла</string>
     <string name="search_options_info">Справка</string>
     <string name="search_guide_title">Что может найти Hazel</string>
     <string name="search_guide_media_title">Медиа · результаты на главной</string>
@@ -26,8 +30,6 @@
     <string name="search_guide_sign_in_title">Вход</string>
     <string name="search_guide_sign_in_body">Для закрытых публикаций, историй, актуального и отметок «Нравится» нужно войти на этот сайт. Hazel спросит, когда это нужно, или войдите в любое время через Cookies в разделе «Ещё».</string>
     <string name="search_mode_media">Медиа</string>
-    <string name="gallery_video_unavailable">Не удалось получить это видео</string>
-    <string name="format_sheet_not_for_file">Недоступно для этого файла</string>
     <string name="profile_stories">Истории</string>
     <string name="profile_highlights">Актуальное</string>
     <string name="profile_posts">Публикации</string>

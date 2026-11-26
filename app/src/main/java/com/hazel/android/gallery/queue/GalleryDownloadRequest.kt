@@ -68,6 +68,17 @@ data class GalleryDownloadRequest(
 
         fun isPayload(payload: String?): Boolean = payload?.startsWith(PAYLOAD_PREFIX) == true
 
+        /**
+         * Marks a failure that happened while reading a link for the gallery sheet: there is no
+         * download to replay, so retrying opens the sheet on the link again.
+         */
+        const val READ_MARK = "gallery-read"
+
+        fun isRead(payload: String?): Boolean = payload == READ_MARK
+
+        /** True for a failure the gallery engine had, whose link the gallery sheet reopens. */
+        fun isGallery(payload: String?): Boolean = isPayload(payload) || isRead(payload)
+
         fun fromPayload(payload: String?): GalleryDownloadRequest? =
             payload?.takeIf(::isPayload)?.let { fromJson(it.removePrefix(PAYLOAD_PREFIX)) }
 

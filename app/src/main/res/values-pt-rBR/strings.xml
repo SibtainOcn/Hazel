@@ -13,6 +13,10 @@
     <string name="gallery_error_sign_in_refused">O site recusou seu login salvo. Entre de novo em Cookies</string>
     <string name="gallery_error_unsupported">A Galeria não consegue ler este link</string>
     <string name="gallery_links_skipped">Alguns links não puderam ser lidos</string>
+    <string name="gallery_video_unavailable">Não foi possível obter este vídeo</string>
+    <string name="profile_turned_away_title">Perfil recusado por enquanto</string>
+    <string name="profile_turned_away_body">Muitas solicitações em pouco tempo podem causar isso. Aguarde alguns minutos e tente de novo, ou entre novamente se continuar.</string>
+    <string name="format_sheet_not_for_file">Indisponível para este arquivo</string>
     <string name="search_options_info">Info</string>
     <string name="search_guide_title">O que o Hazel pode encontrar</string>
     <string name="search_guide_media_title">Mídia · resultados no Início</string>
@@ -26,8 +30,6 @@
     <string name="search_guide_sign_in_title">Entrar</string>
     <string name="search_guide_sign_in_body">Publicações privadas, stories, destaques e curtidas exigem que você esteja conectado ao site. O Hazel pede quando for preciso, ou entre quando quiser pelos Cookies em Mais.</string>
     <string name="search_mode_media">Mídia</string>
-    <string name="gallery_video_unavailable">Não foi possível obter este vídeo</string>
-    <string name="format_sheet_not_for_file">Indisponível para este arquivo</string>
     <string name="profile_stories">Stories</string>
     <string name="profile_highlights">Destaques</string>
     <string name="profile_posts">Publicações</string>

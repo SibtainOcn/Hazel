@@ -13,6 +13,10 @@
     <string name="gallery_error_sign_in_refused">サイトが保存済みのサインインを拒否しました。Cookies でもう一度サインインしてください</string>
     <string name="gallery_error_unsupported">ギャラリーはこのリンクを読み込めません</string>
     <string name="gallery_links_skipped">読み込めなかったリンクがあります</string>
+    <string name="gallery_video_unavailable">この動画を取得できませんでした</string>
+    <string name="profile_turned_away_title">プロフィールが一時的に拒否されました</string>
+    <string name="profile_turned_away_body">短時間にリクエストが多すぎると起こります。数分待ってからもう一度試すか、続く場合はもう一度ログインしてください。</string>
+    <string name="format_sheet_not_for_file">このファイルでは使用できません</string>
     <string name="search_options_info">情報</string>
     <string name="search_guide_title">Hazel で見つけられるもの</string>
     <string name="search_guide_media_title">メディア · 結果はホームに</string>
@@ -26,8 +30,6 @@
     <string name="search_guide_sign_in_title">ログイン</string>
     <string name="search_guide_sign_in_body">非公開の投稿、ストーリーズ、ハイライト、いいねにはそのサイトへのログインが必要です。必要なときは Hazel が確認します。いつでも「その他」の Cookie からログインできます。</string>
     <string name="search_mode_media">メディア</string>
-    <string name="gallery_video_unavailable">この動画を取得できませんでした</string>
-    <string name="format_sheet_not_for_file">このファイルでは使用できません</string>
     <string name="profile_stories">ストーリーズ</string>
     <string name="profile_highlights">ハイライト</string>
     <string name="profile_posts">投稿</string>
