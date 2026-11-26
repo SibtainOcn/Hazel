@@ -112,6 +112,10 @@ internal fun GalleryPostCard(
                         )
                     }
                 }
+                post.section?.let {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    SectionTag(stringResource(it.label))
+                }
             }
             Spacer(modifier = Modifier.height(12.dp))
 
