@@ -160,7 +160,7 @@ private const val IDLE = -1f
 private const val PULSE_MS = 420f
 private const val STAGGER_MS = 90f
 private const val START_MS = 700L
-private const val GAP_MS = 3_000L
+private const val GAP_MS = 5_000L
 private val WAVE_LIFT = 3.dp
 private const val WAVE_GROW = 0.04f
 

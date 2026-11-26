@@ -179,7 +179,7 @@ fun SearchScreen(
     // Bumped when words are searched in Gallery with no site picked: the site chips wave at once.
     var nudge by remember { mutableIntStateOf(0) }
     var guideOpen by remember { mutableStateOf(false) }
-    if (guideOpen) SearchGuideDialog(onDismiss = { guideOpen = false })
+    if (guideOpen) SearchGuideScreen(onBack = { guideOpen = false })
 
     fun chooseImages(on: Boolean) {
         imagesChosen = on
@@ -460,7 +460,7 @@ fun SearchScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 GuideButton(onClick = { guideOpen = true })
                 Spacer(modifier = Modifier.width(6.dp))
-                com.hazel.android.ui.components.SoftIconButton(
+                CookieButton(
                     onClick = { menuOpen = true },
                     modifier = Modifier.padding(end = 8.dp)
                 ) {

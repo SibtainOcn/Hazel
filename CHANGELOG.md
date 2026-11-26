@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Search: a Media | Gallery switch picks the engine; Gallery sites start unpicked and tap again to unpick.
 - Search: video sources and image sites share one chip style, dim while a link is in the field, and wave now and then.
-- Search: an "i" button opens a short guide to what each side finds.
+- Search: an "i" button (also Info in Search options) opens a guide screen to what each side finds.
+- Search options: one fixed height for both tabs; rows scroll inside it.
 
 ### Fixed
 - Gallery: several pasted links are read in one pass, keep their order and layout, and a link that fails is reported.

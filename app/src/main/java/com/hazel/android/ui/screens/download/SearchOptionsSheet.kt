@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PhotoLibrary
@@ -93,12 +94,16 @@ fun SearchOptionsSheet(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    // Opens at half height like any other sheet, and drags up to full.
-    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
+    // One height for both tabs, never the full screen: the rows scroll inside it, so switching
+    // tabs or opening never resizes the sheet.
+    val sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetHeight = (androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp * SHEET_HEIGHT_SHARE).dp
     val resultsCleared = stringResource(R.string.search_results_cleared)
     val historyCleared = stringResource(R.string.search_history_cleared)
     val historyFailed = stringResource(R.string.search_history_clear_failed)
     var finishing by remember { mutableStateOf(false) }
+    var guideOpen by remember { mutableStateOf(false) }
+    if (guideOpen) SearchGuideScreen(onBack = { guideOpen = false })
     fun finish(message: String, ok: Boolean) {
         scope.launch {
             try {
@@ -153,7 +158,7 @@ fun SearchOptionsSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .height(sheetHeight)
                 .padding(horizontal = 16.dp)
                 .navigationBarsPadding()
         ) {
@@ -172,6 +177,13 @@ fun SearchOptionsSheet(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
+                )
+                ClearShape(
+                    icon = Icons.Filled.Info,
+                    label = stringResource(R.string.search_options_info),
+                    description = stringResource(R.string.search_guide_title),
+                    filled = false,
+                    onClick = { guideOpen = true }
                 )
                 ClearShape(
                     icon = Icons.Filled.History,
@@ -208,6 +220,7 @@ fun SearchOptionsSheet(
                 )
             }
 
+            Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             if (imagesTab) {
                 SettingsSection(
                     title = stringResource(R.string.search_source_images),
@@ -315,6 +328,7 @@ fun SearchOptionsSheet(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 
@@ -488,3 +502,6 @@ internal fun profileRows(ask: Boolean, onOpen: (com.hazel.android.gallery.Profil
     }
     return rows
 }
+
+/** The search options sheet's fixed height, as a share of the screen. */
+private const val SHEET_HEIGHT_SHARE = 0.72f
