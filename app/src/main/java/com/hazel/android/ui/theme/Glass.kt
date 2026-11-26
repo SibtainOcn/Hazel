@@ -38,7 +38,7 @@ enum class GlassStyle(val key: String) {
     SUNSET("sunset"), NEBULA("nebula"), FOREST("forest");
 
     companion object {
-        val DEFAULT = FOREST
+        val DEFAULT = SAND
 
         fun fromKey(key: String?): GlassStyle = entries.firstOrNull { it.key == key } ?: DEFAULT
 
