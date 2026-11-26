@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sign-in page: page zoom slider and a help item in the menu.
 ### Changed
 - Cookie import reads JSON exports (Cookie-Editor and similar) and ignores text that is not cookies.
+- Bottom bar: the chosen tab sits on a 6-sided cookie or a 4-leaf clover in turn, and a tap springs the tab.
+- Gallery empty state and Getting started name stories, highlights and captions; share target rows say what each one saves.
 - Delete all cookies also clears saved site data and gallery-dl sessions.
 - Image search offers Pinterest, Bluesky, Tumblr and DeviantArt; X, Instagram and Pixiv need a sign-in to search and are removed.
 - Search: a Media | Gallery switch picks the engine; Gallery sites start unpicked and tap again to unpick.

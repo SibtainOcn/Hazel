@@ -641,7 +641,7 @@ internal fun ShareStep() {
             RowDivider()
             ShareRow(stringResource(R.string.share_label_gallery), stringResource(R.string.guide_share_gallery), Icons.Rounded.Image, MaterialShapes.Cookie6Sided.toShape())
             RowDivider()
-            ShareRow(stringResource(R.string.instant_gallery_label), stringResource(R.string.guide_share_instant), Icons.Rounded.Bolt, MaterialShapes.Cookie4Sided.toShape())
+            ShareRow(stringResource(R.string.instant_gallery_label), stringResource(R.string.guide_share_instant_gallery), Icons.Rounded.Bolt, MaterialShapes.Cookie4Sided.toShape())
         }
     }
 }

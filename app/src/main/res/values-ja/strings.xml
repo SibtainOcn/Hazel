@@ -62,8 +62,8 @@
     <string name="gallery_show_images">画像のみ</string>
     <string name="gallery_show_videos">動画のみ</string>
     <string name="gallery_skip_reposts">リポストを除く</string>
-    <string name="gallery_empty_title">投稿とアルバムを保存</string>
-    <string name="gallery_empty_hint">Instagram、X、Reddit、Pinterest など 1,500 以上のサイトのリンクを貼り付け</string>
+    <string name="gallery_empty_title">投稿、ストーリーズ、ハイライトを保存</string>
+    <string name="gallery_empty_hint">Instagram、X、Pinterest など 1,500 以上のサイトのリンクを貼り付け</string>
     <string name="gallery_view">表示</string>
     <string name="gallery_close">閉じる</string>
     <string name="gallery_under_maintenance">メンテナンス中</string>
@@ -208,7 +208,7 @@
     <string name="guide_step2_title">フォーマット選択</string>
     <string name="guide_step4_title">バッテリー最適化</string>
     <string name="guide_step5_title">通知</string>
-    <string name="guide_step_paste_link">1つのリンク、複数のリンク、プレイリスト全体。動画・音声・画像に対応。</string>
+    <string name="guide_step_paste_link">リンク1つ、複数、プレイリスト全体も。動画、音声、画像、ストーリーズ、ハイライト、キャプション。</string>
     <string name="guide_step_pick_format">カードをタップして形式を選択。各画質のサイズとコーデックを表示します。</string>
     <string name="guide_step_battery_unrestricted">電池の使用を「制限なし」にすると、Android がバックグラウンドのダウンロードを止めません。</string>
     <string name="guide_step_notifications">バックグラウンドでのダウンロード進捗や完了の通知を受け取ります。</string>
@@ -708,7 +708,7 @@
     <string name="whats_new_glass_desc">ガラス効果、新しいスタイルとアクセントカラー。</string>
     <string name="whats_new_highlights_title">このアップデートの内容</string>
     <string name="whats_new_gallery_title">ギャラリータブ</string>
-    <string name="whats_new_gallery_desc">Instagram、X、Pinterest、Reddit などから写真・動画・キャプションを保存。</string>
+    <string name="whats_new_gallery_desc">Instagram、X、Pinterest などから写真・動画・キャプションを保存。</string>
     <string name="whats_new_search_title">画像検索</string>
     <string name="whats_new_search_desc">7 つのサイトを検索。作者ごとにまとめることも可能。</string>
     <string name="whats_new_trim_title">ダウンロード後にカット</string>
@@ -1252,9 +1252,10 @@
     <string name="gallery_group_by_author_summary">同じ投稿者の単体画像を1つのカルーセルに</string>
     <string name="more_image_settings">画像の設定</string>
     <string name="guide_share_from_apps">どのアプリからでもリンクを共有</string>
-    <string name="guide_share_video">すべてのオプションを選んでダウンロード</string>
-    <string name="guide_share_gallery">保存するものを選んでダウンロード</string>
-    <string name="guide_share_instant">保存した画質ですぐにダウンロード</string>
+    <string name="guide_share_video">動画、音声、リール。画質、カット、SponsorBlock などを選んでからダウンロード</string>
+    <string name="guide_share_gallery">画像、投稿、リール、ストーリーズ、ハイライト。保存するものを選んでダウンロード</string>
+    <string name="guide_share_instant">保存した設定で動画や音声を直接保存</string>
+    <string name="guide_share_instant_gallery">保存した設定で投稿、ストーリーズ、ハイライトを直接保存</string>
     <string name="caption_copy">コピー</string>
     <string name="caption_save_text">テキストで保存</string>
     <string name="caption_saved">キャプションをダウンロードしました</string>

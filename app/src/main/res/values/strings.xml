@@ -74,8 +74,8 @@
     <string name="gallery_show_images">Images only</string>
     <string name="gallery_show_videos">Videos only</string>
     <string name="gallery_skip_reposts">Skip reposts</string>
-    <string name="gallery_empty_title">Save posts and albums</string>
-    <string name="gallery_empty_hint">Paste a link from Instagram, X, Reddit, Pinterest and 1,500 more sites</string>
+    <string name="gallery_empty_title">Save posts, stories and highlights</string>
+    <string name="gallery_empty_hint">Paste a link from Instagram, X, Pinterest and 1,500 more sites</string>
     <string name="gallery_view">View</string>
     <string name="gallery_close">Close</string>
     <string name="gallery_under_maintenance">Under maintenance</string>
@@ -225,7 +225,7 @@
     <string name="guide_step2_title">Format Selection</string>
     <string name="guide_step4_title">Battery Optimization</string>
     <string name="guide_step5_title">Notifications</string>
-    <string name="guide_step_paste_link">One link, many links or a whole playlist. Video, audio or images.</string>
+    <string name="guide_step_paste_link">One link, many links or a whole playlist. Video, audio, images, stories, highlights and captions.</string>
     <string name="guide_step_pick_format">Tap a card to pick an exact format, with size and codec for each quality.</string>
     <string name="guide_step_battery_unrestricted">Set battery use to unrestricted so Android won\'t stop background downloads.</string>
     <string name="guide_step_notifications">Get notified about download progress and completions in the background.</string>
@@ -793,7 +793,7 @@
     <string name="whats_new_glass_desc">Glass effect, new styles and accents.</string>
     <string name="whats_new_highlights_title">In this update</string>
     <string name="whats_new_gallery_title">Gallery tab</string>
-    <string name="whats_new_gallery_desc">Save photos, videos and captions from Instagram, X, Pinterest, Reddit and more.</string>
+    <string name="whats_new_gallery_desc">Save photos, videos and captions from Instagram, X, Pinterest and more.</string>
     <string name="whats_new_search_title">Image search</string>
     <string name="whats_new_search_desc">Search seven sites, with results grouped by author if you like.</string>
     <string name="whats_new_trim_title">Trim after download</string>
@@ -1326,9 +1326,10 @@
     <string name="gallery_group_by_author_summary">Single images from one author in one carousel</string>
     <string name="more_image_settings">Image settings</string>
     <string name="guide_share_from_apps">Share a link from any app</string>
-    <string name="guide_share_video">Choose every option, then download</string>
-    <string name="guide_share_gallery">Choose what to save, then download</string>
-    <string name="guide_share_instant">Downloads at once in your saved quality</string>
+    <string name="guide_share_video">Video, audio and reels. Pick quality, cut, SponsorBlock and more, then download</string>
+    <string name="guide_share_gallery">Images, posts, reels, stories and highlights. Pick what to save, then download</string>
+    <string name="guide_share_instant">Video or audio directly, with your saved settings</string>
+    <string name="guide_share_instant_gallery">Posts, stories and highlights directly, with your saved settings</string>
     <string name="caption_copy">Copy</string>
     <string name="caption_save_text">Save as text</string>
     <string name="caption_saved">Caption downloaded</string>

@@ -62,8 +62,8 @@
     <string name="gallery_show_images">Só imagens</string>
     <string name="gallery_show_videos">Só vídeos</string>
     <string name="gallery_skip_reposts">Pular reposts</string>
-    <string name="gallery_empty_title">Salve postagens e álbuns</string>
-    <string name="gallery_empty_hint">Cole um link do Instagram, X, Reddit, Pinterest e mais 1.500 sites</string>
+    <string name="gallery_empty_title">Salve posts, stories e destaques</string>
+    <string name="gallery_empty_hint">Cole um link do Instagram, X, Pinterest e mais 1.500 sites</string>
     <string name="gallery_view">Ver</string>
     <string name="gallery_close">Fechar</string>
     <string name="gallery_under_maintenance">Em manutenção</string>
@@ -218,7 +218,7 @@
     <string name="guide_step2_title">Seleção de formato</string>
     <string name="guide_step4_title">Otimização de bateria</string>
     <string name="guide_step5_title">Notificações</string>
-    <string name="guide_step_paste_link">Um link, vários ou uma playlist inteira. Vídeo, áudio ou imagens.</string>
+    <string name="guide_step_paste_link">Um link, vários links ou uma playlist inteira. Vídeo, áudio, imagens, stories, destaques e legendas.</string>
     <string name="guide_step_pick_format">Toque num cartão para escolher o formato exato, com tamanho e codec de cada qualidade.</string>
     <string name="guide_step_battery_unrestricted">Deixe o uso de bateria irrestrito para o Android não parar downloads em segundo plano.</string>
     <string name="guide_step_notifications">Receba avisos sobre o progresso dos downloads e arquivos concluídos em segundo plano.</string>
@@ -736,7 +736,7 @@
     <string name="whats_new_glass_desc">Efeito de vidro, novos estilos e cores de destaque.</string>
     <string name="whats_new_highlights_title">Nesta atualização</string>
     <string name="whats_new_gallery_title">Aba Galeria</string>
-    <string name="whats_new_gallery_desc">Salve fotos, vídeos e legendas do Instagram, X, Pinterest, Reddit e mais.</string>
+    <string name="whats_new_gallery_desc">Salve fotos, vídeos e legendas do Instagram, X, Pinterest e mais.</string>
     <string name="whats_new_search_title">Busca de imagens</string>
     <string name="whats_new_search_desc">Busque em sete sites, com resultados agrupados por autor se quiser.</string>
     <string name="whats_new_trim_title">Cortar após baixar</string>
@@ -1286,9 +1286,10 @@
     <string name="gallery_group_by_author_summary">Imagens soltas de um autor em um carrossel</string>
     <string name="more_image_settings">Configurações de imagens</string>
     <string name="guide_share_from_apps">Compartilhe um link de qualquer app</string>
-    <string name="guide_share_video">Escolha cada opção e baixe</string>
-    <string name="guide_share_gallery">Escolha o que salvar e baixe</string>
-    <string name="guide_share_instant">Baixa na hora na qualidade salva</string>
+    <string name="guide_share_video">Vídeo, áudio e reels. Escolha qualidade, corte, SponsorBlock e mais, depois baixe</string>
+    <string name="guide_share_gallery">Imagens, posts, reels, stories e destaques. Escolha o que salvar e baixe</string>
+    <string name="guide_share_instant">Vídeo ou áudio direto, com suas configurações salvas</string>
+    <string name="guide_share_instant_gallery">Posts, stories e destaques direto, com suas configurações salvas</string>
     <string name="caption_copy">Copiar</string>
     <string name="caption_save_text">Salvar como texto</string>
     <string name="caption_saved">Legenda baixada</string>
